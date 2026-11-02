@@ -31,3 +31,27 @@ test("layout rejects colors written by the composer", () => {
   doc.cells[0].color = "#A21C86";
   assert.equal(validateDoc(doc).ok, false);
 });
+
+test("layout requires a numeric display level", () => {
+  const doc = fixture();
+  doc.alert.level = null;
+  assert.equal(validateDoc(doc).ok, false);
+});
+
+test("languages cell is required on 16x9, 9x16 and 32x9 but may be dropped on 1x1", () => {
+  const doc = fixture();
+  doc.cells = doc.cells.filter((c: { role: string }) => c.role !== "languages");
+  for (const shape of ["16x9", "9x16", "32x9"]) {
+    doc.shape = shape;
+    assert.equal(validateDoc(doc).ok, false, shape);
+  }
+  doc.shape = "1x1";
+  assert.ok(validateDoc(doc).ok);
+});
+
+test("languages cell must carry ja_easy, en, zh_hans and ko at priority 3", () => {
+  const doc = fixture();
+  const lang = doc.cells.find((c: { role: string }) => c.role === "languages");
+  delete lang.text.ko;
+  assert.equal(validateDoc(doc).ok, false);
+});
