@@ -24,6 +24,8 @@ const SHAPES = {
   '9x16': { width: 1080, height: 1920 },
   '32x9': { width: 3840, height: 1080 },
   '1x1': { width: 1080, height: 1080 },
+  // The pillar wraps a column (four faces left to right); its logical size is recorded at half scale.
+  pillar: { width: 6616, height: 5046, scale: 0.5 },
 }
 
 // Fixture scenario: the four screens cut over on the same frame at 12 s.
@@ -128,7 +130,8 @@ const frameTime = (opts, frame) => opts.startMs + (frame * 1000) / opts.fps
 
 async function openPage(browser, opts, tMs) {
   const page = await browser.newPage()
-  await page.setViewport({ ...SHAPES[opts.shape], deviceScaleFactor: 1 })
+  const { width, height, scale = 1 } = SHAPES[opts.shape]
+  await page.setViewport({ width, height, deviceScaleFactor: scale })
   // Background tabs pause requestAnimationFrame, so evacClock.set() would resolve before painting.
   await page.bringToFront()
   await page.goto(frameUrl(opts, tMs), { waitUntil: 'networkidle0' })
@@ -243,6 +246,8 @@ async function encode(opts, framesDir) {
     '-y', '-loglevel', 'error',
     '-framerate', String(opts.fps),
     '-i', `${framesDir}%05d.png`,
+    // yuv420p needs even sides; the half-scale pillar is 2523 px tall.
+    '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2',
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '16', '-pix_fmt', 'yuv420p', '-an',
     opts.out,
   ])
