@@ -36,7 +36,7 @@ The root `.evac-screen` element carries `data-shape`, `data-template`, `data-var
 |---|---|
 | `shape` | `16x9` \| `9x16` \| `32x9` \| `1x1` (falls back to the viewport aspect) |
 | `layout` | fixture name in `app/fixtures/` (default `wajima-tsunami`) |
-| `src` | URL of a layout JSON to render instead of a fixture. In dev, `/api/layout?file=<absolute path>` serves `.json` files inside the repository (403 for anything else, 404 outside dev) |
+| `src` | dev only: same-origin path (starting with `/`) of a layout JSON to render instead of a fixture; anything else shows `data-error="src-rejected"`. In dev, `/api/layout?file=<absolute path>` serves `.json` files inside the repository (403 for anything else, 404 outside dev) |
 | `variant` | layout variant index for the template and shape (default 0) |
 | `clock=virtual&t=<ms>` | render the state at `t` only; `window.evacClock.set(ms)` steps time and resolves after the frame is committed |
 | `mode=scenario&scenario=switch&t_switch=<ms>[&t_clear=<ms>]` | ambient, then 300 ms black, then the alert; optional 1 s crossfade back |

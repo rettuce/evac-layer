@@ -17,7 +17,13 @@ function numberQuery(value: unknown, fallback: number): number {
 
 const route = useRoute()
 const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
-const src = computed(() => (typeof route.query.src === 'string' ? route.query.src : undefined))
+// Guidance screens must never show a document from an arbitrary origin, so src is a
+// dev-only bridge for the Verifier and accepts same-origin paths only.
+function isAllowedSrc(value: unknown): value is string {
+  return import.meta.dev && typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
+}
+const src = computed(() => (isAllowedSrc(route.query.src) ? route.query.src : undefined))
+const srcRejected = computed(() => route.query.src !== undefined && !src.value)
 const remote = shallowRef<EvacScreen>()
 const remoteError = ref<string>()
 
@@ -71,7 +77,8 @@ if (scenario.value) start()
 </script>
 
 <template>
-  <div v-if="remoteError" class="missing" data-error="src-load-failed">{{ remoteError }}</div>
+  <div v-if="srcRejected" class="missing" data-error="src-rejected">src must be a same-origin path (dev only)</div>
+  <div v-else-if="remoteError" class="missing" data-error="src-load-failed">{{ remoteError }}</div>
   <div v-else-if="src && !screen" class="missing" data-loading="src">loading {{ src }}</div>
   <div v-else-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>
 
