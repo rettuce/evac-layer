@@ -1,0 +1,2091 @@
+{
+  "id": "17204",
+  "name": "輪島市",
+  "prefecture": "石川県",
+  "sources": [
+    {
+      "type": "pdf",
+      "file": "wajima/kinkyu_hinan_basho.pdf",
+      "title": "１　指定緊急避難場所",
+      "year": null,
+      "pages": 1,
+      "sha256": "cf866f18a99fa0145d35ce908054907a6776247e003cc43cd886ea9deb940015"
+    },
+    {
+      "type": "pdf",
+      "file": "wajima/shitei_hinanjo.pdf",
+      "title": "２　指定避難所",
+      "year": null,
+      "pages": 1,
+      "sha256": "12c534426e1d14a1568e223fa3b30e514ce2c842ccfce58a907704ab9279a924"
+    },
+    {
+      "type": "pdf",
+      "file": "wajima/tsunami_hm_wajima.pdf",
+      "title": "津波ハザードマップ［輪島地区］",
+      "year": null,
+      "pages": 1,
+      "sha256": "e1fc1550e19bc4d75f0389c94d8643f1759c69cd5a14931a582594567f4b9a6e"
+    },
+    {
+      "type": "gsi",
+      "file": "17204_1.csv",
+      "title": "国土地理院 指定避難所データ",
+      "year": null,
+      "pages": null,
+      "sha256": "3d16aa33ed3b79a78807e1772247ca930fa06e6b784e07de41409d9a509fde18"
+    },
+    {
+      "type": "gsi",
+      "file": "17204_2.csv",
+      "title": "国土地理院 指定緊急避難場所データ",
+      "year": null,
+      "pages": null,
+      "sha256": "f272127a35e618290a09a157961a4091982d55fc3522f6f3878f5f8a996df801"
+    }
+  ],
+  "hazards": [
+    {
+      "type": "tsunami",
+      "areas": [
+        "輪島地区"
+      ],
+      "notes_ja": "輪島の最大津波高は8.3m",
+      "source_page": 1,
+      "source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      }
+    },
+    {
+      "type": "tsunami",
+      "areas": [
+        "舳倉島"
+      ],
+      "notes_ja": "舳倉島の最大津波高は16.6m",
+      "source_page": 1,
+      "source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      }
+    }
+  ],
+  "routes": [],
+  "cautions": [
+    {
+      "text_ja": "このマップに示す危険箇所は、石川県が作成した津波浸水想定区域図を基にしています（平成24年5月現在）",
+      "source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      }
+    },
+    {
+      "text_ja": "指定避難所の表の収容人数は「3.5㎡」の基準で示されています",
+      "source": {
+        "file": "wajima/shitei_hinanjo.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "２　指定避難所\r\n　　　指定避難所とは、被災者が一定の期間滞在するための施設です。\r\n1 河井 輪島市ふれあい健康センター 河井町2部287番地1 3 鉄筋コンクリート 3 103 ○\r\n2 河井 輪島市立輪島小学校(旧河井小体育館) 河井町18部1番地2 5 鉄筋コンクリート 2（校舎3） 277\r\n3 河井 輪島市立輪島中学校(屋内運動場、全天候型広場) 河井町11部39番地1 49 鉄骨造 2（校舎3） 854\r\n4 河井 輪島市立輪島中学校(武道館) 河井町11部39番地1 49 鉄骨造 1 131\r\n5 河井 石川県立輪島高等学校(体育館) 河井町18部42番地2 5 鉄筋コンクリート 2（校舎3） 748\r\n6 河井 輪島駅ふらっと訪夢 河井町20部1番地131 7 木造 2 39\r\n7 鳳至 輪島市立鳳至公民館 鳳至町石浦町83番地1 6 鉄筋コンクリート 3 235 ○\r\n8 鳳至 夕陽ヶ丘防災拠点施設 堀町15字2番地2 45 木造 1 21\r\n9 海士 舳倉島開発総合センター 海士町所属舳倉島出邑山1番4 8 鉄筋コンクリート 2 33 ○\r\n10 輪島崎 輪島市立港公民館 輪島崎町1部211番地4 1 鉄筋コンクリート 2 41 ○\r\n11 大屋 輪島市立大屋公民館 小伊勢町丸垣内22番地1 10 木造 1 42 ○\r\n12 大屋 旧輪島市立大屋小学校(体育館) 小伊勢町日隅7番地3 8 鉄骨造 1 172\r\n13 大屋 介護予防拠点施設ふれあいプラザ二勢 二勢町４４番地 6 鉄筋コンクリート 2 32\r\n14 河原田 輪島市立河原田公民館 西脇町60番地1 43 木造 1 32 ○\r\n15 河原田 旧輪島市立河原田小学校(体育館) 横地町6字123番地 16 鉄骨造 1（校舎3） 172\r\n16 鵠巣 輪島市立鵠巣公民館 大野町菰沢35番地 35 木造 1 78 〇\r\n17 鵠巣 旧輪島市立鵠巣小学校(体育館) 大野町菰沢2番地3 31 鉄筋コンクリート 1（校舎3） 174\r\n18 町野 輪島市立町野公民館 町野町粟蔵川原田22番地1 10 鉄筋コンクリート 2 71 ○\r\n19 町野 旧輪島市立町野小学校(体育館) 町野町粟蔵川原田42番地 10 鉄筋コンクリート 1（校舎3） 217\r\n20 町野 輪島市立東陽小中学校(旧東陽中体育館) 町野町粟蔵川原田33番地 10 鉄骨鉄筋コンクリート 2（校舎2） 241\r\n21 町野 輪島市ふるさと体験実習館 町野町曽々木サ部45番地 3 木造 1 98\r\n22 南志見 輪島市立南志見公民館 里町32字36番地 8 鉄筋コンクリート 1 210 ○\r\n23 三井 輪島市立三井公民館 三井町長沢2字12番地1 95 鉄筋コンクリート 2 56 ○\r\n24 三井 日本航空学園（WAJIMA MEMORIAL GYM） 三井町洲衛9部27番地6 165 鉄筋コンクリート 3 615\r\n25 西保 旧輪島市立西保小学校（体育館） 赤崎町ニの80番地 87 鉄筋コンクリート 1（校舎2） 138\r\n26 仁岸 輪島市立剱地公民館 門前町剱地ツの60番地 19 木造 1 64 ○\r\n27 仁岸 剱地原子力災害防護施設 門前町剱地ソの13番地 35 鉄筋コンクリート 2 72\r\n28 阿岸 輪島市立阿岸公民館 門前町南ナの17番地 30 木造 1 75 ○\r\n29 黒島 輪島市立黒島公民館 門前町黒島町高池45番地 17 鉄筋コンクリート 1 48 ○\r\n30 諸岡 輪島市立諸岡公民館 門前町道下7の175番地 16 木造 1 70 ○\r\n31 門前 輪島市門前会館（輪島市立門前公民館） 門前町走出6の92番地2 17 鉄筋コンクリート一部鉄骨鉄筋コンクリート 3 139 ○\r\n32 門前 輪島市役所門前総合支所（防災研修室） 門前町走出6の69番地 21 鉄筋コンクリート 3 28 ○\r\n33 門前 輪島市立門前学園(旧門前中体育館) 門前町清水10の21番地 30 鉄筋コンクリート 2（校舎2） 249\r\n34 門前 石川県立門前高等学校(体育館) 門前町広岡5の3番地 19 鉄筋コンクリート 2（校舎3） 419\r\n35 門前 輪島市門前健民体育館 門前町清水7の1番地 11 鉄筋コンクリート 2 375\r\n36 浦上 輪島市立浦上公民館 門前町浦上8の58番地 28 木造 1 59 ○\r\n37 七浦 輪島市立七浦公民館（旧七浦小学校） 門前町鵜山12の50番地 9 鉄骨造一部木造 2 175 ○\r\n収容\r\n人数\r\n3.5㎡\r\n指定緊急\r\n避難場所\r\n兼\r\n通\r\n番\r\n地区 施設名 施設所在地 海抜\r\n（ｍ） 構造 階数"
+      }
+    },
+    {
+      "text_ja": "凡例に示す危険箇所は地区によって該当しないものがあります",
+      "source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      }
+    }
+  ],
+  "shelters": [
+    {
+      "name": "ホテル　ルートイン輪島",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市マリンタウン1-2",
+      "lat": 37.396135984268,
+      "lng": 136.9050235542,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400001201"
+      }
+    },
+    {
+      "name": "旧石川県輪島実業高等学校（格技場）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市稲舟町上野50",
+      "lat": 37.391448608903,
+      "lng": 136.9201708404,
+      "hazards_ok": [
+        "storm_surge"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400002201"
+      }
+    },
+    {
+      "name": "石川県立輪島高等学校稲舟校舎（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市稲舟町上野50",
+      "lat": 37.391313629396,
+      "lng": 136.92131987697,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400002202"
+      }
+    },
+    {
+      "name": "旧輪島市立河原田小学校（体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市横地町６字123",
+      "lat": 37.3725155398767,
+      "lng": 136.907362569205,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400003111"
+      }
+    },
+    {
+      "name": "旧輪島市立河原田小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市横地町６字123",
+      "lat": 37.372163861819,
+      "lng": 136.90709702206,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400003201"
+      }
+    },
+    {
+      "name": "輪島市立輪島中学校（武道館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市河井町１１部39-1",
+      "lat": 37.3900822658468,
+      "lng": 136.911175837564,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400004111"
+      }
+    },
+    {
+      "name": "輪島市立輪島中学校（屋内運動場、全天候型広場）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市河井町１１部39-1",
+      "lat": 37.389584612079,
+      "lng": 136.912555023472,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400004112"
+      }
+    },
+    {
+      "name": "輪島市立輪島中学校（屋外運動場）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市河井町１１部39-1",
+      "lat": 37.389584612079,
+      "lng": 136.91255502347,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400004201"
+      }
+    },
+    {
+      "name": "輪島市健康ふれあい広場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市河井町１６部1-1",
+      "lat": 37.3898908185,
+      "lng": 136.90864806951,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400005201"
+      }
+    },
+    {
+      "name": "輪島市立輪島小学校（旧河井小体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市河井町１８部1-2",
+      "lat": 37.3919789237982,
+      "lng": 136.9035154401,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400006111"
+      }
+    },
+    {
+      "name": "輪島市立輪島小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市河井町１８部1-2",
+      "lat": 37.392279396185,
+      "lng": 136.90404383529,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400006201"
+      }
+    },
+    {
+      "name": "石川県立輪島高等学校（体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市河井町１８部42-2",
+      "lat": 37.3902149180786,
+      "lng": 136.903364730068,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400007111"
+      }
+    },
+    {
+      "name": "石川県立輪島高等学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市河井町１８部42-2",
+      "lat": 37.390214918079,
+      "lng": 136.90336473007,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400007201"
+      }
+    },
+    {
+      "name": "輪島駅ふらっと訪夢",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市河井町２０部1-131",
+      "lat": 37.388899610087,
+      "lng": 136.90617893916,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400008111"
+      }
+    },
+    {
+      "name": "石川県奥能登土木総合事務所",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市河井町２２部1-1",
+      "lat": 37.390815858871,
+      "lng": 136.90141370403,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400010201"
+      }
+    },
+    {
+      "name": "輪島市ふれあい健康センター",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市河井町２部287-1",
+      "lat": 37.3941237772943,
+      "lng": 136.901180571137,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400011111"
+      }
+    },
+    {
+      "name": "輪島市ふれあい健康センター",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市河井町２部287-1",
+      "lat": 37.394123777294,
+      "lng": 136.90118057114,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400011201"
+      }
+    },
+    {
+      "name": "輪島市一本松ゲートボール場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市河井町９部30",
+      "lat": 37.391252936895,
+      "lng": 136.91176590574,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400013201"
+      }
+    },
+    {
+      "name": "へぐら愛らんどタワー",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市海士町所属舳倉島出邑山",
+      "lat": 37.851185793051,
+      "lng": 136.91807331061,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400014201"
+      }
+    },
+    {
+      "name": "舳倉島開発総合センター",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市海士町所属舳倉島出邑山1-4",
+      "lat": 37.8505874862978,
+      "lng": 136.918106838213,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400015111"
+      }
+    },
+    {
+      "name": "舳倉島開発総合センター",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市海士町所属舳倉島出邑山1-4",
+      "lat": 37.850587486298,
+      "lng": 136.91810683821,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400015201"
+      }
+    },
+    {
+      "name": "旧輪島市立三井小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市三井町興徳寺１０字29",
+      "lat": 37.315431110011,
+      "lng": 136.89869533502,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400016201"
+      }
+    },
+    {
+      "name": "旧輪島市立三井中学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市三井町興徳寺１０字33",
+      "lat": 37.316280114163,
+      "lng": 136.89900647126,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400017201"
+      }
+    },
+    {
+      "name": "日本航空学園（ＷＡＪＩＭＡ　ＭＥＭＯＲＩＡＬ　ＧＩＭ）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市三井町洲衛９部27-6",
+      "lat": 37.298103381886,
+      "lng": 136.96314542767,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400018111"
+      }
+    },
+    {
+      "name": "三井地区運動広場（輪島市立三井公民館前広場）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市三井町長沢１字34-2",
+      "lat": 37.315602251673,
+      "lng": 136.90222955295,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400019201"
+      }
+    },
+    {
+      "name": "輪島市立三井公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市三井町長沢２字12-1",
+      "lat": 37.315385599044,
+      "lng": 136.90259947871,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400020111"
+      }
+    },
+    {
+      "name": "輪島市立三井公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市三井町長沢２字12-1",
+      "lat": 37.315385599044,
+      "lng": 136.90259947871,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400020201"
+      }
+    },
+    {
+      "name": "輪島市立大屋公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市小伊勢町丸垣内22-1",
+      "lat": 37.381134745013,
+      "lng": 136.88596170094,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400021111"
+      }
+    },
+    {
+      "name": "輪島市立大屋公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市小伊勢町丸垣内22-1",
+      "lat": 37.381134745013,
+      "lng": 136.88596170094,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400021201"
+      }
+    },
+    {
+      "name": "旧輪島市立大屋小学校（体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市小伊勢町日隅7-3",
+      "lat": 37.383171809131,
+      "lng": 136.88858109171,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400022111"
+      }
+    },
+    {
+      "name": "旧輪島市立大屋小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市小伊勢町日隅7-3",
+      "lat": 37.383011964127,
+      "lng": 136.88929724153,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400022201"
+      }
+    },
+    {
+      "name": "旧輪島市立鵠巣公民館横広場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市深見町６５部33-1",
+      "lat": 37.410792402766,
+      "lng": 136.96963182078,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400023201"
+      }
+    },
+    {
+      "name": "一本松総合運動公園",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市杉平町１字12",
+      "lat": 37.391432968832,
+      "lng": 136.90974626272,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400024201"
+      }
+    },
+    {
+      "name": "輪島市農村ふれあい広場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市西脇町60",
+      "lat": 37.35712127306,
+      "lng": 136.9088076299,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400025201"
+      }
+    },
+    {
+      "name": "輪島市立河原田公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市西脇町60-1",
+      "lat": 37.3571788371635,
+      "lng": 136.908381158665,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400026111"
+      }
+    },
+    {
+      "name": "輪島市立河原田公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市西脇町60-1",
+      "lat": 37.357178837164,
+      "lng": 136.90838115867,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400026201"
+      }
+    },
+    {
+      "name": "旧輪島市立西保小学校（体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市赤崎町ニ80",
+      "lat": 37.3834301660752,
+      "lng": 136.81355095551,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400027111"
+      }
+    },
+    {
+      "name": "旧輪島市立西保小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市赤崎町ニ80",
+      "lat": 37.382991125827,
+      "lng": 136.81376553224,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400027201"
+      }
+    },
+    {
+      "name": "輪島市立西保公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市大沢町ホサソ201-3",
+      "lat": 37.375174788936,
+      "lng": 136.80307641221,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400028201"
+      }
+    },
+    {
+      "name": "旧輪島市立鵠巣小学校（体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市大野町菰沢2-3",
+      "lat": 37.3972674991747,
+      "lng": 136.934602176001,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400029111"
+      }
+    },
+    {
+      "name": "輪島市立鵠巣小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市大野町菰沢2-3",
+      "lat": 37.396839194337,
+      "lng": 136.93479261284,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400029201"
+      }
+    },
+    {
+      "name": "旧輪島市立輪島中学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市宅田町２５部36-1",
+      "lat": 37.385126748687,
+      "lng": 136.89762853853,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400031201"
+      }
+    },
+    {
+      "name": "輪島市立町野公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市町野町粟蔵川原田22-1",
+      "lat": 37.4233635607777,
+      "lng": 137.088129741652,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400032111"
+      }
+    },
+    {
+      "name": "輪島市立町野公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市町野町粟蔵川原田22-1",
+      "lat": 37.423363560778,
+      "lng": 137.08812974165,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400032201"
+      }
+    },
+    {
+      "name": "輪島市立東陽小中学校（体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市町野町粟蔵川原田33",
+      "lat": 37.4224911749238,
+      "lng": 137.088385260518,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400033111"
+      }
+    },
+    {
+      "name": "輪島市立東陽小中学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市町野町粟蔵川原田33",
+      "lat": 37.422608332884,
+      "lng": 137.08678398174,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400033201"
+      }
+    },
+    {
+      "name": "旧輪島市立町野小学校（体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市町野町粟蔵川原田42",
+      "lat": 37.4225931794281,
+      "lng": 137.088799765127,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400034111"
+      }
+    },
+    {
+      "name": "旧輪島市立町野小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市町野町粟蔵川原田42",
+      "lat": 37.421590117578,
+      "lng": 137.08923015635,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400034201"
+      }
+    },
+    {
+      "name": "輪島市ふるさと体験実習館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市町野町曽々木サ部45",
+      "lat": 37.4545804888036,
+      "lng": 137.073281751447,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400035111"
+      }
+    },
+    {
+      "name": "輪島市町野テニスコート",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市町野町東大野出村109",
+      "lat": 37.440069394503,
+      "lng": 137.07858993142,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400036201"
+      }
+    },
+    {
+      "name": "町野野球場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市町野町東大野出村60",
+      "lat": 37.439210132853,
+      "lng": 137.07724740591,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400037201"
+      }
+    },
+    {
+      "name": "輪島市町野グラウンドゴルフ場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市町野町東大野出村91",
+      "lat": 37.438483242652,
+      "lng": 137.07780270713,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400038201"
+      }
+    },
+    {
+      "name": "介護予防拠点施設ふれあいプラザ二勢",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市二勢町44",
+      "lat": 37.3866134088051,
+      "lng": 136.895772561706,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400039111"
+      }
+    },
+    {
+      "name": "旧輪島市立二俣小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市二俣町19-32",
+      "lat": 37.356076243374,
+      "lng": 136.86549708536,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400040201"
+      }
+    },
+    {
+      "name": "千枚田ポケットパーク",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市白米町ハ部99-4",
+      "lat": 37.424121119081,
+      "lng": 136.99803864203,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400041201"
+      }
+    },
+    {
+      "name": "輪島市立鳳至公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市鳳至町石浦町83-1",
+      "lat": 37.3984855986699,
+      "lng": 136.89689919257,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400042111"
+      }
+    },
+    {
+      "name": "輪島市立鳳至公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市鳳至町石浦町83-1",
+      "lat": 37.39848559867,
+      "lng": 136.89689919257,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400042201"
+      }
+    },
+    {
+      "name": "ホテル八汐　駐車場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市鳳至町袖ケ浜1",
+      "lat": 37.401925440304,
+      "lng": 136.89639333903,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400043201"
+      }
+    },
+    {
+      "name": "鳳来山公園",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市鳳至町地内",
+      "lat": 37.400535012239,
+      "lng": 136.89637616779,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400044201"
+      }
+    },
+    {
+      "name": "輪島市立鳳至小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市鳳至町堂金田1",
+      "lat": 37.396154335024,
+      "lng": 136.89559396791,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400045201"
+      }
+    },
+    {
+      "name": "輪島宿舎３号棟",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市鳳至町畠田99-21",
+      "lat": 37.391562393579,
+      "lng": 136.89472088523,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400046201"
+      }
+    },
+    {
+      "name": "輪島地方合同庁舎",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市鳳至町畠田99-3",
+      "lat": 37.391876249183,
+      "lng": 136.89557942947,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400047201"
+      }
+    },
+    {
+      "name": "緑の健康広場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市北谷町ニ字18",
+      "lat": 37.356663562433,
+      "lng": 136.90935812425,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400048201"
+      }
+    },
+    {
+      "name": "夕陽ヶ丘防災拠点施設",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市堀町１５字2-2",
+      "lat": 37.396528916599,
+      "lng": 136.89137806139,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400049111"
+      }
+    },
+    {
+      "name": "旧輪島市立門前東小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前清水1-68",
+      "lat": 37.288255662916,
+      "lng": 136.76708110641,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400050201"
+      }
+    },
+    {
+      "name": "輪島市立七浦公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町鵜山12-50",
+      "lat": 37.345281141227,
+      "lng": 136.75280727821,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400051111"
+      }
+    },
+    {
+      "name": "輪島市立七浦公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町鵜山12-50",
+      "lat": 37.345281141227,
+      "lng": 136.75280727821,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400051201"
+      }
+    },
+    {
+      "name": "あすなろ公園",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町浦上10-20-1",
+      "lat": 37.305086558184,
+      "lng": 136.79648304025,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400052201"
+      }
+    },
+    {
+      "name": "輪島市立浦上公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町浦上8-58",
+      "lat": 37.3057689290989,
+      "lng": 136.797614236869,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400053111"
+      }
+    },
+    {
+      "name": "輪島市立浦上公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町浦上8-58",
+      "lat": 37.305768929099,
+      "lng": 136.79761423687,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400053201"
+      }
+    },
+    {
+      "name": "輪島市浦上健康増進広場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町浦上チ1-1",
+      "lat": 37.305720528018,
+      "lng": 136.79828633026,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400054201"
+      }
+    },
+    {
+      "name": "皆月青少年旅行村（駐車場）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町皆月ミの117",
+      "lat": 37.354664250531,
+      "lng": 136.75465193648,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400055201"
+      }
+    },
+    {
+      "name": "石川県立門前高等学校（体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町広岡5-3",
+      "lat": 37.28614830977,
+      "lng": 136.768591461891,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400056111"
+      }
+    },
+    {
+      "name": "石川県立門前高等学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町広岡5-3",
+      "lat": 37.285418610946,
+      "lng": 136.76788798309,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400056201"
+      }
+    },
+    {
+      "name": "輪島市立黒島公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町黒島町高池45",
+      "lat": 37.2789032745982,
+      "lng": 136.735632924658,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400057111"
+      }
+    },
+    {
+      "name": "輪島市立黒島公民館広場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町黒島町高池45",
+      "lat": 37.279242615525,
+      "lng": 136.73561951361,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400057201"
+      }
+    },
+    {
+      "name": "輪島市立黒島公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町黒島町高池45",
+      "lat": 37.278903274598,
+      "lng": 136.73563292466,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400057202"
+      }
+    },
+    {
+      "name": "旧輪島市もんぜん文化村緑地広場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町腰細9-29",
+      "lat": 37.242648845332,
+      "lng": 136.70369735695,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400058201"
+      }
+    },
+    {
+      "name": "ふれあい工房あぎし（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町是清イ1",
+      "lat": 37.255159620632,
+      "lng": 136.73214061755,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400059201"
+      }
+    },
+    {
+      "name": "輪島市立門前学園（体育館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町清水10-21",
+      "lat": 37.2921548550225,
+      "lng": 136.764061564921,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400060111"
+      }
+    },
+    {
+      "name": "輪島市立門前学園（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町清水10-21",
+      "lat": 37.291258633241,
+      "lng": 136.76421176863,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400060201"
+      }
+    },
+    {
+      "name": "輪島市門前健民体育館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町清水7-1",
+      "lat": 37.2910385974202,
+      "lng": 136.758858868144,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400062111"
+      }
+    },
+    {
+      "name": "門前総合運動公園（門前簡易グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町清水7-1",
+      "lat": 37.291405623944,
+      "lng": 136.75983519223,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400062201"
+      }
+    },
+    {
+      "name": "輪島市門前会館（輪島市立門前公民館）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町走出6-92-2",
+      "lat": 37.2877984492107,
+      "lng": 136.767771407098,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400063111"
+      }
+    },
+    {
+      "name": "輪島市門前会館（輪島市立門前公民館）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町走出6-92-2",
+      "lat": 37.287798449211,
+      "lng": 136.7677714071,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400063201"
+      }
+    },
+    {
+      "name": "輪島市役所門前総合支所（防災研修室）",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町走出6-69",
+      "lat": 37.2873837451974,
+      "lng": 136.767963712729,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400064111"
+      }
+    },
+    {
+      "name": "輪島市役所門前総合支所（防災研修室）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町走出6-69",
+      "lat": 37.287383745197,
+      "lng": 136.76796371273,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400064201"
+      }
+    },
+    {
+      "name": "下本郷農村公園",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町谷口12-28",
+      "lat": 37.287441895538,
+      "lng": 136.81324966455,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400065201"
+      }
+    },
+    {
+      "name": "道下農村公園",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町道下104-2-1",
+      "lat": 37.288242812091,
+      "lng": 136.74436879849,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400066201"
+      }
+    },
+    {
+      "name": "旧輪島市立門前西小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町道下1-123",
+      "lat": 37.285464590102,
+      "lng": 136.74069277898,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400067201"
+      }
+    },
+    {
+      "name": "輪島市立諸岡公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町道下7-175",
+      "lat": 37.2884034015025,
+      "lng": 136.745259123641,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400068111"
+      }
+    },
+    {
+      "name": "輪島市立諸岡公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町道下7-175",
+      "lat": 37.288403401503,
+      "lng": 136.74525912364,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400068201"
+      }
+    },
+    {
+      "name": "南農村公園",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町南カ15",
+      "lat": 37.253863732848,
+      "lng": 136.73144612546,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400069201"
+      }
+    },
+    {
+      "name": "輪島市立阿岸公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町南ナ17",
+      "lat": 37.2554348679507,
+      "lng": 136.733153521258,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400070111"
+      }
+    },
+    {
+      "name": "輪島市立阿岸公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町南ナ17",
+      "lat": 37.255434867951,
+      "lng": 136.73315352126,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400070201"
+      }
+    },
+    {
+      "name": "輪島市立本郷公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町二又川4-4-1",
+      "lat": 37.284835555574,
+      "lng": 136.8266462007,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400071201"
+      }
+    },
+    {
+      "name": "旧輪島市立仁岸小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町馬場ニ20",
+      "lat": 37.231224818876,
+      "lng": 136.7085748493,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400072201"
+      }
+    },
+    {
+      "name": "上本郷農村公園",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町別所2-91",
+      "lat": 37.274902900593,
+      "lng": 136.84018789693,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400073201"
+      }
+    },
+    {
+      "name": "輪島市七浦基幹集落センター（駐車場）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町餅田9-16-2",
+      "lat": 37.34688221068,
+      "lng": 136.75563133679,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400074201"
+      }
+    },
+    {
+      "name": "剱地原子力災害防護施設",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町剱地ソ13",
+      "lat": 37.2315691866032,
+      "lng": 136.71022934517,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400075111"
+      }
+    },
+    {
+      "name": "輪島市立剱地公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市門前町剱地ツ60",
+      "lat": 37.2317654155461,
+      "lng": 136.70871645141,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400076111"
+      }
+    },
+    {
+      "name": "輪島市立剱地公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市門前町剱地ツ60",
+      "lat": 37.231765415546,
+      "lng": 136.70871645141,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400076201"
+      }
+    },
+    {
+      "name": "南志見多目的グラウンド（公民館前広場）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市里町３２字20",
+      "lat": 37.429758188798,
+      "lng": 137.0350136868,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400077201"
+      }
+    },
+    {
+      "name": "輪島市立南志見公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市里町３２字36",
+      "lat": 37.4310020272449,
+      "lng": 137.03421620067,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400078111"
+      }
+    },
+    {
+      "name": "輪島市立南志見公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市里町３２字36",
+      "lat": 37.430260816895,
+      "lng": 137.03412500556,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400078201"
+      }
+    },
+    {
+      "name": "旧輪島市立南志見小学校（グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市里町３部16",
+      "lat": 37.432584041146,
+      "lng": 137.034037031,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400079201"
+      }
+    },
+    {
+      "name": "輪島市立港公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市輪島崎町１部211-4",
+      "lat": 37.40328927933,
+      "lng": 136.8999196746,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400080111"
+      }
+    },
+    {
+      "name": "輪島市立港公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市輪島崎町１部211-4",
+      "lat": 37.40328927933,
+      "lng": 136.8999196746,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400080201"
+      }
+    },
+    {
+      "name": "天神山広場",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市輪島崎町２字地内",
+      "lat": 37.404651548436,
+      "lng": 136.89820006992,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400081201"
+      }
+    },
+    {
+      "name": "舳倉島灯台",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市海士町所属舳倉島高見",
+      "lat": 37.85139,
+      "lng": 136.918504,
+      "hazards_ok": [
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400082201"
+      }
+    },
+    {
+      "name": "輪島市立鵠巣公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "石川県輪島市大野町",
+      "lat": 37.397544,
+      "lng": 136.933553,
+      "hazards_ok": [
+        "flood",
+        "landslide"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "17204_2.csv",
+        "id": "E1720400083201"
+      }
+    },
+    {
+      "name": "輪島市立鵠巣公民館",
+      "kind": "evacuation_shelter",
+      "address": "石川県輪島市大野町菰沢35",
+      "lat": 37.397548,
+      "lng": 136.93355,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "17204_1.csv",
+        "id": "E1720400084111"
+      }
+    }
+  ],
+  "contacts": [],
+  "conflicts": [
+    {
+      "kind": "shelter_name",
+      "pdf_name": "サン・アリーナ",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "ふれあい健康センター",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [
+        "輪島市ふれあい健康センター"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "一本松ゲートボール場",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [
+        "輪島市一本松ゲートボール場"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "河井小学校（体育館）",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "旧輪島市立鵠巣小学校(グラウンド)",
+      "pdf_source": {
+        "file": "wajima/kinkyu_hinan_basho.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "１　指定緊急避難場所\r\n　　　　指定緊急避難場所とは、災害から一時的・緊急的に避難するための場所をいいます。\r\n洪水 土砂\r\n災害 高潮 地震 津波\r\n1 河井 輪島市ふれあい健康センター 河井町2部287番地1 3 鉄筋コンクリート 3 141 ○ ○ ○\r\n2 河井 輪島市健康ふれあい広場 河井町16部1番地1 12 － - 10,080 ○ ○ ○\r\n3 河井 輪島市一本松ゲートボール場 河井町9部30番地 45 － - 2,195 ○ ○ ○\r\n4 河井 輪島市立輪島小学校（旧河井小グラウンド） 河井町18部1番地2 5 － - 8,390 ○ ○ ○\r\n5 河井 輪島市立輪島中学校（屋外運動場） 河井町11部39番地1 49 － - 16,952 ○ ○ ○\r\n6 河井 石川県立輪島高等学校（グラウンド） 河井町18部42番地2 5 － - 14,346 ○ ○ ○\r\n7 河井 石川県奥能登土木総合事務所 河井町22部1番地1 4 鉄筋コンクリート 5 550 ○\r\n8 河井 ホテル　ルートイン輪島 マリンタウン1番地2 3 鉄筋コンクリート 7 1,046 ○\r\n9 鳳至 輪島市立鳳至公民館 鳳至町石浦町83番地1 6 鉄筋コンクリート 3 540 ○ ○ ○\r\n10 輪島崎 天神山広場 輪島崎町2字地内 34 － - 1,490 ○ ○ ○\r\n11 鳳至 鳳来山公園 鳳至町地内 44 － - 16,704 ○ ○ ○\r\n12 鳳至 ホテル八汐　駐車場 鳳至町袖ヶ浜1 16 － - 400 ○\r\n13 鳳至 旧輪島市立鳳至小学校（グラウンド） 鳳至町堂金田1番地 5 － - 12,017 ○ ○ ○\r\n14 鳳至 輪島地方合同庁舎 鳳至町畠田99番地3 5 鉄筋コンクリート 4 803 ○\r\n15 鳳至 輪島宿舎3号棟 鳳至町畠田99番地21 5 鉄筋コンクリート 4 130 ○\r\n16 海士 舳倉島開発総合センター 海士町所属舳倉島出邑山1番4 8 鉄筋コンクリート 2 73 ○ ○ ○\r\n17 海士 へぐら愛らんどタワー 海士町所属舳倉島出邑山 10 鉄筋コンクリート 5 164 ○ ○ ○\r\n18 海士 舳倉島灯台 海士町所属舳倉島高見 12 鉄筋コンクリート - 125 ○ ○\r\n19 輪島崎 輪島市立港公民館 輪島崎町1部211番地4 1 鉄筋コンクリート 2 91 ○ ○ ○\r\n20 大屋 輪島市立大屋公民館 小伊勢町丸垣内22番地1 10 木造 1 91 ○ ○ ○\r\n21 大屋 旧輪島市立二俣小学校（グラウンド） 二俣町19の32番地 54 － - 2,334 ○\r\n22 大屋 旧輪島市立大屋小学校（グラウンド） 小伊勢町日隅7番地3 8 － - 5,319 ○ ○ ○\r\n23 大屋 旧輪島市立輪島中学校（グラウンド） 宅田町25部36番地1 24 － - 13,329 ○ ○ ○\r\n24 河原田 輪島市立河原田公民館 西脇町60番地1 43 木造 1 70 ○ ○ ○\r\n25 河原田 緑の健康広場 北谷町ニ字18番地 44 － - 3,491 ○\r\n26 河原田 輪島市農村ふれあい広場 西脇町60番地 44 － - 6,315 ○\r\n27 河原田 旧輪島市立河原田小学校（グラウンド） 横地町6字123番地 16 － - 5,845 ○\r\n28 河原田 一本松総合運動公園 杉平町1字12番地 31 － - 118,146 ○ ○ ○\r\n29 鵠巣 輪島市立鵠巣公民館 大野町菰沢35番地 35 木造 1 166 〇 〇 〇\r\n30 鵠巣 旧輪島市立鵠巣公民館横広場 深見町65部33番地1 30 － - 1,500 ○ ○ ○\r\n31 鵠巣 旧輪島市立鵠巣小学校（グラウンド） 大野町菰沢2番地3 31 － - 4,634 ○ ○ ○\r\n32 鵠巣 石川県立輪島高等学校稲舟校舎（グラウンド） 稲舟町上野50番地 56 － - 20,236 ○ ○ ○\r\n33 鵠巣 旧石川県輪島実業高等学校（格技場） 稲舟町上野50番地 51 1 548 ○\r\n34 町野 輪島市立町野公民館 町野町粟蔵川原田22番地1 10 鉄筋コンクリート 2 154 ○ ○ ○\r\n35 町野 輪島市立東陽小中学校（旧東陽中グラウンド） 町野町粟蔵川原田33番地 10 － - 8,988 ○ ○ ○\r\n36 町野 町野野球場 町野町東大野出村60番地 9 － - 17,992 ○ ○ ○\r\n37 町野 輪島市町野テニスコート 町野町東大野出村109番地 9 － - 2,935 ○ ○ ○\r\n38 町野 輪島市町野グラウンドゴルフ場 町野町東大野出村91番地 9 － - 7,143 ○ ○ ○\r\n39 町野 旧輪島市立町野小学校（グラウンド） 町野町粟蔵川原田42番地 10 － - 7,870 ○ ○ ○\r\n40 南志見 輪島市立南志見公民館 里町32字36番地 8 鉄筋コンクリート 1 449 ○ ○ ○\r\n41 南志見 旧輪島市立南志見小学校（グラウンド） 里町3部16番地 25 － - 3,720 ○ ○ ○\r\n42 南志見 南志見多目的グラウンド（公民館前広場） 里町32字20番地 8 － - 8,500 ○ ○ ○\r\n43 南志見 千枚田ポケットパーク 白米町ハ部99番地4 57 － - 2,500 ○ ○ ○\r\n44 三井 輪島市立三井公民館 三井町長沢2字12番地1 95 鉄筋コンクリート 2 120 ○ ○ ○\r\n45 三井 三井地区運動広場（輪島市立三井公民館前広場） 三井町長沢1字34番地2 94 － - 2,199 ○\r\n46 三井 旧輪島市立三井小学校（グラウンド） 三井町興徳寺10字29番地 114 － - 4,982 ○\r\n47 三井 旧輪島市立三井中学校（グラウンド） 三井町興徳寺10字33番地 114 － - 9,904 ○\r\n48 西保 輪島市立西保公民館 大沢町ホサソ201番地3 4 木造 1 70 ○ ○\r\n49 西保 旧輪島市立西保小学校（グラウンド） 赤崎町ニの80番地 87 － - 7,692 ○ ○ ○\r\n50 仁岸 輪島市立剱地公民館 門前町剱地ツの60番地 19 木造 1 138 ○ ○ ○\r\n51 仁岸 旧輪島市立仁岸小学校（グラウンド） 門前町馬場ニの20番地 11 － - 2,500 ○ ○ ○\r\n52 仁岸 旧輪島市もんぜん文化村緑地広場 門前町腰細9の29番地 53 － - 12,010 ○ ○ ○\r\n53 阿岸 輪島市立阿岸公民館 門前町南ナの17番地 30 木造 1 163 ○ ○ ○\r\n54 阿岸 南農村公園 門前町南カの15番地 28 － - 1,150 ○ ○ ○\r\n55 阿岸 ふれあい工房あぎし（グラウンド） 門前町是清イの１ 25 － - 2,962 ○ ○ ○\r\n56 黒島 輪島市立黒島公民館 門前町黒島町高池45番地 17 鉄筋コンクリート 1 105 ○ ○ ○\r\n57 黒島 輪島市立黒島公民館広場 門前町黒島町高池45番地 17 － - 1,100 ○ ○ ○\r\n58 諸岡 輪島市立諸岡公民館 門前町道下7の175番地 16 木造 1 153 ○ ○ ○\r\n59 諸岡 道下農村公園 門前町道下104の2番地1 16 － - 3,800 ○ ○ ○\r\n60 諸岡 旧輪島市立門前西小学校（グラウンド） 門前町道下1の123番地 9 － - 6,530 ○ ○ ○\r\n61 門前 輪島市役所門前総合支所（防災研修室） 門前町走出6の69番地 21 鉄筋コンクリート 3 60 ○ ○ ○\r\n62 門前 輪島市門前会館（輪島市立門前公民館） 門前町走出6の92番地2 17 鉄筋コンクリート一部鉄骨鉄筋コンクリート 3 300 ○ ○ ○\r\n63 門前 門前総合運動公園（門前簡易グラウンド） 門前町清水7の1番地 11 － - 7,552 ○ ○ ○\r\n64 門前 旧輪島市立門前東小学校（グラウンド） 門前清水1の68番地 16 － - 9,254 ○ ○ ○\r\n65 門前 輪島市立門前学園（旧門前中グラウンド） 門前町清水10の21番地 11 － - 17,056 ○ ○ ○\r\n66 門前 石川県立門前高等学校（グラウンド） 門前町広岡5の3番地 19 － - 24,665 ○ ○ ○\r\n67 本郷 輪島市立本郷公民館 門前町二又川4の4番地1 58 木造 1 147 ○ ○ ○\r\n68 本郷 上本郷農村公園 門前町別所2の91番地 83 － - 750 ○\r\n69 本郷 下本郷農村公園 門前町谷口12の28番地 43 － - 900 ○\r\n70 浦上 輪島市立浦上公民館 門前町浦上8の58番地 28 木造 1 128 ○ ○ ○\r\n71 浦上 輪島市浦上健康増進広場 門前町浦上チの1番地1 28 － - 3,907 ○\r\n72 浦上 あすなろ公園 門前町浦上10の20番地1 32 － - 1,000 ○\r\n73 七浦 輪島市立七浦公民館 門前町鵜山12の50番地 9 鉄骨造一部木造 2 373 ○ ○ ○\r\n74 七浦 輪島市七浦基幹集落センター（駐車場） 門前町餅田9の16番地2 19 － - 200 ○ ○ ○\r\n75 七浦 皆月青少年旅行村（駐車場） 門前町皆月ミの117番地 26 － - 1,800 ○ ○ ○\r\n通\r\n番\r\n地区 施設名 施設所在地 海抜\r\n（ｍ） 構造 階数 収容\r\n人数\r\n対象とする異常な現象の種類 指定\r\n避難\r\n所兼"
+      },
+      "gsi_candidates": [
+        "旧輪島市立鵠巣小学校（体育館）",
+        "輪島市立鵠巣小学校（グラウンド）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "旧輪島市立鳳至小学校(グラウンド)",
+      "pdf_source": {
+        "file": "wajima/kinkyu_hinan_basho.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "１　指定緊急避難場所\r\n　　　　指定緊急避難場所とは、災害から一時的・緊急的に避難するための場所をいいます。\r\n洪水 土砂\r\n災害 高潮 地震 津波\r\n1 河井 輪島市ふれあい健康センター 河井町2部287番地1 3 鉄筋コンクリート 3 141 ○ ○ ○\r\n2 河井 輪島市健康ふれあい広場 河井町16部1番地1 12 － - 10,080 ○ ○ ○\r\n3 河井 輪島市一本松ゲートボール場 河井町9部30番地 45 － - 2,195 ○ ○ ○\r\n4 河井 輪島市立輪島小学校（旧河井小グラウンド） 河井町18部1番地2 5 － - 8,390 ○ ○ ○\r\n5 河井 輪島市立輪島中学校（屋外運動場） 河井町11部39番地1 49 － - 16,952 ○ ○ ○\r\n6 河井 石川県立輪島高等学校（グラウンド） 河井町18部42番地2 5 － - 14,346 ○ ○ ○\r\n7 河井 石川県奥能登土木総合事務所 河井町22部1番地1 4 鉄筋コンクリート 5 550 ○\r\n8 河井 ホテル　ルートイン輪島 マリンタウン1番地2 3 鉄筋コンクリート 7 1,046 ○\r\n9 鳳至 輪島市立鳳至公民館 鳳至町石浦町83番地1 6 鉄筋コンクリート 3 540 ○ ○ ○\r\n10 輪島崎 天神山広場 輪島崎町2字地内 34 － - 1,490 ○ ○ ○\r\n11 鳳至 鳳来山公園 鳳至町地内 44 － - 16,704 ○ ○ ○\r\n12 鳳至 ホテル八汐　駐車場 鳳至町袖ヶ浜1 16 － - 400 ○\r\n13 鳳至 旧輪島市立鳳至小学校（グラウンド） 鳳至町堂金田1番地 5 － - 12,017 ○ ○ ○\r\n14 鳳至 輪島地方合同庁舎 鳳至町畠田99番地3 5 鉄筋コンクリート 4 803 ○\r\n15 鳳至 輪島宿舎3号棟 鳳至町畠田99番地21 5 鉄筋コンクリート 4 130 ○\r\n16 海士 舳倉島開発総合センター 海士町所属舳倉島出邑山1番4 8 鉄筋コンクリート 2 73 ○ ○ ○\r\n17 海士 へぐら愛らんどタワー 海士町所属舳倉島出邑山 10 鉄筋コンクリート 5 164 ○ ○ ○\r\n18 海士 舳倉島灯台 海士町所属舳倉島高見 12 鉄筋コンクリート - 125 ○ ○\r\n19 輪島崎 輪島市立港公民館 輪島崎町1部211番地4 1 鉄筋コンクリート 2 91 ○ ○ ○\r\n20 大屋 輪島市立大屋公民館 小伊勢町丸垣内22番地1 10 木造 1 91 ○ ○ ○\r\n21 大屋 旧輪島市立二俣小学校（グラウンド） 二俣町19の32番地 54 － - 2,334 ○\r\n22 大屋 旧輪島市立大屋小学校（グラウンド） 小伊勢町日隅7番地3 8 － - 5,319 ○ ○ ○\r\n23 大屋 旧輪島市立輪島中学校（グラウンド） 宅田町25部36番地1 24 － - 13,329 ○ ○ ○\r\n24 河原田 輪島市立河原田公民館 西脇町60番地1 43 木造 1 70 ○ ○ ○\r\n25 河原田 緑の健康広場 北谷町ニ字18番地 44 － - 3,491 ○\r\n26 河原田 輪島市農村ふれあい広場 西脇町60番地 44 － - 6,315 ○\r\n27 河原田 旧輪島市立河原田小学校（グラウンド） 横地町6字123番地 16 － - 5,845 ○\r\n28 河原田 一本松総合運動公園 杉平町1字12番地 31 － - 118,146 ○ ○ ○\r\n29 鵠巣 輪島市立鵠巣公民館 大野町菰沢35番地 35 木造 1 166 〇 〇 〇\r\n30 鵠巣 旧輪島市立鵠巣公民館横広場 深見町65部33番地1 30 － - 1,500 ○ ○ ○\r\n31 鵠巣 旧輪島市立鵠巣小学校（グラウンド） 大野町菰沢2番地3 31 － - 4,634 ○ ○ ○\r\n32 鵠巣 石川県立輪島高等学校稲舟校舎（グラウンド） 稲舟町上野50番地 56 － - 20,236 ○ ○ ○\r\n33 鵠巣 旧石川県輪島実業高等学校（格技場） 稲舟町上野50番地 51 1 548 ○\r\n34 町野 輪島市立町野公民館 町野町粟蔵川原田22番地1 10 鉄筋コンクリート 2 154 ○ ○ ○\r\n35 町野 輪島市立東陽小中学校（旧東陽中グラウンド） 町野町粟蔵川原田33番地 10 － - 8,988 ○ ○ ○\r\n36 町野 町野野球場 町野町東大野出村60番地 9 － - 17,992 ○ ○ ○\r\n37 町野 輪島市町野テニスコート 町野町東大野出村109番地 9 － - 2,935 ○ ○ ○\r\n38 町野 輪島市町野グラウンドゴルフ場 町野町東大野出村91番地 9 － - 7,143 ○ ○ ○\r\n39 町野 旧輪島市立町野小学校（グラウンド） 町野町粟蔵川原田42番地 10 － - 7,870 ○ ○ ○\r\n40 南志見 輪島市立南志見公民館 里町32字36番地 8 鉄筋コンクリート 1 449 ○ ○ ○\r\n41 南志見 旧輪島市立南志見小学校（グラウンド） 里町3部16番地 25 － - 3,720 ○ ○ ○\r\n42 南志見 南志見多目的グラウンド（公民館前広場） 里町32字20番地 8 － - 8,500 ○ ○ ○\r\n43 南志見 千枚田ポケットパーク 白米町ハ部99番地4 57 － - 2,500 ○ ○ ○\r\n44 三井 輪島市立三井公民館 三井町長沢2字12番地1 95 鉄筋コンクリート 2 120 ○ ○ ○\r\n45 三井 三井地区運動広場（輪島市立三井公民館前広場） 三井町長沢1字34番地2 94 － - 2,199 ○\r\n46 三井 旧輪島市立三井小学校（グラウンド） 三井町興徳寺10字29番地 114 － - 4,982 ○\r\n47 三井 旧輪島市立三井中学校（グラウンド） 三井町興徳寺10字33番地 114 － - 9,904 ○\r\n48 西保 輪島市立西保公民館 大沢町ホサソ201番地3 4 木造 1 70 ○ ○\r\n49 西保 旧輪島市立西保小学校（グラウンド） 赤崎町ニの80番地 87 － - 7,692 ○ ○ ○\r\n50 仁岸 輪島市立剱地公民館 門前町剱地ツの60番地 19 木造 1 138 ○ ○ ○\r\n51 仁岸 旧輪島市立仁岸小学校（グラウンド） 門前町馬場ニの20番地 11 － - 2,500 ○ ○ ○\r\n52 仁岸 旧輪島市もんぜん文化村緑地広場 門前町腰細9の29番地 53 － - 12,010 ○ ○ ○\r\n53 阿岸 輪島市立阿岸公民館 門前町南ナの17番地 30 木造 1 163 ○ ○ ○\r\n54 阿岸 南農村公園 門前町南カの15番地 28 － - 1,150 ○ ○ ○\r\n55 阿岸 ふれあい工房あぎし（グラウンド） 門前町是清イの１ 25 － - 2,962 ○ ○ ○\r\n56 黒島 輪島市立黒島公民館 門前町黒島町高池45番地 17 鉄筋コンクリート 1 105 ○ ○ ○\r\n57 黒島 輪島市立黒島公民館広場 門前町黒島町高池45番地 17 － - 1,100 ○ ○ ○\r\n58 諸岡 輪島市立諸岡公民館 門前町道下7の175番地 16 木造 1 153 ○ ○ ○\r\n59 諸岡 道下農村公園 門前町道下104の2番地1 16 － - 3,800 ○ ○ ○\r\n60 諸岡 旧輪島市立門前西小学校（グラウンド） 門前町道下1の123番地 9 － - 6,530 ○ ○ ○\r\n61 門前 輪島市役所門前総合支所（防災研修室） 門前町走出6の69番地 21 鉄筋コンクリート 3 60 ○ ○ ○\r\n62 門前 輪島市門前会館（輪島市立門前公民館） 門前町走出6の92番地2 17 鉄筋コンクリート一部鉄骨鉄筋コンクリート 3 300 ○ ○ ○\r\n63 門前 門前総合運動公園（門前簡易グラウンド） 門前町清水7の1番地 11 － - 7,552 ○ ○ ○\r\n64 門前 旧輪島市立門前東小学校（グラウンド） 門前清水1の68番地 16 － - 9,254 ○ ○ ○\r\n65 門前 輪島市立門前学園（旧門前中グラウンド） 門前町清水10の21番地 11 － - 17,056 ○ ○ ○\r\n66 門前 石川県立門前高等学校（グラウンド） 門前町広岡5の3番地 19 － - 24,665 ○ ○ ○\r\n67 本郷 輪島市立本郷公民館 門前町二又川4の4番地1 58 木造 1 147 ○ ○ ○\r\n68 本郷 上本郷農村公園 門前町別所2の91番地 83 － - 750 ○\r\n69 本郷 下本郷農村公園 門前町谷口12の28番地 43 － - 900 ○\r\n70 浦上 輪島市立浦上公民館 門前町浦上8の58番地 28 木造 1 128 ○ ○ ○\r\n71 浦上 輪島市浦上健康増進広場 門前町浦上チの1番地1 28 － - 3,907 ○\r\n72 浦上 あすなろ公園 門前町浦上10の20番地1 32 － - 1,000 ○\r\n73 七浦 輪島市立七浦公民館 門前町鵜山12の50番地 9 鉄骨造一部木造 2 373 ○ ○ ○\r\n74 七浦 輪島市七浦基幹集落センター（駐車場） 門前町餅田9の16番地2 19 － - 200 ○ ○ ○\r\n75 七浦 皆月青少年旅行村（駐車場） 門前町皆月ミの117番地 26 － - 1,800 ○ ○ ○\r\n通\r\n番\r\n地区 施設名 施設所在地 海抜\r\n（ｍ） 構造 階数 収容\r\n人数\r\n対象とする異常な現象の種類 指定\r\n避難\r\n所兼"
+      },
+      "gsi_candidates": [
+        "輪島市立鳳至小学校（グラウンド）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "松陵中学校（グラウンド）",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "松陵中学校（テニスコート）",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "松陵中学校（体育館）",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "日本航空学園(WAJIMA MEMORIAL GYM)",
+      "pdf_source": {
+        "file": "wajima/shitei_hinanjo.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "２　指定避難所\r\n　　　指定避難所とは、被災者が一定の期間滞在するための施設です。\r\n1 河井 輪島市ふれあい健康センター 河井町2部287番地1 3 鉄筋コンクリート 3 103 ○\r\n2 河井 輪島市立輪島小学校(旧河井小体育館) 河井町18部1番地2 5 鉄筋コンクリート 2（校舎3） 277\r\n3 河井 輪島市立輪島中学校(屋内運動場、全天候型広場) 河井町11部39番地1 49 鉄骨造 2（校舎3） 854\r\n4 河井 輪島市立輪島中学校(武道館) 河井町11部39番地1 49 鉄骨造 1 131\r\n5 河井 石川県立輪島高等学校(体育館) 河井町18部42番地2 5 鉄筋コンクリート 2（校舎3） 748\r\n6 河井 輪島駅ふらっと訪夢 河井町20部1番地131 7 木造 2 39\r\n7 鳳至 輪島市立鳳至公民館 鳳至町石浦町83番地1 6 鉄筋コンクリート 3 235 ○\r\n8 鳳至 夕陽ヶ丘防災拠点施設 堀町15字2番地2 45 木造 1 21\r\n9 海士 舳倉島開発総合センター 海士町所属舳倉島出邑山1番4 8 鉄筋コンクリート 2 33 ○\r\n10 輪島崎 輪島市立港公民館 輪島崎町1部211番地4 1 鉄筋コンクリート 2 41 ○\r\n11 大屋 輪島市立大屋公民館 小伊勢町丸垣内22番地1 10 木造 1 42 ○\r\n12 大屋 旧輪島市立大屋小学校(体育館) 小伊勢町日隅7番地3 8 鉄骨造 1 172\r\n13 大屋 介護予防拠点施設ふれあいプラザ二勢 二勢町４４番地 6 鉄筋コンクリート 2 32\r\n14 河原田 輪島市立河原田公民館 西脇町60番地1 43 木造 1 32 ○\r\n15 河原田 旧輪島市立河原田小学校(体育館) 横地町6字123番地 16 鉄骨造 1（校舎3） 172\r\n16 鵠巣 輪島市立鵠巣公民館 大野町菰沢35番地 35 木造 1 78 〇\r\n17 鵠巣 旧輪島市立鵠巣小学校(体育館) 大野町菰沢2番地3 31 鉄筋コンクリート 1（校舎3） 174\r\n18 町野 輪島市立町野公民館 町野町粟蔵川原田22番地1 10 鉄筋コンクリート 2 71 ○\r\n19 町野 旧輪島市立町野小学校(体育館) 町野町粟蔵川原田42番地 10 鉄筋コンクリート 1（校舎3） 217\r\n20 町野 輪島市立東陽小中学校(旧東陽中体育館) 町野町粟蔵川原田33番地 10 鉄骨鉄筋コンクリート 2（校舎2） 241\r\n21 町野 輪島市ふるさと体験実習館 町野町曽々木サ部45番地 3 木造 1 98\r\n22 南志見 輪島市立南志見公民館 里町32字36番地 8 鉄筋コンクリート 1 210 ○\r\n23 三井 輪島市立三井公民館 三井町長沢2字12番地1 95 鉄筋コンクリート 2 56 ○\r\n24 三井 日本航空学園（WAJIMA MEMORIAL GYM） 三井町洲衛9部27番地6 165 鉄筋コンクリート 3 615\r\n25 西保 旧輪島市立西保小学校（体育館） 赤崎町ニの80番地 87 鉄筋コンクリート 1（校舎2） 138\r\n26 仁岸 輪島市立剱地公民館 門前町剱地ツの60番地 19 木造 1 64 ○\r\n27 仁岸 剱地原子力災害防護施設 門前町剱地ソの13番地 35 鉄筋コンクリート 2 72\r\n28 阿岸 輪島市立阿岸公民館 門前町南ナの17番地 30 木造 1 75 ○\r\n29 黒島 輪島市立黒島公民館 門前町黒島町高池45番地 17 鉄筋コンクリート 1 48 ○\r\n30 諸岡 輪島市立諸岡公民館 門前町道下7の175番地 16 木造 1 70 ○\r\n31 門前 輪島市門前会館（輪島市立門前公民館） 門前町走出6の92番地2 17 鉄筋コンクリート一部鉄骨鉄筋コンクリート 3 139 ○\r\n32 門前 輪島市役所門前総合支所（防災研修室） 門前町走出6の69番地 21 鉄筋コンクリート 3 28 ○\r\n33 門前 輪島市立門前学園(旧門前中体育館) 門前町清水10の21番地 30 鉄筋コンクリート 2（校舎2） 249\r\n34 門前 石川県立門前高等学校(体育館) 門前町広岡5の3番地 19 鉄筋コンクリート 2（校舎3） 419\r\n35 門前 輪島市門前健民体育館 門前町清水7の1番地 11 鉄筋コンクリート 2 375\r\n36 浦上 輪島市立浦上公民館 門前町浦上8の58番地 28 木造 1 59 ○\r\n37 七浦 輪島市立七浦公民館（旧七浦小学校） 門前町鵜山12の50番地 9 鉄骨造一部木造 2 175 ○\r\n収容\r\n人数\r\n3.5㎡\r\n指定緊急\r\n避難場所\r\n兼\r\n通\r\n番\r\n地区 施設名 施設所在地 海抜\r\n（ｍ） 構造 階数"
+      },
+      "gsi_candidates": [
+        "日本航空学園（ＷＡＪＩＭＡ　ＭＥＭＯＲＩＡＬ　ＧＩＭ）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "文化会館（輪島公民館）",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "鳳至公民館",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [
+        "輪島市立鳳至公民館"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "鳳至小学校（グラウンド）",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [
+        "輪島市立鳳至小学校（グラウンド）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "輪島高等学校（体育館）",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [
+        "石川県立輪島高等学校稲舟校舎（グラウンド）",
+        "石川県立輪島高等学校（グラウンド）",
+        "石川県立輪島高等学校（体育館）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "輪島市立東陽小中学校(旧東陽中グラウンド)",
+      "pdf_source": {
+        "file": "wajima/kinkyu_hinan_basho.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "１　指定緊急避難場所\r\n　　　　指定緊急避難場所とは、災害から一時的・緊急的に避難するための場所をいいます。\r\n洪水 土砂\r\n災害 高潮 地震 津波\r\n1 河井 輪島市ふれあい健康センター 河井町2部287番地1 3 鉄筋コンクリート 3 141 ○ ○ ○\r\n2 河井 輪島市健康ふれあい広場 河井町16部1番地1 12 － - 10,080 ○ ○ ○\r\n3 河井 輪島市一本松ゲートボール場 河井町9部30番地 45 － - 2,195 ○ ○ ○\r\n4 河井 輪島市立輪島小学校（旧河井小グラウンド） 河井町18部1番地2 5 － - 8,390 ○ ○ ○\r\n5 河井 輪島市立輪島中学校（屋外運動場） 河井町11部39番地1 49 － - 16,952 ○ ○ ○\r\n6 河井 石川県立輪島高等学校（グラウンド） 河井町18部42番地2 5 － - 14,346 ○ ○ ○\r\n7 河井 石川県奥能登土木総合事務所 河井町22部1番地1 4 鉄筋コンクリート 5 550 ○\r\n8 河井 ホテル　ルートイン輪島 マリンタウン1番地2 3 鉄筋コンクリート 7 1,046 ○\r\n9 鳳至 輪島市立鳳至公民館 鳳至町石浦町83番地1 6 鉄筋コンクリート 3 540 ○ ○ ○\r\n10 輪島崎 天神山広場 輪島崎町2字地内 34 － - 1,490 ○ ○ ○\r\n11 鳳至 鳳来山公園 鳳至町地内 44 － - 16,704 ○ ○ ○\r\n12 鳳至 ホテル八汐　駐車場 鳳至町袖ヶ浜1 16 － - 400 ○\r\n13 鳳至 旧輪島市立鳳至小学校（グラウンド） 鳳至町堂金田1番地 5 － - 12,017 ○ ○ ○\r\n14 鳳至 輪島地方合同庁舎 鳳至町畠田99番地3 5 鉄筋コンクリート 4 803 ○\r\n15 鳳至 輪島宿舎3号棟 鳳至町畠田99番地21 5 鉄筋コンクリート 4 130 ○\r\n16 海士 舳倉島開発総合センター 海士町所属舳倉島出邑山1番4 8 鉄筋コンクリート 2 73 ○ ○ ○\r\n17 海士 へぐら愛らんどタワー 海士町所属舳倉島出邑山 10 鉄筋コンクリート 5 164 ○ ○ ○\r\n18 海士 舳倉島灯台 海士町所属舳倉島高見 12 鉄筋コンクリート - 125 ○ ○\r\n19 輪島崎 輪島市立港公民館 輪島崎町1部211番地4 1 鉄筋コンクリート 2 91 ○ ○ ○\r\n20 大屋 輪島市立大屋公民館 小伊勢町丸垣内22番地1 10 木造 1 91 ○ ○ ○\r\n21 大屋 旧輪島市立二俣小学校（グラウンド） 二俣町19の32番地 54 － - 2,334 ○\r\n22 大屋 旧輪島市立大屋小学校（グラウンド） 小伊勢町日隅7番地3 8 － - 5,319 ○ ○ ○\r\n23 大屋 旧輪島市立輪島中学校（グラウンド） 宅田町25部36番地1 24 － - 13,329 ○ ○ ○\r\n24 河原田 輪島市立河原田公民館 西脇町60番地1 43 木造 1 70 ○ ○ ○\r\n25 河原田 緑の健康広場 北谷町ニ字18番地 44 － - 3,491 ○\r\n26 河原田 輪島市農村ふれあい広場 西脇町60番地 44 － - 6,315 ○\r\n27 河原田 旧輪島市立河原田小学校（グラウンド） 横地町6字123番地 16 － - 5,845 ○\r\n28 河原田 一本松総合運動公園 杉平町1字12番地 31 － - 118,146 ○ ○ ○\r\n29 鵠巣 輪島市立鵠巣公民館 大野町菰沢35番地 35 木造 1 166 〇 〇 〇\r\n30 鵠巣 旧輪島市立鵠巣公民館横広場 深見町65部33番地1 30 － - 1,500 ○ ○ ○\r\n31 鵠巣 旧輪島市立鵠巣小学校（グラウンド） 大野町菰沢2番地3 31 － - 4,634 ○ ○ ○\r\n32 鵠巣 石川県立輪島高等学校稲舟校舎（グラウンド） 稲舟町上野50番地 56 － - 20,236 ○ ○ ○\r\n33 鵠巣 旧石川県輪島実業高等学校（格技場） 稲舟町上野50番地 51 1 548 ○\r\n34 町野 輪島市立町野公民館 町野町粟蔵川原田22番地1 10 鉄筋コンクリート 2 154 ○ ○ ○\r\n35 町野 輪島市立東陽小中学校（旧東陽中グラウンド） 町野町粟蔵川原田33番地 10 － - 8,988 ○ ○ ○\r\n36 町野 町野野球場 町野町東大野出村60番地 9 － - 17,992 ○ ○ ○\r\n37 町野 輪島市町野テニスコート 町野町東大野出村109番地 9 － - 2,935 ○ ○ ○\r\n38 町野 輪島市町野グラウンドゴルフ場 町野町東大野出村91番地 9 － - 7,143 ○ ○ ○\r\n39 町野 旧輪島市立町野小学校（グラウンド） 町野町粟蔵川原田42番地 10 － - 7,870 ○ ○ ○\r\n40 南志見 輪島市立南志見公民館 里町32字36番地 8 鉄筋コンクリート 1 449 ○ ○ ○\r\n41 南志見 旧輪島市立南志見小学校（グラウンド） 里町3部16番地 25 － - 3,720 ○ ○ ○\r\n42 南志見 南志見多目的グラウンド（公民館前広場） 里町32字20番地 8 － - 8,500 ○ ○ ○\r\n43 南志見 千枚田ポケットパーク 白米町ハ部99番地4 57 － - 2,500 ○ ○ ○\r\n44 三井 輪島市立三井公民館 三井町長沢2字12番地1 95 鉄筋コンクリート 2 120 ○ ○ ○\r\n45 三井 三井地区運動広場（輪島市立三井公民館前広場） 三井町長沢1字34番地2 94 － - 2,199 ○\r\n46 三井 旧輪島市立三井小学校（グラウンド） 三井町興徳寺10字29番地 114 － - 4,982 ○\r\n47 三井 旧輪島市立三井中学校（グラウンド） 三井町興徳寺10字33番地 114 － - 9,904 ○\r\n48 西保 輪島市立西保公民館 大沢町ホサソ201番地3 4 木造 1 70 ○ ○\r\n49 西保 旧輪島市立西保小学校（グラウンド） 赤崎町ニの80番地 87 － - 7,692 ○ ○ ○\r\n50 仁岸 輪島市立剱地公民館 門前町剱地ツの60番地 19 木造 1 138 ○ ○ ○\r\n51 仁岸 旧輪島市立仁岸小学校（グラウンド） 門前町馬場ニの20番地 11 － - 2,500 ○ ○ ○\r\n52 仁岸 旧輪島市もんぜん文化村緑地広場 門前町腰細9の29番地 53 － - 12,010 ○ ○ ○\r\n53 阿岸 輪島市立阿岸公民館 門前町南ナの17番地 30 木造 1 163 ○ ○ ○\r\n54 阿岸 南農村公園 門前町南カの15番地 28 － - 1,150 ○ ○ ○\r\n55 阿岸 ふれあい工房あぎし（グラウンド） 門前町是清イの１ 25 － - 2,962 ○ ○ ○\r\n56 黒島 輪島市立黒島公民館 門前町黒島町高池45番地 17 鉄筋コンクリート 1 105 ○ ○ ○\r\n57 黒島 輪島市立黒島公民館広場 門前町黒島町高池45番地 17 － - 1,100 ○ ○ ○\r\n58 諸岡 輪島市立諸岡公民館 門前町道下7の175番地 16 木造 1 153 ○ ○ ○\r\n59 諸岡 道下農村公園 門前町道下104の2番地1 16 － - 3,800 ○ ○ ○\r\n60 諸岡 旧輪島市立門前西小学校（グラウンド） 門前町道下1の123番地 9 － - 6,530 ○ ○ ○\r\n61 門前 輪島市役所門前総合支所（防災研修室） 門前町走出6の69番地 21 鉄筋コンクリート 3 60 ○ ○ ○\r\n62 門前 輪島市門前会館（輪島市立門前公民館） 門前町走出6の92番地2 17 鉄筋コンクリート一部鉄骨鉄筋コンクリート 3 300 ○ ○ ○\r\n63 門前 門前総合運動公園（門前簡易グラウンド） 門前町清水7の1番地 11 － - 7,552 ○ ○ ○\r\n64 門前 旧輪島市立門前東小学校（グラウンド） 門前清水1の68番地 16 － - 9,254 ○ ○ ○\r\n65 門前 輪島市立門前学園（旧門前中グラウンド） 門前町清水10の21番地 11 － - 17,056 ○ ○ ○\r\n66 門前 石川県立門前高等学校（グラウンド） 門前町広岡5の3番地 19 － - 24,665 ○ ○ ○\r\n67 本郷 輪島市立本郷公民館 門前町二又川4の4番地1 58 木造 1 147 ○ ○ ○\r\n68 本郷 上本郷農村公園 門前町別所2の91番地 83 － - 750 ○\r\n69 本郷 下本郷農村公園 門前町谷口12の28番地 43 － - 900 ○\r\n70 浦上 輪島市立浦上公民館 門前町浦上8の58番地 28 木造 1 128 ○ ○ ○\r\n71 浦上 輪島市浦上健康増進広場 門前町浦上チの1番地1 28 － - 3,907 ○\r\n72 浦上 あすなろ公園 門前町浦上10の20番地1 32 － - 1,000 ○\r\n73 七浦 輪島市立七浦公民館 門前町鵜山12の50番地 9 鉄骨造一部木造 2 373 ○ ○ ○\r\n74 七浦 輪島市七浦基幹集落センター（駐車場） 門前町餅田9の16番地2 19 － - 200 ○ ○ ○\r\n75 七浦 皆月青少年旅行村（駐車場） 門前町皆月ミの117番地 26 － - 1,800 ○ ○ ○\r\n通\r\n番\r\n地区 施設名 施設所在地 海抜\r\n（ｍ） 構造 階数 収容\r\n人数\r\n対象とする異常な現象の種類 指定\r\n避難\r\n所兼"
+      },
+      "gsi_candidates": [
+        "輪島市立東陽小中学校（グラウンド）",
+        "輪島市立東陽小中学校（体育館）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "輪島市立東陽小中学校(旧東陽中体育館)",
+      "pdf_source": {
+        "file": "wajima/shitei_hinanjo.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "２　指定避難所\r\n　　　指定避難所とは、被災者が一定の期間滞在するための施設です。\r\n1 河井 輪島市ふれあい健康センター 河井町2部287番地1 3 鉄筋コンクリート 3 103 ○\r\n2 河井 輪島市立輪島小学校(旧河井小体育館) 河井町18部1番地2 5 鉄筋コンクリート 2（校舎3） 277\r\n3 河井 輪島市立輪島中学校(屋内運動場、全天候型広場) 河井町11部39番地1 49 鉄骨造 2（校舎3） 854\r\n4 河井 輪島市立輪島中学校(武道館) 河井町11部39番地1 49 鉄骨造 1 131\r\n5 河井 石川県立輪島高等学校(体育館) 河井町18部42番地2 5 鉄筋コンクリート 2（校舎3） 748\r\n6 河井 輪島駅ふらっと訪夢 河井町20部1番地131 7 木造 2 39\r\n7 鳳至 輪島市立鳳至公民館 鳳至町石浦町83番地1 6 鉄筋コンクリート 3 235 ○\r\n8 鳳至 夕陽ヶ丘防災拠点施設 堀町15字2番地2 45 木造 1 21\r\n9 海士 舳倉島開発総合センター 海士町所属舳倉島出邑山1番4 8 鉄筋コンクリート 2 33 ○\r\n10 輪島崎 輪島市立港公民館 輪島崎町1部211番地4 1 鉄筋コンクリート 2 41 ○\r\n11 大屋 輪島市立大屋公民館 小伊勢町丸垣内22番地1 10 木造 1 42 ○\r\n12 大屋 旧輪島市立大屋小学校(体育館) 小伊勢町日隅7番地3 8 鉄骨造 1 172\r\n13 大屋 介護予防拠点施設ふれあいプラザ二勢 二勢町４４番地 6 鉄筋コンクリート 2 32\r\n14 河原田 輪島市立河原田公民館 西脇町60番地1 43 木造 1 32 ○\r\n15 河原田 旧輪島市立河原田小学校(体育館) 横地町6字123番地 16 鉄骨造 1（校舎3） 172\r\n16 鵠巣 輪島市立鵠巣公民館 大野町菰沢35番地 35 木造 1 78 〇\r\n17 鵠巣 旧輪島市立鵠巣小学校(体育館) 大野町菰沢2番地3 31 鉄筋コンクリート 1（校舎3） 174\r\n18 町野 輪島市立町野公民館 町野町粟蔵川原田22番地1 10 鉄筋コンクリート 2 71 ○\r\n19 町野 旧輪島市立町野小学校(体育館) 町野町粟蔵川原田42番地 10 鉄筋コンクリート 1（校舎3） 217\r\n20 町野 輪島市立東陽小中学校(旧東陽中体育館) 町野町粟蔵川原田33番地 10 鉄骨鉄筋コンクリート 2（校舎2） 241\r\n21 町野 輪島市ふるさと体験実習館 町野町曽々木サ部45番地 3 木造 1 98\r\n22 南志見 輪島市立南志見公民館 里町32字36番地 8 鉄筋コンクリート 1 210 ○\r\n23 三井 輪島市立三井公民館 三井町長沢2字12番地1 95 鉄筋コンクリート 2 56 ○\r\n24 三井 日本航空学園（WAJIMA MEMORIAL GYM） 三井町洲衛9部27番地6 165 鉄筋コンクリート 3 615\r\n25 西保 旧輪島市立西保小学校（体育館） 赤崎町ニの80番地 87 鉄筋コンクリート 1（校舎2） 138\r\n26 仁岸 輪島市立剱地公民館 門前町剱地ツの60番地 19 木造 1 64 ○\r\n27 仁岸 剱地原子力災害防護施設 門前町剱地ソの13番地 35 鉄筋コンクリート 2 72\r\n28 阿岸 輪島市立阿岸公民館 門前町南ナの17番地 30 木造 1 75 ○\r\n29 黒島 輪島市立黒島公民館 門前町黒島町高池45番地 17 鉄筋コンクリート 1 48 ○\r\n30 諸岡 輪島市立諸岡公民館 門前町道下7の175番地 16 木造 1 70 ○\r\n31 門前 輪島市門前会館（輪島市立門前公民館） 門前町走出6の92番地2 17 鉄筋コンクリート一部鉄骨鉄筋コンクリート 3 139 ○\r\n32 門前 輪島市役所門前総合支所（防災研修室） 門前町走出6の69番地 21 鉄筋コンクリート 3 28 ○\r\n33 門前 輪島市立門前学園(旧門前中体育館) 門前町清水10の21番地 30 鉄筋コンクリート 2（校舎2） 249\r\n34 門前 石川県立門前高等学校(体育館) 門前町広岡5の3番地 19 鉄筋コンクリート 2（校舎3） 419\r\n35 門前 輪島市門前健民体育館 門前町清水7の1番地 11 鉄筋コンクリート 2 375\r\n36 浦上 輪島市立浦上公民館 門前町浦上8の58番地 28 木造 1 59 ○\r\n37 七浦 輪島市立七浦公民館（旧七浦小学校） 門前町鵜山12の50番地 9 鉄骨造一部木造 2 175 ○\r\n収容\r\n人数\r\n3.5㎡\r\n指定緊急\r\n避難場所\r\n兼\r\n通\r\n番\r\n地区 施設名 施設所在地 海抜\r\n（ｍ） 構造 階数"
+      },
+      "gsi_candidates": [
+        "輪島市立東陽小中学校（グラウンド）",
+        "輪島市立東陽小中学校（体育館）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "輪島市立門前学園(旧門前中グラウンド)",
+      "pdf_source": {
+        "file": "wajima/kinkyu_hinan_basho.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "１　指定緊急避難場所\r\n　　　　指定緊急避難場所とは、災害から一時的・緊急的に避難するための場所をいいます。\r\n洪水 土砂\r\n災害 高潮 地震 津波\r\n1 河井 輪島市ふれあい健康センター 河井町2部287番地1 3 鉄筋コンクリート 3 141 ○ ○ ○\r\n2 河井 輪島市健康ふれあい広場 河井町16部1番地1 12 － - 10,080 ○ ○ ○\r\n3 河井 輪島市一本松ゲートボール場 河井町9部30番地 45 － - 2,195 ○ ○ ○\r\n4 河井 輪島市立輪島小学校（旧河井小グラウンド） 河井町18部1番地2 5 － - 8,390 ○ ○ ○\r\n5 河井 輪島市立輪島中学校（屋外運動場） 河井町11部39番地1 49 － - 16,952 ○ ○ ○\r\n6 河井 石川県立輪島高等学校（グラウンド） 河井町18部42番地2 5 － - 14,346 ○ ○ ○\r\n7 河井 石川県奥能登土木総合事務所 河井町22部1番地1 4 鉄筋コンクリート 5 550 ○\r\n8 河井 ホテル　ルートイン輪島 マリンタウン1番地2 3 鉄筋コンクリート 7 1,046 ○\r\n9 鳳至 輪島市立鳳至公民館 鳳至町石浦町83番地1 6 鉄筋コンクリート 3 540 ○ ○ ○\r\n10 輪島崎 天神山広場 輪島崎町2字地内 34 － - 1,490 ○ ○ ○\r\n11 鳳至 鳳来山公園 鳳至町地内 44 － - 16,704 ○ ○ ○\r\n12 鳳至 ホテル八汐　駐車場 鳳至町袖ヶ浜1 16 － - 400 ○\r\n13 鳳至 旧輪島市立鳳至小学校（グラウンド） 鳳至町堂金田1番地 5 － - 12,017 ○ ○ ○\r\n14 鳳至 輪島地方合同庁舎 鳳至町畠田99番地3 5 鉄筋コンクリート 4 803 ○\r\n15 鳳至 輪島宿舎3号棟 鳳至町畠田99番地21 5 鉄筋コンクリート 4 130 ○\r\n16 海士 舳倉島開発総合センター 海士町所属舳倉島出邑山1番4 8 鉄筋コンクリート 2 73 ○ ○ ○\r\n17 海士 へぐら愛らんどタワー 海士町所属舳倉島出邑山 10 鉄筋コンクリート 5 164 ○ ○ ○\r\n18 海士 舳倉島灯台 海士町所属舳倉島高見 12 鉄筋コンクリート - 125 ○ ○\r\n19 輪島崎 輪島市立港公民館 輪島崎町1部211番地4 1 鉄筋コンクリート 2 91 ○ ○ ○\r\n20 大屋 輪島市立大屋公民館 小伊勢町丸垣内22番地1 10 木造 1 91 ○ ○ ○\r\n21 大屋 旧輪島市立二俣小学校（グラウンド） 二俣町19の32番地 54 － - 2,334 ○\r\n22 大屋 旧輪島市立大屋小学校（グラウンド） 小伊勢町日隅7番地3 8 － - 5,319 ○ ○ ○\r\n23 大屋 旧輪島市立輪島中学校（グラウンド） 宅田町25部36番地1 24 － - 13,329 ○ ○ ○\r\n24 河原田 輪島市立河原田公民館 西脇町60番地1 43 木造 1 70 ○ ○ ○\r\n25 河原田 緑の健康広場 北谷町ニ字18番地 44 － - 3,491 ○\r\n26 河原田 輪島市農村ふれあい広場 西脇町60番地 44 － - 6,315 ○\r\n27 河原田 旧輪島市立河原田小学校（グラウンド） 横地町6字123番地 16 － - 5,845 ○\r\n28 河原田 一本松総合運動公園 杉平町1字12番地 31 － - 118,146 ○ ○ ○\r\n29 鵠巣 輪島市立鵠巣公民館 大野町菰沢35番地 35 木造 1 166 〇 〇 〇\r\n30 鵠巣 旧輪島市立鵠巣公民館横広場 深見町65部33番地1 30 － - 1,500 ○ ○ ○\r\n31 鵠巣 旧輪島市立鵠巣小学校（グラウンド） 大野町菰沢2番地3 31 － - 4,634 ○ ○ ○\r\n32 鵠巣 石川県立輪島高等学校稲舟校舎（グラウンド） 稲舟町上野50番地 56 － - 20,236 ○ ○ ○\r\n33 鵠巣 旧石川県輪島実業高等学校（格技場） 稲舟町上野50番地 51 1 548 ○\r\n34 町野 輪島市立町野公民館 町野町粟蔵川原田22番地1 10 鉄筋コンクリート 2 154 ○ ○ ○\r\n35 町野 輪島市立東陽小中学校（旧東陽中グラウンド） 町野町粟蔵川原田33番地 10 － - 8,988 ○ ○ ○\r\n36 町野 町野野球場 町野町東大野出村60番地 9 － - 17,992 ○ ○ ○\r\n37 町野 輪島市町野テニスコート 町野町東大野出村109番地 9 － - 2,935 ○ ○ ○\r\n38 町野 輪島市町野グラウンドゴルフ場 町野町東大野出村91番地 9 － - 7,143 ○ ○ ○\r\n39 町野 旧輪島市立町野小学校（グラウンド） 町野町粟蔵川原田42番地 10 － - 7,870 ○ ○ ○\r\n40 南志見 輪島市立南志見公民館 里町32字36番地 8 鉄筋コンクリート 1 449 ○ ○ ○\r\n41 南志見 旧輪島市立南志見小学校（グラウンド） 里町3部16番地 25 － - 3,720 ○ ○ ○\r\n42 南志見 南志見多目的グラウンド（公民館前広場） 里町32字20番地 8 － - 8,500 ○ ○ ○\r\n43 南志見 千枚田ポケットパーク 白米町ハ部99番地4 57 － - 2,500 ○ ○ ○\r\n44 三井 輪島市立三井公民館 三井町長沢2字12番地1 95 鉄筋コンクリート 2 120 ○ ○ ○\r\n45 三井 三井地区運動広場（輪島市立三井公民館前広場） 三井町長沢1字34番地2 94 － - 2,199 ○\r\n46 三井 旧輪島市立三井小学校（グラウンド） 三井町興徳寺10字29番地 114 － - 4,982 ○\r\n47 三井 旧輪島市立三井中学校（グラウンド） 三井町興徳寺10字33番地 114 － - 9,904 ○\r\n48 西保 輪島市立西保公民館 大沢町ホサソ201番地3 4 木造 1 70 ○ ○\r\n49 西保 旧輪島市立西保小学校（グラウンド） 赤崎町ニの80番地 87 － - 7,692 ○ ○ ○\r\n50 仁岸 輪島市立剱地公民館 門前町剱地ツの60番地 19 木造 1 138 ○ ○ ○\r\n51 仁岸 旧輪島市立仁岸小学校（グラウンド） 門前町馬場ニの20番地 11 － - 2,500 ○ ○ ○\r\n52 仁岸 旧輪島市もんぜん文化村緑地広場 門前町腰細9の29番地 53 － - 12,010 ○ ○ ○\r\n53 阿岸 輪島市立阿岸公民館 門前町南ナの17番地 30 木造 1 163 ○ ○ ○\r\n54 阿岸 南農村公園 門前町南カの15番地 28 － - 1,150 ○ ○ ○\r\n55 阿岸 ふれあい工房あぎし（グラウンド） 門前町是清イの１ 25 － - 2,962 ○ ○ ○\r\n56 黒島 輪島市立黒島公民館 門前町黒島町高池45番地 17 鉄筋コンクリート 1 105 ○ ○ ○\r\n57 黒島 輪島市立黒島公民館広場 門前町黒島町高池45番地 17 － - 1,100 ○ ○ ○\r\n58 諸岡 輪島市立諸岡公民館 門前町道下7の175番地 16 木造 1 153 ○ ○ ○\r\n59 諸岡 道下農村公園 門前町道下104の2番地1 16 － - 3,800 ○ ○ ○\r\n60 諸岡 旧輪島市立門前西小学校（グラウンド） 門前町道下1の123番地 9 － - 6,530 ○ ○ ○\r\n61 門前 輪島市役所門前総合支所（防災研修室） 門前町走出6の69番地 21 鉄筋コンクリート 3 60 ○ ○ ○\r\n62 門前 輪島市門前会館（輪島市立門前公民館） 門前町走出6の92番地2 17 鉄筋コンクリート一部鉄骨鉄筋コンクリート 3 300 ○ ○ ○\r\n63 門前 門前総合運動公園（門前簡易グラウンド） 門前町清水7の1番地 11 － - 7,552 ○ ○ ○\r\n64 門前 旧輪島市立門前東小学校（グラウンド） 門前清水1の68番地 16 － - 9,254 ○ ○ ○\r\n65 門前 輪島市立門前学園（旧門前中グラウンド） 門前町清水10の21番地 11 － - 17,056 ○ ○ ○\r\n66 門前 石川県立門前高等学校（グラウンド） 門前町広岡5の3番地 19 － - 24,665 ○ ○ ○\r\n67 本郷 輪島市立本郷公民館 門前町二又川4の4番地1 58 木造 1 147 ○ ○ ○\r\n68 本郷 上本郷農村公園 門前町別所2の91番地 83 － - 750 ○\r\n69 本郷 下本郷農村公園 門前町谷口12の28番地 43 － - 900 ○\r\n70 浦上 輪島市立浦上公民館 門前町浦上8の58番地 28 木造 1 128 ○ ○ ○\r\n71 浦上 輪島市浦上健康増進広場 門前町浦上チの1番地1 28 － - 3,907 ○\r\n72 浦上 あすなろ公園 門前町浦上10の20番地1 32 － - 1,000 ○\r\n73 七浦 輪島市立七浦公民館 門前町鵜山12の50番地 9 鉄骨造一部木造 2 373 ○ ○ ○\r\n74 七浦 輪島市七浦基幹集落センター（駐車場） 門前町餅田9の16番地2 19 － - 200 ○ ○ ○\r\n75 七浦 皆月青少年旅行村（駐車場） 門前町皆月ミの117番地 26 － - 1,800 ○ ○ ○\r\n通\r\n番\r\n地区 施設名 施設所在地 海抜\r\n（ｍ） 構造 階数 収容\r\n人数\r\n対象とする異常な現象の種類 指定\r\n避難\r\n所兼"
+      },
+      "gsi_candidates": [
+        "輪島市立門前学園（グラウンド）",
+        "輪島市立門前学園（体育館）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "輪島市立門前学園(旧門前中体育館)",
+      "pdf_source": {
+        "file": "wajima/shitei_hinanjo.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "２　指定避難所\r\n　　　指定避難所とは、被災者が一定の期間滞在するための施設です。\r\n1 河井 輪島市ふれあい健康センター 河井町2部287番地1 3 鉄筋コンクリート 3 103 ○\r\n2 河井 輪島市立輪島小学校(旧河井小体育館) 河井町18部1番地2 5 鉄筋コンクリート 2（校舎3） 277\r\n3 河井 輪島市立輪島中学校(屋内運動場、全天候型広場) 河井町11部39番地1 49 鉄骨造 2（校舎3） 854\r\n4 河井 輪島市立輪島中学校(武道館) 河井町11部39番地1 49 鉄骨造 1 131\r\n5 河井 石川県立輪島高等学校(体育館) 河井町18部42番地2 5 鉄筋コンクリート 2（校舎3） 748\r\n6 河井 輪島駅ふらっと訪夢 河井町20部1番地131 7 木造 2 39\r\n7 鳳至 輪島市立鳳至公民館 鳳至町石浦町83番地1 6 鉄筋コンクリート 3 235 ○\r\n8 鳳至 夕陽ヶ丘防災拠点施設 堀町15字2番地2 45 木造 1 21\r\n9 海士 舳倉島開発総合センター 海士町所属舳倉島出邑山1番4 8 鉄筋コンクリート 2 33 ○\r\n10 輪島崎 輪島市立港公民館 輪島崎町1部211番地4 1 鉄筋コンクリート 2 41 ○\r\n11 大屋 輪島市立大屋公民館 小伊勢町丸垣内22番地1 10 木造 1 42 ○\r\n12 大屋 旧輪島市立大屋小学校(体育館) 小伊勢町日隅7番地3 8 鉄骨造 1 172\r\n13 大屋 介護予防拠点施設ふれあいプラザ二勢 二勢町４４番地 6 鉄筋コンクリート 2 32\r\n14 河原田 輪島市立河原田公民館 西脇町60番地1 43 木造 1 32 ○\r\n15 河原田 旧輪島市立河原田小学校(体育館) 横地町6字123番地 16 鉄骨造 1（校舎3） 172\r\n16 鵠巣 輪島市立鵠巣公民館 大野町菰沢35番地 35 木造 1 78 〇\r\n17 鵠巣 旧輪島市立鵠巣小学校(体育館) 大野町菰沢2番地3 31 鉄筋コンクリート 1（校舎3） 174\r\n18 町野 輪島市立町野公民館 町野町粟蔵川原田22番地1 10 鉄筋コンクリート 2 71 ○\r\n19 町野 旧輪島市立町野小学校(体育館) 町野町粟蔵川原田42番地 10 鉄筋コンクリート 1（校舎3） 217\r\n20 町野 輪島市立東陽小中学校(旧東陽中体育館) 町野町粟蔵川原田33番地 10 鉄骨鉄筋コンクリート 2（校舎2） 241\r\n21 町野 輪島市ふるさと体験実習館 町野町曽々木サ部45番地 3 木造 1 98\r\n22 南志見 輪島市立南志見公民館 里町32字36番地 8 鉄筋コンクリート 1 210 ○\r\n23 三井 輪島市立三井公民館 三井町長沢2字12番地1 95 鉄筋コンクリート 2 56 ○\r\n24 三井 日本航空学園（WAJIMA MEMORIAL GYM） 三井町洲衛9部27番地6 165 鉄筋コンクリート 3 615\r\n25 西保 旧輪島市立西保小学校（体育館） 赤崎町ニの80番地 87 鉄筋コンクリート 1（校舎2） 138\r\n26 仁岸 輪島市立剱地公民館 門前町剱地ツの60番地 19 木造 1 64 ○\r\n27 仁岸 剱地原子力災害防護施設 門前町剱地ソの13番地 35 鉄筋コンクリート 2 72\r\n28 阿岸 輪島市立阿岸公民館 門前町南ナの17番地 30 木造 1 75 ○\r\n29 黒島 輪島市立黒島公民館 門前町黒島町高池45番地 17 鉄筋コンクリート 1 48 ○\r\n30 諸岡 輪島市立諸岡公民館 門前町道下7の175番地 16 木造 1 70 ○\r\n31 門前 輪島市門前会館（輪島市立門前公民館） 門前町走出6の92番地2 17 鉄筋コンクリート一部鉄骨鉄筋コンクリート 3 139 ○\r\n32 門前 輪島市役所門前総合支所（防災研修室） 門前町走出6の69番地 21 鉄筋コンクリート 3 28 ○\r\n33 門前 輪島市立門前学園(旧門前中体育館) 門前町清水10の21番地 30 鉄筋コンクリート 2（校舎2） 249\r\n34 門前 石川県立門前高等学校(体育館) 門前町広岡5の3番地 19 鉄筋コンクリート 2（校舎3） 419\r\n35 門前 輪島市門前健民体育館 門前町清水7の1番地 11 鉄筋コンクリート 2 375\r\n36 浦上 輪島市立浦上公民館 門前町浦上8の58番地 28 木造 1 59 ○\r\n37 七浦 輪島市立七浦公民館（旧七浦小学校） 門前町鵜山12の50番地 9 鉄骨造一部木造 2 175 ○\r\n収容\r\n人数\r\n3.5㎡\r\n指定緊急\r\n避難場所\r\n兼\r\n通\r\n番\r\n地区 施設名 施設所在地 海抜\r\n（ｍ） 構造 階数"
+      },
+      "gsi_candidates": [
+        "輪島市立門前学園（グラウンド）",
+        "輪島市立門前学園（体育館）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "輪島市立輪島小学校(旧河井小グラウンド)",
+      "pdf_source": {
+        "file": "wajima/kinkyu_hinan_basho.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "１　指定緊急避難場所\r\n　　　　指定緊急避難場所とは、災害から一時的・緊急的に避難するための場所をいいます。\r\n洪水 土砂\r\n災害 高潮 地震 津波\r\n1 河井 輪島市ふれあい健康センター 河井町2部287番地1 3 鉄筋コンクリート 3 141 ○ ○ ○\r\n2 河井 輪島市健康ふれあい広場 河井町16部1番地1 12 － - 10,080 ○ ○ ○\r\n3 河井 輪島市一本松ゲートボール場 河井町9部30番地 45 － - 2,195 ○ ○ ○\r\n4 河井 輪島市立輪島小学校（旧河井小グラウンド） 河井町18部1番地2 5 － - 8,390 ○ ○ ○\r\n5 河井 輪島市立輪島中学校（屋外運動場） 河井町11部39番地1 49 － - 16,952 ○ ○ ○\r\n6 河井 石川県立輪島高等学校（グラウンド） 河井町18部42番地2 5 － - 14,346 ○ ○ ○\r\n7 河井 石川県奥能登土木総合事務所 河井町22部1番地1 4 鉄筋コンクリート 5 550 ○\r\n8 河井 ホテル　ルートイン輪島 マリンタウン1番地2 3 鉄筋コンクリート 7 1,046 ○\r\n9 鳳至 輪島市立鳳至公民館 鳳至町石浦町83番地1 6 鉄筋コンクリート 3 540 ○ ○ ○\r\n10 輪島崎 天神山広場 輪島崎町2字地内 34 － - 1,490 ○ ○ ○\r\n11 鳳至 鳳来山公園 鳳至町地内 44 － - 16,704 ○ ○ ○\r\n12 鳳至 ホテル八汐　駐車場 鳳至町袖ヶ浜1 16 － - 400 ○\r\n13 鳳至 旧輪島市立鳳至小学校（グラウンド） 鳳至町堂金田1番地 5 － - 12,017 ○ ○ ○\r\n14 鳳至 輪島地方合同庁舎 鳳至町畠田99番地3 5 鉄筋コンクリート 4 803 ○\r\n15 鳳至 輪島宿舎3号棟 鳳至町畠田99番地21 5 鉄筋コンクリート 4 130 ○\r\n16 海士 舳倉島開発総合センター 海士町所属舳倉島出邑山1番4 8 鉄筋コンクリート 2 73 ○ ○ ○\r\n17 海士 へぐら愛らんどタワー 海士町所属舳倉島出邑山 10 鉄筋コンクリート 5 164 ○ ○ ○\r\n18 海士 舳倉島灯台 海士町所属舳倉島高見 12 鉄筋コンクリート - 125 ○ ○\r\n19 輪島崎 輪島市立港公民館 輪島崎町1部211番地4 1 鉄筋コンクリート 2 91 ○ ○ ○\r\n20 大屋 輪島市立大屋公民館 小伊勢町丸垣内22番地1 10 木造 1 91 ○ ○ ○\r\n21 大屋 旧輪島市立二俣小学校（グラウンド） 二俣町19の32番地 54 － - 2,334 ○\r\n22 大屋 旧輪島市立大屋小学校（グラウンド） 小伊勢町日隅7番地3 8 － - 5,319 ○ ○ ○\r\n23 大屋 旧輪島市立輪島中学校（グラウンド） 宅田町25部36番地1 24 － - 13,329 ○ ○ ○\r\n24 河原田 輪島市立河原田公民館 西脇町60番地1 43 木造 1 70 ○ ○ ○\r\n25 河原田 緑の健康広場 北谷町ニ字18番地 44 － - 3,491 ○\r\n26 河原田 輪島市農村ふれあい広場 西脇町60番地 44 － - 6,315 ○\r\n27 河原田 旧輪島市立河原田小学校（グラウンド） 横地町6字123番地 16 － - 5,845 ○\r\n28 河原田 一本松総合運動公園 杉平町1字12番地 31 － - 118,146 ○ ○ ○\r\n29 鵠巣 輪島市立鵠巣公民館 大野町菰沢35番地 35 木造 1 166 〇 〇 〇\r\n30 鵠巣 旧輪島市立鵠巣公民館横広場 深見町65部33番地1 30 － - 1,500 ○ ○ ○\r\n31 鵠巣 旧輪島市立鵠巣小学校（グラウンド） 大野町菰沢2番地3 31 － - 4,634 ○ ○ ○\r\n32 鵠巣 石川県立輪島高等学校稲舟校舎（グラウンド） 稲舟町上野50番地 56 － - 20,236 ○ ○ ○\r\n33 鵠巣 旧石川県輪島実業高等学校（格技場） 稲舟町上野50番地 51 1 548 ○\r\n34 町野 輪島市立町野公民館 町野町粟蔵川原田22番地1 10 鉄筋コンクリート 2 154 ○ ○ ○\r\n35 町野 輪島市立東陽小中学校（旧東陽中グラウンド） 町野町粟蔵川原田33番地 10 － - 8,988 ○ ○ ○\r\n36 町野 町野野球場 町野町東大野出村60番地 9 － - 17,992 ○ ○ ○\r\n37 町野 輪島市町野テニスコート 町野町東大野出村109番地 9 － - 2,935 ○ ○ ○\r\n38 町野 輪島市町野グラウンドゴルフ場 町野町東大野出村91番地 9 － - 7,143 ○ ○ ○\r\n39 町野 旧輪島市立町野小学校（グラウンド） 町野町粟蔵川原田42番地 10 － - 7,870 ○ ○ ○\r\n40 南志見 輪島市立南志見公民館 里町32字36番地 8 鉄筋コンクリート 1 449 ○ ○ ○\r\n41 南志見 旧輪島市立南志見小学校（グラウンド） 里町3部16番地 25 － - 3,720 ○ ○ ○\r\n42 南志見 南志見多目的グラウンド（公民館前広場） 里町32字20番地 8 － - 8,500 ○ ○ ○\r\n43 南志見 千枚田ポケットパーク 白米町ハ部99番地4 57 － - 2,500 ○ ○ ○\r\n44 三井 輪島市立三井公民館 三井町長沢2字12番地1 95 鉄筋コンクリート 2 120 ○ ○ ○\r\n45 三井 三井地区運動広場（輪島市立三井公民館前広場） 三井町長沢1字34番地2 94 － - 2,199 ○\r\n46 三井 旧輪島市立三井小学校（グラウンド） 三井町興徳寺10字29番地 114 － - 4,982 ○\r\n47 三井 旧輪島市立三井中学校（グラウンド） 三井町興徳寺10字33番地 114 － - 9,904 ○\r\n48 西保 輪島市立西保公民館 大沢町ホサソ201番地3 4 木造 1 70 ○ ○\r\n49 西保 旧輪島市立西保小学校（グラウンド） 赤崎町ニの80番地 87 － - 7,692 ○ ○ ○\r\n50 仁岸 輪島市立剱地公民館 門前町剱地ツの60番地 19 木造 1 138 ○ ○ ○\r\n51 仁岸 旧輪島市立仁岸小学校（グラウンド） 門前町馬場ニの20番地 11 － - 2,500 ○ ○ ○\r\n52 仁岸 旧輪島市もんぜん文化村緑地広場 門前町腰細9の29番地 53 － - 12,010 ○ ○ ○\r\n53 阿岸 輪島市立阿岸公民館 門前町南ナの17番地 30 木造 1 163 ○ ○ ○\r\n54 阿岸 南農村公園 門前町南カの15番地 28 － - 1,150 ○ ○ ○\r\n55 阿岸 ふれあい工房あぎし（グラウンド） 門前町是清イの１ 25 － - 2,962 ○ ○ ○\r\n56 黒島 輪島市立黒島公民館 門前町黒島町高池45番地 17 鉄筋コンクリート 1 105 ○ ○ ○\r\n57 黒島 輪島市立黒島公民館広場 門前町黒島町高池45番地 17 － - 1,100 ○ ○ ○\r\n58 諸岡 輪島市立諸岡公民館 門前町道下7の175番地 16 木造 1 153 ○ ○ ○\r\n59 諸岡 道下農村公園 門前町道下104の2番地1 16 － - 3,800 ○ ○ ○\r\n60 諸岡 旧輪島市立門前西小学校（グラウンド） 門前町道下1の123番地 9 － - 6,530 ○ ○ ○\r\n61 門前 輪島市役所門前総合支所（防災研修室） 門前町走出6の69番地 21 鉄筋コンクリート 3 60 ○ ○ ○\r\n62 門前 輪島市門前会館（輪島市立門前公民館） 門前町走出6の92番地2 17 鉄筋コンクリート一部鉄骨鉄筋コンクリート 3 300 ○ ○ ○\r\n63 門前 門前総合運動公園（門前簡易グラウンド） 門前町清水7の1番地 11 － - 7,552 ○ ○ ○\r\n64 門前 旧輪島市立門前東小学校（グラウンド） 門前清水1の68番地 16 － - 9,254 ○ ○ ○\r\n65 門前 輪島市立門前学園（旧門前中グラウンド） 門前町清水10の21番地 11 － - 17,056 ○ ○ ○\r\n66 門前 石川県立門前高等学校（グラウンド） 門前町広岡5の3番地 19 － - 24,665 ○ ○ ○\r\n67 本郷 輪島市立本郷公民館 門前町二又川4の4番地1 58 木造 1 147 ○ ○ ○\r\n68 本郷 上本郷農村公園 門前町別所2の91番地 83 － - 750 ○\r\n69 本郷 下本郷農村公園 門前町谷口12の28番地 43 － - 900 ○\r\n70 浦上 輪島市立浦上公民館 門前町浦上8の58番地 28 木造 1 128 ○ ○ ○\r\n71 浦上 輪島市浦上健康増進広場 門前町浦上チの1番地1 28 － - 3,907 ○\r\n72 浦上 あすなろ公園 門前町浦上10の20番地1 32 － - 1,000 ○\r\n73 七浦 輪島市立七浦公民館 門前町鵜山12の50番地 9 鉄骨造一部木造 2 373 ○ ○ ○\r\n74 七浦 輪島市七浦基幹集落センター（駐車場） 門前町餅田9の16番地2 19 － - 200 ○ ○ ○\r\n75 七浦 皆月青少年旅行村（駐車場） 門前町皆月ミの117番地 26 － - 1,800 ○ ○ ○\r\n通\r\n番\r\n地区 施設名 施設所在地 海抜\r\n（ｍ） 構造 階数 収容\r\n人数\r\n対象とする異常な現象の種類 指定\r\n避難\r\n所兼"
+      },
+      "gsi_candidates": [
+        "輪島市立輪島小学校（グラウンド）",
+        "輪島市立輪島小学校（旧河井小体育館）"
+      ],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    },
+    {
+      "kind": "shelter_name",
+      "pdf_name": "舳倉島給水タワー",
+      "pdf_source": {
+        "file": "wajima/tsunami_hm_wajima.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      },
+      "gsi_candidates": [],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    }
+  ],
+  "provenance": {
+    "reader_version": "0.1.0",
+    "model": "claude-sonnet-5-5"
+  }
+}

@@ -1,12 +1,13 @@
 import type Anthropic from "@anthropic-ai/sdk";
 
-export type ModelKey = "sonnet" | "haiku";
+export type ModelKey = "sonnet" | "haiku" | "opus";
 
 interface Rate { input: number; output: number; cacheRead: number }
 
 // USD per million tokens, platform.claude.com pricing as of 2026-10-19. Haiku 5.5 switches tier when the whole
 // prompt (cache reads and writes included) exceeds 100K tokens.
 export const MODELS: Record<ModelKey, { id: string; rate: (promptTokens: number) => Rate }> = {
+  opus: { id: "claude-opus-5-5", rate: () => ({ input: 4, output: 20, cacheRead: 0.2 }) },
   sonnet: { id: "claude-sonnet-5-5", rate: () => ({ input: 2, output: 10, cacheRead: 0.1 }) },
   haiku: {
     id: "claude-haiku-5-5",

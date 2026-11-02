@@ -17,5 +17,5 @@ export const STAGE2_SYSTEM = `あなたは抽出結果を JSON に整形する�
 - 出力の各項目には、その項目を裏付ける引用 ID を citation_id に 1 つだけ入れます。一覧に無い ID は使いません。
 - 一覧に書かれていない事実は出力しません。文言は一覧の文に沿い、言い換えで意味を変えません。
 - 災害種別の対応: 洪水=flood, 土砂災害（崖崩れ・土石流・地滑り）=landslide, 高潮=storm_surge, 地震=earthquake, 津波=tsunami, 大規模な火事=large_fire, 内水氾濫=inland_flood, 火山=volcano, 大雨=heavy_rain。
-- 施設名は資料の表記のまま書きます（略さない・補わない）。
+- 施設名は資料の表記のまま書きます（略さない・補わない）。一覧表に出てくる施設は、1 施設 1 項目ですべて shelter_mentions に入れます（施設の対応災害は hazards_ok に）。
 - documents の file には一覧に出てくるファイル名をそのまま書きます。`;

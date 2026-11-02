@@ -47,19 +47,25 @@
       "slate": "消えたままの駅のサイネージ（4 画面とも黒）。ゆっくり寄る"
     },
     {
-      "cut": "1b",
-      "kind": "title",
-      "seconds": 4,
-      "title": "スクリーンはもうある。\nThe screens are already there."
-    },
-    {
       "cut": "2",
       "kind": "3d",
       "seconds": 10,
       "src": "../renders/cut02.mp4",
-      "caption": "駅と街の画面を作ってきた。\n災害のとき、この画面は何も言わなかった",
+      "caption": "駅と街のスクリーンを作ってきた。\n災害のとき、このスクリーンは何も言わなかった",
       "screens": "ambient",
       "slate": "平時レイヤーが流れる 4 画面をゆっくりドリー"
+    },
+    {
+      "cut": "2b",
+      "kind": "title",
+      "seconds": 3,
+      "title": "黙らない画面\nScreens that don't go silent"
+    },
+    {
+      "cut": "2c",
+      "kind": "title",
+      "seconds": 3,
+      "title": "スクリーンはもうある。\nThe screens are already there."
     },
     {
       "cut": "3",
@@ -88,7 +94,8 @@
       "kind": "capture",
       "seconds": 10,
       "src": "../capture/out/cut05b.mp4",
-      "slate": "管理画面: 一式を承認 →「自動配信 ON」・施設の緯度経度ピン"
+      "slate": "管理画面: 一式を承認 →「自動配信 ON」・施設の緯度経度ピン",
+      "caption": "平時に決めて、有事は自動\nDecide in calm. Deliver in crisis."
     },
     {
       "cut": "6",
@@ -114,9 +121,11 @@
     },
     {
       "cut": "9",
-      "kind": "title",
+      "kind": "composite",
       "seconds": 10,
-      "title": "スクリーンはもうある。\nThe screens are already there.",
+      "src": "../renders/cut09.mp4",
+      "slate": "4 形状（9:16・16:9・32:9・1:1）のスクリーンと、他社 CMS の受け口を並べる",
+      "title": "どの画面にも\nAny screen.",
       "subtitle": "github.com/rettuce/evac-layer"
     }
   ]

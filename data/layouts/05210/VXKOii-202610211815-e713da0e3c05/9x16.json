@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル４氾濫危険警報",
-        "ja_easy": "【かり】",
-        "en": "[draft]",
-        "zh_hans": "[草稿]",
-        "zh_hant": "[草稿]",
-        "ko": "[초안]"
+        "ja_easy": "こよしがわが あふれる きけん",
+        "en": "Level 4 Flood Danger",
+        "zh_hans": "子吉川 4级泛滥危险警报",
+        "zh_hant": "子吉川 4級氾濫危險警報",
+        "ko": "子吉川(고요시강) 레벨4 범람위험경보"
       },
       "pictogram": "flood",
       "motion": "scale-in"
@@ -35,12 +35,12 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "【仮】全員避難",
-        "ja_easy": "【かり】 みんな にげて",
-        "en": "[draft] Evacuate",
-        "zh_hans": "[草稿]全员避难",
-        "zh_hant": "[草稿]全員避難",
-        "ko": "[초안] 전원 대피"
+        "ja": "危険な場所から避難",
+        "ja_easy": "あぶない ばしょから にげて",
+        "en": "Leave danger areas",
+        "zh_hans": "从危险地方避难",
+        "zh_hant": "從危險地方避難",
+        "ko": "위험한 곳에서 대피"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -73,12 +73,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "【仮】全員避難",
-        "ja_easy": "【かり】 みんな にげて",
-        "en": "[draft] Evacuate",
-        "zh_hans": "[草稿]全员避难",
-        "zh_hant": "[草稿]全員避難",
-        "ko": "[초안] 전원 대피"
+        "ja": "危険な場所から避難",
+        "ja_easy": "あぶない ばしょから にげて",
+        "en": "Leave danger areas",
+        "zh_hans": "从危险地方避难",
+        "zh_hant": "從危險地方避難",
+        "ko": "위험한 곳에서 대피"
       },
       "motion": "static"
     },
@@ -87,13 +87,18 @@
       "role": "source",
       "priority": 9,
       "text": {
-        "ja": "出典: 国土地理院 指定緊急避難場所データ / 気象庁 18:15"
+        "ja": "出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 18:15"
       },
       "motion": "static"
     }
   ],
   "palette": "cabinet-office-5",
   "sources": [
+    {
+      "type": "pdf",
+      "file": "yurihonjo/kozui_dosha_hokubu.pdf",
+      "page": 1
+    },
     {
       "type": "gsi",
       "file": "05210_2.csv"

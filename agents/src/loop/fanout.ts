@@ -7,20 +7,27 @@ import { REPO_ROOT } from "../paths.js";
 import { browserVerifier } from "./browser-verifier.js";
 import { runReplay, type ReplaySummary } from "./replay-run.js";
 import { staticVerifier } from "./static-verifier.js";
+import Anthropic from "@anthropic-ai/sdk";
+import { requireApiKey } from "../apikey.js";
+import type { WriterModel } from "../writer/live.js";
 
 const { values } = parseArgs({
   options: {
     municipalities: { type: "string", default: "05210,17204,22424,14100" },
     verifier: { type: "string", default: "static" },
+    writer: { type: "string", default: "placeholder" },
+    "writer-model": { type: "string", default: "opus" },
     "base-url": { type: "string", default: process.env.EVAC_URL ?? "http://127.0.0.1:3152" },
   },
 });
+if (values.writer === "live") requireApiKey();
+const writer = values.writer === "live" ? { client: new Anthropic(), model: values["writer-model"] as WriterModel } : undefined;
 const ids = values.municipalities!.split(",").map((s) => s.trim()).filter(Boolean);
 const stamp = () => new Date().toLocaleTimeString("ja-JP", { hour12: false, timeZone: "Asia/Tokyo" });
 const log = (id: string, msg: string) => console.log(`${stamp()}  [${id}] ${msg}`);
 const t0 = Date.now();
 
-console.log(`${stamp()}  fan-out: ${ids.length} municipalities, verifier=${values.verifier}`);
+console.log(`${stamp()}  fan-out: ${ids.length} municipalities, verifier=${values.verifier}, writer=${writer ? `live(${writer.model})` : "placeholder"}`);
 const results = await Promise.all(ids.map(async (id): Promise<ReplaySummary | { municipality: string; error: string }> => {
   const siteFile = path.join(REPO_ROOT, "data", "sites", `${id}-demo.json`);
   const site = JSON.parse(fs.readFileSync(siteFile, "utf8")) as Site;
@@ -30,10 +37,10 @@ const results = await Promise.all(ids.map(async (id): Promise<ReplaySummary | { 
   const browser = values.verifier === "browser" ? browserVerifier({ baseUrl: values["base-url"]! }) : undefined;
   try {
     const s = await runReplay({
-      municipalityId: id, entries, site, verifier: browser ?? staticVerifier,
+      municipalityId: id, entries, site, verifier: browser ?? staticVerifier, writer,
       onEvent: (e) => { if (e.outcome !== "no-screen") log(id, `${e.issued_at.slice(5, 16).replace("T", " ")} ${e.template} L${e.level} ${e.outcome}${e.reason ? ` — ${e.reason}` : ""}`); },
     });
-    log(id, `done: ${s.name} bulletins=${s.bulletins} screens=${s.screens} pass=${s.pass} fail=${s.fail} no-screen=${s.no_screen} layouts=${s.layouts} ${s.seconds.toFixed(1)}s`);
+    log(id, `done: ${s.name} bulletins=${s.bulletins} screens=${s.screens} pass=${s.pass} fail=${s.fail} no-screen=${s.no_screen} layouts=${s.layouts} writer=$${s.writer_usd.toFixed(3)} ${s.seconds.toFixed(1)}s`);
     return s;
   } catch (e) {
     return { municipality: id, error: (e as Error).message };

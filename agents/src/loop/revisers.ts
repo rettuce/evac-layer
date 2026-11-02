@@ -21,3 +21,22 @@ export const liveWriterReviser: Reviser = {
     throw new NoRevision("live Writer revision lands on Day 2 (needs ANTHROPIC_API_KEY); pass fixture revisions to exercise the loop");
   },
 };
+
+export function writerApiReviser(args: { client: import("@anthropic-ai/sdk").default; model: import("../writer/live.js").WriterModel; alert: import("../jma/parse.js").Alert; municipality: import("../composer/compose.js").Municipality; municipalityId: string; situation: import("../composer/rules.js").Situation; usage: import("../reader/pricing.js").CallUsage[] }): Reviser {
+  return {
+    name: `writer-api(${args.model})`,
+    async revise(_current, findings) {
+      const { writeCells } = await import("../writer/live.js");
+      const feedback = findings.map((f) => `${f.shape} ${f.check}${f.cell_id ? `[${f.cell_id}]` : ""}: ${f.detail}`);
+      let r = await writeCells({ ...args, feedback });
+      args.usage.push(r.usage);
+      // A revision must pass the same guideline lint as the first write.
+      for (let i = 0; i < 2 && r.lint.length; i++) {
+        r = await writeCells({ ...args, feedback: [...feedback, ...r.lint.map((l) => `${l.rule}: 「${l.match}」`)] });
+        args.usage.push(r.usage);
+      }
+      if (r.lint.length) throw new NoRevision(`revised Writer text still breaks the easy-Japanese rules: ${r.lint.map((l) => l.rule).join(", ")}`);
+      return { writer: r.output, source: `writer-api:${args.model}` };
+    },
+  };
+}

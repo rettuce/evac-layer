@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル３大雨警報",
+          "ja_easy": "レベル３ おおあめ けいほう",
+          "en": "Heavy Rain Warning Lv3",
+          "zh_hans": "3级暴雨警报",
+          "zh_hant": "3級豪雨警報",
+          "ko": "레벨3 호우경보"
+        },
+        "basis": "警報 areas[0].kind_name「レベル３大雨警報」（輪島市, status: continued）, level 3, publishing_office 金沢地方気象台"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "浸水増水警戒",
+          "ja_easy": "かわ・ひくい とち ちゅうい",
+          "en": "Beware river/flood",
+          "zh_hans": "警惕浸水与涨水",
+          "zh_hant": "警惕浸水與漲水",
+          "ko": "침수·하천 증수 경계"
+        },
+        "basis": "警報 headline_text「石川県では、低い土地の浸水や河川の増水に警戒してください。」"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "浸水増水警戒",
+          "ja_easy": "かわ・ひくい とち ちゅうい",
+          "en": "Beware river/flood",
+          "zh_hans": "警惕浸水与涨水",
+          "zh_hant": "警惕浸水與漲水",
+          "ko": "침수·하천 증수 경계"
+        },
+        "basis": "action セルと同じ内容。警報 headline_text「低い土地の浸水や河川の増水に警戒してください。」"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VPWW55-202610200711-08afb5e91cb5",
+      "input": 4839,
+      "output": 2229,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.063936
+    }
+  ],
+  "lint": []
+}

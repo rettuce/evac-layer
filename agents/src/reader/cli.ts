@@ -4,6 +4,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import Anthropic, { toFile } from "@anthropic-ai/sdk";
 import { ENV_FILE, MUNICIPALITIES_DIR, RAW_DIR, TMP_DIR } from "../paths.js";
+import { loadApiKey } from "../apikey.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { assemble, type SourceMeta } from "./assemble.js";
 import { addVisionClaims, collectClaims, renderClaims, type Citation, type Claim } from "./claims.js";
@@ -43,11 +44,6 @@ function sha256(file: string) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
 
-function loadApiKey(): boolean {
-  if (fs.existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
-  return Boolean(process.env.ANTHROPIC_API_KEY);
-}
-
 function selectPdfs(reports: { rel: string; report: TextLayerReport }[]) {
   const allowed = new Set(values["allow-suspect"]);
   const isText = ({ rel, report }: { rel: string; report: TextLayerReport }) => report.verdict === "ok" || (report.verdict === "suspect" && allowed.has(path.basename(rel)));
@@ -77,6 +73,8 @@ function assertFinished(msg: Anthropic.Message, stage: string) {
   if (msg.stop_reason === "refusal") stop(`${stage}: model refused (${msg.stop_details?.category ?? "no category"}): ${msg.stop_details?.explanation ?? ""}`);
   if (msg.stop_reason === "max_tokens") stop(`${stage}: hit max_tokens; output is truncated`);
 }
+
+const STARTED_AT = Date.now();
 
 async function main() {
   if (values.estimate) {
@@ -114,12 +112,16 @@ async function main() {
 
   const userText = stage1User(preset.name, files);
   const stage2Schema = toStructuredSchema(EXTRACTION_SCHEMA);
-  const hasKey = loadApiKey();
+  const key = loadApiKey();
+  const hasKey = key.present && key.wellFormed;
 
   if (values["dry-run"]) {
     console.log(JSON.stringify({
       dry_run: true,
-      api_key_present: hasKey,
+      api_key_present: key.present,
+      api_key_well_formed: key.wellFormed,
+      api_key_source: key.source,
+      dotenv_present: key.dotenvPresent,
       municipality: { id: preset.id, name: preset.name },
       model: model.id,
       text_layer: reports.map((r) => ({ path: r.rel, ...r.report })),
@@ -138,7 +140,8 @@ async function main() {
     }, null, 2));
     return;
   }
-  if (!hasKey) stop(`ANTHROPIC_API_KEY not found (${ENV_FILE} absent or empty). Run with --dry-run until the key is set.`);
+  if (!key.present) stop(`ANTHROPIC_API_KEY not found (${ENV_FILE} absent or empty). Run with --dry-run until the key is set.`);
+  if (!key.wellFormed) stop(`ANTHROPIC_API_KEY (from ${key.source}) does not look like an API key; it may still be a placeholder. No API call was made.`);
 
   const client = new Anthropic();
   fs.mkdirSync(path.join(TMP_DIR, "reader"), { recursive: true });
@@ -162,7 +165,18 @@ async function main() {
       ],
     }],
   };
-  const stage1Input = files.length ? (await client.messages.countTokens(stage1Params)).input_tokens : 0;
+  // count_tokens does not accept file_id sources, so the same PDFs are counted as base64 documents.
+  const countParams = {
+    ...stage1Params,
+    messages: [{
+      role: "user" as const,
+      content: [
+        ...pdfs.map((rel, i) => ({ type: "document" as const, source: { type: "base64" as const, media_type: "application/pdf" as const, data: fs.readFileSync(path.join(RAW_DIR, rel)).toString("base64") }, title: files[i], citations: { enabled: true } })),
+        { type: "text" as const, text: userText },
+      ],
+    }],
+  };
+  const stage1Input = files.length ? (await client.messages.countTokens(countParams)).input_tokens : 0;
   const estimate = estimateUsd(modelKey, stage1Input, files.length ? STAGE1_MAX_TOKENS : 0)
     + estimateUsd(modelKey, Math.max(stage1Input, 20_000), STAGE2_MAX_TOKENS)
     + visionPlan.reduce((usd, v) => usd + v.pages.reduce((u, p) => u + estimateUsd(modelKey, imageTokens(v.tiles.filter((t) => t.page === p)) + VISION_PROMPT_TOKENS_PER_PAGE, VISION_OUTPUT_TOKENS_PER_PAGE), 0), 0);
@@ -218,7 +232,7 @@ async function main() {
   fs.writeFileSync(`${base}.stage1.json`, JSON.stringify({ claims, citations: Object.fromEntries(citations) }, null, 2));
   fs.writeFileSync(`${base}.extraction.json`, JSON.stringify(extraction, null, 2));
   const total = usage.reduce((a, u) => ({ input: a.input + u.input, output: a.output + u.output, usd: a.usd + u.usd }), { input: 0, output: 0, usd: 0 });
-  const summary = { model: model.id, usage, total, counts: { claims: claims.length, hazards: doc.hazards.length, routes: doc.routes.length, cautions: doc.cautions.length, contacts: doc.contacts.length, shelter_mentions: extraction.shelter_mentions.length, conflicts: doc.conflicts.length, shelters: doc.shelters.length } };
+  const summary = { model: model.id, seconds: Math.round((Date.now() - STARTED_AT) / 100) / 10, usage, total, counts: { claims: claims.length, hazards: doc.hazards.length, routes: doc.routes.length, cautions: doc.cautions.length, contacts: doc.contacts.length, shelter_mentions: extraction.shelter_mentions.length, conflicts: doc.conflicts.length, shelters: doc.shelters.length } };
   fs.writeFileSync(`${base}.usage.json`, JSON.stringify(summary, null, 2));
   if (!v.ok) {
     fs.writeFileSync(`${base}.invalid.json`, JSON.stringify(doc, null, 2));
