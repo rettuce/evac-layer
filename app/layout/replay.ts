@@ -7,6 +7,7 @@ export interface ReplayRow {
   issued_at: string
   bulletin_id: string
   raw_title: string
+  wmo_code?: string
   municipality_level: number | null
   screen: boolean
   template?: TemplateId
@@ -21,9 +22,28 @@ export interface ReplayIndex {
 }
 
 export interface ReplayStatus extends ReplayIndex {
+  window: ReplayWindow
   speed: number
   elapsedMs: number
   index: number
+}
+
+export interface ReplayWindow {
+  from?: string
+  to?: string
+}
+
+export function isReplayBound(value: unknown): value is string {
+  return typeof value === 'string' && !Number.isNaN(Date.parse(value))
+}
+
+export function rowsInWindow(rows: ReplayRow[], { from, to }: ReplayWindow): ReplayRow[] {
+  const start = from ? Date.parse(from) : -Infinity
+  const end = to ? Date.parse(to) : Infinity
+  return rows.filter((row) => {
+    const issued = Date.parse(row.issued_at)
+    return issued >= start && issued <= end
+  })
 }
 
 export function rowStartMs(rows: ReplayRow[], index: number, speed: number): number {
@@ -52,6 +72,29 @@ export interface LiveFrame {
   ambientVisible: boolean
 }
 
+function streamOf(row: ReplayRow): string {
+  return row.wmo_code ?? ''
+}
+
+// Each bulletin stream (wmo_code) replaces only its own previous bulletin: a prefecture rain advisory
+// does not lift a river level 5 that is still in force. The newest stream that has a screen wins.
+export function shownRowAt(rows: ReplayRow[], index: number, hasScreenFor: (bulletinId: string) => boolean): number {
+  const latestByStream = new Map<string, number>()
+  for (let i = 0; i <= index; i++) latestByStream.set(streamOf(rows[i]!), i)
+  let shown = -1
+  for (const i of latestByStream.values()) {
+    if (rows[i]!.screen && hasScreenFor(rows[i]!.bulletin_id) && i > shown) shown = i
+  }
+  return shown
+}
+
+function lastChangeAt(rows: ReplayRow[], index: number, hasScreenFor: (bulletinId: string) => boolean): number {
+  const current = shownRowAt(rows, index, hasScreenFor)
+  let change = index
+  while (change > 0 && shownRowAt(rows, change - 1, hasScreenFor) === current) change -= 1
+  return change
+}
+
 export function liveFrame(
   rows: ReplayRow[],
   elapsedMs: number,
@@ -59,36 +102,40 @@ export function liveFrame(
   hasScreenFor: (bulletinId: string) => boolean,
 ): LiveFrame {
   const index = rowIndexAt(rows, elapsedMs, speed)
-  const showable = (i: number) => i >= 0 && rows[i]!.screen && hasScreenFor(rows[i]!.bulletin_id)
-  const sinceRow = elapsedMs - rowStartMs(rows, index, speed)
+  const ambient: LiveFrame = { index, showingElapsedMs: 0, showingOpacity: 0, black: false, ambientVisible: true }
+  if (index < 0) return ambient
 
-  if (showable(index)) {
-    const fromAmbient = !showable(index - 1)
-    if (fromAmbient && sinceRow < SWITCH_BLACK_MS) {
+  const shown = shownRowAt(rows, index, hasScreenFor)
+  const change = lastChangeAt(rows, index, hasScreenFor)
+  const previous = change > 0 ? shownRowAt(rows, change - 1, hasScreenFor) : -1
+  const sinceChange = elapsedMs - rowStartMs(rows, change, speed)
+
+  if (shown >= 0) {
+    const fromAmbient = previous < 0
+    if (fromAmbient && sinceChange < SWITCH_BLACK_MS) {
       return { index, showingElapsedMs: 0, showingOpacity: 0, black: true, ambientVisible: false }
     }
     return {
       index,
-      showing: rows[index]!.bulletin_id,
-      showingElapsedMs: fromAmbient ? sinceRow - SWITCH_BLACK_MS : sinceRow,
+      showing: rows[shown]!.bulletin_id,
+      showingElapsedMs: fromAmbient ? sinceChange - SWITCH_BLACK_MS : sinceChange,
       showingOpacity: 1,
       black: false,
       ambientVisible: false,
     }
   }
 
-  if (showable(index - 1) && sinceRow < CLEAR_CROSSFADE_MS) {
-    const previous = index - 1
+  if (previous >= 0 && sinceChange < CLEAR_CROSSFADE_MS) {
     return {
       index,
       showing: rows[previous]!.bulletin_id,
       showingElapsedMs: elapsedMs - rowStartMs(rows, previous, speed),
-      showingOpacity: 1 - sinceRow / CLEAR_CROSSFADE_MS,
+      showingOpacity: 1 - sinceChange / CLEAR_CROSSFADE_MS,
       black: false,
       ambientVisible: true,
     }
   }
-  return { index, showingElapsedMs: 0, showingOpacity: 0, black: false, ambientVisible: true }
+  return ambient
 }
 
 export function isBulletinId(value: unknown): value is string {

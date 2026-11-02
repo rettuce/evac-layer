@@ -25,7 +25,3 @@ export async function writeApprovals(approvals: Approvals): Promise<void> {
   const stable: Approvals = { version: '0.1', layouts: sortedRecord(approvals.layouts), sites: sortedRecord(approvals.sites) }
   await writeFile(approvalsFile(), `${JSON.stringify(stable, null, 2)}\n`)
 }
-
-export function layoutKey(municipality: string, bulletinId: string): string {
-  return `${municipality}/${bulletinId}`
-}
