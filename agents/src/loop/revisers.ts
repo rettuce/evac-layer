@@ -28,8 +28,14 @@ export function writerApiReviser(args: { client: import("@anthropic-ai/sdk").def
     async revise(_current, findings) {
       const { writeCells } = await import("../writer/live.js");
       const feedback = findings.map((f) => `${f.shape} ${f.check}${f.cell_id ? `[${f.cell_id}]` : ""}: ${f.detail}`);
-      const r = await writeCells({ ...args, feedback });
+      let r = await writeCells({ ...args, feedback });
       args.usage.push(r.usage);
+      // A revision must pass the same guideline lint as the first write.
+      for (let i = 0; i < 2 && r.lint.length; i++) {
+        r = await writeCells({ ...args, feedback: [...feedback, ...r.lint.map((l) => `${l.rule}: 「${l.match}」`)] });
+        args.usage.push(r.usage);
+      }
+      if (r.lint.length) throw new NoRevision(`revised Writer text still breaks the easy-Japanese rules: ${r.lint.map((l) => l.rule).join(", ")}`);
       return { writer: r.output, source: `writer-api:${args.model}` };
     },
   };

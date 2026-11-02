@@ -89,6 +89,9 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       writer, writerSource,
       verifier: args.verifier, reviser,
     });
+    if (live && persist && result.outcome === "pass" && result.writer && result.writer !== writer) {
+      saveWriter(municipality.id, e.bulletin_id, { model: live.model, output: result.writer, usage: writerUsage, lint: [] });
+    }
     const { dir, report } = persist
       ? writeReport({ municipalityId: municipality.id, bulletinId: e.bulletin_id, verifier: args.verifier.name, reviser: reviser.name, maxAttempts: 3, result, writerNote: notes || undefined })
       : { dir: "", report: { outcome: result.outcome, reason: result.reason, layouts: result.screens.map((x) => `${x.shape}.json`) } };
