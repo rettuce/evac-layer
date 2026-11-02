@@ -29,15 +29,14 @@ def strip_lengths(points):
     return lengths
 
 
-def build_led_wrap(name, center, half_side, radius, z0, z1, material, source_aspect):
+def build_led_wrap(name, center, half_side, radius, z0, z1, material):
     """Four strips that meet mid-corner, so the LED skin wraps the column with no seam or bezel.
 
-    Each strip shows the source cropped to cover it: full height, centred horizontal crop.
+    The pillar source lays the four faces left to right (face 0 = front). Walking right from the
+    front as a viewer sees it is counter-clockwise from above, the same order the strips are built.
     """
     outline = face_strip_points(half_side, radius)
     lengths = strip_lengths(outline)
-    strip_aspect = lengths[-1] / (z1 - z0)
-    crop = min(1.0, strip_aspect / source_aspect)
     for face in range(4):
         angle = math.radians(90 * face)
         cos_a, sin_a = math.cos(angle), math.sin(angle)
@@ -52,7 +51,7 @@ def build_led_wrap(name, center, half_side, radius, z0, z1, material, source_asp
             for loop_index in poly.loop_indices:
                 vert = mesh.loops[loop_index].vertex_index
                 along = lengths[vert % n] / lengths[-1]
-                uv.data[loop_index].uv = (0.5 + (along - 0.5) * crop, 0.0 if vert < n else 1.0)
+                uv.data[loop_index].uv = ((face + along) / 4, 0.0 if vert < n else 1.0)
         for poly in mesh.polygons:
             poly.use_smooth = True
         mesh.materials.append(material)

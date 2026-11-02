@@ -60,11 +60,11 @@ def pillar_face_center(height_z):
 
 
 COLUMN_CLAD_HALF = COLUMN_SIZE / 2 + COLUMN_CLAD_M
-PORTRAIT_SIZE = panel_from_diagonal(55, 9, 16)
 COLUMN_LED_BOTTOM_Z = 0.4
 COLUMN_LED_TOP_Z = 3.6
 COLUMN_LED_RADIUS = 0.03
 COLUMN_LED_MID_Z = (COLUMN_LED_BOTTOM_Z + COLUMN_LED_TOP_Z) / 2
+COLUMN_LED_PERIMETER = 8 * (COLUMN_SIZE / 2 + COLUMN_CLAD_M - COLUMN_LED_RADIUS) + 2 * math.pi * COLUMN_LED_RADIUS
 RIBBON_SIZE = (RIBBON_PANEL_W, RIBBON_PANEL_H)
 RIBBON_Z = HEADWALL_BOTTOM_Z + RIBBON_PANEL_H / 2
 RIBBON_CENTER_X = 1.0
@@ -91,8 +91,9 @@ def screen_spec(size, pixels, mounts):
 # Each shape is mounted flush in several surfaces; the first mount is the one cameras aim at.
 # yaw: rotation about Z; yaw 0 means the screen faces -Y (toward the camera side of the concourse).
 SCREENS = {
-    "9x16": {**screen_spec(PORTRAIT_SIZE, (1080, 1920), [column_front(*COLUMNS[0], COLUMN_LED_MID_Z)]),
-             "mounts": [], "wraps": COLUMNS},
+    "pillar": {**screen_spec((COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z), (3308, 2524),
+                             [column_front(*COLUMNS[0], COLUMN_LED_MID_Z)]),
+               "mounts": [], "wraps": COLUMNS},
     "16x9": screen_spec(panel_from_diagonal(75, 16, 9), (1920, 1080),
                         [(Vector((x, BACK_WALL_Y, WALL_16X9_Z)), 0.0) for x in WALL_16X9_XS]),
     "32x9": screen_spec(RIBBON_SIZE, (3840, 1080),
@@ -100,7 +101,7 @@ SCREENS = {
     "1x1": {**screen_spec((0.9, 0.9), (1080, 1080), [(pillar_face_center(1.6), PILLAR_YAW)]), "mounts": []},
 }
 
-SHOT_ORDER = ["9x16", "16x9", "32x9", "1x1"]
+SHOT_ORDER = ["pillar", "16x9", "32x9", "1x1"]
 CAMERA_WAYPOINTS = [
     Vector((-5.5, -3.5, EYE_Z)),
     Vector((-0.5, 3.5, EYE_Z + 0.1)),
@@ -118,8 +119,8 @@ def in_front_of(shape, distance, angle_deg, height):
 # Near cameras sit at a horizontal distance from the screen, rotated off its normal so the
 # concourse behind falls out of focus at f/2.8.
 STILL_CAMERAS = {
-    "hero": {"location": Vector((-1.5, -7.5, EYE_Z)), "target": Vector((-2.6, 4.0, 2.4)), "focus": "9x16", "lens": 35.0},
-    "near-column": {"location": in_front_of("9x16", 1.5, -35, EYE_Z), "focus": "9x16", "lens": 24.0, "aim_shift": 0.3},
+    "hero": {"location": Vector((-1.5, -7.5, EYE_Z)), "target": Vector((-2.6, 4.0, 2.4)), "focus": "pillar", "lens": 35.0},
+    "near-column": {"location": in_front_of("pillar", 1.5, -35, EYE_Z), "focus": "pillar", "lens": 24.0, "aim_shift": 0.3},
     "near-wall": {"location": in_front_of("16x9", 2.0, 30, EYE_Z), "focus": "16x9", "lens": 28.0, "aim_shift": -0.3},
     "near-ribbon": {"location": in_front_of("32x9", 3.5, -25, EYE_Z), "focus": "32x9", "lens": 24.0, "aim_shift": 0.0},
     "near-pillar": {"location": in_front_of("1x1", 1.5, 30, EYE_Z), "focus": "1x1", "lens": 28.0, "aim_shift": -0.3},
@@ -130,7 +131,7 @@ STILL_CAMERAS = {
 # which screen recording to show, and a light multiplier (night = everything dimmed).
 SHOTS = {
     "cut01": {
-        "seconds": 10, "screens": "off", "light_scale": 0.03, "lens": 35.0, "focus": "9x16",
+        "seconds": 10, "screens": "off", "light_scale": 0.03, "lens": 35.0, "focus": "pillar",
         "night_lights": [
             (Vector((-2.8, -2.6, CEILING_Z - 0.2)), Vector((-4.5, 1.0, 1.4)), 600.0),
             (Vector((1.5, 5.2, CEILING_Z - 0.2)), Vector((1.5, 9.0, 1.2)), 320.0),
@@ -250,7 +251,7 @@ def build_screens(frame_count, cut):
             vertical_plane(f"screen_{shape}_{i}", surface + normal * FLUSH_EPS_M, width, height, yaw, material)
         for i, (x, y) in enumerate(spec.get("wraps", [])):
             build_led_wrap(f"led_wrap_{i}", (x, y), COLUMN_CLAD_HALF + FLUSH_EPS_M, COLUMN_LED_RADIUS,
-                           COLUMN_LED_BOTTOM_Z, COLUMN_LED_TOP_Z, material, width / height)
+                           COLUMN_LED_BOTTOM_Z, COLUMN_LED_TOP_Z, material)
     build_screen_housings()
     return sources
 
