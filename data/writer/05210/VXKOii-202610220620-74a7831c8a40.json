@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル２氾濫注意報解除",
+          "ja_easy": "こよしがわ みずの ちゅうい おわり",
+          "en": "子吉川 flood advisory ended",
+          "zh_hans": "子吉川（子吉川）泛滥注意报解除",
+          "zh_hant": "子吉川（子吉川）氾濫注意報解除",
+          "ko": "子吉川(고요시강) 범람주의보 해제"
+        },
+        "basis": "警報 raw_title「子吉川レベル２氾濫注意報解除」・areas[0].kind_name「レベル２氾濫注意報解除」・status=cleared（由利本荘市）。ja は12字予算のため「レベル２」を省いた警報名の表記"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "氾濫注意水位を下回る",
+          "ja_easy": "かわの みずが へりました",
+          "en": "Below alert level",
+          "zh_hans": "低于泛滥注意水位",
+          "zh_hant": "低於氾濫注意水位",
+          "ko": "범람주의수위 아래로"
+        },
+        "basis": "警報 headline_text「〔解除〕子吉川では、氾濫注意水位を下回る」"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "氾濫注意水位を下回る",
+          "ja_easy": "かわの みずが へりました",
+          "en": "Below alert level",
+          "zh_hans": "低于泛滥注意水位",
+          "zh_hant": "低於氾濫注意水位",
+          "ko": "범람주의수위 아래로"
+        },
+        "basis": "action セルと同内容。警報 headline_text「〔解除〕子吉川では、氾濫注意水位を下回る」"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VXKOii-202610220620-74a7831c8a40",
+      "input": 3018,
+      "output": 2377,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.059612
+    }
+  ],
+  "lint": []
+}

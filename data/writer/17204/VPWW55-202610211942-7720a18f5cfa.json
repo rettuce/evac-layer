@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル２大雨注意報",
+          "ja_easy": "おおあめ ちゅういほう おわりました",
+          "en": "Rain advisory lifted",
+          "zh_hans": "2级大雨注意报 解除",
+          "zh_hant": "2級大雨注意報 解除",
+          "ko": "2단계 호우주의보 해제"
+        },
+        "basis": "Alert areas[0] (輪島市, code 1720400): kind_name「レベル２大雨注意報」, status \"cleared\"; bulletin raw_title「石川県大雨警報・注意報」 (金沢地方気象台, issued 2026-10-21T19:42+09:00)"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "川の増水に注意",
+          "ja_easy": "かわの みずに ちゅうい",
+          "en": "Watch river levels",
+          "zh_hans": "注意河水上涨",
+          "zh_hant": "注意河水上漲",
+          "ko": "하천 증수 주의"
+        },
+        "basis": "Alert headline_text「石川県では、低い土地の浸水や河川の増水に注意してください。」 (prefecture-wide text; the budget allows only the river part; the low-land flooding part is omitted)"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "川の増水に注意",
+          "ja_easy": "かわの みずに ちゅうい",
+          "en": "Watch river levels",
+          "zh_hans": "注意河水上涨",
+          "zh_hant": "注意河水上漲",
+          "ko": "하천 증수 주의"
+        },
+        "basis": "Same content as the action cell: alert headline_text「石川県では、低い土地の浸水や河川の増水に注意してください。」"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VPWW55-202610211942-7720a18f5cfa",
+      "input": 4761,
+      "output": 2318,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.065404
+    }
+  ],
+  "lint": []
+}

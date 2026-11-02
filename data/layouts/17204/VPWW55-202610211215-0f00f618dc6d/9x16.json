@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル３大雨警報",
-        "ja_easy": "【かり】",
-        "en": "[draft]",
-        "zh_hans": "[草稿]",
-        "zh_hant": "[草稿]",
-        "ko": "[초안]"
+        "ja_easy": "おおあめ けいほう（レベル３）",
+        "en": "Heavy Rain Warning Lv.3",
+        "zh_hans": "3级暴雨警报",
+        "zh_hant": "3級豪雨警報",
+        "ko": "레벨3 호우경보"
       },
       "pictogram": "heavy_rain",
       "motion": "scale-in"
@@ -35,12 +35,12 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "【仮】準備",
-        "ja_easy": "【かり】 じゅんび",
-        "en": "[draft] Prepare",
-        "zh_hans": "[草稿]准备避难",
-        "zh_hant": "[草稿]準備避難",
-        "ko": "[초안] 대피 준비"
+        "ja": "浸水に警戒",
+        "ja_easy": "みずに きを つけてください",
+        "en": "Beware of flooding",
+        "zh_hans": "警惕浸水",
+        "zh_hant": "警惕浸水",
+        "ko": "침수 경계"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -50,10 +50,10 @@
       "role": "direction",
       "priority": 2,
       "text": {
-        "ja": "南西へ"
+        "ja": "北西へ"
       },
       "pictogram": "arrow_forward",
-      "rotation": 135,
+      "rotation": 225,
       "motion": "static"
     },
     {
@@ -61,11 +61,11 @@
       "role": "shelter",
       "priority": 2,
       "text": {
-        "ja": "輪島市ふれあい健康センター"
+        "ja": "輪島市立港公民館"
       },
       "kind": "emergency_evacuation_site",
       "pictogram": "emergency_evacuation_site",
-      "distance_m": 410,
+      "distance_m": 910,
       "motion": "static"
     },
     {
@@ -73,12 +73,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "【仮】準備",
-        "ja_easy": "【かり】 じゅんび",
-        "en": "[draft] Prepare",
-        "zh_hans": "[草稿]准备避难",
-        "zh_hant": "[草稿]準備避難",
-        "ko": "[초안] 대피 준비"
+        "ja": "浸水に警戒",
+        "ja_easy": "みずに きを つけてください",
+        "en": "Beware of flooding",
+        "zh_hans": "警惕浸水",
+        "zh_hant": "警惕浸水",
+        "ko": "침수 경계"
       },
       "motion": "static"
     },
