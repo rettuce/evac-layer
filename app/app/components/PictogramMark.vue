@@ -1,22 +1,27 @@
 <script setup lang="ts">
 const props = defineProps<{ id: string; sizePx: number; rotation?: number }>()
 
+const SVG_BY_PATH = import.meta.glob<string>('../../public/picto/*.svg', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+})
+
 const PLACEHOLDER_LABEL_RATIO = 1 / 6
 const PLACEHOLDER_LABEL_MIN_PX = 12
 
+const svg = computed(() => SVG_BY_PATH[`../../public/picto/${props.id}.svg`])
 const labelPx = computed(() => Math.max(PLACEHOLDER_LABEL_MIN_PX, Math.round(props.sizePx * PLACEHOLDER_LABEL_RATIO)))
-const isArrow = computed(() => props.id === 'arrow_forward')
 </script>
 
 <template>
   <div
     class="pictogram"
     :data-pictogram="id"
+    :data-pictogram-missing="svg ? undefined : '1'"
     :style="{ '--size': sizePx, '--label': labelPx, '--rotation': `${rotation ?? 0}deg` }"
   >
-    <svg v-if="isArrow" class="arrow" viewBox="0 0 100 100" aria-hidden="true">
-      <polygon points="8,40 58,40 58,16 94,50 58,84 58,60 8,60" />
-    </svg>
+    <div v-if="svg" class="glyph" aria-hidden="true" v-html="svg" />
     <span v-else class="placeholder">{{ id }}</span>
   </div>
 </template>
@@ -30,11 +35,15 @@ const isArrow = computed(() => props.id === 'arrow_forward')
   place-items: center;
   overflow: hidden;
 }
-.arrow {
+.glyph {
   width: 100%;
   height: 100%;
-  fill: currentColor;
   transform: rotate(var(--rotation));
+}
+.glyph :deep(svg) {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .placeholder {
   box-sizing: border-box;
