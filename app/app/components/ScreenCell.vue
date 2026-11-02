@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { headlineParts } from '~~/layout/headline'
 import { HEADLINE_STACKED_MAX_LINES, HTML_LANG, LANG_LABEL, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
 import type { LevelBadge } from '~~/layout/levelScale'
 import type { LangKey, LayoutCell } from '~~/layout/types'
@@ -34,7 +35,7 @@ const currentLang = computed(() => {
         class="t-guide headline-text"
         :style="headlineStyle"
         :data-max-lines="stackedHeadline ? HEADLINE_STACKED_MAX_LINES : undefined"
-      >{{ cell.text.ja }}</p>
+      ><template v-if="headlineParts(cell.text.ja).lead"><span class="keep">{{ headlineParts(cell.text.ja).lead }}</span> {{ headlineParts(cell.text.ja).rest }}</template><template v-else>{{ cell.text.ja }}</template></p>
     </template>
 
     <template v-else-if="cell.role === 'action'">
@@ -110,6 +111,9 @@ p {
 }
 .role-headline .headline-text {
   min-width: 0;
+}
+.headline-text .keep {
+  white-space: nowrap;
 }
 .is-inline .role-direction,
 .is-inline .role-shelter {

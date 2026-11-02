@@ -10,9 +10,9 @@ export const LADDER_CURRENT_GROWTH = 1.2
 export const SQUARE_ACTION_PICTOGRAM_STEP = 0.85
 export const SQUARE_GUTTER_STEP_PX = 8
 
-// The current rung only has room for 警戒レベル beside its numeral on wide screens and in the vertical ladder.
-export function ladderHasCaption(mode: LadderMode, cls: ShapeClass): boolean {
-  return mode === 'v' || cls === 'landscape' || cls === 'ribbon'
+// Only the 144-wide ladders of 16:9 and 32:9 have room for 警戒レベル beside the numeral.
+export function ladderHasCaption(cls: ShapeClass): boolean {
+  return cls === 'landscape' || cls === 'ribbon'
 }
 
 export function ladderSizePx(mode: LadderMode, cls: ShapeClass): number {
