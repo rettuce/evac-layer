@@ -1,0 +1,121 @@
+# Screens
+
+Every screen below is drawn from a real bulletin of the Japan Meteorological Agency (Yurihonjo, Akita, 21–22 Oct 2026: the Koyoshi River flood sequence). The wording is written by the Writer agent from the municipal hazard map and checked by the Verifier (static, browser and vision).
+全部、気象庁の実際の電文（秋田県由利本荘市・2026-10-21〜22 の子吉川の洪水）から作った画面です。文言は Writer が自治体のハザードマップから書き、Verifier（静的・ブラウザ・画像）が検査しています。
+
+Regenerate with `pnpm -F app screens` (production build, loopback admin preview).
+
+## 16x9
+
+![レベル３氾濫警報 (16x9)](screens/lv3-16x9.png)
+
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 15:55
+
+![レベル４氾濫危険警報 (16x9)](screens/lv4-16x9.png)
+
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 18:15
+
+![レベル５氾濫特別警報 (16x9)](screens/lv5-16x9.png)
+
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 気象庁 19:45
+
+![レベル２氾濫注意報解除 (16x9)](screens/clear-16x9.png)
+
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 06:20
+
+## 9x16
+
+![レベル３氾濫警報 (9x16)](screens/lv3-9x16.png)
+
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 15:55
+
+![レベル４氾濫危険警報 (9x16)](screens/lv4-9x16.png)
+
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 18:15
+
+![レベル５氾濫特別警報 (9x16)](screens/lv5-9x16.png)
+
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 気象庁 19:45
+
+![レベル２氾濫注意報解除 (9x16)](screens/clear-9x16.png)
+
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 06:20
+
+## 32x9
+
+![レベル３氾濫警報 (32x9)](screens/lv3-32x9.png)
+
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 15:55
+
+![レベル４氾濫危険警報 (32x9)](screens/lv4-32x9.png)
+
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 18:15
+
+![レベル５氾濫特別警報 (32x9)](screens/lv5-32x9.png)
+
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 気象庁 19:45
+
+![レベル２氾濫注意報解除 (32x9)](screens/clear-32x9.png)
+
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 06:20
+
+## 1x1
+
+![レベル３氾濫警報 (1x1)](screens/lv3-1x1.png)
+
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 15:55
+
+![レベル４氾濫危険警報 (1x1)](screens/lv4-1x1.png)
+
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 18:15
+
+![レベル５氾濫特別警報 (1x1)](screens/lv5-1x1.png)
+
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 気象庁 19:45
+
+![レベル２氾濫注意報解除 (1x1)](screens/clear-1x1.png)
+
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 06:20
+
+## pillar (four faces round a column, shown at 0.25)
+
+![レベル３氾濫警報 (pillar)](screens/lv3-pillar.png)
+
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 15:55
+
+![レベル４氾濫危険警報 (pillar)](screens/lv4-pillar.png)
+
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 18:15
+
+![レベル５氾濫特別警報 (pillar)](screens/lv5-pillar.png)
+
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 気象庁 19:45
+
+![レベル２氾濫注意報解除 (pillar)](screens/clear-pillar.png)
+
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 06:20
+
+## Ambient (no alert)
+
+![ambient color-planes (16x9)](screens/ambient-color-planes-16x9.png)
+
+Ambient scene `color-planes` on 16x9; the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+
+![ambient color-planes (pillar)](screens/ambient-color-planes-pillar.png)
+
+Ambient scene `color-planes` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+
+![ambient clock-grid (16x9)](screens/ambient-clock-grid-16x9.png)
+
+Ambient scene `clock-grid` on 16x9; the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+
+![ambient clock-grid (pillar)](screens/ambient-clock-grid-pillar.png)
+
+Ambient scene `clock-grid` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+
+## Switch (ambient → alert)
+
+![switch](screens/switch-16x9-strip.png)
+
+16:9 at t = 11.5, 11.8, 12.1, 12.4, 12.7, 13.0 s: ambient, 300 ms of black at 12.0 s, then the level-4 screen scales in once.
+
