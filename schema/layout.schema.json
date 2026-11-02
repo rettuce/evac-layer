@@ -85,7 +85,8 @@
         "evac-now",
         "evac-prepare",
         "shelter-direction",
-        "all-clear"
+        "all-clear",
+        "secure-now"
       ]
     },
     "cells": {

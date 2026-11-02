@@ -15,11 +15,11 @@ test("子吉川 2026-10-21: levels rise 2 → 3 → 4 → 5 and fall back", () =
   assert.equal(fixture.entries.at(-1)!.municipality_status.join(), "cleared");
 });
 
-test("the real sequence drives the Composer from no screen to evac-prepare to evac-now to all-clear", () => {
+test("the real sequence drives the Composer from no screen to evac-prepare, evac-now, secure-now and all-clear", () => {
   const plan = fixture.entries.map((e) => {
     try { return situationFor(e.alert, "05210").template; } catch (err) { if (err instanceof ComposerStop) return "none"; throw err; }
   });
-  assert.deepEqual(plan, ["none", "evac-prepare", "evac-now", "evac-now", "evac-now", "evac-now", "none", "none", "all-clear"]);
+  assert.deepEqual(plan, ["none", "evac-prepare", "evac-now", "secure-now", "secure-now", "secure-now", "none", "none", "all-clear"]);
 });
 
 test("re-parsing the recorded bulletins reproduces the fixture", () => {

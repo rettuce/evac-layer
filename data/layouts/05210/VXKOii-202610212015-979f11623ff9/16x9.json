@@ -13,7 +13,7 @@
     "issued_at": "2026-10-21T20:15:00+09:00"
   },
   "shape": "16x9",
-  "template": "evac-now",
+  "template": "secure-now",
   "cells": [
     {
       "id": "headline",
@@ -36,7 +36,7 @@
       "priority": 1,
       "text": {
         "ja": "【仮】安全確保",
-        "ja_easy": "【かり】 にげて",
+        "ja_easy": "【かり】 うえの かいへ",
         "en": "[draft] Act now",
         "zh_hans": "[草稿]确保安全",
         "zh_hant": "[草稿]確保安全",
@@ -46,34 +46,12 @@
       "motion": "pulse"
     },
     {
-      "id": "direction",
-      "role": "direction",
-      "priority": 2,
-      "text": {
-        "ja": "南西へ"
-      },
-      "pictogram": "arrow_forward",
-      "rotation": 135,
-      "motion": "static"
-    },
-    {
-      "id": "shelter",
-      "role": "shelter",
-      "priority": 2,
-      "text": {
-        "ja": "鶴舞小学校（指定緊急避難場所）"
-      },
-      "pictogram": "emergency_evacuation_site",
-      "distance_m": 570,
-      "motion": "static"
-    },
-    {
       "id": "languages",
       "role": "languages",
       "priority": 3,
       "text": {
         "ja": "【仮】安全確保",
-        "ja_easy": "【かり】 にげて",
+        "ja_easy": "【かり】 うえの かいへ",
         "en": "[draft] Act now",
         "zh_hans": "[草稿]确保安全",
         "zh_hant": "[草稿]確保安全",
@@ -86,17 +64,13 @@
       "role": "source",
       "priority": 9,
       "text": {
-        "ja": "出典: 国土地理院 指定緊急避難場所データ / 気象庁 20:15"
+        "ja": "出典: 気象庁 20:15"
       },
       "motion": "static"
     }
   ],
   "palette": "cabinet-office-5",
   "sources": [
-    {
-      "type": "gsi",
-      "file": "05210_2.csv"
-    },
     {
       "type": "jma",
       "bulletin_id": "VXKOii-202610212015-979f11623ff9"

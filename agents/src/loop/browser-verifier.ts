@@ -1,0 +1,46 @@
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import puppeteer, { type Browser } from "puppeteer-core";
+import type { Shape } from "../../../app/layout/types";
+import { TMP_DIR } from "../paths.js";
+import { readScreen, sampleLuminance, type Clock } from "../verifier/browser.js";
+import { MAX_REVERSALS, countReversals, judgeContent, judgeFonts, judgeState, type Finding } from "../verifier/checks.js";
+import type { Screen, ScreenVerdict, Verifier } from "./types.js";
+import { staticVerifier } from "./static-verifier.js";
+
+export const DEFAULT_CHROME = process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+
+// The renderer's /api/layout only serves .json files under its own repository root, so layouts are staged in
+// this worktree's tmp/ and the renderer must run from the same worktree.
+export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?: string }): Verifier & { close(): Promise<void> } {
+  let browser: Browser | undefined;
+  const stageDir = path.join(TMP_DIR, "verifier-src");
+  return {
+    name: `static+browser(${opts.baseUrl})`,
+    async verify(screens: Screen[]) {
+      const base = await staticVerifier.verify(screens);
+      browser ??= await puppeteer.launch({ executablePath: opts.chrome ?? DEFAULT_CHROME, headless: true });
+      fs.mkdirSync(stageDir, { recursive: true });
+      const out: ScreenVerdict[] = [];
+      for (const [i, s] of screens.entries()) {
+        const body = JSON.stringify(s);
+        const file = path.join(stageDir, `${crypto.createHash("sha256").update(body).digest("hex").slice(0, 16)}.json`);
+        fs.writeFileSync(file, body);
+        const target = { baseUrl: opts.baseUrl, srcFile: file, variant: 0 };
+        const shape = s.shape as Shape;
+        const { state, samples, cells, scale } = await readScreen(browser, target, shape);
+        const luminances = await sampleLuminance(browser, target, shape, opts.clock ?? "realtime");
+        const reversals = countReversals(luminances);
+        const findings: Finding[] = [...base[i].findings.filter((f) => f.check !== "distance-duplicated"), ...judgeState(state), ...judgeFonts(samples, scale), ...judgeContent(cells)];
+        if (reversals > MAX_REVERSALS) findings.push({ check: "flicker", detail: `${reversals} luminance reversals of ≥10% within 1 s` });
+        out.push({ shape: s.shape, ok: findings.length === 0, findings });
+      }
+      return out;
+    },
+    async close() {
+      await browser?.close();
+      browser = undefined;
+    },
+  };
+}

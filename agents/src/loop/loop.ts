@@ -5,6 +5,9 @@ import { NoRevision, type LoopFinding, type Reviser, type Screen, type Verifier 
 
 export const MAX_ATTEMPTS = 3;
 const WRITER_FIXABLE = new Set(["over-budget", "font-size", "overflow", "distance-duplicated"]);
+// The Composer writes the shelter and source cells from data, so a rewrite of Writer text cannot fix them.
+const WRITER_CELLS = new Set(["headline", "action", "direction", "languages"]);
+const writerCanFix = (f: LoopFinding) => WRITER_FIXABLE.has(f.check) && (f.cell_id === undefined || WRITER_CELLS.has(f.cell_id));
 
 export interface Attempt { n: number; writer_source: string; findings: LoopFinding[]; screens_ok: Record<string, boolean> }
 export interface LoopResult {
@@ -41,8 +44,8 @@ export async function runLoop(args: {
     }
     attempts.push({ n, writer_source: source, findings, screens_ok: screensOk });
     if (!findings.length) return { outcome: "pass", attempts, screens };
-    const blocking = findings.filter((f) => !WRITER_FIXABLE.has(f.check));
-    if (blocking.length) return { outcome: "fail", reason: `not fixable by rewriting text: ${blocking.map((f) => `${f.shape} ${f.check}`).join(", ")}`, attempts, screens };
+    const blocking = findings.filter((f) => !writerCanFix(f));
+    if (blocking.length) return { outcome: "fail", reason: `not fixable by rewriting text: ${blocking.map((f) => `${f.shape} ${f.check}${f.cell_id ? `[${f.cell_id}]` : ""}`).join(", ")}`, attempts, screens };
     if (n === max) break;
     try {
       ({ writer, source } = await args.reviser.revise(writer, findings, n));
