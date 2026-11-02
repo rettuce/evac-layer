@@ -340,12 +340,11 @@
       "wmo_code": "VPWW56",
       "raw_title": "石川県土砂災害警報・注意報",
       "municipality_level": null,
-      "screen": false,
+      "screen": true,
       "template": "all-clear",
       "display_level": 1,
-      "outcome": "fail",
+      "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
-      "reason": "findings remain after 3 attempts",
       "layouts": [
         "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/16x9.json",
         "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/9x16.json",
@@ -397,18 +396,7 @@
       "raw_title": "石川県土砂災害警報・注意報",
       "municipality_level": null,
       "screen": false,
-      "template": "all-clear",
-      "display_level": 1,
-      "outcome": "fail",
-      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
-      "reason": "findings remain after 3 attempts",
-      "layouts": [
-        "data/layouts/17204/VPWW56-202610251540-50b7a29be43b/16x9.json",
-        "data/layouts/17204/VPWW56-202610251540-50b7a29be43b/9x16.json",
-        "data/layouts/17204/VPWW56-202610251540-50b7a29be43b/32x9.json",
-        "data/layouts/17204/VPWW56-202610251540-50b7a29be43b/1x1.json"
-      ],
-      "report": "data/reports/17204-VPWW56-202610251540-50b7a29be43b/report.json"
+      "reason": "all-clear for landslide but no landslide screen was shown before; nothing to clear"
     },
     {
       "issued_at": "2026-10-25T19:45:00+09:00",

@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル２土砂災害注意報解除",
-        "ja_easy": "どしゃさいがい ちゅういほう おわり",
+        "ja_easy": "どしゃくずれ ちゅういほう おわり",
         "en": "Landslide advisory ended",
-        "zh_hans": "2级土砂灾害注意报解除",
-        "zh_hant": "2級土砂災害注意報解除",
-        "ko": "2단계 토사재해 주의보 해제"
+        "zh_hans": "土砂灾害注意报解除",
+        "zh_hant": "土砂災害注意報解除",
+        "ko": "토사재해 주의보 해제"
       },
       "pictogram": "landslide",
       "motion": "scale-in"
@@ -35,12 +35,12 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "避難の必要なし",
-        "ja_easy": "にげなくて だいじょうぶです",
-        "en": "No need to leave",
-        "zh_hans": "无需避难",
-        "zh_hant": "無需避難",
-        "ko": "대피할 필요 없음"
+        "ja": "注意報は解除済み",
+        "ja_easy": "ちゅういほうは おわりました",
+        "en": "Advisory lifted",
+        "zh_hans": "注意报已解除",
+        "zh_hant": "注意報已解除",
+        "ko": "주의보 해제됨"
       },
       "pictogram": "safe_here",
       "motion": "pulse"
@@ -50,12 +50,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "避難の必要なし",
-        "ja_easy": "にげなくて だいじょうぶです",
-        "en": "No need to leave",
-        "zh_hans": "无需避难",
-        "zh_hant": "無需避難",
-        "ko": "대피할 필요 없음"
+        "ja": "注意報は解除済み",
+        "ja_easy": "ちゅういほうは おわりました",
+        "en": "Advisory lifted",
+        "zh_hans": "注意报已解除",
+        "zh_hant": "注意報已解除",
+        "ko": "주의보 해제됨"
       },
       "motion": "static"
     },
