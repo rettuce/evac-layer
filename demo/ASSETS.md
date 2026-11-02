@@ -16,3 +16,5 @@
 テクスチャは `blender/polyhaven.py` が初回実行時に Poly Haven API から取得してキャッシュする（`assets/textures/` は gitignore。ID と作者は上の表）。
 
 人物・外部 3D モデル（Sketchfab 等）は使っていない。
+
+端末収録（`capture/terminal.mjs`）は実行時に次を `cache/terminal/` へ取得する（gitignore・依存には追加しない）: xterm.js 5.5.0（`@xterm/xterm`・MIT・© The xterm.js authors）、JetBrains Mono（`@fontsource/jetbrains-mono` 5.0.20・SIL OFL 1.1・© JetBrains）。和文は `compose/fonts/NotoSansJP-Bold.otf`（SIL OFL 1.1）。
