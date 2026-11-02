@@ -80,3 +80,4 @@ agents 席の CLI（`pnpm -F agents …`）の実走を、端末画面として�
    `report.outcome` の語は `pass`（ほかに `fail` / `stopped`）。コマンドは `--municipality 17204` だけで通る（`--municipality-file` 不要）
 3. **点滅の fixture は作らない**で同意。Renderer に点滅は存在せず、弾かれる実例は作為になる。カット 6 は予算超過・距離二重・文字高で見せる。**`--verifier browser` の URL**: `/screen?src=/api/layout?file=` を使うので、`/api/layout` が生きている **dev サーバ**（同じ worktree）が必要。本番ビルドでは `/api/layout` が 404 になり検査できない。既定は agents worktree の dev `http://127.0.0.1:3152`、`--base-url` で変更可
 4. **ライブ Writer の引数（予定）**: `pnpm -F agents writer --alert <電文 XML> --municipality <id> [--model opus|sonnet] [--out <file>]`。形状ごとの文字数予算は Composer が決めて渡すので、出力は 4 形状分（`{"16x9": WriterOutput, …}`）。pipeline からは同じものを内部で呼び、差し戻し時は findings を添えて再生成する。確定したらこの節を更新する
+5. **追記（report のパス）**: fixture を使う `pipeline` は公開データの木を汚さないよう、既定で `tmp/pipeline/reports/<自治体>-<電文ID>/report.json` に書く（`--publish` のときだけ `data/reports/`）。カット 6 の最後に見せるパスはこれになる

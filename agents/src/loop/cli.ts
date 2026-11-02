@@ -3,7 +3,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import type { Municipality, Site, WriterOutput } from "../composer/compose.js";
 import { parseJmaXml } from "../jma/parse.js";
-import { resolveUserPath } from "../paths.js";
+import { TMP_DIR, resolveUserPath } from "../paths.js";
 import { loadMunicipality } from "./municipality.js";
 import { MAX_ATTEMPTS, runLoop } from "./loop.js";
 import { writeReport } from "./report.js";
@@ -21,6 +21,7 @@ const { values } = parseArgs({
     revisions: { type: "string", multiple: true, default: [] },
     "max-attempts": { type: "string", default: String(MAX_ATTEMPTS) },
     verifier: { type: "string", default: "static" },
+    publish: { type: "boolean", default: false },
     "base-url": { type: "string", default: process.env.EVAC_URL ?? "http://127.0.0.1:3152" },
   },
 });
@@ -51,7 +52,9 @@ const result = await runLoop({
   alert, municipality, site: read<Site>(values.site), writer: read<WriterOutput>(values.writer), writerSource: `fixture:${path.basename(values.writer)}`,
   verifier, reviser, maxAttempts,
 }).finally(() => browser?.close());
-const { dir, report } = writeReport({ municipalityId: municipality.id, bulletinId: alert.bulletin_id, verifier: verifier.name, reviser: reviser.name, maxAttempts, result });
+// Fixture runs must not land in the published data tree; --publish writes to data/.
+const roots = values.publish ? undefined : { reports: path.join(TMP_DIR, "pipeline", "reports"), layouts: path.join(TMP_DIR, "pipeline", "layouts") };
+const { dir, report } = writeReport({ municipalityId: municipality.id, bulletinId: alert.bulletin_id, verifier: verifier.name, reviser: reviser.name, maxAttempts, result, roots });
 for (const a of report.attempts) console.log(`attempt ${a.n} (${a.writer_source}): ${a.findings.length ? a.findings.map((f) => `${f.shape} ${f.check}${f.cell_id ? `[${f.cell_id}]` : ""}`).join(", ") : "no findings"}`);
 console.log(`${report.outcome}${report.reason ? ` — ${report.reason}` : ""}\n${path.relative(process.cwd(), dir)}/report.json`);
 process.exitCode = report.outcome === "pass" ? 0 : 1;

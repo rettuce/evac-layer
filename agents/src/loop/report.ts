@@ -6,9 +6,9 @@ import type { LoopResult } from "./loop.js";
 export const REPORTS_DIR = path.join(REPO_ROOT, "data", "reports");
 export const LAYOUTS_DIR = path.join(REPO_ROOT, "data", "layouts");
 
-export function writeReport(args: { municipalityId: string; bulletinId: string; verifier: string; reviser: string; maxAttempts: number; result: LoopResult; writerNote?: string }) {
-  const dir = path.join(REPORTS_DIR, `${args.municipalityId}-${args.bulletinId}`);
-  const layoutDir = path.join(LAYOUTS_DIR, args.municipalityId, args.bulletinId);
+export function writeReport(args: { municipalityId: string; bulletinId: string; verifier: string; reviser: string; maxAttempts: number; result: LoopResult; writerNote?: string; roots?: { reports: string; layouts: string } }) {
+  const dir = path.join(args.roots?.reports ?? REPORTS_DIR, `${args.municipalityId}-${args.bulletinId}`);
+  const layoutDir = path.join(args.roots?.layouts ?? LAYOUTS_DIR, args.municipalityId, args.bulletinId);
   fs.mkdirSync(dir, { recursive: true });
   fs.rmSync(layoutDir, { recursive: true, force: true });
   fs.mkdirSync(layoutDir, { recursive: true });
