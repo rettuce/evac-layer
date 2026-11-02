@@ -45,13 +45,13 @@ agents 席の CLI（`pnpm -F agents …`）の実走を、端末画面として�
 | 秒 | 見せるもの | コマンド・出力 |
 |---|---|---|
 | 0〜3 | コマンド入力 | `pnpm -F agents pipeline --alert <電文 XML> --municipality 17204 --site agents/test/fixtures/site-wajima-test.json --writer agents/test/fixtures/writer-tsunami-advisory-long.json --revisions agents/test/fixtures/writer-tsunami-advisory.json --verifier browser` |
-| 3〜11 | attempt 1 の差し戻し（長い文言で文字高さ不足・はみ出し） | `attempt 1 (…): <shape> <check>[<cell>], …` |
+| 3〜11 | attempt 1 の差し戻し（予算超過・距離の二重表示・文字高さ不足） | `attempt 1 (…): <shape> <check>[<cell>], …` |
 | 11〜17 | attempt 2 で通る | `attempt 2 (…): no findings` |
 | 17〜20 | 結果とレポートのパス | `report.outcome` の 1 行（値の語は実走で確認）と `data/reports/<…>/report.json` |
 
 右半分に、差し戻された画面と通った画面のスクリーンショットを並べる案もある（report.json が画像を持っていれば合成工程で重ねる）。
 
-実走で決めること: 「点滅頻度超過」を絵に入れるか。Verifier にはフリッカー検査（`reversals`）があるが、差し戻しを起こす fixture が要る。
+点滅の差し戻しは入れない（2026-11-02 司令官裁定。Renderer に点滅が無いので、起こす fixture を作るのは作為になる）。差し戻しは予算超過・距離の二重表示・文字高で見せる。
 
 ## agents 席に確認すること
 
