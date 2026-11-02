@@ -101,13 +101,14 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 - The warning level is shown as a scale (`LevelScale.vue`, `levelScaleFor`): five cells 1–5 on a white plate, the current one filled with its Cabinet Office colour and a large numeral, the others at 30 % tint with an outline; the title alternates 警戒レベル / Alert Level with the language rotation. Tsunami bulletins get three cells (注意報 / 警報 / 大津波警報) titled 津波 / Tsunami.
 - 16:9 and 32:9: the scale sits beside the headline (32:9 below it).
 - 9:16 and 1:1: the scale sits under the headline inside the band, right-aligned, with the headline pictogram spanning both rows. The band is at least 200 (one headline line + label, with room above and below); the headline may take 2 lines (the band grows further only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
+- When a `languages` cell is on screen, the action cell no longer repeats the easy-Japanese line under its pictogram (it appears once, labelled).
 - `all-clear` shows no level scale: a cleared bulletin has no warning level, the white band is only the colour of level 1.
 
 ## Pillar (`shape=pillar`)
 
 - A square column wrapped in LED from 0.40 m to 3.60 m above the floor: logical canvas 6616 × 5046 = four faces of 1654 × 5046 side by side (face 0 is the front, then 1, 2, 3 to the right). The outer 37 px of each face lie on the rounded corner and carry no text.
-- Each face uses the 9:16 template's cells and type sizes at scale 1 (`PILLAR` in `shapes.ts`; same pixel pitch as a 55" portrait panel), rearranged by `pillarFace`: band, ladder and a 960 px action pictogram fill the upper column (2.2–3.6 m); action text, easy Japanese, direction and shelter end at eye height (1.2 m, rows bottom-anchored); the source sits at 0.4–0.6 m. The band and the level ladder (on by default for the pillar) run edge to edge, so they close into rings round the column; text and pictograms repeat on every face.
+- Each face uses the 9:16 template's cells, drawn at 1.6x (`PILLAR.faceScale`; the column is read from 2–5 m) and rearranged by `pillarFace`: band, ladder and a large action pictogram fill the upper column (2.2–3.6 m); action text (up to two lines), easy Japanese, direction and shelter end 1.0 m above the floor (rows bottom-anchored); a level-colour band with the source runs round the foot (0.40–0.75 m). The band and the level ladder (on by default for the pillar) run edge to edge, so they close into rings round the column; text and pictograms repeat on every face.
 - The outer `.evac-screen` carries `data-shape="pillar"`, `data-faces="4"` and the state of face 0 (`data-overflow`, `data-dropped`, `data-level-scale`, …); it turns `data-ready="1"` when all four faces are fitted. Faces 1–3 are `aria-hidden`.
 - Draw at logical pixels and capture at `deviceScaleFactor: 0.5` → 3308 × 2523 (`scripts/shot.mjs` does this).
 - Layouts: the Composer writes `pillar.json` (same cells as 9:16); live, feed and `/delivery` serve it like the other shapes.
-- Ambient: one colour field across the whole canvas, the D21 clock repeated on each face.
+- Ambient: one colour field across the whole canvas, the D21 clock repeated on each face with its top at 2.0 m (eye height).
