@@ -3,7 +3,8 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import type { Municipality, Site, WriterOutput } from "../composer/compose.js";
 import { parseJmaXml } from "../jma/parse.js";
-import { MUNICIPALITIES_DIR, resolveUserPath } from "../paths.js";
+import { resolveUserPath } from "../paths.js";
+import { loadMunicipality } from "./municipality.js";
 import { MAX_ATTEMPTS, runLoop } from "./loop.js";
 import { writeReport } from "./report.js";
 import { fixtureReviser, liveWriterReviser } from "./revisers.js";
@@ -28,18 +29,16 @@ if (!values.alert || !values.site || !(values.municipality || values["municipali
   process.exit(2);
 }
 const read = <T>(p: string): T => JSON.parse(fs.readFileSync(resolveUserPath(p), "utf8")) as T;
-const municipalityFile = values["municipality-file"] ? resolveUserPath(values["municipality-file"]) : path.join(MUNICIPALITIES_DIR, `${values.municipality}.json`);
-if (!fs.existsSync(municipalityFile)) {
-  console.error(`[pipeline stopped] ${municipalityFile} not found; run the Reader for this municipality first`);
-  process.exit(3);
-}
+const loaded = values["municipality-file"]
+  ? { municipality: JSON.parse(fs.readFileSync(resolveUserPath(values["municipality-file"]), "utf8")) as Municipality, readerRan: true }
+  : loadMunicipality(values.municipality!);
 if (!values.writer) {
   console.error("[pipeline stopped] the live Writer lands on Day 2; pass --writer <writer.json> (and --revisions) to run the loop on fixtures");
   process.exit(3);
 }
 
 const alert = parseJmaXml(fs.readFileSync(resolveUserPath(values.alert)));
-const municipality = JSON.parse(fs.readFileSync(municipalityFile, "utf8")) as Municipality;
+const municipality = loaded.municipality;
 const reviser = values.revisions!.length ? fixtureReviser(values.revisions!.map(resolveUserPath)) : liveWriterReviser;
 const maxAttempts = Number(values["max-attempts"]);
 if (values.verifier !== "static" && values.verifier !== "browser") {

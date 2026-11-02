@@ -6,20 +6,21 @@ import { resolveUserPath } from "../paths.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { compose } from "./compose.js";
 import { ComposerStop } from "./rules.js";
+import { loadMunicipality } from "../loop/municipality.js";
 
 const { values } = parseArgs({
   options: { alert: { type: "string" }, municipality: { type: "string" }, site: { type: "string" }, writer: { type: "string" }, "out-dir": { type: "string" } },
 });
 const required = ["alert", "municipality", "site", "writer"] as const;
 if (required.some((k) => !values[k])) {
-  console.error("usage: pnpm -F agents compose --alert <bulletin.xml> --municipality <id>.json --site <site>.json --writer <writer>.json [--out-dir dir]");
+  console.error("usage: pnpm -F agents compose --alert <bulletin.xml> --municipality <id | file.json> --site <site>.json --writer <writer>.json [--out-dir dir]");
   process.exit(2);
 }
 const read = (p: string) => JSON.parse(fs.readFileSync(resolveUserPath(p), "utf8"));
 try {
   const screens = compose({
     alert: parseJmaXml(fs.readFileSync(resolveUserPath(values.alert!))),
-    municipality: read(values.municipality!),
+    municipality: /^\d{5}$/.test(values.municipality!) ? loadMunicipality(values.municipality!).municipality : read(values.municipality!),
     site: read(values.site!),
     writer: read(values.writer!),
   });

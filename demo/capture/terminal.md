@@ -59,3 +59,24 @@ agents 席の CLI（`pnpm -F agents …`）の実走を、端末画面として�
 2. カット 6 の fixture の組み合わせ（`writer-tsunami-advisory-long` → `writer-tsunami-advisory`）で、attempt 1 に差し戻しが出るか
 3. `--verifier browser` が使うアプリの URL（既定 3152）。収録時は demo 席の本番ビルドを使う
 4. ライブの Writer が Day 2 に入ったあとの、`writer` コマンドの最終的な引数
+
+## agents 席の回答（2026-11-02・work/agents で実走して確認）
+
+1. **電文 XML の実ファイル**
+   - カット 4（由利本荘 10-21 18:15 子吉川 レベル４氾濫危険警報）: `$JMA_FEED_DIR/bodies/20261021/20261021091533_0_VXKO55_050000.xml`（`JMA_FEED_DIR` 既定は private の `data/jma-feed`）。`pnpm -F agents compose --alert <このファイル> --municipality 05210 --site data/sites/05210-demo.json --writer <writer>.json --out-dir tmp/cut4` で 4 形状とも `OK` を確認済み。`--municipality` は自治体コードでも渡せる（Reader 未実行の間は `data/municipalities/<id>.shelters.json` から組む）
+   - カット 6（輪島・石川県能登の津波注意報。公式サンプル）: `$JMA_SAMPLES_DIR/32-39_12_02_250206_VTSE41.xml`
+2. **attempt 1 の差し戻し**: 出る。ただし `long → advisory` の attempt 1 は `16x9 over-budget[action]` で、Composer が描画の前に文字数予算で止めたもの（画面は描かれない）。実走結果（`--verifier browser`）:
+   ```
+   attempt 1 (fixture:writer-tsunami-advisory-long.json): 16x9 over-budget[action]
+   attempt 2 (fixture:writer-tsunami-advisory.json): no findings
+   pass
+   ```
+   「Verifier が画面を読んで差し戻す」絵にするなら `writer-tsunami-advisory-distance.json → writer-tsunami-advisory.json` を推奨。描画した画面で方向セルと避難場所セルの距離の二重表示を弾く:
+   ```
+   attempt 1 (fixture:writer-tsunami-advisory-distance.json): 16x9 distance-duplicated[direction], 9x16 distance-duplicated[direction], 32x9 distance-duplicated[direction]
+   attempt 2 (fixture:writer-tsunami-advisory.json): no findings
+   pass
+   ```
+   `report.outcome` の語は `pass`（ほかに `fail` / `stopped`）。コマンドは `--municipality 17204` だけで通る（`--municipality-file` 不要）
+3. **点滅の fixture は作らない**で同意。Renderer に点滅は存在せず、弾かれる実例は作為になる。カット 6 は予算超過・距離二重・文字高で見せる。**`--verifier browser` の URL**: `/screen?src=/api/layout?file=` を使うので、`/api/layout` が生きている **dev サーバ**（同じ worktree）が必要。本番ビルドでは `/api/layout` が 404 になり検査できない。既定は agents worktree の dev `http://127.0.0.1:3152`、`--base-url` で変更可
+4. **ライブ Writer の引数（予定）**: `pnpm -F agents writer --alert <電文 XML> --municipality <id> [--model opus|sonnet] [--out <file>]`。形状ごとの文字数予算は Composer が決めて渡すので、出力は 4 形状分（`{"16x9": WriterOutput, …}`）。pipeline からは同じものを内部で呼び、差し戻し時は findings を添えて再生成する。確定したらこの節を更新する
