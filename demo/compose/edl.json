@@ -42,12 +42,12 @@
       "kind": "3d",
       "seconds": 10,
       "src": "../renders/cut01.mp4",
-      "caption": "2024.1.1 能登半島地震。\n津波の避難先を判断できなかった来訪者がいた",
+      "caption": "2024.1.1 能登半島地震。\nどこへ逃げればよいか判断が難しかった来訪者がいた（上越市の検証）",
       "screens": null,
       "slate": "消えたままの駅のサイネージ（4 画面とも黒）。ゆっくり寄る",
-      "narration_ja": "2024年1月1日、能登半島地震。津波の避難先を判断できなかった来訪者がいました。",
-      "narration_en": "January 1, 2024: the Noto Peninsula earthquake. Some visitors could not tell where to flee from the tsunami.",
-      "caption_en": "January 1, 2024: Noto Peninsula earthquake.\nSome visitors could not tell where to flee from the tsunami."
+      "narration_ja": "2024年1月1日、能登半島地震。どこへ逃げればよいか、判断が難しかった来訪者がいました。",
+      "narration_en": "January 1, 2024: the Noto Peninsula earthquake. Visitors found it hard to judge where to evacuate from the tsunami (City of Jōetsu review).",
+      "caption_en": "January 1, 2024: the Noto Peninsula earthquake.\nVisitors found it hard to judge where to evacuate from the tsunami (City of Jōetsu review)."
     },
     {
       "cut": "2",

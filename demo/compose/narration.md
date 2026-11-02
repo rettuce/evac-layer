@@ -4,7 +4,7 @@
 
 | カット | 開始 | 使える秒数 | 読み上げ文 | 字数／上限 | テロップ |
 |---|---|---|---|---|---|
-| 1 | 0 s | 10 s | 2024年1月1日、能登半島地震。津波の避難先を判断できなかった来訪者がいました。 | 41／50 | 2024.1.1 能登半島地震。 / 津波の避難先を判断できなかった来訪者がいた |
+| 1 | 0 s | 10 s | 2024年1月1日、能登半島地震。どこへ逃げればよいか、判断が難しかった来訪者がいました。 | 45／50 | 2024.1.1 能登半島地震。 / どこへ逃げればよいか判断が難しかった来訪者がいた（上越市の検証） |
 | 2 | 10 s | 10 s | 駅と街のスクリーンを作ってきました。災害のとき、そのスクリーンは何も言いませんでした。 | 43／50 | 駅と街のスクリーンを作ってきた。 / 災害のとき、このスクリーンは何も言わなかった |
 | 2b | 20 s | 6 s | 黙らないスクリーンを。スクリーンは、もうあります。 | 25／30 | 黙らない画面 / Screens that don't go silent |
 | 3 | 26 s | 25 s | まず、自治体のハザードマップを読みます。文字の壊れた PDF は止めて、ページの画像から読み直します。輪島の最大津波高は 8.3 m。どの数字にも出典のページが付きます。 | 81／125 |  |
@@ -18,7 +18,7 @@
 
 ## 英訳（字幕用）
 
-- 1: January 1, 2024: the Noto Peninsula earthquake. Some visitors could not tell where to flee from the tsunami.
+- 1: January 1, 2024: the Noto Peninsula earthquake. Visitors found it hard to judge where to evacuate from the tsunami (City of Jōetsu review).
 - 2: We have built screens for stations and streets. When disaster struck, those screens said nothing.
 - 2b: Screens that don't go silent. The screens are already there.
 - 3: First, it reads the city's hazard maps. A PDF with broken text is stopped and read again from the page image. Wajima's maximum tsunami height: 8.3 m. Every figure carries its source page.
