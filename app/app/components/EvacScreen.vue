@@ -251,7 +251,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
       :scale="levelScale"
       :mode="ladderMode!"
       :size-px="ladderSizePx(ladderMode!, shapeClass)"
-      :caption="ladderHasCaption(ladderMode!, shapeClass)"
+      :caption="ladderHasCaption(shapeClass)"
       :language-index="language.index"
     />
     <div v-if="layout.hero && heroCell?.pictogram" class="hero-pictogram" :style="{ gridArea: 'hero' }">

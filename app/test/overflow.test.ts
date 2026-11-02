@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { overflowAttr } from '../layout/overflow.ts'
+import { headlineParts } from '../layout/headline.ts'
 import { levelBadgeFor, levelScaleAttr, levelScaleFor } from '../layout/levelScale.ts'
 
 test('data-overflow lists <cell id>:<lang> per spilled text, then screen', () => {
@@ -30,4 +31,10 @@ test('data-level-badge carries the current step; level 5 inverts to white; all-c
   assert.equal(levelBadgeFor(levelScaleFor('evac-now', 'tsunami', 3))?.value, '2')
   assert.equal(levelBadgeFor(levelScaleFor('all-clear', 'flood', 1)), undefined)
   assert.equal(levelScaleFor('evac-now', 'flood', 3)?.steps[0]?.tint, 'rgb(236 236 236)')
+})
+
+test('the headline keeps レベル and its numeral together and may wrap only after them', () => {
+  assert.deepEqual(headlineParts('レベル５氾濫特別警報'), { lead: 'レベル５', rest: '氾濫特別警報' })
+  assert.deepEqual(headlineParts('レベル 4 土砂災害警報'), { lead: 'レベル4', rest: '土砂災害警報' })
+  assert.deepEqual(headlineParts('津波警報'), { rest: '津波警報' })
 })
