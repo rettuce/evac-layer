@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { clockSweep, drawOverlay, formatClockJst, labelFont, overlayGeometry, pickAmbient, timeFont } from '~~/layout/ambient'
+import { PILLAR } from '~~/layout/shapes'
 import type { Shape } from '~~/layout/types'
 
 const props = defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string }>()
@@ -10,7 +11,12 @@ const canvas = ref<HTMLCanvasElement>()
 const viewport = ref({ width: 0, height: 0 })
 const fontsReady = ref(false)
 const pick = computed(() => pickAmbient(props.seed, props.clockEpochMs, props.scene))
-const geometry = computed(() => overlayGeometry(viewport.value.width, viewport.value.height, pick.value.corner))
+// A pillar repeats the clock on each face; the colour field runs round all four without a seam.
+const faces = computed(() =>
+  props.shape === 'pillar'
+    ? Array.from({ length: PILLAR.faces }, (_, i) => ({ originX: i * PILLAR.faceWidth, width: PILLAR.faceWidth }))
+    : [{ originX: 0, width: viewport.value.width }],
+)
 
 function draw() {
   const el = canvas.value
@@ -23,12 +29,15 @@ function draw() {
   // CPU-backed canvas: the GPU path rasterised the same gradients slightly differently between runs.
   const ctx = el.getContext('2d', { willReadFrequently: true })!
   pick.value.scene.render(ctx, props.clockEpochMs, pick.value.seed, props.shape)
-  drawOverlay(ctx, geometry.value, {
+  const content = {
     siteName: props.siteName,
     time: formatClockJst(props.clockEpochMs),
     sweep: clockSweep(props.clockEpochMs),
     ink: pick.value.scene.ink,
-  })
+  }
+  for (const face of faces.value) {
+    drawOverlay(ctx, overlayGeometry(face.width, height, pick.value.corner), content, face.originX)
+  }
 }
 
 // Canvas text does not wait for web fonts; drawing before they load would rasterise a fallback face.

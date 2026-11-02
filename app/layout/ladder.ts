@@ -2,7 +2,7 @@ import type { ShapeClass, ShapeLayout } from './types'
 
 export type LadderMode = 'h' | 'v'
 
-export const LADDER_H_PX: Record<ShapeClass, number> = { landscape: 120, portrait: 112, square: 112, ribbon: 120 }
+export const LADDER_H_PX: Record<ShapeClass, number> = { landscape: 120, portrait: 112, square: 112, ribbon: 120, pillar: 112 }
 export const LADDER_V_PX = 144
 export const LADDER_CURRENT_GROWTH = 1.2
 

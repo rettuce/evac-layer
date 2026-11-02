@@ -113,7 +113,7 @@ if (scenario.value) start()
   <div v-else-if="src && !screen" class="missing" data-loading="src">loading {{ src }}</div>
   <div v-else-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>
 
-  <EvacScreen
+  <ShapeScreen
     v-else-if="!frame"
     :screen="screen"
     :shape="shape"
@@ -140,7 +140,7 @@ if (scenario.value) start()
       :data-visible="frame.alertVisible ? '1' : '0'"
       data-layer="alert"
     >
-      <EvacScreen
+      <ShapeScreen
         :screen="screen"
         :shape="shape"
         :variant="variant"

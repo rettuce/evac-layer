@@ -17,6 +17,7 @@ const props = defineProps<{
   elapsedMs: number
   reducedMotion?: boolean
   ladder?: LadderMode
+  box?: { width: number; height: number; scale: number }
 }>()
 const emit = defineEmits<{ ready: [] }>()
 
@@ -54,6 +55,7 @@ const band = computed(() => CABINET_OFFICE_5[props.screen.alert.level])
 
 const rootStyle = computed(() => ({
   ...gridCss(layout.value),
+  ...(props.box ? { width: `${props.box.width}px`, height: `${props.box.height}px` } : {}),
   '--px': `${scale.value}px`,
   '--fs-action': TYPE_PX.action,
   '--fs-guide': TYPE_PX.guide,
@@ -190,7 +192,7 @@ async function fit() {
 }
 
 function updateScale() {
-  scale.value = designScale(window.innerWidth, window.innerHeight)
+  scale.value = props.box?.scale ?? designScale(window.innerWidth, window.innerHeight)
 }
 
 let resizeFrame = 0
