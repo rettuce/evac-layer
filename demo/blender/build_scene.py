@@ -39,6 +39,10 @@ F_STOP = 2.8
 SHADOW_POOL_MB = "1536"
 
 
+def facing(yaw):
+    return Vector((math.sin(yaw), -math.cos(yaw), 0.0))
+
+
 def panel_from_diagonal(diagonal_in, aspect_w, aspect_h):
     unit = diagonal_in * INCH / math.hypot(aspect_w, aspect_h)
     return aspect_w * unit, aspect_h * unit
@@ -90,9 +94,23 @@ CAMERA_WAYPOINTS = [
     Vector((0.8, -2.0, EYE_Z - 0.1)),
     Vector((2.2, -4.0, EYE_Z)),
 ]
-HERO_CAMERA = Vector((-1.5, -7.5, EYE_Z))
-HERO_TARGET = Vector((-2.6, 4.0, 2.4))
-HERO_FOCUS = "9x16"
+
+
+def in_front_of(shape, distance, angle_deg, height):
+    spec = SCREENS[shape]
+    offset = Matrix.Rotation(math.radians(angle_deg), 3, "Z") @ facing(spec["yaw"]) * distance
+    return Vector((spec["center"].x + offset.x, spec["center"].y + offset.y, height))
+
+
+# Near cameras sit at a horizontal distance from the screen, rotated off its normal so the
+# concourse behind falls out of focus at f/2.8.
+STILL_CAMERAS = {
+    "hero": {"location": Vector((-1.5, -7.5, EYE_Z)), "target": Vector((-2.6, 4.0, 2.4)), "focus": "9x16", "lens": 35.0},
+    "near-column": {"location": in_front_of("9x16", 1.5, -35, EYE_Z), "focus": "9x16", "lens": 24.0, "aim_shift": 0.3},
+    "near-wall": {"location": in_front_of("16x9", 2.0, 30, EYE_Z), "focus": "16x9", "lens": 28.0, "aim_shift": -0.3},
+    "near-ribbon": {"location": in_front_of("32x9", 3.5, -25, EYE_Z), "focus": "32x9", "lens": 24.0, "aim_shift": 0.0},
+    "near-pillar": {"location": in_front_of("1x1", 1.5, 30, EYE_Z), "focus": "1x1", "lens": 28.0, "aim_shift": -0.3},
+}
 
 
 def parse_args():
@@ -105,7 +123,8 @@ def parse_args():
     parser.add_argument("--samples", type=int, default=32)
     parser.add_argument("--look", choices=sorted(LOOKS), default="base")
     parser.add_argument("--cut", choices=CUTS, help="read demo/screens/<shape>_<cut>.mp4")
-    parser.add_argument("--still", help="render one frame from the hero camera to this PNG")
+    parser.add_argument("--still", help="render one frame from --cam to this PNG")
+    parser.add_argument("--cam", choices=sorted(STILL_CAMERAS), default="hero")
     parser.add_argument("--stills-dir", default=str(DEMO_DIR / "renders" / "stills"))
     parser.add_argument("--save-blend", action="store_true")
     args = parser.parse_args(argv)
@@ -166,10 +185,6 @@ def screen_material(shape, source, frame_count):
     return mat
 
 
-def facing(yaw):
-    return Vector((math.sin(yaw), -math.cos(yaw), 0.0))
-
-
 def build_screens(frame_count, cut):
     bezel = principled("bezel", (0.02, 0.02, 0.02), 0.3)
     sources = {}
@@ -204,14 +219,14 @@ def build_world(strength):
     links.new(background.outputs["Background"], output.inputs["Surface"])
 
 
-def add_camera(location, target_location):
+def add_camera(location, target_location, lens=LENS_MM):
     bpy.ops.object.empty_add(location=target_location)
     target = bpy.context.active_object
     target.name = "camera_target"
     bpy.ops.object.camera_add(location=location)
     camera = bpy.context.active_object
     camera.name = "camera"
-    camera.data.lens = LENS_MM
+    camera.data.lens = lens
     camera.data.dof.use_dof = True
     camera.data.dof.aperture_fstop = F_STOP
     constraint = camera.constraints.new("TRACK_TO")
@@ -234,9 +249,14 @@ def build_dolly(frame_count):
     return key_frames
 
 
-def build_hero():
-    camera, _ = add_camera(HERO_CAMERA, HERO_TARGET)
-    camera.data.dof.focus_distance = (SCREENS[HERO_FOCUS]["center"] - HERO_CAMERA).length
+def build_still_camera(name):
+    spec = STILL_CAMERAS[name]
+    screen = SCREENS[spec["focus"]]
+    focus_point = screen["center"]
+    tangent = Matrix.Rotation(screen["yaw"], 3, "Z") @ Vector((1.0, 0.0, 0.0))
+    target = spec.get("target", focus_point + tangent * spec.get("aim_shift", 0.0))
+    camera, _ = add_camera(spec["location"], target, spec["lens"])
+    camera.data.dof.focus_distance = (focus_point - spec["location"]).length
 
 
 def shot_frames(frame_count):
@@ -297,7 +317,7 @@ def main():
     build_world(look["hdri_strength"])
     key_frames = None if args.still else build_dolly(frame_count)
     if args.still:
-        build_hero()
+        build_still_camera(args.cam)
     configure_render(args, frame_count, frames_dir)
 
     if args.save_blend:
@@ -309,7 +329,7 @@ def main():
 
     if args.still:
         elapsed = render_still(Path(args.still).resolve())
-        print(f"RENDER_STATS still look={args.look} res={args.width}x{args.height} "
+        print(f"RENDER_STATS still look={args.look} cam={args.cam} res={args.width}x{args.height} "
               f"samples={args.samples} total_s={elapsed:.1f}")
         return
 
