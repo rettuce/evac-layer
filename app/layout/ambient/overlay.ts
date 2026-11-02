@@ -78,7 +78,7 @@ export interface OverlayContent {
 
 const BLOCK_HEIGHT = D21_TYPE.label.line + D21_LABEL_GAP + D21_TYPE.time.line + D21_TRACK_GAP
 
-export function drawOverlay(ctx: CanvasRenderingContext2D, geometry: OverlayGeometry, content: OverlayContent): void {
+export function drawOverlay(ctx: CanvasRenderingContext2D, geometry: OverlayGeometry, content: OverlayContent, originX = 0): void {
   const { scale, block, rules } = geometry
   if (!(scale > 0)) return
   const { height } = ctx.canvas
@@ -89,11 +89,11 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, geometry: OverlayGeom
   ctx.fillStyle = `rgb(${r} ${g} ${b})`
 
   ctx.globalAlpha = RULE_ALPHA
-  for (const x of rules) ctx.fillRect(Math.round(x), Math.round(margin), 1, Math.round(height - 2 * margin))
+  for (const x of rules) ctx.fillRect(Math.round(originX + x), Math.round(margin), 1, Math.round(height - 2 * margin))
 
   const top = block.top ?? height - (block.bottom ?? 0) - BLOCK_HEIGHT * scale
   const alignRight = block.left > margin + 0.5
-  const textX = alignRight ? block.left + block.width : block.left
+  const textX = originX + (alignRight ? block.left + block.width : block.left)
   ctx.textAlign = alignRight ? 'right' : 'left'
   ctx.textBaseline = 'middle'
 
@@ -110,9 +110,9 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, geometry: OverlayGeom
 
   const trackY = Math.round(timeTop + (D21_TYPE.time.line + D21_TRACK_GAP) * scale)
   ctx.globalAlpha = TRACK_ALPHA
-  ctx.fillRect(Math.round(block.left), trackY, Math.round(block.width), 1)
+  ctx.fillRect(Math.round(originX + block.left), trackY, Math.round(block.width), 1)
   ctx.globalAlpha = 1
   const sweepLength = CLOCK_SWEEP_LENGTH * scale
-  ctx.fillRect(Math.round(block.left + content.sweep * block.width - sweepLength / 2), trackY - 1, Math.round(sweepLength), 3)
+  ctx.fillRect(Math.round(originX + block.left + content.sweep * block.width - sweepLength / 2), trackY - 1, Math.round(sweepLength), 3)
   ctx.restore()
 }

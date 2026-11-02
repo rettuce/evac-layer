@@ -99,6 +99,11 @@ describe('feed', { skip }, () => {
     })
     assert.match(await validateWithAgents(alertFeed), /^OK /)
 
+    const pillar = await fetch(`${base}/api/live-layout?municipality=${MUNICIPALITY}&bulletin=${BULLETIN}&shape=pillar&site=${SITE}`)
+    assert.equal(pillar.status, 200)
+    assert.equal((await pillar.json()).shape, '9x16')
+    assert.equal(alertFeed.layouts.pillar, undefined)
+
     const png = await fetch(`${base}${alertFeed.assets['16x9'].png}`)
     assert.equal(png.status, 200)
     assert.equal(png.headers.get('content-type'), 'image/png')

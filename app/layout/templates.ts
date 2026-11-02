@@ -1,4 +1,5 @@
 import type { Role, Shape, ShapeLayout, TemplateDef, TemplateId } from './types'
+import { PILLAR } from './shapes'
 import { SHELTER_PICTOGRAM_PX } from './typography'
 
 const M = 48
@@ -217,7 +218,7 @@ export function definedTemplates(): TemplateId[] {
 }
 
 export function resolveLayout(templateId: TemplateId, shape: Shape, variant = 0): ShapeLayout {
-  const variants = TEMPLATES[templateId]?.[shape]
+  const variants = TEMPLATES[templateId]?.[shape === 'pillar' ? PILLAR.faceShape : shape]
   if (!variants?.length) throw new TemplateNotDefinedError(templateId, shape)
   return variants[variant] ?? variants[0]!
 }
