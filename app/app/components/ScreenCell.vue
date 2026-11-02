@@ -8,6 +8,7 @@ const props = defineProps<{
   level: AlertLevel
   pictogramPx: number
   languageIndex: number
+  languageStyle: Record<string, string | number>
 }>()
 
 const rotationLangs = computed<LangKey[]>(() => LANGUAGE_ROTATION.filter((key) => props.cell.text[key]))
@@ -57,7 +58,8 @@ const currentLang = computed(() => {
           v-for="key in rotationLangs"
           :key="key"
           class="lang-variant"
-          :class="{ 'is-current': key === currentLang, 'm-scale-in': key === currentLang }"
+          :class="{ 'is-current': key === currentLang }"
+          :style="key === currentLang ? languageStyle : undefined"
           :lang="HTML_LANG[key]"
           :data-lang="key"
         >

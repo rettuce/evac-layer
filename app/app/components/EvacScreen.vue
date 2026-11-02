@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '~~/layout/fit'
-import { PULSE_MIN_OPACITY, PULSE_PERIOD_MS, SCALE_IN_FROM, SCALE_IN_MS } from '~~/layout/motion'
+import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
 import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
 import { resolveLayout } from '~~/layout/templates'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
-import { LANGUAGE_ROTATION_MS, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
+import { LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
 
-const props = defineProps<{ screen: EvacScreen; shape: Shape; variant?: number }>()
+const props = defineProps<{
+  screen: EvacScreen
+  shape: Shape
+  variant?: number
+  elapsedMs: number
+  reducedMotion?: boolean
+}>()
+const emit = defineEmits<{ ready: [] }>()
 
 const FONT_FAMILIES = ['Noto Sans JP', 'Noto Sans', 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans KR']
 const FONT_WEIGHTS = [400, 700]
@@ -19,7 +26,6 @@ const scale = ref(1)
 const overflowDropped = ref<DroppedCell[]>([])
 const overflowing = ref<string[]>([])
 const ready = ref(false)
-const languageIndex = ref(0)
 
 const layout = computed(() => resolveLayout(props.screen.template, props.shape, props.variant))
 
@@ -49,18 +55,26 @@ const rootStyle = computed(() => ({
   '--band-rule': contrastRatio(band.value, PAGE_BACKGROUND) < BAND_RULE_MIN_CONTRAST ? BAND_RULE_PX : 0,
   '--dark-band': rgbCss(DARK_BAND),
   '--dark-band-ink': rgbCss(inkOn(DARK_BAND)),
-  '--pulse-period': `${PULSE_PERIOD_MS}ms`,
-  '--pulse-min': PULSE_MIN_OPACITY,
-  '--scale-in-ms': `${SCALE_IN_MS}ms`,
-  '--scale-in-from': SCALE_IN_FROM,
 }))
+
+const language = computed(() => languageStep(props.elapsedMs))
+const languageStyle = computed(() =>
+  frameStyle(motionFrame('scale-in', language.value.sinceAppearMs, props.reducedMotion ?? false)),
+)
+
+function cellStyle(cell: LayoutCell) {
+  if (!ready.value) return { gridArea: cell.role }
+  return {
+    gridArea: cell.role,
+    ...frameStyle(motionFrame(cell.motion, props.elapsedMs, props.reducedMotion ?? false)),
+  }
+}
 
 function cellClass(cell: LayoutCell) {
   return {
     'is-band': cell.role === 'headline',
     'is-dark-band': layout.value.darkBand?.includes(cell.role),
     'is-inline': layout.value.inline?.includes(cell.role),
-    [`m-${cell.motion}`]: ready.value,
   }
 }
 
@@ -115,7 +129,6 @@ async function fit() {
   await loadFonts()
   for (;;) {
     await nextTick()
-    await new Promise(requestAnimationFrame)
     if (generation !== fitGeneration) return
     const over = measureOverflow()
     if (!over.length) {
@@ -130,16 +143,13 @@ async function fit() {
     overflowDropped.value = [...overflowDropped.value, { id: victim.id, reason: 'overflow' }]
   }
   ready.value = true
-  rotationTimer ??= setInterval(() => {
-    languageIndex.value += 1
-  }, LANGUAGE_ROTATION_MS)
+  emit('ready')
 }
 
 function updateScale() {
   scale.value = designScale(window.innerWidth, window.innerHeight)
 }
 
-let rotationTimer: ReturnType<typeof setInterval> | undefined
 let resizeFrame = 0
 
 function onResize() {
@@ -157,7 +167,6 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  clearInterval(rotationTimer)
   cancelAnimationFrame(resizeFrame)
   window.removeEventListener('resize', onResize)
 })
@@ -186,7 +195,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
       :key="cell.id"
       class="cell"
       :class="cellClass(cell)"
-      :style="{ gridArea: cell.role }"
+      :style="cellStyle(cell)"
       :data-cell-id="cell.id"
       :data-role="cell.role"
       :data-priority="cell.priority"
@@ -196,7 +205,8 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :cell="cell"
         :level="screen.alert.level"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
-        :language-index="languageIndex"
+        :language-index="language.index"
+        :language-style="languageStyle"
       />
     </section>
   </main>
