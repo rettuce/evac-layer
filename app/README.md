@@ -38,11 +38,15 @@ NUXT_REPO_ROOT=/path/to/evac-layer NUXT_DATA_DIR=/path/to/evac-layer/data node a
 ### What stays development-only
 
 - `/api/layout?file=<absolute path>` (renders any JSON file inside the repository for the Verifier) returns 404 in a production build.
-- `/screen?src=` accepts only `/api/live-layout?…` in production, so a screen cannot be pointed at a document from elsewhere.
+- `/screen?src=` accepts only the layout store (`/api/live-layout?…`, `/api/admin/preview-layout?…`) in production, so a screen cannot be pointed at a document from elsewhere.
+
+### Approval gate
+
+`/api/live-layout` returns a layout only when the site has auto publish on and the bulletin is approved in `data/approvals.json`; otherwise 403 and the live screen stays ambient with `data-unapproved`. A live screen uses `?site=<site id>` or the `site` in `data/layouts/<code>/index.json`. `/admin` previews read `/api/admin/preview-layout`, which skips the gate but needs admin access.
 
 ### Access
 
-`/api/admin/*` decides what screens may show. Without `NUXT_ADMIN_TOKEN` it answers loopback clients only (403 otherwise). Behind a reverse proxy every request looks like loopback, so set a token there:
+`/api/admin/*` decides what screens may show. Without `NUXT_ADMIN_TOKEN` it answers loopback clients only, and only when Host is localhost/127.0.0.1/[::1], the request is not cross-site, and POST bodies are JSON (403 otherwise). Behind a reverse proxy every request looks like loopback, so set a token there:
 
 ```sh
 NUXT_ADMIN_TOKEN=<random secret> node app/.output/server/index.mjs

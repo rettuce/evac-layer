@@ -55,6 +55,17 @@ function submitToken() {
 const catalog = shallowRef<Catalog>()
 const loadError = ref<string>()
 const selected = ref<{ municipality: string; bulletin: string }>()
+const municipalityId = ref<string>()
+
+const visibleMunicipalities = computed(() =>
+  (catalog.value?.municipalities ?? []).filter((m) => m.id === municipalityId.value),
+)
+
+function selectMunicipality(id: string) {
+  municipalityId.value = id
+  const first = catalog.value?.municipalities.find((m) => m.id === id)?.entries.find((e) => e.screen)
+  selected.value = first ? { municipality: id, bulletin: first.bulletin_id } : undefined
+}
 const saving = ref<string>()
 
 async function load() {
@@ -62,8 +73,8 @@ async function load() {
     catalog.value = await $fetch<Catalog>('/api/admin/catalog', { headers: adminHeaders() })
     needsToken.value = false
     loadError.value = undefined
-    const first = catalog.value.municipalities.flatMap((m) => m.entries.filter((e) => e.screen).map((e) => ({ m: m.id, e })))[0]
-    if (!selected.value && first) selected.value = { municipality: first.m, bulletin: first.e.bulletin_id }
+    const firstMunicipality = catalog.value.municipalities[0]
+    if (!municipalityId.value && firstMunicipality) selectMunicipality(firstMunicipality.id)
   } catch (error) {
     const status = (error as { statusCode?: number }).statusCode
     needsToken.value = status === 401
@@ -78,7 +89,7 @@ const current = computed(() => {
 
 function previewSrc(shape: Shape) {
   if (!selected.value) return ''
-  const layout = `/api/live-layout?municipality=${selected.value.municipality}&bulletin=${selected.value.bulletin}&shape=${shape}`
+  const layout = `/api/admin/preview-layout?municipality=${selected.value.municipality}&bulletin=${selected.value.bulletin}&shape=${shape}`
   return `/screen?shape=${shape}&src=${encodeURIComponent(layout)}&clock=virtual&t=${PREVIEW_AT_MS}`
 }
 
@@ -128,7 +139,13 @@ onMounted(() => {
 
     <template v-if="catalog">
       <nav class="list" aria-label="電文">
-        <section v-for="m in catalog.municipalities" :key="m.id">
+        <label class="picker">
+          <span>自治体</span>
+          <select :value="municipalityId" data-control="municipality" @change="selectMunicipality(($event.target as HTMLSelectElement).value)">
+            <option v-for="m in catalog.municipalities" :key="m.id" :value="m.id">{{ m.name }}（{{ m.id }}・{{ m.entries.filter((e) => e.screen).length }} 画面）</option>
+          </select>
+        </label>
+        <section v-for="m in visibleMunicipalities" :key="m.id">
           <h2>{{ m.name }} <span class="muted">{{ m.id }}</span></h2>
           <p v-if="m.writer_note" class="note">{{ m.writer_note }}</p>
           <ol>
@@ -242,6 +259,9 @@ h2 { font-size: 15px; margin: 16px 0 8px; }
 .token button { padding: 6px 16px; border: 2px solid var(--accent); background: #fff; font: inherit; cursor: pointer; }
 .token button:hover { background: #f0f0f0; }
 .list { grid-area: list; overflow: auto; }
+.picker { display: grid; gap: 4px; padding-top: 16px; color: var(--muted); font-size: 12px; }
+.picker select { padding: 6px 8px; border: 1px solid var(--line); background: #fff; font: 15px 'Noto Sans JP', sans-serif; color: var(--ink); }
+.picker select:focus-visible { outline: 2px solid var(--accent); }
 .list ol { list-style: none; margin: 0; padding: 0; }
 .entry {
   width: 100%;

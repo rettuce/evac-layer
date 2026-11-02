@@ -7,16 +7,20 @@ const props = defineProps<{
   shape: Shape
   speed: number
   virtualElapsedMs?: number
+  site?: string
   siteName?: string
   reset?: boolean
   reducedMotion?: boolean
 }>()
 
 const POLL_MS = 1000
+const APPROVAL_RECHECK_POLLS = 5
 
 const status = shallowRef<ReplayStatus>()
 const layouts = shallowRef<Record<string, EvacScreen>>({})
 const missing = ref<string[]>([])
+const unapproved = ref<string[]>([])
+let pollCount = 0
 const loadError = ref<string>()
 const readyBulletins = ref(new Set<string>())
 const realElapsed = ref(0)
@@ -31,8 +35,12 @@ const rows = computed(() => status.value?.rows ?? [])
 const elapsed = computed(() => props.virtualElapsedMs ?? realElapsed.value)
 const frame = computed(() => liveFrame(rows.value, elapsed.value, props.speed, (id) => id in layouts.value))
 const currentRow = computed(() => (frame.value.index >= 0 ? rows.value[frame.value.index] : undefined))
-const missingCurrent = computed(() =>
+const unavailableCurrent = computed(() =>
   currentRow.value?.screen && !(currentRow.value.bulletin_id in layouts.value) ? currentRow.value.bulletin_id : undefined,
+)
+const missingCurrent = computed(() => (unavailableCurrent.value && missing.value.includes(unavailableCurrent.value) ? unavailableCurrent.value : undefined))
+const unapprovedCurrent = computed(() =>
+  unavailableCurrent.value && unapproved.value.includes(unavailableCurrent.value) ? unavailableCurrent.value : undefined,
 )
 const ready = computed(
   () => status.value !== undefined && Object.keys(layouts.value).every((id) => readyBulletins.value.has(id)),
@@ -58,21 +66,31 @@ function tick() {
 }
 
 async function loadLayouts() {
-  const wanted = rows.value.filter((row) => row.screen)
-  const loaded: Record<string, EvacScreen> = {}
+  const wanted = rows.value.filter((row) => row.screen && !(row.bulletin_id in layouts.value))
+  const loaded: Record<string, EvacScreen> = { ...layouts.value }
   const absent: string[] = []
+  const gated: string[] = []
   await Promise.all(
     wanted.map(async (row) => {
       const params = new URLSearchParams({ municipality: props.municipality, bulletin: row.bulletin_id, shape: props.shape })
+      if (props.site) params.set('site', props.site)
       try {
         loaded[row.bulletin_id] = await $fetch<EvacScreen>(`/api/live-layout?${params}`)
-      } catch {
-        absent.push(row.bulletin_id)
+      } catch (error) {
+        if ((error as { statusCode?: number }).statusCode === 403) gated.push(row.bulletin_id)
+        else absent.push(row.bulletin_id)
       }
     }),
   )
   layouts.value = loaded
   missing.value = absent.sort()
+  unapproved.value = gated.sort()
+}
+
+async function pollAndRecheck() {
+  await poll()
+  pollCount += 1
+  if (unapproved.value.length && pollCount % APPROVAL_RECHECK_POLLS === 0) await loadLayouts()
 }
 
 function markReady(bulletinId: string) {
@@ -89,7 +107,7 @@ onMounted(async () => {
   }
   if (isVirtual.value) return
   frameHandle = requestAnimationFrame(tick)
-  pollTimer = setInterval(() => poll().catch(() => undefined), POLL_MS)
+  pollTimer = setInterval(() => pollAndRecheck().catch(() => undefined), POLL_MS)
 })
 
 onBeforeUnmount(() => {
@@ -109,6 +127,8 @@ onBeforeUnmount(() => {
     :data-bulletin="currentRow?.bulletin_id"
     :data-showing="frame.showing"
     :data-missing-layout="missingCurrent"
+    :data-unapproved="unapprovedCurrent"
+    :data-unapproved-count="unapproved.length"
     :data-missing-layouts="missing.join(',') || undefined"
   >
     <AmbientLayer
