@@ -5,10 +5,253 @@
   "writer_note": "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名をそのまま使い、それ以外は【仮】/[draft] のプレースホルダ。 自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。",
   "entries": [
     {
+      "issued_at": "2026-10-16T09:08:00+09:00",
+      "bulletin_id": "VPWW55-202610160908-4a3873fee411",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T09:08:00+09:00",
+      "bulletin_id": "VPWW56-202610160908-398e78921661",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T09:39:00+09:00",
+      "bulletin_id": "VPWW55-202610160939-8fe650d8c8ad",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T09:39:00+09:00",
+      "bulletin_id": "VPWW56-202610160939-959011d06524",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T10:41:00+09:00",
+      "bulletin_id": "VPWW55-202610161041-7b0e6fad15ed",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T11:25:00+09:00",
+      "bulletin_id": "VPWW55-202610161125-2b6a20530469",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for heavy_rain but no heavy_rain screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-16T11:25:00+09:00",
+      "bulletin_id": "VPWW56-202610161125-4737f313e2ff",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T12:50:00+09:00",
+      "bulletin_id": "VPWW56-202610161250-e37f7b96a0b7",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T13:22:00+09:00",
+      "bulletin_id": "VPWW55-202610161322-3a58611e0e4f",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T14:27:00+09:00",
+      "bulletin_id": "VPWW55-202610161427-64493bbf95ce",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T14:27:00+09:00",
+      "bulletin_id": "VPWW56-202610161427-c84d18ce518e",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for landslide but no landslide screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-19T09:40:00+09:00",
+      "bulletin_id": "VPWW56-202610190940-026b578cb0cb",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-19T15:29:00+09:00",
+      "bulletin_id": "VPWW56-202610191529-7e8708b26c0f",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T05:13:00+09:00",
+      "bulletin_id": "VPWW56-202610210513-2312737c7326",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T06:12:00+09:00",
+      "bulletin_id": "VPWW56-202610210612-66d1dac02da1",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T06:43:00+09:00",
+      "bulletin_id": "VPWW55-202610210643-d613eae88871",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T06:43:00+09:00",
+      "bulletin_id": "VPWW56-202610210643-951336cb7035",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T07:01:00+09:00",
+      "bulletin_id": "VPWW55-202610210701-4818071f67c8",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T09:37:00+09:00",
+      "bulletin_id": "VPWW55-202610210937-6b1e6394a407",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T10:26:00+09:00",
+      "bulletin_id": "VPWW56-202610211026-2fde09104d3c",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T11:33:00+09:00",
+      "bulletin_id": "VPWW56-202610211133-c44bf8d8de06",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
       "issued_at": "2026-10-21T11:45:00+09:00",
       "bulletin_id": "VXKOii-202610211145-e9c5d2903007",
       "wmo_code": "VXKO55",
       "raw_title": "子吉川レベル２氾濫注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T13:17:00+09:00",
+      "bulletin_id": "VPWW56-202610211317-1c9bf80edbcd",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T13:53:00+09:00",
+      "bulletin_id": "VPWW55-202610211353-24a0a65c60be",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T14:34:00+09:00",
+      "bulletin_id": "VPWW55-202610211434-9c7202748c88",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T14:34:00+09:00",
+      "bulletin_id": "VPWW56-202610211434-c88e7f92a405",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T15:31:00+09:00",
+      "bulletin_id": "VPWW55-202610211531-212e6eb8e3cc",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T15:31:00+09:00",
+      "bulletin_id": "VPWW56-202610211531-e4387d37fde3",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
       "municipality_level": 2,
       "screen": false,
       "reason": "level 2 for 05210: below the evacuation threshold, no screen"
@@ -90,6 +333,15 @@
       "report": "data/reports/05210-VXKOii-202610212015-979f11623ff9/report.json"
     },
     {
+      "issued_at": "2026-10-21T20:43:00+09:00",
+      "bulletin_id": "VPWW55-202610212043-adc56baf8523",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
       "issued_at": "2026-10-21T21:15:00+09:00",
       "bulletin_id": "VXKOii-202610212115-34469436adbc",
       "wmo_code": "VXKO55",
@@ -109,6 +361,24 @@
       "report": "data/reports/05210-VXKOii-202610212115-34469436adbc/report.json"
     },
     {
+      "issued_at": "2026-10-21T23:35:00+09:00",
+      "bulletin_id": "VPWW55-202610212335-3bc631c8f464",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T23:35:00+09:00",
+      "bulletin_id": "VPWW56-202610212335-49286eb52cde",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
       "issued_at": "2026-10-22T02:20:00+09:00",
       "bulletin_id": "VXKOii-202610220220-daa0761e7dd8",
       "wmo_code": "VXKO55",
@@ -116,6 +386,33 @@
       "municipality_level": 2,
       "screen": false,
       "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T03:16:00+09:00",
+      "bulletin_id": "VPWW55-202610220316-dbc2ce416702",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T03:16:00+09:00",
+      "bulletin_id": "VPWW56-202610220316-f818cb7dd467",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for landslide but no landslide screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-22T04:39:00+09:00",
+      "bulletin_id": "VPWW56-202610220439-455b63b93ebc",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
     },
     {
       "issued_at": "2026-10-22T04:45:00+09:00",
@@ -144,6 +441,168 @@
         "data/layouts/05210/VXKOii-202610220620-74a7831c8a40/1x1.json"
       ],
       "report": "data/reports/05210-VXKOii-202610220620-74a7831c8a40/report.json"
+    },
+    {
+      "issued_at": "2026-10-22T09:46:00+09:00",
+      "bulletin_id": "VPWW55-202610220946-4597e571a0a0",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for heavy_rain but no heavy_rain screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-30T06:52:00+09:00",
+      "bulletin_id": "VPWW56-202610300652-651f1ae7099e",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-30T16:03:00+09:00",
+      "bulletin_id": "VPWW55-202610301603-305893f32850",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-30T16:03:00+09:00",
+      "bulletin_id": "VPWW56-202610301603-f07e42d584ca",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-30T18:00:00+09:00",
+      "bulletin_id": "VPWW56-202610301800-442017697c42",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-30T18:50:00+09:00",
+      "bulletin_id": "VPWW55-202610301850-74a9f159bb4d",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-30T21:01:00+09:00",
+      "bulletin_id": "VPWW56-202610302101-aae34cec0be9",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-30T22:00:00+09:00",
+      "bulletin_id": "VPWW56-202610302200-924aa62bec37",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-30T23:01:00+09:00",
+      "bulletin_id": "VPWW56-202610302301-1a574523de00",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T03:50:00+09:00",
+      "bulletin_id": "VPWW55-202610310350-e816c5b5b12c",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T08:17:00+09:00",
+      "bulletin_id": "VPWW56-202610310817-4927f533540f",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T16:06:00+09:00",
+      "bulletin_id": "VPWW55-202610311606-3de5d8d2d395",
+      "wmo_code": "VPWW55",
+      "raw_title": "秋田県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T16:06:00+09:00",
+      "bulletin_id": "VPWW56-202610311606-5fd94d96007b",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for landslide but no landslide screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-31T20:59:00+09:00",
+      "bulletin_id": "VPWW56-202610312059-743a1a864aeb",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-11-02T07:00:00+09:00",
+      "bulletin_id": "VPWW56-202611020700-a8e92a8f7328",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-11-02T07:51:00+09:00",
+      "bulletin_id": "VPWW56-202611020751-22892db9d6f3",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-11-02T10:04:00+09:00",
+      "bulletin_id": "VPWW56-202611021004-db57b14ad235",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-11-02T13:55:00+09:00",
+      "bulletin_id": "VPWW56-202611021355-988a359d6046",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
     }
   ]
 }

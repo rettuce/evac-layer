@@ -17,7 +17,8 @@
     "pipeline": "tsx src/loop/cli.ts",
     "shelters": "tsx src/reader/shelters-cli.ts",
     "replay": "tsx src/jma/replay.ts",
-    "replay-pipeline": "tsx src/loop/replay-cli.ts"
+    "replay-pipeline": "tsx src/loop/replay-cli.ts",
+    "fanout": "tsx src/loop/fanout.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

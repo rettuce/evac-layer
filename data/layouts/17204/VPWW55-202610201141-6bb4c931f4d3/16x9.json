@@ -1,0 +1,83 @@
+{
+  "version": "0.1",
+  "kind": "evac-screen",
+  "municipality": {
+    "id": "17204",
+    "name": "輪島市"
+  },
+  "alert": {
+    "source": "jma",
+    "bulletin_id": "VPWW55-202610201141-6bb4c931f4d3",
+    "hazard": "heavy_rain",
+    "level": 1,
+    "issued_at": "2026-10-20T11:41:00+09:00"
+  },
+  "shape": "16x9",
+  "template": "all-clear",
+  "cells": [
+    {
+      "id": "headline",
+      "role": "headline",
+      "priority": 1,
+      "text": {
+        "ja": "レベル２大雨注意報",
+        "ja_easy": "【かり】",
+        "en": "[draft]",
+        "zh_hans": "[草稿]",
+        "zh_hant": "[草稿]",
+        "ko": "[초안]"
+      },
+      "pictogram": "heavy_rain",
+      "motion": "scale-in"
+    },
+    {
+      "id": "action",
+      "role": "action",
+      "priority": 1,
+      "text": {
+        "ja": "【仮】警報解除",
+        "ja_easy": "【かり】 おわり",
+        "en": "[draft] Lifted",
+        "zh_hans": "[草稿]警报解除",
+        "zh_hant": "[草稿]警報解除",
+        "ko": "[초안] 경보 해제"
+      },
+      "pictogram": "go_higher",
+      "motion": "pulse"
+    },
+    {
+      "id": "languages",
+      "role": "languages",
+      "priority": 3,
+      "text": {
+        "ja": "【仮】警報解除",
+        "ja_easy": "【かり】 おわり",
+        "en": "[draft] Lifted",
+        "zh_hans": "[草稿]警报解除",
+        "zh_hant": "[草稿]警報解除",
+        "ko": "[초안] 경보 해제"
+      },
+      "motion": "static"
+    },
+    {
+      "id": "source",
+      "role": "source",
+      "priority": 9,
+      "text": {
+        "ja": "出典: 国土地理院 指定緊急避難場所データ / 気象庁 11:41"
+      },
+      "motion": "static"
+    }
+  ],
+  "palette": "cabinet-office-5",
+  "sources": [
+    {
+      "type": "gsi",
+      "file": "17204_2.csv"
+    },
+    {
+      "type": "jma",
+      "bulletin_id": "VPWW55-202610201141-6bb4c931f4d3"
+    }
+  ]
+}

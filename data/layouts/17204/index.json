@@ -1,0 +1,429 @@
+{
+  "municipality": "17204",
+  "name": "輪島市",
+  "site": "17204-demo",
+  "writer_note": "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名をそのまま使い、それ以外は【仮】/[draft] のプレースホルダ。 自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。",
+  "entries": [
+    {
+      "issued_at": "2026-10-14T03:56:00+09:00",
+      "bulletin_id": "VPWW55-202610140356-31c28cb57279",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-14T04:22:00+09:00",
+      "bulletin_id": "VPWW55-202610140422-aa5dac53def4",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-14T07:52:00+09:00",
+      "bulletin_id": "VPWW55-202610140752-1cf88082b2c9",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T17:04:00+09:00",
+      "bulletin_id": "VPWW55-202610161704-a19808ea4dbb",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-16T18:01:00+09:00",
+      "bulletin_id": "VPWW55-202610161801-5d90d3514b2c",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-19T19:10:00+09:00",
+      "bulletin_id": "VPWW55-202610191910-a4fa07015a4d",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-19T21:11:00+09:00",
+      "bulletin_id": "VPWW55-202610192111-1a1556259aa2",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T03:55:00+09:00",
+      "bulletin_id": "VPWW56-202610200355-de6353686378",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T04:30:00+09:00",
+      "bulletin_id": "VPWW56-202610200430-c7dc15169d01",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T05:00:00+09:00",
+      "bulletin_id": "VPWW55-202610200500-e9e69c6c3b73",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 3,
+      "screen": true,
+      "template": "evac-prepare",
+      "display_level": 3,
+      "outcome": "pass",
+      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/16x9.json",
+        "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/9x16.json",
+        "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/32x9.json",
+        "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/1x1.json"
+      ],
+      "report": "data/reports/17204-VPWW55-202610200500-e9e69c6c3b73/report.json"
+    },
+    {
+      "issued_at": "2026-10-20T07:11:00+09:00",
+      "bulletin_id": "VPWW55-202610200711-08afb5e91cb5",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 3,
+      "screen": true,
+      "template": "evac-prepare",
+      "display_level": 3,
+      "outcome": "pass",
+      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/16x9.json",
+        "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/9x16.json",
+        "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/32x9.json",
+        "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/1x1.json"
+      ],
+      "report": "data/reports/17204-VPWW55-202610200711-08afb5e91cb5/report.json"
+    },
+    {
+      "issued_at": "2026-10-20T09:11:00+09:00",
+      "bulletin_id": "VPWW55-202610200911-cd76a5f1e72d",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T10:21:00+09:00",
+      "bulletin_id": "VPWW55-202610201021-00fdaf1b6511",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T11:41:00+09:00",
+      "bulletin_id": "VPWW55-202610201141-6bb4c931f4d3",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": true,
+      "template": "all-clear",
+      "display_level": 1,
+      "outcome": "pass",
+      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/16x9.json",
+        "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/9x16.json",
+        "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/32x9.json",
+        "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/1x1.json"
+      ],
+      "report": "data/reports/17204-VPWW55-202610201141-6bb4c931f4d3/report.json"
+    },
+    {
+      "issued_at": "2026-10-20T13:32:00+09:00",
+      "bulletin_id": "VPWW56-202610201332-ec12776e1426",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for landslide but no landslide screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-20T23:27:00+09:00",
+      "bulletin_id": "VPWW55-202610202327-816832a01040",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T23:27:00+09:00",
+      "bulletin_id": "VPWW56-202610202327-211b1a15f7a3",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T05:01:00+09:00",
+      "bulletin_id": "VPWW55-202610210501-0da37969f65e",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T07:06:00+09:00",
+      "bulletin_id": "VPWW55-202610210706-70ca00ee2c40",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T11:01:00+09:00",
+      "bulletin_id": "VPWW55-202610211101-9ccedf9d520e",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T11:01:00+09:00",
+      "bulletin_id": "VPWW56-202610211101-2b3f79dac20b",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T12:15:00+09:00",
+      "bulletin_id": "VPWW55-202610211215-0f00f618dc6d",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 3,
+      "screen": true,
+      "template": "evac-prepare",
+      "display_level": 3,
+      "outcome": "pass",
+      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/16x9.json",
+        "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/9x16.json",
+        "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/32x9.json",
+        "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/1x1.json"
+      ],
+      "report": "data/reports/17204-VPWW55-202610211215-0f00f618dc6d/report.json"
+    },
+    {
+      "issued_at": "2026-10-21T13:04:00+09:00",
+      "bulletin_id": "VPWW56-202610211304-1ebf37f5ab8a",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": 3,
+      "screen": true,
+      "template": "evac-prepare",
+      "display_level": 3,
+      "outcome": "pass",
+      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/16x9.json",
+        "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/9x16.json",
+        "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/32x9.json",
+        "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/1x1.json"
+      ],
+      "report": "data/reports/17204-VPWW56-202610211304-1ebf37f5ab8a/report.json"
+    },
+    {
+      "issued_at": "2026-10-21T15:11:00+09:00",
+      "bulletin_id": "VPWW55-202610211511-302e497633a0",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T15:11:00+09:00",
+      "bulletin_id": "VPWW56-202610211511-e40dac69b3e0",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T17:46:00+09:00",
+      "bulletin_id": "VPWW55-202610211746-50bb5d83209a",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T19:42:00+09:00",
+      "bulletin_id": "VPWW55-202610211942-7720a18f5cfa",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": true,
+      "template": "all-clear",
+      "display_level": 1,
+      "outcome": "pass",
+      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/16x9.json",
+        "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/9x16.json",
+        "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/32x9.json",
+        "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/1x1.json"
+      ],
+      "report": "data/reports/17204-VPWW55-202610211942-7720a18f5cfa/report.json"
+    },
+    {
+      "issued_at": "2026-10-21T20:58:00+09:00",
+      "bulletin_id": "VPWW55-202610212058-d550a0d779fb",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T20:58:00+09:00",
+      "bulletin_id": "VPWW56-202610212058-9b69f3d5b018",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T00:00:00+09:00",
+      "bulletin_id": "VPWW55-202610220000-fd9c6ade817e",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T00:00:00+09:00",
+      "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": true,
+      "template": "all-clear",
+      "display_level": 1,
+      "outcome": "pass",
+      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/16x9.json",
+        "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/9x16.json",
+        "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/32x9.json",
+        "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/1x1.json"
+      ],
+      "report": "data/reports/17204-VPWW56-202610220000-d13b2ada2646/report.json"
+    },
+    {
+      "issued_at": "2026-10-24T15:59:00+09:00",
+      "bulletin_id": "VPWW55-202610241559-b39791a291f0",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-24T21:13:00+09:00",
+      "bulletin_id": "VPWW55-202610242113-088e9db480f9",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-24T23:41:00+09:00",
+      "bulletin_id": "VPWW56-202610242341-5968beb30bee",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-25T14:34:00+09:00",
+      "bulletin_id": "VPWW55-202610251434-8595b16dc85a",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for heavy_rain but no heavy_rain screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-25T15:40:00+09:00",
+      "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for landslide but no landslide screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-25T19:45:00+09:00",
+      "bulletin_id": "VPWW56-202610251945-8dd994ae404f",
+      "wmo_code": "VPWW56",
+      "raw_title": "石川県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-30T21:32:00+09:00",
+      "bulletin_id": "VPWW55-202610302132-dd1a3197f3cb",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T02:50:00+09:00",
+      "bulletin_id": "VPWW55-202610310250-8c2cbe18298d",
+      "wmo_code": "VPWW55",
+      "raw_title": "石川県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 17204: below the evacuation threshold, no screen"
+    }
+  ]
+}
