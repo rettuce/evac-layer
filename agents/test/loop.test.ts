@@ -24,7 +24,7 @@ test("a clean Writer output passes on the first attempt", async () => {
   const r = await runLoop({ ...base(), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: liveWriterReviser });
   assert.equal(r.outcome, "pass");
   assert.equal(r.attempts.length, 1);
-  assert.equal(r.screens.length, 4);
+  assert.equal(r.screens.length, 5);
 });
 
 test("repeated distance is sent back and fixed by the next revision", async () => {
