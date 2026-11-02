@@ -57,7 +57,7 @@ test("languages cell must carry ja_easy, en, zh_hans and ko at priority 3", () =
 });
 
 test("committed GSI shelter files validate", () => {
-  for (const id of ["17204", "22424", "14100"]) {
+  for (const id of ["17204", "22424", "14100", "05210"]) {
     const doc = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, `data/municipalities/${id}.shelters.json`), "utf8"));
     const r = validateDoc(doc);
     assert.equal(r.schema, "shelters");

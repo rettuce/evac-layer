@@ -1,0 +1,3812 @@
+{
+  "municipality_id": "05210",
+  "name": "由利本荘市",
+  "provenance": {
+    "publisher": "国土地理院",
+    "dataset": "指定緊急避難場所データ・指定避難所データ",
+    "license": "PDL1.0",
+    "attribution": "出典：国土地理院ウェブサイト（https://hinanmap.gsi.go.jp/）",
+    "edited": "EVAC LAYER が CSV の列を JSON に対応付けた（施設名・住所・座標・災害種別の値は変更していない）",
+    "notice_ja": "最新でない場合や未掲載の場合があるため、最新かつ詳細の状況などは必ず当該市町村にご確認ください。",
+    "notice_url": "https://www.gsi.go.jp/bousaichiri/hinanbasho-menseki.html",
+    "files": [
+      {
+        "file": "05210_2.csv",
+        "url": "https://hinanmap.gsi.go.jp/hinanjocp/defaultFtpData/csv/05210_2.csv",
+        "retrieved": "2026-11-02",
+        "sha256": "78ee34056cf37f98a29e0a386d9a6dea3463d665b07986050cdec6f254db562e",
+        "rows": 142
+      },
+      {
+        "file": "05210_1.csv",
+        "url": "https://hinanmap.gsi.go.jp/hinanjocp/defaultFtpData/csv/05210_1.csv",
+        "retrieved": "2026-11-02",
+        "sha256": "2ccf42ddc6c679d14ba842a6668616a10a14e522119224d38204253ab4ae2386",
+        "rows": 78
+      }
+    ]
+  },
+  "counts": {
+    "emergency_evacuation_site": 142,
+    "evacuation_shelter": 78
+  },
+  "shelters": [
+    {
+      "name": "芦川配水池敷地",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市芦川字芦川145-2",
+      "lat": 39.4657785,
+      "lng": 140.0396437,
+      "hazards_ok": [
+        "storm_surge",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000001201"
+      }
+    },
+    {
+      "name": "折林八幡神社境内",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市芦川字折林69",
+      "lat": 39.47879618,
+      "lng": 140.0428541,
+      "hazards_ok": [
+        "storm_surge",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000002201"
+      }
+    },
+    {
+      "name": "本荘ステーションホテル",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市花畑町1-80",
+      "lat": 39.38633978,
+      "lng": 140.0563304,
+      "hazards_ok": [
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000003201"
+      }
+    },
+    {
+      "name": "子吉地区コミュニティ防災センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市葛法字轌田1-5",
+      "lat": 39.34050255,
+      "lng": 140.049829,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000004111"
+      }
+    },
+    {
+      "name": "子吉地区コミュニティ防災センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市葛法字轌田1-5",
+      "lat": 39.34050255,
+      "lng": 140.049829,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000004201"
+      }
+    },
+    {
+      "name": "鶴舞会館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市瓦谷地1",
+      "lat": 39.38600596,
+      "lng": 140.0457488,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000005111"
+      }
+    },
+    {
+      "name": "鶴舞会館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市瓦谷地1",
+      "lat": 39.38600596,
+      "lng": 140.0457488,
+      "hazards_ok": [
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000005201"
+      }
+    },
+    {
+      "name": "ウッディホールこだま",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市館字中島372",
+      "lat": 39.33910067,
+      "lng": 140.1239764,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000006111"
+      }
+    },
+    {
+      "name": "ウッディホールこだま",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市館字中島372",
+      "lat": 39.33910067,
+      "lng": 140.1239764,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000006201"
+      }
+    },
+    {
+      "name": "旧石沢小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市館字六角167",
+      "lat": 39.339838519521,
+      "lng": 140.12548918502,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000007111"
+      }
+    },
+    {
+      "name": "旧石沢小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市館字六角167",
+      "lat": 39.340052,
+      "lng": 140.125487,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000007201"
+      }
+    },
+    {
+      "name": "石沢体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市館字六角168",
+      "lat": 39.34004993,
+      "lng": 140.1242633,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000008111"
+      }
+    },
+    {
+      "name": "石沢体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市館字六角168",
+      "lat": 39.34004993,
+      "lng": 140.1242633,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000008201"
+      }
+    },
+    {
+      "name": "石沢運動広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市館字六角168",
+      "lat": 39.339575,
+      "lng": 140.124771,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000008202"
+      }
+    },
+    {
+      "name": "亀田出張所",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩城亀田亀田町字田町41",
+      "lat": 39.50088551,
+      "lng": 140.0838312,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000011111"
+      }
+    },
+    {
+      "name": "亀田出張所",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城亀田亀田町字田町41",
+      "lat": 39.50088551,
+      "lng": 140.0838312,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000011201"
+      }
+    },
+    {
+      "name": "岩城多目的グラウンド（天鷺グラウンド）",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城亀田町字亀田町45",
+      "lat": 39.49986562,
+      "lng": 140.085656,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000012201"
+      }
+    },
+    {
+      "name": "上新谷自治会グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城勝手字前砂沢64",
+      "lat": 39.57796348,
+      "lng": 140.061917,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000013201"
+      }
+    },
+    {
+      "name": "岩城小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩城赤平字新鶴巻4",
+      "lat": 39.5022487,
+      "lng": 140.0721227,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000014111"
+      }
+    },
+    {
+      "name": "岩城小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城赤平字新鶴巻4",
+      "lat": 39.5022487,
+      "lng": 140.0721227,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000014201"
+      }
+    },
+    {
+      "name": "国立病院機構あきた病院",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城内道川字井戸ノ沢84-40",
+      "lat": 39.56073252,
+      "lng": 140.060061,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000015201"
+      }
+    },
+    {
+      "name": "旧道川中学校グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城内道川字烏森150-70",
+      "lat": 39.5562931,
+      "lng": 140.0586809,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000016201"
+      }
+    },
+    {
+      "name": "旧道川小学校グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城内道川字烏森151",
+      "lat": 39.55537155,
+      "lng": 140.0578844,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000017201"
+      }
+    },
+    {
+      "name": "岩城総合体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩城内道川字新鶴潟50",
+      "lat": 39.5434729,
+      "lng": 140.0574792,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000018111"
+      }
+    },
+    {
+      "name": "岩城コミュニティセンター「岩城会館」",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩城内道川字新鶴潟50",
+      "lat": 39.54401895,
+      "lng": 140.055945,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000018112"
+      }
+    },
+    {
+      "name": "岩城総合体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城内道川字新鶴潟50",
+      "lat": 39.5434729,
+      "lng": 140.0574792,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000018201"
+      }
+    },
+    {
+      "name": "岩城コミュニティセンター「岩城会館」",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城内道川字新鶴潟50",
+      "lat": 39.54401895,
+      "lng": 140.055945,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000018202"
+      }
+    },
+    {
+      "name": "岩城総合支所駐車場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城内道川字新鶴潟50",
+      "lat": 39.543462,
+      "lng": 140.055999,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000018203"
+      }
+    },
+    {
+      "name": "二古自治会グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城二古字庵ノ前1-4",
+      "lat": 39.5315414,
+      "lng": 140.0569079,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000019201"
+      }
+    },
+    {
+      "name": "岩城中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩城二古字向村20-1",
+      "lat": 39.52768268,
+      "lng": 140.055112,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000020111"
+      }
+    },
+    {
+      "name": "岩城中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城二古字向村20-1",
+      "lat": 39.52768268,
+      "lng": 140.055112,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000020201"
+      }
+    },
+    {
+      "name": "岩谷小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩谷町字十二柳2",
+      "lat": 39.438929,
+      "lng": 140.097153,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000021111"
+      }
+    },
+    {
+      "name": "岩谷小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩谷町字十二柳2",
+      "lat": 39.438929,
+      "lng": 140.097153,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000021201"
+      }
+    },
+    {
+      "name": "由利本荘市総合体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩谷町字西越62",
+      "lat": 39.44203348,
+      "lng": 140.0880145,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000022111"
+      }
+    },
+    {
+      "name": "由利本荘市総合体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩谷町字西越62",
+      "lat": 39.44203348,
+      "lng": 140.0880145,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000022201"
+      }
+    },
+    {
+      "name": "大内農村環境改善センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩谷町字日渡100",
+      "lat": 39.44358896,
+      "lng": 140.0964762,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000023111"
+      }
+    },
+    {
+      "name": "大内農村環境改善センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩谷町字日渡100",
+      "lat": 39.44358896,
+      "lng": 140.0964762,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000023201"
+      }
+    },
+    {
+      "name": "岩谷体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩谷町字日渡78",
+      "lat": 39.44342325,
+      "lng": 140.0968109,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000024111"
+      }
+    },
+    {
+      "name": "岩谷体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩谷町字日渡78",
+      "lat": 39.44342325,
+      "lng": 140.0968109,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000024201"
+      }
+    },
+    {
+      "name": "本荘グランドホテル",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩渕下254",
+      "lat": 39.39212458,
+      "lng": 140.0491803,
+      "hazards_ok": [
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000025201"
+      }
+    },
+    {
+      "name": "本荘合同庁舎",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市給人町17",
+      "lat": 39.38861168,
+      "lng": 140.043524,
+      "hazards_ok": [
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000026201"
+      }
+    },
+    {
+      "name": "由利緑地公園グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市黒沢字山本68",
+      "lat": 39.31789311,
+      "lng": 140.0952979,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000027201"
+      }
+    },
+    {
+      "name": "砂子下コミュニティセンター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市砂子下15-1",
+      "lat": 39.38673531,
+      "lng": 140.0392146,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000028111"
+      }
+    },
+    {
+      "name": "砂子下コミュニティセンター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市砂子下15-1",
+      "lat": 39.38673531,
+      "lng": 140.0392146,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000028201"
+      }
+    },
+    {
+      "name": "ホテルアイリス",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市肴町5",
+      "lat": 39.39071261,
+      "lng": 140.042081,
+      "hazards_ok": [
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000029201"
+      }
+    },
+    {
+      "name": "鶴舞小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市桜小路1",
+      "lat": 39.384052,
+      "lng": 140.050339,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000030112"
+      }
+    },
+    {
+      "name": "鶴舞小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市桜小路1",
+      "lat": 39.384052,
+      "lng": 140.050339,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000030202"
+      }
+    },
+    {
+      "name": "小友公民館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市三条字三条谷地72-1",
+      "lat": 39.36004553,
+      "lng": 140.0776701,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000031111"
+      }
+    },
+    {
+      "name": "小友公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市三条字三条谷地72-1",
+      "lat": 39.36004553,
+      "lng": 140.0776701,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000031201"
+      }
+    },
+    {
+      "name": "山内公民館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市山内下長田39",
+      "lat": 39.32552875,
+      "lng": 140.1769571,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000032111"
+      }
+    },
+    {
+      "name": "山内公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市山内下長田39",
+      "lat": 39.32552875,
+      "lng": 140.1769571,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000032201"
+      }
+    },
+    {
+      "name": "上川大内出張所",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市小栗山字小栗山113",
+      "lat": 39.41496502,
+      "lng": 140.2255111,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000033111"
+      }
+    },
+    {
+      "name": "上川大内出張所",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市小栗山字小栗山113",
+      "lat": 39.41496502,
+      "lng": 140.2255111,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000033201"
+      }
+    },
+    {
+      "name": "旧上川大内小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市小栗山字小栗山76-2",
+      "lat": 39.41462148,
+      "lng": 140.2224054,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000034201"
+      }
+    },
+    {
+      "name": "本荘南部コミュニティ防災センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市小人町42-2",
+      "lat": 39.3791097,
+      "lng": 140.0508282,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000035111"
+      }
+    },
+    {
+      "name": "本荘南部コミュニティ防災センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市小人町42-2",
+      "lat": 39.3791097,
+      "lng": 140.0508282,
+      "hazards_ok": [
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000035201"
+      }
+    },
+    {
+      "name": "松ヶ崎八幡神社境内",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市松ケ崎字宮ノ腰27",
+      "lat": 39.50019411,
+      "lng": 140.0498883,
+      "hazards_ok": [
+        "storm_surge",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000036201"
+      }
+    },
+    {
+      "name": "光禅寺境内",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市松ケ崎字光禅寺前105",
+      "lat": 39.49510402,
+      "lng": 140.0541851,
+      "hazards_ok": [
+        "storm_surge",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000037201"
+      }
+    },
+    {
+      "name": "松ヶ崎体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市松ケ崎字荒町北側181-1",
+      "lat": 39.49722283,
+      "lng": 140.0519231,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000038111"
+      }
+    },
+    {
+      "name": "松ヶ崎体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市松ケ崎字荒町北側181-1",
+      "lat": 39.49722283,
+      "lng": 140.0519231,
+      "hazards_ok": [
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000038201"
+      }
+    },
+    {
+      "name": "大内小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市松本字小及位野78",
+      "lat": 39.44995409,
+      "lng": 140.1743161,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000039111"
+      }
+    },
+    {
+      "name": "大内小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市松本字小及位野78",
+      "lat": 39.44995409,
+      "lng": 140.1743161,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000039201"
+      }
+    },
+    {
+      "name": "下川大内出張所",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市松本字上川原14-4",
+      "lat": 39.453177359314,
+      "lng": 140.17009196614,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000040111"
+      }
+    },
+    {
+      "name": "下川大内出張所",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市松本字上川原14-4",
+      "lat": 39.452987,
+      "lng": 140.170638,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000040201"
+      }
+    },
+    {
+      "name": "市民交流学習センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市上大野16",
+      "lat": 39.37559135,
+      "lng": 140.0632006,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000041111"
+      }
+    },
+    {
+      "name": "市民交流学習センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市上大野16",
+      "lat": 39.37559135,
+      "lng": 140.0632006,
+      "hazards_ok": [
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000041201"
+      }
+    },
+    {
+      "name": "旧下川大内小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市新沢字猫屋布45",
+      "lat": 39.456939,
+      "lng": 140.155653,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000042201"
+      }
+    },
+    {
+      "name": "神沢配水池敷地",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市神沢字赤砂子25-2",
+      "lat": 39.49192454,
+      "lng": 140.0520845,
+      "hazards_ok": [
+        "storm_surge",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000043201"
+      }
+    },
+    {
+      "name": "松ヶ崎運動広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市神沢字大森山地内",
+      "lat": 39.48335079,
+      "lng": 140.0433516,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000044201"
+      }
+    },
+    {
+      "name": "松ヶ崎公民館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市神沢字浜辺111",
+      "lat": 39.49059468,
+      "lng": 140.0438778,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000045111"
+      }
+    },
+    {
+      "name": "松ヶ崎公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市神沢字浜辺111",
+      "lat": 39.49059468,
+      "lng": 140.0438778,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000045201"
+      }
+    },
+    {
+      "name": "神沢緑地広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市神沢字冷水237",
+      "lat": 39.49298462,
+      "lng": 140.0459372,
+      "hazards_ok": [
+        "storm_surge",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000046201"
+      }
+    },
+    {
+      "name": "親川御嶽神社境内",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市親川字親川58",
+      "lat": 39.45938252,
+      "lng": 140.0382721,
+      "hazards_ok": [
+        "storm_surge",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000047201"
+      }
+    },
+    {
+      "name": "深沢運動広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市親川字濁川61-1",
+      "lat": 39.43825984,
+      "lng": 140.0321135,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000048201"
+      }
+    },
+    {
+      "name": "本荘由利総合運動公園",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市水林379",
+      "lat": 39.37843215,
+      "lng": 140.0308746,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000050201"
+      }
+    },
+    {
+      "name": "秋田県立ゆり支援学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市水林456-3",
+      "lat": 39.379115217337,
+      "lng": 140.02567881646,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000051111"
+      }
+    },
+    {
+      "name": "秋田県立ゆり支援学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市水林456-3",
+      "lat": 39.379052558242,
+      "lng": 140.02576668109,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000051121"
+      }
+    },
+    {
+      "name": "秋田県立ゆり支援学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市水林456-3",
+      "lat": 39.3790388790928,
+      "lng": 140.026282755271,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000051201"
+      }
+    },
+    {
+      "name": "本荘南中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市水林466",
+      "lat": 39.38395388,
+      "lng": 140.0378382,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000052111"
+      }
+    },
+    {
+      "name": "本荘南中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市水林466",
+      "lat": 39.38395388,
+      "lng": 140.0378382,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000052201"
+      }
+    },
+    {
+      "name": "旧西沢小グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西沢字舞台5-7",
+      "lat": 39.28280257,
+      "lng": 140.0699265,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000053201"
+      }
+    },
+    {
+      "name": "津波避難タワー",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町海士剥字海士剥下52-21",
+      "lat": 39.36730842,
+      "lng": 140.0156282,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000054201"
+      }
+    },
+    {
+      "name": "特別養護老人ホーム「ひまわり」駐車場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町海士剥字御月森1",
+      "lat": 39.36888561,
+      "lng": 140.0201869,
+      "hazards_ok": [
+        "storm_surge",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000055201"
+      }
+    },
+    {
+      "name": "御月森グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町海士剥字御月森1-530",
+      "lat": 39.3716616,
+      "lng": 140.0163711,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000056201"
+      }
+    },
+    {
+      "name": "坊主森",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町出戸字浜山1",
+      "lat": 39.35204539,
+      "lng": 140.004425,
+      "hazards_ok": [
+        "storm_surge",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000057201"
+      }
+    },
+    {
+      "name": "中高屋公民館広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町出戸字浜山1-47",
+      "lat": 39.36315519,
+      "lng": 140.0074855,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000058201"
+      }
+    },
+    {
+      "name": "西目中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市西目町出戸字浜山6-107",
+      "lat": 39.341757,
+      "lng": 140.004418,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000059111"
+      }
+    },
+    {
+      "name": "西目中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町出戸字浜山6-107",
+      "lat": 39.341757,
+      "lng": 140.004418,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000059201"
+      }
+    },
+    {
+      "name": "出戸交流センター敷地内",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町出戸字浜山6-108",
+      "lat": 39.33842138,
+      "lng": 139.996835,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000060201"
+      }
+    },
+    {
+      "name": "西目小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市西目町沼田字新屋下37-1",
+      "lat": 39.341323,
+      "lng": 140.011743,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000061111"
+      }
+    },
+    {
+      "name": "西目小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町沼田字新屋下37-1",
+      "lat": 39.341323,
+      "lng": 140.011743,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000061201"
+      }
+    },
+    {
+      "name": "西目高等学校グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町沼田字新道下2-142",
+      "lat": 39.35214841,
+      "lng": 140.013138,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000062201"
+      }
+    },
+    {
+      "name": "西目公民館「シーガル」",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市西目町沼田字新道下2-533",
+      "lat": 39.34790398,
+      "lng": 140.0151989,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000063111"
+      }
+    },
+    {
+      "name": "西目公民館「シーガル」",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町沼田字新道下2-533",
+      "lat": 39.34790398,
+      "lng": 140.0151989,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000063201"
+      }
+    },
+    {
+      "name": "Ｂ＆Ｇ西目海洋センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市西目町沼田字新道下2-682",
+      "lat": 39.347439360258,
+      "lng": 140.01664195057,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000064111"
+      }
+    },
+    {
+      "name": "Ｂ＆Ｇ西目海洋センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市西目町沼田字新道下2-682",
+      "lat": 39.34745181,
+      "lng": 140.0167117,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000064201"
+      }
+    },
+    {
+      "name": "新山小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市石脇字山ノ神11",
+      "lat": 39.40285074,
+      "lng": 140.0390775,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000065111"
+      }
+    },
+    {
+      "name": "新山小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市石脇字山ノ神11",
+      "lat": 39.40285074,
+      "lng": 140.0390775,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000065201"
+      }
+    },
+    {
+      "name": "本荘北中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市石脇字山ノ神11-304",
+      "lat": 39.40570547,
+      "lng": 140.0401329,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000066111"
+      }
+    },
+    {
+      "name": "本荘北中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市石脇字山ノ神11-304",
+      "lat": 39.40570547,
+      "lng": 140.0401329,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000066201"
+      }
+    },
+    {
+      "name": "由利工業高校グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市石脇字田尻30",
+      "lat": 39.40609535,
+      "lng": 140.0271365,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000067201"
+      }
+    },
+    {
+      "name": "由利本荘市職業訓練センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市石脇字田尻30-22",
+      "lat": 39.40368867,
+      "lng": 140.0256856,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000068111"
+      }
+    },
+    {
+      "name": "由利本荘市職業訓練センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市石脇字田尻30-22",
+      "lat": 39.40368867,
+      "lng": 140.0256856,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000068201"
+      }
+    },
+    {
+      "name": "由利本荘総合防災公園",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市石脇字田尻野18",
+      "lat": 39.39833708,
+      "lng": 140.0321505,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000069111"
+      }
+    },
+    {
+      "name": "由利本荘総合防災公園",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市石脇字田尻野18",
+      "lat": 39.39833708,
+      "lng": 140.0321505,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000069201"
+      }
+    },
+    {
+      "name": "田尻野消防センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市石脇字田尻野23-8",
+      "lat": 39.3948051,
+      "lng": 140.0297073,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000070201"
+      }
+    },
+    {
+      "name": "石脇体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市石脇字弁慶川2",
+      "lat": 39.39855771,
+      "lng": 140.0476301,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000071111"
+      }
+    },
+    {
+      "name": "石脇体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市石脇字弁慶川2",
+      "lat": 39.39855771,
+      "lng": 140.0476301,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000071201"
+      }
+    },
+    {
+      "name": "石脇公園グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市石脇字弁慶川57",
+      "lat": 39.39784308,
+      "lng": 140.0479455,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000072201"
+      }
+    },
+    {
+      "name": "鶴舞球場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市切通15-4",
+      "lat": 39.38384166,
+      "lng": 140.0454423,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000073201"
+      }
+    },
+    {
+      "name": "南内越運動広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市川口字愛宕山150",
+      "lat": 39.39896476,
+      "lng": 140.0592895,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000074201"
+      }
+    },
+    {
+      "name": "南内越公民館・体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市川口字愛宕町192",
+      "lat": 39.39910451,
+      "lng": 140.0583364,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000075111"
+      }
+    },
+    {
+      "name": "南内越公民館・体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市川口字愛宕町192",
+      "lat": 39.399542,
+      "lng": 140.058724,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000075201"
+      }
+    },
+    {
+      "name": "由利高等学校グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市川口字太鞁森7",
+      "lat": 39.40050705,
+      "lng": 140.0566774,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000076201"
+      }
+    },
+    {
+      "name": "西滝沢水辺プラザ",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市川西字高野242-1",
+      "lat": 39.28439727,
+      "lng": 140.1131844,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000077201"
+      }
+    },
+    {
+      "name": "由利小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市前郷字金神110",
+      "lat": 39.314117,
+      "lng": 140.113933,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000078111"
+      }
+    },
+    {
+      "name": "由利小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市前郷字金神110",
+      "lat": 39.314117,
+      "lng": 140.113933,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000078201"
+      }
+    },
+    {
+      "name": "由利体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市前郷字御伊勢下1",
+      "lat": 39.315723,
+      "lng": 140.110529,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000079111"
+      }
+    },
+    {
+      "name": "由利体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市前郷字御伊勢下1",
+      "lat": 39.315723,
+      "lng": 140.110529,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000079201"
+      }
+    },
+    {
+      "name": "由利コミュニティセンター「善隣館」",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市前郷字御伊勢下24-1",
+      "lat": 39.31646649,
+      "lng": 140.1107304,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000080111"
+      }
+    },
+    {
+      "name": "由利コミュニティセンター「善隣館」",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市前郷字御伊勢下24-1",
+      "lat": 39.31646649,
+      "lng": 140.1107304,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000080201"
+      }
+    },
+    {
+      "name": "Ｂ＆Ｇ由利海洋センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市前郷字御伊勢下39-2",
+      "lat": 39.317523529587,
+      "lng": 140.11118526684,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000081111"
+      }
+    },
+    {
+      "name": "Ｂ＆Ｇ由利海洋センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市前郷字御伊勢下39-2",
+      "lat": 39.317582,
+      "lng": 140.111157,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000081201"
+      }
+    },
+    {
+      "name": "由利中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市前郷字根堀台39",
+      "lat": 39.31950741,
+      "lng": 140.1113835,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000082111"
+      }
+    },
+    {
+      "name": "由利中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市前郷字根堀台39",
+      "lat": 39.31950741,
+      "lng": 140.1113835,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000082201"
+      }
+    },
+    {
+      "name": "旧前郷小学校グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市前郷字滝沢舘76-4",
+      "lat": 39.3093096,
+      "lng": 140.1098034,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000083201"
+      }
+    },
+    {
+      "name": "大内中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市中館字堤台6",
+      "lat": 39.4365504,
+      "lng": 140.0838839,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000084111"
+      }
+    },
+    {
+      "name": "大内中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市中館字堤台6",
+      "lat": 39.4365504,
+      "lng": 140.0838839,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000084201"
+      }
+    },
+    {
+      "name": "鳥海山木のおもちゃ館駐車場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市町村字鳴瀬台65-1",
+      "lat": 39.333983021064,
+      "lng": 140.06669943662,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000086201"
+      }
+    },
+    {
+      "name": "直根学習センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市鳥海町下直根字大谷地37",
+      "lat": 39.16551508,
+      "lng": 140.1629238,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000088111"
+      }
+    },
+    {
+      "name": "直根学習センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町下直根字大谷地37",
+      "lat": 39.16551508,
+      "lng": 140.1629238,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000088201"
+      }
+    },
+    {
+      "name": "小川農村環境改善センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市鳥海町小川字倉隅16-1",
+      "lat": 39.156498,
+      "lng": 140.2411817,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000091111"
+      }
+    },
+    {
+      "name": "小川農村環境改善センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町小川字倉隅16-1",
+      "lat": 39.156498,
+      "lng": 140.2411817,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000091201"
+      }
+    },
+    {
+      "name": "笹子公民館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市鳥海町上笹子字下野77-2",
+      "lat": 39.10666372,
+      "lng": 140.2925976,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000092111"
+      }
+    },
+    {
+      "name": "笹子公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町上笹子字下野77-2",
+      "lat": 39.10666372,
+      "lng": 140.2925976,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000092201"
+      }
+    },
+    {
+      "name": "旧笹子小学校・旧笹子学習センターグラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町上笹子字堺台65",
+      "lat": 39.110502,
+      "lng": 140.289,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000093202"
+      }
+    },
+    {
+      "name": "鳥海中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市鳥海町上川内字西野108",
+      "lat": 39.18118469,
+      "lng": 140.194446,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000094111"
+      }
+    },
+    {
+      "name": "鳥海中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町上川内字西野108",
+      "lat": 39.18118469,
+      "lng": 140.194446,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000094201"
+      }
+    },
+    {
+      "name": "鳥海小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市鳥海町上川内字西野14-1",
+      "lat": 39.18189327,
+      "lng": 140.1944624,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000095111"
+      }
+    },
+    {
+      "name": "鳥海小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町上川内字西野14-1",
+      "lat": 39.18189327,
+      "lng": 140.1944624,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000095201"
+      }
+    },
+    {
+      "name": "直根公民館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市鳥海町中直根字中山5-2",
+      "lat": 39.14979316,
+      "lng": 140.1722838,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000096111"
+      }
+    },
+    {
+      "name": "直根公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町中直根字中山5-2",
+      "lat": 39.14979316,
+      "lng": 140.1722838,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000096201"
+      }
+    },
+    {
+      "name": "紫水館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市鳥海町伏見字久保193",
+      "lat": 39.19112214,
+      "lng": 140.1912009,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000097111"
+      }
+    },
+    {
+      "name": "紫水館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町伏見字久保193",
+      "lat": 39.19112214,
+      "lng": 140.1912009,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000097201"
+      }
+    },
+    {
+      "name": "健康広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町伏見字折切38-1",
+      "lat": 39.18590427,
+      "lng": 140.1863823,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000098201"
+      }
+    },
+    {
+      "name": "鳥海トレーニングセンター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市鳥海町伏見字折切38-3",
+      "lat": 39.186471,
+      "lng": 140.187109,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000099111"
+      }
+    },
+    {
+      "name": "鳥海トレーニングセンター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市鳥海町伏見字折切38-3",
+      "lat": 39.186471,
+      "lng": 140.187109,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000099201"
+      }
+    },
+    {
+      "name": "本荘高等学校グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市陳場岱6",
+      "lat": 39.37578,
+      "lng": 140.0415,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000100201"
+      }
+    },
+    {
+      "name": "秋田県立大学本荘キャンパス",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市土谷字海老ノ口84-4",
+      "lat": 39.393318,
+      "lng": 140.073067,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000101201"
+      }
+    },
+    {
+      "name": "文化交流館「カダーレ」",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東町15",
+      "lat": 39.386617206136,
+      "lng": 140.05307721583,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000102111"
+      }
+    },
+    {
+      "name": "文化交流館「カダーレ」",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東町15",
+      "lat": 39.386617206136,
+      "lng": 140.05307721583,
+      "hazards_ok": [
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000102201"
+      }
+    },
+    {
+      "name": "玉米会館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利館合字向田79-4",
+      "lat": 39.28697807,
+      "lng": 140.2844889,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000103111"
+      }
+    },
+    {
+      "name": "玉米会館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利館合字向田79-4",
+      "lat": 39.28697807,
+      "lng": 140.2844889,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000103201"
+      }
+    },
+    {
+      "name": "八塩館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利黒渕字野中83-5",
+      "lat": 39.25253775,
+      "lng": 140.2624286,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000105111"
+      }
+    },
+    {
+      "name": "八塩館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利黒渕字野中83-5",
+      "lat": 39.25253775,
+      "lng": 140.2624286,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000105201"
+      }
+    },
+    {
+      "name": "高瀬館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利宿字上ノ台363-1",
+      "lat": 39.31264971,
+      "lng": 140.2303207,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000106111"
+      }
+    },
+    {
+      "name": "高瀬館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利宿字上ノ台363-1",
+      "lat": 39.31264971,
+      "lng": 140.2303207,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000106201"
+      }
+    },
+    {
+      "name": "旧大琴生涯学習センターグラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利宿字上ノ台73",
+      "lat": 39.311374015417,
+      "lng": 140.2296580934,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000107201"
+      }
+    },
+    {
+      "name": "大蔵館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利蔵字蔵113-1",
+      "lat": 39.31492385,
+      "lng": 140.2659267,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000108111"
+      }
+    },
+    {
+      "name": "大蔵館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利蔵字蔵113-1",
+      "lat": 39.31492385,
+      "lng": 140.2659267,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000108201"
+      }
+    },
+    {
+      "name": "住吉館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利田代字住吉48-1",
+      "lat": 39.26610065,
+      "lng": 140.257005,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000109111"
+      }
+    },
+    {
+      "name": "住吉館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利田代字住吉48-1",
+      "lat": 39.26610065,
+      "lng": 140.257005,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000109201"
+      }
+    },
+    {
+      "name": "旧住吉小学校跡広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利田代字住吉48-1",
+      "lat": 39.2663263,
+      "lng": 140.2567584,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000109202"
+      }
+    },
+    {
+      "name": "袖山館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利田代字滝ノ下5-1",
+      "lat": 39.28044123,
+      "lng": 140.2372923,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000110111"
+      }
+    },
+    {
+      "name": "袖山館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利田代字滝ノ下5-1",
+      "lat": 39.28044123,
+      "lng": 140.2372923,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000110201"
+      }
+    },
+    {
+      "name": "東由利小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利法内字宮ノ前243",
+      "lat": 39.313469,
+      "lng": 140.274661,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000111111"
+      }
+    },
+    {
+      "name": "東由利小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利法内字宮ノ前243",
+      "lat": 39.313469,
+      "lng": 140.274661,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000111201"
+      }
+    },
+    {
+      "name": "東由利克雪センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利法内字上苗代沢36",
+      "lat": 39.33225852,
+      "lng": 140.2708056,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000112111"
+      }
+    },
+    {
+      "name": "東由利克雪センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利法内字上苗代沢36",
+      "lat": 39.33225852,
+      "lng": 140.2708056,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000112201"
+      }
+    },
+    {
+      "name": "老方館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利老方字五升畑13",
+      "lat": 39.306058685635,
+      "lng": 140.28569192838,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000113111"
+      }
+    },
+    {
+      "name": "老方館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利老方字五升畑13",
+      "lat": 39.306058685635,
+      "lng": 140.28569192839,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000113201"
+      }
+    },
+    {
+      "name": "老方館グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利老方字五升畑13",
+      "lat": 39.30590253,
+      "lng": 140.2859092,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000113202"
+      }
+    },
+    {
+      "name": "東由利運動場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利老方字台山23",
+      "lat": 39.29867558,
+      "lng": 140.2766848,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000114201"
+      }
+    },
+    {
+      "name": "総合開発センター「有鄰館」",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利老方字台山36",
+      "lat": 39.29902447,
+      "lng": 140.2797258,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000115111"
+      }
+    },
+    {
+      "name": "総合開発センター「有鄰館」",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利老方字台山36",
+      "lat": 39.29902447,
+      "lng": 140.2797258,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000115201"
+      }
+    },
+    {
+      "name": "東由利体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利老方字台山40",
+      "lat": 39.298223,
+      "lng": 140.280226,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000116111"
+      }
+    },
+    {
+      "name": "東由利体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利老方字台山40",
+      "lat": 39.298223,
+      "lng": 140.280226,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000116201"
+      }
+    },
+    {
+      "name": "東由利中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市東由利老方字台山85",
+      "lat": 39.296485,
+      "lng": 140.279849,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000117111"
+      }
+    },
+    {
+      "name": "東由利中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利老方字台山85",
+      "lat": 39.296485,
+      "lng": 140.279849,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000117201"
+      }
+    },
+    {
+      "name": "「黄桜温泉」湯楽里駐車場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市東由利老方字畑田28",
+      "lat": 39.30124833,
+      "lng": 140.2845549,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000118201"
+      }
+    },
+    {
+      "name": "北内越運動広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市内越字中の目209",
+      "lat": 39.42404675,
+      "lng": 140.0821559,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000119201"
+      }
+    },
+    {
+      "name": "北内越公民館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市内越字平岡304-1",
+      "lat": 39.42011744,
+      "lng": 140.0762229,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000120111"
+      }
+    },
+    {
+      "name": "北内越公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市内越字平岡304-1",
+      "lat": 39.42011744,
+      "lng": 140.0762229,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000120201"
+      }
+    },
+    {
+      "name": "本荘公園",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市尾崎14",
+      "lat": 39.38459212,
+      "lng": 140.0477543,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000121201"
+      }
+    },
+    {
+      "name": "本荘由利広域行政センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市尾崎17",
+      "lat": 39.38568764,
+      "lng": 140.0493575,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000122111"
+      }
+    },
+    {
+      "name": "本荘由利広域行政センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市尾崎17",
+      "lat": 39.38568764,
+      "lng": 140.0493575,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000122201"
+      }
+    },
+    {
+      "name": "本荘公園前広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市尾崎17",
+      "lat": 39.38605888,
+      "lng": 140.0476001,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000122202"
+      }
+    },
+    {
+      "name": "由利本荘市消防庁舎",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市美倉町27-2",
+      "lat": 39.39069464,
+      "lng": 140.0484115,
+      "hazards_ok": [
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000123201"
+      }
+    },
+    {
+      "name": "コミュニティ体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市美倉町30",
+      "lat": 39.39096826,
+      "lng": 140.0487763,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000124111"
+      }
+    },
+    {
+      "name": "コミュニティ体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市美倉町30",
+      "lat": 39.39096826,
+      "lng": 140.0487763,
+      "hazards_ok": [
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000124201"
+      }
+    },
+    {
+      "name": "三川公民館前広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市浜三川字三川12-1",
+      "lat": 39.41836857,
+      "lng": 140.0284991,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000125201"
+      }
+    },
+    {
+      "name": "ボートプラザ「アクアパル」",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市北裏地54-1",
+      "lat": 39.39232365,
+      "lng": 140.0384703,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000126111"
+      }
+    },
+    {
+      "name": "ボートプラザ「アクアパル」",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市北裏地54-1",
+      "lat": 39.39232365,
+      "lng": 140.0384703,
+      "hazards_ok": [
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000126201"
+      }
+    },
+    {
+      "name": "羽後信用金庫駐車場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市本荘13",
+      "lat": 39.391215218942,
+      "lng": 140.04648879576,
+      "hazards_ok": [
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000127201"
+      }
+    },
+    {
+      "name": "子吉公民館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市埋田字用堰北17",
+      "lat": 39.360265,
+      "lng": 140.058032,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000128111"
+      }
+    },
+    {
+      "name": "子吉公民館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市埋田字用堰北17",
+      "lat": 39.360265,
+      "lng": 140.058032,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000128201"
+      }
+    },
+    {
+      "name": "由利本荘市消防署矢島分署",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町元町字大川原127-1",
+      "lat": 39.23119986,
+      "lng": 140.146604,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000130201"
+      }
+    },
+    {
+      "name": "矢島ふれあい公園",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町七日町字羽坂174",
+      "lat": 39.23264943,
+      "lng": 140.1378698,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000131201"
+      }
+    },
+    {
+      "name": "矢島コミュニティセンター「日新館」",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市矢島町七日町字羽坂64-1",
+      "lat": 39.231494279475,
+      "lng": 140.13956491111,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000132111"
+      }
+    },
+    {
+      "name": "矢島コミュニティセンター「日新館」",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町七日町字羽坂64-1",
+      "lat": 39.231401,
+      "lng": 140.1394,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000132201"
+      }
+    },
+    {
+      "name": "矢島高等学校グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町七日町字助の渕1-5",
+      "lat": 39.23233114,
+      "lng": 140.1447119,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000133201"
+      }
+    },
+    {
+      "name": "矢島ソフトボール場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町七日町字上山寺20-1",
+      "lat": 39.22434829,
+      "lng": 140.1368869,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000134201"
+      }
+    },
+    {
+      "name": "矢島多目的運動広場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町七日町字上山寺34-2",
+      "lat": 39.22453567,
+      "lng": 140.1362723,
+      "hazards_ok": [
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000135201"
+      }
+    },
+    {
+      "name": "矢島体育センター",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市矢島町七日町字上山寺54-1",
+      "lat": 39.225394092575,
+      "lng": 140.13761163952,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000136111"
+      }
+    },
+    {
+      "name": "矢島体育センター",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町七日町字上山寺54-1",
+      "lat": 39.225394092576,
+      "lng": 140.13761163953,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000136201"
+      }
+    },
+    {
+      "name": "矢島中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市矢島町七日町助の渕1-4",
+      "lat": 39.2335727,
+      "lng": 140.1441761,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000137111"
+      }
+    },
+    {
+      "name": "矢島中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町七日町助の渕1-4",
+      "lat": 39.2335727,
+      "lng": 140.1441761,
+      "hazards_ok": [
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000137201"
+      }
+    },
+    {
+      "name": "旧矢島小学校グラウンド",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町城内字八森6",
+      "lat": 39.23035,
+      "lng": 140.134508,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000138201"
+      }
+    },
+    {
+      "name": "矢島保育園",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町城内字八森下515",
+      "lat": 39.23525265,
+      "lng": 140.1358505,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000139201"
+      }
+    },
+    {
+      "name": "本荘東中学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市薬師堂字境橋77",
+      "lat": 39.37119601,
+      "lng": 140.0591216,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000140111"
+      }
+    },
+    {
+      "name": "本荘東中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市薬師堂字境橋77",
+      "lat": 39.37119601,
+      "lng": 140.0591216,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000140201"
+      }
+    },
+    {
+      "name": "子吉小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市薬師堂字堂ノ下93-2",
+      "lat": 39.36838,
+      "lng": 140.045494,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000141201"
+      }
+    },
+    {
+      "name": "高城体育館",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市岩城亀田亀田町字亀田町18-2",
+      "lat": 39.498709,
+      "lng": 140.085305,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000143111"
+      }
+    },
+    {
+      "name": "高城体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市岩城亀田亀田町字亀田町18-2",
+      "lat": 39.498685,
+      "lng": 140.085315,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "tsunami",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000143201"
+      }
+    },
+    {
+      "name": "矢島小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市矢島町七日町字助の渕1-4",
+      "lat": 39.233778,
+      "lng": 140.144608,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000144111"
+      }
+    },
+    {
+      "name": "矢島小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町七日町字助の渕1-4",
+      "lat": 39.233824,
+      "lng": 140.143911,
+      "hazards_ok": [
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000144201"
+      }
+    },
+    {
+      "name": "矢島格技場",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市矢島町矢島町1",
+      "lat": 39.23013,
+      "lng": 140.132559,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000145111"
+      }
+    },
+    {
+      "name": "矢島格技場",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市矢島町矢島町1",
+      "lat": 39.230101,
+      "lng": 140.132554,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000145201"
+      }
+    },
+    {
+      "name": "本荘東小学校",
+      "kind": "evacuation_shelter",
+      "address": "秋田県由利本荘市薬師堂字一番堰1-1",
+      "lat": 39.371257,
+      "lng": 140.058235,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "05210_1.csv",
+        "id": "E0521000146111"
+      }
+    },
+    {
+      "name": "本荘東小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "秋田県由利本荘市薬師堂字一番堰1-1",
+      "lat": 39.371472,
+      "lng": 140.058206,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood",
+        "volcano"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "05210_2.csv",
+        "id": "E0521000146201"
+      }
+    }
+  ]
+}

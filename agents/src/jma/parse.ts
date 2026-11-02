@@ -133,11 +133,15 @@ function parseVxko(headline: Node, body: Node): { areas: AlertArea[]; level: num
 
   const cities = new Map<string, AlertArea>();
   for (const item of warning?.Item ?? []) {
-    if (!text(item.Kind?.Name).startsWith("浸水想定地区")) continue;
+    const kindName = text(item.Kind?.Name);
+    if (!kindName.startsWith("浸水想定地区")) continue;
+    // Areas listed under 氾濫発生情報 are keyed by the breach point, not a water-level station; flooding has
+    // already occurred there, so the forecast area's level applies.
+    const breach = kindName.includes("氾濫発生情報");
     for (const a of item.Areas?.Area ?? []) {
       const cityCode = text(a.CityCode);
       if (!cityCode) continue;
-      const level = stationLevel.get(text(a.Code)) ?? null;
+      const level = stationLevel.get(text(a.Code)) ?? (breach ? headLevel : null);
       const prev = cities.get(cityCode);
       if (prev && (prev.level ?? 0) >= (level ?? 0)) continue;
       cities.set(cityCode, {

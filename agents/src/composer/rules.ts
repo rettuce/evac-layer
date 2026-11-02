@@ -72,6 +72,10 @@ export function situationFor(alert: Alert, municipalityId: string): Situation {
   const mine = alert.areas.filter((a) => a.code_type === "city" && a.code.slice(0, 5) === municipalityId);
   if (!mine.length) stop(`bulletin ${alert.bulletin_id} does not list municipality ${municipalityId}`);
   if (mine.every((a) => a.status === "cleared")) return { level: 1, template: "all-clear", cleared: true };
+  const unknown = mine.filter((a) => a.level === null && a.status !== "cleared" && a.status !== "none");
+  if (unknown.length && alert.level !== null) {
+    stop(`bulletin ${alert.bulletin_id} is level ${alert.level} but gives no level for ${unknown.map((a) => a.name).join(", ")}; not composing a screen from a guess`);
+  }
   const level = Math.max(...mine.map((a) => a.level ?? 0));
   if (level >= 4) return { level, template: "evac-now", cleared: false };
   if (level === 3) return { level, template: "evac-prepare", cleared: false };

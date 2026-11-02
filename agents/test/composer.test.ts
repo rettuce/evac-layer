@@ -64,3 +64,9 @@ test("a bulletin that does not cover the municipality stops", () => {
   const other = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_11_02_250206_VTSE41.xml")));
   assert.throws(() => compose({ alert: other, municipality, site, writer }), /does not cover/);
 });
+
+test("a city the bulletin lists without a level stops instead of falling below the threshold", () => {
+  const alert = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "16_11_03_260312_VXKOii.xml")));
+  assert.equal(alert.areas.find((a) => a.name === "村山市")?.level, null);
+  assert.throws(() => compose({ alert, municipality: { ...municipality, id: "06208" }, site: { ...site, municipality_id: "06208" }, writer }), /gives no level for 村山市/);
+});

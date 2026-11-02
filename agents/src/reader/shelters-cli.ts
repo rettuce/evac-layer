@@ -5,9 +5,9 @@ import { MUNICIPALITIES_DIR, RAW_DIR } from "../paths.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { readGsiCsv } from "./gsi.js";
 
-const MUNICIPALITIES: Record<string, string> = { "17204": "輪島市", "22424": "吉田町", "14100": "横浜市" };
-// Retrieval date of the CSVs under RAW_DIR/gsi-shelters (recorded in the raw data manifest).
-const RETRIEVED = "2026-10-19";
+const MUNICIPALITIES: Record<string, string> = { "17204": "輪島市", "22424": "吉田町", "14100": "横浜市", "05210": "由利本荘市" };
+// Retrieval dates of the CSVs under RAW_DIR/gsi-shelters, as recorded in the raw data manifest.
+const RETRIEVED: Record<string, string> = { "17204": "2026-10-19", "22424": "2026-10-19", "14100": "2026-10-19", "05210": "2026-11-02" };
 const CSV_URL = (file: string) => `https://hinanmap.gsi.go.jp/hinanjocp/defaultFtpData/csv/${file}`;
 const NOTICE_URL = "https://www.gsi.go.jp/bousaichiri/hinanbasho-menseki.html";
 const NOTICE_JA = "最新でない場合や未掲載の場合があるため、最新かつ詳細の状況などは必ず当該市町村にご確認ください。";
@@ -30,7 +30,7 @@ for (const id of ids) {
       notice_url: NOTICE_URL,
       files: files.map((f) => {
         const abs = path.join(RAW_DIR, "gsi-shelters", f);
-        return { file: f, url: CSV_URL(f), retrieved: RETRIEVED, sha256: crypto.createHash("sha256").update(fs.readFileSync(abs)).digest("hex"), rows: readGsiCsv(abs).length };
+        return { file: f, url: CSV_URL(f), retrieved: RETRIEVED[id], sha256: crypto.createHash("sha256").update(fs.readFileSync(abs)).digest("hex"), rows: readGsiCsv(abs).length };
       }),
     },
     counts: {

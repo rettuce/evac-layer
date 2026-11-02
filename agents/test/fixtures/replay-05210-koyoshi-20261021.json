@@ -1,0 +1,294 @@
+{
+  "municipality": "05210",
+  "source": "JMA long feed recording (extra_l), parsed by agents/src/jma/parse.ts",
+  "entries": [
+    {
+      "issued_at": "2026-10-21T11:45:00+09:00",
+      "file": "bodies/20261021/20261021024630_0_VXKO55_050000.xml",
+      "wmo_code": "VXKO55",
+      "bulletin_id": "VXKOii-202610211145-e9c5d2903007",
+      "municipality_level": 2,
+      "municipality_status": [
+        "issued"
+      ],
+      "alert": {
+        "bulletin_id": "VXKOii-202610211145-e9c5d2903007",
+        "code": "VXKOii",
+        "hazard": "flood",
+        "level": 2,
+        "info_type": "issued",
+        "areas": [
+          {
+            "code": "0521000",
+            "name": "由利本荘市",
+            "code_type": "city",
+            "level": 2,
+            "kind_code": "20",
+            "kind_name": "レベル２氾濫注意報",
+            "status": "issued"
+          }
+        ],
+        "issued_at": "2026-10-21T11:45:00+09:00",
+        "raw_title": "子吉川レベル２氾濫注意報",
+        "headline_text": "【警戒レベル２情報［洪水］】〔新規〕子吉川では、氾濫注意水位に到達し、今後、水位はさらに上昇する見込み",
+        "publishing_office": "秋田河川国道事務所 秋田地方気象台"
+      }
+    },
+    {
+      "issued_at": "2026-10-21T15:55:00+09:00",
+      "file": "bodies/20261021/20261021065519_0_VXKO55_050000.xml",
+      "wmo_code": "VXKO55",
+      "bulletin_id": "VXKOii-202610211555-d5ccc7c6b547",
+      "municipality_level": 3,
+      "municipality_status": [
+        "issued"
+      ],
+      "alert": {
+        "bulletin_id": "VXKOii-202610211555-d5ccc7c6b547",
+        "code": "VXKOii",
+        "hazard": "flood",
+        "level": 3,
+        "info_type": "issued",
+        "areas": [
+          {
+            "code": "0521000",
+            "name": "由利本荘市",
+            "code_type": "city",
+            "level": 3,
+            "kind_code": "30",
+            "kind_name": "レベル３氾濫警報",
+            "status": "issued"
+          }
+        ],
+        "issued_at": "2026-10-21T15:55:00+09:00",
+        "raw_title": "子吉川レベル３氾濫警報",
+        "headline_text": "【警戒レベル３相当情報［洪水］】〔警戒レベル２から３相当に切替〕子吉川では、今後、氾濫危険水位に到達する見込み",
+        "publishing_office": "秋田河川国道事務所 秋田地方気象台"
+      }
+    },
+    {
+      "issued_at": "2026-10-21T18:15:00+09:00",
+      "file": "bodies/20261021/20261021091533_0_VXKO55_050000.xml",
+      "wmo_code": "VXKO55",
+      "bulletin_id": "VXKOii-202610211815-e713da0e3c05",
+      "municipality_level": 4,
+      "municipality_status": [
+        "issued"
+      ],
+      "alert": {
+        "bulletin_id": "VXKOii-202610211815-e713da0e3c05",
+        "code": "VXKOii",
+        "hazard": "flood",
+        "level": 4,
+        "info_type": "issued",
+        "areas": [
+          {
+            "code": "0521000",
+            "name": "由利本荘市",
+            "code_type": "city",
+            "level": 4,
+            "kind_code": "40",
+            "kind_name": "レベル４氾濫危険警報",
+            "status": "issued"
+          }
+        ],
+        "issued_at": "2026-10-21T18:15:00+09:00",
+        "raw_title": "子吉川レベル４氾濫危険警報",
+        "headline_text": "【警戒レベル４相当情報［洪水］】〔警戒レベル３相当から４相当に切替〕子吉川では、氾濫危険水位に到達し、氾濫のおそれあり",
+        "publishing_office": "秋田河川国道事務所 秋田地方気象台"
+      }
+    },
+    {
+      "issued_at": "2026-10-21T19:45:00+09:00",
+      "file": "bodies/20261021/20261021104512_0_VXKO55_050000.xml",
+      "wmo_code": "VXKO55",
+      "bulletin_id": "VXKOii-202610211945-a25f8f3aba7d",
+      "municipality_level": 5,
+      "municipality_status": [
+        "issued"
+      ],
+      "alert": {
+        "bulletin_id": "VXKOii-202610211945-a25f8f3aba7d",
+        "code": "VXKOii",
+        "hazard": "flood",
+        "level": 5,
+        "info_type": "issued",
+        "areas": [
+          {
+            "code": "0521000",
+            "name": "由利本荘市",
+            "code_type": "city",
+            "level": 5,
+            "kind_code": "51",
+            "kind_name": "レベル５氾濫特別警報",
+            "status": "issued"
+          }
+        ],
+        "issued_at": "2026-10-21T19:45:00+09:00",
+        "raw_title": "子吉川レベル５氾濫特別警報",
+        "headline_text": "【警戒レベル５相当情報［洪水］】〔警戒レベル４相当から５相当に切替〕《氾濫切迫》子吉川では、氾濫しているおそれ　氾濫のおそれがある区間：子吉川明法基準観測所受け持ち区間",
+        "publishing_office": "秋田河川国道事務所 秋田地方気象台"
+      }
+    },
+    {
+      "issued_at": "2026-10-21T20:15:00+09:00",
+      "file": "bodies/20261021/20261021111514_0_VXKO55_050000.xml",
+      "wmo_code": "VXKO55",
+      "bulletin_id": "VXKOii-202610212015-979f11623ff9",
+      "municipality_level": 5,
+      "municipality_status": [
+        "issued"
+      ],
+      "alert": {
+        "bulletin_id": "VXKOii-202610212015-979f11623ff9",
+        "code": "VXKOii",
+        "hazard": "flood",
+        "level": 5,
+        "info_type": "issued",
+        "areas": [
+          {
+            "code": "0521000",
+            "name": "由利本荘市",
+            "code_type": "city",
+            "level": 5,
+            "kind_code": "51",
+            "kind_name": "レベル５氾濫特別警報",
+            "status": "issued"
+          }
+        ],
+        "issued_at": "2026-10-21T20:15:00+09:00",
+        "raw_title": "子吉川レベル５氾濫特別警報",
+        "headline_text": "【警戒レベル５相当情報［洪水］】〔継続〕《氾濫発生》子吉川では、越水による氾濫が発生　氾濫発生箇所：子吉川秋田県由利本荘市森子　地先（左岸）",
+        "publishing_office": "秋田河川国道事務所 秋田地方気象台"
+      }
+    },
+    {
+      "issued_at": "2026-10-21T21:15:00+09:00",
+      "file": "bodies/20261021/20261021121521_0_VXKO55_050000.xml",
+      "wmo_code": "VXKO55",
+      "bulletin_id": "VXKOii-202610212115-34469436adbc",
+      "municipality_level": 5,
+      "municipality_status": [
+        "issued"
+      ],
+      "alert": {
+        "bulletin_id": "VXKOii-202610212115-34469436adbc",
+        "code": "VXKOii",
+        "hazard": "flood",
+        "level": 5,
+        "info_type": "issued",
+        "areas": [
+          {
+            "code": "0521000",
+            "name": "由利本荘市",
+            "code_type": "city",
+            "level": 5,
+            "kind_code": "51",
+            "kind_name": "レベル５氾濫特別警報",
+            "status": "issued"
+          }
+        ],
+        "issued_at": "2026-10-21T21:15:00+09:00",
+        "raw_title": "子吉川レベル５氾濫特別警報",
+        "headline_text": "【警戒レベル５相当情報［洪水］】〔継続〕《氾濫発生》子吉川では、越水による氾濫が発生中　氾濫発生箇所：子吉川秋田県由利本荘市森子　地先（左岸）",
+        "publishing_office": "秋田河川国道事務所 秋田地方気象台"
+      }
+    },
+    {
+      "issued_at": "2026-10-22T02:20:00+09:00",
+      "file": "bodies/20261021/20261021172015_0_VXKO55_050000.xml",
+      "wmo_code": "VXKO55",
+      "bulletin_id": "VXKOii-202610220220-daa0761e7dd8",
+      "municipality_level": 2,
+      "municipality_status": [
+        "issued"
+      ],
+      "alert": {
+        "bulletin_id": "VXKOii-202610220220-daa0761e7dd8",
+        "code": "VXKOii",
+        "hazard": "flood",
+        "level": 2,
+        "info_type": "issued",
+        "areas": [
+          {
+            "code": "0521000",
+            "name": "由利本荘市",
+            "code_type": "city",
+            "level": 2,
+            "kind_code": "22",
+            "kind_name": "レベル２氾濫注意報（警報解除）",
+            "status": "issued"
+          }
+        ],
+        "issued_at": "2026-10-22T02:20:00+09:00",
+        "raw_title": "子吉川レベル２氾濫注意報（警報解除）",
+        "headline_text": "【警戒レベル２情報［洪水］】〔警戒レベル５相当から２に切替〕子吉川では、氾濫注意水位を上回る水位が続く見込み",
+        "publishing_office": "秋田河川国道事務所 秋田地方気象台"
+      }
+    },
+    {
+      "issued_at": "2026-10-22T04:45:00+09:00",
+      "file": "bodies/20261021/20261021194520_0_VXKO55_050000.xml",
+      "wmo_code": "VXKO55",
+      "bulletin_id": "VXKOii-202610220445-0c4640595a97",
+      "municipality_level": 2,
+      "municipality_status": [
+        "issued"
+      ],
+      "alert": {
+        "bulletin_id": "VXKOii-202610220445-0c4640595a97",
+        "code": "VXKOii",
+        "hazard": "flood",
+        "level": 2,
+        "info_type": "issued",
+        "areas": [
+          {
+            "code": "0521000",
+            "name": "由利本荘市",
+            "code_type": "city",
+            "level": 2,
+            "kind_code": "21",
+            "kind_name": "レベル２氾濫注意報",
+            "status": "issued"
+          }
+        ],
+        "issued_at": "2026-10-22T04:45:00+09:00",
+        "raw_title": "子吉川レベル２氾濫注意報",
+        "headline_text": "【警戒レベル２情報［洪水］】〔継続〕子吉川では、当分の間、氾濫注意水位付近の水位が続く見込み",
+        "publishing_office": "秋田河川国道事務所 秋田地方気象台"
+      }
+    },
+    {
+      "issued_at": "2026-10-22T06:20:00+09:00",
+      "file": "bodies/20261021/20261021212015_0_VXKO55_050000.xml",
+      "wmo_code": "VXKO55",
+      "bulletin_id": "VXKOii-202610220620-74a7831c8a40",
+      "municipality_level": null,
+      "municipality_status": [
+        "cleared"
+      ],
+      "alert": {
+        "bulletin_id": "VXKOii-202610220620-74a7831c8a40",
+        "code": "VXKOii",
+        "hazard": "flood",
+        "level": null,
+        "info_type": "issued",
+        "areas": [
+          {
+            "code": "0521000",
+            "name": "由利本荘市",
+            "code_type": "city",
+            "level": null,
+            "kind_code": "10",
+            "kind_name": "レベル２氾濫注意報解除",
+            "status": "cleared"
+          }
+        ],
+        "issued_at": "2026-10-22T06:20:00+09:00",
+        "raw_title": "子吉川レベル２氾濫注意報解除",
+        "headline_text": "〔解除〕子吉川では、氾濫注意水位を下回る",
+        "publishing_office": "秋田河川国道事務所 秋田地方気象台"
+      }
+    }
+  ]
+}
