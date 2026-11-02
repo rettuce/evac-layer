@@ -4,6 +4,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import Anthropic, { toFile } from "@anthropic-ai/sdk";
 import { ENV_FILE, MUNICIPALITIES_DIR, RAW_DIR, TMP_DIR } from "../paths.js";
+import { loadApiKey } from "../apikey.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { assemble, type SourceMeta } from "./assemble.js";
 import { addVisionClaims, collectClaims, renderClaims, type Citation, type Claim } from "./claims.js";
@@ -43,22 +44,6 @@ function sha256(file: string) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
 
-// Reports where the key came from, never the key: process.loadEnvFile does not override a variable already in the
-// environment, so a stale shell export silently wins over a fresh .env.
-// A placeholder such as "sk-ant-..." must never reach the API; only the shape of a Console API key is checked.
-const API_KEY_PREFIX = "sk-ant-";
-const API_KEY_MIN_LENGTH = 40;
-
-function loadApiKey(): { present: boolean; wellFormed: boolean; source: "environment" | "dotenv" | "none"; dotenvPresent: boolean } {
-  const fromEnv = Boolean(process.env.ANTHROPIC_API_KEY);
-  const dotenvPresent = fs.existsSync(ENV_FILE);
-  if (dotenvPresent) process.loadEnvFile(ENV_FILE);
-  const value = process.env.ANTHROPIC_API_KEY ?? "";
-  const present = value.length > 0;
-  const wellFormed = value.startsWith(API_KEY_PREFIX) && value.length >= API_KEY_MIN_LENGTH;
-  return { present, wellFormed, source: fromEnv ? "environment" : present ? "dotenv" : "none", dotenvPresent };
-}
-
 function selectPdfs(reports: { rel: string; report: TextLayerReport }[]) {
   const allowed = new Set(values["allow-suspect"]);
   const isText = ({ rel, report }: { rel: string; report: TextLayerReport }) => report.verdict === "ok" || (report.verdict === "suspect" && allowed.has(path.basename(rel)));
@@ -88,6 +73,8 @@ function assertFinished(msg: Anthropic.Message, stage: string) {
   if (msg.stop_reason === "refusal") stop(`${stage}: model refused (${msg.stop_details?.category ?? "no category"}): ${msg.stop_details?.explanation ?? ""}`);
   if (msg.stop_reason === "max_tokens") stop(`${stage}: hit max_tokens; output is truncated`);
 }
+
+const STARTED_AT = Date.now();
 
 async function main() {
   if (values.estimate) {
@@ -154,7 +141,7 @@ async function main() {
     return;
   }
   if (!key.present) stop(`ANTHROPIC_API_KEY not found (${ENV_FILE} absent or empty). Run with --dry-run until the key is set.`);
-  if (!key.wellFormed) stop(`ANTHROPIC_API_KEY (from ${key.source}) does not look like a Console API key (expected "${API_KEY_PREFIX}…", at least ${API_KEY_MIN_LENGTH} characters); it may still be a placeholder. No API call was made.`);
+  if (!key.wellFormed) stop(`ANTHROPIC_API_KEY (from ${key.source}) does not look like an API key; it may still be a placeholder. No API call was made.`);
 
   const client = new Anthropic();
   fs.mkdirSync(path.join(TMP_DIR, "reader"), { recursive: true });
@@ -245,7 +232,7 @@ async function main() {
   fs.writeFileSync(`${base}.stage1.json`, JSON.stringify({ claims, citations: Object.fromEntries(citations) }, null, 2));
   fs.writeFileSync(`${base}.extraction.json`, JSON.stringify(extraction, null, 2));
   const total = usage.reduce((a, u) => ({ input: a.input + u.input, output: a.output + u.output, usd: a.usd + u.usd }), { input: 0, output: 0, usd: 0 });
-  const summary = { model: model.id, usage, total, counts: { claims: claims.length, hazards: doc.hazards.length, routes: doc.routes.length, cautions: doc.cautions.length, contacts: doc.contacts.length, shelter_mentions: extraction.shelter_mentions.length, conflicts: doc.conflicts.length, shelters: doc.shelters.length } };
+  const summary = { model: model.id, seconds: Math.round((Date.now() - STARTED_AT) / 100) / 10, usage, total, counts: { claims: claims.length, hazards: doc.hazards.length, routes: doc.routes.length, cautions: doc.cautions.length, contacts: doc.contacts.length, shelter_mentions: extraction.shelter_mentions.length, conflicts: doc.conflicts.length, shelters: doc.shelters.length } };
   fs.writeFileSync(`${base}.usage.json`, JSON.stringify(summary, null, 2));
   if (!v.ok) {
     fs.writeFileSync(`${base}.invalid.json`, JSON.stringify(doc, null, 2));
