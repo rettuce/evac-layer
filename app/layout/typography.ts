@@ -38,6 +38,9 @@ export const TYPE_PX: Record<TypeStep, number> = {
   fine: fontPxForViewDistance(VIEW_DISTANCE_M.fine),
 }
 
+export const HEADLINE_STACKED_MAX_LINES = 2
+export const HEADLINE_STEP_DOWN = 0.85
+
 export const SHELTER_PICTOGRAM_RATIO = 1.6
 export const SHELTER_PICTOGRAM_PX = Math.round(TYPE_PX.guide * SHELTER_PICTOGRAM_RATIO)
 
