@@ -7,6 +7,7 @@ const props = defineProps<{
   cell: LayoutCell
   levelScale?: LevelScale
   stackedHeadline?: boolean
+  easyInAction?: boolean
   headlineScale?: number
   pictogramPx: number
   languageIndex: number
@@ -39,7 +40,7 @@ const currentLang = computed(() => {
       <p class="t-action action-text">{{ cell.text.ja }}</p>
       <div class="action-sub">
         <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" />
-        <p v-if="cell.text.ja_easy" class="t-guide" lang="ja" data-lang="ja_easy">{{ cell.text.ja_easy }}</p>
+        <p v-if="cell.text.ja_easy && easyInAction" class="t-guide" lang="ja" data-lang="ja_easy">{{ cell.text.ja_easy }}</p>
       </div>
     </template>
 

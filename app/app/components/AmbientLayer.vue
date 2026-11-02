@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { clockSweep, drawOverlay, formatClockJst, labelFont, overlayGeometry, pickAmbient, timeFont } from '~~/layout/ambient'
-import { PILLAR } from '~~/layout/shapes'
+import { PILLAR, pillarYForHeight } from '~~/layout/shapes'
 import type { Shape } from '~~/layout/types'
 
 const props = defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string }>()
 
 const TIME_GLYPHS = '0123456789:'
+const PILLAR_CLOCK_TOP_M = 2.0
 
 const canvas = ref<HTMLCanvasElement>()
 const viewport = ref({ width: 0, height: 0 })
@@ -36,7 +37,9 @@ function draw() {
     ink: pick.value.scene.ink,
   }
   for (const face of faces.value) {
-    drawOverlay(ctx, overlayGeometry(face.width, height, pick.value.corner), content, face.originX)
+    const geometry = overlayGeometry(face.width, height, pick.value.corner)
+    const atEyeHeight = props.shape === 'pillar' ? { ...geometry, block: { ...geometry.block, top: pillarYForHeight(PILLAR_CLOCK_TOP_M), bottom: undefined } } : geometry
+    drawOverlay(ctx, atEyeHeight, content, face.originX)
   }
 }
 
