@@ -9,6 +9,8 @@ export default defineNuxtConfig({
     repoRoot: fileURLToPath(new URL('..', import.meta.url)),
     dataDir: '',
     adminToken: '',
+    distDir: '',
+    webhookAllowPrivate: '',
   },
   css: [
     '@fontsource/noto-sans-jp/400.css',
