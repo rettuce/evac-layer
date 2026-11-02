@@ -1,0 +1,60 @@
+{
+  "kind": "evac-verifier-findings",
+  "date": "2026-11-02",
+  "verifier": "static+browser+vision(claude-sonnet-5-5)",
+  "run": "vision-4",
+  "stats": {
+    "municipalities": [
+      "05210",
+      "17204"
+    ],
+    "screens": 14,
+    "pass": 12,
+    "vision_checks": 72,
+    "vision_usd": 0.783,
+    "log": "17:11-17:17"
+  },
+  "note": "Re-run after 8dedf81 (no municipal order names in the action). Same two overflows as run 3; no other finding on the first attempt of any screen.",
+  "findings": [
+    {
+      "run": 4,
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
+      "shape": "9x16",
+      "check": "overflow",
+      "cell_id": "headline",
+      "reason": "「レベル２土砂災害注意報解除」(13 字) が右の「警戒レベル1」ラベルに押されて 3 行に折り返し、見出し帯から溢れる。見出しの ja は警報名からコードが決めるので、Writer の書き直し 3 回では直らない。",
+      "fix": "renderer: no level label on all-clear, label below a two-line headline in 9:16 and 1:1 (f292654); agents stop on a Japanese overflow instead of asking the Writer (7ae76d8); run 5: 輪島市 7/7 pass, no Writer call"
+    },
+    {
+      "run": 4,
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
+      "shape": "1x1",
+      "check": "overflow",
+      "cell_id": "headline",
+      "reason": "「レベル２土砂災害注意報解除」(13 字) が右の「警戒レベル1」ラベルに押されて 3 行に折り返し、見出し帯から溢れる。見出しの ja は警報名からコードが決めるので、Writer の書き直し 3 回では直らない。",
+      "fix": "renderer: no level label on all-clear, label below a two-line headline in 9:16 and 1:1 (f292654); agents stop on a Japanese overflow instead of asking the Writer (7ae76d8); run 5: 輪島市 7/7 pass, no Writer call"
+    },
+    {
+      "run": 4,
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+      "shape": "9x16",
+      "check": "overflow",
+      "cell_id": "headline",
+      "reason": "「レベル２土砂災害注意報解除」(13 字) が右の「警戒レベル1」ラベルに押されて 3 行に折り返し、見出し帯から溢れる。見出しの ja は警報名からコードが決めるので、Writer の書き直し 3 回では直らない。",
+      "fix": "renderer: no level label on all-clear, label below a two-line headline in 9:16 and 1:1 (f292654); agents stop on a Japanese overflow instead of asking the Writer (7ae76d8); run 5: 輪島市 7/7 pass, no Writer call"
+    },
+    {
+      "run": 4,
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+      "shape": "1x1",
+      "check": "overflow",
+      "cell_id": "headline",
+      "reason": "「レベル２土砂災害注意報解除」(13 字) が右の「警戒レベル1」ラベルに押されて 3 行に折り返し、見出し帯から溢れる。見出しの ja は警報名からコードが決めるので、Writer の書き直し 3 回では直らない。",
+      "fix": "renderer: no level label on all-clear, label below a two-line headline in 9:16 and 1:1 (f292654); agents stop on a Japanese overflow instead of asking the Writer (7ae76d8); run 5: 輪島市 7/7 pass, no Writer call"
+    }
+  ]
+}
