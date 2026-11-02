@@ -3,8 +3,9 @@
 python3 demo/compose/compose.py [--edl demo/compose/edl.json]
 
 Each segment is normalized to the EDL size/fps, captioned with drawtext, and concatenated
-without audio (sound is mixed in a later pass). A missing source becomes a labeled slate,
-so the full timeline can be previewed before every cut exists.
+without audio (sound is mixed in a later pass). A missing 3D cut whose screen recordings exist
+becomes a four-shape preview of those recordings; any other missing source becomes a labeled
+slate, so the full timeline can be previewed before every cut exists.
 """
 
 import argparse
@@ -16,6 +17,7 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+SCREENS_DIR = HERE.parent / "screens"
 FONT_DIR = HERE / "fonts"
 FONT_URL = "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/SubsetOTF/JP/NotoSansJP-Bold.otf"
 FONT_LICENSE_URL = "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/LICENSE"
@@ -73,6 +75,35 @@ def segment_filters(segment, work, width, height):
     return filters
 
 
+# Four-shape preview on a 1920x1080 canvas: (shape, x, y, width, height) as fractions of the canvas.
+SCREEN_GRID = [
+    ("9x16", 0.0083, 0.0259, 0.3, 0.9481),
+    ("32x9", 0.3167, 0.0259, 0.675, 0.3375),
+    ("16x9", 0.3167, 0.3787, 0.45, 0.45),
+    ("1x1", 0.775, 0.3787, 0.2167, 0.3852),
+]
+
+
+def screen_grid_inputs(segment):
+    if not segment.get("screens"):
+        return None
+    sources = [SCREENS_DIR / f"{shape}_{segment['screens']}.mp4" for shape, *_ in SCREEN_GRID]
+    return sources if all(path.exists() for path in sources) else None
+
+
+def screen_grid_filter(width, height, fps):
+    chains = [f"color=c={SLATE_COLOR}:s={width}x{height}:r={fps}[base]"]
+    previous = "base"
+    for i, (_, x, y, w, h) in enumerate(SCREEN_GRID):
+        box_w, box_h = round(w * width), round(h * height)
+        chains.append(f"[{i}:v]scale={box_w}:{box_h}:force_original_aspect_ratio=decrease,fps={fps},"
+                      f"tpad=stop_mode=clone:stop=-1[s{i}]")
+        chains.append(f"[{previous}][s{i}]overlay=x={round(x * width)}+({box_w}-w)/2:y={round(y * height)}+({box_h}-h)/2"
+                      f":shortest=0[g{i}]")
+        previous = f"g{i}"
+    return ";".join(chains), previous
+
+
 KIND_LABELS = {"3d": "3D（Blender）", "capture": "画面収録", "title": "タイトル", "composite": "素材＋テロップ"}
 
 
@@ -96,6 +127,20 @@ def render_segment(segment, index, work, edl):
     src = segment.get("src")
     source = (HERE / src).resolve() if src else None
     filters = segment_filters(segment, work, width, height)
+    grid = None if source and source.exists() else screen_grid_inputs(segment)
+    if grid:
+        size = round(height * SLATE_SIZE_RATIO)
+        label = write_text(work, f"grid_{segment['cut']}", f"CUT {segment['cut']} · 3D 未レンダ · 画面素材 4 形状（{segment['screens']}）")
+        graph, last = screen_grid_filter(width, height, fps)
+        corner = drawtext(label, size, f"h-text_h-{size}", box=False).replace("x=(w-text_w)/2", f"x=w-text_w-{size}")
+        chain = ",".join([corner, *filters])
+        command = ["ffmpeg", "-y", "-loglevel", "error"]
+        for path in grid:
+            command += ["-i", str(path)]
+        command += ["-filter_complex", f"{graph};[{last}]{chain}[out]", "-map", "[out]", "-t", seconds]
+        subprocess.run([*command, "-r", str(fps), *ENCODE, str(out)], check=True)
+        print(f"CUT {segment['cut']:>3} {segment['seconds']:>3}s grid {segment['screens']} x{len(grid)}")
+        return out
     if source and source.exists():
         inputs = ["-i", str(source)]
         fit = f"scale={width}:{height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,fps={fps},tpad=stop_mode=clone:stop=-1"

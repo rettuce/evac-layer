@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import puppeteer from "puppeteer-core";
-import type { Shape } from "../../../app/layout/types";
 import { SHAPES } from "../../../app/layout/shapes";
+import { SHAPE_ORDER, type ComposerShape } from "../composer/rules.js";
 import { LAYOUTS_DIR } from "../loop/report.js";
 import { DEFAULT_CHROME } from "../loop/browser-verifier.js";
 import { REPO_ROOT } from "../paths.js";
@@ -10,7 +10,8 @@ import { formatErrors, validateDoc } from "../schemas.js";
 import { exportable, readApprovals } from "./gate.js";
 import { INLINE_PAGE_SCRIPT } from "./inline-page.js";
 
-const SHAPE_ORDER: Shape[] = ["16x9", "9x16", "32x9", "1x1"];
+// pillar is drawn at its logical size and captured at half scale (contract v0, 18:03: 6616 × 5834 → 3308 × 2917).
+const CAPTURE_SCALE: Partial<Record<ComposerShape, number>> = { pillar: 0.5 };
 const READY_TIMEOUT_MS = 30_000;
 const SETTLE_MS = 500;
 
@@ -27,8 +28,13 @@ export function findSite(siteId: string): { id: string; municipality_id: string 
   throw new ExportStop(`no site ${siteId} in data/sites/`);
 }
 
-export async function exportSite(opts: { site: string; out: string; baseUrl: string; chrome?: string; log?: (m: string) => void }) {
+export async function exportSite(opts: { site: string; out: string; baseUrl: string; chrome?: string; skipShapes?: readonly string[]; log?: (m: string) => void }) {
   const log = opts.log ?? (() => {});
+  const shapes = SHAPE_ORDER.filter((shape) => !opts.skipShapes?.includes(shape));
+  for (const shape of SHAPE_ORDER) if (!shapes.includes(shape)) log(`skip shape ${shape} (--skip-shapes)`);
+  const viewportOf = (shape: ComposerShape) =>
+    (SHAPES as Partial<Record<ComposerShape, { width: number; height: number }>>)[shape] ??
+    (() => { throw new ExportStop(`the renderer has no ${shape} shape yet; pass --skip-shapes ${shape}`); })();
   const site = findSite(opts.site);
   const m = site.municipality_id;
   const approvals = readApprovals();
@@ -49,7 +55,7 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
     for (const e of ready) {
       const files: Record<string, { json: string; png: string; html: string }> = {};
       let sources: unknown[] = [];
-      for (const shape of SHAPE_ORDER) {
+      for (const shape of shapes) {
         const layoutFile = path.join(LAYOUTS_DIR, m, e.bulletin_id, `${shape}.json`);
         const layout = JSON.parse(fs.readFileSync(layoutFile, "utf8"));
         const v = validateDoc(layout, "layout");
@@ -61,7 +67,7 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
         const live = `/api/live-layout?${new URLSearchParams({ municipality: m, bulletin: e.bulletin_id, shape, site: site.id })}`;
         const page = await browser.newPage();
         try {
-          await page.setViewport({ ...SHAPES[shape], deviceScaleFactor: 1 });
+          await page.setViewport({ ...viewportOf(shape), deviceScaleFactor: CAPTURE_SCALE[shape] ?? 1 });
           await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
           await page.goto(`${opts.baseUrl}/screen?${new URLSearchParams({ shape, src: live })}`, { waitUntil: "networkidle0" });
           const failed = await page.$('[data-error]');
@@ -91,5 +97,5 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
   const v = validateDoc(manifest, "export-manifest");
   if (!v.ok) throw new ExportStop(`manifest fails export-manifest.schema.json:\n${formatErrors(v.errors)}`);
   fs.writeFileSync(path.join(siteDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
-  return { siteDir, entries: entries.length, files: entries.length * SHAPE_ORDER.length * 3 + 1 };
+  return { siteDir, entries: entries.length, shapes: shapes.length, files: entries.length * shapes.length * 3 + 1 };
 }

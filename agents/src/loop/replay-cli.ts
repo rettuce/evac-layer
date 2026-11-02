@@ -10,7 +10,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { requireApiKey } from "../apikey.js";
 import type { WriterModel } from "../writer/live.js";
 
-const { values } = parseArgs({ options: { replay: { type: "string" }, site: { type: "string" }, verifier: { type: "string", default: "static" }, writer: { type: "string", default: "placeholder" }, "writer-model": { type: "string", default: "opus" }, "base-url": { type: "string", default: process.env.EVAC_URL ?? "http://127.0.0.1:3152" } } });
+const { values } = parseArgs({ options: { replay: { type: "string" }, site: { type: "string" }, verifier: { type: "string", default: "static" }, writer: { type: "string", default: "placeholder" }, "writer-model": { type: "string", default: "opus" }, "base-url": { type: "string", default: process.env.EVAC_URL ?? "http://127.0.0.1:3152" }, "skip-browser-shapes": { type: "string", default: "" } } });
 if (!values.replay || !values.site) {
   console.error("usage: pnpm -F agents replay-pipeline --replay <replay.json> --site <site.json> [--verifier static|browser]");
   process.exit(2);
@@ -22,7 +22,7 @@ const writer = values.writer === "live" ? { client: new Anthropic(), model: valu
 const visionUsage: import("../reader/pricing.js").CallUsage[] = [];
 if (values.verifier === "vision") requireApiKey();
 const browser = values.verifier === "browser" || values.verifier === "vision"
-  ? browserVerifier({ baseUrl: values["base-url"]!, ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) })
+  ? browserVerifier({ baseUrl: values["base-url"]!, skipShapes: values["skip-browser-shapes"]!.split(",").filter(Boolean), ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) })
   : undefined;
 try {
   const summary = await runReplay({

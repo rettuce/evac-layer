@@ -4,7 +4,7 @@ import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { Lang } from "../writer/request.js";
 import { budgetsFor } from "./budgets.js";
 import { shapeContract } from "./template.js";
-import { actionPictogram, BudgetExceeded, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
+import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
 export interface WriterOutput { cells: WriterCell[] }
@@ -122,11 +122,12 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
   ];
 
   return SHAPE_ORDER.map((shape) => {
-    const { slots, required } = shapeContract(situation.template, shape);
-    const w = writerFor(input.writer, shape);
+    const cellShape = CELLS_OF[shape];
+    const { slots, required } = shapeContract(situation.template, cellShape);
+    const w = writerFor(input.writer, cellShape);
     const text = (role: string) => {
       const c = w.cells.find((x) => x.role === role);
-      if (c) checkBudget(situation.template, shape, c);
+      if (c) checkBudget(situation.template, cellShape, c);
       return c?.text;
     };
     const cells: LayoutCell[] = [];

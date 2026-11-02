@@ -28,7 +28,8 @@
               "16x9": { "$ref": "#/$defs/files" },
               "9x16": { "$ref": "#/$defs/files" },
               "32x9": { "$ref": "#/$defs/files" },
-              "1x1": { "$ref": "#/$defs/files" }
+              "1x1": { "$ref": "#/$defs/files" },
+              "pillar": { "$ref": "#/$defs/files" }
             }
           },
           "sources": { "type": "array", "items": { "$ref": "layout.schema.json#/$defs/source" } }

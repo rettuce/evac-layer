@@ -18,8 +18,10 @@ const { values } = parseArgs({
     writer: { type: "string", default: "placeholder" },
     "writer-model": { type: "string", default: "opus" },
     "base-url": { type: "string", default: process.env.EVAC_URL ?? "http://127.0.0.1:3152" },
+    "skip-browser-shapes": { type: "string", default: "" },
   },
 });
+const skipShapes = values["skip-browser-shapes"]!.split(",").map((s) => s.trim()).filter(Boolean);
 if (values.writer === "live" || values.verifier === "vision") requireApiKey();
 const writer = values.writer === "live" ? { client: new Anthropic(), model: values["writer-model"] as WriterModel } : undefined;
 const ids = values.municipalities!.split(",").map((s) => s.trim()).filter(Boolean);
@@ -36,7 +38,7 @@ const results = await Promise.all(ids.map(async (id): Promise<ReplaySummary | { 
   log(id, `start: ${entries.length} recorded bulletins`);
   const visionUsage: import("../reader/pricing.js").CallUsage[] = [];
   const browser = values.verifier === "browser" || values.verifier === "vision"
-    ? browserVerifier({ baseUrl: values["base-url"]!, ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) })
+    ? browserVerifier({ baseUrl: values["base-url"]!, skipShapes, ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) })
     : undefined;
   try {
     const s = await runReplay({

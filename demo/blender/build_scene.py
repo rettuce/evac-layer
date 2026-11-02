@@ -17,7 +17,12 @@ from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from layout import BACK_WALL_Y, CEILING_Z, COLUMN_SIZE, COLUMNS, EYE_Z, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW
+from layout import (
+    BACK_WALL_Y, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
+    HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIBBON_PANEL_H, RIBBON_PANEL_W,
+    RIGHT_WALL_X,
+)
+from led_wrap import build_led_wrap
 from looks import LOOKS, build_look
 from primitives import box, principled, spot_light, vertical_plane
 
@@ -29,8 +34,8 @@ PLACEHOLDER_FONT = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
 CUTS = ("ambient", "switch", "alert", "off", "test")
 
 INCH = 0.0254
-BEZEL_M = 0.02
-BEZEL_DEPTH_M = 0.06
+JOINT_M = 0.003
+FLUSH_EPS_M = 0.001
 SCREEN_EMISSION = 3.0
 SCREEN_GLASS_ROUGHNESS = 0.06
 LENS_MM = 35.0
@@ -49,43 +54,50 @@ def panel_from_diagonal(diagonal_in, aspect_w, aspect_h):
     return aspect_w * unit, aspect_h * unit
 
 
-def panel_from_width(width_m, aspect_w, aspect_h):
-    return width_m, width_m * aspect_h / aspect_w
-
-
 def pillar_face_center(height_z):
-    front = Matrix.Rotation(PILLAR_YAW, 3, "Z") @ Vector((0.0, -PILLAR_SIZE[1] / 2 - BEZEL_DEPTH_M, 0.0))
+    front = Matrix.Rotation(PILLAR_YAW, 3, "Z") @ Vector((0.0, -PILLAR_SIZE[1] / 2, 0.0))
     return Vector((PILLAR_CENTER.x, PILLAR_CENTER.y, height_z)) + front
 
 
-COLUMN_FRONT_Y = COLUMNS[0][1] - COLUMN_SIZE / 2
+COLUMN_CLAD_HALF = COLUMN_SIZE / 2 + COLUMN_CLAD_M
+PORTRAIT_SIZE = panel_from_diagonal(55, 9, 16)
+COLUMN_LED_BOTTOM_Z = 0.4
+COLUMN_LED_TOP_Z = 3.6
+COLUMN_LED_RADIUS = 0.03
+COLUMN_LED_MID_Z = (COLUMN_LED_BOTTOM_Z + COLUMN_LED_TOP_Z) / 2
+RIBBON_SIZE = (RIBBON_PANEL_W, RIBBON_PANEL_H)
+RIBBON_Z = HEADWALL_BOTTOM_Z + RIBBON_PANEL_H / 2
+RIBBON_CENTER_X = 1.0
+WALL_16X9_Z = 2.0
+# x positions on the back wall chosen so the back columns do not hide them from the hero camera.
+WALL_16X9_XS = [1.9, -2.3, -8.0, 7.8]
+HEADWALL_FRONT_Y = HEADWALL_Y - HEADWALL_DEPTH / 2
 
+
+def column_front(x, y, z):
+    return Vector((x, y - COLUMN_CLAD_HALF, z)), 0.0
+
+
+def ribbon_xs():
+    pitch = RIBBON_SIZE[0] + 2 * JOINT_M
+    return [RIBBON_CENTER_X, RIBBON_CENTER_X - pitch, RIBBON_CENTER_X + pitch]
+
+
+def screen_spec(size, pixels, mounts):
+    center, yaw = mounts[0]
+    return {"size": size, "pixels": pixels, "mounts": mounts, "center": center, "yaw": yaw}
+
+
+# Each shape is mounted flush in several surfaces; the first mount is the one cameras aim at.
 # yaw: rotation about Z; yaw 0 means the screen faces -Y (toward the camera side of the concourse).
 SCREENS = {
-    "9x16": {
-        "size": panel_from_diagonal(55, 9, 16),
-        "pixels": (1080, 1920),
-        "center": Vector((COLUMNS[0][0], COLUMN_FRONT_Y - BEZEL_DEPTH_M, 1.9)),
-        "yaw": 0.0,
-    },
-    "16x9": {
-        "size": panel_from_diagonal(75, 16, 9),
-        "pixels": (1920, 1080),
-        "center": Vector((1.5, BACK_WALL_Y - BEZEL_DEPTH_M, 2.0)),
-        "yaw": 0.0,
-    },
-    "32x9": {
-        "size": panel_from_width(6.0, 32, 9),
-        "pixels": (3840, 1080),
-        "center": Vector((0.0, 4.5, 3.95)),
-        "yaw": 0.0,
-    },
-    "1x1": {
-        "size": (0.9, 0.9),
-        "pixels": (1080, 1080),
-        "center": pillar_face_center(1.6),
-        "yaw": PILLAR_YAW,
-    },
+    "9x16": {**screen_spec(PORTRAIT_SIZE, (1080, 1920), [column_front(*COLUMNS[0], COLUMN_LED_MID_Z)]),
+             "mounts": [], "wraps": COLUMNS},
+    "16x9": screen_spec(panel_from_diagonal(75, 16, 9), (1920, 1080),
+                        [(Vector((x, BACK_WALL_Y, WALL_16X9_Z)), 0.0) for x in WALL_16X9_XS]),
+    "32x9": screen_spec(RIBBON_SIZE, (3840, 1080),
+                        [(Vector((x, HEADWALL_FRONT_Y, RIBBON_Z)), 0.0) for x in ribbon_xs()]),
+    "1x1": {**screen_spec((0.9, 0.9), (1080, 1080), [(pillar_face_center(1.6), PILLAR_YAW)]), "mounts": []},
 }
 
 SHOT_ORDER = ["9x16", "16x9", "32x9", "1x1"]
@@ -225,23 +237,35 @@ def screen_material(shape, source, frame_count):
 
 
 def build_screens(frame_count, cut):
-    bezel = principled("bezel", (0.02, 0.02, 0.02), 0.3)
+    joint = principled("joint", (0.004, 0.004, 0.004), 0.5)
     sources = {}
     for shape, spec in SCREENS.items():
         width, height = spec["size"]
-        center, yaw = spec["center"], spec["yaw"]
-        bezel_center = center - facing(yaw) * (BEZEL_DEPTH_M / 2)
-        box(f"bezel_{shape}", bezel_center, (width + 2 * BEZEL_M, BEZEL_DEPTH_M, height + 2 * BEZEL_M), bezel, yaw)
         sources[shape] = screen_source(shape, cut)
         material = screen_material(shape, sources[shape], frame_count)
-        vertical_plane(f"screen_{shape}", center + facing(yaw) * 0.002, width, height, yaw, material)
-    ribbon = SCREENS["32x9"]
-    top_z = ribbon["center"].z + ribbon["size"][1] / 2
-    rod_len = CEILING_Z - top_z
-    for dx in (-2.6, 2.6):
-        box(f"ribbon_rod_{dx:+.1f}", (ribbon["center"].x + dx, ribbon["center"].y, top_z + rod_len / 2),
-            (0.03, 0.03, rod_len), bezel)
+        for i, (surface, yaw) in enumerate(spec["mounts"]):
+            normal = facing(yaw)
+            vertical_plane(f"joint_{shape}_{i}", surface + normal * (FLUSH_EPS_M / 2),
+                           width + 2 * JOINT_M, height + 2 * JOINT_M, yaw, joint)
+            vertical_plane(f"screen_{shape}_{i}", surface + normal * FLUSH_EPS_M, width, height, yaw, material)
+        for i, (x, y) in enumerate(spec.get("wraps", [])):
+            build_led_wrap(f"led_wrap_{i}", (x, y), COLUMN_CLAD_HALF + FLUSH_EPS_M, COLUMN_LED_RADIUS,
+                           COLUMN_LED_BOTTOM_Z, COLUMN_LED_TOP_Z, material, width / height)
+    build_screen_housings()
     return sources
+
+
+def build_screen_housings():
+    cladding = principled("column_cladding", (0.035, 0.035, 0.038), 0.32, metallic=0.7)
+    side = 2 * COLUMN_CLAD_HALF
+    for i, (x, y) in enumerate(COLUMNS):
+        for part, (z0, z1) in enumerate([(0.0, COLUMN_LED_BOTTOM_Z), (COLUMN_LED_TOP_Z, COLUMN_CLAD_TOP_Z)]):
+            box(f"column_cladding_{i}_{part}", (x, y, (z0 + z1) / 2), (side, side, z1 - z0), cladding)
+    headwall = principled("headwall", (0.09, 0.09, 0.095), 0.55)
+    height = CEILING_Z - HEADWALL_BOTTOM_Z
+    width = RIGHT_WALL_X - LEFT_WALL_X
+    box("headwall", ((LEFT_WALL_X + RIGHT_WALL_X) / 2, HEADWALL_Y, HEADWALL_BOTTOM_Z + height / 2),
+        (width, HEADWALL_DEPTH, height), headwall)
 
 
 def build_world(strength):
@@ -381,8 +405,8 @@ def main():
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
     wall = SCREENS["16x9"]
-    half = wall["size"][0] / 2 + BEZEL_M
-    look = build_look(args.look, (wall["center"].x - half, wall["center"].x + half))
+    half = wall["size"][0] / 2 + JOINT_M
+    look = build_look(args.look, [(center.x - half, center.x + half) for center, _ in wall["mounts"]])
     sources = build_screens(frame_count, cut)
     build_world(look["hdri_strength"] * light_scale)
     scale_lights(light_scale)

@@ -3,7 +3,7 @@ import math
 import bpy
 
 from layout import (
-    BACK_WALL_Y, CEILING_Z, COLUMN_SIZE, COLUMNS, FRONT_Y, LEFT_WALL_X, LIGHT_XS, LIGHT_YS,
+    BACK_WALL_Y, CEILING_TRIM_M, CEILING_Z, COLUMN_SIZE, COLUMNS, FRONT_Y, LEFT_WALL_X, LIGHT_XS, LIGHT_YS,
     PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIGHT_WALL_X, room_center, room_size,
 )
 from polyhaven import fetch_texture
@@ -168,10 +168,9 @@ def look_c(back_wall_clear):
 
 def build_louvers(material, back_wall_clear, pitch=0.15, slat_w=0.05, slat_d=0.06):
     width, depth = room_size()
-    clear_min, clear_max = back_wall_clear
     for k in range(int(width / pitch)):
         x = LEFT_WALL_X + (k + 0.5) * pitch
-        if clear_min - slat_w < x < clear_max + slat_w:
+        if any(lo - slat_w < x < hi + slat_w for lo, hi in back_wall_clear):
             continue
         box(f"louver_back_{k}", (x, BACK_WALL_Y - slat_d / 2, CEILING_Z / 2), (slat_w, slat_d, CEILING_Z), material)
     for k in range(int(depth / pitch)):
@@ -180,7 +179,7 @@ def build_louvers(material, back_wall_clear, pitch=0.15, slat_w=0.05, slat_d=0.0
     ceiling_pitch = 0.3
     for k in range(int(width / ceiling_pitch)):
         x = LEFT_WALL_X + (k + 0.5) * ceiling_pitch
-        box(f"louver_ceiling_{k}", (x, room_center().y, CEILING_Z - 0.06), (0.06, depth, 0.12), material)
+        box(f"louver_ceiling_{k}", (x, room_center().y, CEILING_Z - CEILING_TRIM_M / 2), (0.06, depth, CEILING_TRIM_M), material)
 
 
 LOOKS = {"base": look_base, "A": look_a, "B": look_b, "C": look_c}
