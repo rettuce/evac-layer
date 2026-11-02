@@ -6,7 +6,8 @@ What a screen shows while there is no alert: a generative scene on a canvas, wit
 
 - `pickAmbient(siteKey, epochMs, pinnedSceneId?)` hashes `siteKey` and the hour slot `floor(epochMs / 3600 s)`. The hash picks the scene, the overlay corner (D21 variants A–D: top-left, top-right, bottom-left, bottom-right) and the scene seed. Adjacent hours never repeat a scene while more than one is registered (the base indices of the two slots are compared, so no state is kept).
 - `scene.render(ctx, t, seed, shape)` is a pure function of its arguments. `t` is the clock time in ms (virtual or real), so the same `t` draws the same picture. Scenes never read `Date.now()` or `Math.random()`.
-- `/screen?…&scene=<id>` pins a scene (demo recordings). Unknown ids fall back to the hourly pick.
+- The site key is `seed=` on `/screen` (default: the layout name) and, in live mode, the `site` query or else the municipality code.
+- `/screen?…&scene=<id>` pins a scene (demo recordings). Unknown ids fall back to the hourly pick. The corner still follows `t`, so a recording that must not change picks a fixed `t` range as well.
 - The root element carries `data-scene`, `data-corner` and `data-slot`.
 
 ## Overlay (after wgl ss design D21)
