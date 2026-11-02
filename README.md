@@ -10,8 +10,6 @@ Turn the screens a city already has into evacuation guidance anyone can read.
 
 [All screens — every shape and level, the pillar, the ambient layer and the switch →](docs/screens.md)
 
-Built from scratch during **Built with Claude: Japan 2026** (Nov 2–8, 2026). 
-
 Built from scratch during **Built with Claude: Japan 2026** (Nov 2–8, 2026). Status: Day 2 — the pipeline runs end to end on real data; the demo video and the remaining polish are in progress.
 
 [Demo video — coming Nov 8] · [日本語の概要](#日本語の概要)
