@@ -17,7 +17,10 @@ from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from layout import BACK_WALL_Y, CEILING_Z, COLUMN_SIZE, COLUMNS, EYE_Z, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW
+from layout import (
+    BACK_WALL_Y, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
+    HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIGHT_WALL_X,
+)
 from looks import LOOKS, build_look
 from primitives import box, principled, spot_light, vertical_plane
 
@@ -31,6 +34,7 @@ CUTS = ("ambient", "switch", "alert", "off", "test")
 INCH = 0.0254
 BEZEL_M = 0.02
 BEZEL_DEPTH_M = 0.06
+FLUSH_PROUD_M = 0.012
 SCREEN_EMISSION = 3.0
 SCREEN_GLASS_ROUGHNESS = 0.06
 LENS_MM = 35.0
@@ -58,15 +62,21 @@ def pillar_face_center(height_z):
     return Vector((PILLAR_CENTER.x, PILLAR_CENTER.y, height_z)) + front
 
 
-COLUMN_FRONT_Y = COLUMNS[0][1] - COLUMN_SIZE / 2
+SIGNAGE_COLUMN = COLUMNS[0]
+COLUMN_CLAD_HALF = COLUMN_SIZE / 2 + COLUMN_CLAD_M
+COLUMN_SCREEN_Z = 1.21
 
 # yaw: rotation about Z; yaw 0 means the screen faces -Y (toward the camera side of the concourse).
 SCREENS = {
     "9x16": {
         "size": panel_from_diagonal(55, 9, 16),
         "pixels": (1080, 1920),
-        "center": Vector((COLUMNS[0][0], COLUMN_FRONT_Y - BEZEL_DEPTH_M, 1.9)),
+        "center": Vector((SIGNAGE_COLUMN[0], SIGNAGE_COLUMN[1] - COLUMN_CLAD_HALF - FLUSH_PROUD_M, COLUMN_SCREEN_Z)),
         "yaw": 0.0,
+        "mirrors": [(
+            Vector((SIGNAGE_COLUMN[0] + COLUMN_CLAD_HALF + FLUSH_PROUD_M, SIGNAGE_COLUMN[1], COLUMN_SCREEN_Z)),
+            math.pi / 2,
+        )],
     },
     "16x9": {
         "size": panel_from_diagonal(75, 16, 9),
@@ -77,7 +87,7 @@ SCREENS = {
     "32x9": {
         "size": panel_from_width(6.0, 32, 9),
         "pixels": (3840, 1080),
-        "center": Vector((0.0, 4.5, 3.95)),
+        "center": Vector((0.0, HEADWALL_Y - HEADWALL_DEPTH / 2 - FLUSH_PROUD_M, 3.95)),
         "yaw": 0.0,
     },
     "1x1": {
@@ -229,19 +239,26 @@ def build_screens(frame_count, cut):
     sources = {}
     for shape, spec in SCREENS.items():
         width, height = spec["size"]
-        center, yaw = spec["center"], spec["yaw"]
-        bezel_center = center - facing(yaw) * (BEZEL_DEPTH_M / 2)
-        box(f"bezel_{shape}", bezel_center, (width + 2 * BEZEL_M, BEZEL_DEPTH_M, height + 2 * BEZEL_M), bezel, yaw)
         sources[shape] = screen_source(shape, cut)
         material = screen_material(shape, sources[shape], frame_count)
-        vertical_plane(f"screen_{shape}", center + facing(yaw) * 0.002, width, height, yaw, material)
-    ribbon = SCREENS["32x9"]
-    top_z = ribbon["center"].z + ribbon["size"][1] / 2
-    rod_len = CEILING_Z - top_z
-    for dx in (-2.6, 2.6):
-        box(f"ribbon_rod_{dx:+.1f}", (ribbon["center"].x + dx, ribbon["center"].y, top_z + rod_len / 2),
-            (0.03, 0.03, rod_len), bezel)
+        faces = [(spec["center"], spec["yaw"])] + spec.get("mirrors", [])
+        for i, (center, yaw) in enumerate(faces):
+            bezel_center = center - facing(yaw) * (BEZEL_DEPTH_M / 2)
+            box(f"bezel_{shape}_{i}", bezel_center, (width + 2 * BEZEL_M, BEZEL_DEPTH_M, height + 2 * BEZEL_M), bezel, yaw)
+            vertical_plane(f"screen_{shape}_{i}", center + facing(yaw) * 0.002, width, height, yaw, material)
+    build_screen_housings()
     return sources
+
+
+def build_screen_housings():
+    cladding = principled("column_cladding", (0.035, 0.035, 0.038), 0.32, metallic=0.7)
+    side = 2 * COLUMN_CLAD_HALF
+    box("column_cladding", (SIGNAGE_COLUMN[0], SIGNAGE_COLUMN[1], COLUMN_CLAD_TOP_Z / 2), (side, side, COLUMN_CLAD_TOP_Z), cladding)
+    headwall = principled("headwall", (0.09, 0.09, 0.095), 0.55)
+    height = CEILING_Z - HEADWALL_BOTTOM_Z
+    width = RIGHT_WALL_X - LEFT_WALL_X
+    box("headwall", ((LEFT_WALL_X + RIGHT_WALL_X) / 2, HEADWALL_Y, HEADWALL_BOTTOM_Z + height / 2),
+        (width, HEADWALL_DEPTH, height), headwall)
 
 
 def build_world(strength):
