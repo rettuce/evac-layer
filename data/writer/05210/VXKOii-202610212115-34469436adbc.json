@@ -7,47 +7,55 @@
         "text": {
           "ja": "レベル５氾濫特別警報",
           "ja_easy": "こよしがわが あふれて います",
-          "en": "子吉川 (Koyoshi) Lv5 Flood",
+          "en": "Koyoshi R. Level 5 Flood",
           "zh_hans": "子吉川5级泛滥特别警报",
           "zh_hant": "子吉川5級氾濫特別警報",
-          "ko": "子吉川 레벨5 범람특별경보"
+          "ko": "고요시강(子吉川) 레벨5 범람 특별경보"
         },
-        "basis": "Alert raw_title「子吉川レベル５氾濫特別警報」 (areas[0].kind_name「レベル５氾濫特別警報」, level 5). ja_easy follows headline_text「《氾濫発生》子吉川では、越水による氾濫が発生中」."
+        "basis": "警報 raw_title「子吉川レベル５氾濫特別警報」、areas[0].kind_name「レベル５氾濫特別警報」。ja_easy は headline_text「《氾濫発生》子吉川では、越水による氾濫が発生中」に基づく"
       },
       {
         "role": "action",
         "text": {
-          "ja": "高い所へ上がって",
+          "ja": "高い所へ上がる",
           "ja_easy": "たかい ところへ あがって",
-          "en": "Go to higher place",
-          "zh_hans": "请到高处",
-          "zh_hant": "請到高處",
+          "en": "Go to a high place",
+          "zh_hans": "请往高处去",
+          "zh_hant": "請往高處去",
           "ko": "높은 곳으로 올라가세요"
         },
-        "basis": "Alert level 5 (警戒レベル５相当情報［洪水］, 氾濫発生中) under the secure-now template. The text matches the go_higher pictogram (move up from where you are to a higher place). It does not use にげる or ひなん, following the level-5 rule."
+        "basis": "警報 level 5（警戒レベル５相当・氾濫発生中）と図記号 go_higher（いまいる場所から高い所へ上がる）。レベル5のため避難場所への移動ではなく、いまいる場所で高い所へ上がる行動として記載（プロジェクトの取り決め）"
       },
       {
         "role": "languages",
         "text": {
-          "ja": "高い所へ上がって",
+          "ja": "高い所へ上がる",
           "ja_easy": "たかい ところへ あがって",
-          "en": "Go to higher place",
-          "zh_hans": "请到高处",
-          "zh_hant": "請到高處",
+          "en": "Go to a high place",
+          "zh_hans": "请往高处去",
+          "zh_hant": "請往高處去",
           "ko": "높은 곳으로 올라가세요"
         },
-        "basis": "Same content as the action cell. Based on alert level 5 (氾濫発生中) and the go_higher pictogram."
+        "basis": "action セルと同じ内容（警報 level 5 と図記号 go_higher）を各言語で表示"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VXKOii-202610212115-34469436adbc",
-      "input": 3126,
-      "output": 2149,
+      "input": 3225,
+      "output": 2040,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.055484
+      "usd": 0.0537
+    },
+    {
+      "stage": "writer VXKOii-202610212115-34469436adbc",
+      "input": 3268,
+      "output": 2072,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.054512
     }
   ],
   "lint": []

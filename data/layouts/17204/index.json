@@ -103,10 +103,7 @@
         "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/1x1.json",
         "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/pillar.json"
       ],
-      "report": "data/reports/17204-VPWW55-202610200500-e9e69c6c3b73/report.json",
-      "browser_skipped": [
-        "pillar"
-      ]
+      "report": "data/reports/17204-VPWW55-202610200500-e9e69c6c3b73/report.json"
     },
     {
       "issued_at": "2026-10-20T07:11:00+09:00",
@@ -126,10 +123,7 @@
         "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/1x1.json",
         "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/pillar.json"
       ],
-      "report": "data/reports/17204-VPWW55-202610200711-08afb5e91cb5/report.json",
-      "browser_skipped": [
-        "pillar"
-      ]
+      "report": "data/reports/17204-VPWW55-202610200711-08afb5e91cb5/report.json"
     },
     {
       "issued_at": "2026-10-20T09:11:00+09:00",
@@ -167,10 +161,7 @@
         "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/1x1.json",
         "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/pillar.json"
       ],
-      "report": "data/reports/17204-VPWW55-202610201141-6bb4c931f4d3/report.json",
-      "browser_skipped": [
-        "pillar"
-      ]
+      "report": "data/reports/17204-VPWW55-202610201141-6bb4c931f4d3/report.json"
     },
     {
       "issued_at": "2026-10-20T13:32:00+09:00",
@@ -253,10 +244,7 @@
         "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/1x1.json",
         "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/pillar.json"
       ],
-      "report": "data/reports/17204-VPWW55-202610211215-0f00f618dc6d/report.json",
-      "browser_skipped": [
-        "pillar"
-      ]
+      "report": "data/reports/17204-VPWW55-202610211215-0f00f618dc6d/report.json"
     },
     {
       "issued_at": "2026-10-21T13:04:00+09:00",
@@ -276,10 +264,7 @@
         "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/1x1.json",
         "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/pillar.json"
       ],
-      "report": "data/reports/17204-VPWW56-202610211304-1ebf37f5ab8a/report.json",
-      "browser_skipped": [
-        "pillar"
-      ]
+      "report": "data/reports/17204-VPWW56-202610211304-1ebf37f5ab8a/report.json"
     },
     {
       "issued_at": "2026-10-21T15:11:00+09:00",
@@ -326,10 +311,7 @@
         "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/1x1.json",
         "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/pillar.json"
       ],
-      "report": "data/reports/17204-VPWW55-202610211942-7720a18f5cfa/report.json",
-      "browser_skipped": [
-        "pillar"
-      ]
+      "report": "data/reports/17204-VPWW55-202610211942-7720a18f5cfa/report.json"
     },
     {
       "issued_at": "2026-10-21T20:58:00+09:00",
@@ -376,10 +358,7 @@
         "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/1x1.json",
         "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/pillar.json"
       ],
-      "report": "data/reports/17204-VPWW56-202610220000-d13b2ada2646/report.json",
-      "browser_skipped": [
-        "pillar"
-      ]
+      "report": "data/reports/17204-VPWW56-202610220000-d13b2ada2646/report.json"
     },
     {
       "issued_at": "2026-10-24T15:59:00+09:00",

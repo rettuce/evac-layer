@@ -6,48 +6,56 @@
         "role": "headline",
         "text": {
           "ja": "レベル５氾濫特別警報",
-          "ja_easy": "こよしがわ とくべつけいほう",
-          "en": "Koyoshi 子吉川 Lv5 Flood",
-          "zh_hans": "子吉川5级泛滥特别警报",
-          "zh_hant": "子吉川5級氾濫特別警報",
-          "ko": "고요시강(子吉川) 5단계 범람 특별경보"
+          "ja_easy": "こよしがわ はんらんとくべつけいほう",
+          "en": "Koyoshi River: Flood Lv5",
+          "zh_hans": "子吉川 5级泛滥特别警报",
+          "zh_hant": "子吉川 5級氾濫特別警報",
+          "ko": "고요시강(子吉川) 레벨5 범람 특별경보"
         },
-        "basis": "警報 raw_title「子吉川レベル５氾濫特別警報」および areas[0].kind_name「レベル５氾濫特別警報」（kind_code 51, level 5, 由利本荘市）。ja は警報名を変えずにそのまま使用。ja_easy と en は文字数予算のため短くしています。"
+        "basis": "Alert raw_title「子吉川レベル５氾濫特別警報」, areas[0].kind_name「レベル５氾濫特別警報」 (level 5, hazard flood, 由利本荘市). The JMA warning name is used as is in ja."
       },
       {
         "role": "action",
         "text": {
           "ja": "高い所へ上がって",
           "ja_easy": "たかい ところへ あがって",
-          "en": "Go up high now",
-          "zh_hans": "立即登上高处",
-          "zh_hant": "立即登上高處",
-          "ko": "즉시 높은 곳으로"
+          "en": "Move up higher",
+          "zh_hans": "到高处去",
+          "zh_hant": "到高處去",
+          "ko": "높은 곳으로 올라가세요"
         },
-        "basis": "警報 level 5（headline_text【警戒レベル５相当情報［洪水］】《氾濫切迫》）に対応する図記号 go_higher（いまいる場所から高い所へ上がる）。警戒レベル5の取り決めのため「にげる」「ひなん」は使わず、いまいる場所で命を守る行動として書いています。補足として、知識ファイル cautions（yurihonjo/tsunami_honjo_nishime.pdf p.1）に「高さのある場所」への言及があります。"
+        "basis": "Alert level 5 and headline_text「《氾濫切迫》子吉川では、氾濫しているおそれ」. The action matches the go_higher pictogram: protect life from where you are by moving to a higher place. Per the level 5 rule, it avoids evacuation-to-shelter wording and the municipal order name."
       },
       {
         "role": "languages",
         "text": {
           "ja": "高い所へ上がって",
           "ja_easy": "たかい ところへ あがって",
-          "en": "Go up high now",
-          "zh_hans": "立即登上高处",
-          "zh_hant": "立即登上高處",
-          "ko": "즉시 높은 곳으로"
+          "en": "Move up higher",
+          "zh_hans": "到高处去",
+          "zh_hant": "到高處去",
+          "ko": "높은 곳으로 올라가세요"
         },
-        "basis": "action セルと同じ内容を各言語で表示（テンプレート secure-now の指定）。根拠は action と同じで、警報 level 5 と図記号 go_higher です。"
+        "basis": "Same content as the action cell (alert level 5, headline_text「氾濫しているおそれ」, go_higher pictogram)."
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VXKOii-202610211945-a25f8f3aba7d",
-      "input": 3141,
-      "output": 1961,
+      "input": 3240,
+      "output": 2072,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.051784
+      "usd": 0.0544
+    },
+    {
+      "stage": "writer VXKOii-202610211945-a25f8f3aba7d",
+      "input": 3283,
+      "output": 2145,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.056032
     }
   ],
   "lint": []

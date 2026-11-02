@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル３氾濫警報",
-        "ja_easy": "こよしがわ はんらん けいほう",
-        "en": "子吉川 Lv3 Flood Warning",
-        "zh_hans": "子吉川 3级泛滥警报",
-        "zh_hant": "子吉川 3級氾濫警報",
-        "ko": "子吉川(고요시강) 레벨3 범람경보"
+        "ja_easy": "こよしがわ あふれる けいほう",
+        "en": "Koyoshi River Lv3 Flood",
+        "zh_hans": "子吉川3级泛滥警报",
+        "zh_hant": "子吉川3級氾濫警報",
+        "ko": "고요시강 레벨3 범람경보"
       },
       "pictogram": "flood",
       "motion": "scale-in"
@@ -36,11 +36,11 @@
       "priority": 1,
       "text": {
         "ja": "高齢者は避難",
-        "ja_easy": "おとしよりは にげてください",
+        "ja_easy": "としよりは にげて ください",
         "en": "Elderly: evacuate",
-        "zh_hans": "老人请避难",
-        "zh_hant": "老人請避難",
-        "ko": "고령자는 대피"
+        "zh_hans": "老年人请避难",
+        "zh_hant": "老年人請避難",
+        "ko": "고령자는 대피하세요"
       },
       "pictogram": "directions_run",
       "motion": "pulse"
@@ -74,11 +74,11 @@
       "priority": 3,
       "text": {
         "ja": "高齢者は避難",
-        "ja_easy": "おとしよりは にげてください",
+        "ja_easy": "としよりは にげて ください",
         "en": "Elderly: evacuate",
-        "zh_hans": "老人请避难",
-        "zh_hant": "老人請避難",
-        "ko": "고령자는 대피"
+        "zh_hans": "老年人请避难",
+        "zh_hant": "老年人請避難",
+        "ko": "고령자는 대피하세요"
       },
       "motion": "static"
     },
