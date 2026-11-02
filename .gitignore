@@ -11,3 +11,4 @@ dist/
 demo/renders/
 demo/cache/
 tmp/
+data/approvals.json
