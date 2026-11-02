@@ -87,8 +87,9 @@ async function main() {
   const fileName = (rel: string) => rel.replace(/^municipal-pdfs\//, "");
   const files = pdfs.map(fileName);
   const visionPlan = selected.vision.map((rel) => {
-    const outDir = path.join(TMP_DIR, "reader", "vision", fileName(rel).replace(/[/.]/g, "_"));
-    const tiles = planTiles(pageSizes(path.join(RAW_DIR, rel)), outDir);
+    const abs = path.join(RAW_DIR, rel);
+    const outDir = path.join(TMP_DIR, "reader", "vision", `${fileName(rel).replace(/[/.]/g, "_")}-${sha256(abs).slice(0, 16)}`);
+    const tiles = planTiles(pageSizes(abs), outDir);
     return { rel, file: fileName(rel), tiles, pages: [...new Set(tiles.map((t) => t.page))] };
   });
   const visionTokens = visionPlan.reduce((n, v) => n + imageTokens(v.tiles) + v.pages.length * VISION_PROMPT_TOKENS_PER_PAGE, 0);
