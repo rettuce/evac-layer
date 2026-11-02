@@ -58,11 +58,12 @@
       "role": "shelter",
       "priority": 2,
       "text": {
-        "ja": "輪島中学校（指定緊急避難場所）"
+        "ja": "輪島中学校"
       },
       "pictogram": "emergency_evacuation_site",
       "distance_m": 350,
-      "motion": "static"
+      "motion": "static",
+      "kind": "emergency_evacuation_site"
     },
     {
       "id": "languages",

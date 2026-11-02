@@ -24,8 +24,11 @@ export interface LayoutCell {
   pictogram?: string
   rotation?: number
   distance_m?: number
+  kind?: ShelterKind
   motion: Motion
 }
+
+export type ShelterKind = 'emergency_evacuation_site' | 'evacuation_shelter'
 
 export interface ScreenSource {
   type: 'pdf' | 'jma' | 'gsi'
