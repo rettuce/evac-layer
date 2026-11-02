@@ -21,7 +21,7 @@ Anything not listed here is internal and may change shape without notice. The si
 
 ## What the rendered screen reports
 
-The root `.evac-screen` element carries `data-shape`, `data-template`, `data-variant`, `data-level`, `data-ready="1"` once fonts are loaded and the fit loop has finished, `data-dropped="<cell id>:<reason>,..."` (reasons: `no-slot`, `duplicate-role`, `overflow`), `data-overflow="<cell id>:<lang>,..."` (what still overflows after every optional cell was dropped; `lang` is the text key that spilled — `ja` for the headline and other code-written text, `ja_easy` / `en` / `zh_hans` / `zh_hant` / `ko` for Writer text, `pictogram` when only the pictogram box spills; `screen` when the page itself overflows), `data-headline-scale="0.85"` when a 9:16 or 1:1 headline was stepped down, `data-level-scale="<steps>:<current>"` for the warning-level scale (`5:4` = Cabinet Office level 4 of 5; tsunami uses its own `3:<n>` — 1 advisory, 2 warning, 3 major warning; absent on all-clear) and `data-missing-required`. Each cell carries `data-cell-id`, `data-role`, `data-priority` and `data-motion`.
+The root `.evac-screen` element carries `data-shape`, `data-template`, `data-variant`, `data-level`, `data-ready="1"` once fonts are loaded and the fit loop has finished, `data-dropped="<cell id>:<reason>,..."` (reasons: `no-slot`, `duplicate-role`, `overflow`), `data-overflow="<cell id>:<lang>,..."` (what still overflows after every optional cell was dropped; `lang` is the text key that spilled — `ja` for the headline and other code-written text, `ja_easy` / `en` / `zh_hans` / `zh_hant` / `ko` for Writer text, `pictogram` when only the pictogram box spills; `screen` when the page itself overflows), `data-headline-scale="0.85"` when a 9:16 or 1:1 headline was stepped down and `data-missing-required`. Each cell carries `data-cell-id`, `data-role`, `data-priority` and `data-motion`.
 
 ## Templates
 
@@ -98,18 +98,16 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 
 ## Headline band
 
-- The warning level has two parts (`layout/levelScale.ts`):
-  - a vertical ladder on the left edge (`LevelLadder.vue`, `withLadder`), 1 at the bottom to 5 at the top, 144 wide on 16:9 and 32:9, 120 on 9:16 and 1:1; the current rung is in its Cabinet Office colour, 1.2x wide with a large numeral, the others at a 50 % tint (level 1 light grey), with 8 px white joints. Tsunami bulletins get three rungs (1 注意報, 2 警報, 3 大津波警報). The pillar keeps a horizontal ladder that rings the column.
-  - a round badge at the start of the headline band (`LevelBadge.vue`): the current numeral on a disc of the level colour with a 6 px white rim, 0.8 of the band height; on the level-5 black band it turns white with a black numeral. `data-level-badge` on `.evac-screen`.
-- 9:16 and 1:1: the band is at least 200 (badge, pictogram and up to two headline lines); the headline may take 2 lines (the band grows further only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
+- The band carries the warning level as text (警戒レベル4, `levelLabelFor`): beside the headline on 16:9, under it on 32:9.
+- 9:16 and 1:1: the level label sits under the headline inside the band, right-aligned, with the headline pictogram spanning both rows. The band is at least 200 (one headline line + label); the headline may take 2 lines (the band grows further only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
 - When a `languages` cell is on screen, the action cell no longer repeats the easy-Japanese line under its pictogram (it appears once, labelled).
-- `all-clear` shows no ladder and no badge: a cleared bulletin has no warning level, the white band is only the colour of level 1.
+- `all-clear` shows no level label: a cleared bulletin has no warning level, the white band is only the colour of level 1.
 
 ## Pillar (`shape=pillar`)
 
 - A square column wrapped in LED from 0.40 m to 3.60 m above the floor: logical canvas 6616 × 5046 = four faces of 1654 × 5046 side by side (face 0 is the front, then 1, 2, 3 to the right). The outer 37 px of each face lie on the rounded corner and carry no text.
-- Each face uses the 9:16 template's cells, drawn at 1.6x (`PILLAR.faceScale`; the column is read from 2–5 m) and rearranged by `pillarFace`: band, ladder and a large action pictogram fill the upper column (2.2–3.6 m); action text (up to two lines), easy Japanese, direction and shelter end 1.0 m above the floor (rows bottom-anchored); a level-colour band with the source runs round the foot (0.40–0.75 m). The band and the level ladder (on by default for the pillar) run edge to edge, so they close into rings round the column; text and pictograms repeat on every face.
-- The outer `.evac-screen` carries `data-shape="pillar"`, `data-faces="4"` and the state of face 0 (`data-overflow`, `data-dropped`, `data-level-scale`, …); it turns `data-ready="1"` when all four faces are fitted. Faces 1–3 are `aria-hidden`.
+- Each face uses the 9:16 template's cells, drawn at 1.6x (`PILLAR.faceScale`; the column is read from 2–5 m) and rearranged by `pillarFace`: band and a large action pictogram fill the upper column (2.2–3.6 m); action text (up to two lines), easy Japanese, direction and shelter end 1.0 m above the floor (rows bottom-anchored); a level-colour band with the source runs round the foot (0.40–0.75 m). The band runs edge to edge, so it closes into a ring round the column; text and pictograms repeat on every face.
+- The outer `.evac-screen` carries `data-shape="pillar"`, `data-faces="4"` and the state of face 0 (`data-overflow`, `data-dropped`, …); it turns `data-ready="1"` when all four faces are fitted. Faces 1–3 are `aria-hidden`.
 - Draw at logical pixels and capture at `deviceScaleFactor: 0.5` → 3308 × 2523 (`scripts/shot.mjs` does this).
 - Layouts: the Composer writes `pillar.json` (same cells as 9:16); live, feed and `/delivery` serve it like the other shapes.
 - Ambient is one picture round the column (alerts repeat per face so everyone sees the same information; the ambient layer should feel like one continuous space): the colour field and the D21 rules run across all 6616 px without seams, and the clock and site name appear once, on face 0 (the front) with their top at 2.0 m.

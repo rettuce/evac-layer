@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '~~/layout/fit'
 import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
-import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, rgbCss } from '~~/layout/palette'
+import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
-import { BAND_PX, STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
-import { ladderHasCaption, ladderSizePx, withLadder, type LadderMode } from '~~/layout/ladder'
-import { levelBadgeFor, levelScaleAttr, levelScaleFor } from '~~/layout/levelScale'
+import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
 import { HEADLINE_STEP_DOWN, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
@@ -16,7 +14,6 @@ const props = defineProps<{
   variant?: number
   elapsedMs: number
   reducedMotion?: boolean
-  ladder?: LadderMode
   box?: { width: number; height: number; scale: number }
 }>()
 const emit = defineEmits<{ ready: [] }>()
@@ -30,21 +27,12 @@ const root = ref<HTMLElement>()
 const scale = ref(1)
 const overflowDropped = ref<DroppedCell[]>([])
 const overflow = ref('')
-const levelScale = computed(() => levelScaleFor(props.screen.template, props.screen.alert.hazard, props.screen.alert.level))
+const levelLabel = computed(() => levelLabelFor(props.screen.template, props.screen.alert.level))
 const headlineScale = ref(1)
 const stackedHeadline = computed(() => ['portrait', 'square', 'pillar'].includes(SHAPES[props.shape].cls))
 const ready = ref(false)
 
-const shapeClass = computed(() => SHAPES[props.shape].cls)
-const ladderMode = computed(() => (levelScale.value ? (props.ladder ?? 'v') : undefined))
-const badge = computed(() => levelBadgeFor(levelScale.value))
-const BADGE_TO_BAND = 0.8
-const badgePx = computed(() => Math.round((stackedHeadline.value ? STACKED_BAND_MIN_PX : BAND_PX) * BADGE_TO_BAND))
-const layout = computed(() => {
-  const base = resolveLayout(props.screen.template, props.shape, props.variant)
-  return ladderMode.value ? withLadder(base, ladderMode.value, shapeClass.value) : base
-})
-const showLadder = computed(() => ladderMode.value !== undefined && layout.value.areas.some((row) => row.split(/\s+/).includes('ladder')))
+const layout = computed(() => resolveLayout(props.screen.template, props.shape, props.variant))
 
 const initial = computed(() => initialPlacement(props.screen.cells, layout.value))
 const placed = computed(() => {
@@ -235,25 +223,13 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-template="screen.template"
     :data-variant="layout.id"
     :data-level="screen.alert.level"
-    :data-level-scale="levelScaleAttr(levelScale)"
-    :data-level-badge="badge?.value"
     :data-dropped="dropped.map((d) => `${d.id}:${d.reason}`).join(',')"
     :data-missing-required="missing.join(',') || undefined"
     :data-overflow="overflow || undefined"
     :data-headline-scale="headlineScale !== 1 ? headlineScale : undefined"
-    :data-ladder="showLadder ? ladderMode : undefined"
     :data-ready="ready ? '1' : '0'"
     :data-bulletin-id="screen.alert.bulletin_id"
   >
-    <LevelLadder
-      v-if="showLadder && levelScale"
-      :style="{ gridArea: 'ladder' }"
-      :scale="levelScale"
-      :mode="ladderMode!"
-      :size-px="ladderSizePx(ladderMode!, shapeClass)"
-      :caption="ladderHasCaption(shapeClass)"
-      :language-index="language.index"
-    />
     <div v-if="layout.hero && heroCell?.pictogram" class="hero-pictogram" :style="{ gridArea: 'hero' }">
       <PictogramMark :id="heroCell.pictogram" :size-px="layout.hero.px" />
     </div>
@@ -270,8 +246,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     >
       <ScreenCell
         :cell="cell"
-        :badge="badge"
-        :badge-px="badgePx"
+        :level-label="levelLabel"
         :stacked-headline="stackedHeadline"
         :easy-in-action="easyInAction"
         :headline-scale="headlineScale"

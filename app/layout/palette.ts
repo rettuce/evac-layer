@@ -1,4 +1,4 @@
-import type { AlertLevel } from './types'
+import type { AlertLevel, TemplateId } from './types'
 
 type Rgb = readonly [number, number, number]
 
@@ -9,6 +9,19 @@ export const CABINET_OFFICE_5: Record<AlertLevel, Rgb> = {
   3: [255, 40, 0],
   2: [242, 231, 0],
   1: [255, 255, 255],
+}
+
+export const LEVEL_LABEL_JA: Record<AlertLevel, string> = {
+  5: '警戒レベル5',
+  4: '警戒レベル4',
+  3: '警戒レベル3',
+  2: '警戒レベル2',
+  1: '警戒レベル1',
+}
+
+// A cleared bulletin has no warning level; its white band is only the colour of level 1.
+export function levelLabelFor(template: TemplateId, level: AlertLevel): string | undefined {
+  return template === 'all-clear' ? undefined : LEVEL_LABEL_JA[level]
 }
 
 export const PAGE_BACKGROUND: Rgb = [255, 255, 255]

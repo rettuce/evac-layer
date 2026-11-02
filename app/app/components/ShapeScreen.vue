@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { LadderMode } from '~~/layout/ladder'
 import type { EvacScreen, Shape } from '~~/layout/types'
 
 defineProps<{
@@ -8,7 +7,6 @@ defineProps<{
   variant?: number
   elapsedMs: number
   reducedMotion?: boolean
-  ladder?: LadderMode
 }>()
 const emit = defineEmits<{ ready: [] }>()
 </script>
@@ -20,7 +18,6 @@ const emit = defineEmits<{ ready: [] }>()
     :variant="variant"
     :elapsed-ms="elapsedMs"
     :reduced-motion="reducedMotion"
-    :ladder="ladder"
     @ready="emit('ready')"
   />
   <EvacScreen
@@ -30,7 +27,6 @@ const emit = defineEmits<{ ready: [] }>()
     :variant="variant"
     :elapsed-ms="elapsedMs"
     :reduced-motion="reducedMotion"
-    :ladder="ladder"
     @ready="emit('ready')"
   />
 </template>
