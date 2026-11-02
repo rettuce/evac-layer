@@ -1,0 +1,33 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { countReversals, droppedCells, judgeFonts, judgeState, requiredPx, type TextSample } from "../src/verifier/checks.js";
+import { TYPE_PX } from "../../app/layout/typography";
+
+const sample = (over: Partial<TextSample>): TextSample => ({ cell_id: "c", role: "action", step_class: "action", font_px: TYPE_PX.action, kind: "primary", text: "すぐ高いところへ", ...over });
+
+test("the action line must meet the action viewing distance", () => {
+  assert.deepEqual(judgeFonts([sample({})], 1), []);
+  const [f] = judgeFonts([sample({ font_px: TYPE_PX.guide })], 1);
+  assert.equal(f.check, "font-size");
+  assert.match(f.detail, /action viewing distance 11 m/);
+});
+
+test("labels are held to the fine distance, action sub-lines to the guide distance", () => {
+  assert.equal(requiredPx("languages", 1, "label").step, "fine");
+  assert.equal(requiredPx("action", 1, "secondary").step, "guide");
+  assert.equal(requiredPx("source", 1, "primary").step, "fine");
+  assert.equal(requiredPx("headline", 2, "primary").px, TYPE_PX.guide * 2);
+});
+
+test("state attributes turn into findings; drops are reported, not failed", () => {
+  const state = { shape: "16x9", template: "evac-now", variant: "split", level: "4", dropped: "shelter:overflow", overflow: "action", missing_required: "languages" };
+  assert.deepEqual(judgeState(state).map((f) => f.check), ["missing-required", "overflow"]);
+  assert.deepEqual(droppedCells(state), [{ id: "shelter", reason: "overflow" }]);
+});
+
+test("flash counting follows WCAG 2.3.1 (10% luminance reversals)", () => {
+  assert.equal(countReversals([0.2, 0.2, 0.2]), 0);
+  assert.equal(countReversals([0.2, 0.25, 0.2]), 0);
+  assert.equal(countReversals([0.1, 0.5, 0.1]), 1);
+  assert.equal(countReversals([0.1, 0.5, 0.1, 0.5]), 2);
+});
