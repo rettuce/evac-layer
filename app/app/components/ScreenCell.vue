@@ -7,6 +7,7 @@ const props = defineProps<{
   cell: LayoutCell
   levelLabel?: string
   stackedHeadline?: boolean
+  headlineLimited?: boolean
   easyInAction?: boolean
   headlineScale?: number
   pictogramPx: number
@@ -31,7 +32,7 @@ const currentLang = computed(() => {
       <p
         class="t-guide headline-text"
         :style="headlineStyle"
-        :data-max-lines="stackedHeadline ? HEADLINE_STACKED_MAX_LINES : undefined"
+        :data-max-lines="headlineLimited ? HEADLINE_STACKED_MAX_LINES : undefined"
       ><template v-if="headlineParts(cell.text.ja).lead"><span class="keep">{{ headlineParts(cell.text.ja).lead }}</span> {{ headlineParts(cell.text.ja).rest }}</template><template v-else>{{ cell.text.ja }}</template></p>
       <p v-if="levelLabel" class="t-guide level-label">{{ levelLabel }}</p>
     </template>

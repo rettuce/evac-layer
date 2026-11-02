@@ -30,6 +30,8 @@ const overflow = ref('')
 const levelLabel = computed(() => levelLabelFor(props.screen.template, props.screen.alert.level))
 const headlineScale = ref(1)
 const stackedHeadline = computed(() => ['portrait', 'square', 'pillar'].includes(SHAPES[props.shape].cls))
+// 32:9 sets the headline in a narrow column, so it gets the same two-line limit as the stacked bands.
+const headlineLimited = computed(() => stackedHeadline.value || SHAPES[props.shape].cls === 'ribbon')
 const ready = ref(false)
 
 const layout = computed(() => resolveLayout(props.screen.template, props.shape, props.variant))
@@ -170,7 +172,7 @@ async function fit() {
       break
     }
     const headlineOver = over.cells.some((cell) => placed.value.find((c) => c.id === cell.cellId)?.role === 'headline')
-    if (headlineOver && stackedHeadline.value && headlineScale.value === 1) {
+    if (headlineOver && headlineLimited.value && headlineScale.value === 1) {
       headlineScale.value = HEADLINE_STEP_DOWN
       continue
     }
@@ -248,6 +250,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :cell="cell"
         :level-label="levelLabel"
         :stacked-headline="stackedHeadline"
+        :headline-limited="headlineLimited"
         :easy-in-action="easyInAction"
         :headline-scale="headlineScale"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
