@@ -43,3 +43,10 @@ test("level 5 placeholder and lint keep evacuation wording out", async () => {
   for (const t of Object.values(PLACEHOLDER_ACTION["5"])) assert.deepEqual(lintLevel5(t), [], t);
   assert.equal(lintLevel5("すぐ にげて")[0].rule, "level5-no-evacuation-wording");
 });
+
+test("the action does not borrow a municipal evacuation order name", async () => {
+  const { lintMunicipalOrderName } = await import("../src/writer/rules.js");
+  assert.equal(lintMunicipalOrderName("高齢者等避難")[0]?.rule, "no-municipal-order-name");
+  assert.deepEqual(lintMunicipalOrderName("高齢者等は避難"), []);
+  assert.deepEqual(lintMunicipalOrderName("危険な場所から避難"), []);
+});

@@ -46,7 +46,7 @@ export function actionPictogram(hazard: string, template: string): string {
 export const ACTION_PICTOGRAM_MEANING_JA: Record<string, string> = {
   safe_here: "解除。避難の必要がなくなったことを伝える。注意や警戒の呼びかけは書かない",
   go_higher: "いまいる場所から高い所へ上がる",
-  directions_run: "危険な場所から避難する（レベル3 は高齢者等が避難し、ほかの人は避難の準備をする）",
+  directions_run: "危険な場所から避難する（レベル3 では高齢者等が避難し、ほかの人は避難の準備をする）",
 };
 
 // heavy_rain warnings drive inundation guidance, so shelters designated for inland flooding or floods qualify.
