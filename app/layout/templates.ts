@@ -3,8 +3,8 @@ import { SHELTER_PICTOGRAM_PX } from './typography'
 
 const M = 48
 const G = 24
-export const BAND_PX = 176
-const BAND = BAND_PX
+const BAND = 176
+export const STACKED_BAND_MIN_PX = 200
 
 const LANDSCAPE: ShapeLayout = {
   id: 'split',
@@ -102,7 +102,7 @@ const SQUARE: ShapeLayout = {
     '. . .',
   ],
   required: ['headline', 'action', 'direction', 'source'],
-  pictogramPx: { headline: 112, action: 160, direction: 128, shelter: SHELTER_PICTOGRAM_PX },
+  pictogramPx: { headline: 112, action: 136, direction: 128, shelter: SHELTER_PICTOGRAM_PX },
   inline: ['direction'],
 }
 
@@ -160,7 +160,8 @@ const SECURE_PORTRAIT: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', picto
 const SECURE_RIBBON: ShapeLayout = { ...CLEAR_RIBBON, id: 'secure-columns', pictogramPx: { headline: 160, action: 384 } }
 const SECURE_SQUARE: ShapeLayout = { ...CLEAR_SQUARE, id: 'secure-square', pictogramPx: { headline: 112, action: 240 } }
 
-// 9:16 and 1:1 put the level label under the headline, so their band grows past BAND_PX for a two-line headline.
+// 9:16 and 1:1 put the level label under the headline: the band is at least STACKED_BAND_MIN_PX
+// (one headline line + label with room above and below) and grows further for a two-line headline.
 function stackedBand(layout: ShapeLayout): ShapeLayout {
   return { ...layout, rows: ['auto', ...layout.rows.slice(1)] }
 }

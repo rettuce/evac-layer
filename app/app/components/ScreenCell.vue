@@ -113,7 +113,7 @@ p {
     'pictogram label';
   align-content: center;
   row-gap: 0;
-  min-height: calc(var(--band-height) * var(--px));
+  min-height: calc(var(--stacked-band-min) * var(--px));
 }
 .role-headline.is-stacked > .pictogram {
   grid-area: pictogram;
