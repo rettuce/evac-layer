@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { countReversals, droppedCells, judgeFonts, judgeState, requiredPx, type TextSample } from "../src/verifier/checks.js";
+import { countReversals, droppedCells, judgeContent, judgeFonts, judgeState, requiredPx, type TextSample } from "../src/verifier/checks.js";
 import { TYPE_PX } from "../../app/layout/typography";
 
 const sample = (over: Partial<TextSample>): TextSample => ({ cell_id: "c", role: "action", step_class: "action", font_px: TYPE_PX.action, kind: "primary", text: "すぐ高いところへ", ...over });
@@ -9,7 +9,7 @@ test("the action line must meet the action viewing distance", () => {
   assert.deepEqual(judgeFonts([sample({})], 1), []);
   const [f] = judgeFonts([sample({ font_px: TYPE_PX.guide })], 1);
   assert.equal(f.check, "font-size");
-  assert.match(f.detail, /action viewing distance 11 m/);
+  assert.match(f.detail, /action type step/);
 });
 
 test("labels are held to the fine distance, action sub-lines to the guide distance", () => {
@@ -30,4 +30,10 @@ test("flash counting follows WCAG 2.3.1 (10% luminance reversals)", () => {
   assert.equal(countReversals([0.2, 0.25, 0.2]), 0);
   assert.equal(countReversals([0.1, 0.5, 0.1]), 1);
   assert.equal(countReversals([0.1, 0.5, 0.1, 0.5]), 2);
+});
+
+test("distance shown on both the direction and the shelter cell is flagged", () => {
+  const shelter = { id: "shelter", role: "shelter" as const, text: "輪島中学校（指定緊急避難場所） 350 m" };
+  assert.deepEqual(judgeContent([shelter, { id: "direction", role: "direction", text: "出口 B → 左 350m" }]).map((f) => f.cell_id), ["direction"]);
+  assert.deepEqual(judgeContent([shelter, { id: "direction", role: "direction", text: "出口 B → 左" }]), []);
 });

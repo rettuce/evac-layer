@@ -1,5 +1,7 @@
 import type { Role } from "../../../app/layout/types";
-import { TYPE_PX, VIEW_DISTANCE_M, type TypeStep } from "../../../app/layout/typography";
+import { TYPE_PX } from "../../../app/layout/typography";
+
+export type TypeStep = keyof typeof TYPE_PX;
 
 // The Verifier holds its own expectation per role instead of trusting the renderer's class choice: the main action
 // line must read at the action distance, guidance at the guide distance, the source line at the fine distance.
@@ -23,7 +25,8 @@ export const MAX_REVERSALS = 1;
 export type TextKind = "primary" | "secondary" | "label";
 export interface TextSample { cell_id: string; role: Role; step_class: TypeStep | null; font_px: number; kind: TextKind; text: string }
 export interface ScreenState { shape: string; template: string; variant: string; level: string; dropped: string; overflow: string | null; missing_required: string | null }
-export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker"; cell_id?: string; detail: string }
+export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated"; cell_id?: string; detail: string }
+export interface CellText { id: string; role: Role; text: string }
 
 // A language label only names the language of the text beside it, so it is held to the fine distance.
 export function requiredPx(role: Role, scale: number, kind: TextKind): { step: TypeStep; px: number } {
@@ -38,7 +41,7 @@ export function judgeFonts(samples: TextSample[], scale: number): Finding[] {
     return [{
       check: "font-size" as const,
       cell_id: s.cell_id,
-      detail: `${s.role} text "${s.text.slice(0, 24)}" is ${s.font_px}px; ${need.step} viewing distance ${VIEW_DISTANCE_M[need.step]} m needs ${need.px.toFixed(1)}px`,
+      detail: `${s.role} text "${s.text.slice(0, 24)}" is ${s.font_px}px; the ${need.step} type step needs ${need.px.toFixed(1)}px`,
     }];
   });
 }
@@ -57,4 +60,14 @@ export function droppedCells(state: ScreenState): { id: string; reason: string }
 export function countReversals(luminances: number[]): number {
   const steps = luminances.slice(1).map((l, i) => l - luminances[i]).filter((d) => Math.abs(d) >= FLASH_LUMINANCE_DELTA).map(Math.sign);
   return steps.slice(1).filter((s, i) => s !== steps[i]).length;
+}
+
+const DISTANCE = /\d[\d,.]*\s*(m|km|メートル)(?![a-z])/i;
+
+// Contract: the distance to the shelter is shown once, on the shelter cell; the direction cell carries only the way to go.
+export function judgeContent(cells: CellText[]): Finding[] {
+  const shelterHasDistance = cells.some((c) => c.role === "shelter" && DISTANCE.test(c.text));
+  return cells
+    .filter((c) => c.role === "direction" && shelterHasDistance && DISTANCE.test(c.text))
+    .map((c) => ({ check: "distance-duplicated" as const, cell_id: c.id, detail: `direction text "${c.text}" repeats the distance already shown on the shelter cell` }));
 }

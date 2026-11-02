@@ -1,11 +1,13 @@
 import type { Browser, Page } from "puppeteer-core";
 import type { Shape } from "../../../app/layout/types";
-import { SHAPES, designScale } from "../../../app/layout/shapes";
-import type { ScreenState, TextSample } from "./checks.js";
+import { SHAPES } from "../../../app/layout/shapes";
+import type { CellText, ScreenState, TextSample } from "./checks.js";
 
 const READY_TIMEOUT_MS = 30_000;
 const FLICKER_FRAMES = 3;
 const FLICKER_WINDOW_MS = 1000;
+// TYPE_PX is specified for a 1080 px short side; screens are captured at their native SHAPES size.
+const TYPE_BASE_SHORT_SIDE_PX = 1080;
 
 export type Clock = "realtime" | "virtual";
 
@@ -53,8 +55,11 @@ export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape
           }));
       }),
     );
+    const cells = await page.$$eval("[data-cell-id]", (els): CellText[] =>
+      els.map((el) => ({ id: (el as HTMLElement).dataset.cellId!, role: (el as HTMLElement).dataset.role as CellText["role"], text: (el as HTMLElement).innerText.replace(/\s+/g, " ").trim() })),
+    );
     const { width, height } = SHAPES[shape];
-    return { state, samples, scale: designScale(width, height) };
+    return { state, samples, cells, scale: Math.min(width, height) / TYPE_BASE_SHORT_SIDE_PX };
   } finally {
     await page.close();
   }

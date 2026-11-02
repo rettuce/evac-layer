@@ -16,8 +16,8 @@ Validate any document: `pnpm -F agents validate <file.json>` (schema inferred; `
 
 ## Composer (agents/src/composer/)
 
-- Slots and required cells come from `app/layout/templates.ts` (render seat), read only through `agents/src/composer/template.ts#shapeContract`. A shape may have several layout variants chosen at render time, so the Composer uses the union of their slots and the union of their required roles. It also adds the `languages` cell the contract requires on 16x9 / 9x16 / 32x9 and stops if a required role is missing.
-- Template choice: tsunami major warning / warning / advisory and level 4-5 → `evac-now`; level 3 → `evac-prepare`; all areas cleared → `all-clear`; tsunami forecast or level ≤ 2 → no screen. `evac-now` and `evac-prepare` are defined in templates.ts; `all-clear` stops with a reason until it is.
+- Slots and required cells come from the render seat's public `resolveTemplate(templateId, shape)` (`app/layout/README.md`), read through `agents/src/composer/template.ts#shapeContract`. The Composer also adds the `languages` cell the contract requires on 16x9 / 9x16 / 32x9 and stops if a required role is missing.
+- Template choice: tsunami major warning / warning / advisory and level 4-5 → `evac-now`; level 3 → `evac-prepare`; all areas cleared → `all-clear`; tsunami forecast or level ≤ 2 → no screen. All three (`evac-now`, `evac-prepare`, `all-clear`) are defined in templates.ts.
 - Shelter: nearest GSI designated emergency evacuation site whose designated hazards match the alert (heavy_rain → inland_flood or flood), excluding any name listed in `conflicts[]`; distance rounded to 10 m and shown once, on the shelter cell.
 
 ### Character budgets (provisional, `agents/src/composer/budgets.ts`)

@@ -4,7 +4,7 @@ import { parseArgs } from "node:util";
 import puppeteer from "puppeteer-core";
 import type { Shape } from "../../../app/layout/types";
 import { TMP_DIR } from "../paths.js";
-import { MAX_REVERSALS, countReversals, droppedCells, judgeFonts, judgeState, type Finding } from "./checks.js";
+import { MAX_REVERSALS, countReversals, droppedCells, judgeContent, judgeFonts, judgeState, type Finding } from "./checks.js";
 import { readScreen, sampleLuminance, type Clock } from "./browser.js";
 
 const SHAPES: Shape[] = ["16x9", "9x16", "32x9", "1x1"];
@@ -28,10 +28,10 @@ const browser = await puppeteer.launch({ executablePath: values.chrome, headless
 try {
   const screens = [];
   for (const shape of SHAPES) {
-    const { state, samples, scale } = await readScreen(browser, target, shape);
+    const { state, samples, cells, scale } = await readScreen(browser, target, shape);
     const luminances = await sampleLuminance(browser, target, shape, values.clock as Clock);
     const reversals = countReversals(luminances);
-    const findings: Finding[] = [...judgeState(state), ...judgeFonts(samples, scale)];
+    const findings: Finding[] = [...judgeState(state), ...judgeFonts(samples, scale), ...judgeContent(cells)];
     if (reversals > MAX_REVERSALS) findings.push({ check: "flicker", detail: `${reversals} luminance reversals of ≥10% within 1 s (${luminances.map((l) => l.toFixed(4)).join(", ")})` });
     screens.push({
       shape, template: state.template, variant: state.variant, level: state.level,
