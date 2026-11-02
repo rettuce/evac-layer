@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   runtimeConfig: {
     repoRoot: fileURLToPath(new URL('..', import.meta.url)),
+    dataDir: '',
   },
   css: [
     '@fontsource/noto-sans-jp/400.css',
