@@ -1,0 +1,114 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Noto Sans JP', 'Noto Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-kerning: normal;
+}
+
+:lang(en) {
+  font-family: 'Noto Sans', 'Noto Sans JP', sans-serif;
+}
+:lang(zh-Hans) {
+  font-family: 'Noto Sans SC', 'Noto Sans', sans-serif;
+}
+:lang(zh-Hant) {
+  font-family: 'Noto Sans TC', 'Noto Sans', sans-serif;
+}
+:lang(ko) {
+  font-family: 'Noto Sans KR', 'Noto Sans', sans-serif;
+}
+
+.evac-screen {
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+}
+.evac-screen[data-ready='0'] {
+  visibility: hidden;
+}
+
+.cell {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.cell.is-band {
+  background: var(--band);
+  color: var(--band-ink);
+}
+.cell.is-dark-band {
+  background: var(--dark-band);
+  color: var(--dark-band-ink);
+  padding: 0 calc(48 * var(--px));
+}
+
+.t-action,
+.t-guide {
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.t-action {
+  font-size: calc(var(--fs-action) * var(--px));
+  line-height: var(--lh-action);
+  font-weight: 700;
+}
+.t-guide {
+  font-size: calc(var(--fs-guide) * var(--px));
+  line-height: var(--lh-guide);
+  font-weight: 700;
+}
+.t-fine {
+  font-size: calc(var(--fs-fine) * var(--px));
+  line-height: var(--lh-fine);
+  font-weight: 400;
+}
+
+.m-scale-in {
+  animation: scale-in var(--scale-in-ms) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.m-pulse {
+  animation:
+    scale-in var(--scale-in-ms) cubic-bezier(0.2, 0.7, 0.2, 1) both,
+    pulse var(--pulse-period) ease-in-out var(--scale-in-ms) infinite;
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(var(--scale-in-from));
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--pulse-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m-scale-in,
+  .m-pulse {
+    animation: none;
+  }
+}
