@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { headlineParts } from '~~/layout/headline'
 import { HEADLINE_STACKED_MAX_LINES, HTML_LANG, LANG_LABEL, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
-import type { LevelBadge } from '~~/layout/levelScale'
 import type { LangKey, LayoutCell } from '~~/layout/types'
 
 const props = defineProps<{
   cell: LayoutCell
-  badge?: LevelBadge
-  badgePx?: number
+  levelLabel?: string
   stackedHeadline?: boolean
   easyInAction?: boolean
   headlineScale?: number
@@ -29,13 +27,13 @@ const currentLang = computed(() => {
 <template>
   <div class="cell-body" :class="[`role-${cell.role}`, { 'is-stacked': cell.role === 'headline' && stackedHeadline }]">
     <template v-if="cell.role === 'headline'">
-      <LevelBadge v-if="badge && badgePx" :badge="badge" :diameter-px="badgePx" />
       <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" />
       <p
         class="t-guide headline-text"
         :style="headlineStyle"
         :data-max-lines="stackedHeadline ? HEADLINE_STACKED_MAX_LINES : undefined"
       ><template v-if="headlineParts(cell.text.ja).lead"><span class="keep">{{ headlineParts(cell.text.ja).lead }}</span> {{ headlineParts(cell.text.ja).rest }}</template><template v-else>{{ cell.text.ja }}</template></p>
+      <p v-if="levelLabel" class="t-guide level-label">{{ levelLabel }}</p>
     </template>
 
     <template v-else-if="cell.role === 'action'">
@@ -106,8 +104,31 @@ p {
   gap: calc(24 * var(--px));
   padding: 0 calc(48 * var(--px));
 }
+.role-headline .level-label {
+  margin-left: auto;
+  white-space: nowrap;
+}
 .role-headline.is-stacked {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'pictogram text'
+    'pictogram label';
+  align-content: center;
+  row-gap: 0;
   min-height: calc(var(--stacked-band-min) * var(--px));
+}
+.role-headline.is-stacked > .pictogram {
+  grid-area: pictogram;
+  align-self: center;
+}
+.role-headline.is-stacked .headline-text {
+  grid-area: text;
+}
+.role-headline.is-stacked .level-label {
+  grid-area: label;
+  margin-left: 0;
+  text-align: right;
 }
 .role-headline .headline-text {
   min-width: 0;
@@ -125,6 +146,9 @@ p {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+}
+.shape-ribbon .role-headline .level-label {
+  margin-left: 0;
 }
 .role-action,
 .role-direction,

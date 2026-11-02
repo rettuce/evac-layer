@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { LadderMode } from '~~/layout/ladder'
 import { PILLAR } from '~~/layout/shapes'
 import type { EvacScreen } from '~~/layout/types'
 
@@ -8,13 +7,12 @@ const props = defineProps<{
   variant?: number
   elapsedMs: number
   reducedMotion?: boolean
-  ladder?: LadderMode
 }>()
 const emit = defineEmits<{ ready: [] }>()
 
 const FACES = Array.from({ length: PILLAR.faces }, (_, i) => i)
 const FACE_BOX = { width: PILLAR.faceWidth, height: PILLAR.height, scale: PILLAR.faceScale }
-const COPIED_STATE = ['template', 'variant', 'level', 'levelScale', 'levelBadge', 'ladder', 'dropped', 'missingRequired', 'overflow', 'headlineScale', 'bulletinId'] as const
+const COPIED_STATE = ['template', 'variant', 'level', 'dropped', 'missingRequired', 'overflow', 'headlineScale', 'bulletinId'] as const
 
 const firstFace = ref<HTMLElement>()
 const readyFaces = ref(new Set<number>())
@@ -47,9 +45,6 @@ watch(
     :data-template="state.template"
     :data-variant="state.variant"
     :data-level="state.level"
-    :data-level-scale="state.levelScale"
-    :data-level-badge="state.levelBadge"
-    :data-ladder="state.ladder"
     :data-dropped="state.dropped"
     :data-missing-required="state.missingRequired || undefined"
     :data-overflow="state.overflow || undefined"
@@ -72,7 +67,6 @@ watch(
         :variant="variant"
         :elapsed-ms="elapsedMs"
         :reduced-motion="reducedMotion"
-        :ladder="ladder ?? 'h'"
         :box="FACE_BOX"
         @ready="onFaceReady(face)"
       />
@@ -90,12 +84,5 @@ watch(
 .pillar-face {
   position: absolute;
   top: 0;
-  --corner: calc(v-bind('PILLAR.cornerPx') * 1px);
-}
-.pillar-face :deep(.ladder .rung:first-child) {
-  padding-left: var(--corner);
-}
-.pillar-face :deep(.ladder .rung:last-child) {
-  padding-right: var(--corner);
 }
 </style>

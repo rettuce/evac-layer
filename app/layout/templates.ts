@@ -1,12 +1,10 @@
 import type { Role, Shape, ShapeLayout, TemplateDef, TemplateId, Track } from './types'
-import { LADDER_H_PX } from './ladder'
 import { PILLAR } from './shapes'
 import { SHELTER_PICTOGRAM_PX } from './typography'
 
 const M = 48
 const G = 24
 const BAND = 176
-export const BAND_PX = BAND
 export const STACKED_BAND_MIN_PX = 200
 
 const LANDSCAPE: ShapeLayout = {
@@ -197,7 +195,7 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
 }
 
 // Pillar faces read best at eye height: the reading rows end 1.0 m above the floor, a level-colour band
-// with the source runs round the foot of the column (0.40–0.75 m), and the top band, ladder and one large
+// with the source runs round the foot of the column (0.40–0.75 m), and the top band and one large
 // action pictogram take the upper column. Rows are in design px, so metres are divided by the face scale.
 const PILLAR_EYE_LOW_M = 1.0
 const PILLAR_EYE_HIGH_M = 2.2
@@ -212,7 +210,7 @@ function pillarDesignPx(fromMetres: number, toMetres: number): number {
 function pillarFace(layout: ShapeLayout): ShapeLayout {
   const roles = areaRoles(layout)
   const topMetres = PILLAR.floorMetres + PILLAR.height / PILLAR.pxPerMetre
-  const heroRow = pillarDesignPx(PILLAR_EYE_HIGH_M, topMetres) - STACKED_BAND_MIN_PX - LADDER_H_PX.pillar
+  const heroRow = pillarDesignPx(PILLAR_EYE_HIGH_M, topMetres) - STACKED_BAND_MIN_PX
   const rows: Track[] = [layout.rows[0]!, heroRow, '1fr']
   const areas = ['headline headline headline', '. hero .', '. . .']
   PILLAR_BODY_ORDER.filter((role) => roles.has(role)).forEach((role, i) => {
