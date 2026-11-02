@@ -1,6 +1,6 @@
 // Records /screen as a deterministic PNG sequence on a virtual clock, then encodes it with ffmpeg.
 //
-//   node demo/capture/record.mjs --shape 16x9 --cut alert [--seconds 1] [--site-name <name>] [--verify]
+//   node demo/capture/record.mjs --shape 16x9 --cut alert [--seconds 1] [--from-ms <ms>] [--site-name <name>] [--verify]
 //
 // Output: demo/screens/<shape>_<cut>.mp4 (h264, yuv420p, no audio, native screen resolution).
 import { execFile } from 'node:child_process'
@@ -65,6 +65,8 @@ function options() {
       out: { type: 'string' },
       'keep-frames': { type: 'boolean', default: false },
       verify: { type: 'boolean', default: false },
+      'from-ms': { type: 'string' },
+      'frames-dir': { type: 'string' },
     },
   })
   if (!SHAPES[values.shape]) throw new Error(`--shape must be one of ${Object.keys(SHAPES).join(', ')}`)
@@ -74,6 +76,7 @@ function options() {
   return {
     ...values,
     fps,
+    startMs: values['from-ms'] ? Number(values['from-ms']) : CUTS[values.cut].startMs,
     frameCount: Math.round(seconds * fps),
     out: values.out ?? `${SCREENS_DIR}${values.shape}_${values.cut}.mp4`,
   }
@@ -120,7 +123,7 @@ async function seekOnce(page, opts, tMs) {
 }
 
 const frameName = (frame) => String(frame + 1).padStart(5, '0')
-const frameTime = (opts, frame) => CUTS[opts.cut].startMs + (frame * 1000) / opts.fps
+const frameTime = (opts, frame) => opts.startMs + (frame * 1000) / opts.fps
 
 async function openPage(browser, opts, tMs) {
   const page = await browser.newPage()
@@ -175,7 +178,8 @@ async function captureFrames(browser, opts, framesDir) {
 // Frames to re-shoot: first, middle, last, and the two frames around each screen change.
 function verifyFrames(opts) {
   const frames = [0, Math.floor(opts.frameCount / 2), opts.frameCount - 1]
-  const { startMs, events } = CUTS[opts.cut]
+  const { startMs } = opts
+  const { events } = CUTS[opts.cut]
   for (const eventMs of events) {
     const eventFrame = Math.round(((eventMs - startMs) / 1000) * opts.fps)
     frames.push(eventFrame - 1, eventFrame)
@@ -225,7 +229,7 @@ async function encode(opts, framesDir) {
 
 async function main() {
   const opts = options()
-  const framesDir = `${FRAMES_ROOT}${opts.shape}_${opts.cut}/`
+  const framesDir = opts['frames-dir'] ? `${opts['frames-dir'].replace(/\/$/, '')}/` : `${FRAMES_ROOT}${opts.shape}_${opts.cut}/`
   await rm(framesDir, { recursive: true, force: true })
   await mkdir(framesDir, { recursive: true })
   const started = performance.now()
