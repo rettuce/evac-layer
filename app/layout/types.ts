@@ -55,15 +55,17 @@ export interface EvacScreen {
 export type Track = number | `${number}fr` | 'auto'
 
 export interface ShapeLayout {
+  id: string
   columns: Track[]
   rows: Track[]
   areas: string[]
   required: Role[]
   pictogramPx: Partial<Record<Role, number>>
   darkBand?: Role[]
+  inline?: Role[]
 }
 
-export type TemplateDef = Record<Shape, ShapeLayout>
+export type TemplateDef = Record<Shape, ShapeLayout[]>
 
 export type DropReason = 'no-slot' | 'duplicate-role' | 'overflow'
 export interface DroppedCell {

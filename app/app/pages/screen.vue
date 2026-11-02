@@ -11,6 +11,7 @@ function fixtureByName(name: string): EvacScreen | undefined {
 const route = useRoute()
 const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
 const screen = computed(() => fixtureByName(layoutName.value))
+const variant = computed(() => Number(route.query.variant ?? 0) || 0)
 const shape = computed(() => {
   const requested = route.query.shape
   return isShape(requested) ? requested : shapeForViewport(window.innerWidth, window.innerHeight)
@@ -18,7 +19,7 @@ const shape = computed(() => {
 </script>
 
 <template>
-  <EvacScreen v-if="screen" :screen="screen" :shape="shape" />
+  <EvacScreen v-if="screen" :screen="screen" :shape="shape" :variant="variant" />
   <p v-else class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</p>
 </template>
 

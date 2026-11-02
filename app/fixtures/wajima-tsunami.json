@@ -50,7 +50,7 @@
         "ja": "出口 B → 左 350m"
       },
       "pictogram": "arrow_forward",
-      "rotation": 90,
+      "rotation": 180,
       "motion": "static"
     },
     {
