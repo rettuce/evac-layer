@@ -1,42 +1,31 @@
 <script setup lang="ts">
-import { ambientOffset, ambientPalette, formatClockJst } from '~~/layout/ambient'
-import { designScale } from '~~/layout/shapes'
-import { TYPE_PX } from '~~/layout/typography'
+import { D21_TYPE, clockSweep, CLOCK_SWEEP_LENGTH, formatClockJst, overlayGeometry, pickAmbient } from '~~/layout/ambient'
+import type { Shape } from '~~/layout/types'
 
-const props = defineProps<{ seed: string; elapsedMs: number; clockEpochMs: number; siteName: string }>()
+const props = defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string }>()
 
 const canvas = ref<HTMLCanvasElement>()
-const scale = ref(1)
-const palette = computed(() => ambientPalette(props.seed))
-const label = computed(() => `${props.siteName}　${formatClockJst(props.clockEpochMs)}`)
+const viewport = ref({ width: 0, height: 0 })
+const pick = computed(() => pickAmbient(props.seed, props.clockEpochMs, props.scene))
+const geometry = computed(() => overlayGeometry(viewport.value.width, viewport.value.height, pick.value.corner))
+const time = computed(() => formatClockJst(props.clockEpochMs))
+const sweep = computed(() => clockSweep(props.clockEpochMs))
 
 function draw() {
   const el = canvas.value
-  if (!el) return
-  const width = window.innerWidth
-  const height = window.innerHeight
+  const { width, height } = viewport.value
+  if (!el || width === 0) return
   if (el.width !== width || el.height !== height) {
     el.width = width
     el.height = height
   }
+  // CPU-backed canvas: the GPU path rasterised the same gradients slightly differently between runs.
   const ctx = el.getContext('2d', { willReadFrequently: true })!
-  const { colors } = palette.value
-  const tile = height * 2
-  const gradient = ctx.createLinearGradient(0, 0, 0, tile)
-  colors.forEach((color, i) => gradient.addColorStop(i / colors.length, color))
-  gradient.addColorStop(1, colors[0]!)
-  const shift = Math.round(ambientOffset(palette.value, props.elapsedMs) * tile)
-  ctx.fillStyle = gradient
-  ctx.save()
-  ctx.translate(0, -shift)
-  ctx.fillRect(0, 0, width, tile)
-  ctx.fillRect(0, tile, width, tile)
-  ctx.restore()
+  pick.value.scene.render(ctx, props.clockEpochMs, pick.value.seed, props.shape)
 }
 
 function onResize() {
-  scale.value = designScale(window.innerWidth, window.innerHeight)
-  draw()
+  viewport.value = { width: window.innerWidth, height: window.innerHeight }
 }
 
 onMounted(() => {
@@ -44,13 +33,43 @@ onMounted(() => {
   window.addEventListener('resize', onResize)
 })
 onBeforeUnmount(() => window.removeEventListener('resize', onResize))
-watch(() => [props.elapsedMs, props.seed], draw)
+watch([() => props.clockEpochMs, () => props.shape, pick, viewport], draw, { flush: 'post' })
 </script>
 
 <template>
-  <div class="ambient" :style="{ '--px': `${scale}px`, '--fs-fine': TYPE_PX.fine }" data-layer="ambient" data-ready="1">
+  <div
+    class="ambient"
+    :class="`ink-${pick.scene.ink}`"
+    :style="{
+      '--s': `${geometry.scale}px`,
+      '--label-size': D21_TYPE.label.size,
+      '--label-line': D21_TYPE.label.line,
+      '--time-size': D21_TYPE.time.size,
+      '--time-line': D21_TYPE.time.line,
+      '--sweep-length': CLOCK_SWEEP_LENGTH,
+    }"
+    data-layer="ambient"
+    :data-scene="pick.scene.id"
+    :data-corner="pick.corner"
+    :data-slot="pick.slot"
+    :data-ready="viewport.width > 0 ? '1' : '0'"
+  >
     <canvas ref="canvas" class="ambient-canvas" />
-    <p class="ambient-label">{{ label }}</p>
+    <div v-for="x in geometry.rules" :key="x" class="rule" :style="{ left: `${x}px` }" />
+    <div
+      class="block"
+      :class="pick.corner"
+      :style="{
+        left: `${geometry.block.left}px`,
+        width: `${geometry.block.width}px`,
+        top: geometry.block.top === undefined ? undefined : `${geometry.block.top}px`,
+        bottom: geometry.block.bottom === undefined ? undefined : `${geometry.block.bottom}px`,
+      }"
+    >
+      <p class="site">{{ siteName }}</p>
+      <p class="time">{{ time }}</p>
+      <div class="track"><div class="sweep" :style="{ left: `${sweep * 100}%` }" /></div>
+    </div>
   </div>
 </template>
 
@@ -59,20 +78,62 @@ watch(() => [props.elapsedMs, props.seed], draw)
   position: fixed;
   inset: 0;
   overflow: hidden;
+  --ink: rgb(21 24 28);
+}
+.ambient.ink-light {
+  --ink: rgb(244 242 236);
 }
 .ambient-canvas {
   display: block;
   width: 100%;
   height: 100%;
 }
-.ambient-label {
+.rule {
   position: absolute;
-  right: calc(48 * var(--px));
-  bottom: calc(40 * var(--px));
-  margin: 0;
-  font-size: calc(var(--fs-fine) * var(--px));
+  top: calc(48 * var(--s));
+  bottom: calc(48 * var(--s));
+  width: 1px;
+  background: var(--ink);
+  opacity: 0.14;
+}
+.block {
+  position: absolute;
+  color: var(--ink);
+}
+.block.top-right,
+.block.bottom-right {
+  text-align: right;
+}
+.site {
+  margin: 0 0 calc(8 * var(--s));
+  font-size: calc(var(--label-size) * var(--s));
+  line-height: calc(var(--label-line) * var(--s));
   font-weight: 400;
-  color: rgb(0 0 0 / 0.55);
+  letter-spacing: 0.04em;
+  opacity: 0.8;
+}
+.time {
+  margin: 0;
+  font-family: 'Noto Sans', sans-serif;
+  font-size: calc(var(--time-size) * var(--s));
+  line-height: calc(var(--time-line) * var(--s));
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.track {
+  position: relative;
+  height: 1px;
+  margin-top: calc(24 * var(--s));
+  background: var(--ink);
+  opacity: 0.4;
+}
+.sweep {
+  position: absolute;
+  top: -1px;
+  height: 3px;
+  width: calc(var(--sweep-length) * var(--s));
+  margin-left: calc(var(--sweep-length) * var(--s) * -0.5);
+  background: var(--ink);
 }
 </style>
