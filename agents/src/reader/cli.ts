@@ -4,6 +4,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import Anthropic, { toFile } from "@anthropic-ai/sdk";
 import { ENV_FILE, MUNICIPALITIES_DIR, RAW_DIR, TMP_DIR } from "../paths.js";
+import { loadApiKey } from "../apikey.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { assemble, type SourceMeta } from "./assemble.js";
 import { addVisionClaims, collectClaims, renderClaims, type Citation, type Claim } from "./claims.js";
@@ -41,22 +42,6 @@ const { values } = parseArgs({
 
 function sha256(file: string) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
-}
-
-// Reports where the key came from, never the key: process.loadEnvFile does not override a variable already in the
-// environment, so a stale shell export silently wins over a fresh .env.
-// A placeholder such as "sk-ant-..." must never reach the API; only the shape of a Console API key is checked.
-const API_KEY_PREFIX = "sk-ant-";
-const API_KEY_MIN_LENGTH = 40;
-
-function loadApiKey(): { present: boolean; wellFormed: boolean; source: "environment" | "dotenv" | "none"; dotenvPresent: boolean } {
-  const fromEnv = Boolean(process.env.ANTHROPIC_API_KEY);
-  const dotenvPresent = fs.existsSync(ENV_FILE);
-  if (dotenvPresent) process.loadEnvFile(ENV_FILE);
-  const value = process.env.ANTHROPIC_API_KEY ?? "";
-  const present = value.length > 0;
-  const wellFormed = value.startsWith(API_KEY_PREFIX) && value.length >= API_KEY_MIN_LENGTH;
-  return { present, wellFormed, source: fromEnv ? "environment" : present ? "dotenv" : "none", dotenvPresent };
 }
 
 function selectPdfs(reports: { rel: string; report: TextLayerReport }[]) {
@@ -154,7 +139,7 @@ async function main() {
     return;
   }
   if (!key.present) stop(`ANTHROPIC_API_KEY not found (${ENV_FILE} absent or empty). Run with --dry-run until the key is set.`);
-  if (!key.wellFormed) stop(`ANTHROPIC_API_KEY (from ${key.source}) does not look like a Console API key (expected "${API_KEY_PREFIX}…", at least ${API_KEY_MIN_LENGTH} characters); it may still be a placeholder. No API call was made.`);
+  if (!key.wellFormed) stop(`ANTHROPIC_API_KEY (from ${key.source}) does not look like an API key; it may still be a placeholder. No API call was made.`);
 
   const client = new Anthropic();
   fs.mkdirSync(path.join(TMP_DIR, "reader"), { recursive: true });

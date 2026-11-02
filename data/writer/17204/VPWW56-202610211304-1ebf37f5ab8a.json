@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル３土砂災害警報",
+          "ja_easy": "レベル３ どしゃさいがい けいほう",
+          "en": "Landslide Warning Lv.3",
+          "zh_hans": "3级泥石流灾害警报",
+          "zh_hant": "3級土石災害警報",
+          "ko": "레벨3 토사재해 경보"
+        },
+        "basis": "警報 areas[0].kind_name「レベル３土砂災害警報」（輪島市、level 3、status upgraded）。ja は警報名をそのまま使用"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "避難の準備",
+          "ja_easy": "にげる じゅんびを して",
+          "en": "Get ready to leave",
+          "zh_hans": "做好避难准备",
+          "zh_hant": "做好避難準備",
+          "ko": "대피 준비를 하세요"
+        },
+        "basis": "警報 level 3 と headline_text「能登では、土砂災害に警戒してください。」、テンプレート evac-prepare（表示レベル3）。自治体知識ファイルに土砂災害の避難先の記載なし（hazards 空）のため避難所名は書かない"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "避難の準備",
+          "ja_easy": "にげる じゅんびを して",
+          "en": "Prepare to evacuate",
+          "zh_hans": "做好避难准备",
+          "zh_hant": "做好避難準備",
+          "ko": "대피 준비를 하세요"
+        },
+        "basis": "action セルと同じ内容（警報 level 3、headline_text、テンプレート evac-prepare）を各言語で表示"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VPWW56-202610211304-1ebf37f5ab8a",
+      "input": 4755,
+      "output": 1295,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.04492
+    }
+  ],
+  "lint": []
+}
