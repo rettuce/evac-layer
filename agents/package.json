@@ -14,7 +14,8 @@
     "writer": "tsx src/writer/cli.ts",
     "compose": "tsx src/composer/cli.ts",
     "verify": "tsx src/verifier/cli.ts",
-    "pipeline": "tsx src/loop/cli.ts"
+    "pipeline": "tsx src/loop/cli.ts",
+    "shelters": "tsx src/reader/shelters-cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

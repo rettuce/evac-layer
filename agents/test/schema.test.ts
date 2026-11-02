@@ -55,3 +55,13 @@ test("languages cell must carry ja_easy, en, zh_hans and ko at priority 3", () =
   delete lang.text.ko;
   assert.equal(validateDoc(doc).ok, false);
 });
+
+test("committed GSI shelter files validate", () => {
+  for (const id of ["17204", "22424", "14100"]) {
+    const doc = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, `data/municipalities/${id}.shelters.json`), "utf8"));
+    const r = validateDoc(doc);
+    assert.equal(r.schema, "shelters");
+    assert.ok(r.ok, formatErrors(r.errors));
+    assert.equal(doc.shelters.length, doc.counts.emergency_evacuation_site + doc.counts.evacuation_shelter);
+  }
+});
