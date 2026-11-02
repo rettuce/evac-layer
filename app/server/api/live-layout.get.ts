@@ -1,13 +1,15 @@
-import { join } from 'node:path'
-import { isShape } from '~~/layout/shapes'
-import { isBulletinId, isMunicipalityId } from '~~/layout/replay'
-
+// Screens only ever show layouts an operator approved, and only at sites with auto publish on;
+// everything else stays on the ambient layer.
 export default defineEventHandler(async (event) => {
-  const { municipality, bulletin, shape } = getQuery(event)
-  if (!isMunicipalityId(municipality) || !isBulletinId(bulletin) || !isShape(shape)) {
-    throw createError({ status: 400, statusText: 'Bad Request', message: 'municipality, bulletin and shape are required' })
+  const query = getQuery(event)
+  const layoutQuery = parseLayoutQuery(query)
+  const site = isSiteId(query.site) ? query.site : await defaultSiteFor(layoutQuery.municipality)
+  const approvals = await readApprovals()
+  if (!site || !approvals.sites[site]?.auto_publish) {
+    throw createError({ status: 403, statusText: 'Forbidden', data: { reason: 'auto-publish-off', site } })
   }
-  const layout = await readJsonIfExists(join(dataDir(), 'layouts', municipality, bulletin, `${shape}.json`))
-  if (!layout) throw createError({ status: 404, statusText: 'Not Found', message: `no layout for ${bulletin} ${shape}` })
-  return layout
+  if (!approvals.layouts[layoutKey(layoutQuery.municipality, layoutQuery.bulletin)]?.approved) {
+    throw createError({ status: 403, statusText: 'Forbidden', data: { reason: 'unapproved', site } })
+  }
+  return readLayout(layoutQuery)
 })
