@@ -48,6 +48,8 @@ const CUTS = {
   ambient: { seconds: 12, startMs: 0, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   switch: { seconds: 27, startMs: 5000, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
+  // The dashboard counts up in about 4 s of its own clock; a quarter rate stretches that over the cut.
+  dashboard: { seconds: 25, startMs: 0, rate: 0.25, page: '/dashboard', query: {}, ready: '.dashboard[data-ready="1"]', events: [] },
   'fixture-alert': { seconds: 27, startMs: 0, query: { layout: 'wajima-tsunami' }, ready: READY_SELECTOR, events: [] },
   'scenario-ambient': { seconds: 12, startMs: 0, query: { ...SCENARIO, scenario: 'ambient' }, ready: READY_SELECTOR, events: [] },
   'scenario-switch': {
@@ -93,7 +95,7 @@ function frameUrl(opts, tMs) {
     ...CUTS[opts.cut].query,
   })
   if (opts['site-name'] && opts.cut !== 'alert') params.set('site_name', opts['site-name'])
-  return `${opts['base-url']}/screen?${params}`
+  return `${opts['base-url']}${CUTS[opts.cut].page ?? '/screen'}?${params}`
 }
 
 // Prefer an in-page clock hook when the renderer exposes one; a full navigation per frame is the fallback.
@@ -126,7 +128,7 @@ async function seekOnce(page, opts, tMs) {
 }
 
 const frameName = (frame) => String(frame + 1).padStart(5, '0')
-const frameTime = (opts, frame) => opts.startMs + (frame * 1000) / opts.fps
+const frameTime = (opts, frame) => opts.startMs + ((frame * 1000) / opts.fps) * (CUTS[opts.cut].rate ?? 1)
 
 async function openPage(browser, opts, tMs) {
   const page = await browser.newPage()
@@ -185,7 +187,7 @@ function verifyFrames(opts) {
   const { startMs } = opts
   const { events } = CUTS[opts.cut]
   for (const eventMs of events) {
-    const eventFrame = Math.round(((eventMs - startMs) / 1000) * opts.fps)
+    const eventFrame = Math.round(((eventMs - startMs) / 1000 / (CUTS[opts.cut].rate ?? 1)) * opts.fps)
     frames.push(eventFrame - 1, eventFrame)
   }
   return [...new Set(frames)].filter((f) => f >= 0 && f < opts.frameCount).sort((a, b) => a - b)
