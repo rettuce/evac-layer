@@ -25,7 +25,7 @@ export const MAX_REVERSALS = 1;
 export type TextKind = "primary" | "secondary" | "label";
 export interface TextSample { cell_id: string; role: Role; step_class: TypeStep | null; font_px: number; kind: TextKind; text: string }
 export interface ScreenState { shape: string; template: string; variant: string; level: string; dropped: string; overflow: string | null; missing_required: string | null }
-export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source"; cell_id?: string; detail: string }
+export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source"; cell_id?: string; lang?: string; detail: string }
 export interface CellText { id: string; role: Role; text: string }
 
 // A label (language name, shelter designation) only names what the text beside it is, so it is held to the fine distance.
@@ -49,7 +49,10 @@ export function judgeFonts(samples: TextSample[], scale: number): Finding[] {
 export function judgeState(state: ScreenState): Finding[] {
   const out: Finding[] = [];
   if (state.missing_required) out.push({ check: "missing-required", detail: `required cells not placed: ${state.missing_required}` });
-  if (state.overflow) for (const id of state.overflow.split(",")) out.push({ check: "overflow", cell_id: id, detail: `cell ${id} overflows its slot` });
+  if (state.overflow) for (const token of state.overflow.split(",")) {
+    const [id, lang] = token.split(":");
+    out.push({ check: "overflow", cell_id: id, ...(lang ? { lang } : {}), detail: `cell ${id}${lang ? ` (${lang})` : ""} overflows its slot` });
+  }
   return out;
 }
 
