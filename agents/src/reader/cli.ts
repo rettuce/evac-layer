@@ -45,12 +45,18 @@ function sha256(file: string) {
 
 // Reports where the key came from, never the key: process.loadEnvFile does not override a variable already in the
 // environment, so a stale shell export silently wins over a fresh .env.
-function loadApiKey(): { present: boolean; source: "environment" | "dotenv" | "none"; dotenvPresent: boolean } {
+// A placeholder such as "sk-ant-..." must never reach the API; only the shape of a Console API key is checked.
+const API_KEY_PREFIX = "sk-ant-api";
+const API_KEY_MIN_LENGTH = 40;
+
+function loadApiKey(): { present: boolean; wellFormed: boolean; source: "environment" | "dotenv" | "none"; dotenvPresent: boolean } {
   const fromEnv = Boolean(process.env.ANTHROPIC_API_KEY);
   const dotenvPresent = fs.existsSync(ENV_FILE);
   if (dotenvPresent) process.loadEnvFile(ENV_FILE);
-  const present = Boolean(process.env.ANTHROPIC_API_KEY);
-  return { present, source: fromEnv ? "environment" : present ? "dotenv" : "none", dotenvPresent };
+  const value = process.env.ANTHROPIC_API_KEY ?? "";
+  const present = value.length > 0;
+  const wellFormed = value.startsWith(API_KEY_PREFIX) && value.length >= API_KEY_MIN_LENGTH;
+  return { present, wellFormed, source: fromEnv ? "environment" : present ? "dotenv" : "none", dotenvPresent };
 }
 
 function selectPdfs(reports: { rel: string; report: TextLayerReport }[]) {
@@ -120,12 +126,13 @@ async function main() {
   const userText = stage1User(preset.name, files);
   const stage2Schema = toStructuredSchema(EXTRACTION_SCHEMA);
   const key = loadApiKey();
-  const hasKey = key.present;
+  const hasKey = key.present && key.wellFormed;
 
   if (values["dry-run"]) {
     console.log(JSON.stringify({
       dry_run: true,
-      api_key_present: hasKey,
+      api_key_present: key.present,
+      api_key_well_formed: key.wellFormed,
       api_key_source: key.source,
       dotenv_present: key.dotenvPresent,
       municipality: { id: preset.id, name: preset.name },
@@ -146,7 +153,8 @@ async function main() {
     }, null, 2));
     return;
   }
-  if (!hasKey) stop(`ANTHROPIC_API_KEY not found (${ENV_FILE} absent or empty). Run with --dry-run until the key is set.`);
+  if (!key.present) stop(`ANTHROPIC_API_KEY not found (${ENV_FILE} absent or empty). Run with --dry-run until the key is set.`);
+  if (!key.wellFormed) stop(`ANTHROPIC_API_KEY (from ${key.source}) does not look like a Console API key (expected "${API_KEY_PREFIX}…", at least ${API_KEY_MIN_LENGTH} characters); it may still be a placeholder. No API call was made.`);
 
   const client = new Anthropic();
   fs.mkdirSync(path.join(TMP_DIR, "reader"), { recursive: true });
