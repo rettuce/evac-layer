@@ -24,7 +24,7 @@ const SHOT_INTERVAL_MS = 66
 const MUNICIPALITY = '05210'
 const BULLETIN = 'VXKOii-202610211815-e713da0e3c05'
 const SITE = '05210-demo-honjo-station'
-const MOVE_STEPS = 24
+const MOVE_STEPS = 12
 
 const { values: opts } = parseArgs({ options: { 'base-url': { type: 'string', default: 'http://127.0.0.1:3151' } } })
 
@@ -63,7 +63,7 @@ async function moveTo(page, selector) {
 
 async function clickOn(page, selector) {
   await moveTo(page, selector)
-  await pause(250)
+  await pause(150)
   await page.mouse.down()
   await pause(80)
   await page.mouse.up()
@@ -77,32 +77,32 @@ async function scrollListTo(page, selector) {
   for (let i = 0; i < 60; i++) {
     const box = await (await page.$(selector)).boundingBox()
     if (box.y + box.height < listBox.y + listBox.height - 80) return
-    await page.mouse.wheel({ deltaY: 90 })
-    await pause(70)
+    await page.mouse.wheel({ deltaY: 180 })
+    await pause(40)
   }
   throw new Error(`could not scroll ${selector} into the list`)
 }
 
 async function act(page) {
   await page.mouse.move(VIEW.width * 0.55, VIEW.height * 0.5)
-  await pause(1500)
+  await pause(750)
   await moveTo(page, '[data-control="municipality"]')
   await page.select('[data-control="municipality"]', MUNICIPALITY)
-  await pause(1500)
+  await pause(750)
   await scrollListTo(page, `[data-bulletin="${BULLETIN}"]`)
-  await pause(500)
+  await pause(250)
   await clickOn(page, `[data-bulletin="${BULLETIN}"]`)
-  await pause(3000)
+  await pause(1500)
   await moveTo(page, '.report [data-outcome]')
-  await pause(2200)
+  await pause(1100)
   await clickOn(page, '[data-action="approve"]')
   await page.waitForSelector('[data-action="approve"][aria-pressed="true"]')
-  await pause(2200)
+  await pause(1100)
   await moveTo(page, `[data-site="${SITE}"]`)
-  await pause(500)
+  await pause(250)
   await clickOn(page, `[data-site="${SITE}"]`)
   await page.waitForFunction((site) => document.querySelector(`[data-site="${site}"]`)?.checked, {}, SITE)
-  await pause(3000)
+  await pause(1500)
 }
 
 async function encode(frames) {
