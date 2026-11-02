@@ -1,0 +1,53 @@
+{
+  "municipality": "14100",
+  "name": "横浜市",
+  "site": "14100-demo",
+  "writer_note": "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名をそのまま使い、それ以外は【仮】/[draft] のプレースホルダ。 自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。",
+  "entries": [
+    {
+      "issued_at": "2026-10-25T12:22:00+09:00",
+      "bulletin_id": "VPWW56-202610251222-76fe7078a4d0",
+      "wmo_code": "VPWW56",
+      "raw_title": "神奈川県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 14100: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-25T12:50:00+09:00",
+      "bulletin_id": "VPWW56-202610251250-3f92cd50e506",
+      "wmo_code": "VPWW56",
+      "raw_title": "神奈川県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 14100: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-25T18:05:00+09:00",
+      "bulletin_id": "VPWW56-202610251805-7728f730c1e5",
+      "wmo_code": "VPWW56",
+      "raw_title": "神奈川県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 14100: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-26T10:06:00+09:00",
+      "bulletin_id": "VPWW56-202610261006-bc1dc5938022",
+      "wmo_code": "VPWW56",
+      "raw_title": "神奈川県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 14100: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-27T05:58:00+09:00",
+      "bulletin_id": "VPWW56-202610270558-866483a2507c",
+      "wmo_code": "VPWW56",
+      "raw_title": "神奈川県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 14100: below the evacuation threshold, no screen"
+    }
+  ]
+}

@@ -29,3 +29,14 @@ test("re-parsing the recorded bulletins reproduces the fixture", () => {
     assert.deepEqual(parseJmaXml(fs.readFileSync(file)), e.alert, e.file);
   }
 });
+
+test("an all-clear with nothing shown before produces no screen", async () => {
+  const { runReplay } = await import("../src/loop/replay-run.js");
+  const { staticVerifier } = await import("../src/loop/static-verifier.js");
+  const events: string[] = [];
+  const last = fixture.entries.at(-1)!;
+  const site = { id: "t", municipality_id: "05210", lat: 39.386, lng: 140.056, facing_deg: 0 };
+  const s = await runReplay({ municipalityId: "05210", entries: [last], site, verifier: staticVerifier, persist: false, onEvent: (e) => events.push(`${e.outcome}:${e.reason ?? ""}`) });
+  assert.equal(s.screens, 0);
+  assert.match(events[0], /nothing to clear/);
+});
