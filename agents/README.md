@@ -11,9 +11,11 @@ Reader, Writer, Composer, Verifier, the JMA XML parser and the revision loop. Ty
 | `pnpm -F agents shelters [id...]` | GSI shelter CSVs → `data/municipalities/<id>.shelters.json` |
 | `pnpm -F agents reader [--dry-run] [--model sonnet\|haiku]` | municipal PDFs → municipality knowledge file (text-layer check, citations, structured outputs) |
 | `pnpm -F agents writer --dry-run --alert <xml>` | the Writer request (live call on Day 2) |
-| `pnpm -F agents compose ...` | alert + municipality + site + Writer output → four layout JSONs |
+| `pnpm -F agents compose ...` | alert + municipality + site + Writer output → five layout JSONs (16x9, 9x16, 32x9, 1x1, and pillar, which repeats the 9:16 cells on four faces) |
 | `pnpm -F agents verify --layout <fixture>` | rule-based inspection of the rendered screen |
 | `pnpm -F agents pipeline ...` | compose → verify → revise (≤ 3) → `data/reports/` |
+| `pnpm -F agents fanout --municipalities <ids> --verifier static\|browser\|vision --writer placeholder\|live` | replay every recorded bulletin of each municipality through the loop → `data/layouts/<id>/` and `data/reports/` (`--skip-browser-shapes pillar` checks a shape statically only) |
+| `pnpm -F agents export --site <site_id>` | approved screens → PNG + self-contained HTML per shape and `manifest.json` (pillar captured at half scale, 3308 × 2523; `--skip-shapes` leaves shapes out) |
 
 ## 実データ（気象庁 長期フィードの記録, 2026-10-11 〜 11-02）
 

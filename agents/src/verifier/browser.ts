@@ -33,9 +33,10 @@ async function open(browser: Browser, url: string, shape: Shape, reducedMotion: 
 }
 
 // The pillar repeats one screen on four faces, so only face 0 is read and captured (the renderer marks the
-// others aria-hidden). Its faces have the pixel density of a 9:16 panel, hence faceScale rather than the short side.
+// others aria-hidden). A face has the pixel density of the 55-inch 9:16 panel (contract v0, 18:03), so the
+// viewing-distance sizes apply unscaled; PILLAR.faceScale is how much larger the renderer draws, not the floor.
 const cellsRoot = (shape: Shape) => (shape === "pillar" ? '[data-face="0"] ' : "");
-const typeScale = (shape: Shape) => (shape === "pillar" ? PILLAR.faceScale : Math.min(SHAPES[shape].width, SHAPES[shape].height) / TYPE_BASE_SHORT_SIDE_PX);
+const typeScale = (shape: Shape) => (shape === "pillar" ? 1 : Math.min(SHAPES[shape].width, SHAPES[shape].height) / TYPE_BASE_SHORT_SIDE_PX);
 
 // Wider than 2:1 is captured as two halves so that downscaling to the API's 1568 px edge keeps text legible.
 async function capture(page: Page, shape: Shape): Promise<string[]> {

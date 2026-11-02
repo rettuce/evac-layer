@@ -10,7 +10,7 @@ import { REPO_ROOT } from "../paths.js";
 import { MODELS, costOf, type CallUsage } from "../reader/pricing.js";
 import { toStructuredSchema } from "../reader/extraction.js";
 import { WRITER_OUTPUT_SCHEMA, writerSystem, writerUser } from "./request.js";
-import { lintEasyJapanese, lintJaEasyScript, lintLevel5, lintMunicipalOrderName, type LintFinding } from "./rules.js";
+import { lintEasyJapanese, lintEnglishScript, lintJaEasyScript, lintLevel5, lintMunicipalOrderName, type LintFinding } from "./rules.js";
 
 export const WRITER_DIR = path.join(REPO_ROOT, "data", "writer");
 const WRITER_ROLES = ["headline", "action", "languages"] as const;
@@ -53,6 +53,7 @@ export function lintWriter(out: WriterOutput, level: number): LintFinding[] {
     return [
       ...lintEasyJapanese(easy).map((f) => ({ ...f, rule: `${c.role}.ja_easy ${f.rule}` })),
       ...lintJaEasyScript(easy).map((f) => ({ ...f, rule: `${c.role}.ja_easy ${f.rule}` })),
+      ...lintEnglishScript(c.text.en ?? "").map((f) => ({ ...f, rule: `${c.role}.en ${f.rule}` })),
       ...(c.role === "action" ? lintMunicipalOrderName(c.text.ja ?? "").map((f) => ({ ...f, rule: `action.ja ${f.rule}` })) : []),
       ...(level >= 5 ? Object.entries(c.text).flatMap(([lang, t]) => lintLevel5(t ?? "").map((f) => ({ ...f, rule: `${c.role}.${lang} ${f.rule}` }))) : []),
     ];
