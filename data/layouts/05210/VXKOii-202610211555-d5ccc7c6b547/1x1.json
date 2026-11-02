@@ -35,7 +35,7 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "【仮】高齢者避難",
+        "ja": "【仮】準備",
         "ja_easy": "【かり】 じゅんび",
         "en": "[draft] Prepare",
         "zh_hans": "[草稿]准备避难",
@@ -61,8 +61,9 @@
       "role": "shelter",
       "priority": 2,
       "text": {
-        "ja": "鶴舞小学校（指定緊急避難場所）"
+        "ja": "鶴舞小学校"
       },
+      "kind": "emergency_evacuation_site",
       "pictogram": "emergency_evacuation_site",
       "distance_m": 570,
       "motion": "static"
@@ -72,7 +73,7 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "【仮】高齢者避難",
+        "ja": "【仮】準備",
         "ja_easy": "【かり】 じゅんび",
         "en": "[draft] Prepare",
         "zh_hans": "[草稿]准备避难",

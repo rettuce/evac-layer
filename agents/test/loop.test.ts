@@ -68,3 +68,11 @@ test("without an API key the live reviser declines instead of inventing text", a
   assert.equal(r.outcome, "fail");
   assert.match(r.reason!, /Day 2/);
 });
+
+test("an overflowing shelter cell is not sent back to the Writer", async () => {
+  const overflowing: Verifier = { name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "shelter", detail: "cell shelter overflows its slot" }] })) };
+  const r = await runLoop({ ...base(), verifier: overflowing, writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([fxPath("writer-tsunami-advisory.json")]) });
+  assert.equal(r.outcome, "fail");
+  assert.equal(r.attempts.length, 1);
+  assert.match(r.reason!, /overflow\[shelter\]/);
+});

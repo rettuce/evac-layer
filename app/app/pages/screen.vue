@@ -18,10 +18,24 @@ function numberQuery(value: unknown, fallback: number): number {
 
 const route = useRoute()
 const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
-// Guidance screens must never show a document from an arbitrary origin, so src is a
-// dev-only bridge for the Verifier and accepts same-origin paths only.
+// Guidance screens must never show a document from an arbitrary origin. In dev any same-origin
+// path is allowed for the Verifier; production only accepts the pre-generated layout store.
+const PRODUCTION_SRC_PREFIXES = ['/api/live-layout?', '/api/admin/preview-layout?']
+const ADMIN_TOKEN_STORAGE_KEY = 'evac-admin-token'
+
 function isAllowedSrc(value: unknown): value is string {
-  return import.meta.dev && typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) return false
+  return import.meta.dev || PRODUCTION_SRC_PREFIXES.some((prefix) => value.startsWith(prefix))
+}
+
+function adminHeadersFor(url: string): Record<string, string> {
+  if (!url.startsWith('/api/admin/')) return {}
+  try {
+    const token = sessionStorage.getItem(ADMIN_TOKEN_STORAGE_KEY)
+    return token ? { authorization: `Bearer ${token}` } : {}
+  } catch {
+    return {}
+  }
 }
 const src = computed(() => (isAllowedSrc(route.query.src) ? route.query.src : undefined))
 const srcRejected = computed(() => route.query.src !== undefined && !src.value)
@@ -35,7 +49,7 @@ watch(
     remoteError.value = undefined
     if (!url) return
     try {
-      remote.value = await $fetch<EvacScreen>(url)
+      remote.value = await $fetch<EvacScreen>(url, { headers: adminHeadersFor(url) })
     } catch (error) {
       remoteError.value = `failed to load ${url}: ${(error as Error).message}`
     }
@@ -89,12 +103,13 @@ if (scenario.value) start()
     :shape="shape"
     :speed="liveSpeed"
     :virtual-elapsed-ms="clockMode === 'virtual' ? elapsed : undefined"
+    :site="typeof route.query.site === 'string' ? route.query.site : undefined"
     :site-name="typeof route.query.site_name === 'string' ? route.query.site_name : undefined"
     :reset="route.query.reset !== undefined"
     :reduced-motion="reducedMotion"
     :data-clock="clockMode"
   />
-  <div v-else-if="srcRejected" class="missing" data-error="src-rejected">src must be a same-origin path (dev only)</div>
+  <div v-else-if="srcRejected" class="missing" data-error="src-rejected">src must be a same-origin path (production: the layout store only)</div>
   <div v-else-if="remoteError" class="missing" data-error="src-load-failed">{{ remoteError }}</div>
   <div v-else-if="src && !screen" class="missing" data-loading="src">loading {{ src }}</div>
   <div v-else-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>

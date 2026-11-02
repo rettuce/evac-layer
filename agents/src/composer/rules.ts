@@ -54,6 +54,10 @@ export const SHELTER_HAZARDS: Record<string, string[]> = {
 
 export interface Situation { level: number; template: TemplateId; cleared: boolean }
 
+// Cabinet Office level 5 (緊急安全確保): moving to a shelter may itself be dangerous, so the screen gives no
+// shelter or direction and asks for immediate safety where people are.
+export const NO_SHELTER_TEMPLATES = new Set<string>(["secure-now"]);
+
 export function situationFor(alert: Alert, municipalityId: string): Situation {
   if (alert.info_type === "cancelled") stop(`bulletin ${alert.bulletin_id} is a cancellation; nothing to compose`);
   if (alert.hazard === "tsunami") {
@@ -77,7 +81,8 @@ export function situationFor(alert: Alert, municipalityId: string): Situation {
     stop(`bulletin ${alert.bulletin_id} is level ${alert.level} but gives no level for ${unknown.map((a) => a.name).join(", ")}; not composing a screen from a guess`);
   }
   const level = Math.max(...mine.map((a) => a.level ?? 0));
-  if (level >= 4) return { level, template: "evac-now", cleared: false };
+  if (level >= 5) return { level, template: "secure-now" as TemplateId, cleared: false };
+  if (level === 4) return { level, template: "evac-now", cleared: false };
   if (level === 3) return { level, template: "evac-prepare", cleared: false };
   return stop(`level ${level} for ${municipalityId}: below the evacuation threshold, no screen`);
 }

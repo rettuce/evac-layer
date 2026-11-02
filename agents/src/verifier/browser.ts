@@ -11,10 +11,11 @@ const TYPE_BASE_SHORT_SIDE_PX = 1080;
 
 export type Clock = "realtime" | "virtual";
 
-export interface ScreenTarget { baseUrl: string; layout: string; variant: number }
+export interface ScreenTarget { baseUrl: string; layout?: string; srcFile?: string; variant: number }
 
 function screenUrl(t: ScreenTarget, shape: Shape, extra: Record<string, string> = {}): string {
-  const q = new URLSearchParams({ shape, layout: t.layout, variant: String(t.variant), ...extra });
+  const source: Record<string, string> = t.srcFile ? { src: `/api/layout?${new URLSearchParams({ file: t.srcFile })}` } : { layout: t.layout ?? "" };
+  const q = new URLSearchParams({ shape, ...source, variant: String(t.variant), ...extra });
   return `${t.baseUrl}/screen?${q}`;
 }
 
@@ -25,6 +26,8 @@ async function open(browser: Browser, url: string, shape: Shape, reducedMotion: 
   await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: reducedMotion ? "reduce" : "no-preference" }]);
   await page.goto(url, { waitUntil: "networkidle0" });
   if (await page.$('[data-error="fixture-not-found"]')) throw new Error(`renderer reports fixture not found: ${url}`);
+  const srcError = await page.$('[data-error="src-load-failed"]');
+  if (srcError) throw new Error(`renderer could not load the layout: ${await srcError.evaluate((el) => el.textContent)} (${url})`);
   await page.waitForSelector('.evac-screen[data-ready="1"]', { timeout: READY_TIMEOUT_MS });
   return page;
 }
@@ -50,7 +53,7 @@ export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape
             role: c.dataset.role as TextSample["role"],
             step_class: (["action", "guide", "fine"].find((s) => el.classList.contains(`t-${s}`)) ?? null) as TextSample["step_class"],
             font_px: parseFloat(getComputedStyle(el).fontSize),
-            kind: (el.classList.contains("lang-label") ? "label" : c.dataset.role === "action" && !el.classList.contains("action-text") ? "secondary" : "primary") as TextSample["kind"],
+            kind: (["lang-label", "shelter-kind"].some((c) => el.classList.contains(c)) ? "label" : c.dataset.role === "action" && !el.classList.contains("action-text") ? "secondary" : "primary") as TextSample["kind"],
             text: el.innerText.replace(/\s+/g, " ").trim(),
           }));
       }),

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HTML_LANG, LANG_LABEL, LANGUAGE_ROTATION } from '~~/layout/typography'
+import { HTML_LANG, LANG_LABEL, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
 import type { AlertLevel, LangKey, LayoutCell } from '~~/layout/types'
 import { LEVEL_LABEL_JA } from '~~/layout/palette'
 
@@ -47,7 +47,12 @@ const currentLang = computed(() => {
     <template v-else-if="cell.role === 'shelter'">
       <div class="shelter-name">
         <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" />
-        <p class="t-guide">{{ cell.text.ja }}</p>
+        <div class="shelter-text">
+          <p v-if="cell.kind" class="t-fine shelter-kind" :data-kind="cell.kind">
+            {{ SHELTER_KIND_LABEL[cell.kind].ja }}<span lang="en"> / {{ SHELTER_KIND_LABEL[cell.kind].en }}</span>
+          </p>
+          <p class="t-guide" :data-max-lines="SHELTER_NAME_MAX_LINES">{{ cell.text.ja }}</p>
+        </div>
       </div>
       <p v-if="cell.distance_m !== undefined" class="t-guide distance">{{ cell.distance_m }} m</p>
     </template>
@@ -118,6 +123,12 @@ p {
   display: flex;
   align-items: center;
   gap: calc(24 * var(--px));
+}
+.shelter-text {
+  min-width: 0;
+}
+.shelter-kind {
+  opacity: 0.75;
 }
 .distance {
   flex: none;

@@ -38,6 +38,7 @@ export const SIGNAGE_CONVENTIONS_JA: readonly string[] = [
   "ja_easy は ひらがな・カタカナ で書き、文節の あいだを 半角スペースで 区切る（契約 v0 の例「すぐ たかい ところへ にげて」）",
   "見出しの ja は気象庁の警報名をそのまま使う（気象業務法 23 条: 電文の本質を変えない）",
   "画面形状ごとの文字数予算を超えない（予算は Composer が渡す）",
+  "警戒レベル5（緊急安全確保）では「にげる」「ひなん」を使わず、いまいる場所で命を守る行動（たかい ところへ・うえの かいへ）を書く。避難場所への移動がかえって危険な段階のため（内閣府の避難情報の考え方。プロジェクトの取り決め）",
 ];
 
 export interface LintFinding { rule: string; match: string }
@@ -63,4 +64,11 @@ export function lintEasyJapanese(text: string): LintFinding[] {
 export function lintJaEasyScript(text: string): LintFinding[] {
   const kanji = text.match(/[一-鿿]/g);
   return kanji ? [{ rule: "signage-kana-only", match: kanji.join("") }] : [];
+}
+
+const LEVEL5_FORBIDDEN = /にげ|逃げ|避難|ひなん|evacuat/i;
+
+export function lintLevel5(text: string): LintFinding[] {
+  const m = text.match(LEVEL5_FORBIDDEN);
+  return m ? [{ rule: "level5-no-evacuation-wording", match: m[0] }] : [];
 }

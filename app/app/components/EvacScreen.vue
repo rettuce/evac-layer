@@ -96,10 +96,13 @@ const OVERFLOW_TOLERANCE_PX = 1
 
 // Box rects, not scrollHeight: Noto's ascent+descent exceed the line-height, so the inline
 // content area pokes out of every line box and would read as overflow on any cell.
-// SVG internals are skipped: clipPath children report unscaled user-space rects.
+// Only the pictogram box itself is measured: it clips its contents, while a rotated glyph or an
+// SVG clipPath child reports a larger axis-aligned rect than what is drawn.
 function cellOverflows(cellEl: HTMLElement): boolean {
   const bounds = cellEl.getBoundingClientRect()
-  const boxes = [...cellEl.querySelectorAll<HTMLElement>('*')].filter((child) => !child.closest('svg'))
+  const boxes = [...cellEl.querySelectorAll<HTMLElement>('*')].filter(
+    (child) => child.classList.contains('pictogram') || !child.closest('.pictogram'),
+  )
   return boxes.some((child) => {
     const r = child.getBoundingClientRect()
     const outside =
@@ -108,8 +111,15 @@ function cellOverflows(cellEl: HTMLElement): boolean {
       r.top < bounds.top - OVERFLOW_TOLERANCE_PX ||
       r.left < bounds.left - OVERFLOW_TOLERANCE_PX
     const textTooWide = child.tagName === 'P' && child.scrollWidth > child.clientWidth + OVERFLOW_TOLERANCE_PX
-    return outside || textTooWide
+    return outside || textTooWide || exceedsMaxLines(child)
   })
+}
+
+function exceedsMaxLines(el: HTMLElement): boolean {
+  const maxLines = Number(el.dataset.maxLines)
+  if (!maxLines) return false
+  const lineHeight = parseFloat(getComputedStyle(el).lineHeight)
+  return el.getBoundingClientRect().height > maxLines * lineHeight + OVERFLOW_TOLERANCE_PX
 }
 
 function measureOverflow(): string[] {

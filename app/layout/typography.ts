@@ -1,5 +1,5 @@
 import { BASE_SHORT_SIDE_PX, UNIT_PX } from './shapes'
-import type { LangKey } from './types'
+import type { LangKey, ShelterKind } from './types'
 
 // Signage rule of thumb: 1 inch of letter height per 10 ft of viewing distance.
 // No normative standard (JIS / ISO) was found for screens, so this stays a named, replaceable constant.
@@ -65,3 +65,23 @@ export const LANG_LABEL: Record<LangKey, string> = {
   zh_hant: '中文',
   ko: '한국어',
 }
+
+// Fixed vocabulary from the Disaster Countermeasures Basic Act categories; the Writer never rewrites it.
+export const SHELTER_KIND_LABEL: Record<ShelterKind, Partial<Record<LangKey, string>> & { ja: string; en: string }> = {
+  emergency_evacuation_site: {
+    ja: '指定緊急避難場所',
+    en: 'Emergency evacuation site',
+    zh_hans: '指定紧急避难场所',
+    zh_hant: '指定緊急避難場所',
+    ko: '지정 긴급 대피 장소',
+  },
+  evacuation_shelter: {
+    ja: '指定避難所',
+    en: 'Evacuation shelter',
+    zh_hans: '指定避难所',
+    zh_hant: '指定避難所',
+    ko: '지정 대피소',
+  },
+}
+
+export const SHELTER_NAME_MAX_LINES = 2

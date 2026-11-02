@@ -85,7 +85,8 @@
         "evac-now",
         "evac-prepare",
         "shelter-direction",
-        "all-clear"
+        "all-clear",
+        "secure-now"
       ]
     },
     "cells": {
@@ -161,6 +162,13 @@
         "distance_m": {
           "type": "number",
           "minimum": 0
+        },
+        "kind": {
+          "description": "Shelter designation from GSI data; the renderer draws its fixed multilingual label, so text.ja carries the facility name only.",
+          "enum": [
+            "emergency_evacuation_site",
+            "evacuation_shelter"
+          ]
         }
       },
       "allOf": [
@@ -185,6 +193,41 @@
               "text": {
                 "$ref": "#/$defs/textAllLanguages"
               }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "type": "string",
+                "const": "shelter"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "else": {
+            "not": {
+              "properties": {
+                "kind": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind"
+              ]
             }
           }
         }

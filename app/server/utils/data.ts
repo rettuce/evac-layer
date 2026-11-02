@@ -1,10 +1,6 @@
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
-export function assertDev() {
-  if (!import.meta.dev) throw createError({ status: 404, statusText: 'Not Found' })
-}
-
 export function dataDir(): string {
   const config = useRuntimeConfig()
   return config.dataDir || join(config.repoRoot, 'data')

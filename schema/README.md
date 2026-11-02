@@ -17,13 +17,14 @@ Validate any document: `pnpm -F agents validate <file.json>` (schema inferred; `
 ## Composer (agents/src/composer/)
 
 - Slots and required cells come from the render seat's public `resolveTemplate(templateId, shape)` (`app/layout/README.md`), read through `agents/src/composer/template.ts#shapeContract`. The Composer also adds the `languages` cell the contract requires on 16x9 / 9x16 / 32x9 and stops if a required role is missing.
-- Template choice: tsunami major warning / warning / advisory and level 4-5 → `evac-now`; level 3 → `evac-prepare`; all areas cleared → `all-clear`; tsunami forecast or level ≤ 2 → no screen. All three (`evac-now`, `evac-prepare`, `all-clear`) are defined in templates.ts.
-- Shelter: nearest GSI designated emergency evacuation site whose designated hazards match the alert (heavy_rain → inland_flood or flood), excluding any name listed in `conflicts[]`; distance rounded to 10 m and shown once, on the shelter cell.
+- Template choice: level 5 → `secure-now` (Cabinet Office 緊急安全確保: no shelter or direction cell, action is immediate safety where people are, no evacuation wording); tsunami major warning / warning / advisory and level 4 → `evac-now`; level 3 → `evac-prepare`; all areas cleared → `all-clear`; tsunami forecast or level ≤ 2 → no screen. All four (`secure-now`, `evac-now`, `evac-prepare`, `all-clear`) are defined in templates.ts.
+- Shelter: nearest GSI designated emergency evacuation site (text = facility name, `kind` = designation) whose designated hazards match the alert (heavy_rain → inland_flood or flood), excluding any name listed in `conflicts[]`; distance rounded to 10 m and shown once, on the shelter cell.
 
 ### Character budgets (provisional, `agents/src/composer/budgets.ts`)
 
 - Headline: ja 12 / ja_easy 18 / en 24 on every shape. The headline uses the JMA warning name verbatim, so the budget is set by the longest official name (ja「レベル４土砂災害危険警報」12, en "Major Tsunami Warning" 21), not by width; the renderer must fit it (two lines on 9x16 / 32x9 where needed).
-- Other cells: one line in the cell's track at the action/guide type sizes, with full-width ja ≈ 1 em and en ≈ 0.55 em per character, rounded down. To be replaced by measurements from `scripts/shot.mjs` after integration.
+- Other cells: one line in the cell's track at the action/guide type sizes, with full-width ja ≈ 1 em and en ≈ 0.55 em per character, rounded down, except where the render seat measured the screen (2026-11-02): on 1x1 the action line holds 6 full-width characters on `evac-prepare` (shelter is required, one line only) and 12 on `evac-now` / `secure-now` / `all-clear` (two lines); the 1x1 ja_easy line holds 24. Budgets are looked up per template and shape (`budgetsFor`).
+- Shelter cell: `text.ja` is the GSI facility name only; `kind` (emergency_evacuation_site | evacuation_shelter) lets the renderer draw the fixed multilingual designation label. The name may take two lines.
 - Over-budget text stops the Composer; it never truncates.
 
 ## Revision loop (agents/src/loop/, `pnpm -F agents pipeline`)

@@ -22,11 +22,12 @@ test("system prompt carries every guideline rule", () => {
   for (const r of EASY_JA_RULES) assert.ok(sys.includes(r.rule_ja), r.id);
 });
 
-test("placeholder text fits the strictest character budget of every shape", async () => {
+test("placeholder text fits the strictest character budget of every shape for its template", async () => {
   const { PLACEHOLDER_ACTION } = await import("../src/writer/placeholder.js");
   const { strictestBudgets } = await import("../src/composer/budgets.js");
-  const budgets = strictestBudgets(["16x9", "9x16", "32x9", "1x1"]);
+  const templateOf: Record<string, string> = { "5": "secure-now", "4": "evac-now", "3": "evac-prepare", cleared: "all-clear" };
   for (const [key, text] of Object.entries(PLACEHOLDER_ACTION)) {
+    const budgets = strictestBudgets(templateOf[key], ["16x9", "9x16", "32x9", "1x1"]);
     for (const role of ["action", "languages"]) {
       for (const [lang, max] of Object.entries(budgets.find((b) => b.role === role)!.max_chars)) {
         const t = text[lang as keyof typeof text];
@@ -34,4 +35,11 @@ test("placeholder text fits the strictest character budget of every shape", asyn
       }
     }
   }
+});
+
+test("level 5 placeholder and lint keep evacuation wording out", async () => {
+  const { PLACEHOLDER_ACTION } = await import("../src/writer/placeholder.js");
+  const { lintLevel5 } = await import("../src/writer/rules.js");
+  for (const t of Object.values(PLACEHOLDER_ACTION["5"])) assert.deepEqual(lintLevel5(t), [], t);
+  assert.equal(lintLevel5("すぐ にげて")[0].rule, "level5-no-evacuation-wording");
 });

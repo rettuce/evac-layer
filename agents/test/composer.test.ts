@@ -31,7 +31,8 @@ test("shelter is the nearest undisputed tsunami site; distance appears once, on 
   const [landscape] = compose({ alert: advisory(), municipality, site, writer });
   const shelter = landscape.cells.find((c) => c.role === "shelter")!;
   const direction = landscape.cells.find((c) => c.role === "direction")!;
-  assert.equal(shelter.text.ja, "ホテル　ルートイン輪島（指定緊急避難場所）");
+  assert.equal(shelter.text.ja, "ホテル　ルートイン輪島");
+  assert.equal((shelter as { kind?: string }).kind, "emergency_evacuation_site");
   assert.equal(shelter.distance_m, 800);
   assert.ok(shelter.distance_m! > 0 && shelter.distance_m! % 10 === 0);
   assert.ok(!/\d+\s*m/.test(direction.text.ja));

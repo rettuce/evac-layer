@@ -28,7 +28,7 @@ export interface ScreenState { shape: string; template: string; variant: string;
 export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated"; cell_id?: string; detail: string }
 export interface CellText { id: string; role: Role; text: string }
 
-// A language label only names the language of the text beside it, so it is held to the fine distance.
+// A label (language name, shelter designation) only names what the text beside it is, so it is held to the fine distance.
 export function requiredPx(role: Role, scale: number, kind: TextKind): { step: TypeStep; px: number } {
   const step = kind === "label" ? "fine" : role === "action" && kind === "secondary" ? "guide" : ROLE_MIN_STEP[role];
   return { step, px: TYPE_PX[step] * scale };

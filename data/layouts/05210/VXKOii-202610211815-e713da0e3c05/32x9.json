@@ -61,8 +61,9 @@
       "role": "shelter",
       "priority": 2,
       "text": {
-        "ja": "鶴舞小学校（指定緊急避難場所）"
+        "ja": "鶴舞小学校"
       },
+      "kind": "emergency_evacuation_site",
       "pictogram": "emergency_evacuation_site",
       "distance_m": 570,
       "motion": "static"
