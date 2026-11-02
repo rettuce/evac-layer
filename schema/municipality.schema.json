@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evac-layer.dev/schema/municipality.schema.json",
+  "title": "EVAC LAYER municipality knowledge file",
+  "description": "PDF-derived facts carry the PDF file and page they were cited from; shelters come from the GSI open data CSV, which is authoritative over PDFs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "prefecture", "sources", "hazards", "routes", "cautions", "shelters", "contacts", "conflicts", "provenance"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/municipalityId" },
+    "name": { "type": "string", "minLength": 1 },
+    "prefecture": { "type": "string", "minLength": 1 },
+    "sources": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/source" } },
+    "hazards": { "type": "array", "items": { "$ref": "#/$defs/hazardEntry" } },
+    "routes": { "type": "array", "items": { "$ref": "#/$defs/citedText" } },
+    "cautions": { "type": "array", "items": { "$ref": "#/$defs/citedText" } },
+    "shelters": { "type": "array", "items": { "$ref": "#/$defs/shelter" } },
+    "contacts": { "type": "array", "items": { "$ref": "#/$defs/contact" } },
+    "conflicts": { "type": "array", "items": { "$ref": "#/$defs/conflict" } },
+    "provenance": { "$ref": "#/$defs/provenance" }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "file", "title", "year", "pages"],
+      "properties": {
+        "type": { "enum": ["pdf", "gsi"] },
+        "file": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "year": { "anyOf": [{ "type": "integer", "minimum": 1990, "maximum": 2100 }, { "type": "null" }] },
+        "pages": { "anyOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }] },
+        "url": { "type": "string", "format": "uri" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "page", "cited_text"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "page": { "type": "integer", "minimum": 1 },
+        "cited_text": { "type": "string", "minLength": 1 }
+      }
+    },
+    "citedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text_ja", "source"],
+      "properties": {
+        "text_ja": { "type": "string", "minLength": 1 },
+        "source": { "$ref": "#/$defs/citation" }
+      }
+    },
+    "hazardEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "areas", "notes_ja", "source_page", "source"],
+      "properties": {
+        "type": { "$ref": "common.schema.json#/$defs/hazard" },
+        "areas": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "notes_ja": { "type": "string" },
+        "source_page": { "type": "integer", "minimum": 1 },
+        "source": { "$ref": "#/$defs/citation" }
+      }
+    },
+    "shelter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "address", "lat", "lng", "hazards_ok", "source"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["emergency_evacuation_site", "evacuation_shelter"] },
+        "address": { "type": "string" },
+        "lat": { "type": "number", "minimum": 20, "maximum": 46 },
+        "lng": { "type": "number", "minimum": 122, "maximum": 154 },
+        "hazards_ok": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/hazard" } },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "file", "id"],
+          "properties": {
+            "type": { "const": "gsi" },
+            "file": { "type": "string", "minLength": 1 },
+            "id": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label_ja", "phone", "source"],
+      "properties": {
+        "label_ja": { "type": "string", "minLength": 1 },
+        "phone": { "type": "string", "pattern": "^[0-9()+-]{6,20}$" },
+        "source": { "$ref": "#/$defs/citation" }
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "pdf_name", "pdf_source", "gsi_candidates", "note_ja"],
+      "properties": {
+        "kind": { "const": "shelter_name" },
+        "pdf_name": { "type": "string", "minLength": 1 },
+        "pdf_source": { "$ref": "#/$defs/citation" },
+        "gsi_candidates": { "type": "array", "items": { "type": "string" } },
+        "note_ja": { "type": "string" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reader_version", "model"],
+      "properties": {
+        "reader_version": { "type": "string" },
+        "model": { "type": "string" }
+      }
+    }
+  }
+}
