@@ -159,7 +159,7 @@ onBeforeUnmount(() => {
       :style="{ opacity: frame.showing === bulletinId ? frame.showingOpacity : 0 }"
       :data-layer-bulletin="bulletinId"
     >
-      <EvacScreen
+      <ShapeScreen
         :screen="screen"
         :shape="shape"
         :elapsed-ms="frame.showing === bulletinId ? frame.showingElapsedMs : 0"

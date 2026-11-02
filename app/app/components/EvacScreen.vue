@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '~~/layout/fit'
 import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
-import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
+import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
+import { ladderSizePx, withLadder, type LadderMode } from '~~/layout/ladder'
+import { levelScaleAttr, levelScaleFor } from '~~/layout/levelScale'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
 import { HEADLINE_STEP_DOWN, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
@@ -14,6 +16,8 @@ const props = defineProps<{
   variant?: number
   elapsedMs: number
   reducedMotion?: boolean
+  ladder?: LadderMode
+  box?: { width: number; height: number; scale: number }
 }>()
 const emit = defineEmits<{ ready: [] }>()
 
@@ -26,11 +30,18 @@ const root = ref<HTMLElement>()
 const scale = ref(1)
 const overflowDropped = ref<DroppedCell[]>([])
 const overflow = ref('')
+const levelScale = computed(() => levelScaleFor(props.screen.template, props.screen.alert.hazard, props.screen.alert.level))
 const headlineScale = ref(1)
-const stackedHeadline = computed(() => ['portrait', 'square'].includes(SHAPES[props.shape].cls))
+const stackedHeadline = computed(() => ['portrait', 'square', 'pillar'].includes(SHAPES[props.shape].cls))
 const ready = ref(false)
 
-const layout = computed(() => resolveLayout(props.screen.template, props.shape, props.variant))
+const shapeClass = computed(() => SHAPES[props.shape].cls)
+const ladderMode = computed(() => (props.ladder && levelScale.value ? props.ladder : undefined))
+const layout = computed(() => {
+  const base = resolveLayout(props.screen.template, props.shape, props.variant)
+  return ladderMode.value ? withLadder(base, ladderMode.value, shapeClass.value) : base
+})
+const showLadder = computed(() => ladderMode.value !== undefined && layout.value.areas.some((row) => row.split(/\s+/).includes('ladder')))
 
 const initial = computed(() => initialPlacement(props.screen.cells, layout.value))
 const placed = computed(() => {
@@ -39,11 +50,13 @@ const placed = computed(() => {
 })
 const dropped = computed(() => [...initial.value.dropped, ...overflowDropped.value])
 const missing = computed(() => missingRequired(initial.value.placed, layout.value))
+const heroCell = computed(() => (layout.value.hero ? placed.value.find((cell) => cell.role === layout.value.hero!.role) : undefined))
 
 const band = computed(() => CABINET_OFFICE_5[props.screen.alert.level])
 
 const rootStyle = computed(() => ({
   ...gridCss(layout.value),
+  ...(props.box ? { width: `${props.box.width}px`, height: `${props.box.height}px` } : {}),
   '--px': `${scale.value}px`,
   '--fs-action': TYPE_PX.action,
   '--fs-guide': TYPE_PX.guide,
@@ -180,7 +193,7 @@ async function fit() {
 }
 
 function updateScale() {
-  scale.value = designScale(window.innerWidth, window.innerHeight)
+  scale.value = props.box?.scale ?? designScale(window.innerWidth, window.innerHeight)
 }
 
 let resizeFrame = 0
@@ -217,13 +230,26 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-template="screen.template"
     :data-variant="layout.id"
     :data-level="screen.alert.level"
+    :data-level-scale="levelScaleAttr(levelScale)"
     :data-dropped="dropped.map((d) => `${d.id}:${d.reason}`).join(',')"
     :data-missing-required="missing.join(',') || undefined"
     :data-overflow="overflow || undefined"
     :data-headline-scale="headlineScale !== 1 ? headlineScale : undefined"
+    :data-ladder="showLadder ? ladderMode : undefined"
     :data-ready="ready ? '1' : '0'"
     :data-bulletin-id="screen.alert.bulletin_id"
   >
+    <LevelLadder
+      v-if="showLadder && levelScale"
+      :style="{ gridArea: 'ladder' }"
+      :scale="levelScale"
+      :mode="ladderMode!"
+      :size-px="ladderSizePx(ladderMode!, shapeClass)"
+      :language-index="language.index"
+    />
+    <div v-if="layout.hero && heroCell?.pictogram" class="hero-pictogram" :style="{ gridArea: 'hero' }">
+      <PictogramMark :id="heroCell.pictogram" :size-px="layout.hero.px" />
+    </div>
     <section
       v-for="cell in placed"
       :key="cell.id"
@@ -237,7 +263,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     >
       <ScreenCell
         :cell="cell"
-        :level-label="levelLabelFor(screen.template, screen.alert.level)"
+        :level-scale="showLadder ? undefined : levelScale"
         :stacked-headline="stackedHeadline"
         :headline-scale="headlineScale"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
@@ -247,3 +273,10 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     </section>
   </main>
 </template>
+
+<style scoped>
+.hero-pictogram {
+  display: grid;
+  place-items: center;
+}
+</style>

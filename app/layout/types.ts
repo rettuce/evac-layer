@@ -1,5 +1,6 @@
-export type Shape = '16x9' | '9x16' | '32x9' | '1x1'
-export type ShapeClass = 'landscape' | 'portrait' | 'ribbon' | 'square'
+export type PanelShape = '16x9' | '9x16' | '32x9' | '1x1'
+export type Shape = PanelShape | 'pillar'
+export type ShapeClass = 'landscape' | 'portrait' | 'ribbon' | 'square' | 'pillar'
 export type TemplateId = 'evac-now' | 'evac-prepare' | 'secure-now' | 'shelter-direction' | 'all-clear'
 export type Role =
   | 'headline'
@@ -66,9 +67,10 @@ export interface ShapeLayout {
   pictogramPx: Partial<Record<Role, number>>
   darkBand?: Role[]
   inline?: Role[]
+  hero?: { role: Role; px: number }
 }
 
-export type TemplateDef = Record<Shape, ShapeLayout[]>
+export type TemplateDef = Record<PanelShape, ShapeLayout[]>
 
 export type DropReason = 'no-slot' | 'duplicate-role' | 'overflow'
 export interface DroppedCell {

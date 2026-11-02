@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { HEADLINE_STACKED_MAX_LINES, HTML_LANG, LANG_LABEL, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
+import type { LevelScale } from '~~/layout/levelScale'
 import type { LangKey, LayoutCell } from '~~/layout/types'
 
 const props = defineProps<{
   cell: LayoutCell
-  levelLabel?: string
+  levelScale?: LevelScale
   stackedHeadline?: boolean
   headlineScale?: number
   pictogramPx: number
@@ -31,7 +32,7 @@ const currentLang = computed(() => {
         :style="headlineStyle"
         :data-max-lines="stackedHeadline ? HEADLINE_STACKED_MAX_LINES : undefined"
       >{{ cell.text.ja }}</p>
-      <p v-if="levelLabel" class="t-guide level-label">{{ levelLabel }}</p>
+      <LevelScale v-if="levelScale" class="level-label" :scale="levelScale" :language-index="languageIndex" />
     </template>
 
     <template v-else-if="cell.role === 'action'">
@@ -124,8 +125,8 @@ p {
 }
 .role-headline.is-stacked .level-label {
   grid-area: label;
+  justify-self: end;
   margin-left: 0;
-  text-align: right;
 }
 .is-inline .role-direction,
 .is-inline .role-shelter {

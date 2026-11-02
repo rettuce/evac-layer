@@ -21,7 +21,7 @@ interface Catalog {
 }
 
 const PREVIEW_SHAPES: Shape[] = ['16x9', '32x9', '9x16', '1x1']
-const PREVIEW_HEIGHT_PX: Record<Shape, number> = { '16x9': 216, '32x9': 108, '9x16': 300, '1x1': 216 }
+const PREVIEW_HEIGHT_PX: Record<Shape, number> = { '16x9': 216, '32x9': 108, '9x16': 300, '1x1': 216, pillar: 300 }
 const PREVIEW_AT_MS = 3000
 
 const TOKEN_STORAGE_KEY = 'evac-admin-token'

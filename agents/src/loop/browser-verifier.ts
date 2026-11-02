@@ -16,17 +16,22 @@ export const DEFAULT_CHROME = process.env.CHROME_PATH ?? "/Applications/Google C
 
 // The renderer's /api/layout only serves .json files under its own repository root, so layouts are staged in
 // this worktree's tmp/ and the renderer must run from the same worktree.
-export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?: string; vision?: { client: Anthropic; model: ModelKey; usage: CallUsage[] } }): Verifier & { close(): Promise<void> } {
+export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?: string; skipShapes?: readonly string[]; vision?: { client: Anthropic; model: ModelKey; usage: CallUsage[] } }): Verifier & { close(): Promise<void> } {
   let browser: Browser | undefined;
   const stageDir = path.join(TMP_DIR, "verifier-src");
   return {
     name: `static+browser${opts.vision ? `+vision(${opts.vision.model})` : ""}(${opts.baseUrl})`,
+    skippedShapes: opts.skipShapes ?? [],
     async verify(screens: Screen[], ctx?: VerifyContext) {
       const base = await staticVerifier.verify(screens);
       browser ??= await puppeteer.launch({ executablePath: opts.chrome ?? DEFAULT_CHROME, headless: true });
       fs.mkdirSync(stageDir, { recursive: true });
       const out: ScreenVerdict[] = [];
       for (const [i, s] of screens.entries()) {
+        if (opts.skipShapes?.includes(s.shape)) {
+          out.push({ ...base[i], note: `browser and vision checks skipped for ${s.shape}; static checks only` });
+          continue;
+        }
         const body = JSON.stringify(s);
         const file = path.join(stageDir, `${crypto.createHash("sha256").update(body).digest("hex").slice(0, 16)}.json`);
         fs.writeFileSync(file, body);

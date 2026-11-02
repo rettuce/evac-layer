@@ -13,7 +13,7 @@ import { APP_DIR, REPO_ROOT, SERVER_ENTRY, postJson, startServer } from './helpe
 const MUNICIPALITY = '00002'
 const BULLETIN = 'TEST-FEED-1'
 const SITE = 'feed-site'
-const SHAPES = ['16x9', '9x16', '32x9', '1x1'] as const
+const SHAPES = ['16x9', '9x16', '32x9', '1x1', 'pillar'] as const
 const SECRET = 'a-shared-secret-of-enough-length'
 const WEBHOOK_WAIT_MS = 8000
 
@@ -98,6 +98,10 @@ describe('feed', { skip }, () => {
       '16x9': { png: `/delivery/${SITE}/${BULLETIN}/16x9.png`, html: `/delivery/${SITE}/${BULLETIN}/16x9.html` },
     })
     assert.match(await validateWithAgents(alertFeed), /^OK /)
+
+    const pillar = await fetch(`${base}/api/live-layout?municipality=${MUNICIPALITY}&bulletin=${BULLETIN}&shape=pillar&site=${SITE}`)
+    assert.equal(pillar.status, 200)
+    assert.equal((await pillar.json()).shape, 'pillar')
 
     const png = await fetch(`${base}${alertFeed.assets['16x9'].png}`)
     assert.equal(png.status, 200)

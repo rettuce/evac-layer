@@ -1,0 +1,84 @@
+{
+  "version": "0.1",
+  "kind": "evac-screen",
+  "municipality": {
+    "id": "05210",
+    "name": "由利本荘市"
+  },
+  "alert": {
+    "source": "jma",
+    "bulletin_id": "VXKOii-202610212015-979f11623ff9",
+    "hazard": "flood",
+    "level": 5,
+    "issued_at": "2026-10-21T20:15:00+09:00"
+  },
+  "shape": "pillar",
+  "template": "secure-now",
+  "cells": [
+    {
+      "id": "headline",
+      "role": "headline",
+      "priority": 1,
+      "text": {
+        "ja": "レベル５氾濫特別警報",
+        "ja_easy": "こよしがわ が あふれて います",
+        "en": "子吉川 Lv5 Flood Emergency",
+        "zh_hans": "子吉川(子吉川) 5级泛滥特别警报",
+        "zh_hant": "子吉川 5級氾濫特別警報",
+        "ko": "고요시강(子吉川) 레벨5 범람 특별경보"
+      },
+      "pictogram": "flood",
+      "motion": "scale-in"
+    },
+    {
+      "id": "action",
+      "role": "action",
+      "priority": 1,
+      "text": {
+        "ja": "高い所へ上がって",
+        "ja_easy": "たかい ところへ あがって",
+        "en": "Go up higher",
+        "zh_hans": "请上到高处",
+        "zh_hant": "請上到高處",
+        "ko": "높은 곳으로 올라가세요"
+      },
+      "pictogram": "go_higher",
+      "motion": "pulse"
+    },
+    {
+      "id": "languages",
+      "role": "languages",
+      "priority": 3,
+      "text": {
+        "ja": "高い所へ上がって",
+        "ja_easy": "たかい ところへ あがって",
+        "en": "Go up higher",
+        "zh_hans": "请上到高处",
+        "zh_hant": "請上到高處",
+        "ko": "높은 곳으로 올라가세요"
+      },
+      "motion": "static"
+    },
+    {
+      "id": "source",
+      "role": "source",
+      "priority": 9,
+      "text": {
+        "ja": "出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 気象庁 20:15"
+      },
+      "motion": "static"
+    }
+  ],
+  "palette": "cabinet-office-5",
+  "sources": [
+    {
+      "type": "pdf",
+      "file": "yurihonjo/kozui_dosha_hokubu.pdf",
+      "page": 1
+    },
+    {
+      "type": "jma",
+      "bulletin_id": "VXKOii-202610212015-979f11623ff9"
+    }
+  ]
+}

@@ -35,6 +35,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   const notes = [...(live ? [] : [PLACEHOLDER_NOTE]), ...(readerRan ? [] : ["自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。"])].join(" ");
   // Only a pass that went through the renderer may be shown; a static-only pass has not been seen on a screen.
   const browserChecked = args.verifier !== staticVerifier;
+  const browserSkipped = (files: string[]) => (args.verifier.skippedShapes ?? []).filter((shape) => files.some((f) => f.endsWith(`/${shape}.json`)));
   const index = [];
   let pass = 0, fail = 0, noScreen = 0, layouts = 0;
   // A clearance only means something to people who saw the warning; per hazard, all-clear follows a shown screen.
@@ -107,6 +108,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       ...row, screen, template: situation.template, display_level: situation.level, outcome: report.outcome, verified_by: args.verifier.name,
       ...(report.outcome === "pass" && !browserChecked ? { reason: "not browser-verified" } : report.reason ? { reason: report.reason } : {}),
       layouts: report.layouts, report: path.relative(REPO_ROOT, path.join(dir, "report.json")),
+      ...(browserSkipped(report.layouts).length ? { browser_skipped: browserSkipped(report.layouts) } : {}),
     });
     args.onEvent?.({ municipality: municipality.id, issued_at: e.issued_at, template: situation.template, level: situation.level, outcome: report.outcome, reason: report.reason });
   }

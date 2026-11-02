@@ -2,7 +2,7 @@ import type { Shape } from '../../types'
 import { mulberry32 } from '../rng.ts'
 import type { AmbientScene } from '../types'
 
-const PLANES_BY_SHAPE: Record<Shape, number> = { '16x9': 4, '9x16': 4, '32x9': 7, '1x1': 3 }
+const PLANES_BY_SHAPE: Record<Shape, number> = { '16x9': 4, '9x16': 4, '32x9': 7, '1x1': 3, pillar: 14 }
 const DRIFT_PERIOD_MS = { min: 90_000, max: 150_000 }
 const DRIFT_AMPLITUDE_SHORT_SIDES = { min: 0.08, max: 0.16 }
 const RADIUS_SHORT_SIDES = { min: 0.55, max: 0.95 }

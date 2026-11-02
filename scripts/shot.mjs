@@ -17,6 +17,8 @@ const SHAPES = {
   '9x16': { width: 1080, height: 1920 },
   '32x9': { width: 3840, height: 1080 },
   '1x1': { width: 1080, height: 1080 },
+  // Drawn at logical pixels, captured at half size: the full 6616 x 5834 frame is 38 MP.
+  pillar: { width: 6616, height: 5046, deviceScaleFactor: 0.5 },
 }
 
 const READY_TIMEOUT_MS = 30000
@@ -33,7 +35,7 @@ function screenUrl(shape) {
 
 async function openScreen(browser, shape, { reducedMotion }) {
   const page = await browser.newPage()
-  await page.setViewport({ ...SHAPES[shape], deviceScaleFactor: 1 })
+  await page.setViewport({ deviceScaleFactor: 1, ...SHAPES[shape] })
   await page.emulateMediaFeatures([
     { name: 'prefers-reduced-motion', value: reducedMotion ? 'reduce' : 'no-preference' },
   ])
@@ -168,7 +170,7 @@ async function recordFrames() {
   const began = performance.now()
   try {
     const page = await browser.newPage()
-    await page.setViewport({ ...SHAPES[shape], deviceScaleFactor: 1 })
+    await page.setViewport({ deviceScaleFactor: 1, ...SHAPES[shape] })
     await page.goto(url, { waitUntil: 'networkidle0' })
     await page.waitForSelector('.evac-screen[data-ready="1"]', { timeout: READY_TIMEOUT_MS })
     for (let i = 0; i < frameCount; i++) {
