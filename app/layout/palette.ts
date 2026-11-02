@@ -24,6 +24,11 @@ export function levelLabelFor(template: TemplateId, level: AlertLevel): string |
   return template === 'all-clear' ? undefined : LEVEL_LABEL_JA[level]
 }
 
+// Secondary labels are drawn in the cell's ink at reduced opacity; test/contrast.test.ts keeps them
+// above WCAG 4.5:1 on every background they appear on.
+export const SHELTER_KIND_OPACITY = 0.75
+export const LANG_LABEL_OPACITY = 0.7
+
 export const PAGE_BACKGROUND: Rgb = [255, 255, 255]
 export const PAGE_INK: Rgb = [0, 0, 0]
 export const DARK_BAND: Rgb = [0, 0, 0]
