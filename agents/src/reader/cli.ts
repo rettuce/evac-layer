@@ -43,9 +43,14 @@ function sha256(file: string) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
 
-function loadApiKey(): boolean {
-  if (fs.existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
-  return Boolean(process.env.ANTHROPIC_API_KEY);
+// Reports where the key came from, never the key: process.loadEnvFile does not override a variable already in the
+// environment, so a stale shell export silently wins over a fresh .env.
+function loadApiKey(): { present: boolean; source: "environment" | "dotenv" | "none"; dotenvPresent: boolean } {
+  const fromEnv = Boolean(process.env.ANTHROPIC_API_KEY);
+  const dotenvPresent = fs.existsSync(ENV_FILE);
+  if (dotenvPresent) process.loadEnvFile(ENV_FILE);
+  const present = Boolean(process.env.ANTHROPIC_API_KEY);
+  return { present, source: fromEnv ? "environment" : present ? "dotenv" : "none", dotenvPresent };
 }
 
 function selectPdfs(reports: { rel: string; report: TextLayerReport }[]) {
@@ -114,12 +119,15 @@ async function main() {
 
   const userText = stage1User(preset.name, files);
   const stage2Schema = toStructuredSchema(EXTRACTION_SCHEMA);
-  const hasKey = loadApiKey();
+  const key = loadApiKey();
+  const hasKey = key.present;
 
   if (values["dry-run"]) {
     console.log(JSON.stringify({
       dry_run: true,
       api_key_present: hasKey,
+      api_key_source: key.source,
+      dotenv_present: key.dotenvPresent,
       municipality: { id: preset.id, name: preset.name },
       model: model.id,
       text_layer: reports.map((r) => ({ path: r.rel, ...r.report })),
