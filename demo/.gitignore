@@ -1,0 +1,3 @@
+screens/*.mp4
+screens/*.png
+!screens/.gitkeep
