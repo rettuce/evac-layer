@@ -12,12 +12,14 @@ const canvas = ref<HTMLCanvasElement>()
 const viewport = ref({ width: 0, height: 0 })
 const fontsReady = ref(false)
 const pick = computed(() => pickAmbient(props.seed, props.clockEpochMs, props.scene))
-// A pillar repeats the clock on each face; the colour field runs round all four without a seam.
-const faces = computed(() =>
-  props.shape === 'pillar'
-    ? Array.from({ length: PILLAR.faces }, (_, i) => ({ originX: i * PILLAR.faceWidth, width: PILLAR.faceWidth }))
-    : [{ originX: 0, width: viewport.value.width }],
-)
+// The ambient pillar is one picture round the column: the field and the D21 rules run across all four
+// faces at the face's scale, and the clock appears once, on the front face at eye height.
+function overlayFor(width: number, height: number) {
+  if (props.shape !== 'pillar') return overlayGeometry(width, height, pick.value.corner)
+  const front = overlayGeometry(PILLAR.faceWidth, height, pick.value.corner)
+  const rules = overlayGeometry(width, height, pick.value.corner, front.scale).rules
+  return { ...front, rules, block: { ...front.block, top: pillarYForHeight(PILLAR_CLOCK_TOP_M), bottom: undefined } }
+}
 
 function draw() {
   const el = canvas.value
@@ -36,11 +38,7 @@ function draw() {
     sweep: clockSweep(props.clockEpochMs),
     ink: pick.value.scene.ink,
   }
-  for (const face of faces.value) {
-    const geometry = overlayGeometry(face.width, height, pick.value.corner)
-    const atEyeHeight = props.shape === 'pillar' ? { ...geometry, block: { ...geometry.block, top: pillarYForHeight(PILLAR_CLOCK_TOP_M), bottom: undefined } } : geometry
-    drawOverlay(ctx, atEyeHeight, content, face.originX)
-  }
+  drawOverlay(ctx, overlayFor(width, height), content)
 }
 
 // Canvas text does not wait for web fonts; drawing before they load would rasterise a fallback face.

@@ -111,4 +111,4 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 - The outer `.evac-screen` carries `data-shape="pillar"`, `data-faces="4"` and the state of face 0 (`data-overflow`, `data-dropped`, `data-level-scale`, …); it turns `data-ready="1"` when all four faces are fitted. Faces 1–3 are `aria-hidden`.
 - Draw at logical pixels and capture at `deviceScaleFactor: 0.5` → 3308 × 2523 (`scripts/shot.mjs` does this).
 - Layouts: the Composer writes `pillar.json` (same cells as 9:16); live, feed and `/delivery` serve it like the other shapes.
-- Ambient: one colour field across the whole canvas, the D21 clock repeated on each face with its top at 2.0 m (eye height).
+- Ambient is one picture round the column (alerts repeat per face so everyone sees the same information; the ambient layer should feel like one continuous space): the colour field and the D21 rules run across all 6616 px without seams, and the clock and site name appear once, on face 0 (the front) with their top at 2.0 m.
