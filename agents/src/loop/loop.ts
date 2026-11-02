@@ -9,9 +9,10 @@ const WRITER_FIXABLE = new Set(["over-budget", "font-size", "overflow", "distanc
 const WRITER_CELLS = new Set(["headline", "action", "direction", "languages"]);
 // The action pictogram is fixed by the template and its meaning is given to the Writer, so a mismatch on the
 // action cell is the text's to fix; any other pictogram belongs to the Composer.
-// Japanese that overflows passed the Composer's budget or was set by code (the headline is the JMA name), so a
-// rewrite cannot help: the renderer's slot or the budget is wrong.
-const renderOverflow = (f: LoopFinding) => f.check === "overflow" && f.lang === "ja";
+// The renderer reports ja for the headline and every text the code writes, pictogram when only the pictogram
+// does not fit, and screen for the whole page; none of them changes when the Writer rewrites its text.
+const NOT_WRITER_LANGS = new Set(["ja", "pictogram", "screen"]);
+const renderOverflow = (f: LoopFinding) => f.check === "overflow" && f.lang !== undefined && NOT_WRITER_LANGS.has(f.lang);
 const writerCanFix = (f: LoopFinding) =>
   !renderOverflow(f) &&
   ((f.check === "pictogram-misuse" && f.cell_id === "action") ||

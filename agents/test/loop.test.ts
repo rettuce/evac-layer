@@ -94,6 +94,9 @@ test("a Japanese overflow stops at once as render-overflow; other languages go t
   const ja = await runLoop({ ...base(), verifier: overflow("ja"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });
   assert.equal(ja.attempts.length, 1);
   assert.match(ja.reason!, /render-overflow\[headline:ja\]/);
+  const picto = await runLoop({ ...base(), verifier: overflow("pictogram"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });
+  assert.equal(picto.attempts.length, 1);
+  assert.match(picto.reason!, /render-overflow\[headline:pictogram\]/);
   const en = await runLoop({ ...base(), verifier: overflow("en"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean, clean, clean, clean]), maxAttempts: 5 });
   assert.equal(en.attempts.length, 3);
   assert.match(en.reason!, /sent to the Writer 2 times already/);
