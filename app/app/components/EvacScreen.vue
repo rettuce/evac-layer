@@ -3,7 +3,7 @@ import { gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '
 import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
 import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
-import { BAND_PX, resolveLayout } from '~~/layout/templates'
+import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
 import { HEADLINE_STEP_DOWN, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
@@ -48,7 +48,7 @@ const rootStyle = computed(() => ({
   '--fs-action': TYPE_PX.action,
   '--fs-guide': TYPE_PX.guide,
   '--fs-fine': TYPE_PX.fine,
-  '--band-height': BAND_PX,
+  '--stacked-band-min': STACKED_BAND_MIN_PX,
   '--lh-action': LINE_HEIGHT.action,
   '--lh-guide': LINE_HEIGHT.guide,
   '--lh-fine': LINE_HEIGHT.fine,

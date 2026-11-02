@@ -99,5 +99,5 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 ## Headline band
 
 - 16:9 and 32:9: the warning-level label sits beside the headline (32:9 below it, as before).
-- 9:16 and 1:1: the label sits under the headline inside the band, right-aligned, with the headline pictogram spanning both rows. The headline may take 2 lines (the band grows past 176 only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
+- 9:16 and 1:1: the label sits under the headline inside the band, right-aligned, with the headline pictogram spanning both rows. The band is at least 200 (one headline line + label, with room above and below); the headline may take 2 lines (the band grows further only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
 - `all-clear` shows no level label: a cleared bulletin has no warning level, the white band is only the colour of level 1.
