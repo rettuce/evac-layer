@@ -36,6 +36,7 @@ const SCENARIO = { mode: 'scenario', layout: 'wajima-tsunami' }
 const LIVE = {
   mode: 'live', municipality: '05210', speed: '1200',
   from: '2026-10-21T11:00+09:00', to: '2026-10-22T07:00+09:00',
+  scene: 'color-planes',
 }
 const LIVE_READY = '[data-mode="live"][data-ready="1"]'
 const LIVE_EVENTS_MS = [13100, 20100, 24600, 26100, 29100, 44350]
@@ -168,7 +169,7 @@ async function captureFrames(browser, opts, framesDir) {
   const page = await openPage(browser, opts, 0)
   const modes = new Set()
   for (let frame = 0; frame < opts.frameCount; frame++) {
-    if (frame > 0) modes.add(await seek(page, opts, frameTime(opts, frame)))
+    modes.add(await seek(page, opts, frameTime(opts, frame)))
     await page.screenshot({ path: `${framesDir}${frameName(frame)}.png`, type: 'png' })
   }
   await page.close()
@@ -204,7 +205,7 @@ async function verify(browser, opts, framesDir) {
   const results = []
   for (const frame of verifyFrames(opts)) {
     const page = await openPage(browser, opts, 0)
-    if (frame > 0) await seek(page, opts, frameTime(opts, frame))
+    await seek(page, opts, frameTime(opts, frame))
     const again = `${framesDir}verify_${frameName(frame)}.png`
     await page.screenshot({ path: again, type: 'png' })
     await page.close()
