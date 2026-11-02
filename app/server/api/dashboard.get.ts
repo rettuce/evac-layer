@@ -7,9 +7,22 @@ interface LayoutIndexFile {
   entries: (ReplayRow & { layouts?: string[] })[]
 }
 
-interface ReportFile {
-  outcome: string
-  attempts: { findings: unknown[]; screens_ok: Record<string, boolean> }[]
+interface VerifierFinding {
+  run?: number
+  municipality: string
+  fix?: string
+}
+
+interface VerifierFindingsFile {
+  run: string
+  findings: VerifierFinding[]
+}
+
+export interface FindingsSummary {
+  found: number
+  fixed: number
+  byRun: { run: number; found: number }[]
+  files: string[]
 }
 
 interface MunicipalityStats {
@@ -20,29 +33,48 @@ interface MunicipalityStats {
   layouts: number
   languageVariants: number
   reports: number
-  ngAttempts: number
-  fixedAfterNg: number
+  ngFound: number
+  ngFixed: number
 }
 
-function attemptFailed(attempt: ReportFile['attempts'][number]): boolean {
-  return attempt.findings.length > 0 || Object.values(attempt.screens_ok).some((ok) => !ok)
+const FINDINGS_DIR = 'verifier-findings'
+
+function runOf(finding: VerifierFinding, file: VerifierFindingsFile): number {
+  return finding.run ?? Number(/\d+/.exec(file.run)?.[0] ?? 0)
+}
+
+async function readFindings(root: string): Promise<{ file: string; findings: (VerifierFinding & { runNo: number })[] }[]> {
+  const names = (await listDir(join(root, FINDINGS_DIR))).filter((f) => f.endsWith('.json'))
+  const files = await Promise.all(
+    names.map(async (name) => {
+      const file = await readJsonIfExists<VerifierFindingsFile>(join(root, FINDINGS_DIR, name))
+      return { file: name, findings: (file?.findings ?? []).map((f) => ({ ...f, runNo: runOf(f, file!) })) }
+    }),
+  )
+  return files
+}
+
+function isFixed(finding: VerifierFinding): boolean {
+  return typeof finding.fix === 'string' && finding.fix.trim().length > 0
 }
 
 export default defineEventHandler(async () => {
   const root = dataDir()
   const knowledge = new Set((await listDir(join(root, 'municipalities'))).map((f) => f.split('.')[0]!).filter((code) => /^\d{5}$/.test(code)))
 
+  const findingFiles = await readFindings(root)
+  const findings = findingFiles.flatMap((f) => f.findings)
+
   const rows: MunicipalityStats[] = []
   const sources = new Set<string>()
-  for (const code of await listDir(join(root, 'layouts'))) {
+  const codes = [...new Set([...knowledge, ...(await listDir(join(root, 'layouts'))).filter((code) => /^\d{5}$/.test(code))])].sort()
+  for (const code of codes) {
     const index = await readJsonIfExists<LayoutIndexFile>(join(root, 'layouts', code, 'index.json'))
-    if (!index) continue
+    const knowledgeFile = await readJsonIfExists<{ name?: string }>(join(root, 'municipalities', `${code}.json`))
     let layouts = 0
     let languageVariants = 0
-    let ngAttempts = 0
-    let fixedAfterNg = 0
     let reports = 0
-    for (const entry of index.entries) {
+    for (const entry of index?.entries ?? []) {
       for (const file of entry.layouts ?? []) {
         const layout = await readJsonIfExists<EvacScreen>(join(root, file.replace(/^data\//, '')))
         if (!layout) continue
@@ -51,26 +83,28 @@ export default defineEventHandler(async () => {
         languageVariants += languages ? Object.keys(languages.text).length : 1
         for (const source of layout.sources) sources.add(JSON.stringify(source))
       }
-      const report = entry.screen
-        ? await readJsonIfExists<ReportFile>(join(root, 'reports', `${code}-${entry.bulletin_id}`, 'report.json'))
-        : undefined
-      if (!report) continue
-      reports += 1
-      const failed = report.attempts.filter(attemptFailed).length
-      ngAttempts += failed
-      if (failed > 0 && report.outcome === 'pass') fixedAfterNg += 1
+      if (entry.screen && (await readJsonIfExists(join(root, 'reports', `${code}-${entry.bulletin_id}`, 'report.json')))) reports += 1
     }
+    const own = findings.filter((f) => f.municipality === code)
     rows.push({
       id: code,
-      name: index.name,
-      bulletins: index.entries.length,
-      screens: index.entries.filter((e) => e.screen).length,
+      name: index?.name ?? knowledgeFile?.name ?? code,
+      bulletins: index?.entries.length ?? 0,
+      screens: index?.entries.filter((e) => e.screen).length ?? 0,
       layouts,
       languageVariants,
       reports,
-      ngAttempts,
-      fixedAfterNg,
+      ngFound: own.length,
+      ngFixed: own.filter(isFixed).length,
     })
+  }
+
+  const runs = [...new Set(findings.map((f) => f.runNo))].sort((x, y) => x - y)
+  const summary: FindingsSummary = {
+    found: findings.length,
+    fixed: findings.filter(isFixed).length,
+    byRun: runs.map((run) => ({ run, found: findings.filter((f) => f.runNo === run).length })),
+    files: findingFiles.map((f) => `data/${FINDINGS_DIR}/${f.file}`),
   }
 
   const sum = (key: Exclude<keyof MunicipalityStats, 'id' | 'name'>) => rows.reduce((total, row) => total + row[key], 0)
@@ -81,10 +115,11 @@ export default defineEventHandler(async () => {
       screens: sum('screens'),
       layouts: sum('layouts'),
       languageVariants: sum('languageVariants'),
-      ngAttempts: sum('ngAttempts'),
-      fixedAfterNg: sum('fixedAfterNg'),
+      ngFound: summary.found,
+      ngFixed: summary.fixed,
       sources: sources.size,
     },
     rows,
+    findings: summary,
   }
 })

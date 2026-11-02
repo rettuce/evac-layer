@@ -89,7 +89,7 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 |---|---|---|
 | `GET /api/replay?municipality&speed[&from][&to][&t][&reset]` | public | replay rows inside the window and the current index |
 | `GET /api/live-layout?municipality&bulletin&shape[&site]` | public, gated | layout JSON only for an approved bulletin at an auto-publish site; 403 with `data.reason` = `auto-publish-off` \| `unapproved` |
-| `GET /api/dashboard` | public | totals and per-municipality rows |
+| `GET /api/dashboard` | public | totals and per-municipality rows (every municipality with a knowledge file or layouts); NG found / fixed are counted from `data/verifier-findings/*.json` (one finding per entry, fixed when `fix` is filled) with the per-run counts and the file names |
 | `GET /api/feed/<site_id>` | public, gated | the site's feed (`schema/feed.schema.json`); ETag / If-None-Match |
 | `GET /delivery/<site>/<bulletin>/<shape>.{png,html,json}` | public, gated | exported files from `dist/` while the bulletin is deliverable |
 | `POST /api/admin/subscriptions` | admin | register a webhook `{site_id, url, secret}`; see `app/README.md` Delivery |
