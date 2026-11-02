@@ -19,7 +19,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from layout import (
     BACK_WALL_Y, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
-    HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIGHT_WALL_X,
+    HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIBBON_PANEL_H, RIBBON_PANEL_W,
+    RIGHT_WALL_X,
 )
 from led_wrap import build_led_wrap
 from looks import LOOKS, build_look
@@ -53,10 +54,6 @@ def panel_from_diagonal(diagonal_in, aspect_w, aspect_h):
     return aspect_w * unit, aspect_h * unit
 
 
-def panel_from_width(width_m, aspect_w, aspect_h):
-    return width_m, width_m * aspect_h / aspect_w
-
-
 def pillar_face_center(height_z):
     front = Matrix.Rotation(PILLAR_YAW, 3, "Z") @ Vector((0.0, -PILLAR_SIZE[1] / 2, 0.0))
     return Vector((PILLAR_CENTER.x, PILLAR_CENTER.y, height_z)) + front
@@ -64,14 +61,12 @@ def pillar_face_center(height_z):
 
 COLUMN_CLAD_HALF = COLUMN_SIZE / 2 + COLUMN_CLAD_M
 PORTRAIT_SIZE = panel_from_diagonal(55, 9, 16)
-SQUARE_M = 0.75
-COLUMN_LED_BOTTOM_Z = 1.3
-COLUMN_LED_TOP_Z = CEILING_Z - 0.2
+COLUMN_LED_BOTTOM_Z = 0.4
+COLUMN_LED_TOP_Z = 3.6
 COLUMN_LED_RADIUS = 0.03
 COLUMN_LED_MID_Z = (COLUMN_LED_BOTTOM_Z + COLUMN_LED_TOP_Z) / 2
-COLUMN_BASE_SQUARE_Z = 0.8
-RIBBON_SIZE = panel_from_width(6.0, 32, 9)
-RIBBON_Z = 3.95
+RIBBON_SIZE = (RIBBON_PANEL_W, RIBBON_PANEL_H)
+RIBBON_Z = HEADWALL_BOTTOM_Z + RIBBON_PANEL_H / 2
 RIBBON_CENTER_X = 1.0
 WALL_16X9_Z = 2.0
 # x positions on the back wall chosen so the back columns do not hide them from the hero camera.
@@ -81,11 +76,6 @@ HEADWALL_FRONT_Y = HEADWALL_Y - HEADWALL_DEPTH / 2
 
 def column_front(x, y, z):
     return Vector((x, y - COLUMN_CLAD_HALF, z)), 0.0
-
-
-def column_aisle_side(x, y, z):
-    toward_aisle = 1.0 if x < 0 else -1.0
-    return Vector((x + toward_aisle * COLUMN_CLAD_HALF, y, z)), toward_aisle * math.pi / 2
 
 
 def ribbon_xs():
@@ -98,8 +88,6 @@ def screen_spec(size, pixels, mounts):
     return {"size": size, "pixels": pixels, "mounts": mounts, "center": center, "yaw": yaw}
 
 
-FRONT_COLUMNS = [(x, y) for x, y in COLUMNS if y == min(cy for _, cy in COLUMNS)]
-
 # Each shape is mounted flush in several surfaces; the first mount is the one cameras aim at.
 # yaw: rotation about Z; yaw 0 means the screen faces -Y (toward the camera side of the concourse).
 SCREENS = {
@@ -109,9 +97,7 @@ SCREENS = {
                         [(Vector((x, BACK_WALL_Y, WALL_16X9_Z)), 0.0) for x in WALL_16X9_XS]),
     "32x9": screen_spec(RIBBON_SIZE, (3840, 1080),
                         [(Vector((x, HEADWALL_FRONT_Y, RIBBON_Z)), 0.0) for x in ribbon_xs()]),
-    "1x1": screen_spec((SQUARE_M, SQUARE_M), (1080, 1080),
-                       [(pillar_face_center(1.6), PILLAR_YAW)]
-                       + [column_front(x, y, COLUMN_BASE_SQUARE_Z) for x, y in FRONT_COLUMNS]),
+    "1x1": {**screen_spec((0.9, 0.9), (1080, 1080), [(pillar_face_center(1.6), PILLAR_YAW)]), "mounts": []},
 }
 
 SHOT_ORDER = ["9x16", "16x9", "32x9", "1x1"]
