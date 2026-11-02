@@ -124,7 +124,7 @@
       "kind": "composite",
       "seconds": 10,
       "src": "../renders/cut09.mp4",
-      "slate": "4 形状（9:16・16:9・32:9・1:1）のスクリーンと、他社 CMS の受け口を並べる",
+      "slate": "3D ヒーロー画角の 4 画面が Lv5 secure-now（look 確定後に cut09 として作る）\n右下に examples/minimal-cms の収録を小窓で重ねる（webhook ログ 2〜3 行 → PNG 表示）",
       "title": "どの画面にも\nAny screen.",
       "subtitle": "github.com/rettuce/evac-layer"
     }
