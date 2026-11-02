@@ -43,7 +43,7 @@
       "check": "bulletin-mismatch",
       "cell_id": "headline",
       "reason": "電文の level は null（解除）なのに画面右上に「警戒レベル1」と表示されている。",
-      "fix": "renderer: the level label on all-clear screens (reported to the render seat)"
+      "fix": "renderer: no level label on all-clear screens (f292654)"
     },
     {
       "run": 3,
@@ -53,7 +53,7 @@
       "check": "overflow",
       "cell_id": "headline",
       "reason": "「レベル２土砂災害注意報解除」(13 字) が右の「警戒レベル1」ラベルに押されて 3 行に折り返し、見出し帯から溢れる。見出しの ja は警報名からコードが決めるので、Writer の書き直し 3 回では直らない。",
-      "fix": "open: renderer header bar (reported to the render seat)"
+      "fix": "renderer: no level label on all-clear, label below a two-line headline in 9:16 and 1:1 (f292654); re-run: 輪島市 7/7 pass, no Writer call"
     },
     {
       "run": 3,
@@ -63,7 +63,7 @@
       "check": "overflow",
       "cell_id": "headline",
       "reason": "同上",
-      "fix": "open: renderer header bar (reported to the render seat)"
+      "fix": "renderer: no level label on all-clear, label below a two-line headline in 9:16 and 1:1 (f292654); re-run: 輪島市 7/7 pass, no Writer call"
     }
   ]
 }
