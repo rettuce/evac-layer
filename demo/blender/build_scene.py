@@ -148,6 +148,29 @@ SHOTS = {
             (Vector((0.8, -6.2, EYE_Z)), Vector((0.5, 6.0, 2.8))),
         ],
     },
+    "cut05": {
+        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": 30.0, "focus": "pillar",
+        "path": [
+            (Vector((-6.0, -7.2, EYE_Z)), Vector((-0.5, 4.5, 2.6))),
+            (Vector((-2.5, -7.8, EYE_Z)), Vector((-1.5, 4.5, 2.5))),
+            (Vector((1.5, -7.0, EYE_Z)), Vector((-2.5, 4.0, 2.4))),
+        ],
+    },
+    "cut08": {
+        "seconds": 18, "screens": "alert", "light_scale": 1.0, "lens": 35.0, "focus": "pillar",
+        "path": [
+            (Vector((-1.5, -7.5, EYE_Z)), Vector((-2.6, 4.0, 2.4))),
+            (Vector((-2.6, -3.0, 1.5)), Vector((-4.3, 1.0, 1.6))),
+            (Vector((-3.5, -0.5, 1.0)), Vector((-4.5, 0.97, 0.75))),
+        ],
+    },
+    "cut09": {
+        "seconds": 10, "screens": "alert", "light_scale": 1.0, "lens": 35.0, "focus": "pillar",
+        "path": [
+            (Vector((-1.5, -7.5, EYE_Z)), Vector((-2.6, 4.0, 2.4))),
+            (Vector((-1.4, -6.7, EYE_Z)), Vector((-2.6, 4.0, 2.4))),
+        ],
+    },
 }
 
 
