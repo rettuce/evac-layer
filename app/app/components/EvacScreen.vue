@@ -96,9 +96,11 @@ const OVERFLOW_TOLERANCE_PX = 1
 
 // Box rects, not scrollHeight: Noto's ascent+descent exceed the line-height, so the inline
 // content area pokes out of every line box and would read as overflow on any cell.
+// SVG internals are skipped: clipPath children report unscaled user-space rects.
 function cellOverflows(cellEl: HTMLElement): boolean {
   const bounds = cellEl.getBoundingClientRect()
-  return [...cellEl.querySelectorAll<HTMLElement>('*')].some((child) => {
+  const boxes = [...cellEl.querySelectorAll<HTMLElement>('*')].filter((child) => !child.closest('svg'))
+  return boxes.some((child) => {
     const r = child.getBoundingClientRect()
     const outside =
       r.bottom > bounds.bottom + OVERFLOW_TOLERANCE_PX ||
