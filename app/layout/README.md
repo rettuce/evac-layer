@@ -76,6 +76,8 @@ The alert layer is mounted hidden from the start, so `.evac-screen[data-ready="1
 
 Only bulletins that are approved and belong to a site with auto publish on are shown; others stay ambient. All screens polling the same municipality and speed switch together. Ready: `[data-mode="live"][data-ready="1"]`. State attributes on that root: `data-live-index`, `data-bulletin`, `data-showing`, `data-missing-layout` (no file), `data-unapproved` (gated), `data-unapproved-count`.
 
+The live screen never goes dark on a failed poll (unreachable server, HTTP error, malformed or slow response, 5 s timeout): it keeps the last state it had (ambient, or the alert it was showing) and the next poll, once a second, resyncs. With no data yet it shows the ambient layer. A small `更新 HH:MM` (last successful sync, JST wall time) sits in the bottom-right margin; after 60 s without a sync the root gets `data-stale="1"` and the stamp a faint `○` (no blinking; `?stale_after=<ms>` changes the threshold, used by the tests). Also `data-last-sync` (ISO) and `data-sync-error` (last failure). In virtual-clock mode the stamp is hidden so recordings stay deterministic.
+
 ## Other pages
 
 | URL | Meaning |
