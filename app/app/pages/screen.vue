@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DEFAULT_REPLAY_SPEED, isMunicipalityId } from '~~/layout/replay'
 import { DEFAULT_SWITCH_AT_MS, scenarioFrame, type ScenarioName } from '~~/layout/scenario'
 import { isShape, shapeForViewport } from '~~/layout/shapes'
 import type { EvacScreen } from '~~/layout/types'
@@ -73,11 +74,27 @@ const clockEpochMs = computed(() => {
   return issued - switchAtMs.value + elapsed.value
 })
 
+const liveMunicipality = computed(() =>
+  route.query.mode === 'live' && isMunicipalityId(route.query.municipality) ? route.query.municipality : undefined,
+)
+const liveSpeed = computed(() => numberQuery(route.query.speed, DEFAULT_REPLAY_SPEED))
+
 if (scenario.value) start()
 </script>
 
 <template>
-  <div v-if="srcRejected" class="missing" data-error="src-rejected">src must be a same-origin path (dev only)</div>
+  <LiveScreen
+    v-if="liveMunicipality"
+    :municipality="liveMunicipality"
+    :shape="shape"
+    :speed="liveSpeed"
+    :virtual-elapsed-ms="clockMode === 'virtual' ? elapsed : undefined"
+    :site-name="typeof route.query.site_name === 'string' ? route.query.site_name : undefined"
+    :reset="route.query.reset !== undefined"
+    :reduced-motion="reducedMotion"
+    :data-clock="clockMode"
+  />
+  <div v-else-if="srcRejected" class="missing" data-error="src-rejected">src must be a same-origin path (dev only)</div>
   <div v-else-if="remoteError" class="missing" data-error="src-load-failed">{{ remoteError }}</div>
   <div v-else-if="src && !screen" class="missing" data-loading="src">loading {{ src }}</div>
   <div v-else-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>

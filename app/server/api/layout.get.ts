@@ -4,7 +4,7 @@ import { extname, isAbsolute, sep } from 'node:path'
 // Dev-only bridge so the Verifier can render Composer output straight from disk.
 // The repo root also holds .env, so only .json files under it are served.
 export default defineEventHandler(async (event) => {
-  if (!import.meta.dev) throw createError({ status: 404, statusText: 'Not Found' })
+  assertDev()
 
   const file = getQuery(event).file
   if (typeof file !== 'string' || !isAbsolute(file) || extname(file) !== '.json') {

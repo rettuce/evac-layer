@@ -42,3 +42,4 @@ The root `.evac-screen` element carries `data-shape`, `data-template`, `data-var
 | `clock=virtual&t=<ms>` | render the state at `t` only; `window.evacClock.set(ms)` steps time and resolves after the frame is committed |
 | `mode=scenario&scenario=switch&t_switch=<ms>[&t_clear=<ms>]` | ambient, then 300 ms black, then the alert; optional 1 s crossfade back |
 | `mode=scenario&scenario=ambient[&seed=…&site_name=…]` | ambient layer only |
+| `mode=live&municipality=<code>[&speed=600&reset&clock=virtual&t=…&site_name=…]` | replay the municipality's bulletins in compressed time and show the pre-generated layout for the current one (`data/layouts/<code>/index.json` + `<bulletin>/<shape>.json`); all screens polling the same municipality and speed switch together. Root `[data-mode="live"]` carries `data-ready`, `data-live-index`, `data-bulletin`, `data-showing`, `data-missing-layout` |
