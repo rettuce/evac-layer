@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル５氾濫特別警報",
+          "ja_easy": "かわの みずが あふれました",
+          "en": "Level 5 Flood Emergency",
+          "zh_hans": "5级泛滥特别警报",
+          "zh_hant": "5級氾濫特別警報",
+          "ko": "레벨5 범람 특별경보"
+        },
+        "basis": "警報 areas[0].kind_name「レベル５氾濫特別警報」（raw_title「子吉川レベル５氾濫特別警報」は13字で ja 予算12字を超えるため kind_name を使用）。ja_easy は headline_text「《氾濫発生》子吉川では、越水による氾濫が発生」に基づく"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "すぐ上の階へ",
+          "ja_easy": "すぐ うえの かいへ",
+          "en": "Go upstairs now",
+          "zh_hans": "立即到楼上",
+          "zh_hant": "立即到樓上",
+          "ko": "즉시 위층으로"
+        },
+        "basis": "警報 level 5（警戒レベル５相当・氾濫発生）とテンプレート secure-now の取り決め（レベル5では移動による避難ではなく、いまいる場所で上の階へ）。知識ファイル cautions「高さのある場所であれば避難することができる」（yurihonjo/tsunami_honjo_nishime.pdf p.1）とも整合"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "すぐ上の階へ",
+          "ja_easy": "すぐ うえの かいへ",
+          "en": "Go upstairs now",
+          "zh_hans": "立即到楼上",
+          "zh_hant": "立即到樓上",
+          "ko": "즉시 위층으로"
+        },
+        "basis": "action セルと同じ内容の多言語表示（警報 level 5、secure-now の取り決め）"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VXKOii-202610212015-979f11623ff9",
+      "input": 3072,
+      "output": 1606,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.044408
+    }
+  ],
+  "lint": []
+}

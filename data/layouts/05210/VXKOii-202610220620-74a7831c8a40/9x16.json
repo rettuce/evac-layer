@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル２氾濫注意報解除",
-        "ja_easy": "【かり】",
-        "en": "[draft]",
-        "zh_hans": "[草稿]",
-        "zh_hant": "[草稿]",
-        "ko": "[초안]"
+        "ja_easy": "こよしがわ みずの ちゅうい おわり",
+        "en": "子吉川 flood advisory ended",
+        "zh_hans": "子吉川（子吉川）泛滥注意报解除",
+        "zh_hant": "子吉川（子吉川）氾濫注意報解除",
+        "ko": "子吉川(고요시강) 범람주의보 해제"
       },
       "pictogram": "flood",
       "motion": "scale-in"
@@ -35,12 +35,12 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "【仮】警報解除",
-        "ja_easy": "【かり】 おわり",
-        "en": "[draft] Lifted",
-        "zh_hans": "[草稿]警报解除",
-        "zh_hant": "[草稿]警報解除",
-        "ko": "[초안] 경보 해제"
+        "ja": "氾濫注意水位を下回る",
+        "ja_easy": "かわの みずが へりました",
+        "en": "Below alert level",
+        "zh_hans": "低于泛滥注意水位",
+        "zh_hant": "低於氾濫注意水位",
+        "ko": "범람주의수위 아래로"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -50,12 +50,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "【仮】警報解除",
-        "ja_easy": "【かり】 おわり",
-        "en": "[draft] Lifted",
-        "zh_hans": "[草稿]警报解除",
-        "zh_hant": "[草稿]警報解除",
-        "ko": "[초안] 경보 해제"
+        "ja": "氾濫注意水位を下回る",
+        "ja_easy": "かわの みずが へりました",
+        "en": "Below alert level",
+        "zh_hans": "低于泛滥注意水位",
+        "zh_hant": "低於氾濫注意水位",
+        "ko": "범람주의수위 아래로"
       },
       "motion": "static"
     },
@@ -64,13 +64,18 @@
       "role": "source",
       "priority": 9,
       "text": {
-        "ja": "出典: 国土地理院 指定緊急避難場所データ / 気象庁 06:20"
+        "ja": "出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 06:20"
       },
       "motion": "static"
     }
   ],
   "palette": "cabinet-office-5",
   "sources": [
+    {
+      "type": "pdf",
+      "file": "yurihonjo/kozui_dosha_hokubu.pdf",
+      "page": 1
+    },
     {
       "type": "gsi",
       "file": "05210_2.csv"

@@ -33,6 +33,21 @@ Bulletins that concern the demo municipalities (city code in the body, or the mu
 
 Highest level for the municipality in the replayable bulletins: 輪島市 level 3 (大雨 2026-10-20 05:00 and 10-21 12:15; 土砂災害 10-21 13:04), 吉田町 level 2 (大雨 10-20 09:55), 横浜市 none (土砂災害 bulletins list the city with no warning in force). Nationally the recording also holds level 4 landslide warnings (18 VPWW56) and level 5 flood special warnings (3 VXKO55), none for these three municipalities.
 
+### Reader runs (2026-11-02, first live run)
+
+Municipal PDFs → municipality knowledge file, `pnpm -F agents reader --municipality <id> --model <m> --allow-vision`. The Sonnet output is the published `data/municipalities/<id>.json`. Seconds were only measured for 輪島市 (the other runs went in parallel; later runs record `seconds` in the usage file).
+
+| Municipality | Model | Cost | Input / output tokens | Vision pages | Seconds | Claims | Shelter mentions | Hazards | Conflicts with GSI |
+|---|---|---|---|---|---|---|---|---|---|
+| 輪島市 17204 | Sonnet 5.5 | $0.257 | 36,703 / 18,320 | 1 | 98 | 146 | 113 | 2 | 20 |
+| 輪島市 17204 | Haiku 5.5 | $0.009 | 22,690 / 13,790 | 1 | 53 | 35 | 19 | 5 | 12 |
+| 由利本荘市 05210 | Sonnet 5.5 | $1.165 | 347,798 / 46,947 | 28 | — | 590 | 59 | 6 | 3 |
+| 吉田町 22424 | Sonnet 5.5 | $0.326 | 70,830 / 18,442 | 1 | — | 168 | 42 | 7 | 1 |
+| 横浜市 14100 | Sonnet 5.5 | $0.583 | 241,367 / 10,068 | 0 | — | 67 | 0 | 13 | 0 |
+| 柏崎市 15205 | Sonnet 5.5 | $0.541 | 73,485 / 39,390 | 0 | — | 331 | 305 | 7 | 2 |
+
+Haiku was 30× cheaper on 輪島市 but kept 19 of the ~110 listed facilities and restated table headers as hazards; Sonnet listed nearly every facility and recovered the tsunami heights (8.3 m, 16.6 m) from the glyph-dropping map through Vision, so Sonnet is the Reader model. 横浜市's guidebook has no shelter list (shelters come from GSI). Every conflict is a real mismatch kept off the screens: 2012 map names no longer in GSI, 旧 prefixes in the 2026 city list, and a GSI typo (ＷＡＪＩＭＡ ＭＥＭＯＲＩＡＬ GIM for GYM).
+
 ### What the real data caught
 
 **A text layer that silently drops characters.** The 輪島市 tsunami hazard map has a text layer, but its CID fonts lack a ToUnicode map, so extraction loses glyphs (「最大津波 16.6m」 becomes 「最 津波 16.6m」, 「石川県」 becomes 「川県」). Character counts and script ratios both pass it, and the same symptom decodes fine in other PDFs, so the check marks such files `suspect` and stops; a person clears a file after a spot check, or `--allow-vision` reads the page images with `{method: "vision", cited_text: null}` provenance.

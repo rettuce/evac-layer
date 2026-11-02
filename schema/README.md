@@ -6,6 +6,8 @@
 | `alert.schema.json` | JMA XML parser (`agents/src/jma/`) | Writer, Composer |
 | `municipality.schema.json` | Reader (`agents/src/reader/`) | Writer, Composer |
 | `common.schema.json` | shared `$defs` (hazard, level, municipality id) | all of the above |
+| `feed.schema.json` | feed API / webhook (render seat) | other signage systems |
+| `export-manifest.schema.json` | `pnpm -F agents export` | systems that take files only |
 
 Validate any document: `pnpm -F agents validate <file.json>` (schema inferred; `--schema` to force).
 

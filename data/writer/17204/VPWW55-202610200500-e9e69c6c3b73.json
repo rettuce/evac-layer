@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル３大雨警報",
+          "ja_easy": "レベル３ おおあめ けいほう",
+          "en": "Heavy Rain Warning Lv 3",
+          "zh_hans": "3级暴雨警报",
+          "zh_hant": "3級豪雨警報",
+          "ko": "레벨3 호우경보"
+        },
+        "basis": "警報 areas[0].kind_name「レベル３大雨警報」（輪島市, level 3, status upgraded）"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "浸水に警戒",
+          "ja_easy": "みずに きを つけて",
+          "en": "Watch for flooding",
+          "zh_hans": "警惕浸水",
+          "zh_hant": "警惕淹水",
+          "ko": "침수 경계"
+        },
+        "basis": "警報 headline_text「能登では、低い土地の浸水や河川の増水に警戒してください。」（金沢地方気象台）。避難の指示は警報にも知識ファイルにもないため書かない"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "浸水に警戒",
+          "ja_easy": "みずに きを つけて",
+          "en": "Watch for flooding",
+          "zh_hans": "警惕浸水",
+          "zh_hant": "警惕淹水",
+          "ko": "침수 경계"
+        },
+        "basis": "action セルと同じ内容。警報 headline_text「低い土地の浸水や河川の増水に警戒してください」"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VPWW55-202610200500-e9e69c6c3b73",
+      "input": 4762,
+      "output": 1845,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.055948
+    }
+  ],
+  "lint": []
+}

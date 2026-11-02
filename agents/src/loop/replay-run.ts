@@ -7,7 +7,10 @@ import { placeholderWriter } from "../writer/placeholder.js";
 import { runLoop } from "./loop.js";
 import { loadMunicipality } from "./municipality.js";
 import { LAYOUTS_DIR, REPORTS_DIR, writeReport } from "./report.js";
-import { liveWriterReviser } from "./revisers.js";
+import { liveWriterReviser, writerApiReviser } from "./revisers.js";
+import type Anthropic from "@anthropic-ai/sdk";
+import { cachedWriter, saveWriter, writeCells, type WriterModel } from "../writer/live.js";
+import type { CallUsage } from "../reader/pricing.js";
 import { staticVerifier } from "./static-verifier.js";
 import type { Verifier } from "./types.js";
 import fs from "node:fs";
@@ -16,9 +19,9 @@ const PLACEHOLDER_NOTE = "文言は仮: Writer は API キー未設定のため�
 
 export interface ReplayEvent { municipality: string; issued_at: string; template?: string; level?: number | null; outcome: "pass" | "fail" | "stopped" | "no-screen"; reason?: string }
 
-export interface ReplaySummary { municipality: string; name: string; bulletins: number; screens: number; pass: number; fail: number; no_screen: number; layouts: number; seconds: number }
+export interface ReplaySummary { municipality: string; name: string; bulletins: number; screens: number; pass: number; fail: number; no_screen: number; layouts: number; seconds: number; writer_usd: number }
 
-export async function runReplay(args: { municipalityId: string; entries: ReplayEntry[]; site: Site; verifier: Verifier; onEvent?: (e: ReplayEvent) => void; persist?: boolean }): Promise<ReplaySummary> {
+export async function runReplay(args: { municipalityId: string; entries: ReplayEntry[]; site: Site; verifier: Verifier; onEvent?: (e: ReplayEvent) => void; persist?: boolean; writer?: { client: Anthropic; model: WriterModel } }): Promise<ReplaySummary> {
   const persist = args.persist ?? true;
   const t0 = Date.now();
   const { municipality, readerRan } = loadMunicipality(args.municipalityId);
@@ -27,7 +30,9 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
     fs.rmSync(path.join(LAYOUTS_DIR, municipality.id), { recursive: true, force: true });
     if (fs.existsSync(REPORTS_DIR)) for (const d of fs.readdirSync(REPORTS_DIR)) if (d.startsWith(`${municipality.id}-`)) fs.rmSync(path.join(REPORTS_DIR, d), { recursive: true, force: true });
   }
-  const notes = [PLACEHOLDER_NOTE, ...(readerRan ? [] : ["自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。"])].join(" ");
+  const live = args.writer;
+  const writerUsage: CallUsage[] = [];
+  const notes = [...(live ? [] : [PLACEHOLDER_NOTE]), ...(readerRan ? [] : ["自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。"])].join(" ");
   // Only a pass that went through the renderer may be shown; a static-only pass has not been seen on a screen.
   const browserChecked = args.verifier !== staticVerifier;
   const index = [];
@@ -53,13 +58,43 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       args.onEvent?.({ municipality: municipality.id, issued_at: e.issued_at, outcome: "no-screen", reason });
       continue;
     }
+    const usageStart = writerUsage.length;
+    let writer = placeholderWriter(e.alert, municipality.id, situation.level, situation.cleared);
+    let writerSource = "placeholder";
+    let reviser = liveWriterReviser;
+    if (live) {
+      const ctx = { client: live.client, model: live.model, alert: e.alert, municipality, municipalityId: municipality.id, situation };
+      const cached = cachedWriter(municipality.id, e.bulletin_id);
+      if (cached) {
+        writer = cached;
+        writerSource = "writer-cache";
+      } else {
+        const used: CallUsage[] = [];
+        let r = await writeCells(ctx);
+        used.push(r.usage);
+        // The guideline lint is cheap and deterministic, so its findings go back to the Writer before rendering.
+        for (let i = 0; i < 2 && r.lint.length; i++) {
+          r = await writeCells({ ...ctx, feedback: r.lint.map((f) => `${f.rule}: 「${f.match}」`) });
+          used.push(r.usage);
+        }
+        if (r.lint.length) throw new Error(`Writer output for ${e.bulletin_id} still breaks the easy-Japanese rules: ${r.lint.map((f) => f.rule).join(", ")}`);
+        writer = r.output;
+        writerSource = `writer-api:${live.model}`;
+        writerUsage.push(...used);
+        if (persist) saveWriter(municipality.id, e.bulletin_id, { model: live.model, output: writer, usage: used, lint: r.lint });
+      }
+      reviser = writerApiReviser({ ...ctx, usage: writerUsage });
+    }
     const result = await runLoop({
       alert: e.alert, municipality, site: args.site,
-      writer: placeholderWriter(e.alert, municipality.id, situation.level, situation.cleared), writerSource: "placeholder",
-      verifier: args.verifier, reviser: liveWriterReviser,
+      writer, writerSource,
+      verifier: args.verifier, reviser,
     });
+    if (live && persist && result.outcome === "pass" && result.writer && result.writer !== writer) {
+      saveWriter(municipality.id, e.bulletin_id, { model: live.model, output: result.writer, usage: writerUsage.slice(usageStart), lint: [] });
+    }
     const { dir, report } = persist
-      ? writeReport({ municipalityId: municipality.id, bulletinId: e.bulletin_id, verifier: args.verifier.name, reviser: liveWriterReviser.name, maxAttempts: 3, result, writerNote: notes })
+      ? writeReport({ municipalityId: municipality.id, bulletinId: e.bulletin_id, verifier: args.verifier.name, reviser: reviser.name, maxAttempts: 3, result, writerNote: notes || undefined })
       : { dir: "", report: { outcome: result.outcome, reason: result.reason, layouts: result.screens.map((x) => `${x.shape}.json`) } };
     const screen = report.outcome === "pass" && browserChecked;
     if (report.outcome === "pass") pass++; else fail++;
@@ -78,5 +113,5 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   const indexFile = path.join(LAYOUTS_DIR, municipality.id, "index.json");
   if (persist) fs.mkdirSync(path.dirname(indexFile), { recursive: true });
   if (persist) fs.writeFileSync(indexFile, JSON.stringify({ municipality: municipality.id, name: municipality.name, site: args.site.id, writer_note: notes, entries: index }, null, 2) + "\n");
-  return { municipality: municipality.id, name: municipality.name, bulletins: args.entries.length, screens: pass + fail, pass, fail, no_screen: noScreen, layouts, seconds: (Date.now() - t0) / 1000 };
+  return { municipality: municipality.id, name: municipality.name, bulletins: args.entries.length, screens: pass + fail, pass, fail, no_screen: noScreen, layouts, seconds: (Date.now() - t0) / 1000, writer_usd: writerUsage.reduce((n, u) => n + u.usd, 0) };
 }

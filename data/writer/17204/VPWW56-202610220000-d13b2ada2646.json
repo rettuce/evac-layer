@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル２土砂災害注意報",
+          "ja_easy": "どしゃくずれ ちゅういほう おわり",
+          "en": "Landslide advisory ended",
+          "zh_hans": "土砂灾害注意报解除",
+          "zh_hant": "土砂災害注意報解除",
+          "ko": "토사재해 주의보 해제"
+        },
+        "basis": "警報 areas[0].kind_name「レベル２土砂災害注意報」（輪島市 1720400）と areas[0].status「cleared」、headline_text「注意報を解除します。」（金沢地方気象台、2026-10-22T00:00+09:00）。ja の文字数予算12字のため「レベル２」を省いた（警報名＋「解除」は13字）。"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "注意報は解除済み",
+          "ja_easy": "ちゅういほうは おわりました",
+          "en": "Advisory lifted",
+          "zh_hans": "注意报已解除",
+          "zh_hant": "注意報已解除",
+          "ko": "주의보 해제됨"
+        },
+        "basis": "警報 headline_text「注意報を解除します。」と areas[0].status「cleared」。警報にも自治体知識ファイルにも解除後の行動の指示はないため、解除の事実だけを書いた。"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "注意報は解除済み",
+          "ja_easy": "ちゅういほうは おわりました",
+          "en": "Advisory lifted",
+          "zh_hans": "注意报已解除",
+          "zh_hant": "注意報已解除",
+          "ko": "주의보 해제됨"
+        },
+        "basis": "action セルと同じ内容（警報 headline_text「注意報を解除します。」と areas[0].status「cleared」）を各言語で表示。"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VPWW56-202610220000-d13b2ada2646",
+      "input": 4743,
+      "output": 1812,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.055212
+    }
+  ],
+  "lint": []
+}

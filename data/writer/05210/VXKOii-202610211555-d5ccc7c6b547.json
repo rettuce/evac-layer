@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル３氾濫警報",
+          "ja_easy": "こよしがわ けいかい レベル３",
+          "en": "子吉川 Flood Level 3",
+          "zh_hans": "子吉川3级泛滥警报",
+          "zh_hant": "子吉川3級氾濫警報",
+          "ko": "子吉川(고요시강) 3단계 범람경보"
+        },
+        "basis": "警報 raw_title「子吉川レベル３氾濫警報」と headline_text「【警戒レベル３相当情報［洪水］】」（areas: 由利本荘市, level 3）"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "避難の準備",
+          "ja_easy": "にげる じゅんびを して",
+          "en": "Ready to evacuate",
+          "zh_hans": "准备避难",
+          "zh_hant": "準備避難",
+          "ko": "대피 준비를 하세요"
+        },
+        "basis": "警報 level 3（警戒レベル３相当［洪水］、子吉川は今後氾濫危険水位に到達する見込み）とテンプレート evac-prepare（表示レベル3）。知識ファイルに行動の記載はなし"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "避難の準備",
+          "ja_easy": "にげる じゅんびを して",
+          "en": "Ready to evacuate",
+          "zh_hans": "准备避难",
+          "zh_hant": "準備避難",
+          "ko": "대피 준비를 하세요"
+        },
+        "basis": "action セルと同じ内容（警報 level 3・テンプレート evac-prepare）"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VXKOii-202610211555-d5ccc7c6b547",
+      "input": 3050,
+      "output": 1709,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.04638
+    }
+  ],
+  "lint": []
+}

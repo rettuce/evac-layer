@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル２大雨注意報",
+          "ja_easy": "おおあめ ちゅういほう おわりです",
+          "en": "Heavy rain advisory over",
+          "zh_hans": "2级大雨注意报解除",
+          "zh_hant": "2級大雨注意報解除",
+          "ko": "레벨2 호우주의보 해제"
+        },
+        "basis": "Alert areas[0] (輪島市): kind_name「レベル２大雨注意報」, status \"cleared\"; info from 金沢地方気象台, issued 2026-10-20T11:41+09:00. The English and ja_easy versions omit \"Level 2\" to fit the character budget."
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "注意報を解除します",
+          "ja_easy": "ちゅういほうは おわりました",
+          "en": "Advisory lifted",
+          "zh_hans": "解除注意报",
+          "zh_hant": "解除注意報",
+          "ko": "주의보를 해제합니다"
+        },
+        "basis": "Alert headline_text「注意報を解除します。」 together with areas[0].status \"cleared\" (輪島市). The municipality file has no hazard or shelter entries tied to this all-clear, so no other action is added."
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "注意報を解除します",
+          "ja_easy": "ちゅういほうは おわりました",
+          "en": "Advisory lifted",
+          "zh_hans": "解除注意报",
+          "zh_hant": "解除注意報",
+          "ko": "주의보를 해제합니다"
+        },
+        "basis": "Same content as the action cell, shown in each language. Source is the alert headline_text「注意報を解除します。」 and areas[0].status \"cleared\" (輪島市)."
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VPWW55-202610201141-6bb4c931f4d3",
+      "input": 4744,
+      "output": 1943,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.057836
+    }
+  ],
+  "lint": []
+}
