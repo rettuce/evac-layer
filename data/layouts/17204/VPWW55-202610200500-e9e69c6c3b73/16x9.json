@@ -22,10 +22,10 @@
       "text": {
         "ja": "レベル３大雨警報",
         "ja_easy": "レベル３ おおあめ けいほう",
-        "en": "Heavy Rain Warning Lv 3",
-        "zh_hans": "3级暴雨警报",
-        "zh_hant": "3級豪雨警報",
-        "ko": "레벨3 호우경보"
+        "en": "Lv3 Heavy Rain Warning",
+        "zh_hans": "轮岛市（輪島市）3级暴雨警报",
+        "zh_hant": "輪島市 3級大雨警報",
+        "ko": "와지마시(輪島市) 레벨3 호우경보"
       },
       "pictogram": "heavy_rain",
       "motion": "scale-in"
@@ -35,14 +35,14 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "浸水に警戒",
-        "ja_easy": "みずに きを つけて",
-        "en": "Watch for flooding",
-        "zh_hans": "警惕浸水",
-        "zh_hant": "警惕淹水",
-        "ko": "침수 경계"
+        "ja": "避難の準備",
+        "ja_easy": "にげる じゅんびを します",
+        "en": "Prepare to leave",
+        "zh_hans": "做好避难准备",
+        "zh_hant": "做好避難準備",
+        "ko": "대피 준비"
       },
-      "pictogram": "go_higher",
+      "pictogram": "directions_run",
       "motion": "pulse"
     },
     {
@@ -73,12 +73,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "浸水に警戒",
-        "ja_easy": "みずに きを つけて",
-        "en": "Watch for flooding",
-        "zh_hans": "警惕浸水",
-        "zh_hant": "警惕淹水",
-        "ko": "침수 경계"
+        "ja": "避難の準備",
+        "ja_easy": "にげる じゅんびを します",
+        "en": "Prepare to leave",
+        "zh_hans": "做好避难准备",
+        "zh_hant": "做好避難準備",
+        "ko": "대피 준비"
       },
       "motion": "static"
     },

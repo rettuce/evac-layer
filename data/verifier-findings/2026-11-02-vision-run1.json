@@ -1,0 +1,234 @@
+{
+  "kind": "evac-verifier-findings",
+  "run": "vision-1",
+  "date": "2026-11-02",
+  "verifier": "static+browser+vision(claude-sonnet-5-5)",
+  "note": "First Vision Verifier pass over the layouts built from the recorded JMA feed. Every finding was a Composer defect; the loop stopped instead of sending them to the Writer, the Composer was fixed (commit 6c757d6) and the set was re-verified.",
+  "findings": [
+    {
+      "municipality": "05210",
+      "bulletin_id": "VXKOii-202610211815-e713da0e3c05",
+      "shape": "9x16",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "行動「危険な場所から避難」に「高い所・上の階へ」の図記号(上矢印と建物)が使われている。画面の案内は南西へ570 m先の避難場所へ移動することで、上の階へ上がる指示は出ていない。避難する行動を表す図記号(directions_run)が合う。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "05210",
+      "bulletin_id": "VXKOii-202610211815-e713da0e3c05",
+      "shape": "32x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "行動は「危険な場所から避難」だが、図記号は go_higher（高い所・上の階へ）で、上向き矢印とビル、水面が描かれている。電文は氾濫危険水位到達による避難で、上の階への垂直避難を指示してはいない。画面には南西の避難場所への水平避難の案内もあるため、行動と図記号が合わない。directions_run（避難する）が適切。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "05210",
+      "bulletin_id": "VXKOii-202610211815-e713da0e3c05",
+      "shape": "1x1",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "「危険な場所から避難」という行動に、高い所・上の階へ移動を示す go_higher の図記号(上矢印と建物)が使われている。電文の洪水・氾濫危険警報では垂直避難に限定する根拠がなく、避難する行動の図記号(directions_run)とも合っていない。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "05210",
+      "bulletin_id": "VXKOii-202610220620-74a7831c8a40",
+      "shape": "16x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "電文は氾濫注意報の解除（水位が下がった）で、避難を促す場面ではない。action セルの図記号は go_higher（高い所・上の階へ）だが、これは上へ逃げる行動を示す記号で、水位低下を伝える内容と合わない。画面には水位が下がる意味の絵として描かれているものの、割り当てられた図記号 ID は解除の内容と食い違っている。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "05210",
+      "bulletin_id": "VXKOii-202610220620-74a7831c8a40",
+      "shape": "9x16",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "解除（安全になった）の画面で、行動セルに「高い所・上の階へ」（go_higher）の図記号が使われている。上へ逃げるよう促す図記号は、水位が下がったという内容と合わず、避難を促していると誤解されるおそれがある。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "05210",
+      "bulletin_id": "VXKOii-202610220620-74a7831c8a40",
+      "shape": "32x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "「氾濫注意水位を下回る」は水位が下がった解除の画面で、行動も不要です。それなのに、上向き矢印と水面を組み合わせた go_higher（高い所・上の階へ）の図記号が付いています。これは上の階へ逃げる行動を示すので、解除の内容と合いません。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "05210",
+      "bulletin_id": "VXKOii-202610220620-74a7831c8a40",
+      "shape": "1x1",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "解除画面の「かわの みずが へりました」に、高い所・上の階へ逃げることを表す go_higher の図記号が使われている。上向き矢印と水面の絵は水位が上がっているようにも見え、避難を促していると誤解されかねない。解除なので避難系の図記号は合わない。ここは safe_here などが適切。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW55-202610200500-e9e69c6c3b73",
+      "shape": "16x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "行動欄の文言は「浸水に警戒」「みずに きを つけて」で、警戒を促すだけです。ところが図記号は go_higher（高い所・上の階へ）で、上へ避難する指示に見えます。文言とは行動が合いません。浸水を表す flood の図記号が適切です。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW55-202610200500-e9e69c6c3b73",
+      "shape": "9x16",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "行動セルの文言は「浸水に警戒」「みずに きを つけて」で、水害への注意を促しているだけです。ところが図記号は go_higher（高い所・上の階へ）で、上の階への垂直避難を指示しているように見えます。電文は大雨警報（レベル3）で、避難や上階移動の指示はなく、図記号が文言より強い行動を示しています。画像では水面の波と建物に上向き矢印が描かれており、この印象を強めています。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW55-202610200500-e9e69c6c3b73",
+      "shape": "1x1",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "「浸水に警戒」「みずに きを つけて」は注意を促す行動なのに、図記号は高い所・上の階へ逃げる go_higher（上向き矢印とビル）になっている。垂直避難の指示に見え、文言と合わない。洪水・浸水の flood などのほうが適切。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW55-202610200711-08afb5e91cb5",
+      "shape": "32x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "action セルの「浸水増水警戒」には図記号 go_higher（高い所・上の階へ）が使われている。画面の文言は警戒を促すもので上の階への避難は指示していないうえ、電文も大雨警報のレベル3で、上の階へ逃げる行動は示していない。画面上の図記号は上矢印と建物と水面で、文言と合っていない。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW55-202610211215-0f00f618dc6d",
+      "shape": "16x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "行動欄の文言は「浸水に警戒」「みずに きを つけてください」で、避難や上の階への移動を求めていない。それなのに図記号は go_higher（高い所・上の階へ）で、上へ逃げる指示に見える。文言と行動の意味が合っていない。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW55-202610211215-0f00f618dc6d",
+      "shape": "1x1",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "行動欄の図記号は go_higher（高い所・上の階へ）だが、文言は「浸水に警戒／みずに きを つけてください」という注意喚起で、上へ逃げる行動は示していない。図記号だけ見ると上の階へ避難すべきだと誤解しかねず、レベル3の準備段階の行動と合わない。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
+      "shape": "16x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "「注意報は解除済み」「ちゅういほうは おわりました」という解除の行動セルに、避難を意味する directions_run(走る人)が使われている。解除の画面では避難を促す印象になり、行動と合わない。ここは安全を示す safe_here などが適切。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
+      "shape": "9x16",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "注意報は解除済みで「ちゅういほうはおわりました」と伝える行動欄に、避難する（走る人）の図記号 directions_run が使われている。解除の画面なのに避難を促しているように見える。safe_here などが適切。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
+      "shape": "32x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "「注意報は解除済み」「ちゅういほうは おわりました」という解除の画面に、避難する(directions_run)の走る人の図記号が使われている。解除なのに避難を促しているように見える。解除なら safe_here などが適切。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
+      "shape": "32x9",
+      "check": "bulletin-mismatch",
+      "cell_id": "headline",
+      "reason": "電文は注意報の解除(status=cleared, level=null)だが、見出しは「レベル２土砂災害注意報」と発表中のように表示され、「警戒レベル1」とも併記されている。解除済みの内容と食い違い、レベル2とレベル1が混在して矛盾している。",
+      "fix": "headline set by the Composer; a cleared VPWW bulletin reads 〈警報名〉解除"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
+      "shape": "1x1",
+      "check": "bulletin-mismatch",
+      "cell_id": "headline",
+      "reason": "電文は注意報の解除(status: cleared, level: null)なのに、見出しに「レベル２土砂災害注意報」と発令中のように表示され、右上には「警戒レベル1」という電文にないレベル表示がある。解除済みであることが見出しから読み取れない。",
+      "fix": "headline set by the Composer; a cleared VPWW bulletin reads 〈警報名〉解除"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
+      "shape": "1x1",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "「注意報は解除済み」という解除の画面に、避難する(走る人)の図記号 directions_run が使われている。避難を促しているように見え、解除の内容と合わない。ここは安全を示す safe_here などが適切。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+      "shape": "16x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "「注意報は解除です」「ちゅういほうは おわりです」という解除の行動に、避難する（走る人）の図記号 directions_run が使われている。解除の画面で避難を促すように見えるため、行動と合っていない。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+      "shape": "9x16",
+      "check": "bulletin-mismatch",
+      "cell_id": "headline",
+      "reason": "電文では輪島市のレベル２土砂災害注意報は解除(cleared)されているのに、見出しは「レベル２土砂災害注意報」のままで解除と読めず、右側に「警戒レベル1」も出ている。見出しだけでは注意報が出ている状態に見え、電文の解除と食い違う。",
+      "fix": "headline set by the Composer; a cleared VPWW bulletin reads 〈警報名〉解除"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+      "shape": "9x16",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "解除を伝える「注意報は解除です」「ちゅういほうはおわりです」の行動欄に、避難する(走る人)の図記号 directions_run が使われている。解除の画面で避難を促す印象になる。ここは safe_here などが適切。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+      "shape": "32x9",
+      "check": "bulletin-mismatch",
+      "cell_id": "headline",
+      "reason": "電文では輪島市の土砂災害注意報は status=cleared（解除）で level は null。画面左には「レベル２土砂災害注意報」と「警戒レベル1」が現行の発表のように表示され、解除の内容と合っていない。右側の「注意報は解除です」とも食い違っている。",
+      "fix": "headline set by the Composer; a cleared VPWW bulletin reads 〈警報名〉解除"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+      "shape": "32x9",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "解除の画面で、避難する（走る人）の図記号 directions_run が使われている。解除なのに避難を促しているように見え、「注意報は解除です」という内容と合わない。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    },
+    {
+      "municipality": "17204",
+      "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+      "shape": "1x1",
+      "check": "pictogram-misuse",
+      "cell_id": "action",
+      "reason": "注意報の解除を伝える画面なのに、行動欄に「避難する（走る人）」の図記号(directions_run)が使われている。避難を促しているように見え、解除という内容と合わない。ここは安全を示す safe_here などが適切。",
+      "fix": "action pictogram now follows the template (all-clear → safe_here, evac-now → directions_run, evac-prepare → hazard pictogram)"
+    }
+  ]
+}

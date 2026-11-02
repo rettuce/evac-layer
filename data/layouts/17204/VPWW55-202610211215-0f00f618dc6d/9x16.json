@@ -21,8 +21,8 @@
       "priority": 1,
       "text": {
         "ja": "レベル３大雨警報",
-        "ja_easy": "おおあめ けいほう（レベル３）",
-        "en": "Heavy Rain Warning Lv.3",
+        "ja_easy": "れべる３ おおあめ けいほう",
+        "en": "Heavy Rain Warning Lv 3",
         "zh_hans": "3级暴雨警报",
         "zh_hant": "3級豪雨警報",
         "ko": "레벨3 호우경보"
@@ -35,14 +35,14 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "浸水に警戒",
-        "ja_easy": "みずに きを つけてください",
-        "en": "Beware of flooding",
-        "zh_hans": "警惕浸水",
-        "zh_hant": "警惕浸水",
-        "ko": "침수 경계"
+        "ja": "高齢者は避難",
+        "ja_easy": "としよりは にげてください",
+        "en": "Elderly: evacuate",
+        "zh_hans": "老年人请避难",
+        "zh_hant": "老年人請避難",
+        "ko": "고령자는 대피하세요"
       },
-      "pictogram": "go_higher",
+      "pictogram": "directions_run",
       "motion": "pulse"
     },
     {
@@ -73,12 +73,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "浸水に警戒",
-        "ja_easy": "みずに きを つけてください",
-        "en": "Beware of flooding",
-        "zh_hans": "警惕浸水",
-        "zh_hant": "警惕浸水",
-        "ko": "침수 경계"
+        "ja": "高齢者は避難",
+        "ja_easy": "としよりは にげてください",
+        "en": "Elderly: evacuate",
+        "zh_hans": "老年人请避难",
+        "zh_hant": "老年人請避難",
+        "ko": "고령자는 대피하세요"
       },
       "motion": "static"
     },

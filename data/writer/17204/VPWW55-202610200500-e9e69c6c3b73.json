@@ -7,47 +7,47 @@
         "text": {
           "ja": "レベル３大雨警報",
           "ja_easy": "レベル３ おおあめ けいほう",
-          "en": "Heavy Rain Warning Lv 3",
-          "zh_hans": "3级暴雨警报",
-          "zh_hant": "3級豪雨警報",
-          "ko": "레벨3 호우경보"
+          "en": "Lv3 Heavy Rain Warning",
+          "zh_hans": "轮岛市（輪島市）3级暴雨警报",
+          "zh_hant": "輪島市 3級大雨警報",
+          "ko": "와지마시(輪島市) 레벨3 호우경보"
         },
-        "basis": "警報 areas[0].kind_name「レベル３大雨警報」（輪島市, level 3, status upgraded）"
+        "basis": "警報 areas[0].name「輪島市」、areas[0].kind_name「レベル３大雨警報」、level 3（VPWW55-202610200500-e9e69c6c3b73、金沢地方気象台 2026-10-20 05:00 発表）"
       },
       {
         "role": "action",
         "text": {
-          "ja": "浸水に警戒",
-          "ja_easy": "みずに きを つけて",
-          "en": "Watch for flooding",
-          "zh_hans": "警惕浸水",
-          "zh_hant": "警惕淹水",
-          "ko": "침수 경계"
+          "ja": "避難の準備",
+          "ja_easy": "にげる じゅんびを します",
+          "en": "Prepare to leave",
+          "zh_hans": "做好避难准备",
+          "zh_hant": "做好避難準備",
+          "ko": "대피 준비"
         },
-        "basis": "警報 headline_text「能登では、低い土地の浸水や河川の増水に警戒してください。」（金沢地方気象台）。避難の指示は警報にも知識ファイルにもないため書かない"
+        "basis": "警報 level 3 と、テンプレート evac-prepare の図記号 directions_run の意味（レベル3：避難の準備をする）。自治体知識ファイルには該当する行動の記載なし"
       },
       {
         "role": "languages",
         "text": {
-          "ja": "浸水に警戒",
-          "ja_easy": "みずに きを つけて",
-          "en": "Watch for flooding",
-          "zh_hans": "警惕浸水",
-          "zh_hant": "警惕淹水",
-          "ko": "침수 경계"
+          "ja": "避難の準備",
+          "ja_easy": "にげる じゅんびを します",
+          "en": "Prepare to leave",
+          "zh_hans": "做好避难准备",
+          "zh_hant": "做好避難準備",
+          "ko": "대피 준비"
         },
-        "basis": "action セルと同じ内容。警報 headline_text「低い土地の浸水や河川の増水に警戒してください」"
+        "basis": "action セルと同じ内容（警報 level 3、図記号 directions_run の意味）"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VPWW55-202610200500-e9e69c6c3b73",
-      "input": 4762,
-      "output": 1845,
+      "input": 4840,
+      "output": 1865,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.055948
+      "usd": 0.05666
     }
   ],
   "lint": []

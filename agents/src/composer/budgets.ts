@@ -2,7 +2,7 @@ import type { Shape, TemplateId } from "../../../app/layout/types";
 import type { CellBudget } from "../writer/request.js";
 
 // Provisional; the rationale lives in schema/README.md ("Character budgets").
-const HEADLINE = { role: "headline" as const, max_chars: { ja: 12, ja_easy: 18, en: 24 } };
+const HEADLINE = { role: "headline" as const, max_chars: { ja: 14, ja_easy: 18, en: 24 } };
 export const CHAR_BUDGETS: Record<Shape, CellBudget[]> = {
   "16x9": [
     HEADLINE,

@@ -6,48 +6,48 @@
         "role": "headline",
         "text": {
           "ja": "レベル４氾濫危険警報",
-          "ja_easy": "こよしがわが あふれる きけん",
-          "en": "Level 4 Flood Danger",
-          "zh_hans": "子吉川 4级泛滥危险警报",
-          "zh_hant": "子吉川 4級氾濫危險警報",
-          "ko": "子吉川(고요시강) 레벨4 범람위험경보"
+          "ja_easy": "こよしがわ かわが あふれる きけん",
+          "en": "Koyoshi(子吉川) flood L4",
+          "zh_hans": "子吉川4级泛滥危险警报",
+          "zh_hant": "子吉川4級氾濫危險警報",
+          "ko": "고요시강(子吉川) 레벨4 범람위험경보"
         },
-        "basis": "警報 areas[0].kind_name「レベル４氾濫危険警報」、raw_title「子吉川レベル４氾濫危険警報」、headline_text「子吉川では、氾濫危険水位に到達し、氾濫のおそれあり」。ja は12字の予算内に収めるため kind_name をそのまま使用"
+        "basis": "警報 raw_title「子吉川レベル４氾濫危険警報」と areas[0].kind_name「レベル４氾濫危険警報」・level 4、headline_text「子吉川では、氾濫危険水位に到達し、氾濫のおそれあり」"
       },
       {
         "role": "action",
         "text": {
           "ja": "危険な場所から避難",
-          "ja_easy": "あぶない ばしょから にげて",
-          "en": "Leave danger areas",
-          "zh_hans": "从危险地方避难",
-          "zh_hant": "從危險地方避難",
+          "ja_easy": "あぶない ところから にげて",
+          "en": "Leave danger zones",
+          "zh_hans": "离开危险地方避难",
+          "zh_hant": "離開危險地方避難",
           "ko": "위험한 곳에서 대피"
         },
-        "basis": "警報 level 4（警戒レベル４相当情報［洪水］）とテンプレート evac-now（表示レベル4）。避難場所の具体名は知識ファイルに洪水用の記載がないため書いていない"
+        "basis": "警報 level 4（警戒レベル４相当情報［洪水］）と図記号 directions_run（危険な場所から避難する）。知識ファイルに避難場所の具体名はないため、施設名は書かない"
       },
       {
         "role": "languages",
         "text": {
           "ja": "危険な場所から避難",
-          "ja_easy": "あぶない ばしょから にげて",
-          "en": "Leave danger areas",
-          "zh_hans": "从危险地方避难",
-          "zh_hant": "從危險地方避難",
+          "ja_easy": "あぶない ところから にげて",
+          "en": "Leave danger zones",
+          "zh_hans": "离开危险地方避难",
+          "zh_hant": "離開危險地方避難",
           "ko": "위험한 곳에서 대피"
         },
-        "basis": "action セルと同じ内容（警報 level 4・テンプレート evac-now）を各言語で表示"
+        "basis": "action セルと同じ内容（警報 level 4 と図記号 directions_run）を各言語で表示"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VXKOii-202610211815-e713da0e3c05",
-      "input": 3057,
-      "output": 1617,
+      "input": 3135,
+      "output": 1385,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.044568
+      "usd": 0.04024
     }
   ],
   "lint": []
