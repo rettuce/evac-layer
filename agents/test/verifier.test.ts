@@ -23,6 +23,8 @@ test("state attributes turn into findings; drops are reported, not failed", () =
   const state = { shape: "16x9", template: "evac-now", variant: "split", level: "4", dropped: "shelter:overflow", overflow: "action", missing_required: "languages" };
   assert.deepEqual(judgeState(state).map((f) => f.check), ["missing-required", "overflow"]);
   assert.deepEqual(droppedCells(state), [{ id: "shelter", reason: "overflow" }]);
+  const withLang = judgeState({ ...state, missing_required: null, overflow: "headline:ja,action:en" });
+  assert.deepEqual(withLang.map((f) => [f.cell_id, f.lang]), [["headline", "ja"], ["action", "en"]]);
 });
 
 test("flash counting follows WCAG 2.3.1 (10% luminance reversals)", () => {
