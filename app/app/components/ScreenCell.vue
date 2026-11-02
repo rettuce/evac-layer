@@ -90,6 +90,12 @@ p {
 .role-headline .level-label {
   margin-left: auto;
 }
+.is-inline .role-direction,
+.is-inline .role-shelter {
+  flex-direction: row;
+  align-items: center;
+  gap: calc(48 * var(--px));
+}
 .shape-ribbon .role-headline {
   flex-direction: column;
   align-items: flex-start;
@@ -112,6 +118,8 @@ p {
   gap: calc(24 * var(--px));
 }
 .distance {
+  flex: none;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .role-languages {

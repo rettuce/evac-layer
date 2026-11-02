@@ -7,8 +7,9 @@ const puppeteer = require('puppeteer-core')
 
 const BASE_URL = process.env.EVAC_URL ?? 'http://127.0.0.1:3150'
 const LAYOUT = process.env.EVAC_LAYOUT ?? 'wajima-tsunami'
+const VARIANT = process.env.EVAC_VARIANT ?? '0'
 const CHROME_PATH = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-const OUT_DIR = fileURLToPath(new URL('../app/shots/', import.meta.url))
+const OUT_DIR = fileURLToPath(new URL(`../app/shots/${process.env.EVAC_SHOTS_SUBDIR ?? ''}`, import.meta.url))
 
 const SHAPES = {
   '16x9': { width: 1920, height: 1080 },
@@ -26,7 +27,7 @@ const FLASH_LUMINANCE_DELTA = 0.1
 const MAX_REVERSALS = 1
 
 function screenUrl(shape) {
-  return `${BASE_URL}/screen?shape=${shape}&layout=${encodeURIComponent(LAYOUT)}`
+  return `${BASE_URL}/screen?shape=${shape}&layout=${encodeURIComponent(LAYOUT)}&variant=${VARIANT}`
 }
 
 async function openScreen(browser, shape, { reducedMotion }) {
@@ -44,6 +45,7 @@ async function readScreenState(page) {
   return page.$eval('.evac-screen', (el) => ({
     shape: el.dataset.shape,
     template: el.dataset.template,
+    variant: el.dataset.variant,
     level: el.dataset.level,
     dropped: el.dataset.dropped || '',
     overflow: el.dataset.overflow ?? null,

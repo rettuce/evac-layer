@@ -1,0 +1,102 @@
+{
+  "version": "0.1",
+  "kind": "evac-screen",
+  "municipality": {
+    "id": "17204",
+    "name": "輪島市"
+  },
+  "alert": {
+    "source": "jma",
+    "bulletin_id": "<電文 ID>",
+    "hazard": "tsunami",
+    "level": 3,
+    "issued_at": "2026-11-02T11:42:00+09:00"
+  },
+  "shape": "16x9",
+  "template": "evac-now",
+  "cells": [
+    {
+      "id": "headline",
+      "role": "headline",
+      "priority": 1,
+      "text": {
+        "ja": "津波警報",
+        "ja_easy": "つなみが きます",
+        "en": "Tsunami Warning",
+        "zh_hans": "海啸警报",
+        "zh_hant": "海嘯警報",
+        "ko": "쓰나미 경보"
+      },
+      "pictogram": "tsunami",
+      "motion": "scale-in"
+    },
+    {
+      "id": "action",
+      "role": "action",
+      "priority": 1,
+      "text": {
+        "ja": "すぐ高いところへ",
+        "ja_easy": "すぐ たかい ところへ にげて",
+        "en": "Go to high ground now"
+      },
+      "pictogram": "go_higher",
+      "motion": "pulse"
+    },
+    {
+      "id": "direction",
+      "role": "direction",
+      "priority": 2,
+      "text": {
+        "ja": "出口 B → 左 350m"
+      },
+      "pictogram": "arrow_forward",
+      "rotation": 180,
+      "motion": "static"
+    },
+    {
+      "id": "shelter",
+      "role": "shelter",
+      "priority": 2,
+      "text": {
+        "ja": "輪島中学校（指定緊急避難場所）"
+      },
+      "pictogram": "emergency_evacuation_site",
+      "distance_m": 350,
+      "motion": "static"
+    },
+    {
+      "id": "languages",
+      "role": "languages",
+      "priority": 3,
+      "text": {
+        "ja": "すぐ高いところへ",
+        "ja_easy": "すぐ たかい ところへ にげて",
+        "en": "Go to high ground now",
+        "zh_hans": "立即前往高处",
+        "ko": "지금 바로 높은 곳으로"
+      },
+      "motion": "scale-in"
+    },
+    {
+      "id": "source",
+      "role": "source",
+      "priority": 9,
+      "text": {
+        "ja": "出典: 輪島市津波ハザードマップ 2025 p.3 / 気象庁 11:42"
+      },
+      "motion": "static"
+    }
+  ],
+  "palette": "cabinet-office-5",
+  "sources": [
+    {
+      "type": "pdf",
+      "file": "wajima-tsunami-2025.pdf",
+      "page": 3
+    },
+    {
+      "type": "jma",
+      "bulletin_id": "<電文 ID>"
+    }
+  ]
+}
