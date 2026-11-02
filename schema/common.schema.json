@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evac-layer.dev/schema/common.schema.json",
+  "title": "EVAC LAYER shared definitions",
+  "$defs": {
+    "hazard": {
+      "description": "Hazard types. The first eight mirror the GSI designated emergency evacuation site categories; heavy_rain is the JMA heavy-rain (inundation) warning.",
+      "enum": ["flood", "landslide", "storm_surge", "earthquake", "tsunami", "large_fire", "inland_flood", "volcano", "heavy_rain"]
+    },
+    "level": {
+      "description": "Cabinet Office five-level alert. null when the source defines no level (JMA tsunami bulletins).",
+      "anyOf": [{ "type": "integer", "minimum": 1, "maximum": 5 }, { "type": "null" }]
+    },
+    "municipalityId": {
+      "description": "Local government code without check digit (e.g. 17204).",
+      "type": "string",
+      "pattern": "^[0-9]{5}$"
+    }
+  }
+}

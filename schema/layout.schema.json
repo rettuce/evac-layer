@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evac-layer.dev/schema/layout.schema.json",
+  "title": "EVAC LAYER layout (contract v0)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "kind", "municipality", "alert", "shape", "template", "cells", "palette", "sources"],
+  "properties": {
+    "version": { "const": "0.1" },
+    "kind": { "const": "evac-screen" },
+    "municipality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/municipalityId" },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "alert": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "bulletin_id", "hazard", "level", "issued_at"],
+      "properties": {
+        "source": { "const": "jma" },
+        "bulletin_id": { "type": "string", "minLength": 1 },
+        "hazard": { "$ref": "common.schema.json#/$defs/hazard" },
+        "level": { "$ref": "common.schema.json#/$defs/level" },
+        "issued_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "shape": { "enum": ["16x9", "9x16", "32x9", "1x1"] },
+    "template": { "enum": ["evac-now", "evac-prepare", "shelter-direction", "all-clear"] },
+    "cells": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/cell" }
+    },
+    "palette": { "const": "cabinet-office-5" },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/source" }
+    }
+  },
+  "$defs": {
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "priority", "text", "motion"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "role": { "enum": ["headline", "hazard", "action", "direction", "shelter", "languages", "source", "pictogram"] },
+        "priority": { "type": "integer", "minimum": 1, "maximum": 9 },
+        "text": { "$ref": "#/$defs/text" },
+        "pictogram": { "$ref": "#/$defs/pictogram" },
+        "motion": { "enum": ["scale-in", "pulse", "static"] },
+        "rotation": { "type": "number", "minimum": 0, "exclusiveMaximum": 360 },
+        "distance_m": { "type": "number", "minimum": 0 }
+      }
+    },
+    "text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ja"],
+      "properties": {
+        "ja": { "type": "string", "minLength": 1 },
+        "ja_easy": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 },
+        "zh_hans": { "type": "string", "minLength": 1 },
+        "zh_hant": { "type": "string", "minLength": 1 },
+        "ko": { "type": "string", "minLength": 1 }
+      }
+    },
+    "pictogram": {
+      "description": "Material Symbols (Apache-2.0) ids followed by EVAC LAYER original symbols.",
+      "enum": [
+        "tsunami", "flood", "landslide", "cyclone", "directions_run", "arrow_forward", "my_location",
+        "storm_surge", "earthquake", "go_higher", "emergency_evacuation_site", "evacuation_shelter", "safe_here", "heavy_rain"
+      ]
+    },
+    "source": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "file", "page"],
+          "properties": {
+            "type": { "const": "pdf" },
+            "file": { "type": "string", "minLength": 1 },
+            "page": { "type": "integer", "minimum": 1 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "bulletin_id"],
+          "properties": {
+            "type": { "const": "jma" },
+            "bulletin_id": { "type": "string", "minLength": 1 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "file"],
+          "properties": {
+            "type": { "const": "gsi" },
+            "file": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  }
+}
