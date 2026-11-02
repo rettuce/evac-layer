@@ -7,7 +7,11 @@ export const MAX_ATTEMPTS = 3;
 const WRITER_FIXABLE = new Set(["over-budget", "font-size", "overflow", "distance-duplicated", "bulletin-mismatch"]);
 // The Composer writes the shelter and source cells from data, so a rewrite of Writer text cannot fix them.
 const WRITER_CELLS = new Set(["headline", "action", "direction", "languages"]);
-const writerCanFix = (f: LoopFinding) => WRITER_FIXABLE.has(f.check) && (f.cell_id === undefined || WRITER_CELLS.has(f.cell_id));
+// The action pictogram is fixed by the template and its meaning is given to the Writer, so a mismatch on the
+// action cell is the text's to fix; any other pictogram belongs to the Composer.
+const writerCanFix = (f: LoopFinding) =>
+  (f.check === "pictogram-misuse" && f.cell_id === "action") ||
+  (WRITER_FIXABLE.has(f.check) && (f.cell_id === undefined || WRITER_CELLS.has(f.cell_id)));
 
 export interface Attempt { n: number; writer_source: string; findings: LoopFinding[]; screens_ok: Record<string, boolean>; notes?: Record<string, string> }
 export interface LoopResult {

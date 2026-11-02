@@ -3,7 +3,7 @@ import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import type { Municipality, WriterOutput } from "../composer/compose.js";
 import { strictestBudgets } from "../composer/budgets.js";
-import type { Situation } from "../composer/rules.js";
+import { ACTION_PICTOGRAM_MEANING_JA, actionPictogram, type Situation } from "../composer/rules.js";
 import type { Alert } from "../jma/parse.js";
 import { tsunamiRegionsFor } from "../jma/regions.js";
 import { REPO_ROOT } from "../paths.js";
@@ -63,8 +63,10 @@ export async function writeCells(args: {
 }): Promise<{ output: WriterOutput; usage: CallUsage; lint: LintFinding[] }> {
   const budgets = strictestBudgets(args.situation.template, ["16x9", "9x16", "32x9", "1x1"]).filter((b) => (WRITER_ROLES as readonly string[]).includes(b.role));
   const ctx = writerContext(args.alert, args.municipality, args.municipalityId);
+  const picto = actionPictogram(args.alert.hazard, args.situation.template);
   const instructions = [
     `テンプレート: ${args.situation.template}（表示レベル ${args.situation.level}${args.situation.cleared ? "・解除" : ""}）。書くセルは ${WRITER_ROLES.join("・")} だけ。languages は action と同じ内容を各言語で。`,
+    `action セルには図記号 ${picto}（${ACTION_PICTOGRAM_MEANING_JA[picto]}）が付く。action はこの図記号と同じ意味の行動として書く。`,
     ...(args.feedback?.length ? ["前回の出力への指摘（すべて直すこと）:", ...args.feedback.map((f) => `- ${f}`)] : []),
   ].join("\n");
   const msg = await args.client.messages.stream({

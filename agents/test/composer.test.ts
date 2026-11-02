@@ -76,7 +76,8 @@ test("action pictogram follows the template, and a cleared VPWW headline says ่ง
   const { actionPictogram } = await import("../src/composer/rules.js");
   assert.equal(actionPictogram("flood", "all-clear"), "safe_here");
   assert.equal(actionPictogram("flood", "evac-now"), "directions_run");
-  assert.equal(actionPictogram("heavy_rain", "evac-prepare"), "heavy_rain");
+  assert.equal(actionPictogram("heavy_rain", "evac-prepare"), "directions_run");
+  assert.equal(actionPictogram("landslide", "evac-prepare"), "directions_run");
   assert.equal(actionPictogram("flood", "secure-now"), "go_higher");
   assert.equal(actionPictogram("tsunami", "evac-now"), "go_higher");
   const { headlineFor } = await import("../src/composer/compose.js");
