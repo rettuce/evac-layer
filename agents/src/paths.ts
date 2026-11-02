@@ -10,3 +10,8 @@ export const MUNICIPALITIES_DIR = path.join(REPO_ROOT, "data", "municipalities")
 export function resolveUserPath(p: string): string {
   return path.resolve(process.env.INIT_CWD ?? process.cwd(), p);
 }
+
+// Raw inputs (municipal PDFs, GSI CSVs) are not redistributed; they live outside the public repository.
+export const RAW_DIR = process.env.EVAC_RAW_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/raw";
+export const ENV_FILE = path.join(REPO_ROOT, ".env");
+export const TMP_DIR = path.join(REPO_ROOT, "tmp");
