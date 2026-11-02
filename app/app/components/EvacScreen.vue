@@ -4,6 +4,7 @@ import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
 import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
+import { ladderSizePx, withLadder, type LadderMode } from '~~/layout/ladder'
 import { levelScaleAttr, levelScaleFor } from '~~/layout/levelScale'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
@@ -15,6 +16,7 @@ const props = defineProps<{
   variant?: number
   elapsedMs: number
   reducedMotion?: boolean
+  ladder?: LadderMode
 }>()
 const emit = defineEmits<{ ready: [] }>()
 
@@ -32,7 +34,13 @@ const headlineScale = ref(1)
 const stackedHeadline = computed(() => ['portrait', 'square'].includes(SHAPES[props.shape].cls))
 const ready = ref(false)
 
-const layout = computed(() => resolveLayout(props.screen.template, props.shape, props.variant))
+const shapeClass = computed(() => SHAPES[props.shape].cls)
+const ladderMode = computed(() => (props.ladder && levelScale.value ? props.ladder : undefined))
+const layout = computed(() => {
+  const base = resolveLayout(props.screen.template, props.shape, props.variant)
+  return ladderMode.value ? withLadder(base, ladderMode.value, shapeClass.value) : base
+})
+const showLadder = computed(() => ladderMode.value !== undefined && layout.value.areas.some((row) => row.split(/\s+/).includes('ladder')))
 
 const initial = computed(() => initialPlacement(props.screen.cells, layout.value))
 const placed = computed(() => {
@@ -224,9 +232,18 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-missing-required="missing.join(',') || undefined"
     :data-overflow="overflow || undefined"
     :data-headline-scale="headlineScale !== 1 ? headlineScale : undefined"
+    :data-ladder="showLadder ? ladderMode : undefined"
     :data-ready="ready ? '1' : '0'"
     :data-bulletin-id="screen.alert.bulletin_id"
   >
+    <LevelLadder
+      v-if="showLadder && levelScale"
+      :style="{ gridArea: 'ladder' }"
+      :scale="levelScale"
+      :mode="ladderMode!"
+      :size-px="ladderSizePx(ladderMode!, shapeClass)"
+      :language-index="language.index"
+    />
     <section
       v-for="cell in placed"
       :key="cell.id"
@@ -240,7 +257,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     >
       <ScreenCell
         :cell="cell"
-        :level-scale="levelScale"
+        :level-scale="showLadder ? undefined : levelScale"
         :stacked-headline="stackedHeadline"
         :headline-scale="headlineScale"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
