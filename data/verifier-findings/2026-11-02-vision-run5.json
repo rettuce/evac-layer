@@ -1,0 +1,18 @@
+{
+  "kind": "evac-verifier-findings",
+  "date": "2026-11-02",
+  "verifier": "static+browser+vision(claude-sonnet-5-5)",
+  "run": "vision-5",
+  "stats": {
+    "municipalities": [
+      "17204"
+    ],
+    "screens": 7,
+    "pass": 7,
+    "vision_checks": 28,
+    "vision_usd": 0.315,
+    "log": "17:30-17:34"
+  },
+  "note": "輪島市 only, after the renderer header bar fix and language-tagged overflow (main ac32543). Every screen passed on the first attempt with no Writer call; the 10-25 15:40 all-clear is no longer reachable because 10-22 00:00 now clears the landslide screen. 由利本荘市 had no finding since run 2.",
+  "findings": []
+}

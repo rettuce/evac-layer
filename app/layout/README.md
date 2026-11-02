@@ -21,7 +21,7 @@ Anything not listed here is internal and may change shape without notice. The si
 
 ## What the rendered screen reports
 
-The root `.evac-screen` element carries `data-shape`, `data-template`, `data-variant`, `data-level`, `data-ready="1"` once fonts are loaded and the fit loop has finished, `data-dropped="<cell id>:<reason>,..."` (reasons: `no-slot`, `duplicate-role`, `overflow`), `data-overflow` (cells, or `screen`, that still overflow after every optional cell was dropped) and `data-missing-required`. Each cell carries `data-cell-id`, `data-role`, `data-priority` and `data-motion`.
+The root `.evac-screen` element carries `data-shape`, `data-template`, `data-variant`, `data-level`, `data-ready="1"` once fonts are loaded and the fit loop has finished, `data-dropped="<cell id>:<reason>,..."` (reasons: `no-slot`, `duplicate-role`, `overflow`), `data-overflow="<cell id>:<lang>,..."` (what still overflows after every optional cell was dropped; `lang` is the text key that spilled — `ja` for the headline and other code-written text, `ja_easy` / `en` / `zh_hans` / `zh_hant` / `ko` for Writer text, `pictogram` when only the pictogram box spills; `screen` when the page itself overflows), `data-headline-scale="0.85"` when a 9:16 or 1:1 headline was stepped down and `data-missing-required`. Each cell carries `data-cell-id`, `data-role`, `data-priority` and `data-motion`.
 
 ## Templates
 
@@ -89,9 +89,15 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 |---|---|---|
 | `GET /api/replay?municipality&speed[&from][&to][&t][&reset]` | public | replay rows inside the window and the current index |
 | `GET /api/live-layout?municipality&bulletin&shape[&site]` | public, gated | layout JSON only for an approved bulletin at an auto-publish site; 403 with `data.reason` = `auto-publish-off` \| `unapproved` |
-| `GET /api/dashboard` | public | totals and per-municipality rows |
+| `GET /api/dashboard` | public | totals and per-municipality rows (every municipality with a knowledge file or layouts); NG found / fixed are counted from `data/verifier-findings/*.json` (one finding per entry, fixed when `fix` is filled) with the per-run counts and the file names |
 | `GET /api/feed/<site_id>` | public, gated | the site's feed (`schema/feed.schema.json`); ETag / If-None-Match |
 | `GET /delivery/<site>/<bulletin>/<shape>.{png,html,json}` | public, gated | exported files from `dist/` while the bulletin is deliverable |
 | `POST /api/admin/subscriptions` | admin | register a webhook `{site_id, url, secret}`; see `app/README.md` Delivery |
 | `GET /api/admin/catalog`, `GET /api/admin/preview-layout`, `POST /api/admin/approve`, `POST /api/admin/site` | admin | Bearer `NUXT_ADMIN_TOKEN` when set; otherwise local only (loopback address, local Host, not cross-site, JSON POST bodies). Writes go to `data/approvals.json` |
 | `GET /api/layout?file=<absolute path>` | dev only | any `.json` inside the repository, for the Verifier; 404 in production |
+
+## Headline band
+
+- 16:9 and 32:9: the warning-level label sits beside the headline (32:9 below it, as before).
+- 9:16 and 1:1: the label sits under the headline inside the band, right-aligned, with the headline pictogram spanning both rows. The headline may take 2 lines (the band grows past 176 only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
+- `all-clear` shows no level label: a cleared bulletin has no warning level, the white band is only the colour of level 1.

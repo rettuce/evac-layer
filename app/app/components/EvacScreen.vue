@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '~~/layout/fit'
 import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
-import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, rgbCss } from '~~/layout/palette'
+import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
-import { resolveLayout } from '~~/layout/templates'
+import { BAND_PX, resolveLayout } from '~~/layout/templates'
+import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
-import { LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
+import { HEADLINE_STEP_DOWN, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
 
 const props = defineProps<{
   screen: EvacScreen
@@ -24,7 +25,9 @@ const BAND_RULE_PX = 4
 const root = ref<HTMLElement>()
 const scale = ref(1)
 const overflowDropped = ref<DroppedCell[]>([])
-const overflowing = ref<string[]>([])
+const overflow = ref('')
+const headlineScale = ref(1)
+const stackedHeadline = computed(() => ['portrait', 'square'].includes(SHAPES[props.shape].cls))
 const ready = ref(false)
 
 const layout = computed(() => resolveLayout(props.screen.template, props.shape, props.variant))
@@ -45,6 +48,7 @@ const rootStyle = computed(() => ({
   '--fs-action': TYPE_PX.action,
   '--fs-guide': TYPE_PX.guide,
   '--fs-fine': TYPE_PX.fine,
+  '--band-height': BAND_PX,
   '--lh-action': LINE_HEIGHT.action,
   '--lh-guide': LINE_HEIGHT.guide,
   '--lh-fine': LINE_HEIGHT.fine,
@@ -98,12 +102,12 @@ const OVERFLOW_TOLERANCE_PX = 1
 // content area pokes out of every line box and would read as overflow on any cell.
 // Only the pictogram box itself is measured: it clips its contents, while a rotated glyph or an
 // SVG clipPath child reports a larger axis-aligned rect than what is drawn.
-function cellOverflows(cellEl: HTMLElement): boolean {
+function overflowingBoxes(cellEl: HTMLElement): HTMLElement[] {
   const bounds = cellEl.getBoundingClientRect()
   const boxes = [...cellEl.querySelectorAll<HTMLElement>('*')].filter(
     (child) => child.classList.contains('pictogram') || !child.closest('.pictogram'),
   )
-  return boxes.some((child) => {
+  return boxes.filter((child) => {
     const r = child.getBoundingClientRect()
     const outside =
       r.bottom > bounds.bottom + OVERFLOW_TOLERANCE_PX ||
@@ -122,14 +126,25 @@ function exceedsMaxLines(el: HTMLElement): boolean {
   return el.getBoundingClientRect().height > maxLines * lineHeight + OVERFLOW_TOLERANCE_PX
 }
 
-function measureOverflow(): string[] {
+// The headline and fixed labels are written by code in ja; Writer languages carry data-lang.
+function overflowLang(cellEl: HTMLElement, box: HTMLElement): string | undefined {
+  if (box.classList.contains('pictogram')) return OVERFLOW_PICTOGRAM
+  if (box.tagName !== 'P') return undefined
+  if (cellEl.dataset.role === 'headline') return 'ja'
+  return box.closest<HTMLElement>('[data-lang]')?.dataset.lang ?? 'ja'
+}
+
+function measureOverflow(): { cells: CellOverflow[]; screen: boolean } {
   const el = root.value
-  if (!el) return []
-  const ids = [...el.querySelectorAll<HTMLElement>('[data-cell-id]')]
-    .filter(cellOverflows)
-    .map((cellEl) => cellEl.dataset.cellId!)
-  const screenOverflows = el.scrollHeight > el.clientHeight + OVERFLOW_TOLERANCE_PX
-  return screenOverflows ? [...ids, 'screen'] : ids
+  if (!el) return { cells: [], screen: false }
+  const cells: CellOverflow[] = []
+  for (const cellEl of el.querySelectorAll<HTMLElement>('[data-cell-id]')) {
+    const boxes = overflowingBoxes(cellEl)
+    if (!boxes.length) continue
+    const langs = boxes.map((box) => overflowLang(cellEl, box)).filter((lang) => lang !== undefined)
+    cells.push({ cellId: cellEl.dataset.cellId!, langs })
+  }
+  return { cells, screen: el.scrollHeight > el.clientHeight + OVERFLOW_TOLERANCE_PX }
 }
 
 let fitGeneration = 0
@@ -138,18 +153,24 @@ async function fit() {
   const generation = ++fitGeneration
   ready.value = false
   overflowDropped.value = []
+  headlineScale.value = 1
   await loadFonts()
   for (;;) {
     await nextTick()
     if (generation !== fitGeneration) return
     const over = measureOverflow()
-    if (!over.length) {
-      overflowing.value = []
+    if (!over.cells.length && !over.screen) {
+      overflow.value = ''
       break
+    }
+    const headlineOver = over.cells.some((cell) => placed.value.find((c) => c.id === cell.cellId)?.role === 'headline')
+    if (headlineOver && stackedHeadline.value && headlineScale.value === 1) {
+      headlineScale.value = HEADLINE_STEP_DOWN
+      continue
     }
     const victim = nextOverflowVictim(placed.value, layout.value)
     if (!victim) {
-      overflowing.value = over
+      overflow.value = overflowAttr(over.cells, over.screen)
       break
     }
     overflowDropped.value = [...overflowDropped.value, { id: victim.id, reason: 'overflow' }]
@@ -198,7 +219,8 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-level="screen.alert.level"
     :data-dropped="dropped.map((d) => `${d.id}:${d.reason}`).join(',')"
     :data-missing-required="missing.join(',') || undefined"
-    :data-overflow="overflowing.join(',') || undefined"
+    :data-overflow="overflow || undefined"
+    :data-headline-scale="headlineScale !== 1 ? headlineScale : undefined"
     :data-ready="ready ? '1' : '0'"
     :data-bulletin-id="screen.alert.bulletin_id"
   >
@@ -215,7 +237,9 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     >
       <ScreenCell
         :cell="cell"
-        :level="screen.alert.level"
+        :level-label="levelLabelFor(screen.template, screen.alert.level)"
+        :stacked-headline="stackedHeadline"
+        :headline-scale="headlineScale"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
         :language-index="language.index"
         :language-style="languageStyle"

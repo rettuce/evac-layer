@@ -9,9 +9,18 @@ const WRITER_FIXABLE = new Set(["over-budget", "font-size", "overflow", "distanc
 const WRITER_CELLS = new Set(["headline", "action", "direction", "languages"]);
 // The action pictogram is fixed by the template and its meaning is given to the Writer, so a mismatch on the
 // action cell is the text's to fix; any other pictogram belongs to the Composer.
+// The renderer reports ja for the headline and every text the code writes, pictogram when only the pictogram
+// does not fit, and screen for the whole page; none of them changes when the Writer rewrites its text.
+const NOT_WRITER_LANGS = new Set(["ja", "pictogram", "screen"]);
+const renderOverflow = (f: LoopFinding) => f.check === "overflow" && f.lang !== undefined && NOT_WRITER_LANGS.has(f.lang);
 const writerCanFix = (f: LoopFinding) =>
-  (f.check === "pictogram-misuse" && f.cell_id === "action") ||
-  (WRITER_FIXABLE.has(f.check) && (f.cell_id === undefined || WRITER_CELLS.has(f.cell_id)));
+  !renderOverflow(f) &&
+  ((f.check === "pictogram-misuse" && f.cell_id === "action") ||
+    (WRITER_FIXABLE.has(f.check) && (f.cell_id === undefined || WRITER_CELLS.has(f.cell_id))));
+const MAX_RESENDS = 2;
+const findingKey = (f: LoopFinding) => `${f.shape} ${f.check}[${f.cell_id ?? ""}${f.lang ? `:${f.lang}` : ""}]`;
+const blockingLabel = (f: LoopFinding) =>
+  `${f.shape} ${renderOverflow(f) ? "render-overflow" : f.check}${f.cell_id ? `[${f.cell_id}${f.lang ? `:${f.lang}` : ""}]` : ""}`;
 
 export interface Attempt { n: number; writer_source: string; findings: LoopFinding[]; screens_ok: Record<string, boolean>; notes?: Record<string, string> }
 export interface LoopResult {
@@ -31,6 +40,7 @@ export async function runLoop(args: {
   let writer = args.writer;
   let source = args.writerSource;
   let screens: Screen[] = [];
+  const resends = new Map<string, number>();
   for (let n = 1; n <= max; n++) {
     let findings: LoopFinding[];
     const screensOk: Record<string, boolean> = {};
@@ -54,8 +64,11 @@ export async function runLoop(args: {
     attempts.push({ n, writer_source: source, findings, screens_ok: screensOk, ...(Object.keys(notes).length ? { notes } : {}) });
     if (!findings.length) return { outcome: "pass", attempts, screens, writer };
     const blocking = findings.filter((f) => !writerCanFix(f));
-    if (blocking.length) return { outcome: "fail", reason: `not fixable by rewriting text: ${blocking.map((f) => `${f.shape} ${f.check}${f.cell_id ? `[${f.cell_id}]` : ""}`).join(", ")}`, attempts, screens };
+    if (blocking.length) return { outcome: "fail", reason: `not fixable by rewriting text: ${blocking.map(blockingLabel).join(", ")}`, attempts, screens };
     if (n === max) break;
+    const exhausted = findings.filter((f) => (resends.get(findingKey(f)) ?? 0) >= MAX_RESENDS);
+    if (exhausted.length) return { outcome: "fail", reason: `sent to the Writer ${MAX_RESENDS} times already: ${exhausted.map(findingKey).join(", ")}`, attempts, screens };
+    for (const f of findings) resends.set(findingKey(f), (resends.get(findingKey(f)) ?? 0) + 1);
     try {
       ({ writer, source } = await args.reviser.revise(writer, findings, n));
     } catch (e) {

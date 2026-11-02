@@ -6,7 +6,7 @@ export interface ScreenVerdict { shape: string; ok: boolean; findings: Finding[]
 export interface VerifyContext { alert: import("../jma/parse.js").Alert; municipalityId: string }
 export interface Verifier { name: string; verify(screens: Screen[], ctx?: VerifyContext): Promise<ScreenVerdict[]> }
 
-export interface LoopFinding { shape: string; check: string; cell_id?: string; detail: string }
+export interface LoopFinding { shape: string; check: string; cell_id?: string; lang?: string; detail: string }
 export interface Reviser {
   name: string;
   revise(current: WriterOutput, findings: LoopFinding[], attempt: number): Promise<{ writer: WriterOutput; source: string }>;

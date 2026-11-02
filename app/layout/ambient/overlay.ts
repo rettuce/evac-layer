@@ -11,6 +11,15 @@ export const D21_TYPE = {
 } as const
 export const CLOCK_SWEEP_PERIOD_MS = 60_000
 export const CLOCK_SWEEP_LENGTH = 48
+export const D21_LABEL_GAP = 8
+export const D21_TRACK_GAP = 24
+const RULE_ALPHA = 0.14
+const TRACK_ALPHA = 0.4
+const LABEL_ALPHA = 0.8
+const LABEL_TRACKING_EM = 0.04
+export const LABEL_FONT_FAMILY = '"Noto Sans JP", sans-serif'
+export const TIME_FONT_FAMILY = '"Noto Sans", sans-serif'
+export const OVERLAY_INK = { dark: [21, 24, 28], light: [244, 242, 236] } as const
 
 export const OVERLAY_CORNERS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const
 export type OverlayCorner = (typeof OVERLAY_CORNERS)[number]
@@ -50,4 +59,60 @@ const JST_OFFSET_MS = 9 * 3600 * 1000
 export function formatClockJst(epochMs: number): string {
   const jst = new Date(epochMs + JST_OFFSET_MS)
   return `${String(jst.getUTCHours()).padStart(2, '0')}:${String(jst.getUTCMinutes()).padStart(2, '0')}`
+}
+
+export function labelFont(scale: number): string {
+  return `400 ${D21_TYPE.label.size * scale}px ${LABEL_FONT_FAMILY}`
+}
+
+export function timeFont(scale: number): string {
+  return `400 ${D21_TYPE.time.size * scale}px ${TIME_FONT_FAMILY}`
+}
+
+export interface OverlayContent {
+  siteName: string
+  time: string
+  sweep: number
+  ink: keyof typeof OVERLAY_INK
+}
+
+const BLOCK_HEIGHT = D21_TYPE.label.line + D21_LABEL_GAP + D21_TYPE.time.line + D21_TRACK_GAP
+
+export function drawOverlay(ctx: CanvasRenderingContext2D, geometry: OverlayGeometry, content: OverlayContent): void {
+  const { scale, block, rules } = geometry
+  if (!(scale > 0)) return
+  const { height } = ctx.canvas
+  const [r, g, b] = OVERLAY_INK[content.ink]
+  const margin = D21_MARGIN * scale
+  ctx.save()
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.fillStyle = `rgb(${r} ${g} ${b})`
+
+  ctx.globalAlpha = RULE_ALPHA
+  for (const x of rules) ctx.fillRect(Math.round(x), Math.round(margin), 1, Math.round(height - 2 * margin))
+
+  const top = block.top ?? height - (block.bottom ?? 0) - BLOCK_HEIGHT * scale
+  const alignRight = block.left > margin + 0.5
+  const textX = alignRight ? block.left + block.width : block.left
+  ctx.textAlign = alignRight ? 'right' : 'left'
+  ctx.textBaseline = 'middle'
+
+  ctx.globalAlpha = LABEL_ALPHA
+  ctx.font = labelFont(scale)
+  ctx.letterSpacing = `${D21_TYPE.label.size * scale * LABEL_TRACKING_EM}px`
+  ctx.fillText(content.siteName, textX, top + (D21_TYPE.label.line * scale) / 2)
+
+  ctx.globalAlpha = 1
+  ctx.font = timeFont(scale)
+  ctx.letterSpacing = `${-0.01 * D21_TYPE.time.size * scale}px`
+  const timeTop = top + (D21_TYPE.label.line + D21_LABEL_GAP) * scale
+  ctx.fillText(content.time, textX, timeTop + (D21_TYPE.time.line * scale) / 2)
+
+  const trackY = Math.round(timeTop + (D21_TYPE.time.line + D21_TRACK_GAP) * scale)
+  ctx.globalAlpha = TRACK_ALPHA
+  ctx.fillRect(Math.round(block.left), trackY, Math.round(block.width), 1)
+  ctx.globalAlpha = 1
+  const sweepLength = CLOCK_SWEEP_LENGTH * scale
+  ctx.fillRect(Math.round(block.left + content.sweep * block.width - sweepLength / 2), trackY - 1, Math.round(sweepLength), 3)
+  ctx.restore()
 }

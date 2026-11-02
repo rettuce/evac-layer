@@ -9,12 +9,13 @@ interface DashboardRow {
   layouts: number
   languageVariants: number
   reports: number
-  ngAttempts: number
-  fixedAfterNg: number
+  ngFound: number
+  ngFixed: number
 }
 interface Dashboard {
-  totals: Record<'municipalities' | 'bulletins' | 'screens' | 'layouts' | 'languageVariants' | 'ngAttempts' | 'fixedAfterNg' | 'sources', number>
+  totals: Record<'municipalities' | 'bulletins' | 'screens' | 'layouts' | 'languageVariants' | 'ngFound' | 'ngFixed' | 'sources', number>
   rows: DashboardRow[]
+  findings: { found: number; fixed: number; byRun: { run: number; found: number; screens?: number; pass?: number }[]; files: string[] }
 }
 
 const COUNT_UP_MS = 2400
@@ -36,7 +37,7 @@ const stats = computed(() => {
     { key: 'bulletins', label: '気象庁の電文', value: t.bulletins, sub: `うち画面あり ${t.screens}` },
     { key: 'layouts', label: 'レイアウト（形状別）', value: t.layouts },
     { key: 'languageVariants', label: '形状 × 言語', value: t.languageVariants },
-    { key: 'ngAttempts', label: 'Verifier の NG', value: t.ngAttempts, sub: `修正して合格 ${t.fixedAfterNg}` },
+    { key: 'ngFound', label: 'Verifier が見つけた NG', value: t.ngFound, subValue: t.ngFixed, subLabel: '直した' },
     { key: 'sources', label: '出典（重複なし）', value: t.sources },
   ]
 })
@@ -69,11 +70,12 @@ onMounted(async () => {
         <p class="value">{{ shown(stat.value, i) }}</p>
         <p class="label">{{ stat.label }}</p>
         <p v-if="stat.sub" class="sub">{{ stat.sub }}</p>
+        <p v-if="stat.subLabel" class="sub">{{ stat.subLabel }} {{ shown(stat.subValue ?? 0, i) }}</p>
       </article>
     </section>
     <table v-if="data">
       <thead>
-        <tr><th>自治体</th><th>電文</th><th>画面あり</th><th>レイアウト</th><th>形状 × 言語</th><th>検査レポート</th><th>NG</th><th>修正して合格</th></tr>
+        <tr><th>自治体</th><th>電文</th><th>画面あり</th><th>レイアウト</th><th>形状 × 言語</th><th>検査レポート</th><th>見つけた NG</th><th>直した</th></tr>
       </thead>
       <tbody>
         <tr v-for="row in data.rows" :key="row.id">
@@ -83,11 +85,15 @@ onMounted(async () => {
           <td>{{ row.layouts }}</td>
           <td>{{ row.languageVariants }}</td>
           <td>{{ row.reports }}</td>
-          <td>{{ row.ngAttempts }}</td>
-          <td>{{ row.fixedAfterNg }}</td>
+          <td>{{ row.ngFound }}</td>
+          <td>{{ row.ngFixed }}</td>
         </tr>
       </tbody>
     </table>
+    <p v-if="data?.findings.files.length" class="provenance" data-provenance="findings">
+      Verifier の指摘（Vision 検査）: {{ data.findings.byRun.map((r) => `run ${r.run} ${r.found} 件${r.screens ? `（${r.pass}/${r.screens} 画面 pass）` : ''}`).join(' → ') }}・集計元
+      data/verifier-findings/{{ data.findings.files.map((f) => f.split('/').pop()).join(', ') }}
+    </p>
   </div>
 </template>
 
@@ -100,6 +106,11 @@ onMounted(async () => {
   background: #fff;
   color: #111;
   font: 16px/1.5 'Noto Sans JP', 'Noto Sans', sans-serif;
+}
+.provenance {
+  margin: 24px 0 0;
+  font-size: 13px;
+  color: #666;
 }
 h1 {
   font-size: 22px;

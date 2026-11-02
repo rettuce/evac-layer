@@ -87,3 +87,17 @@ test("an action text that contradicts its pictogram goes back to the Writer; a h
   assert.equal(headline.attempts.length, 1);
   assert.match(headline.reason!, /not fixable/);
 });
+
+test("a Japanese overflow stops at once as render-overflow; other languages go to the Writer at most twice", async () => {
+  const overflow = (lang: string): Verifier => ({ name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "headline", lang, detail: `cell headline (${lang}) overflows its slot` }] })) });
+  const clean = fxPath("writer-tsunami-advisory.json");
+  const ja = await runLoop({ ...base(), verifier: overflow("ja"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });
+  assert.equal(ja.attempts.length, 1);
+  assert.match(ja.reason!, /render-overflow\[headline:ja\]/);
+  const picto = await runLoop({ ...base(), verifier: overflow("pictogram"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });
+  assert.equal(picto.attempts.length, 1);
+  assert.match(picto.reason!, /render-overflow\[headline:pictogram\]/);
+  const en = await runLoop({ ...base(), verifier: overflow("en"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean, clean, clean, clean]), maxAttempts: 5 });
+  assert.equal(en.attempts.length, 3);
+  assert.match(en.reason!, /sent to the Writer 2 times already/);
+});
