@@ -45,7 +45,14 @@ for (const e of replay.entries) {
     verifier, reviser: liveWriterReviser,
   });
   const { dir, report } = writeReport({ municipalityId: municipality.id, bulletinId: e.bulletin_id, verifier: verifier.name, reviser: liveWriterReviser.name, maxAttempts: 3, result, writerNote: notes });
-  index.push({ ...row, screen: report.outcome === "pass", template: situation.template, display_level: situation.level, outcome: report.outcome, layouts: report.layouts, report: path.relative(REPO_ROOT, path.join(dir, "report.json")) });
+  // Only a pass that went through the renderer may be shown; a static-only pass has not been seen on a screen.
+  const browserChecked = verifier !== staticVerifier;
+  const screen = report.outcome === "pass" && browserChecked;
+  index.push({
+    ...row, screen, template: situation.template, display_level: situation.level, outcome: report.outcome, verified_by: verifier.name,
+    ...(report.outcome === "pass" && !browserChecked ? { reason: "not browser-verified" } : {}),
+    layouts: report.layouts, report: path.relative(REPO_ROOT, path.join(dir, "report.json")),
+  });
   console.log(`${e.issued_at}  ${situation.template.padEnd(12)} L${situation.level}  ${report.outcome}${report.reason ? ` — ${report.reason}` : ""}`);
 }
 await browser?.close();

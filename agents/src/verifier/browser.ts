@@ -53,7 +53,7 @@ export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape
             role: c.dataset.role as TextSample["role"],
             step_class: (["action", "guide", "fine"].find((s) => el.classList.contains(`t-${s}`)) ?? null) as TextSample["step_class"],
             font_px: parseFloat(getComputedStyle(el).fontSize),
-            kind: (el.classList.contains("lang-label") ? "label" : c.dataset.role === "action" && !el.classList.contains("action-text") ? "secondary" : "primary") as TextSample["kind"],
+            kind: (["lang-label", "shelter-kind"].some((c) => el.classList.contains(c)) ? "label" : c.dataset.role === "action" && !el.classList.contains("action-text") ? "secondary" : "primary") as TextSample["kind"],
             text: el.innerText.replace(/\s+/g, " ").trim(),
           }));
       }),

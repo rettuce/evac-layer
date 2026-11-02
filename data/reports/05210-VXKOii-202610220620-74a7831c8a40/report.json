@@ -3,7 +3,7 @@
   "version": "0.1",
   "municipality": "05210",
   "bulletin_id": "VXKOii-202610220620-74a7831c8a40",
-  "verifier": "static",
+  "verifier": "static+browser(http://127.0.0.1:3152)",
   "reviser": "writer-api",
   "writer_note": "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名をそのまま使い、それ以外は【仮】/[draft] のプレースホルダ。 自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。",
   "max_attempts": 3,
