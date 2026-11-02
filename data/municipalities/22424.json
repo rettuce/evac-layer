@@ -1,0 +1,1247 @@
+{
+  "id": "22424",
+  "name": "吉田町",
+  "prefecture": "静岡県",
+  "sources": [
+    {
+      "type": "pdf",
+      "file": "yoshida/hinanjo_list.pdf",
+      "title": "資料１．３－22 指定緊急避難場所・指定避難所関係",
+      "year": 2017,
+      "pages": 4,
+      "sha256": "c04176c6f06afc170c420e406bd29d3e1710cad42f32c77cb3b4aa63c962eff2"
+    },
+    {
+      "type": "pdf",
+      "file": "yoshida/kozui_hm_en.pdf",
+      "title": "Yoshida Town Flood Hazard Map",
+      "year": 2021,
+      "pages": 8,
+      "sha256": "2050aa9b1644e7cec7ce57abea70149ef896342201910d9c1afb8bc3a9ba1017"
+    },
+    {
+      "type": "pdf",
+      "file": "yoshida/tsunami_hm_map.pdf",
+      "title": "1000年に一度の大津波を想定した 吉田町津波ハザードマップ",
+      "year": 2011,
+      "pages": 1,
+      "sha256": "00aa3d70bb6a580f6407070e7f88690b7f14ea14ea896c59892354d98f00c60d"
+    },
+    {
+      "type": "gsi",
+      "file": "22424_1.csv",
+      "title": "国土地理院 指定避難所データ",
+      "year": null,
+      "pages": null,
+      "sha256": "38866b2d7000c7435d21b10c13a8feb6cf7d0cc0e7822f8d99ebfb9bc432b984"
+    },
+    {
+      "type": "gsi",
+      "file": "22424_2.csv",
+      "title": "国土地理院 指定緊急避難場所データ",
+      "year": null,
+      "pages": null,
+      "sha256": "aea6580a35c21b9a9574c7fb5f3409c15905c7f45f4664878014fb7161931c0b"
+    }
+  ],
+  "hazards": [
+    {
+      "type": "flood",
+      "areas": [
+        "Oi River",
+        "Yui River",
+        "Saguchiya River"
+      ],
+      "notes_ja": "このハザードマップは、Oi River、Yui River、Saguchiya River の 3 河川が、1000 年に一度起こりうる大規模な大雨により氾濫し堤防が壊れた場合の、浸水被害の危険が高い想定区域と最大浸水深を同時に示している。",
+      "source_page": 8,
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 8,
+        "method": "citation",
+        "cited_text": "(22)\r\n(27)\r\n(25) (21)\r\n(26)\r\n(24)\r\nYoshida Town Hall\r\n(18)\r\n(23)\r\n(15)\r\n(14)\r\n(17)\r\n(12)\r\n(10)\r\n(19)\r\n(11)\r\n(16)\r\n(８)\r\n(13)\r\n(3)\r\n(2)\r\n(4)\r\n(7)\r\n(6)\r\n(9) (5)\r\n(1)\r\n(20)\r\nKando Community Center\r\nYoshida-cho Health & Welfare Center-Heartful\r\nSayuri Nursery School\r\nSumire Nusery School\r\nNorth Oasis Park (Oasis Community Center)\r\nKawashiri Community Center\r\nChuo Elementary School\r\nMarch 15,2019\r\nDesignated date Designated precondition of rainfall\r\nTotal rainfall for 18 hours is 772.0mm\r\nTotal rainfall of 729.3mm in 14hours\r\nDesignated precondition of rainfall\r\nMarch 15,2019 Shizuoka \r\nPrefecture\r\nSource Designated date\r\nTotal rainfall for 2\r\ndays is 787mm\r\nDesignated precondition of rainfall\r\nJune 21,2019\r\nDesignated date\r\nShizuoka River \r\nManagement \r\nOi River Flood Inundation Risk Area （Estimated Large Scale)\r\nYoshida Town Hall\r\nYoshida Town Hall\r\nYoshida Town Hall\r\nしていきんきゅうひなんばしょ\r\n指定緊急避難場所\r\nしていひなんじょ\r\n指定避難所\r\nつなみひなんばしょ\r\n津波避難場所\r\nふくしひなんじょ\r\n福祉避難所\r\nいりょうかんけいきかん\r\n医療関係機関\r\nようはいりょしゃりようしせつ\r\n要配慮者利用施設\r\nしょうぼうしょ・しょうぼうだん\r\n消防署・消防団\r\nすいいかんそくじょ\r\n水位観測所\r\nはいすいぽんぷじょう\r\n排水ポンプ場\r\nきょう りょう 橋\r\nSign\r\nはんれい\r\n凡例 英語\r\nDesignated Emergency \r\nEvacuation Area\r\nDesignated Evacuation \r\nShelter (Center)\r\nFire Station ・\r\nWelfare Evacuation\r\nShelter (Center)\r\nTsunami Evacuation\r\nArea\r\nTsunami Evacuation\r\nBuilding\r\nMedical Related \r\nInstitution\r\nFacility for Those Who \r\nNeed Special Assistance\r\nVolunteer Fire Corps\r\nWater Level \r\nObservation Site\r\nDrain Pump Station\r\nBridge\r\nArea with Past Occurrence \r\nof Inundation inside a Levee\r\nInundation by River Water Inundation inside a levee\r\nYui River Inundation Damage Area（Estimated Large Scale)\r\nSource\r\nThis hazard map shows simultaneously the estimated high risk of flood inundation damage areas and the \r\nmaximum inundation depth when 3 rivers, Oi River, Yui River and Saguchiya River, overflow and the dikes are \r\nbroken due to estimated large-scale heavy rainfall (which possibly occurs once every 1000 years)."
+      }
+    },
+    {
+      "type": "heavy_rain",
+      "areas": [
+        "Oi River"
+      ],
+      "notes_ja": "Oi River の 1000 年に一度の大規模な大雨は 787mm/2days に達すると予測されている。これは過去最大の大雨 (509mm/2days)（1982 年台風 10 号）の約 1.5 倍である。",
+      "source_page": 8,
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 8,
+        "method": "citation",
+        "cited_text": "Information about \r\nLegend\r\nAn estimated areas at risk of \r\nflood that might distroy \r\nhouses or bulidings\r\nArea at risk of \r\nriver bank erosion\r\nSediment disaster \r\nspecial hazard zone\r\nArea at risk of river \r\noverflow flooding\r\nSedimet disaster \r\nhazard zone\r\nInformation about \r\nsediment disaster\r\nInundation depth \r\n(Maximun expected scale)\r\n10.0m～less than 20.0m\r\n5.0m～less than 10.0m\r\n3.0m～less than 5.0m\r\n0.5m～less than 3.0m\r\n0～less than 0.5m\r\nA predicated large-scale heavy rainfall \r\n( that occurs once every 1000 years) of \r\nOi River, is expected to reach \r\n787mm/2days which is approximately 1.5 \r\ntimes of that the large rainfall ever \r\nrecorded (509mm/ 2days)(Typoon No 10 \r\nof 1982)."
+      }
+    },
+    {
+      "type": "landslide",
+      "areas": [],
+      "notes_ja": "急傾斜地の崩壊が集中して起きた場合に、住民に重大な被害が出るおそれのある建物被害が予想される区域がある。",
+      "source_page": 8,
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 8,
+        "method": "citation",
+        "cited_text": "Sediment disaster and the warning signs \r\nUpper end\r\nHeight \r\nArea where damage to \r\nbuildings is anticipated \r\ncausing serious injuries \r\nor fatalies among \r\nresidents in the event \r\nof the conceentrated \r\nsteep slope failures."
+      }
+    },
+    {
+      "type": "storm_surge",
+      "areas": [],
+      "notes_ja": "ハザードマップでは高潮による浸水は考慮されていない。",
+      "source_page": 8,
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 8,
+        "method": "citation",
+        "cited_text": "In case that the flooding due to levee breaking, flooding due to rainfall of a size exceeding the rainfall that is the \r\npremise of the simulation and flooding due to a storm surge (high tide) and inland water etc., were not taken into \r\nconsideration."
+      }
+    },
+    {
+      "type": "inland_flood",
+      "areas": [],
+      "notes_ja": "大雨で雨量が側溝や下水道の排水能力を超え、排水システムが機能しないことがある。",
+      "source_page": 8,
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 8,
+        "method": "citation",
+        "cited_text": "When heavy rain falls, the rainfall may \r\nexceed the drainage capacity of gutters \r\nand sewers, and drainage system may \r\nnot function."
+      }
+    },
+    {
+      "type": "large_fire",
+      "areas": [],
+      "notes_ja": "広域避難地とは、大規模地震等による同時多発火災等による延焼火災時の避難地をいう。",
+      "source_page": 3,
+      "source": {
+        "file": "yoshida/hinanjo_list.pdf",
+        "page": 3,
+        "method": "citation",
+        "cited_text": "資 料 編 \r\n＜共通対策＞\r\n資料 - 87 -\r\n（３）津波避難街区及び津波避難施設位置図\r\n「津波避難街区及び津波避難施設位置図」\r\n（４）広域避難地\r\n□「広域避難地」とは、大規模地震等による同時多発火災等による延焼火災時の避難地をいう。\r\n（大規模地震対策「避難計画策定指針」抜粋）\r\n番号 施 設 名 所在地 電 話 有効面積\r\n１ 吉田町立住吉小学校 住吉 2223 34-1476 1.5 ha\r\n２ 吉田町立吉田中学校 住吉 230 32-0200 2.7 ha\r\n３ 吉田町立中央小学校 片岡 850-1 32-1300 0.9 ha\r\n４ 静岡県立吉田特別支援学校 片岡 2130 23-9871 2.3 ha"
+      }
+    },
+    {
+      "type": "tsunami",
+      "areas": [],
+      "notes_ja": "想定は1498年明応地震による津波を「1000年に一度の大津波」と表現している（西伊豆で10mを超える津波痕跡が複数見られる）",
+      "source_page": 1,
+      "source": {
+        "file": "yoshida/tsunami_hm_map.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      }
+    }
+  ],
+  "routes": [
+    {
+      "text_ja": "特別な事情がない限り、避難に車を使わない。消防車や緊急車両の活動に影響するため。",
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 4,
+        "method": "citation",
+        "cited_text": "Please do not use car when evacuating, \r\nbecause that would affect fire engines and \r\nother emergency vehicles activities, unless \r\nthere are special circumstances."
+      }
+    },
+    {
+      "text_ja": "避難所までの経路を事前に自分で決め、実際に安全に行けるか確認する。",
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 4,
+        "method": "citation",
+        "cited_text": "③ ④\r\n➀ ②\r\n \r\n⑦ ⑧\r\n⑤ ⑥ \r\n4\r\n●\r\n●\r\n●\r\n●\r\n●\r\n●\r\n●\r\n●\r\n●\r\n●\r\n●\r\n●\r\nEvacuee life\r\nAcquire Knowledge on evacuation\r\nWhen stay safe at home or acquaintance's home When stay at evacuation shelter\r\n【 Precaution when entering an evacuation Sheltter 】\r\nDecide routes to evacuation shelter on your \r\nown in advance, and confirm the routes \r\nwhether can be reached safely to shelter or \r\nnot actually."
+      }
+    }
+  ],
+  "cautions": [
+    {
+      "text_ja": "家屋倒壊等氾濫想定区域：この区域に住む人、または家の高さが想定浸水深（水位）より低い人は、早めの避難を検討する。",
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 8,
+        "method": "citation",
+        "cited_text": "Houses collapse risk area: Resident lives \r\nin this area or the heighth of their house \r\nis lower than the estimated inundation \r\ndepth (water level) , please consider an \r\nearly evacuation\r\n➀\r\n② Houses \r\ncollapse\r\n大\r\n井\r\n川\r\nWeb-based Flood Simulation Serach System \r\nat an Arbitrary Point management by MLIT."
+      }
+    },
+    {
+      "text_ja": "外出すると命に危険がある場合は、その時点で今いる場所（自宅、建物など）の中で最も安全な場所へ避難する。",
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 7,
+        "method": "citation",
+        "cited_text": "In situations when going out would put your\r\n life at risk, evacuate to a safest place of your\r\n present location (home, building etc.) at the\r\n point of time to secure safety."
+      }
+    },
+    {
+      "text_ja": "高齢者、子ども、障害のある人などは早めに避難する。近所の支援が必要な人の避難を手助けする。",
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 4,
+        "method": "citation",
+        "cited_text": "Confirm the safe evacuation routes \r\nThe elderly, children and dissbiled person etc. \r\nin need of special assistance should make an \r\nearly evacuation. Please help nearby elderly, \r\ndisabled people etc. requiring special \r\nassistance (need, care) to evacuate."
+      }
+    },
+    {
+      "text_ja": "津波は繰り返し襲ってくる。必ずしも第一波が最大とは限らない。少なくとも12時間以上は警戒が必要",
+      "source": {
+        "file": "yoshida/tsunami_hm_map.pdf",
+        "page": 1,
+        "method": "vision",
+        "cited_text": null
+      }
+    },
+    {
+      "text_ja": "土砂災害が起きる前に前兆が現れる。前兆に気づいたら、できるだけ早く安全な場所へ避難する必要がある。",
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 8,
+        "method": "citation",
+        "cited_text": "The warning signs will be appeared before sediment disaster occurs. When \r\nyou are conscious of the warning signs, you need to evacuate to a safty \r\nplace as sooner as possible."
+      }
+    }
+  ],
+  "shelters": [
+    {
+      "name": "吉田町学習ホール",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町住吉1567",
+      "lat": 34.760728411155,
+      "lng": 138.25526638017,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400001111"
+      }
+    },
+    {
+      "name": "吉田町保健センター",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町住吉1567",
+      "lat": 34.760726207613,
+      "lng": 138.25546486364,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400001112"
+      }
+    },
+    {
+      "name": "住吉会館",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町住吉1567",
+      "lat": 34.760578570129,
+      "lng": 138.25493915066,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400001113"
+      }
+    },
+    {
+      "name": "住吉会館",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉1567",
+      "lat": 34.760578570129,
+      "lng": 138.25493915066,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400001201"
+      }
+    },
+    {
+      "name": "吉田町学習ホール",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉1567",
+      "lat": 34.760728411155,
+      "lng": 138.25526638017,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400001202"
+      }
+    },
+    {
+      "name": "吉田町立さくら保育園",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町住吉1621-1",
+      "lat": 34.762914106967,
+      "lng": 138.25592262557,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400002111"
+      }
+    },
+    {
+      "name": "吉田町立さくら保育園",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉1621-1",
+      "lat": 34.762914106967,
+      "lng": 138.25592262557,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400002201"
+      }
+    },
+    {
+      "name": "吉田町総合体育館",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町住吉180-1",
+      "lat": 34.768839496491,
+      "lng": 138.2543732787,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400003111"
+      }
+    },
+    {
+      "name": "吉田町総合体育館",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉180-1",
+      "lat": 34.768839496491,
+      "lng": 138.2543732787,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400003201"
+      }
+    },
+    {
+      "name": "津波避難タワーＲ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉2143-1",
+      "lat": 34.760691209049,
+      "lng": 138.25702992852,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400004201"
+      }
+    },
+    {
+      "name": "吉田町立住吉小学校",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町住吉2223",
+      "lat": 34.759320383689,
+      "lng": 138.25396644776,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400005111"
+      }
+    },
+    {
+      "name": "吉田町立住吉小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉2223",
+      "lat": 34.759320383689,
+      "lng": 138.25396644776,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "earthquake",
+        "tsunami",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400005201"
+      }
+    },
+    {
+      "name": "吉田町立吉田中学校",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町住吉230",
+      "lat": 34.769357790742,
+      "lng": 138.25294433509,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400006111"
+      }
+    },
+    {
+      "name": "吉田町立吉田中学校",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉230",
+      "lat": 34.769357790743,
+      "lng": 138.25294433509,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400006201"
+      }
+    },
+    {
+      "name": "津波避難タワーＰ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉2649-2",
+      "lat": 34.753866885409,
+      "lng": 138.24815602842,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400007201"
+      }
+    },
+    {
+      "name": "津波避難タワーＫ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉２８６８－３地先",
+      "lat": 34.755227562833,
+      "lng": 138.25413817115,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400008201"
+      }
+    },
+    {
+      "name": "津波避難タワーＢ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉３２５４－６地先",
+      "lat": 34.750222832726,
+      "lng": 138.25197362849,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400009201"
+      }
+    },
+    {
+      "name": "津波避難タワーＪ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉3365-1",
+      "lat": 34.749092263851,
+      "lng": 138.2446324224,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400010201"
+      }
+    },
+    {
+      "name": "吉田町体育センター",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉3367-6",
+      "lat": 34.748775834994,
+      "lng": 138.24470153386,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400011201"
+      }
+    },
+    {
+      "name": "津波避難タワーＤ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉3484-1",
+      "lat": 34.754467286518,
+      "lng": 138.25940871187,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400012201"
+      }
+    },
+    {
+      "name": "津波避難タワーＦ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉３７１９－１地先",
+      "lat": 34.758330299108,
+      "lng": 138.2654302711,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400013201"
+      }
+    },
+    {
+      "name": "津波避難タワーＡ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉４４０３－６地先",
+      "lat": 34.746315362336,
+      "lng": 138.24795299718,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400014201"
+      }
+    },
+    {
+      "name": "津波避難タワーＣ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉４８０５－２地先",
+      "lat": 34.751161655937,
+      "lng": 138.2569732661,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400015201"
+      }
+    },
+    {
+      "name": "津波避難タワーＥ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉5228-1",
+      "lat": 34.754359304674,
+      "lng": 138.26380485245,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400016201"
+      }
+    },
+    {
+      "name": "津波避難タワーＬ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉５５２５－１地先",
+      "lat": 34.758422850531,
+      "lng": 138.25944894501,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400017201"
+      }
+    },
+    {
+      "name": "ホテルプレストンｙｏｓｈｉｄａ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町住吉580",
+      "lat": 34.765718538575,
+      "lng": 138.25144571646,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400018201"
+      }
+    },
+    {
+      "name": "吉田町立自彊小学校",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町神戸1748-2",
+      "lat": 34.785706316009,
+      "lng": 138.24051564488,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400019111"
+      }
+    },
+    {
+      "name": "吉田町立自彊小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町神戸1748-2",
+      "lat": 34.785706316009,
+      "lng": 138.24051564488,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400019201"
+      }
+    },
+    {
+      "name": "吉田町立わかば保育園",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町神戸2092-1",
+      "lat": 34.783938511514,
+      "lng": 138.24183914243,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400020111"
+      }
+    },
+    {
+      "name": "吉田町立わかば保育園",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町神戸2092-1",
+      "lat": 34.783938511514,
+      "lng": 138.24183914243,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400020201"
+      }
+    },
+    {
+      "name": "自彊館",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町神戸2167-2",
+      "lat": 34.786100191311,
+      "lng": 138.24375145041,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400021111"
+      }
+    },
+    {
+      "name": "自彊館",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町神戸2167-2",
+      "lat": 34.786100191311,
+      "lng": 138.24375145041,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400021201"
+      }
+    },
+    {
+      "name": "神戸集落センター",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町神戸2693-1",
+      "lat": 34.780108318158,
+      "lng": 138.24083315623,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400022111"
+      }
+    },
+    {
+      "name": "神戸集落センター",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町神戸2693-1",
+      "lat": 34.780108318158,
+      "lng": 138.24083315624,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400022201"
+      }
+    },
+    {
+      "name": "神戸西会館",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町神戸3934-1",
+      "lat": 34.779808782121,
+      "lng": 138.23425483444,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400023111"
+      }
+    },
+    {
+      "name": "神戸西会館",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町神戸3934-1",
+      "lat": 34.779808782121,
+      "lng": 138.23425483444,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400023201"
+      }
+    },
+    {
+      "name": "北オアシスパーク（オアシス館）",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町神戸673-1",
+      "lat": 34.787675433797,
+      "lng": 138.24682042079,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400024201"
+      }
+    },
+    {
+      "name": "川尻会館",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町川尻1623",
+      "lat": 34.768082529865,
+      "lng": 138.27053947754,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400025111"
+      }
+    },
+    {
+      "name": "川尻会館",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町川尻1623",
+      "lat": 34.768082529865,
+      "lng": 138.27053947754,
+      "hazards_ok": [
+        "storm_surge",
+        "earthquake",
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400025201"
+      }
+    },
+    {
+      "name": "津波避難タワーＧ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町川尻2557-11",
+      "lat": 34.760639646443,
+      "lng": 138.27110582538,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400026201"
+      }
+    },
+    {
+      "name": "津波避難タワーＯ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町川尻2743-1",
+      "lat": 34.765126782903,
+      "lng": 138.27429881689,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400027201"
+      }
+    },
+    {
+      "name": "津波避難タワーＨ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町川尻2918",
+      "lat": 34.764216763317,
+      "lng": 138.27779373526,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400028201"
+      }
+    },
+    {
+      "name": "レック㈱吉田防災倉庫",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町川尻3308",
+      "lat": 34.7663533232,
+      "lng": 138.27821954733,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400029201"
+      }
+    },
+    {
+      "name": "吉田町立すみれ保育園",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町川尻791",
+      "lat": 34.772246248701,
+      "lng": 138.2623662218,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400030111"
+      }
+    },
+    {
+      "name": "吉田町立すみれ保育園",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町川尻791",
+      "lat": 34.772642830057,
+      "lng": 138.26218383158,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400030201"
+      }
+    },
+    {
+      "name": "大幡会館",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町大幡1142",
+      "lat": 34.792264435258,
+      "lng": 138.24852436451,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400031201"
+      }
+    },
+    {
+      "name": "津波避難タワーＭ",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町片岡1697-1",
+      "lat": 34.763031339086,
+      "lng": 138.26162723477,
+      "hazards_ok": [
+        "tsunami"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400032201"
+      }
+    },
+    {
+      "name": "総合障害者自立支援施設",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町片岡1996-1",
+      "lat": 34.772750622432,
+      "lng": 138.25694402195,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400033121"
+      }
+    },
+    {
+      "name": "吉田町総合障害者自立支援施設（あつまリーナ）",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町片岡1996-1",
+      "lat": 34.772628299878,
+      "lng": 138.25695619088,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400033201"
+      }
+    },
+    {
+      "name": "吉田特別支援学校",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町片岡2130",
+      "lat": 34.77702701405,
+      "lng": 138.25288426976,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400034111"
+      }
+    },
+    {
+      "name": "静岡県立吉田特別支援学校",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町片岡2130",
+      "lat": 34.77702701405,
+      "lng": 138.25288426976,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400034201"
+      }
+    },
+    {
+      "name": "片岡会館",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町片岡2488-1",
+      "lat": 34.776288912062,
+      "lng": 138.25042735458,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400035111"
+      }
+    },
+    {
+      "name": "片岡会館",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町片岡2488-1",
+      "lat": 34.776306537077,
+      "lng": 138.25037907482,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400035201"
+      }
+    },
+    {
+      "name": "吉田町立図書館",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町片岡404",
+      "lat": 34.780263310325,
+      "lng": 138.25107300394,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400036111"
+      }
+    },
+    {
+      "name": "吉田町立図書館",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町片岡404",
+      "lat": 34.780263310325,
+      "lng": 138.25107300394,
+      "hazards_ok": [
+        "flood",
+        "landslide",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400036201"
+      }
+    },
+    {
+      "name": "吉田町健康福祉センター（はぁとふる）",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町片岡795-1",
+      "lat": 34.771900174519,
+      "lng": 138.25701375939,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400037121"
+      }
+    },
+    {
+      "name": "吉田町健康福祉センター（はぁとふる）",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町片岡795-1",
+      "lat": 34.771892419497,
+      "lng": 138.25707957249,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400037201"
+      }
+    },
+    {
+      "name": "吉田町立さゆり保育園",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町片岡805-1",
+      "lat": 34.770713773753,
+      "lng": 138.25712976722,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400038111"
+      }
+    },
+    {
+      "name": "吉田町立さゆり保育園",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町片岡805-1",
+      "lat": 34.770713773753,
+      "lng": 138.25712976722,
+      "hazards_ok": [
+        "earthquake"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400038201"
+      }
+    },
+    {
+      "name": "吉田町中央児童館",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町片岡805-5",
+      "lat": 34.771136777401,
+      "lng": 138.25732476592,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400039111"
+      }
+    },
+    {
+      "name": "吉田町中央児童館",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町片岡805-5",
+      "lat": 34.771136777401,
+      "lng": 138.25732476592,
+      "hazards_ok": [
+        "flood",
+        "earthquake",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400039201"
+      }
+    },
+    {
+      "name": "吉田町立中央小学校",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町片岡850-1",
+      "lat": 34.771056924389,
+      "lng": 138.25961812434,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400040111"
+      }
+    },
+    {
+      "name": "吉田町立中央小学校",
+      "kind": "emergency_evacuation_site",
+      "address": "静岡県吉田町片岡850-1",
+      "lat": 34.771056924389,
+      "lng": 138.25961812434,
+      "hazards_ok": [
+        "flood",
+        "storm_surge",
+        "earthquake",
+        "large_fire",
+        "inland_flood"
+      ],
+      "source": {
+        "type": "gsi",
+        "file": "22424_2.csv",
+        "id": "E2242400040201"
+      }
+    },
+    {
+      "name": "特別養護老人ホーム片岡杉の子園",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町片岡2895",
+      "lat": 34.772131776869,
+      "lng": 138.24146813856,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400041121"
+      }
+    },
+    {
+      "name": "特別養護老人ホーム住吉杉の子園",
+      "kind": "evacuation_shelter",
+      "address": "静岡県吉田町住吉3239",
+      "lat": 34.752285839392,
+      "lng": 138.2514338655,
+      "hazards_ok": [],
+      "source": {
+        "type": "gsi",
+        "file": "22424_1.csv",
+        "id": "E2242400042121"
+      }
+    }
+  ],
+  "contacts": [
+    {
+      "label_ja": "Yoshida Town Disaster Prevention Division（吉田町防災課）",
+      "phone": "0548-33-2164",
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "Yoshida Town Disaster Prevention Division \r\nAddress: 87 Sumiyoshi , Yoshida-cho, Haibara-gun, Shizuoka Pref. Japan\r\n(Zip Code 421-0395 ) TEL: 0548-33-2164 FAX : 0548-32-6121 \r\nInquiries\r\nVarious kinds of hazard maps are \r\npublished and released."
+      }
+    },
+    {
+      "label_ja": "Town Disaster Management Radio Broadcast（自動音声）",
+      "phone": "0548-33-2777",
+      "source": {
+        "file": "yoshida/kozui_hm_en.pdf",
+        "page": 2,
+        "method": "citation",
+        "cited_text": "Town Disaster Management Radio Broadcast\r\n Contents are played as an automated voice message\r\n which can be heard by calling following number.\r\n TEL：0548-33-2777 (Regular charge)\r\n Yoshida Town Disaster Prevention Radio\r\n You can hear the broadcast content via this\r\n Potable Radio."
+      }
+    },
+    {
+      "label_ja": "吉田町立住吉小学校（避難場所の表）",
+      "phone": "32-1476",
+      "source": {
+        "file": "yoshida/hinanjo_list.pdf",
+        "page": 1,
+        "method": "citation",
+        "cited_text": "資 料 編 \r\n＜共通対策＞\r\n資料 - 85 -\r\n資料１．３－22 指定緊急避難場所・指定避難所関係\r\n（１）避難場所（洪水・土砂災害・高潮・地震・大火災） \r\n（平成 29 年 4 月 1 日現在）\r\n□「避難場所」とは、切迫した災害の危険から命を守るために避難する場所で、異常な現象の種類ごとに\r\n町が指定したものをいう。（災害対策基本法第４９条の４）\r\n□「避難場所」には、大規模地震対策「避難計画策定指針」（静岡県危機管理部）における「避難地」を\r\n含む。\r\n□「避難地」とは、緊急時において、要避難地区（避難対象地区を含む）の要避難者が避難する場所とし\r\nて、市町が地震災害危険予想地域の外側、若しくは災害危険が及ばない地域に指定したグラウンド、公\r\n園、緑地などの屋外の場所をいう。また、高齢者、障害者、乳幼児その他特に配慮を要する避難者の保\r\n護を行う上でやむを得ない場合は、耐震性を有し、耐火性の高い公共的な建築物の屋内施設を含む。\r\n（大規模地震対策「避難計画策定指針」抜粋）\r\n□災害別避難場所の適否の凡例 → 「○」：適 「×」：不適\r\n地\r\n区\r\n施 設 名 所在地 電 話\r\n災害別避難場所の適否\r\n洪 備考\r\n水\r\n土\r\n砂\r\n災\r\n害\r\n高\r\n潮\r\n地\r\n震\r\n大\r\n火\r\n災\r\n住\r\n吉\r\n吉田町立住吉小学校 住吉 2223 32-1476 ○ × ○ ○ ○ （注１）\r\n吉田町総合体育館 住吉 180-1 32-5555 ○ × ○ ○ ×\r\n吉田町立吉田中学校 住吉 230 32-0200 ○ × ○ ○ ○\r\n吉田町学習ホール 住吉 1567 32-7366 ○ × ○ × ×\r\n吉田町体育センター 住吉 3367-6 － ○ × ○ × ×\r\n住吉会館 住吉 1567 32-3447 ○ × ○ × ×\r\n吉田町立さくら保育園 住吉 1621-1 32-0414 ○ × ○ × ×\r\n川\r\n尻\r\n吉田町立中央小学校 片岡 850-1 32-1300 ○ × ○ ○ ○\r\n川尻会館 川尻 1623 32-0564 × × ○ ○ × （注２）\r\n吉田町立すみれ保育園 川尻 791 32-1117 ○ × ○ ○ ×\r\n片\r\n岡\r\n静岡県立吉田特別支援学校 片岡 2130 23-9871 ○ ○ × ○ ○\r\n吉田町健康福祉センター（はぁとふる） 片岡 795-1 34-1111 ○ × × ○ ×\r\n片岡会館 片岡 2488-1 32-5620 ○ ○ × ○ ×\r\n吉田町立さゆり保育園 片岡 805-1 32-1650 × × × ○ ×\r\n吉田町総合障害者自立支援施設\r\n（あつまリーナ） 片岡 1996-1 34-2000 ○ × × ○ ×\r\n吉田町立図書館 片岡 404 33-3434 ○ ○ × ○ ×\r\n吉田町中央児童館 片岡 805-5 32-3401 ○ × × ○ ×\r\n北\r\n区\r\n吉田町立自彊小学校 神戸 1748-2 32-0009 ○ ○ × ○ ○\r\n自彊館 神戸 2167-2 32-9876 ○ × × ○ ×\r\n神戸集落センター 神戸 2693-1 32-5628 × × × ○ ×\r\n神戸西会館 神戸 3934-1 32-3692 ○ ○ × ○ ×\r\n大幡会館 大幡 1142 － ○ × × ○ ×\r\n吉田町立わかば保育園 神戸 2092-1 32-0016 ○ × × ○ ×\r\n北オアシスパーク(オアシス館) 神戸 673-1 33-2700 ○ ○ × ○ ○\r\n（注１）：地震の場合の避難場所は、屋上となる。\r\n（注２）：地震の場合の避難場所は、２階及び屋上となる。"
+      }
+    }
+  ],
+  "conflicts": [
+    {
+      "kind": "shelter_name",
+      "pdf_name": "ホテルプレストンYoshida",
+      "pdf_source": {
+        "file": "yoshida/hinanjo_list.pdf",
+        "page": 2,
+        "method": "citation",
+        "cited_text": "資 料 編 \r\n＜共通対策＞\r\n資料 - 86 -\r\n（２）避難場所（津波避難施設）\r\n□「津波避難施設」とは、突発地震が発生した場合で、津波到達予想時間までに避難地に避難できない避\r\n難者のために、市町が津波危険予想地域内に指定、確保、整備する避難施設のことで、津波避難ビル、\r\n津波避難タワー、人口高台（津波避難マウント）をいう。\r\n（大規模地震対策「避難計画策定指針」抜粋）\r\n避難\r\n街区\r\n津波避難施設 所在地\r\n収容\r\n人数\r\n（人）\r\n地盤高\r\n（海抜ｍ）\r\n想定津波\r\n浸水高\r\n（海抜ｍ）\r\n避難場所\r\nの高さ\r\n（海抜ｍ）\r\n避難対象地区\r\nＡ 津波避難タワーＡ 住吉4403-6地先 500 1.9 7.1 10.0 住吉新田・山八\r\nＢ 津波避難タワーＢ 住吉3254-6地先 500 3.0 7.6 10.4 住吉山八\r\nＣ 津波避難タワーＣ 住吉4805-2地先 1,100 3.0 8.2 11.1 住吉山八・西浜\r\nＤ 津波避難タワーＤ 住吉3484-1 900 3.2 8.0 10.9 住吉西浜・東浜\r\nＥ 津波避難タワーＥ 住吉5228-1 900 2.8 8.5 11.4 住吉東浜・大浜\r\nＦ 津波避難タワーＦ 住吉3719-1地先 500 3.5 7.6 10.4 住吉東浜・大浜\r\nＧ 津波避難タワーＧ 川尻2557-11 700 3.8 7.7 10.2\r\n住吉大浜、片岡\r\n下、川尻西組\r\nＨ 津波避難タワーＨ 川尻2918 800 3.2 6.2 8.7 川尻西組・東組\r\nI \r\nレック㈱\r\n吉田防災倉庫（注１） 川尻3308 1,000 2.3 6.5 29.3 川尻東組\r\nＪ 津波避難タワーＪ 住吉3365-1 800 3.4 7.8 10.5 住吉新田・山八\r\nＫ 津波避難タワーＫ 住吉2868-3地先 1,200 3.1 6.8 9.6\r\n住吉森下・山八\r\n・西浜\r\nＬ 津波避難タワーＬ 住吉5525-1地先 800 2.8 6.4 9.1\r\n住吉森下・東村\r\n・東浜、片岡下\r\nＭ 津波避難タワーＭ 片岡1697-1 1,000 3.2 6.2 8.7\r\n住吉東村、片岡\r\n下\r\nＮ 川尻会館（注２） 川尻1623 1,600 3.3 5.0\r\n2階 7.5\r\n屋上12.3\r\n川尻山通・西組\r\n・東組、片岡下\r\nＯ 津波避難タワーＯ 川尻2743-1 500 3.0 6.0\r\n1層 7.7\r\n2層11.1\r\n川尻西組・東組\r\nＰ 津波避難タワーＰ 住吉2649-2 1,300 3.3 7.2 9.7 住吉新田・山八\r\nＱ \r\n吉田町立\r\n住吉小学校（注１） 住吉2223 1,560 3.4 5.0 20.4\r\n住吉森下・新田\r\n・山八・西浜・\r\n東浜\r\nＲ 津波避難タワーＲ 住吉2143-1 800 3.5 5.7 7.5 住吉森下・東村\r\nＳ \r\nホテルプレストン\r\nYoshida\r\n（注３） 住吉580 517 4.2 4.9\r\n3階12.2\r\n～\r\n屋上25.2\r\n住吉森下・上組\r\n・東村\r\n（注１）：避難場所は、屋上となる。\r\n（注２）：避難場所は、２階及び屋上となる。\r\n（注３）：避難場所は、脱衣場、非常階段及び屋上となる。"
+      },
+      "gsi_candidates": [],
+      "note_ja": "PDF の施設名が国土地理院データの施設名と一致しない。画面には出さない。"
+    }
+  ],
+  "provenance": {
+    "reader_version": "0.1.0",
+    "model": "claude-sonnet-5-5"
+  }
+}

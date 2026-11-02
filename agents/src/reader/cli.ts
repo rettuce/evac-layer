@@ -74,6 +74,8 @@ function assertFinished(msg: Anthropic.Message, stage: string) {
   if (msg.stop_reason === "max_tokens") stop(`${stage}: hit max_tokens; output is truncated`);
 }
 
+const STARTED_AT = Date.now();
+
 async function main() {
   if (values.estimate) {
     const ids = values.municipality === "all" ? Object.keys(PRESETS) : [values.municipality!];
@@ -230,7 +232,7 @@ async function main() {
   fs.writeFileSync(`${base}.stage1.json`, JSON.stringify({ claims, citations: Object.fromEntries(citations) }, null, 2));
   fs.writeFileSync(`${base}.extraction.json`, JSON.stringify(extraction, null, 2));
   const total = usage.reduce((a, u) => ({ input: a.input + u.input, output: a.output + u.output, usd: a.usd + u.usd }), { input: 0, output: 0, usd: 0 });
-  const summary = { model: model.id, usage, total, counts: { claims: claims.length, hazards: doc.hazards.length, routes: doc.routes.length, cautions: doc.cautions.length, contacts: doc.contacts.length, shelter_mentions: extraction.shelter_mentions.length, conflicts: doc.conflicts.length, shelters: doc.shelters.length } };
+  const summary = { model: model.id, seconds: Math.round((Date.now() - STARTED_AT) / 100) / 10, usage, total, counts: { claims: claims.length, hazards: doc.hazards.length, routes: doc.routes.length, cautions: doc.cautions.length, contacts: doc.contacts.length, shelter_mentions: extraction.shelter_mentions.length, conflicts: doc.conflicts.length, shelters: doc.shelters.length } };
   fs.writeFileSync(`${base}.usage.json`, JSON.stringify(summary, null, 2));
   if (!v.ok) {
     fs.writeFileSync(`${base}.invalid.json`, JSON.stringify(doc, null, 2));
