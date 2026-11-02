@@ -30,11 +30,16 @@ const SHAPES = {
 const SCENARIO_SWITCH_AT_MS = 12000
 const SCENARIO = { mode: 'scenario', layout: 'wajima-tsunami' }
 
-// Live replay of nine real JMA bulletins for Yurihonjo (05210) at 1200x speed. Events are the
-// approximate moments the screen changes: Lv3 prepare, Lv4, Lv5, cross-fade toward all-clear.
-const LIVE = { mode: 'live', municipality: '05210', speed: '1200' }
+// Live replay of real JMA bulletins for Yurihonjo (05210) at 1200x speed, limited to the
+// 2026-10-21 flood so the first screen comes 13 s in rather than minutes later. Events are when the
+// screen changes: Lv3 prepare, Lv4, three Lv5 bulletins, cross-fade back to ambient.
+const LIVE = {
+  mode: 'live', municipality: '05210', speed: '1200',
+  from: '2026-10-21T11:00+09:00', to: '2026-10-22T07:00+09:00',
+}
 const LIVE_READY = '[data-mode="live"][data-ready="1"]'
-const LIVE_EVENTS_MS = [14000, 21000, 26000, 44000]
+const LIVE_EVENTS_MS = [13100, 20100, 24600, 26100, 29100, 44350]
+const LIVE_SITE_ID = '05210-demo-honjo-station'
 
 const CUTS = {
   ambient: { seconds: 12, startMs: 0, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
@@ -127,6 +132,35 @@ async function openPage(browser, opts, tMs) {
   return page
 }
 
+// Live screens only show approved bulletins and read approvals once on mount, so approve every
+// bulletin that becomes a screen (and turn auto-publish on) before the first page opens.
+async function approveLive(browser, opts) {
+  const { query } = CUTS[opts.cut]
+  if (query.mode !== 'live') return null
+  const { mode, ...replayQuery } = query
+  const replayPath = `/api/replay?${new URLSearchParams(replayQuery)}`
+  const page = await browser.newPage()
+  await page.goto(`${opts['base-url']}${replayPath}`)
+  const approved = await page.evaluate(async ({ municipality, siteId, replayPath }) => {
+    const post = async (path, body) => {
+      const response = await fetch(path, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!response.ok) throw new Error(`${path} answered ${response.status}`)
+    }
+    const replay = await (await fetch(replayPath)).json()
+    const ids = replay.rows.filter((row) => row.screen).map((row) => row.bulletin_id)
+    await post('/api/admin/site', { site_id: siteId, auto_publish: true })
+    for (const id of ids) await post('/api/admin/approve', { municipality, bulletin_id: id, approved: true })
+    return ids
+  }, { municipality: query.municipality, siteId: LIVE_SITE_ID, replayPath })
+  await page.close()
+  if (approved.length === 0) throw new Error(`no screen bulletins to approve for ${query.municipality}`)
+  return approved
+}
+
 async function captureFrames(browser, opts, framesDir) {
   const page = await openPage(browser, opts, 0)
   const modes = new Set()
@@ -198,7 +232,9 @@ async function main() {
   const browser = await puppeteer.launch({ executablePath: CHROME_PATH, headless: true })
   let modes
   let checks = []
+  let approved = null
   try {
+    approved = await approveLive(browser, opts)
     modes = await captureFrames(browser, opts, framesDir)
     if (opts.verify) checks = await verify(browser, opts, framesDir)
   } finally {
@@ -211,6 +247,7 @@ async function main() {
     `RECORDED ${opts.out} shape=${opts.shape} cut=${opts.cut} frames=${opts.frameCount} fps=${opts.fps} ` +
       `seek=${modes.join('+') || '-'} elapsed_s=${seconds.toFixed(1)} per_frame_s=${(seconds / opts.frameCount).toFixed(2)}`,
   )
+  if (approved) console.log(`APPROVED ${approved.length} bulletins + auto_publish for ${LIVE_SITE_ID}`)
   for (const c of checks) {
     console.log(`VERIFY frame=${c.frame} t_ms=${c.tMs} ${c.identical ? 'identical' : `DIFFERS max_delta=${c.delta}`}`)
   }
