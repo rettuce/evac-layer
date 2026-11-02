@@ -1,7 +1,7 @@
 import type { LayoutCell, Shape } from "../../../app/layout/types";
 import type { Alert } from "../jma/parse.js";
 import type { Lang } from "../writer/request.js";
-import { CHAR_BUDGETS } from "./budgets.js";
+import { budgetsFor } from "./budgets.js";
 import { shapeContract } from "./template.js";
 import { ACTION_PICTOGRAM, BudgetExceeded, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
@@ -79,8 +79,8 @@ function writerFor(writer: WriterOutput | Partial<Record<Shape, WriterOutput>>, 
   return (writer as Partial<Record<Shape, WriterOutput>>)[shape] ?? stop(`no Writer output for shape ${shape}`);
 }
 
-function checkBudget(shape: Shape, cell: WriterCell) {
-  const budget = CHAR_BUDGETS[shape].find((b) => b.role === cell.role);
+function checkBudget(template: string, shape: Shape, cell: WriterCell) {
+  const budget = budgetsFor(template, shape).find((b) => b.role === cell.role);
   for (const [lang, max] of Object.entries(budget?.max_chars ?? {})) {
     const t = cell.text[lang as Lang];
     if (t !== undefined && [...t].length > max!) throw new BudgetExceeded(shape, cell.role, lang, [...t].length, max!, t);
@@ -112,7 +112,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     const w = writerFor(input.writer, shape);
     const text = (role: string) => {
       const c = w.cells.find((x) => x.role === role);
-      if (c) checkBudget(shape, c);
+      if (c) checkBudget(situation.template, shape, c);
       return c?.text;
     };
     const cells: LayoutCell[] = [];
@@ -121,7 +121,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: ACTION_PICTOGRAM[alert.hazard], motion: "pulse" });
     if (guide && way) {
       add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: way.text_ja }, pictogram: "arrow_forward", rotation: way.rotation, motion: "static" });
-      add({ id: "shelter", role: "shelter", priority: 2, text: { ja: `${guide.shelter.name}（指定緊急避難場所）` }, pictogram: "emergency_evacuation_site", distance_m: guide.distance_m, motion: "static" });
+      add({ id: "shelter", role: "shelter", priority: 2, text: { ja: guide.shelter.name }, kind: guide.shelter.kind, pictogram: "emergency_evacuation_site", distance_m: guide.distance_m, motion: "static" } as LayoutCell);
     }
     const languages = text("languages");
     if (languages) add({ id: "languages", role: "languages", priority: 3, text: languages, motion: "static" });

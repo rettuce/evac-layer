@@ -7,7 +7,7 @@ import { tsunamiRegionsFor } from "../jma/regions.js";
 export const PLACEHOLDER_ACTION: Record<string, { ja: string; ja_easy: string; en: string; zh_hans: string; zh_hant: string; ko: string }> = {
   "5": { ja: "【仮】安全確保", ja_easy: "【かり】 うえの かいへ", en: "[draft] Act now", zh_hans: "[草稿]确保安全", zh_hant: "[草稿]確保安全", ko: "[초안] 안전 확보" },
   "4": { ja: "【仮】全員避難", ja_easy: "【かり】 みんな にげて", en: "[draft] Evacuate", zh_hans: "[草稿]全员避难", zh_hant: "[草稿]全員避難", ko: "[초안] 전원 대피" },
-  "3": { ja: "【仮】高齢者避難", ja_easy: "【かり】 じゅんび", en: "[draft] Prepare", zh_hans: "[草稿]准备避难", zh_hant: "[草稿]準備避難", ko: "[초안] 대피 준비" },
+  "3": { ja: "【仮】準備", ja_easy: "【かり】 じゅんび", en: "[draft] Prepare", zh_hans: "[草稿]准备避难", zh_hant: "[草稿]準備避難", ko: "[초안] 대피 준비" },
   cleared: { ja: "【仮】警報解除", ja_easy: "【かり】 おわり", en: "[draft] Lifted", zh_hans: "[草稿]警报解除", zh_hant: "[草稿]警報解除", ko: "[초안] 경보 해제" },
 };
 

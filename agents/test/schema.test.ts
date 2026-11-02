@@ -65,3 +65,13 @@ test("committed GSI shelter files validate", () => {
     assert.equal(doc.shelters.length, doc.counts.emergency_evacuation_site + doc.counts.evacuation_shelter);
   }
 });
+
+test("shelter cells carry kind; other cells may not", () => {
+  const doc = fixture();
+  const shelter = doc.cells.find((c: { role: string }) => c.role === "shelter");
+  delete shelter.kind;
+  assert.equal(validateDoc(doc).ok, false);
+  const doc2 = fixture();
+  doc2.cells[0].kind = "evacuation_shelter";
+  assert.equal(validateDoc(doc2).ok, false);
+});
