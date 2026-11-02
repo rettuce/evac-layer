@@ -33,14 +33,15 @@ export const HAZARD_PICTOGRAM: Record<string, string> = {
   earthquake: "earthquake",
 };
 
-export const ACTION_PICTOGRAM: Record<string, string> = {
-  tsunami: "go_higher",
-  flood: "go_higher",
-  inland_flood: "go_higher",
-  storm_surge: "go_higher",
-  heavy_rain: "go_higher",
-  landslide: "directions_run",
-};
+// The action pictogram follows what the screen asks people to do, not only the hazard: rising water or a tsunami
+// means going up, an evacuation order with a shelter means moving to it, a level 3 screen only warns of the
+// hazard, and an all-clear asks for nothing (found by the Vision Verifier on the 2026-10 replay).
+export function actionPictogram(hazard: string, template: string): string {
+  if (template === "all-clear") return "safe_here";
+  if (hazard === "tsunami" || template === "secure-now") return "go_higher";
+  if (template === "evac-now") return "directions_run";
+  return HAZARD_PICTOGRAM[hazard] ?? "directions_run";
+}
 
 // heavy_rain warnings drive inundation guidance, so shelters designated for inland flooding or floods qualify.
 export const SHELTER_HAZARDS: Record<string, string[]> = {

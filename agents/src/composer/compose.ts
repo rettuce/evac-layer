@@ -1,9 +1,10 @@
 import type { LayoutCell, Shape } from "../../../app/layout/types";
 import type { Alert } from "../jma/parse.js";
+import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { Lang } from "../writer/request.js";
 import { budgetsFor } from "./budgets.js";
 import { shapeContract } from "./template.js";
-import { ACTION_PICTOGRAM, BudgetExceeded, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
+import { actionPictogram, BudgetExceeded, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
 export interface WriterOutput { cells: WriterCell[] }
@@ -69,6 +70,18 @@ export function pickShelter(m: Municipality, site: Site, hazard: string) {
   return { shelter: best.s, distance_m: Math.round(best.d / DISTANCE_STEP_M) * DISTANCE_STEP_M };
 }
 
+// The headline is the JMA warning name verbatim (Meteorological Service Act art. 23). A VPWW clearance keeps the
+// warning's name and sets Status 解除, so the cleared state is shown by appending 解除 to that name.
+export function headlineFor(alert: Alert, municipalityId: string): string {
+  const regions = new Set(tsunamiRegionsFor(municipalityId));
+  const mine = alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
+  const live = mine.filter((a) => a.status !== "cleared" && a.status !== "none").sort((a, b) => (b.level ?? 0) - (a.level ?? 0));
+  if (live.length) return live[0].kind_name;
+  const cleared = mine.find((a) => a.status === "cleared");
+  if (cleared) return cleared.kind_name.endsWith("解除") ? cleared.kind_name : `${cleared.kind_name}解除`;
+  return alert.raw_title;
+}
+
 function hhmm(iso: string): string {
   const m = iso.match(/T(\d{2}):(\d{2})/) ?? stop(`issued_at ${iso} has no time`);
   return `${m[1]}:${m[2]}`;
@@ -91,6 +104,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
   const { alert, municipality: m, site } = input;
   if (site.municipality_id !== m.id) stop(`site ${site.id} belongs to ${site.municipality_id}, not ${m.id}`);
   const situation = situationFor(alert, m.id);
+  const headline = headlineFor(alert, m.id);
   const guide = NO_SHELTER_TEMPLATES.has(situation.template) ? null : pickShelter(m, site, alert.hazard);
   const way = guide ? directionToward(site, guide.shelter) : null;
   const hazardEntry = m.hazards.find((h) => h.type === alert.hazard);
@@ -117,8 +131,9 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     };
     const cells: LayoutCell[] = [];
     const add = (cell: LayoutCell) => { if (slots.has(cell.role)) cells.push(cell); };
-    add({ id: "headline", role: "headline", priority: 1, text: text("headline") ?? stop("Writer output has no headline"), pictogram: HAZARD_PICTOGRAM[alert.hazard], motion: "scale-in" });
-    add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: ACTION_PICTOGRAM[alert.hazard], motion: "pulse" });
+    const headlineText = text("headline") ?? stop("Writer output has no headline");
+    add({ id: "headline", role: "headline", priority: 1, text: { ...headlineText, ja: headline }, pictogram: HAZARD_PICTOGRAM[alert.hazard], motion: "scale-in" });
+    add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: actionPictogram(alert.hazard, situation.template), motion: "pulse" });
     if (guide && way) {
       add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: way.text_ja }, pictogram: "arrow_forward", rotation: way.rotation, motion: "static" });
       add({ id: "shelter", role: "shelter", priority: 2, text: { ja: guide.shelter.name }, kind: guide.shelter.kind, pictogram: "emergency_evacuation_site", distance_m: guide.distance_m, motion: "static" } as LayoutCell);
