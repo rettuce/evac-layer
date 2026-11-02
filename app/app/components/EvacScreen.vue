@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '~~/layout/fit'
 import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
-import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
+import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
+import { levelScaleAttr, levelScaleFor } from '~~/layout/levelScale'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
 import { HEADLINE_STEP_DOWN, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
@@ -26,6 +27,7 @@ const root = ref<HTMLElement>()
 const scale = ref(1)
 const overflowDropped = ref<DroppedCell[]>([])
 const overflow = ref('')
+const levelScale = computed(() => levelScaleFor(props.screen.template, props.screen.alert.hazard, props.screen.alert.level))
 const headlineScale = ref(1)
 const stackedHeadline = computed(() => ['portrait', 'square'].includes(SHAPES[props.shape].cls))
 const ready = ref(false)
@@ -217,6 +219,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-template="screen.template"
     :data-variant="layout.id"
     :data-level="screen.alert.level"
+    :data-level-scale="levelScaleAttr(levelScale)"
     :data-dropped="dropped.map((d) => `${d.id}:${d.reason}`).join(',')"
     :data-missing-required="missing.join(',') || undefined"
     :data-overflow="overflow || undefined"
@@ -237,7 +240,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     >
       <ScreenCell
         :cell="cell"
-        :level-label="levelLabelFor(screen.template, screen.alert.level)"
+        :level-scale="levelScale"
         :stacked-headline="stackedHeadline"
         :headline-scale="headlineScale"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
