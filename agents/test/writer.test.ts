@@ -21,3 +21,17 @@ test("system prompt carries every guideline rule", () => {
   const sys = writerSystem();
   for (const r of EASY_JA_RULES) assert.ok(sys.includes(r.rule_ja), r.id);
 });
+
+test("placeholder text fits the strictest character budget of every shape", async () => {
+  const { PLACEHOLDER_ACTION } = await import("../src/writer/placeholder.js");
+  const { strictestBudgets } = await import("../src/composer/budgets.js");
+  const budgets = strictestBudgets(["16x9", "9x16", "32x9", "1x1"]);
+  for (const [key, text] of Object.entries(PLACEHOLDER_ACTION)) {
+    for (const role of ["action", "languages"]) {
+      for (const [lang, max] of Object.entries(budgets.find((b) => b.role === role)!.max_chars)) {
+        const t = text[lang as keyof typeof text];
+        assert.ok([...t].length <= max!, `${key} ${role}.${lang} "${t}" > ${max}`);
+      }
+    }
+  }
+});

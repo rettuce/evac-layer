@@ -13,7 +13,28 @@ export interface Site {
   municipality_id: string;
   lat: number;
   lng: number;
-  direction: { text_ja: string; rotation: number };
+  direction?: { text_ja: string; rotation: number };
+  facing_deg?: number;
+  note?: string;
+}
+
+const COMPASS_JA = ["北", "北東", "東", "南東", "南", "南西", "西", "北西"];
+
+function bearingDeg(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const y = Math.sin(rad(b.lng - a.lng)) * Math.cos(rad(b.lat));
+  const x = Math.cos(rad(a.lat)) * Math.sin(rad(b.lat)) - Math.sin(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.cos(rad(b.lng - a.lng));
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+}
+
+// Screen rotation is clockwise from pointing right; facing_deg is the compass direction the viewer faces while
+// reading the screen, so a target straight ahead points up (270).
+export function directionToward(site: Site, target: { lat: number; lng: number }): { text_ja: string; rotation: number } {
+  if (site.direction) return site.direction;
+  if (site.facing_deg === undefined) stop(`site ${site.id} has neither a direction nor facing_deg`);
+  const bearing = bearingDeg(site, target);
+  const rotation = Math.round(((bearing - site.facing_deg! + 270) % 360) / 45) * 45 % 360;
+  return { text_ja: `${COMPASS_JA[Math.round(bearing / 45) % 8]}へ`, rotation };
 }
 
 interface Shelter { name: string; kind: string; lat: number; lng: number; hazards_ok: string[]; source: { file: string; id: string } }
@@ -71,6 +92,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
   if (site.municipality_id !== m.id) stop(`site ${site.id} belongs to ${site.municipality_id}, not ${m.id}`);
   const situation = situationFor(alert, m.id);
   const { shelter, distance_m } = pickShelter(m, site, alert.hazard);
+  const way = directionToward(site, shelter);
   const hazardEntry = m.hazards.find((h) => h.type === alert.hazard);
   const pdfTitle = hazardEntry ? m.sources.find((s) => s.file === hazardEntry.source.file)?.title ?? hazardEntry.source.file : null;
   const gsiFile = shelter.source.file;
@@ -97,7 +119,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     const add = (cell: LayoutCell) => { if (slots.has(cell.role)) cells.push(cell); };
     add({ id: "headline", role: "headline", priority: 1, text: text("headline") ?? stop("Writer output has no headline"), pictogram: HAZARD_PICTOGRAM[alert.hazard], motion: "scale-in" });
     add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: ACTION_PICTOGRAM[alert.hazard], motion: "pulse" });
-    add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: site.direction.text_ja }, pictogram: "arrow_forward", rotation: site.direction.rotation, motion: "static" });
+    add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: way.text_ja }, pictogram: "arrow_forward", rotation: way.rotation, motion: "static" });
     add({ id: "shelter", role: "shelter", priority: 2, text: { ja: `${shelter.name}（指定緊急避難場所）` }, pictogram: "emergency_evacuation_site", distance_m, motion: "static" });
     const languages = text("languages");
     if (languages) add({ id: "languages", role: "languages", priority: 3, text: languages, motion: "static" });

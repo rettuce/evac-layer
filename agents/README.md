@@ -32,3 +32,9 @@ Bulletins that concern the demo municipalities (city code in the body, or the mu
 | VPHW50 / VPHW51 | 4 / 4 | 0 / 0 | 0 / 0 |
 
 Highest level for the municipality in the replayable bulletins: 輪島市 level 3 (大雨 2026-10-20 05:00 and 10-21 12:15; 土砂災害 10-21 13:04), 吉田町 level 2 (大雨 10-20 09:55), 横浜市 none (土砂災害 bulletins list the city with no warning in force). Nationally the recording also holds level 4 landslide warnings (18 VPWW56) and level 5 flood special warnings (3 VXKO55), none for these three municipalities.
+
+### What the real data caught
+
+- The 2026-10-21 20:15 and 21:15 Level 5 flood special warnings for 子吉川 listed 由利本荘市 under 浸水想定地区（氾濫発生情報）, keyed by the breach point instead of a water-level station, so the parser first derived no level for the city and the Composer would have shown nothing. The breach area now takes the forecast area's level, and a fixture of the nine real bulletins guards it.
+- Where a bulletin carries a level but none can be derived for the municipality, the Composer now stops with that reason instead of treating the city as below the evacuation threshold: disaster information never degrades silently.
+- The recorded feed also held status words absent from the official samples (警報から注意報, 危険警報から注意報); the parser stopped on them, and only the two words that actually occur were added.
