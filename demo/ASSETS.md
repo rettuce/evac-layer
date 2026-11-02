@@ -9,6 +9,7 @@
 | `assets/textures/granite_tile/`（2k の diffuse・rough・nor_gl） | Poly Haven「granite_tile」 https://polyhaven.com/a/granite_tile | Charlotte Baglioni | CC0 1.0 |
 | `assets/textures/long_white_tiles/`（2k の diffuse・rough・nor_gl） | Poly Haven「long_white_tiles」 https://polyhaven.com/a/long_white_tiles | Jenelle van Heerden, Sergej Majboroda | CC0 1.0 |
 | `assets/textures/marble_01/`（2k の diffuse・rough・nor_gl） | Poly Haven「marble_01」 https://polyhaven.com/a/marble_01 | Rob Tuytel | CC0 1.0 |
+| `compose/fonts/NotoSansJP-Bold.otf`（テロップ） | Noto CJK https://github.com/notofonts/noto-cjk （`compose.py` が初回に取得・LICENSE 同梱・gitignore） | Adobe / Google | SIL OFL 1.1 |
 | `screens/*.png`（プレースホルダ） | `build_scene.py` が ffmpeg で自動生成（形状名の文字のみ） | 自作 | — （リポには入れない） |
 | ジオメトリ（床・天井・壁・柱・案内柱・ベゼル） | `build_scene.py` が bpy のプリミティブから生成 | 自作 | — |
 
