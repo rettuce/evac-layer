@@ -65,7 +65,8 @@ def segment_filters(segment, work, width, height):
         filters.append(drawtext(write_text(work, f"cap_{segment['cut']}", segment["caption"]), size, f"h-text_h-{size * 2}"))
     if segment.get("title"):
         size = round(height * TITLE_SIZE_RATIO)
-        filters.append(drawtext(write_text(work, f"title_{segment['cut']}", segment["title"]), size, "(h-text_h)/2-th", box=False))
+        y = "(h-text_h)/2-th" if segment.get("subtitle") else "(h-text_h)/2"
+        filters.append(drawtext(write_text(work, f"title_{segment['cut']}", segment["title"]), size, y, box=False))
     if segment.get("subtitle"):
         size = round(height * CAPTION_SIZE_RATIO)
         filters.append(drawtext(write_text(work, f"sub_{segment['cut']}", segment["subtitle"]), size, f"h/2+{size * 3}", box=False))

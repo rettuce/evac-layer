@@ -47,6 +47,12 @@
       "slate": "消えたままの駅のサイネージ（4 画面とも黒）。ゆっくり寄る"
     },
     {
+      "cut": "1b",
+      "kind": "title",
+      "seconds": 4,
+      "title": "スクリーンはもうある。\nThe screens are already there."
+    },
+    {
       "cut": "2",
       "kind": "3d",
       "seconds": 10,
@@ -110,7 +116,7 @@
       "cut": "9",
       "kind": "title",
       "seconds": 10,
-      "title": "街にすでにある画面を、\n誰にでも読める案内に",
+      "title": "スクリーンはもうある。\nThe screens are already there.",
       "subtitle": "github.com/rettuce/evac-layer"
     }
   ]
