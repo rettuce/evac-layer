@@ -1,0 +1,143 @@
+{
+  "municipality": "05210",
+  "name": "由利本荘市",
+  "site": "05210-demo-honjo-station",
+  "writer_note": "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名をそのまま使い、それ以外は【仮】/[draft] のプレースホルダ。 自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。",
+  "entries": [
+    {
+      "issued_at": "2026-10-21T11:45:00+09:00",
+      "bulletin_id": "VXKOii-202610211145-e9c5d2903007",
+      "wmo_code": "VXKO55",
+      "raw_title": "子吉川レベル２氾濫注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T15:55:00+09:00",
+      "bulletin_id": "VXKOii-202610211555-d5ccc7c6b547",
+      "wmo_code": "VXKO55",
+      "raw_title": "子吉川レベル３氾濫警報",
+      "municipality_level": 3,
+      "screen": true,
+      "template": "evac-prepare",
+      "display_level": 3,
+      "outcome": "pass",
+      "layouts": [
+        "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/16x9.json",
+        "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/9x16.json",
+        "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/32x9.json",
+        "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/1x1.json"
+      ],
+      "report": "data/reports/05210-VXKOii-202610211555-d5ccc7c6b547/report.json"
+    },
+    {
+      "issued_at": "2026-10-21T18:15:00+09:00",
+      "bulletin_id": "VXKOii-202610211815-e713da0e3c05",
+      "wmo_code": "VXKO55",
+      "raw_title": "子吉川レベル４氾濫危険警報",
+      "municipality_level": 4,
+      "screen": true,
+      "template": "evac-now",
+      "display_level": 4,
+      "outcome": "pass",
+      "layouts": [
+        "data/layouts/05210/VXKOii-202610211815-e713da0e3c05/16x9.json",
+        "data/layouts/05210/VXKOii-202610211815-e713da0e3c05/9x16.json",
+        "data/layouts/05210/VXKOii-202610211815-e713da0e3c05/32x9.json",
+        "data/layouts/05210/VXKOii-202610211815-e713da0e3c05/1x1.json"
+      ],
+      "report": "data/reports/05210-VXKOii-202610211815-e713da0e3c05/report.json"
+    },
+    {
+      "issued_at": "2026-10-21T19:45:00+09:00",
+      "bulletin_id": "VXKOii-202610211945-a25f8f3aba7d",
+      "wmo_code": "VXKO55",
+      "raw_title": "子吉川レベル５氾濫特別警報",
+      "municipality_level": 5,
+      "screen": true,
+      "template": "evac-now",
+      "display_level": 5,
+      "outcome": "pass",
+      "layouts": [
+        "data/layouts/05210/VXKOii-202610211945-a25f8f3aba7d/16x9.json",
+        "data/layouts/05210/VXKOii-202610211945-a25f8f3aba7d/9x16.json",
+        "data/layouts/05210/VXKOii-202610211945-a25f8f3aba7d/32x9.json",
+        "data/layouts/05210/VXKOii-202610211945-a25f8f3aba7d/1x1.json"
+      ],
+      "report": "data/reports/05210-VXKOii-202610211945-a25f8f3aba7d/report.json"
+    },
+    {
+      "issued_at": "2026-10-21T20:15:00+09:00",
+      "bulletin_id": "VXKOii-202610212015-979f11623ff9",
+      "wmo_code": "VXKO55",
+      "raw_title": "子吉川レベル５氾濫特別警報",
+      "municipality_level": 5,
+      "screen": true,
+      "template": "evac-now",
+      "display_level": 5,
+      "outcome": "pass",
+      "layouts": [
+        "data/layouts/05210/VXKOii-202610212015-979f11623ff9/16x9.json",
+        "data/layouts/05210/VXKOii-202610212015-979f11623ff9/9x16.json",
+        "data/layouts/05210/VXKOii-202610212015-979f11623ff9/32x9.json",
+        "data/layouts/05210/VXKOii-202610212015-979f11623ff9/1x1.json"
+      ],
+      "report": "data/reports/05210-VXKOii-202610212015-979f11623ff9/report.json"
+    },
+    {
+      "issued_at": "2026-10-21T21:15:00+09:00",
+      "bulletin_id": "VXKOii-202610212115-34469436adbc",
+      "wmo_code": "VXKO55",
+      "raw_title": "子吉川レベル５氾濫特別警報",
+      "municipality_level": 5,
+      "screen": true,
+      "template": "evac-now",
+      "display_level": 5,
+      "outcome": "pass",
+      "layouts": [
+        "data/layouts/05210/VXKOii-202610212115-34469436adbc/16x9.json",
+        "data/layouts/05210/VXKOii-202610212115-34469436adbc/9x16.json",
+        "data/layouts/05210/VXKOii-202610212115-34469436adbc/32x9.json",
+        "data/layouts/05210/VXKOii-202610212115-34469436adbc/1x1.json"
+      ],
+      "report": "data/reports/05210-VXKOii-202610212115-34469436adbc/report.json"
+    },
+    {
+      "issued_at": "2026-10-22T02:20:00+09:00",
+      "bulletin_id": "VXKOii-202610220220-daa0761e7dd8",
+      "wmo_code": "VXKO55",
+      "raw_title": "子吉川レベル２氾濫注意報（警報解除）",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T04:45:00+09:00",
+      "bulletin_id": "VXKOii-202610220445-0c4640595a97",
+      "wmo_code": "VXKO55",
+      "raw_title": "子吉川レベル２氾濫注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T06:20:00+09:00",
+      "bulletin_id": "VXKOii-202610220620-74a7831c8a40",
+      "wmo_code": "VXKO55",
+      "raw_title": "子吉川レベル２氾濫注意報解除",
+      "municipality_level": null,
+      "screen": true,
+      "template": "all-clear",
+      "display_level": 1,
+      "outcome": "pass",
+      "layouts": [
+        "data/layouts/05210/VXKOii-202610220620-74a7831c8a40/16x9.json",
+        "data/layouts/05210/VXKOii-202610220620-74a7831c8a40/9x16.json",
+        "data/layouts/05210/VXKOii-202610220620-74a7831c8a40/32x9.json",
+        "data/layouts/05210/VXKOii-202610220620-74a7831c8a40/1x1.json"
+      ],
+      "report": "data/reports/05210-VXKOii-202610220620-74a7831c8a40/report.json"
+    }
+  ]
+}

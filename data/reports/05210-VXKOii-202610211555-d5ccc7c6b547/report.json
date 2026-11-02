@@ -1,0 +1,30 @@
+{
+  "kind": "evac-loop-report",
+  "version": "0.1",
+  "municipality": "05210",
+  "bulletin_id": "VXKOii-202610211555-d5ccc7c6b547",
+  "verifier": "static",
+  "reviser": "writer-api",
+  "writer_note": "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名をそのまま使い、それ以外は【仮】/[draft] のプレースホルダ。 自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。",
+  "max_attempts": 3,
+  "outcome": "pass",
+  "attempts": [
+    {
+      "n": 1,
+      "writer_source": "placeholder",
+      "findings": [],
+      "screens_ok": {
+        "16x9": true,
+        "9x16": true,
+        "32x9": true,
+        "1x1": true
+      }
+    }
+  ],
+  "layouts": [
+    "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/16x9.json",
+    "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/9x16.json",
+    "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/32x9.json",
+    "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/1x1.json"
+  ]
+}
