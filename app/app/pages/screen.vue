@@ -103,6 +103,7 @@ if (scenario.value) start()
     :site-name="typeof route.query.site_name === 'string' ? route.query.site_name : undefined"
     :reset="route.query.reset !== undefined"
     :scene="sceneQuery"
+    :stale-after-ms="route.query.stale_after === undefined ? undefined : numberQuery(route.query.stale_after, 0)"
     :reduced-motion="reducedMotion"
     :data-clock="clockMode"
   />

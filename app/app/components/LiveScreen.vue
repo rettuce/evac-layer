@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { formatClockJst } from '~~/layout/ambient'
 import { liveFrame, replayClockEpochMs, type ReplayStatus } from '~~/layout/replay'
 import type { EvacScreen, Shape } from '~~/layout/types'
 
@@ -14,9 +15,12 @@ const props = defineProps<{
   reset?: boolean
   reducedMotion?: boolean
   scene?: string
+  staleAfterMs?: number
 }>()
 
 const POLL_MS = 1000
+const FETCH_TIMEOUT_MS = 5000
+const STALE_AFTER_MS = 60_000
 const APPROVAL_RECHECK_POLLS = 5
 
 const status = shallowRef<ReplayStatus>()
@@ -25,6 +29,11 @@ const missing = ref<string[]>([])
 const unapproved = ref<string[]>([])
 let pollCount = 0
 const loadError = ref<string>()
+const syncError = ref<string>()
+const lastSyncAt = ref<number>()
+const wallNow = ref(Date.now())
+let mountedAt = Date.now()
+let syncing = false
 const layoutsLoaded = ref(false)
 const readyBulletins = ref(new Set<string>())
 const realElapsed = ref(0)
@@ -49,7 +58,10 @@ const unapprovedCurrent = computed(() =>
 const ready = computed(
   () => layoutsLoaded.value && Object.keys(layouts.value).every((id) => readyBulletins.value.has(id)),
 )
-const clockEpochMs = computed(() => replayClockEpochMs(rows.value, elapsed.value, props.speed))
+const clockEpochMs = computed(() =>
+  rows.value.length || isVirtual.value ? replayClockEpochMs(rows.value, elapsed.value, props.speed) : wallNow.value,
+)
+const stale = computed(() => wallNow.value - (lastSyncAt.value ?? mountedAt) > (props.staleAfterMs ?? STALE_AFTER_MS))
 
 function replayUrl(extra: Record<string, string>) {
   const params = new URLSearchParams({ municipality: props.municipality, speed: String(props.speed), ...extra })
@@ -58,9 +70,17 @@ function replayUrl(extra: Record<string, string>) {
   return `/api/replay?${params}`
 }
 
+function isReplayStatus(value: unknown): value is ReplayStatus {
+  const candidate = value as Partial<ReplayStatus> | null
+  return typeof candidate === 'object' && candidate !== null && Array.isArray(candidate.rows) && Number.isFinite(candidate.elapsedMs)
+}
+
 async function poll(extra: Record<string, string> = {}) {
-  const next = await $fetch<ReplayStatus>(replayUrl(extra))
+  const next = await $fetch<unknown>(replayUrl(extra), { timeout: FETCH_TIMEOUT_MS, retry: 0 })
+  if (!isReplayStatus(next)) throw new Error('replay status is not in the expected shape')
   status.value = next
+  lastSyncAt.value = Date.now()
+  syncError.value = undefined
   syncedElapsed = next.elapsedMs
   syncedAt = performance.now()
   realElapsed.value = syncedElapsed
@@ -80,7 +100,7 @@ async function loadLayouts() {
       const params = new URLSearchParams({ municipality: props.municipality, bulletin: row.bulletin_id, shape: props.shape })
       if (props.site) params.set('site', props.site)
       try {
-        return [row.bulletin_id, await $fetch<EvacScreen>(`/api/live-layout?${params}`)]
+        return [row.bulletin_id, await $fetch<EvacScreen>(`/api/live-layout?${params}`, { timeout: FETCH_TIMEOUT_MS, retry: 0 })]
       } catch (error) {
         if ((error as { statusCode?: number }).statusCode === 403) gated.push(row.bulletin_id)
         else absent.push(row.bulletin_id)
@@ -109,18 +129,44 @@ function markReady(bulletinId: string) {
   readyBulletins.value = new Set(readyBulletins.value).add(bulletinId)
 }
 
-onMounted(async () => {
+// A signage player must never go dark because the server is unreachable: every failure keeps the
+// last known state on screen and the next poll tries again.
+async function sync(first = false) {
+  if (syncing) return
+  syncing = true
   try {
-    await poll(isVirtual.value ? { t: '0' } : props.reset ? { reset: '1' } : {})
-    await loadLayouts()
-    layoutsLoaded.value = true
+    if (!layoutsLoaded.value) {
+      await poll(first && props.reset ? { reset: '1' } : {})
+      await loadLayouts()
+      layoutsLoaded.value = true
+    } else {
+      await pollAndRecheck()
+    }
   } catch (error) {
-    loadError.value = (error as Error).message
+    syncError.value = (error as Error).message
+  } finally {
+    syncing = false
+  }
+}
+
+onMounted(async () => {
+  mountedAt = Date.now()
+  if (isVirtual.value) {
+    try {
+      await poll({ t: '0' })
+      await loadLayouts()
+      layoutsLoaded.value = true
+    } catch (error) {
+      loadError.value = (error as Error).message
+    }
     return
   }
-  if (isVirtual.value) return
+  await sync(true)
   frameHandle = requestAnimationFrame(tick)
-  pollTimer = setInterval(() => pollAndRecheck().catch(() => undefined), POLL_MS)
+  pollTimer = setInterval(() => {
+    wallNow.value = Date.now()
+    void sync()
+  }, POLL_MS)
 })
 
 onBeforeUnmount(() => {
@@ -143,6 +189,9 @@ onBeforeUnmount(() => {
     :data-unapproved="unapprovedCurrent"
     :data-unapproved-count="unapproved.length"
     :data-missing-layouts="missing.join(',') || undefined"
+    :data-stale="!isVirtual && stale ? '1' : undefined"
+    :data-last-sync="lastSyncAt ? new Date(lastSyncAt).toISOString() : undefined"
+    :data-sync-error="syncError"
   >
     <AmbientLayer
       v-show="frame.ambientVisible"
@@ -168,6 +217,9 @@ onBeforeUnmount(() => {
       />
     </div>
     <div v-if="frame.black" class="black" data-layer="black" />
+    <p v-if="!isVirtual" class="sync-stamp" :class="{ 'is-stale': stale }" data-layer="sync">
+      更新 {{ lastSyncAt ? formatClockJst(lastSyncAt) : '--:--' }}<span v-if="stale" class="stale-mark" aria-label="同期が途絶えています"> ○</span>
+    </p>
   </div>
 </template>
 
@@ -183,5 +235,18 @@ onBeforeUnmount(() => {
 }
 .black {
   background: #000;
+}
+.sync-stamp {
+  position: fixed;
+  right: calc(min(100vw, 100vh) / 1080 * 48);
+  bottom: calc(min(100vw, 100vh) / 1080 * 8);
+  margin: 0;
+  font-family: 'Noto Sans', 'Noto Sans JP', sans-serif;
+  font-size: calc(min(100vw, 100vh) / 1080 * 20);
+  font-variant-numeric: tabular-nums;
+  color: rgb(128 128 128);
+}
+.sync-stamp.is-stale {
+  opacity: 0.6;
 }
 </style>

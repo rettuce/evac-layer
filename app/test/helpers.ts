@@ -17,8 +17,8 @@ export async function freePort(): Promise<number> {
   })
 }
 
-export async function startServer(env: Record<string, string>): Promise<{ base: string; child: ChildProcess }> {
-  const port = await freePort()
+export async function startServer(env: Record<string, string>, fixedPort?: number): Promise<{ base: string; child: ChildProcess }> {
+  const port = fixedPort ?? (await freePort())
   const child = spawn(process.execPath, [SERVER_ENTRY], { env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), ...env }, stdio: 'ignore' })
   const base = `http://127.0.0.1:${port}`
   const deadline = Date.now() + READY_TIMEOUT_MS
