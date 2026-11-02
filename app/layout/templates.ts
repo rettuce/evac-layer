@@ -6,6 +6,7 @@ import { SHELTER_PICTOGRAM_PX } from './typography'
 const M = 48
 const G = 24
 const BAND = 176
+export const BAND_PX = BAND
 export const STACKED_BAND_MIN_PX = 200
 
 const LANDSCAPE: ShapeLayout = {

@@ -20,9 +20,10 @@ const showEnglish = computed(() => props.languageIndex % 2 === 1)
       :key="step.label"
       class="rung"
       :class="{ 'is-current': i + 1 === scale.current }"
-      :style="{ '--step': step.color, '--step-ink': step.ink }"
+      :style="{ '--step': step.color, '--step-ink': step.ink, '--tint': step.tint }"
     >
       <span class="num">{{ step.label }}</span>
+      <span v-if="step.name" class="name">{{ step.name }}</span>
       <span v-if="caption && i + 1 === scale.current" class="caption">
         <span :class="{ 'is-shown': !showEnglish }" lang="ja">{{ scale.title.ja }}</span>
         <span :class="{ 'is-shown': showEnglish }" lang="en">{{ scale.title.en }}</span>
@@ -34,11 +35,11 @@ const showEnglish = computed(() => props.languageIndex % 2 === 1)
 <style scoped>
 .ladder {
   display: flex;
-  gap: calc(4 * var(--px));
+  gap: calc(8 * var(--px));
   background: rgb(255 255 255);
 }
 .mode-h {
-  align-items: flex-end;
+  align-items: flex-start;
   height: 100%;
 }
 .mode-v {
@@ -55,7 +56,7 @@ const showEnglish = computed(() => props.languageIndex % 2 === 1)
   gap: calc(16 * var(--px));
   flex: 1 1 0;
   box-sizing: border-box;
-  background: color-mix(in srgb, var(--step) 35%, rgb(255 255 255));
+  background: var(--tint);
   box-shadow: inset 0 0 0 calc(2 * var(--px)) rgb(0 0 0 / 0.1);
   color: rgb(0 0 0 / 0.6);
   font-weight: 400;
@@ -81,11 +82,18 @@ const showEnglish = computed(() => props.languageIndex % 2 === 1)
 }
 .mode-h .rung.is-current {
   height: calc(100% * var(--growth));
+  border-top: none;
+  border-bottom: calc(8 * var(--px)) solid var(--step-ink);
 }
 .mode-v .rung.is-current {
   width: calc(100% * var(--growth));
   border-top: none;
   border-right: calc(8 * var(--px)) solid var(--step-ink);
+}
+.name {
+  font-size: calc(var(--fs-fine) * 0.8 * var(--px));
+  font-weight: 700;
+  white-space: nowrap;
 }
 .rung.is-current .num {
   font-size: calc(var(--ladder) * 0.7 * var(--px));

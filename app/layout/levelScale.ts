@@ -3,8 +3,10 @@ import type { AlertLevel, TemplateId } from './types'
 
 export interface ScaleStep {
   label: string
+  name?: string
   color: string
   ink: string
+  tint: string
 }
 
 export interface LevelScale {
@@ -16,6 +18,9 @@ export interface LevelScale {
 }
 
 const ALERT_LEVELS: AlertLevel[] = [1, 2, 3, 4, 5]
+const TINT_STRENGTH = 0.5
+// Level 1 is white; at any tint it would read as an empty cell, so it gets a light grey instead.
+const LEVEL_1_TINT = 'rgb(236 236 236)'
 
 // Tsunami bulletins are outside the Cabinet Office five levels; the Composer maps them onto
 // level colours (advisory → 2, warning → 3, major warning → 4), so the scale has three steps.
@@ -25,9 +30,15 @@ const TSUNAMI_STEPS: { level: AlertLevel; short: string; ja: string; en: string 
   { level: 4, short: '大津波警報', ja: '大津波警報', en: 'Major Tsunami Warning' },
 ]
 
-function step(label: string, level: AlertLevel): ScaleStep {
+function tintOf(level: AlertLevel): string {
+  if (level === 1) return LEVEL_1_TINT
+  const [r, g, b] = CABINET_OFFICE_5[level].map((c) => Math.round(255 - (255 - c) * TINT_STRENGTH))
+  return `rgb(${r} ${g} ${b})`
+}
+
+function step(label: string, level: AlertLevel, name?: string): ScaleStep {
   const color = CABINET_OFFICE_5[level]
-  return { label, color: rgbCss(color), ink: rgbCss(inkOn(color)) }
+  return { label, ...(name ? { name } : {}), color: rgbCss(color), ink: rgbCss(inkOn(color)), tint: tintOf(level) }
 }
 
 export function levelScaleFor(template: TemplateId, hazard: string, level: AlertLevel): LevelScale | undefined {
@@ -38,7 +49,7 @@ export function levelScaleFor(template: TemplateId, hazard: string, level: Alert
     return {
       kind: 'tsunami',
       title: { ja: '津波', en: 'Tsunami' },
-      steps: TSUNAMI_STEPS.map((s) => step(s.short, s.level)),
+      steps: TSUNAMI_STEPS.map((s, i) => step(String(i + 1), s.level, s.short)),
       current,
       currentName: named ? { ja: named.ja, en: named.en } : { ja: '', en: '' },
     }
@@ -54,4 +65,22 @@ export function levelScaleFor(template: TemplateId, hazard: string, level: Alert
 
 export function levelScaleAttr(scale: LevelScale | undefined): string | undefined {
   return scale ? `${scale.steps.length}:${scale.current}` : undefined
+}
+
+export interface LevelBadge {
+  value: string
+  color: string
+  ink: string
+}
+
+// On the level-5 black band a black disc would vanish, so the badge turns white with a black numeral.
+export function levelBadgeFor(scale: LevelScale | undefined): LevelBadge | undefined {
+  const current = scale?.steps[scale.current - 1]
+  if (!scale || !current) return undefined
+  const inverted = scale.kind === 'alert' && scale.current === 5
+  return {
+    value: current.label,
+    color: inverted ? 'rgb(255 255 255)' : current.color,
+    ink: inverted ? 'rgb(0 0 0)' : current.ink,
+  }
 }

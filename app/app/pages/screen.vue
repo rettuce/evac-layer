@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { DEFAULT_REPLAY_SPEED, isMunicipalityId } from '~~/layout/replay'
 import { DEFAULT_SWITCH_AT_MS, scenarioFrame, type ScenarioName } from '~~/layout/scenario'
-import { isLadderMode } from '~~/layout/ladder'
 import { isShape, shapeForViewport } from '~~/layout/shapes'
 import { isTrustedLayoutSrc } from '~~/layout/trust'
 import type { EvacScreen } from '~~/layout/types'
@@ -53,7 +52,6 @@ watch(
 
 const screen = computed(() => (src.value ? remote.value : fixtureByName(layoutName.value)))
 const variant = computed(() => numberQuery(route.query.variant, 0))
-const ladder = computed(() => (isLadderMode(route.query.ladder) ? route.query.ladder : undefined))
 const shape = computed(() => {
   const requested = route.query.shape
   return isShape(requested) ? requested : shapeForViewport(window.innerWidth, window.innerHeight)
@@ -118,7 +116,6 @@ if (scenario.value) start()
     :screen="screen"
     :shape="shape"
     :variant="variant"
-    :ladder="ladder"
     :elapsed-ms="elapsed"
     :reduced-motion="reducedMotion"
     :data-clock="clockMode"
@@ -144,7 +141,6 @@ if (scenario.value) start()
         :screen="screen"
         :shape="shape"
         :variant="variant"
-    :ladder="ladder"
         :elapsed-ms="frame.alertElapsedMs"
         :reduced-motion="reducedMotion"
       />
