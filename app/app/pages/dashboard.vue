@@ -15,7 +15,7 @@ interface DashboardRow {
 interface Dashboard {
   totals: Record<'municipalities' | 'bulletins' | 'screens' | 'layouts' | 'languageVariants' | 'ngFound' | 'ngFixed' | 'sources', number>
   rows: DashboardRow[]
-  findings: { found: number; fixed: number; byRun: { run: number; found: number }[]; files: string[] }
+  findings: { found: number; fixed: number; byRun: { run: number; found: number; screens?: number; pass?: number }[]; files: string[] }
 }
 
 const COUNT_UP_MS = 2400
@@ -91,8 +91,8 @@ onMounted(async () => {
       </tbody>
     </table>
     <p v-if="data?.findings.files.length" class="provenance" data-provenance="findings">
-      Verifier の指摘（Vision 検査）: {{ data.findings.byRun.map((r) => `run ${r.run} ${r.found} 件`).join(' → ') }}・集計元
-      {{ data.findings.files.join(', ') }}
+      Verifier の指摘（Vision 検査）: {{ data.findings.byRun.map((r) => `run ${r.run} ${r.found} 件${r.screens ? `（${r.pass}/${r.screens} 画面 pass）` : ''}`).join(' → ') }}・集計元
+      data/verifier-findings/{{ data.findings.files.map((f) => f.split('/').pop()).join(', ') }}
     </p>
   </div>
 </template>

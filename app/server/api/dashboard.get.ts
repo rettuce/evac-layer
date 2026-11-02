@@ -16,12 +16,13 @@ interface VerifierFinding {
 interface VerifierFindingsFile {
   run: string
   findings: VerifierFinding[]
+  stats?: { screens?: number; pass?: number }
 }
 
 export interface FindingsSummary {
   found: number
   fixed: number
-  byRun: { run: number; found: number }[]
+  byRun: { run: number; found: number; screens?: number; pass?: number }[]
   files: string[]
 }
 
@@ -39,16 +40,28 @@ interface MunicipalityStats {
 
 const FINDINGS_DIR = 'verifier-findings'
 
-function runOf(finding: VerifierFinding, file: VerifierFindingsFile): number {
-  return finding.run ?? Number(/\d+/.exec(file.run)?.[0] ?? 0)
+function fileRunNo(file: VerifierFindingsFile): number {
+  return Number(/\d+/.exec(file.run)?.[0] ?? 0)
 }
 
-async function readFindings(root: string): Promise<{ file: string; findings: (VerifierFinding & { runNo: number })[] }[]> {
+function runOf(finding: VerifierFinding, file: VerifierFindingsFile): number {
+  return finding.run ?? fileRunNo(file)
+}
+
+interface FindingsFileView {
+  file: string
+  runNo: number
+  stats?: VerifierFindingsFile['stats']
+  findings: (VerifierFinding & { runNo: number })[]
+}
+
+async function readFindings(root: string): Promise<FindingsFileView[]> {
   const names = (await listDir(join(root, FINDINGS_DIR))).filter((f) => f.endsWith('.json'))
   const files = await Promise.all(
     names.map(async (name) => {
       const file = await readJsonIfExists<VerifierFindingsFile>(join(root, FINDINGS_DIR, name))
-      return { file: name, findings: (file?.findings ?? []).map((f) => ({ ...f, runNo: runOf(f, file!) })) }
+      if (!file) return { file: name, runNo: 0, findings: [] }
+      return { file: name, runNo: fileRunNo(file), stats: file.stats, findings: file.findings.map((f) => ({ ...f, runNo: runOf(f, file) })) }
     }),
   )
   return files
@@ -99,11 +112,17 @@ export default defineEventHandler(async () => {
     })
   }
 
-  const runs = [...new Set(findings.map((f) => f.runNo))].sort((x, y) => x - y)
+  const runs = [...new Set([...findingFiles.map((f) => f.runNo), ...findings.map((f) => f.runNo)])].sort((x, y) => x - y)
+  const statsByRun = new Map(findingFiles.filter((f) => f.stats).map((f) => [f.runNo, f.stats!]))
   const summary: FindingsSummary = {
     found: findings.length,
     fixed: findings.filter(isFixed).length,
-    byRun: runs.map((run) => ({ run, found: findings.filter((f) => f.runNo === run).length })),
+    byRun: runs.map((run) => ({
+      run,
+      found: findings.filter((f) => f.runNo === run).length,
+      screens: statsByRun.get(run)?.screens,
+      pass: statsByRun.get(run)?.pass,
+    })),
     files: findingFiles.map((f) => `data/${FINDINGS_DIR}/${f.file}`),
   }
 
