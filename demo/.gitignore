@@ -1,3 +1,5 @@
 screens/*.mp4
 screens/*.png
 !screens/.gitkeep
+assets/textures/
+blender/__pycache__/

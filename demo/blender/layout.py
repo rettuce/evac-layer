@@ -1,0 +1,26 @@
+from mathutils import Vector
+
+CEILING_Z = 5.2
+BACK_WALL_Y = 9.0
+LEFT_WALL_X = -10.0
+RIGHT_WALL_X = 12.0
+FRONT_Y = -9.0
+EYE_Z = 1.6
+
+COLUMN_SIZE = 0.9
+COLUMNS = [(-4.5, 1.5), (4.5, 1.5), (-4.5, 6.5), (4.5, 6.5)]
+
+PILLAR_CENTER = Vector((4.0, -1.0, 1.15))
+PILLAR_SIZE = (1.1, 0.45, 2.3)
+PILLAR_YAW = -0.3
+
+LIGHT_XS = [-6.0, 0.0, 6.0]
+LIGHT_YS = [-4.0, 1.0, 6.0]
+
+
+def room_center():
+    return Vector(((LEFT_WALL_X + RIGHT_WALL_X) / 2, (FRONT_Y + BACK_WALL_Y) / 2, 0.0))
+
+
+def room_size():
+    return RIGHT_WALL_X - LEFT_WALL_X, BACK_WALL_Y - FRONT_Y
