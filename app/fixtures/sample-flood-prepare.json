@@ -10,7 +10,7 @@
     { "id": "action", "role": "action", "priority": 1, "text": { "ja": "にげる準備を", "ja_easy": "にげる じゅんびを して ください", "en": "Get ready to evacuate" }, "pictogram": "directions_run", "motion": "pulse" },
     { "id": "shelter", "role": "shelter", "priority": 2, "text": { "ja": "[避難場所名]（指定緊急避難場所）" }, "pictogram": "evacuation_shelter", "motion": "static" },
     { "id": "direction", "role": "direction", "priority": 3, "text": { "ja": "[方向と距離]" }, "pictogram": "arrow_forward", "rotation": 0, "motion": "static" },
-    { "id": "languages", "role": "languages", "priority": 4, "text": { "ja": "にげる準備を", "ja_easy": "にげる じゅんびを して ください", "en": "Get ready to evacuate", "zh_hans": "请做好避难准备", "ko": "대피할 준비를 하세요" }, "motion": "scale-in" },
+    { "id": "languages", "role": "languages", "priority": 3, "text": { "ja": "にげる準備を", "ja_easy": "にげる じゅんびを して ください", "en": "Get ready to evacuate", "zh_hans": "请做好避难准备", "ko": "대피할 준비를 하세요" }, "motion": "scale-in" },
     { "id": "source", "role": "source", "priority": 9, "text": { "ja": "出典: [自治体ハザードマップ p.N] / 気象庁 [hh:mm] 発表" }, "motion": "static" }
   ],
   "palette": "cabinet-office-5",
