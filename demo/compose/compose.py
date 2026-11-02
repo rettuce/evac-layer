@@ -73,7 +73,7 @@ def segment_filters(segment, work, width, height):
     return filters
 
 
-KIND_LABELS = {"3d": "3D（Blender）", "capture": "画面収録", "title": "タイトル"}
+KIND_LABELS = {"3d": "3D（Blender）", "capture": "画面収録", "title": "タイトル", "composite": "素材＋テロップ"}
 
 
 def slate_text(segment, edl):
