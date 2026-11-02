@@ -5,9 +5,9 @@ import { MUNICIPALITIES_DIR, RAW_DIR } from "../paths.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { readGsiCsv } from "./gsi.js";
 
-const MUNICIPALITIES: Record<string, string> = { "17204": "輪島市", "22424": "吉田町", "14100": "横浜市", "05210": "由利本荘市" };
+const MUNICIPALITIES: Record<string, string> = { "17204": "輪島市", "22424": "吉田町", "14100": "横浜市", "05210": "由利本荘市", "15205": "柏崎市" };
 // Retrieval dates of the CSVs under RAW_DIR/gsi-shelters, as recorded in the raw data manifest.
-const RETRIEVED: Record<string, string> = { "17204": "2026-10-19", "22424": "2026-10-19", "14100": "2026-10-19", "05210": "2026-11-02" };
+const RETRIEVED: Record<string, string> = { "17204": "2026-10-19", "22424": "2026-10-19", "14100": "2026-10-19", "05210": "2026-11-02", "15205": "2026-11-02" };
 const CSV_URL = (file: string) => `https://hinanmap.gsi.go.jp/hinanjocp/defaultFtpData/csv/${file}`;
 const NOTICE_URL = "https://www.gsi.go.jp/bousaichiri/hinanbasho-menseki.html";
 const NOTICE_JA = "最新でない場合や未掲載の場合があるため、最新かつ詳細の状況などは必ず当該市町村にご確認ください。";

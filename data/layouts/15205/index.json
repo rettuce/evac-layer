@@ -1,0 +1,698 @@
+{
+  "municipality": "15205",
+  "name": "柏崎市",
+  "site": "15205-demo",
+  "writer_note": "",
+  "entries": [
+    {
+      "issued_at": "2026-10-14T11:36:00+09:00",
+      "bulletin_id": "VPWW55-202610141136-ccf6ea4e9203",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-14T15:17:00+09:00",
+      "bulletin_id": "VPWW55-202610141517-d22799808868",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T04:03:00+09:00",
+      "bulletin_id": "VPWW55-202610200403-453d93e8cdeb",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T04:03:00+09:00",
+      "bulletin_id": "VPWW56-202610200403-423e47f93225",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T05:58:00+09:00",
+      "bulletin_id": "VPWW55-202610200558-95c1889e5036",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T05:58:00+09:00",
+      "bulletin_id": "VPWW56-202610200558-8f956d8c0475",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T07:25:00+09:00",
+      "bulletin_id": "VPWW55-202610200725-7f761bc76ab7",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T07:25:00+09:00",
+      "bulletin_id": "VPWW56-202610200725-bcf7d996801f",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T07:56:00+09:00",
+      "bulletin_id": "VPWW55-202610200756-920903508044",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T08:21:00+09:00",
+      "bulletin_id": "VPWW55-202610200821-4ad7a0a797fc",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T08:21:00+09:00",
+      "bulletin_id": "VPWW56-202610200821-bb7af6bad802",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T10:15:00+09:00",
+      "bulletin_id": "VPWW55-202610201015-ea3ee77e4fca",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T10:15:00+09:00",
+      "bulletin_id": "VPWW56-202610201015-65483ad8be09",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-20T13:02:00+09:00",
+      "bulletin_id": "VPWW55-202610201302-0c78dd1eb944",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for heavy_rain but no heavy_rain screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-20T13:02:00+09:00",
+      "bulletin_id": "VPWW56-202610201302-e56a0f980726",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for landslide but no landslide screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-20T16:21:00+09:00",
+      "bulletin_id": "VPWW56-202610201621-8ba4f8ae1e2c",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T08:57:00+09:00",
+      "bulletin_id": "VPWW56-202610210857-c24b0c4ff628",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T10:27:00+09:00",
+      "bulletin_id": "VPWW56-202610211027-a27af8289d91",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T11:25:00+09:00",
+      "bulletin_id": "VPWW56-202610211125-2b832fb7b941",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T13:23:00+09:00",
+      "bulletin_id": "VPWW55-202610211323-cda8b30227df",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T13:23:00+09:00",
+      "bulletin_id": "VPWW56-202610211323-3b0f4c873aff",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T14:46:00+09:00",
+      "bulletin_id": "VPWW56-202610211446-37381ff929db",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T16:02:00+09:00",
+      "bulletin_id": "VPWW55-202610211602-3f044ed73a1c",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T16:22:00+09:00",
+      "bulletin_id": "VPWW56-202610211622-9d671076b809",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T17:44:00+09:00",
+      "bulletin_id": "VPWW55-202610211744-2c3a1aaead92",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T20:24:00+09:00",
+      "bulletin_id": "VPWW55-202610212024-858212cf4000",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T20:24:00+09:00",
+      "bulletin_id": "VPWW56-202610212024-aca5f91d500c",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-21T22:03:00+09:00",
+      "bulletin_id": "VPWW55-202610212203-c0b8a62f7647",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T00:01:00+09:00",
+      "bulletin_id": "VPWW55-202610220001-577969f63ff8",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for heavy_rain but no heavy_rain screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-22T00:01:00+09:00",
+      "bulletin_id": "VPWW56-202610220001-d109b1f72c6e",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T04:23:00+09:00",
+      "bulletin_id": "VPWW55-202610220423-44d0a40682b9",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T04:23:00+09:00",
+      "bulletin_id": "VPWW56-202610220423-23480401448c",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T06:45:00+09:00",
+      "bulletin_id": "VPWW56-202610220645-8f12c8afad5f",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T08:17:00+09:00",
+      "bulletin_id": "VPWW56-202610220817-4368c8d39d0e",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T14:39:00+09:00",
+      "bulletin_id": "VPWW56-202610221439-1dc4da16cd91",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-22T20:39:00+09:00",
+      "bulletin_id": "VPWW56-202610222039-08cd34eb5a47",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for landslide but no landslide screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-25T01:34:00+09:00",
+      "bulletin_id": "VPWW56-202610250134-1e66a749e408",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-25T04:43:00+09:00",
+      "bulletin_id": "VPWW56-202610250443-7e901a9d662c",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-25T06:41:00+09:00",
+      "bulletin_id": "VPWW56-202610250641-432b837f39fb",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-25T11:48:00+09:00",
+      "bulletin_id": "VPWW56-202610251148-051b37b92a50",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-25T20:19:00+09:00",
+      "bulletin_id": "VPWW56-202610252019-8557eadb9d28",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-25T23:37:00+09:00",
+      "bulletin_id": "VPWW56-202610252337-81b2f10ffb8b",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for landslide but no landslide screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-26T06:22:00+09:00",
+      "bulletin_id": "VPWW56-202610260622-5012d4daa2e6",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-26T09:42:00+09:00",
+      "bulletin_id": "VPWW56-202610260942-e2816a4cd594",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-26T16:18:00+09:00",
+      "bulletin_id": "VPWW56-202610261618-7d6b26d59dca",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-28T02:00:00+09:00",
+      "bulletin_id": "VPWW56-202610280200-327c5affe1e1",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-28T06:52:00+09:00",
+      "bulletin_id": "VPWW56-202610280652-26822f6d09e3",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-28T16:14:00+09:00",
+      "bulletin_id": "VPWW56-202610281614-f223b9bd67e2",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-28T23:45:00+09:00",
+      "bulletin_id": "VPWW56-202610282345-789654207a14",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T03:58:00+09:00",
+      "bulletin_id": "VPWW55-202610310358-6c6cf6207c7a",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T07:35:00+09:00",
+      "bulletin_id": "VPWW55-202610310735-917293162c39",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for heavy_rain but no heavy_rain screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-31T08:12:00+09:00",
+      "bulletin_id": "VPWW56-202610310812-bc36eccc8ab4",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T08:40:00+09:00",
+      "bulletin_id": "VPWW55-202610310840-51fc87558f70",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T08:40:00+09:00",
+      "bulletin_id": "VPWW56-202610310840-066355eea822",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T08:50:00+09:00",
+      "bulletin_id": "VPWW55-202610310850-fbfa4883e6f6",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T10:10:00+09:00",
+      "bulletin_id": "VPWW56-202610311010-ba64e06f1028",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T11:51:00+09:00",
+      "bulletin_id": "VPWW55-202610311151-d9cb0d712f52",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T13:05:00+09:00",
+      "bulletin_id": "VPWW56-202610311305-8d123b27226e",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T14:54:00+09:00",
+      "bulletin_id": "VPWW55-202610311454-84d481aab40d",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T14:54:00+09:00",
+      "bulletin_id": "VPWW56-202610311454-f6fe8f47c7ce",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T16:53:00+09:00",
+      "bulletin_id": "VPWW55-202610311653-fda4b942c6c8",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T16:53:00+09:00",
+      "bulletin_id": "VPWW56-202610311653-b3fa1b3a2ced",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 4,
+      "screen": true,
+      "template": "evac-now",
+      "display_level": 4,
+      "outcome": "pass",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/15205/VPWW56-202610311653-b3fa1b3a2ced/16x9.json",
+        "data/layouts/15205/VPWW56-202610311653-b3fa1b3a2ced/9x16.json",
+        "data/layouts/15205/VPWW56-202610311653-b3fa1b3a2ced/32x9.json",
+        "data/layouts/15205/VPWW56-202610311653-b3fa1b3a2ced/1x1.json",
+        "data/layouts/15205/VPWW56-202610311653-b3fa1b3a2ced/pillar.json"
+      ],
+      "report": "data/reports/15205-VPWW56-202610311653-b3fa1b3a2ced/report.json"
+    },
+    {
+      "issued_at": "2026-10-31T17:53:00+09:00",
+      "bulletin_id": "VPWW55-202610311753-171cfea18044",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T18:04:00+09:00",
+      "bulletin_id": "VPWW55-202610311804-1c7a6030427d",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T18:39:00+09:00",
+      "bulletin_id": "VPWW55-202610311839-e1f804e86202",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T18:39:00+09:00",
+      "bulletin_id": "VPWW56-202610311839-e6123510be74",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 4,
+      "screen": true,
+      "template": "evac-now",
+      "display_level": 4,
+      "outcome": "pass",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/15205/VPWW56-202610311839-e6123510be74/16x9.json",
+        "data/layouts/15205/VPWW56-202610311839-e6123510be74/9x16.json",
+        "data/layouts/15205/VPWW56-202610311839-e6123510be74/32x9.json",
+        "data/layouts/15205/VPWW56-202610311839-e6123510be74/1x1.json",
+        "data/layouts/15205/VPWW56-202610311839-e6123510be74/pillar.json"
+      ],
+      "report": "data/reports/15205-VPWW56-202610311839-e6123510be74/report.json"
+    },
+    {
+      "issued_at": "2026-10-31T20:31:00+09:00",
+      "bulletin_id": "VPWW55-202610312031-6bb21be52dbc",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "all-clear for heavy_rain but no heavy_rain screen was shown before; nothing to clear"
+    },
+    {
+      "issued_at": "2026-10-31T20:31:00+09:00",
+      "bulletin_id": "VPWW56-202610312031-f303db0c5603",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": 2,
+      "screen": false,
+      "reason": "level 2 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-10-31T21:52:00+09:00",
+      "bulletin_id": "VPWW55-202610312152-27d8442d9f52",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-11-01T04:01:00+09:00",
+      "bulletin_id": "VPWW56-202611010401-fc7d8fb812f9",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": true,
+      "template": "all-clear",
+      "display_level": 1,
+      "outcome": "pass",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/15205/VPWW56-202611010401-fc7d8fb812f9/16x9.json",
+        "data/layouts/15205/VPWW56-202611010401-fc7d8fb812f9/9x16.json",
+        "data/layouts/15205/VPWW56-202611010401-fc7d8fb812f9/32x9.json",
+        "data/layouts/15205/VPWW56-202611010401-fc7d8fb812f9/1x1.json",
+        "data/layouts/15205/VPWW56-202611010401-fc7d8fb812f9/pillar.json"
+      ],
+      "report": "data/reports/15205-VPWW56-202611010401-fc7d8fb812f9/report.json"
+    },
+    {
+      "issued_at": "2026-11-02T18:56:00+09:00",
+      "bulletin_id": "VPWW55-202611021856-7a2ce5539717",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-11-02T20:27:00+09:00",
+      "bulletin_id": "VPWW55-202611022027-f5c0c4206deb",
+      "wmo_code": "VPWW55",
+      "raw_title": "新潟県大雨警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-11-02T21:56:00+09:00",
+      "bulletin_id": "VPWW56-202611022156-6a5496ee6768",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    }
+  ]
+}

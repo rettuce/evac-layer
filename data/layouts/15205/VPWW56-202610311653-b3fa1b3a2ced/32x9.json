@@ -1,0 +1,111 @@
+{
+  "version": "0.1",
+  "kind": "evac-screen",
+  "municipality": {
+    "id": "15205",
+    "name": "柏崎市"
+  },
+  "alert": {
+    "source": "jma",
+    "bulletin_id": "VPWW56-202610311653-b3fa1b3a2ced",
+    "hazard": "landslide",
+    "level": 4,
+    "issued_at": "2026-10-31T16:53:00+09:00"
+  },
+  "shape": "32x9",
+  "template": "evac-now",
+  "cells": [
+    {
+      "id": "headline",
+      "role": "headline",
+      "priority": 1,
+      "text": {
+        "ja": "レベル４土砂災害危険警報",
+        "ja_easy": "レベル４ どしゃ さいがい けいほう",
+        "en": "Lv4 Landslide Warning",
+        "zh_hans": "4级土砂灾害危险警报",
+        "zh_hant": "4級土砂災害危險警報",
+        "ko": "레벨4 토사재해 위험경보"
+      },
+      "pictogram": "landslide",
+      "motion": "scale-in"
+    },
+    {
+      "id": "action",
+      "role": "action",
+      "priority": 1,
+      "text": {
+        "ja": "危険な場所から避難",
+        "ja_easy": "あぶない ところから にげて",
+        "en": "Leave danger zones",
+        "zh_hans": "离开危险地点避难",
+        "zh_hant": "離開危險地點避難",
+        "ko": "위험한 곳에서 대피"
+      },
+      "pictogram": "directions_run",
+      "motion": "pulse"
+    },
+    {
+      "id": "direction",
+      "role": "direction",
+      "priority": 2,
+      "text": {
+        "ja": "北へ"
+      },
+      "pictogram": "arrow_forward",
+      "rotation": 270,
+      "motion": "static"
+    },
+    {
+      "id": "shelter",
+      "role": "shelter",
+      "priority": 2,
+      "text": {
+        "ja": "文化会館アルフォーレ"
+      },
+      "kind": "emergency_evacuation_site",
+      "pictogram": "emergency_evacuation_site",
+      "distance_m": 0,
+      "motion": "static"
+    },
+    {
+      "id": "languages",
+      "role": "languages",
+      "priority": 3,
+      "text": {
+        "ja": "危険な場所から避難",
+        "ja_easy": "あぶない ところから にげて",
+        "en": "Leave danger zones",
+        "zh_hans": "离开危险地点避难",
+        "zh_hant": "離開危險地點避難",
+        "ko": "위험한 곳에서 대피"
+      },
+      "motion": "static"
+    },
+    {
+      "id": "source",
+      "role": "source",
+      "priority": 9,
+      "text": {
+        "ja": "出典: 柏崎市 柏崎市土砂災害ハザードマップ（保存版） p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 16:53"
+      },
+      "motion": "static"
+    }
+  ],
+  "palette": "cabinet-office-5",
+  "sources": [
+    {
+      "type": "pdf",
+      "file": "kashiwazaki/dosha_hm_2022.pdf",
+      "page": 1
+    },
+    {
+      "type": "gsi",
+      "file": "15205_2.csv"
+    },
+    {
+      "type": "jma",
+      "bulletin_id": "VPWW56-202610311653-b3fa1b3a2ced"
+    }
+  ]
+}

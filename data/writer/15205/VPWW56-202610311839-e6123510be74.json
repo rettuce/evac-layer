@@ -1,0 +1,54 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル４土砂災害危険警報",
+          "ja_easy": "レベル４ どしゃ きけん けいほう",
+          "en": "Lv4 Landslide Warning",
+          "zh_hans": "4级土砂灾害危险警报",
+          "zh_hant": "4級土砂災害危險警報",
+          "ko": "레벨4 토사재해 위험경보"
+        },
+        "basis": "警報 areas[0].kind_name「レベル４土砂災害危険警報」(柏崎市, level 4, status continued), publishing_office 新潟地方気象台, issued_at 2026-10-31T18:39+09:00"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "危険な場所から避難",
+          "ja_easy": "あぶない ばしょから にげて",
+          "en": "Leave danger zones",
+          "zh_hans": "从危险地点撤离",
+          "zh_hant": "從危險地點撤離",
+          "ko": "위험한 곳에서 대피"
+        },
+        "basis": "警報 level 4 とテンプレート evac-now の図記号 directions_run（危険な場所から避難する）。市の避難情報名は使わず行動として記述。知識ファイル kashiwazaki/dosha_hm_2022.pdf p.1 の土砂災害の危険が高まった際の避難の呼びかけとも整合"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "危険な場所から避難",
+          "ja_easy": "あぶない ばしょから にげて",
+          "en": "Leave danger zones",
+          "zh_hans": "从危险地点撤离",
+          "zh_hant": "從危險地點撤離",
+          "ko": "위험한 곳에서 대피"
+        },
+        "basis": "action セルと同内容（警報 level 4、図記号 directions_run: 危険な場所から避難する）の各言語表記"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VPWW56-202610311839-e6123510be74",
+      "input": 35685,
+      "output": 1336,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.16946
+    }
+  ],
+  "lint": []
+}
