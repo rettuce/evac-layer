@@ -24,6 +24,7 @@ const missing = ref<string[]>([])
 const unapproved = ref<string[]>([])
 let pollCount = 0
 const loadError = ref<string>()
+const layoutsLoaded = ref(false)
 const readyBulletins = ref(new Set<string>())
 const realElapsed = ref(0)
 
@@ -45,7 +46,7 @@ const unapprovedCurrent = computed(() =>
   unavailableCurrent.value && unapproved.value.includes(unavailableCurrent.value) ? unavailableCurrent.value : undefined,
 )
 const ready = computed(
-  () => status.value !== undefined && Object.keys(layouts.value).every((id) => readyBulletins.value.has(id)),
+  () => layoutsLoaded.value && Object.keys(layouts.value).every((id) => readyBulletins.value.has(id)),
 )
 const clockEpochMs = computed(() => replayClockEpochMs(rows.value, elapsed.value, props.speed))
 
@@ -105,6 +106,7 @@ onMounted(async () => {
   try {
     await poll(isVirtual.value ? { t: '0' } : props.reset ? { reset: '1' } : {})
     await loadLayouts()
+    layoutsLoaded.value = true
   } catch (error) {
     loadError.value = (error as Error).message
     return

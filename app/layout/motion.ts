@@ -74,5 +74,7 @@ function roundTo(value: number, decimals: number): number {
 
 export function frameStyle(frame: MotionFrame): Record<string, string | number> {
   const scale = roundTo(frame.scale, SCALE_DECIMALS)
-  return { opacity: roundTo(frame.opacity, OPACITY_DECIMALS), transform: `scale(${scale})` }
+  // A settled element must drop its transform: Chrome otherwise keeps the raster from the last
+  // intermediate scale, so a frame reached step by step differs from the same frame reached directly.
+  return { opacity: roundTo(frame.opacity, OPACITY_DECIMALS), transform: scale === 1 ? 'none' : `scale(${scale})` }
 }
