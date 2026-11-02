@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル５氾濫特別警報",
-        "ja_easy": "【かり】",
-        "en": "[draft]",
-        "zh_hans": "[草稿]",
-        "zh_hant": "[草稿]",
-        "ko": "[초안]"
+        "ja_easy": "レベル５ はんらん とくべつけいほう",
+        "en": "Level 5 Flood Emergency",
+        "zh_hans": "5级泛滥特别警报",
+        "zh_hant": "5級氾濫特別警報",
+        "ko": "레벨5 범람 특별경보"
       },
       "pictogram": "flood",
       "motion": "scale-in"
@@ -35,12 +35,12 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "【仮】安全確保",
-        "ja_easy": "【かり】 うえの かいへ",
-        "en": "[draft] Act now",
-        "zh_hans": "[草稿]确保安全",
-        "zh_hant": "[草稿]確保安全",
-        "ko": "[초안] 안전 확보"
+        "ja": "すぐ上の階へ",
+        "ja_easy": "すぐ うえの かいへ",
+        "en": "Go upstairs now",
+        "zh_hans": "立即上楼",
+        "zh_hant": "立即上樓",
+        "ko": "즉시 위층으로"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -50,12 +50,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "【仮】安全確保",
-        "ja_easy": "【かり】 うえの かいへ",
-        "en": "[draft] Act now",
-        "zh_hans": "[草稿]确保安全",
-        "zh_hant": "[草稿]確保安全",
-        "ko": "[초안] 안전 확보"
+        "ja": "すぐ上の階へ",
+        "ja_easy": "すぐ うえの かいへ",
+        "en": "Go upstairs now",
+        "zh_hans": "立即上楼",
+        "zh_hant": "立即上樓",
+        "ko": "즉시 위층으로"
       },
       "motion": "static"
     },
@@ -64,13 +64,18 @@
       "role": "source",
       "priority": 9,
       "text": {
-        "ja": "出典: 気象庁 21:15"
+        "ja": "出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 気象庁 21:15"
       },
       "motion": "static"
     }
   ],
   "palette": "cabinet-office-5",
   "sources": [
+    {
+      "type": "pdf",
+      "file": "yurihonjo/kozui_dosha_hokubu.pdf",
+      "page": 1
+    },
     {
       "type": "jma",
       "bulletin_id": "VXKOii-202610212115-34469436adbc"

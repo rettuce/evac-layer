@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル２大雨注意報",
-        "ja_easy": "【かり】",
-        "en": "[draft]",
-        "zh_hans": "[草稿]",
-        "zh_hant": "[草稿]",
-        "ko": "[초안]"
+        "ja_easy": "おおあめ ちゅういほう おわりました",
+        "en": "Rain advisory lifted",
+        "zh_hans": "2级大雨注意报 解除",
+        "zh_hant": "2級大雨注意報 解除",
+        "ko": "2단계 호우주의보 해제"
       },
       "pictogram": "heavy_rain",
       "motion": "scale-in"
@@ -35,12 +35,12 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "【仮】警報解除",
-        "ja_easy": "【かり】 おわり",
-        "en": "[draft] Lifted",
-        "zh_hans": "[草稿]警报解除",
-        "zh_hant": "[草稿]警報解除",
-        "ko": "[초안] 경보 해제"
+        "ja": "川の増水に注意",
+        "ja_easy": "かわの みずに ちゅうい",
+        "en": "Watch river levels",
+        "zh_hans": "注意河水上涨",
+        "zh_hant": "注意河水上漲",
+        "ko": "하천 증수 주의"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -50,12 +50,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "【仮】警報解除",
-        "ja_easy": "【かり】 おわり",
-        "en": "[draft] Lifted",
-        "zh_hans": "[草稿]警报解除",
-        "zh_hant": "[草稿]警報解除",
-        "ko": "[초안] 경보 해제"
+        "ja": "川の増水に注意",
+        "ja_easy": "かわの みずに ちゅうい",
+        "en": "Watch river levels",
+        "zh_hans": "注意河水上涨",
+        "zh_hant": "注意河水上漲",
+        "ko": "하천 증수 주의"
       },
       "motion": "static"
     },

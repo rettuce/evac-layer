@@ -2,7 +2,7 @@
   "municipality": "17204",
   "name": "輪島市",
   "site": "17204-demo",
-  "writer_note": "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名をそのまま使い、それ以外は【仮】/[draft] のプレースホルダ。 自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。",
+  "writer_note": "",
   "entries": [
     {
       "issued_at": "2026-10-14T03:56:00+09:00",

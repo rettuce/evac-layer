@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル２土砂災害注意報",
-        "ja_easy": "【かり】",
-        "en": "[draft]",
-        "zh_hans": "[草稿]",
-        "zh_hant": "[草稿]",
-        "ko": "[초안]"
+        "ja_easy": "どしゃくずれ ちゅういほう おわり",
+        "en": "Landslide advisory ended",
+        "zh_hans": "土砂灾害注意报解除",
+        "zh_hant": "土砂災害注意報解除",
+        "ko": "토사재해 주의보 해제"
       },
       "pictogram": "landslide",
       "motion": "scale-in"
@@ -35,12 +35,12 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "【仮】警報解除",
-        "ja_easy": "【かり】 おわり",
-        "en": "[draft] Lifted",
-        "zh_hans": "[草稿]警报解除",
-        "zh_hant": "[草稿]警報解除",
-        "ko": "[초안] 경보 해제"
+        "ja": "注意報は解除済み",
+        "ja_easy": "ちゅういほうは おわりました",
+        "en": "Advisory lifted",
+        "zh_hans": "注意报已解除",
+        "zh_hant": "注意報已解除",
+        "ko": "주의보 해제됨"
       },
       "pictogram": "directions_run",
       "motion": "pulse"
@@ -50,12 +50,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "【仮】警報解除",
-        "ja_easy": "【かり】 おわり",
-        "en": "[draft] Lifted",
-        "zh_hans": "[草稿]警报解除",
-        "zh_hant": "[草稿]警報解除",
-        "ko": "[초안] 경보 해제"
+        "ja": "注意報は解除済み",
+        "ja_easy": "ちゅういほうは おわりました",
+        "en": "Advisory lifted",
+        "zh_hans": "注意报已解除",
+        "zh_hant": "注意報已解除",
+        "ko": "주의보 해제됨"
       },
       "motion": "static"
     },

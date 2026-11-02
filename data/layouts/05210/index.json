@@ -2,7 +2,7 @@
   "municipality": "05210",
   "name": "由利本荘市",
   "site": "05210-demo-honjo-station",
-  "writer_note": "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名をそのまま使い、それ以外は【仮】/[draft] のプレースホルダ。 自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。",
+  "writer_note": "",
   "entries": [
     {
       "issued_at": "2026-10-16T09:08:00+09:00",
@@ -598,6 +598,15 @@
     {
       "issued_at": "2026-11-02T13:55:00+09:00",
       "bulletin_id": "VPWW56-202611021355-988a359d6046",
+      "wmo_code": "VPWW56",
+      "raw_title": "秋田県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 05210: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-11-02T16:05:00+09:00",
+      "bulletin_id": "VPWW56-202611021605-2b2815081b63",
       "wmo_code": "VPWW56",
       "raw_title": "秋田県土砂災害警報・注意報",
       "municipality_level": null,
