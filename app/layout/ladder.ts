@@ -6,6 +6,11 @@ export const LADDER_H_PX: Record<ShapeClass, number> = { landscape: 120, portrai
 export const LADDER_V_PX = 144
 export const LADDER_CURRENT_GROWTH = 1.2
 
+// The current rung only has room for 警戒レベル beside its numeral on wide screens and in the vertical ladder.
+export function ladderHasCaption(mode: LadderMode, cls: ShapeClass): boolean {
+  return mode === 'v' || cls === 'landscape' || cls === 'ribbon'
+}
+
 export function isLadderMode(value: unknown): value is LadderMode {
   return value === 'h' || value === 'v'
 }
