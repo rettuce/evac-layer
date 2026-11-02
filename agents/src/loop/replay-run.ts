@@ -58,6 +58,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       args.onEvent?.({ municipality: municipality.id, issued_at: e.issued_at, outcome: "no-screen", reason });
       continue;
     }
+    const usageStart = writerUsage.length;
     let writer = placeholderWriter(e.alert, municipality.id, situation.level, situation.cleared);
     let writerSource = "placeholder";
     let reviser = liveWriterReviser;
@@ -90,7 +91,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       verifier: args.verifier, reviser,
     });
     if (live && persist && result.outcome === "pass" && result.writer && result.writer !== writer) {
-      saveWriter(municipality.id, e.bulletin_id, { model: live.model, output: result.writer, usage: writerUsage, lint: [] });
+      saveWriter(municipality.id, e.bulletin_id, { model: live.model, output: result.writer, usage: writerUsage.slice(usageStart), lint: [] });
     }
     const { dir, report } = persist
       ? writeReport({ municipalityId: municipality.id, bulletinId: e.bulletin_id, verifier: args.verifier.name, reviser: reviser.name, maxAttempts: 3, result, writerNote: notes || undefined })
