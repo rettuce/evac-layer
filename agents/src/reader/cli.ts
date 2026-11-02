@@ -46,7 +46,7 @@ function sha256(file: string) {
 // Reports where the key came from, never the key: process.loadEnvFile does not override a variable already in the
 // environment, so a stale shell export silently wins over a fresh .env.
 // A placeholder such as "sk-ant-..." must never reach the API; only the shape of a Console API key is checked.
-const API_KEY_PREFIX = "sk-ant-api";
+const API_KEY_PREFIX = "sk-ant-";
 const API_KEY_MIN_LENGTH = 40;
 
 function loadApiKey(): { present: boolean; wellFormed: boolean; source: "environment" | "dotenv" | "none"; dotenvPresent: boolean } {
@@ -178,7 +178,18 @@ async function main() {
       ],
     }],
   };
-  const stage1Input = files.length ? (await client.messages.countTokens(stage1Params)).input_tokens : 0;
+  // count_tokens does not accept file_id sources, so the same PDFs are counted as base64 documents.
+  const countParams = {
+    ...stage1Params,
+    messages: [{
+      role: "user" as const,
+      content: [
+        ...pdfs.map((rel, i) => ({ type: "document" as const, source: { type: "base64" as const, media_type: "application/pdf" as const, data: fs.readFileSync(path.join(RAW_DIR, rel)).toString("base64") }, title: files[i], citations: { enabled: true } })),
+        { type: "text" as const, text: userText },
+      ],
+    }],
+  };
+  const stage1Input = files.length ? (await client.messages.countTokens(countParams)).input_tokens : 0;
   const estimate = estimateUsd(modelKey, stage1Input, files.length ? STAGE1_MAX_TOKENS : 0)
     + estimateUsd(modelKey, Math.max(stage1Input, 20_000), STAGE2_MAX_TOKENS)
     + visionPlan.reduce((usd, v) => usd + v.pages.reduce((u, p) => u + estimateUsd(modelKey, imageTokens(v.tiles.filter((t) => t.page === p)) + VISION_PROMPT_TOKENS_PER_PAGE, VISION_OUTPUT_TOKENS_PER_PAGE), 0), 0);
