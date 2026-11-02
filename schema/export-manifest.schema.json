@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evac-layer.dev/schema/export-manifest.schema.json",
+  "title": "EVAC LAYER static export manifest (dist/<site>/manifest.json)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feed_version", "site", "municipality_id", "entries"],
+  "properties": {
+    "feed_version": { "const": "0.1" },
+    "site": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,80}$" },
+    "municipality_id": { "$ref": "common.schema.json#/$defs/municipalityId" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["bulletin_id", "issued_at", "template", "display_level", "approved_at", "files", "sources"],
+        "properties": {
+          "bulletin_id": { "type": "string", "minLength": 1 },
+          "issued_at": { "type": "string", "format": "date-time" },
+          "template": { "type": "string" },
+          "display_level": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "approved_at": { "type": "string", "format": "date-time" },
+          "files": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "16x9": { "$ref": "#/$defs/files" },
+              "9x16": { "$ref": "#/$defs/files" },
+              "32x9": { "$ref": "#/$defs/files" },
+              "1x1": { "$ref": "#/$defs/files" }
+            }
+          },
+          "sources": { "type": "array", "items": { "$ref": "layout.schema.json#/$defs/source" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "files": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["json", "png", "html"],
+      "properties": {
+        "json": { "type": "string" },
+        "png": { "type": "string" },
+        "html": { "type": "string" }
+      }
+    }
+  }
+}
