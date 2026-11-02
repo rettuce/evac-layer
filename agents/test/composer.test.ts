@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { compose, pickShelter, type Municipality, type Site, type WriterOutput } from "../src/composer/compose.js";
-import { ComposerStop } from "../src/composer/rules.js";
+import { CELLS_OF, ComposerStop } from "../src/composer/rules.js";
 import { shapeContract } from "../src/composer/template.js";
 import { parseJmaXml } from "../src/jma/parse.js";
 import { formatErrors, validateDoc } from "../src/schemas.js";
@@ -16,9 +16,9 @@ const site = fx<Site>("site-wajima-test.json");
 const writer = fx<WriterOutput>("writer-tsunami-advisory.json");
 const advisory = () => parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_12_02_250206_VTSE41.xml")));
 
-test("tsunami advisory for 石川県能登 composes four valid layouts at display level 2", () => {
+test("tsunami advisory for 石川県能登 composes five valid layouts at display level 2", () => {
   const screens = compose({ alert: advisory(), municipality, site, writer });
-  assert.deepEqual(screens.map((s) => s.shape), ["16x9", "9x16", "32x9", "1x1"]);
+  assert.deepEqual(screens.map((s) => s.shape), ["16x9", "9x16", "32x9", "1x1", "pillar"]);
   for (const s of screens) {
     const r = validateDoc(s, "layout");
     assert.ok(r.ok, `${s.shape}\n${formatErrors(r.errors)}`);
@@ -41,7 +41,7 @@ test("shelter is the nearest undisputed tsunami site; distance appears once, on 
 
 test("every emitted cell has a slot in the render template", () => {
   for (const screen of compose({ alert: advisory(), municipality, site, writer })) {
-    const { slots } = shapeContract("evac-now", screen.shape);
+    const { slots } = shapeContract("evac-now", CELLS_OF[screen.shape]);
     for (const c of screen.cells) assert.ok(slots.has(c.role), `${screen.shape} ${c.role}`);
   }
 });
@@ -85,4 +85,15 @@ test("action pictogram follows the template, and a cleared VPWW headline says �
   const file = path.join(FEED, "bodies/20261021/20261021150027_0_VPWW56_170000.xml");
   if (!fs.existsSync(file)) throw new Error(`recorded bulletin ${file} not found. Set JMA_FEED_DIR.`);
   assert.equal(headlineFor(parseJmaXml(fs.readFileSync(file)), "17204"), "レベル２土砂災害注意報解除");
+});
+
+test("pillar carries the 9:16 cells and is validated as a layout", async () => {
+  const { validateDoc } = await import("../src/schemas.js");
+  const screens = compose({ alert: advisory(), municipality, site, writer });
+  const pillar = screens.find((x) => x.shape === "pillar")!;
+  const portrait = screens.find((x) => x.shape === "9x16")!;
+  assert.deepEqual({ ...pillar, shape: "9x16" }, portrait);
+  assert.ok(pillar.cells.some((c) => c.role === "languages"));
+  assert.ok(validateDoc(pillar, "layout").ok);
+  assert.equal(validateDoc({ ...pillar, cells: pillar.cells.filter((c) => c.role !== "languages") }, "layout").ok, false);
 });
