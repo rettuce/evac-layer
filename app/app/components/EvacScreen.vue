@@ -4,7 +4,7 @@ import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
 import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
-import { ladderSizePx, withLadder, type LadderMode } from '~~/layout/ladder'
+import { ladderHasCaption, ladderSizePx, withLadder, type LadderMode } from '~~/layout/ladder'
 import { levelScaleAttr, levelScaleFor } from '~~/layout/levelScale'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
@@ -50,6 +50,7 @@ const placed = computed(() => {
 })
 const dropped = computed(() => [...initial.value.dropped, ...overflowDropped.value])
 const missing = computed(() => missingRequired(initial.value.placed, layout.value))
+const easyInAction = computed(() => !placed.value.some((cell) => cell.role === 'languages'))
 const heroCell = computed(() => (layout.value.hero ? placed.value.find((cell) => cell.role === layout.value.hero!.role) : undefined))
 
 const band = computed(() => CABINET_OFFICE_5[props.screen.alert.level])
@@ -89,7 +90,8 @@ function cellStyle(cell: LayoutCell) {
 
 function cellClass(cell: LayoutCell) {
   return {
-    'is-band': cell.role === 'headline',
+    'is-band': cell.role === 'headline' || layout.value.bandRoles?.includes(cell.role),
+    'is-band-row': layout.value.bandRoles?.includes(cell.role),
     'is-dark-band': layout.value.darkBand?.includes(cell.role),
     'is-inline': layout.value.inline?.includes(cell.role),
   }
@@ -245,6 +247,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
       :scale="levelScale"
       :mode="ladderMode!"
       :size-px="ladderSizePx(ladderMode!, shapeClass)"
+      :caption="ladderHasCaption(ladderMode!, shapeClass)"
       :language-index="language.index"
     />
     <div v-if="layout.hero && heroCell?.pictogram" class="hero-pictogram" :style="{ gridArea: 'hero' }">
@@ -265,6 +268,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :cell="cell"
         :level-scale="showLadder ? undefined : levelScale"
         :stacked-headline="stackedHeadline"
+        :easy-in-action="easyInAction"
         :headline-scale="headlineScale"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
         :language-index="language.index"

@@ -195,22 +195,23 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   },
 }
 
-// Pillar faces read best at eye height: the reading rows end 1.2 m above the floor and the source sits
-// at 0.4–0.6 m, while the band, ladder and one large action pictogram take the upper part of the column.
-const PILLAR_EYE_LOW_M = 1.2
+// Pillar faces read best at eye height: the reading rows end 1.0 m above the floor, a level-colour band
+// with the source runs round the foot of the column (0.40–0.75 m), and the top band, ladder and one large
+// action pictogram take the upper column. Rows are in design px, so metres are divided by the face scale.
+const PILLAR_EYE_LOW_M = 1.0
 const PILLAR_EYE_HIGH_M = 2.2
-const PILLAR_SOURCE_TOP_M = 0.6
-const PILLAR_HERO_PX = 960
+const PILLAR_FOOT_BAND_TOP_M = 0.75
+const PILLAR_HERO_PX = 800
 const PILLAR_BODY_ORDER: Role[] = ['action', 'languages', 'direction', 'shelter']
 
-function pillarRowPx(fromMetres: number, toMetres: number): number {
-  return Math.round((toMetres - fromMetres) * PILLAR.pxPerMetre)
+function pillarDesignPx(fromMetres: number, toMetres: number): number {
+  return ((toMetres - fromMetres) * PILLAR.pxPerMetre) / PILLAR.faceScale
 }
 
 function pillarFace(layout: ShapeLayout): ShapeLayout {
   const roles = areaRoles(layout)
   const topMetres = PILLAR.floorMetres + PILLAR.height / PILLAR.pxPerMetre
-  const heroRow = pillarRowPx(PILLAR_EYE_HIGH_M, topMetres) - STACKED_BAND_MIN_PX - LADDER_H_PX.pillar
+  const heroRow = pillarDesignPx(PILLAR_EYE_HIGH_M, topMetres) - STACKED_BAND_MIN_PX - LADDER_H_PX.pillar
   const rows: Track[] = [layout.rows[0]!, heroRow, '1fr']
   const areas = ['headline headline headline', '. hero .', '. . .']
   PILLAR_BODY_ORDER.filter((role) => roles.has(role)).forEach((role, i) => {
@@ -221,8 +222,8 @@ function pillarFace(layout: ShapeLayout): ShapeLayout {
     rows.push('auto')
     areas.push(`. ${role} .`)
   })
-  rows.push(pillarRowPx(PILLAR_SOURCE_TOP_M, PILLAR_EYE_LOW_M), pillarRowPx(PILLAR.floorMetres, PILLAR_SOURCE_TOP_M))
-  areas.push('. . .', '. source .')
+  rows.push(pillarDesignPx(PILLAR_FOOT_BAND_TOP_M, PILLAR_EYE_LOW_M), pillarDesignPx(PILLAR.floorMetres, PILLAR_FOOT_BAND_TOP_M))
+  areas.push('. . .', 'source source source')
   return {
     ...layout,
     id: `pillar-${layout.id}`,
@@ -231,6 +232,7 @@ function pillarFace(layout: ShapeLayout): ShapeLayout {
     areas,
     pictogramPx: { ...layout.pictogramPx, action: 0 },
     hero: { role: 'action', px: PILLAR_HERO_PX },
+    bandRoles: ['source'],
   }
 }
 

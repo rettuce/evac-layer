@@ -2,7 +2,7 @@
 import { LADDER_CURRENT_GROWTH, type LadderMode } from '~~/layout/ladder'
 import type { LevelScale } from '~~/layout/levelScale'
 
-const props = defineProps<{ scale: LevelScale; mode: LadderMode; sizePx: number; languageIndex: number }>()
+const props = defineProps<{ scale: LevelScale; mode: LadderMode; sizePx: number; languageIndex: number; caption: boolean }>()
 const showEnglish = computed(() => props.languageIndex % 2 === 1)
 </script>
 
@@ -23,7 +23,7 @@ const showEnglish = computed(() => props.languageIndex % 2 === 1)
       :style="{ '--step': step.color, '--step-ink': step.ink }"
     >
       <span class="num">{{ step.label }}</span>
-      <span v-if="i + 1 === scale.current" class="caption">
+      <span v-if="caption && i + 1 === scale.current" class="caption">
         <span :class="{ 'is-shown': !showEnglish }" lang="ja">{{ scale.title.ja }}</span>
         <span :class="{ 'is-shown': showEnglish }" lang="en">{{ scale.title.en }}</span>
       </span>
@@ -48,7 +48,6 @@ const showEnglish = computed(() => props.languageIndex % 2 === 1)
   height: 100%;
 }
 .rung {
-  container-type: inline-size;
   position: relative;
   display: flex;
   align-items: center;
@@ -104,10 +103,5 @@ const showEnglish = computed(() => props.languageIndex % 2 === 1)
 }
 .caption > span:not(.is-shown) {
   visibility: hidden;
-}
-@container (max-width: 300px) {
-  .mode-h .caption {
-    display: none;
-  }
 }
 </style>
