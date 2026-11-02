@@ -1,4 +1,5 @@
 import { join } from 'node:path'
+import { layoutKey } from '~~/layout/gate'
 import type { ReplayRow } from '~~/layout/replay'
 
 interface LayoutIndexFile {

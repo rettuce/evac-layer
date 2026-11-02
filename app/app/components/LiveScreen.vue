@@ -13,6 +13,7 @@ const props = defineProps<{
   siteName?: string
   reset?: boolean
   reducedMotion?: boolean
+  scene?: string
 }>()
 
 const POLL_MS = 1000
@@ -139,10 +140,11 @@ onBeforeUnmount(() => {
   >
     <AmbientLayer
       v-show="frame.ambientVisible"
-      :seed="municipality"
-      :elapsed-ms="elapsed"
+      :seed="site ?? municipality"
       :clock-epoch-ms="clockEpochMs"
       :site-name="siteName ?? status?.name ?? ''"
+      :shape="shape"
+      :scene="scene"
     />
     <div
       v-for="(screen, bulletinId) in layouts"

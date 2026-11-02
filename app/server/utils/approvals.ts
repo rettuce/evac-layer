@@ -1,11 +1,6 @@
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-
-export interface Approvals {
-  version: '0.1'
-  layouts: Record<string, { approved: boolean; updated_at: string }>
-  sites: Record<string, { auto_publish: boolean; updated_at: string }>
-}
+import type { Approvals } from '~~/layout/gate'
 
 const EMPTY: Approvals = { version: '0.1', layouts: {}, sites: {} }
 
