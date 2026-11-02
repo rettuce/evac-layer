@@ -10,7 +10,8 @@
     "jma": "tsx src/jma/cli.ts",
     "reader": "tsx src/reader/cli.ts",
     "test": "tsx --test test/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "writer": "tsx src/writer/cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
