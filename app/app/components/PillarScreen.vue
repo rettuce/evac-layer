@@ -14,7 +14,7 @@ const emit = defineEmits<{ ready: [] }>()
 
 const FACES = Array.from({ length: PILLAR.faces }, (_, i) => i)
 const FACE_BOX = { width: PILLAR.faceWidth, height: PILLAR.height, scale: PILLAR.faceScale }
-const COPIED_STATE = ['template', 'variant', 'level', 'levelScale', 'ladder', 'dropped', 'missingRequired', 'overflow', 'headlineScale', 'bulletinId'] as const
+const COPIED_STATE = ['template', 'variant', 'level', 'levelScale', 'levelBadge', 'ladder', 'dropped', 'missingRequired', 'overflow', 'headlineScale', 'bulletinId'] as const
 
 const firstFace = ref<HTMLElement>()
 const readyFaces = ref(new Set<number>())
@@ -48,6 +48,7 @@ watch(
     :data-variant="state.variant"
     :data-level="state.level"
     :data-level-scale="state.levelScale"
+    :data-level-badge="state.levelBadge"
     :data-ladder="state.ladder"
     :data-dropped="state.dropped"
     :data-missing-required="state.missingRequired || undefined"

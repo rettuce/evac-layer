@@ -98,11 +98,12 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 
 ## Headline band
 
-- The warning level is shown as a scale (`LevelScale.vue`, `levelScaleFor`): five cells 1–5 on a white plate, the current one filled with its Cabinet Office colour and a large numeral, the others at 30 % tint with an outline; the title alternates 警戒レベル / Alert Level with the language rotation. Tsunami bulletins get three cells (注意報 / 警報 / 大津波警報) titled 津波 / Tsunami.
-- 16:9 and 32:9: the scale sits beside the headline (32:9 below it).
-- 9:16 and 1:1: the scale sits under the headline inside the band, right-aligned, with the headline pictogram spanning both rows. The band is at least 200 (one headline line + label, with room above and below); the headline may take 2 lines (the band grows further only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
+- The warning level has two parts (`layout/levelScale.ts`):
+  - a vertical ladder on the left edge (`LevelLadder.vue`, `withLadder`), 1 at the bottom to 5 at the top, 144 wide on 16:9 and 32:9, 120 on 9:16 and 1:1; the current rung is in its Cabinet Office colour, 1.2x wide with a large numeral, the others at a 50 % tint (level 1 light grey), with 8 px white joints. Tsunami bulletins get three rungs (1 注意報, 2 警報, 3 大津波警報). The pillar keeps a horizontal ladder that rings the column.
+  - a round badge at the start of the headline band (`LevelBadge.vue`): the current numeral on a disc of the level colour with a 6 px white rim, 0.8 of the band height; on the level-5 black band it turns white with a black numeral. `data-level-badge` on `.evac-screen`.
+- 9:16 and 1:1: the band is at least 200 (badge, pictogram and up to two headline lines); the headline may take 2 lines (the band grows further only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
 - When a `languages` cell is on screen, the action cell no longer repeats the easy-Japanese line under its pictogram (it appears once, labelled).
-- `all-clear` shows no level scale: a cleared bulletin has no warning level, the white band is only the colour of level 1.
+- `all-clear` shows no ladder and no badge: a cleared bulletin has no warning level, the white band is only the colour of level 1.
 
 ## Pillar (`shape=pillar`)
 
