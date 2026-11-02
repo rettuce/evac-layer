@@ -1,6 +1,6 @@
 // Records /screen as a deterministic PNG sequence on a virtual clock, then encodes it with ffmpeg.
 //
-//   node demo/capture/record.mjs --shape 16x9 --cut alert [--seconds 1] [--layout wajima-tsunami] [--verify]
+//   node demo/capture/record.mjs --shape 16x9 --cut alert [--seconds 1] [--site-name <name>] [--verify]
 //
 // Output: demo/screens/<shape>_<cut>.mp4 (h264, yuv420p, no audio, native screen resolution).
 import { execFile } from 'node:child_process'
@@ -26,13 +26,26 @@ const SHAPES = {
   '1x1': { width: 1080, height: 1080 },
 }
 
-// Switch moment shared by every shape so the four screens cut over on the same frame (storyboard cut 5).
-const SWITCH_AT_MS = 12000
+// Fixture scenario: the four screens cut over on the same frame at 12 s.
+const SCENARIO_SWITCH_AT_MS = 12000
+const SCENARIO = { mode: 'scenario', layout: 'wajima-tsunami' }
+
+// Live replay of nine real JMA bulletins for Yurihonjo (05210) at 1200x speed. Events are the
+// approximate moments the screen changes: Lv3 prepare, Lv4, Lv5, cross-fade toward all-clear.
+const LIVE = { mode: 'live', municipality: '05210', speed: '1200' }
+const LIVE_READY = '[data-mode="live"][data-ready="1"]'
+const LIVE_EVENTS_MS = [14000, 21000, 26000, 44000]
 
 const CUTS = {
-  ambient: { seconds: 12, query: { mode: 'scenario', scenario: 'ambient' } },
-  switch: { seconds: 27, query: { mode: 'scenario', scenario: 'switch', t_switch: String(SWITCH_AT_MS) } },
-  alert: { seconds: 27, query: {} },
+  ambient: { seconds: 12, startMs: 0, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
+  switch: { seconds: 27, startMs: 5000, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
+  alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
+  'fixture-alert': { seconds: 27, startMs: 0, query: { layout: 'wajima-tsunami' }, ready: READY_SELECTOR, events: [] },
+  'scenario-ambient': { seconds: 12, startMs: 0, query: { ...SCENARIO, scenario: 'ambient' }, ready: READY_SELECTOR, events: [] },
+  'scenario-switch': {
+    seconds: 27, startMs: 0, ready: READY_SELECTOR, events: [SCENARIO_SWITCH_AT_MS],
+    query: { ...SCENARIO, scenario: 'switch', t_switch: String(SCENARIO_SWITCH_AT_MS) },
+  },
 }
 
 function options() {
@@ -42,7 +55,7 @@ function options() {
       cut: { type: 'string' },
       seconds: { type: 'string' },
       fps: { type: 'string', default: '30' },
-      layout: { type: 'string', default: 'wajima-tsunami' },
+      'site-name': { type: 'string' },
       'base-url': { type: 'string', default: process.env.EVAC_URL ?? 'http://127.0.0.1:3150' },
       out: { type: 'string' },
       'keep-frames': { type: 'boolean', default: false },
@@ -64,16 +77,30 @@ function options() {
 function frameUrl(opts, tMs) {
   const params = new URLSearchParams({
     shape: opts.shape,
-    layout: opts.layout,
     clock: 'virtual',
     t: String(Math.round(tMs)),
     ...CUTS[opts.cut].query,
   })
+  if (opts['site-name'] && opts.cut !== 'alert') params.set('site_name', opts['site-name'])
   return `${opts['base-url']}/screen?${params}`
 }
 
 // Prefer an in-page clock hook when the renderer exposes one; a full navigation per frame is the fallback.
+const SEEK_ATTEMPTS = 3
+
+// A dev server's HMR can reload the page mid-recording; wait for it to settle and seek again.
 async function seek(page, opts, tMs) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await seekOnce(page, opts, tMs)
+    } catch (error) {
+      if (attempt >= SEEK_ATTEMPTS || !/context was destroyed/.test(error.message)) throw error
+      await page.waitForSelector(CUTS[opts.cut].ready, { timeout: READY_TIMEOUT_MS })
+    }
+  }
+}
+
+async function seekOnce(page, opts, tMs) {
   const seeked = await page.evaluate(async (t) => {
     if (typeof window.evacClock?.set !== 'function') return false
     await window.evacClock.set(t)
@@ -82,19 +109,21 @@ async function seek(page, opts, tMs) {
   }, tMs)
   if (!seeked) {
     await page.goto(frameUrl(opts, tMs), { waitUntil: 'networkidle0' })
-    await page.waitForSelector(READY_SELECTOR, { timeout: READY_TIMEOUT_MS })
+    await page.waitForSelector(CUTS[opts.cut].ready, { timeout: READY_TIMEOUT_MS })
   }
   return seeked ? 'hook' : 'navigate'
 }
 
 const frameName = (frame) => String(frame + 1).padStart(5, '0')
-const frameTime = (opts, frame) => (frame * 1000) / opts.fps
+const frameTime = (opts, frame) => CUTS[opts.cut].startMs + (frame * 1000) / opts.fps
 
 async function openPage(browser, opts, tMs) {
   const page = await browser.newPage()
   await page.setViewport({ ...SHAPES[opts.shape], deviceScaleFactor: 1 })
+  // Background tabs pause requestAnimationFrame, so evacClock.set() would resolve before painting.
+  await page.bringToFront()
   await page.goto(frameUrl(opts, tMs), { waitUntil: 'networkidle0' })
-  await page.waitForSelector(READY_SELECTOR, { timeout: READY_TIMEOUT_MS })
+  await page.waitForSelector(CUTS[opts.cut].ready, { timeout: READY_TIMEOUT_MS })
   return page
 }
 
@@ -109,12 +138,13 @@ async function captureFrames(browser, opts, framesDir) {
   return [...modes]
 }
 
-// Frames to re-shoot: first, middle, last, and the two frames around the switch.
+// Frames to re-shoot: first, middle, last, and the two frames around each screen change.
 function verifyFrames(opts) {
   const frames = [0, Math.floor(opts.frameCount / 2), opts.frameCount - 1]
-  if (opts.cut === 'switch') {
-    const switchFrame = Math.round((SWITCH_AT_MS / 1000) * opts.fps)
-    frames.push(switchFrame - 1, switchFrame)
+  const { startMs, events } = CUTS[opts.cut]
+  for (const eventMs of events) {
+    const eventFrame = Math.round(((eventMs - startMs) / 1000) * opts.fps)
+    frames.push(eventFrame - 1, eventFrame)
   }
   return [...new Set(frames)].filter((f) => f >= 0 && f < opts.frameCount).sort((a, b) => a - b)
 }
@@ -128,12 +158,15 @@ async function maxPixelDelta(fileA, fileB) {
   return Number(stderr.match(/YMAX=(\d+)/)?.[1] ?? NaN)
 }
 
-// Re-shoots each sample time on a fresh page loaded directly at t, so a pass also proves the
-// frame does not depend on the frames before it.
+// Re-shoots each sample time on a fresh page that jumps from t=0 straight to t through the same
+// seek path as the recording, so a pass also proves the frame does not depend on the frames before
+// it. Comparing against a page opened directly at t would mix two Chrome rasterization paths, which
+// differ by 1/255 on text that is mid scale-in.
 async function verify(browser, opts, framesDir) {
   const results = []
   for (const frame of verifyFrames(opts)) {
-    const page = await openPage(browser, opts, frameTime(opts, frame))
+    const page = await openPage(browser, opts, 0)
+    if (frame > 0) await seek(page, opts, frameTime(opts, frame))
     const again = `${framesDir}verify_${frameName(frame)}.png`
     await page.screenshot({ path: again, type: 'png' })
     await page.close()

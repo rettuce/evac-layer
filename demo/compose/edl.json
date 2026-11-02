@@ -7,20 +7,34 @@
   "fps": 30,
   "capture_spec": "画面収録 16:9・1920×1080・30fps・ブラウザ枠なし（ヘッドレスのビューポートを直接収録）\nタブ・アドレスバー・OS のメニューバー・カーソルを写さない。収録元は app（127.0.0.1:3150）",
   "screen_cuts": {
-    "switch_at_s": 12.0,
+    "source": "render 席 /screen の live モード（mode=live&municipality=05210&speed=1200&clock=virtual）。由利本荘市の実電文 9 本を 1200 倍で再生",
     "ambient": {
       "seconds": 12,
-      "content": "平時レイヤーのみ（t=0〜12 s）"
+      "live_t_ms": [
+        0,
+        12000
+      ],
+      "content": "平時レイヤー（由利本荘市）"
     },
     "switch": {
       "seconds": 27,
-      "content": "t=0〜12.0 s は平時、t=12.0 s で 4 形状とも同じフレームで有事へ切替、以後は有事"
+      "live_t_ms": [
+        5000,
+        32000
+      ],
+      "content": "平時 → Lv3 prepare（live t≈14 s＝カット内 9 s）→ Lv4（21 s＝16 s）→ Lv5（26 s＝21 s）。4 形状とも同じ t 列で撮るので同じフレームで切り替わる"
     },
     "alert": {
-      "seconds": 27,
-      "content": "t=0 から有事"
+      "seconds": 18,
+      "live_t_ms": [
+        26000,
+        44000
+      ],
+      "content": "Lv5（安全確保）の区間。live t=44 s のクロスフェード直前まで"
     },
-    "files": "demo/screens/<shape>_<cut>.mp4（demo/capture/record.mjs が書く）"
+    "fixture_variants": "scenario-ambient / scenario-switch / fixture-alert（wajima-tsunami）も record.mjs に残してある",
+    "files": "demo/screens/<shape>_<cut>.mp4（demo/capture/record.mjs が書く）",
+    "site_name": "羽後本荘駅（ambient と switch の平時レイヤーに表示）"
   },
   "segments": [
     {
@@ -87,10 +101,10 @@
     {
       "cut": "8",
       "kind": "3d",
-      "seconds": 25,
+      "seconds": 18,
       "src": "../renders/cut08.mp4",
       "screens": "alert",
-      "slate": "柱・壁・リボン・案内柱に有事画面が同時表示。寄りで出典の小さな文字が読める"
+      "slate": "柱・壁・リボン・案内柱に Lv5 の有事画面（由利本荘・実電文）が同時表示。寄りで出典の小さな文字が読める"
     },
     {
       "cut": "9",
