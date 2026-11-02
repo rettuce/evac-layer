@@ -1,0 +1,16 @@
+{
+  "version": "0.1",
+  "kind": "evac-screen",
+  "municipality": { "id": "00000", "name": "[市町村]" },
+  "alert": { "source": "jma", "bulletin_id": "<電文 ID>", "hazard": "tsunami", "level": 1, "issued_at": "2026-11-02T15:00:00+09:00" },
+  "shape": "16x9",
+  "template": "all-clear",
+  "cells": [
+    { "id": "headline", "role": "headline", "priority": 1, "text": { "ja": "津波警報 解除", "ja_easy": "つなみの けいほうは おわりました", "en": "Tsunami warning lifted" }, "pictogram": "safe_here", "motion": "scale-in" },
+    { "id": "action", "role": "action", "priority": 1, "text": { "ja": "安全を確かめてから戻る", "ja_easy": "あんぜんを たしかめてから もどって ください", "en": "Check it is safe before returning" }, "pictogram": "safe_here", "motion": "static" },
+    { "id": "languages", "role": "languages", "priority": 3, "text": { "ja": "安全を確かめてから戻る", "ja_easy": "あんぜんを たしかめてから もどって ください", "en": "Check it is safe before returning", "zh_hans": "确认安全后再返回", "ko": "안전을 확인한 뒤 돌아오세요" }, "motion": "scale-in" },
+    { "id": "source", "role": "source", "priority": 9, "text": { "ja": "出典: 気象庁 [hh:mm] 発表" }, "motion": "static" }
+  ],
+  "palette": "cabinet-office-5",
+  "sources": [ { "type": "jma", "bulletin_id": "<電文 ID>" } ]
+}

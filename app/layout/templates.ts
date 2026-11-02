@@ -1,4 +1,4 @@
-import type { Role, ShapeLayout, TemplateDef, TemplateId } from './types'
+import type { Role, Shape, ShapeLayout, TemplateDef, TemplateId } from './types'
 
 const M = 48
 const G = 24
@@ -111,6 +111,48 @@ function preparing(layout: ShapeLayout): ShapeLayout {
   return { ...layout, required: [...new Set(required)] }
 }
 
+const CLEAR_STACK: ShapeLayout = {
+  id: 'clear-stack',
+  columns: [M, '1fr', M],
+  rows: [BAND, M, '1fr', G, 'auto', 16, 'auto', 40],
+  areas: [
+    'headline headline headline',
+    '. . .',
+    '. action .',
+    '. . .',
+    '. languages .',
+    '. . .',
+    '. source .',
+    '. . .',
+  ],
+  required: ['headline', 'action', 'languages', 'source'],
+  pictogramPx: { headline: 112, action: 192 },
+}
+
+const CLEAR_RIBBON: ShapeLayout = {
+  id: 'clear-columns',
+  columns: [720, M, '1fr', M],
+  rows: [M, 'auto', G, '1fr', M, 256],
+  areas: [
+    'headline . . .',
+    'headline . source .',
+    'headline . . .',
+    'headline . action .',
+    'headline . . .',
+    'headline languages languages languages',
+  ],
+  required: ['headline', 'action', 'languages', 'source'],
+  pictogramPx: { headline: 160, action: 288 },
+  darkBand: ['languages'],
+}
+
+const CLEAR_SQUARE: ShapeLayout = {
+  ...CLEAR_STACK,
+  id: 'clear-square',
+  required: ['headline', 'action', 'source'],
+  pictogramPx: { headline: 112, action: 160 },
+}
+
 export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   'evac-now': {
     '16x9': [LANDSCAPE],
@@ -124,8 +166,49 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
     '32x9': [preparing(RIBBON), preparing(RIBBON_WIDE_DIRECTION)],
     '1x1': [preparing(SQUARE)],
   },
+  'all-clear': {
+    '16x9': [CLEAR_STACK],
+    '9x16': [CLEAR_STACK],
+    '32x9': [CLEAR_RIBBON],
+    '1x1': [CLEAR_SQUARE],
+  },
 }
 
 export function areaRoles(layout: ShapeLayout): Set<string> {
   return new Set(layout.areas.flatMap((row) => row.split(/\s+/)).filter((name) => name !== '.'))
+}
+
+const ROLE_ORDER: Role[] = ['headline', 'hazard', 'action', 'direction', 'shelter', 'languages', 'source', 'pictogram']
+
+export interface ResolvedTemplate {
+  required: Role[]
+  slots: Role[]
+  variant?: string
+}
+
+export class TemplateNotDefinedError extends Error {
+  constructor(templateId: TemplateId, shape: Shape) {
+    super(`template ${templateId} has no layout for shape ${shape} in app/layout/templates.ts`)
+    this.name = 'TemplateNotDefinedError'
+  }
+}
+
+export function definedTemplates(): TemplateId[] {
+  return (Object.keys(TEMPLATES) as TemplateId[]).sort()
+}
+
+export function resolveLayout(templateId: TemplateId, shape: Shape, variant = 0): ShapeLayout {
+  const variants = TEMPLATES[templateId]?.[shape]
+  if (!variants?.length) throw new TemplateNotDefinedError(templateId, shape)
+  return variants[variant] ?? variants[0]!
+}
+
+export function resolveTemplate(templateId: TemplateId, shape: Shape): ResolvedTemplate {
+  const layout = resolveLayout(templateId, shape)
+  const placeable = areaRoles(layout)
+  return {
+    required: ROLE_ORDER.filter((role) => layout.required.includes(role)),
+    slots: ROLE_ORDER.filter((role) => placeable.has(role)),
+    variant: layout.id,
+  }
 }
