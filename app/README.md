@@ -42,4 +42,9 @@ NUXT_REPO_ROOT=/path/to/evac-layer NUXT_DATA_DIR=/path/to/evac-layer/data node a
 
 ### Access
 
-`/api/admin/approve` and `/api/admin/site` change what screens may show and have no authentication yet. Bind the server to `127.0.0.1` (as above) or put it behind an authenticated proxy; do not expose it on a public interface.
+`/api/admin/*` decides what screens may show. Without `NUXT_ADMIN_TOKEN` it answers loopback clients only (403 otherwise). Behind a reverse proxy every request looks like loopback, so set a token there:
+
+```sh
+NUXT_ADMIN_TOKEN=<random secret> node app/.output/server/index.mjs
+# /admin asks for the token once and keeps it in sessionStorage; API calls send it as a Bearer token
+```
