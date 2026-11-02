@@ -1,0 +1,18 @@
+{
+  "version": "0.1",
+  "kind": "evac-screen",
+  "municipality": { "id": "00000", "name": "[市町村]" },
+  "alert": { "source": "jma", "bulletin_id": "<電文 ID>", "hazard": "flood", "level": 3, "issued_at": "2026-11-02T09:00:00+09:00" },
+  "shape": "16x9",
+  "template": "evac-prepare",
+  "cells": [
+    { "id": "headline", "role": "headline", "priority": 1, "text": { "ja": "洪水警報", "ja_easy": "こうずいに ちゅうい", "en": "Flood Warning" }, "pictogram": "flood", "motion": "scale-in" },
+    { "id": "action", "role": "action", "priority": 1, "text": { "ja": "にげる準備を", "ja_easy": "にげる じゅんびを して ください", "en": "Get ready to evacuate" }, "pictogram": "directions_run", "motion": "pulse" },
+    { "id": "shelter", "role": "shelter", "priority": 2, "text": { "ja": "[避難場所名]（指定緊急避難場所）" }, "pictogram": "evacuation_shelter", "motion": "static" },
+    { "id": "direction", "role": "direction", "priority": 3, "text": { "ja": "[方向と距離]" }, "pictogram": "arrow_forward", "rotation": 0, "motion": "static" },
+    { "id": "languages", "role": "languages", "priority": 4, "text": { "ja": "にげる準備を", "ja_easy": "にげる じゅんびを して ください", "en": "Get ready to evacuate", "zh_hans": "请做好避难准备", "ko": "대피할 준비를 하세요" }, "motion": "scale-in" },
+    { "id": "source", "role": "source", "priority": 9, "text": { "ja": "出典: [自治体ハザードマップ p.N] / 気象庁 [hh:mm] 発表" }, "motion": "static" }
+  ],
+  "palette": "cabinet-office-5",
+  "sources": [ { "type": "pdf", "file": "[hazard-map].pdf", "page": 1 }, { "type": "jma", "bulletin_id": "<電文 ID>" } ]
+}

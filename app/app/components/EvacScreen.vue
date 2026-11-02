@@ -7,7 +7,7 @@ import { TEMPLATES } from '~~/layout/templates'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
 import { LANGUAGE_ROTATION_MS, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
 
-const props = defineProps<{ screen: EvacScreen; shape: Shape }>()
+const props = defineProps<{ screen: EvacScreen; shape: Shape; variant?: number }>()
 
 const FONT_FAMILIES = ['Noto Sans JP', 'Noto Sans', 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans KR']
 const FONT_WEIGHTS = [400, 700]
@@ -22,7 +22,8 @@ const languageIndex = ref(0)
 const layout = computed(() => {
   const template = TEMPLATES[props.screen.template]
   if (!template) throw new Error(`template not implemented: ${props.screen.template}`)
-  return template[props.shape]
+  const variants = template[props.shape]
+  return variants[props.variant ?? 0] ?? variants[0]!
 })
 
 const initial = computed(() => initialPlacement(props.screen.cells, layout.value))
@@ -60,6 +61,7 @@ function cellClass(cell: LayoutCell) {
   return {
     'is-band': cell.role === 'headline',
     'is-dark-band': layout.value.darkBand?.includes(cell.role),
+    'is-inline': layout.value.inline?.includes(cell.role),
     [`m-${cell.motion}`]: ready.value,
   }
 }
@@ -162,7 +164,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize)
 })
 
-watch(() => [props.screen, props.shape], fit)
+watch(() => [props.screen, props.shape, props.variant], fit)
 </script>
 
 <template>
@@ -173,6 +175,7 @@ watch(() => [props.screen, props.shape], fit)
     :style="rootStyle"
     :data-shape="shape"
     :data-template="screen.template"
+    :data-variant="layout.id"
     :data-level="screen.alert.level"
     :data-dropped="dropped.map((d) => `${d.id}:${d.reason}`).join(',')"
     :data-missing-required="missing.join(',') || undefined"
