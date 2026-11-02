@@ -168,7 +168,7 @@ p {
   min-width: 0;
 }
 .shelter-kind {
-  opacity: 0.75;
+  opacity: var(--shelter-kind-opacity);
 }
 .distance {
   flex: none;
@@ -196,6 +196,6 @@ p {
 .lang-label {
   flex: none;
   min-width: calc(200 * var(--px));
-  opacity: 0.7;
+  opacity: var(--lang-label-opacity);
 }
 </style>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '~~/layout/fit'
 import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
-import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
+import { CABINET_OFFICE_5, DARK_BAND, LANG_LABEL_OPACITY, PAGE_BACKGROUND, PAGE_INK, SHELTER_KIND_OPACITY, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
@@ -56,6 +56,8 @@ const rootStyle = computed(() => ({
   '--fs-guide': TYPE_PX.guide,
   '--fs-fine': TYPE_PX.fine,
   '--stacked-band-min': STACKED_BAND_MIN_PX,
+  '--shelter-kind-opacity': SHELTER_KIND_OPACITY,
+  '--lang-label-opacity': LANG_LABEL_OPACITY,
   '--lh-action': LINE_HEIGHT.action,
   '--lh-guide': LINE_HEIGHT.guide,
   '--lh-fine': LINE_HEIGHT.fine,
