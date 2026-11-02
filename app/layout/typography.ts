@@ -35,6 +35,10 @@ export const TYPE_PX: Record<TypeStep, number> = {
   fine: fontPxForViewDistance(VIEW_DISTANCE_M.fine),
 }
 
+// The shelter mark sits beside a guide-size name and must read as a symbol, not a bullet.
+export const SHELTER_PICTOGRAM_RATIO = 1.6
+export const SHELTER_PICTOGRAM_PX = Math.round(TYPE_PX.guide * SHELTER_PICTOGRAM_RATIO)
+
 export const LINE_HEIGHT: Record<TypeStep, number> = {
   action: 1.15,
   guide: 1.3,
