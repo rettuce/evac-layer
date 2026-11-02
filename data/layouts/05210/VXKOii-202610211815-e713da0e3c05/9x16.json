@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル４氾濫危険警報",
-        "ja_easy": "こよしがわが あふれる きけん",
-        "en": "Level 4 Flood Danger",
-        "zh_hans": "子吉川 4级泛滥危险警报",
-        "zh_hant": "子吉川 4級氾濫危險警報",
-        "ko": "子吉川(고요시강) 레벨4 범람위험경보"
+        "ja_easy": "こよしがわ かわが あふれる きけん",
+        "en": "Koyoshi(子吉川) flood L4",
+        "zh_hans": "子吉川4级泛滥危险警报",
+        "zh_hant": "子吉川4級氾濫危險警報",
+        "ko": "고요시강(子吉川) 레벨4 범람위험경보"
       },
       "pictogram": "flood",
       "motion": "scale-in"
@@ -36,13 +36,13 @@
       "priority": 1,
       "text": {
         "ja": "危険な場所から避難",
-        "ja_easy": "あぶない ばしょから にげて",
-        "en": "Leave danger areas",
-        "zh_hans": "从危险地方避难",
-        "zh_hant": "從危險地方避難",
+        "ja_easy": "あぶない ところから にげて",
+        "en": "Leave danger zones",
+        "zh_hans": "离开危险地方避难",
+        "zh_hant": "離開危險地方避難",
         "ko": "위험한 곳에서 대피"
       },
-      "pictogram": "go_higher",
+      "pictogram": "directions_run",
       "motion": "pulse"
     },
     {
@@ -74,10 +74,10 @@
       "priority": 3,
       "text": {
         "ja": "危険な場所から避難",
-        "ja_easy": "あぶない ばしょから にげて",
-        "en": "Leave danger areas",
-        "zh_hans": "从危险地方避难",
-        "zh_hant": "從危險地方避難",
+        "ja_easy": "あぶない ところから にげて",
+        "en": "Leave danger zones",
+        "zh_hans": "离开危险地方避难",
+        "zh_hant": "離開危險地方避難",
         "ko": "위험한 곳에서 대피"
       },
       "motion": "static"

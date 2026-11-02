@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル５氾濫特別警報",
-        "ja_easy": "かわの みずが あふれました",
-        "en": "Level 5 Flood Emergency",
-        "zh_hans": "5级泛滥特别警报",
-        "zh_hant": "5級氾濫特別警報",
-        "ko": "레벨5 범람 특별경보"
+        "ja_easy": "こよしがわ が あふれて います",
+        "en": "子吉川 Lv5 Flood Emergency",
+        "zh_hans": "子吉川(子吉川) 5级泛滥特别警报",
+        "zh_hant": "子吉川 5級氾濫特別警報",
+        "ko": "고요시강(子吉川) 레벨5 범람 특별경보"
       },
       "pictogram": "flood",
       "motion": "scale-in"
@@ -35,12 +35,12 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "すぐ上の階へ",
-        "ja_easy": "すぐ うえの かいへ",
-        "en": "Go upstairs now",
-        "zh_hans": "立即到楼上",
-        "zh_hant": "立即到樓上",
-        "ko": "즉시 위층으로"
+        "ja": "高い所へ上がって",
+        "ja_easy": "たかい ところへ あがって",
+        "en": "Go up higher",
+        "zh_hans": "请上到高处",
+        "zh_hant": "請上到高處",
+        "ko": "높은 곳으로 올라가세요"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -50,12 +50,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "すぐ上の階へ",
-        "ja_easy": "すぐ うえの かいへ",
-        "en": "Go upstairs now",
-        "zh_hans": "立即到楼上",
-        "zh_hant": "立即到樓上",
-        "ko": "즉시 위층으로"
+        "ja": "高い所へ上がって",
+        "ja_easy": "たかい ところへ あがって",
+        "en": "Go up higher",
+        "zh_hans": "请上到高处",
+        "zh_hant": "請上到高處",
+        "ko": "높은 곳으로 올라가세요"
       },
       "motion": "static"
     },

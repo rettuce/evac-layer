@@ -1,0 +1,109 @@
+{
+  "kind": "evac-loop-report",
+  "version": "0.1",
+  "municipality": "17204",
+  "bulletin_id": "VPWW56-202610251540-50b7a29be43b",
+  "verifier": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+  "reviser": "writer-api(opus)",
+  "max_attempts": 3,
+  "outcome": "fail",
+  "reason": "findings remain after 3 attempts",
+  "attempts": [
+    {
+      "n": 1,
+      "writer_source": "writer-cache",
+      "findings": [
+        {
+          "shape": "9x16",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        },
+        {
+          "shape": "1x1",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        }
+      ],
+      "screens_ok": {
+        "16x9": true,
+        "9x16": false,
+        "32x9": true,
+        "1x1": false
+      },
+      "notes": {
+        "16x9": "大きな「注意報は解除です」とチェック入りの盾の図記号で、注意報が終わり今すぐ行動は不要だと3秒で分かる。ただし警戒レベル1の表示は専門用語で、予備知識がない人には意味が伝わりにくい。",
+        "9x16": "大きな「注意報は解除です」と盾にチェックの図記号で、注意報が終わり今は特に行動しなくてよいことが3秒で分かる。ただし上部の見出し文字が枠からはみ出して切れており、読みにくい。",
+        "32x9": "大きく「注意報は解除です」と盾にチェックの図記号が出ており、避難の必要はないと3秒で分かる。左の「レベル２土砂災害注意報解除」は文字が折り返して読みにくいが、行動の理解には影響しない。",
+        "1x1": "大きな「注意報は解除です」と安全を示す盾のチェック記号、ひらがなの「ちゅういほうは おわりです」で、土砂災害の注意報が終わり避難は不要だと3秒で分かる。ただし上部の見出しは文字が見切れていて読みにくく、「警戒レベル1」も折り返して読みづらい。"
+      }
+    },
+    {
+      "n": 2,
+      "writer_source": "writer-api:opus",
+      "findings": [
+        {
+          "shape": "9x16",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        },
+        {
+          "shape": "1x1",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        }
+      ],
+      "screens_ok": {
+        "16x9": true,
+        "9x16": false,
+        "32x9": true,
+        "1x1": false
+      },
+      "notes": {
+        "16x9": "大きな「避難の必要なし」と、チェック入りの盾の図記号、ひらがなの「にげなくて だいじょうぶです」で、逃げなくてよいとすぐ分かる。土砂災害注意報が解除されたことも見出しで読み取れる。",
+        "9x16": "大きな文字の「避難の必要なし」と、チェック入りの盾の図記号、「にげなくてだいじょうぶです」で、逃げなくてよいとすぐ分かる。ただし上部の見出しは文字がはみ出して切れており、何が解除されたのかは3秒では読み取りにくい。",
+        "32x9": "大きな「避難の必要なし」と盾にチェックの図記号、「にげなくて だいじょうぶです」で、逃げなくてよいと3秒で分かる。左の土砂災害の図記号と「解除」の文字から、注意報が終わったことも読み取れるが、見出しは折り返しで「レベル」と「２」が離れ、やや読みにくい。",
+        "1x1": "大きな「避難の必要なし」と盾にチェックの図記号、ひらがなの「にげなくてだいじょうぶです」で、逃げなくてよいとすぐ分かる。ただ、上部の見出しは文字がはみ出して切れており、何が解除されたかは読み取りにくい。"
+      }
+    },
+    {
+      "n": 3,
+      "writer_source": "writer-api:opus",
+      "findings": [
+        {
+          "shape": "9x16",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        },
+        {
+          "shape": "1x1",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        }
+      ],
+      "screens_ok": {
+        "16x9": true,
+        "9x16": false,
+        "32x9": true,
+        "1x1": false
+      },
+      "notes": {
+        "16x9": "「避難は不要です」と大きく表示され、盾とチェックの図記号とやさしい日本語の「にげなくて だいじょうぶです」も添えられているため、前提知識がなくても何もしなくてよいと3秒で分かる。",
+        "9x16": "「避難は不要です」と大きく出ていて、盾にチェックの図記号とひらがなの「にげなくてだいじょうぶです」も添えられているので、3秒で何もしなくてよいと分かる。ただし上部の見出しは文字が枠からはみ出して一部欠けており、「警戒レベル1」と合わせて少し読みにくい。",
+        "32x9": "大きな「避難は不要です」とチェック入りの盾、「にげなくて だいじょうぶです」で、逃げなくてよいとすぐ分かる。ただし左の見出しは「レベル２土砂災害注意報解除」が折り返して読みにくく、何が解除されたかの把握は少し遅れる。",
+        "1x1": "「避難は不要です」と大きく出ていて、盾にチェックの図記号と「にげなくてだいじょうぶです」も添えてあるので、何もしなくてよいと3秒で分かる。ただし上部の見出しは文字が欠けて読みにくく、何が解除されたのかは分かりにくい。"
+      }
+    }
+  ],
+  "layouts": [
+    "data/layouts/17204/VPWW56-202610251540-50b7a29be43b/16x9.json",
+    "data/layouts/17204/VPWW56-202610251540-50b7a29be43b/9x16.json",
+    "data/layouts/17204/VPWW56-202610251540-50b7a29be43b/32x9.json",
+    "data/layouts/17204/VPWW56-202610251540-50b7a29be43b/1x1.json"
+  ]
+}

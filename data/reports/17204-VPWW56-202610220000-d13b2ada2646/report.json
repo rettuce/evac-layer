@@ -3,20 +3,100 @@
   "version": "0.1",
   "municipality": "17204",
   "bulletin_id": "VPWW56-202610220000-d13b2ada2646",
-  "verifier": "static+browser(http://127.0.0.1:3152)",
+  "verifier": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
   "reviser": "writer-api(opus)",
   "max_attempts": 3,
-  "outcome": "pass",
+  "outcome": "fail",
+  "reason": "findings remain after 3 attempts",
   "attempts": [
     {
       "n": 1,
-      "writer_source": "writer-api:opus",
-      "findings": [],
+      "writer_source": "writer-cache",
+      "findings": [
+        {
+          "shape": "9x16",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        },
+        {
+          "shape": "1x1",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        }
+      ],
       "screens_ok": {
         "16x9": true,
-        "9x16": true,
+        "9x16": false,
         "32x9": true,
-        "1x1": true
+        "1x1": false
+      },
+      "notes": {
+        "16x9": "はい。大きく「注意報は解除済み」と、チェック入りの盾の図記号、ひらがなの「ちゅういほうは おわりました」が出ているので、もう警報は終わったと3秒で分かり、特別な行動は要らないと理解できます。",
+        "9x16": "「注意報は解除済み」と大きな文字、チェック入りの盾、「ちゅういほうはおわりました」で、もう何もしなくてよいと分かる。ただし上部の見出しは文字が欠けていて読みにくい。",
+        "32x9": "大きな文字の「注意報は解除済み」と盾にチェックの図記号で、注意報が終わり避難は不要だと3秒で分かる。左側のレベル表記は文字が崩れて読みにくいが、全体の意味は伝わる。",
+        "1x1": "「注意報は解除済み」が大きく出ていて、盾にチェックの図記号と「ちゅういほうはおわりました」で、もう安全で何もしなくてよいと3秒で分かる。ただ、上部の見出しは文字が見切れて読みにくいので、主な情報は下の大きな文字から得ることになる。"
+      }
+    },
+    {
+      "n": 2,
+      "writer_source": "writer-api:opus",
+      "findings": [
+        {
+          "shape": "9x16",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        },
+        {
+          "shape": "1x1",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        }
+      ],
+      "screens_ok": {
+        "16x9": true,
+        "9x16": false,
+        "32x9": true,
+        "1x1": false
+      },
+      "notes": {
+        "16x9": "「避難の必要なし」と大きく表示され、盾にチェックの図記号と「にげなくて だいじょうぶです」も添えられているので、前提知識のない人でも3秒で逃げなくてよいと分かる。上部の土砂災害の図記号と「注意報解除」の文言で、何が解除されたかも読み取れる。",
+        "9x16": "大きな「避難の必要なし」と盾にチェックの図記号、「にげなくてだいじょうぶです」で、逃げなくてよいとすぐ分かる。ただし上部の見出しは文字が欠けて重なっており読みにくく、何が解除されたかは3秒では分かりにくい。",
+        "32x9": "大きな「避難の必要なし」と盾のチェック記号、下段の「にげなくて だいじょうぶです」で、逃げなくてよいとすぐ分かる。ただし右側の「にげなくて だいじょうぶです」は画面右端で見切れかけている。",
+        "1x1": "分かる。大きな「避難の必要なし」と盾にチェックの図記号、ひらがなの「にげなくてだいじょうぶです」で、逃げなくてよいと3秒で伝わる。ただし上部の見出しは文字が枠からはみ出して切れており、読みづらい。"
+      }
+    },
+    {
+      "n": 3,
+      "writer_source": "writer-api:opus",
+      "findings": [
+        {
+          "shape": "9x16",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        },
+        {
+          "shape": "1x1",
+          "check": "overflow",
+          "cell_id": "headline",
+          "detail": "cell headline overflows its slot"
+        }
+      ],
+      "screens_ok": {
+        "16x9": true,
+        "9x16": false,
+        "32x9": true,
+        "1x1": false
+      },
+      "notes": {
+        "16x9": "「避難の必要なし」と大きく表示され、盾にチェックの図記号と「にげなくて だいじょうぶです」も添えられているので、前提知識がなくても逃げなくてよいと3秒で分かる。上部の土砂災害の図記号と「注意報解除」により、何が解除されたかも伝わる。",
+        "9x16": "大きな「避難の必要なし」と盾にチェックの図記号、「にげなくてだいじょうぶです」で、逃げなくてよいと3秒で分かる。ただし上部の見出しは文字が切れて読みにくく、解除された注意報の内容までは伝わりにくい。",
+        "32x9": "大きな「避難の必要なし」と盾のチェック記号、下段の「にげなくて だいじょうぶです」で、逃げなくてよいと3秒で分かる。ただし左の見出しは「レベル２土砂災害注意報解除」が折り返して読みにくく、右の「だいじょうぶです」も右端で切れそうなので、余裕を持たせたい。",
+        "1x1": "大きな「避難の必要なし」と盾にチェックの図記号、ひらがなの「にげなくてだいじょうぶです」で、逃げなくてよいとすぐ分かる。ただし上部の見出しは文字が欠けて読みにくく、解除の情報は主に下の大きな文言に頼る。"
       }
     }
   ],

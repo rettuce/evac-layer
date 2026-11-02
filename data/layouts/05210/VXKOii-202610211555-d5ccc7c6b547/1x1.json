@@ -21,11 +21,11 @@
       "priority": 1,
       "text": {
         "ja": "レベル３氾濫警報",
-        "ja_easy": "こよしがわ けいかい レベル３",
-        "en": "子吉川 Flood Level 3",
-        "zh_hans": "子吉川3级泛滥警报",
-        "zh_hant": "子吉川3級氾濫警報",
-        "ko": "子吉川(고요시강) 3단계 범람경보"
+        "ja_easy": "こよしがわ はんらん けいほう",
+        "en": "子吉川 Lv3 Flood Warning",
+        "zh_hans": "子吉川 3级泛滥警报",
+        "zh_hant": "子吉川 3級氾濫警報",
+        "ko": "子吉川(고요시강) 레벨3 범람경보"
       },
       "pictogram": "flood",
       "motion": "scale-in"
@@ -35,14 +35,14 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "避難の準備",
-        "ja_easy": "にげる じゅんびを して",
-        "en": "Ready to evacuate",
-        "zh_hans": "准备避难",
-        "zh_hant": "準備避難",
-        "ko": "대피 준비를 하세요"
+        "ja": "高齢者は避難",
+        "ja_easy": "おとしよりは にげてください",
+        "en": "Elderly: evacuate",
+        "zh_hans": "老人请避难",
+        "zh_hant": "老人請避難",
+        "ko": "고령자는 대피"
       },
-      "pictogram": "go_higher",
+      "pictogram": "directions_run",
       "motion": "pulse"
     },
     {
@@ -73,12 +73,12 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "避難の準備",
-        "ja_easy": "にげる じゅんびを して",
-        "en": "Ready to evacuate",
-        "zh_hans": "准备避难",
-        "zh_hant": "準備避難",
-        "ko": "대피 준비를 하세요"
+        "ja": "高齢者は避難",
+        "ja_easy": "おとしよりは にげてください",
+        "en": "Elderly: evacuate",
+        "zh_hans": "老人请避难",
+        "zh_hant": "老人請避難",
+        "ko": "고령자는 대피"
       },
       "motion": "static"
     },
