@@ -19,13 +19,13 @@ function draw() {
     el.width = width
     el.height = height
   }
-  const ctx = el.getContext('2d')!
+  const ctx = el.getContext('2d', { willReadFrequently: true })!
   const { colors } = palette.value
   const tile = height * 2
   const gradient = ctx.createLinearGradient(0, 0, 0, tile)
   colors.forEach((color, i) => gradient.addColorStop(i / colors.length, color))
   gradient.addColorStop(1, colors[0]!)
-  const shift = ambientOffset(palette.value, props.elapsedMs) * tile
+  const shift = Math.round(ambientOffset(palette.value, props.elapsedMs) * tile)
   ctx.fillStyle = gradient
   ctx.save()
   ctx.translate(0, -shift)
