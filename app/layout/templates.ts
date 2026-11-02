@@ -3,7 +3,8 @@ import { SHELTER_PICTOGRAM_PX } from './typography'
 
 const M = 48
 const G = 24
-const BAND = 176
+export const BAND_PX = 176
+const BAND = BAND_PX
 
 const LANDSCAPE: ShapeLayout = {
   id: 'split',
@@ -159,30 +160,35 @@ const SECURE_PORTRAIT: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', picto
 const SECURE_RIBBON: ShapeLayout = { ...CLEAR_RIBBON, id: 'secure-columns', pictogramPx: { headline: 160, action: 384 } }
 const SECURE_SQUARE: ShapeLayout = { ...CLEAR_SQUARE, id: 'secure-square', pictogramPx: { headline: 112, action: 240 } }
 
+// 9:16 and 1:1 put the level label under the headline, so their band grows past BAND_PX for a two-line headline.
+function stackedBand(layout: ShapeLayout): ShapeLayout {
+  return { ...layout, rows: ['auto', ...layout.rows.slice(1)] }
+}
+
 export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   'evac-now': {
     '16x9': [LANDSCAPE],
-    '9x16': [PORTRAIT],
+    '9x16': [stackedBand(PORTRAIT)],
     '32x9': [RIBBON, RIBBON_WIDE_DIRECTION],
-    '1x1': [SQUARE],
+    '1x1': [stackedBand(SQUARE)],
   },
   'evac-prepare': {
     '16x9': [requireShelterInsteadOfDirection(LANDSCAPE)],
-    '9x16': [requireShelterInsteadOfDirection(PORTRAIT)],
+    '9x16': [stackedBand(requireShelterInsteadOfDirection(PORTRAIT))],
     '32x9': [requireShelterInsteadOfDirection(RIBBON), requireShelterInsteadOfDirection(RIBBON_WIDE_DIRECTION)],
-    '1x1': [requireShelterInsteadOfDirection(SQUARE)],
+    '1x1': [stackedBand(requireShelterInsteadOfDirection(SQUARE))],
   },
   'secure-now': {
     '16x9': [SECURE_LANDSCAPE],
-    '9x16': [SECURE_PORTRAIT],
+    '9x16': [stackedBand(SECURE_PORTRAIT)],
     '32x9': [SECURE_RIBBON],
-    '1x1': [SECURE_SQUARE],
+    '1x1': [stackedBand(SECURE_SQUARE)],
   },
   'all-clear': {
     '16x9': [CLEAR_STACK],
-    '9x16': [CLEAR_STACK],
+    '9x16': [stackedBand(CLEAR_STACK)],
     '32x9': [CLEAR_RIBBON],
-    '1x1': [CLEAR_SQUARE],
+    '1x1': [stackedBand(CLEAR_SQUARE)],
   },
 }
 

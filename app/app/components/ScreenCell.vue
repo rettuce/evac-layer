@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import { HTML_LANG, LANG_LABEL, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
-import type { AlertLevel, LangKey, LayoutCell } from '~~/layout/types'
-import { LEVEL_LABEL_JA } from '~~/layout/palette'
+import { HEADLINE_STACKED_MAX_LINES, HTML_LANG, LANG_LABEL, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
+import type { LangKey, LayoutCell } from '~~/layout/types'
 
 const props = defineProps<{
   cell: LayoutCell
-  level: AlertLevel
+  levelLabel?: string
+  stackedHeadline?: boolean
+  headlineScale?: number
   pictogramPx: number
   languageIndex: number
   languageStyle: Record<string, string | number>
 }>()
 
 const rotationLangs = computed<LangKey[]>(() => LANGUAGE_ROTATION.filter((key) => props.cell.text[key]))
+const headlineStyle = computed(() =>
+  props.headlineScale && props.headlineScale !== 1 ? { fontSize: `calc(var(--fs-guide) * ${props.headlineScale} * var(--px))` } : undefined,
+)
 const currentLang = computed(() => {
   const langs = rotationLangs.value
   return langs.length ? langs[props.languageIndex % langs.length] : undefined
@@ -19,18 +23,22 @@ const currentLang = computed(() => {
 </script>
 
 <template>
-  <div class="cell-body" :class="`role-${cell.role}`">
+  <div class="cell-body" :class="[`role-${cell.role}`, { 'is-stacked': cell.role === 'headline' && stackedHeadline }]">
     <template v-if="cell.role === 'headline'">
       <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" />
-      <p class="t-guide headline-text">{{ cell.text.ja }}</p>
-      <p class="t-guide level-label">{{ LEVEL_LABEL_JA[level] }}</p>
+      <p
+        class="t-guide headline-text"
+        :style="headlineStyle"
+        :data-max-lines="stackedHeadline ? HEADLINE_STACKED_MAX_LINES : undefined"
+      >{{ cell.text.ja }}</p>
+      <p v-if="levelLabel" class="t-guide level-label">{{ levelLabel }}</p>
     </template>
 
     <template v-else-if="cell.role === 'action'">
       <p class="t-action action-text">{{ cell.text.ja }}</p>
       <div class="action-sub">
         <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" />
-        <p v-if="cell.text.ja_easy" class="t-guide" lang="ja">{{ cell.text.ja_easy }}</p>
+        <p v-if="cell.text.ja_easy" class="t-guide" lang="ja" data-lang="ja_easy">{{ cell.text.ja_easy }}</p>
       </div>
     </template>
 
@@ -96,6 +104,28 @@ p {
 }
 .role-headline .level-label {
   margin-left: auto;
+}
+.role-headline.is-stacked {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'pictogram text'
+    'pictogram label';
+  align-content: center;
+  row-gap: 0;
+  min-height: calc(var(--band-height) * var(--px));
+}
+.role-headline.is-stacked > .pictogram {
+  grid-area: pictogram;
+  align-self: center;
+}
+.role-headline.is-stacked .headline-text {
+  grid-area: text;
+}
+.role-headline.is-stacked .level-label {
+  grid-area: label;
+  margin-left: 0;
+  text-align: right;
 }
 .is-inline .role-direction,
 .is-inline .role-shelter {
