@@ -88,6 +88,16 @@ export function shownRowAt(rows: ReplayRow[], index: number, hasScreenFor: (bull
   return shown
 }
 
+export function currentBulletinAt(
+  rows: ReplayRow[],
+  elapsedMs: number,
+  speed: number,
+  hasScreenFor: (bulletinId: string) => boolean,
+): string | undefined {
+  const shown = shownRowAt(rows, rowIndexAt(rows, elapsedMs, speed), hasScreenFor)
+  return shown >= 0 ? rows[shown]!.bulletin_id : undefined
+}
+
 function lastChangeAt(rows: ReplayRow[], index: number, hasScreenFor: (bulletinId: string) => boolean): number {
   const current = shownRowAt(rows, index, hasScreenFor)
   let change = index

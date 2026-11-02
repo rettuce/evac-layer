@@ -12,3 +12,4 @@ demo/renders/
 demo/cache/
 tmp/
 data/approvals.json
+data/subscriptions.json

@@ -7,6 +7,8 @@ import { isTrustedLayoutSrc } from '../layout/trust.ts'
 import { adminAccess, clientAddressFor, type AdminRequest } from '../server/utils/adminPolicy.ts'
 import { liveLayoutGate } from '../layout/gate.ts'
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
+import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
+import { WEBHOOK_RETRIES, webhookRetryDelayMs } from '../layout/feed.ts'
 
 test('dev layout bridge serves only .json files inside the repository', async () => {
   const sandbox = await mkdtemp(join(tmpdir(), 'evac-repo-'))
@@ -99,4 +101,19 @@ test('dev trusts only the forwarded address appended by a local relay', () => {
   assert.equal(clientAddressFor(undefined, undefined, true), '')
   assert.equal(clientAddressFor('10.0.0.5', '127.0.0.1', false), '10.0.0.5')
   assert.equal(clientAddressFor(undefined, '127.0.0.1', false), '')
+})
+
+test('webhook targets: only public addresses over http(s)', () => {
+  for (const address of ['127.0.0.1', '10.1.2.3', '172.20.0.1', '192.168.0.92', '169.254.169.254', '100.64.0.1', '0.0.0.0', '::1', 'fd00::1', 'fe80::1', '::ffff:127.0.0.1', '::ffff:7f00:1', '::ffff:c0a8:5c', '::7f00:1', '2002:c0a8:5c::1', '2001:0:4136:e378::1', '64:ff9b::7f00:1', '2001:db8::1']) {
+    assert.equal(isPublicAddress(address), false, address)
+  }
+  for (const address of ['8.8.8.8', '133.242.0.1', '2001:4860:4860::8888']) assert.equal(isPublicAddress(address), true, address)
+  assert.equal(checkWebhookUrl('ftp://example.com/').ok, false)
+  assert.equal(checkWebhookUrl('not a url').ok, false)
+  assert.equal(checkWebhookUrl('https://cms.example/hooks/evac').ok, true)
+})
+
+test('webhook retries back off exponentially, five times', () => {
+  assert.equal(WEBHOOK_RETRIES, 5)
+  assert.deepEqual([0, 1, 2, 3, 4].map(webhookRetryDelayMs), [1000, 2000, 4000, 8000, 16000])
 })
