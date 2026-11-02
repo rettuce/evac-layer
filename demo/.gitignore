@@ -3,3 +3,4 @@ screens/*.png
 !screens/.gitkeep
 assets/textures/
 blender/__pycache__/
+capture/out/
