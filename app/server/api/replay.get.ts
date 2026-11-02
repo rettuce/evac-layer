@@ -37,7 +37,6 @@ async function loadReplayIndex(municipality: string): Promise<ReplayIndex | unde
 }
 
 export default defineEventHandler(async (event): Promise<ReplayStatus> => {
-  assertDev()
   const query = getQuery(event)
   if (!isMunicipalityId(query.municipality)) throw createError({ status: 400, statusText: 'Bad Request', message: 'municipality must be a 5-digit code' })
   const speed = Number(query.speed ?? DEFAULT_REPLAY_SPEED)

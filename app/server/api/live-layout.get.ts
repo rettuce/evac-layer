@@ -3,7 +3,6 @@ import { isShape } from '~~/layout/shapes'
 import { isBulletinId, isMunicipalityId } from '~~/layout/replay'
 
 export default defineEventHandler(async (event) => {
-  assertDev()
   const { municipality, bulletin, shape } = getQuery(event)
   if (!isMunicipalityId(municipality) || !isBulletinId(bulletin) || !isShape(shape)) {
     throw createError({ status: 400, statusText: 'Bad Request', message: 'municipality, bulletin and shape are required' })

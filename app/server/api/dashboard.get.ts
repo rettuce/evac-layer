@@ -29,7 +29,6 @@ function attemptFailed(attempt: ReportFile['attempts'][number]): boolean {
 }
 
 export default defineEventHandler(async () => {
-  assertDev()
   const root = dataDir()
   const knowledge = new Set((await listDir(join(root, 'municipalities'))).map((f) => f.split('.')[0]!).filter((code) => /^\d{5}$/.test(code)))
 
@@ -45,7 +44,7 @@ export default defineEventHandler(async () => {
     let reports = 0
     for (const entry of index.entries) {
       for (const file of entry.layouts ?? []) {
-        const layout = await readJsonIfExists<EvacScreen>(join(root, '..', file))
+        const layout = await readJsonIfExists<EvacScreen>(join(root, file.replace(/^data\//, '')))
         if (!layout) continue
         layouts += 1
         const languages = layout.cells.find((cell) => cell.role === 'languages')

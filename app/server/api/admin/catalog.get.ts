@@ -25,7 +25,6 @@ interface SiteFile {
 }
 
 export default defineEventHandler(async () => {
-  assertDev()
   const root = dataDir()
   const approvals = await readApprovals()
 
