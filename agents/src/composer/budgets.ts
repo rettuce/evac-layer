@@ -1,9 +1,9 @@
-import type { Shape, TemplateId } from "../../../app/layout/types";
+import type { PanelShape, TemplateId } from "../../../app/layout/types";
 import type { CellBudget } from "../writer/request.js";
 
 // Provisional; the rationale lives in schema/README.md ("Character budgets").
 const HEADLINE = { role: "headline" as const, max_chars: { ja: 14, ja_easy: 18, en: 24 } };
-export const CHAR_BUDGETS: Record<Shape, CellBudget[]> = {
+export const CHAR_BUDGETS: Record<PanelShape, CellBudget[]> = {
   "16x9": [
     HEADLINE,
     { role: "action", max_chars: { ja: 12, ja_easy: 18, en: 28 } },
@@ -33,13 +33,13 @@ export const CHAR_BUDGETS: Record<Shape, CellBudget[]> = {
 // Measured by the render seat (2026-11-02): on 1x1 the action line is 144 px in a 984 px body, so one line holds
 // 6 full-width characters and two lines 12. evac-prepare keeps the shelter required, which leaves room for one
 // line only; the other templates allow two.
-const TEMPLATE_OVERRIDES: Partial<Record<TemplateId | "secure-now", Partial<Record<Shape, CellBudget[]>>>> = {
+const TEMPLATE_OVERRIDES: Partial<Record<TemplateId | "secure-now", Partial<Record<PanelShape, CellBudget[]>>>> = {
   "evac-now": { "1x1": [{ role: "action", max_chars: { ja: 12 } }] },
   "secure-now": { "1x1": [{ role: "action", max_chars: { ja: 12 } }] },
   "all-clear": { "1x1": [{ role: "action", max_chars: { ja: 12 } }] },
 };
 
-export function budgetsFor(template: string, shape: Shape): CellBudget[] {
+export function budgetsFor(template: string, shape: PanelShape): CellBudget[] {
   const over = TEMPLATE_OVERRIDES[template as TemplateId]?.[shape] ?? [];
   return CHAR_BUDGETS[shape].map((b) => {
     const o = over.find((x) => x.role === b.role);
@@ -47,7 +47,7 @@ export function budgetsFor(template: string, shape: Shape): CellBudget[] {
   });
 }
 
-export function strictestBudgets(template: string, shapes: readonly Shape[]): CellBudget[] {
+export function strictestBudgets(template: string, shapes: readonly PanelShape[]): CellBudget[] {
   const roles = [...new Set(shapes.flatMap((s) => budgetsFor(template, s).map((b) => b.role)))];
   return roles.map((role) => {
     const max: CellBudget["max_chars"] = {};

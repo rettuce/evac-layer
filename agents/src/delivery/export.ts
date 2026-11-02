@@ -2,7 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import puppeteer from "puppeteer-core";
 import { SHAPES } from "../../../app/layout/shapes";
-import { SHAPE_ORDER, type ComposerShape } from "../composer/rules.js";
+import type { Shape } from "../../../app/layout/types";
+import { SHAPE_ORDER } from "../composer/rules.js";
 import { LAYOUTS_DIR } from "../loop/report.js";
 import { DEFAULT_CHROME } from "../loop/browser-verifier.js";
 import { REPO_ROOT } from "../paths.js";
@@ -10,8 +11,8 @@ import { formatErrors, validateDoc } from "../schemas.js";
 import { exportable, readApprovals } from "./gate.js";
 import { INLINE_PAGE_SCRIPT } from "./inline-page.js";
 
-// pillar is drawn at its logical size and captured at half scale (contract v0, 18:03: 6616 × 5834 → 3308 × 2917).
-const CAPTURE_SCALE: Partial<Record<ComposerShape, number>> = { pillar: 0.5 };
+// pillar is drawn at its logical size and captured at half scale (6616 × 5046 → 3308 × 2523).
+const CAPTURE_SCALE: Partial<Record<Shape, number>> = { pillar: 0.5 };
 const READY_TIMEOUT_MS = 30_000;
 const SETTLE_MS = 500;
 
@@ -32,9 +33,6 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
   const log = opts.log ?? (() => {});
   const shapes = SHAPE_ORDER.filter((shape) => !opts.skipShapes?.includes(shape));
   for (const shape of SHAPE_ORDER) if (!shapes.includes(shape)) log(`skip shape ${shape} (--skip-shapes)`);
-  const viewportOf = (shape: ComposerShape) =>
-    (SHAPES as Partial<Record<ComposerShape, { width: number; height: number }>>)[shape] ??
-    (() => { throw new ExportStop(`the renderer has no ${shape} shape yet; pass --skip-shapes ${shape}`); })();
   const site = findSite(opts.site);
   const m = site.municipality_id;
   const approvals = readApprovals();
@@ -67,7 +65,7 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
         const live = `/api/live-layout?${new URLSearchParams({ municipality: m, bulletin: e.bulletin_id, shape, site: site.id })}`;
         const page = await browser.newPage();
         try {
-          await page.setViewport({ ...viewportOf(shape), deviceScaleFactor: CAPTURE_SCALE[shape] ?? 1 });
+          await page.setViewport({ ...SHAPES[shape], deviceScaleFactor: CAPTURE_SCALE[shape] ?? 1 });
           await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
           await page.goto(`${opts.baseUrl}/screen?${new URLSearchParams({ shape, src: live })}`, { waitUntil: "networkidle0" });
           const failed = await page.$('[data-error]');

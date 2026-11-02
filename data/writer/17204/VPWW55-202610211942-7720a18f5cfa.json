@@ -6,48 +6,56 @@
         "role": "headline",
         "text": {
           "ja": "レベル２大雨注意報",
-          "ja_easy": "おおあめ ちゅういほう おわりです",
+          "ja_easy": "おおあめ ちゅういほう おわり",
           "en": "Heavy Rain Advisory Over",
-          "zh_hans": "大雨注意报已解除",
-          "zh_hant": "大雨注意報已解除",
-          "ko": "호우주의보 해제"
+          "zh_hans": "2级大雨注意报解除",
+          "zh_hant": "2級大雨注意報解除",
+          "ko": "레벨2 호우주의보 해제"
         },
-        "basis": "Alert VPWW55 for 輪島市 (code 1720400): kind_name 'レベル２大雨注意報', status 'cleared'. Issued 2026-10-21T19:42+09:00 by 金沢地方気象台. The warning name is used unchanged."
+        "basis": "警報 areas[0].kind_name「レベル２大雨注意報」と status: cleared（輪島市）。見出しは電文の警報名に「解除」を空白なしでつなげて表記。"
       },
       {
         "role": "action",
         "text": {
           "ja": "避難は不要です",
-          "ja_easy": "にげなくて いいです",
-          "en": "No need to leave",
+          "ja_easy": "にげなくて だいじょうぶです",
+          "en": "No need to flee",
           "zh_hans": "无需避难",
           "zh_hant": "無需避難",
           "ko": "대피할 필요 없음"
         },
-        "basis": "Alert areas[輪島市].status 'cleared' for レベル２大雨注意報. This matches the all-clear template's safe_here pictogram, which means evacuation is no longer needed. No hazard or shelter entries in the 輪島市 knowledge file apply. Its cautions concern the tsunami map (tsunami_hm_wajima.pdf p.1) and shelter capacity (shitei_hinanjo.pdf p.1), so they are not used."
+        "basis": "警報 areas[0].status: cleared（輪島市のレベル２大雨注意報の解除）と、テンプレート all-clear の図記号 safe_here（避難の必要がなくなった）。"
       },
       {
         "role": "languages",
         "text": {
           "ja": "避難は不要です",
-          "ja_easy": "にげなくて いいです",
-          "en": "No need to leave",
+          "ja_easy": "にげなくて だいじょうぶです",
+          "en": "No need to flee",
           "zh_hans": "无需避难",
           "zh_hant": "無需避難",
           "ko": "대피할 필요 없음"
         },
-        "basis": "The same content as the action cell, in each language. It rests on alert areas[輪島市].status 'cleared' for レベル２大雨注意報 and the safe_here pictogram."
+        "basis": "action セルと同じ内容。根拠は警報 areas[0].status: cleared と図記号 safe_here。"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VPWW55-202610211942-7720a18f5cfa",
-      "input": 4835,
-      "output": 1969,
+      "input": 4934,
+      "output": 1440,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.05872
+      "usd": 0.048536
+    },
+    {
+      "stage": "writer VPWW55-202610211942-7720a18f5cfa",
+      "input": 5103,
+      "output": 1461,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.049632
     }
   ],
   "lint": []

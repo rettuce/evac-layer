@@ -1,4 +1,4 @@
-import type { LayoutCell, Shape } from "../../../app/layout/types";
+import type { LayoutCell, PanelShape } from "../../../app/layout/types";
 import type { Alert } from "../jma/parse.js";
 import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { Lang } from "../writer/request.js";
@@ -87,12 +87,12 @@ function hhmm(iso: string): string {
   return `${m[1]}:${m[2]}`;
 }
 
-function writerFor(writer: WriterOutput | Partial<Record<Shape, WriterOutput>>, shape: Shape): WriterOutput {
+function writerFor(writer: WriterOutput | Partial<Record<PanelShape, WriterOutput>>, shape: PanelShape): WriterOutput {
   if ("cells" in writer) return writer as WriterOutput;
-  return (writer as Partial<Record<Shape, WriterOutput>>)[shape] ?? stop(`no Writer output for shape ${shape}`);
+  return (writer as Partial<Record<PanelShape, WriterOutput>>)[shape] ?? stop(`no Writer output for shape ${shape}`);
 }
 
-function checkBudget(template: string, shape: Shape, cell: WriterCell) {
+function checkBudget(template: string, shape: PanelShape, cell: WriterCell) {
   const budget = budgetsFor(template, shape).find((b) => b.role === cell.role);
   for (const [lang, max] of Object.entries(budget?.max_chars ?? {})) {
     const t = cell.text[lang as Lang];
@@ -100,7 +100,7 @@ function checkBudget(template: string, shape: Shape, cell: WriterCell) {
   }
 }
 
-export function compose(input: { alert: Alert; municipality: Municipality; site: Site; writer: WriterOutput | Partial<Record<Shape, WriterOutput>> }) {
+export function compose(input: { alert: Alert; municipality: Municipality; site: Site; writer: WriterOutput | Partial<Record<PanelShape, WriterOutput>> }) {
   const { alert, municipality: m, site } = input;
   if (site.municipality_id !== m.id) stop(`site ${site.id} belongs to ${site.municipality_id}, not ${m.id}`);
   const situation = situationFor(alert, m.id);

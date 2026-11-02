@@ -1,6 +1,6 @@
 import type { Browser, Page } from "puppeteer-core";
 import type { Shape } from "../../../app/layout/types";
-import { SHAPES } from "../../../app/layout/shapes";
+import { PILLAR, SHAPES } from "../../../app/layout/shapes";
 import type { CellText, ScreenState, TextSample } from "./checks.js";
 
 const READY_TIMEOUT_MS = 30_000;
@@ -32,8 +32,15 @@ async function open(browser: Browser, url: string, shape: Shape, reducedMotion: 
   return page;
 }
 
+// The pillar repeats one screen on four faces, so only face 0 is read and captured (the renderer marks the
+// others aria-hidden). A face has the pixel density of the 55-inch 9:16 panel (contract v0, 18:03), so the
+// viewing-distance sizes apply unscaled; PILLAR.faceScale is how much larger the renderer draws, not the floor.
+const cellsRoot = (shape: Shape) => (shape === "pillar" ? '[data-face="0"] ' : "");
+const typeScale = (shape: Shape) => (shape === "pillar" ? 1 : Math.min(SHAPES[shape].width, SHAPES[shape].height) / TYPE_BASE_SHORT_SIDE_PX);
+
 // Wider than 2:1 is captured as two halves so that downscaling to the API's 1568 px edge keeps text legible.
 async function capture(page: Page, shape: Shape): Promise<string[]> {
+  if (shape === "pillar") return [Buffer.from(await page.screenshot({ type: "png", clip: { x: 0, y: 0, width: PILLAR.faceWidth, height: PILLAR.height } })).toString("base64")];
   const { width, height } = SHAPES[shape];
   if (width / height <= 2) return [Buffer.from(await page.screenshot({ type: "png" })).toString("base64")];
   const half = width / 2;
@@ -48,7 +55,7 @@ export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape
       const d = (el as HTMLElement).dataset;
       return { shape: d.shape ?? "", template: d.template ?? "", variant: d.variant ?? "", level: d.level ?? "", dropped: d.dropped ?? "", overflow: d.overflow ?? null, missing_required: d.missingRequired ?? null };
     });
-    const samples = await page.$$eval("[data-cell-id]", (cells): TextSample[] =>
+    const samples = await page.$$eval(`${cellsRoot(shape)}[data-cell-id]`, (cells): TextSample[] =>
       cells.flatMap((cell) => {
         const c = cell as HTMLElement;
         return [...c.querySelectorAll<HTMLElement>(".t-action, .t-guide, .t-fine")]
@@ -67,11 +74,10 @@ export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape
           }));
       }),
     );
-    const cells = await page.$$eval("[data-cell-id]", (els): CellText[] =>
+    const cells = await page.$$eval(`${cellsRoot(shape)}[data-cell-id]`, (els): CellText[] =>
       els.map((el) => ({ id: (el as HTMLElement).dataset.cellId!, role: (el as HTMLElement).dataset.role as CellText["role"], text: (el as HTMLElement).innerText.replace(/\s+/g, " ").trim() })),
     );
-    const { width, height } = SHAPES[shape];
-    return { state, samples, cells, pngs, scale: Math.min(width, height) / TYPE_BASE_SHORT_SIDE_PX };
+    return { state, samples, cells, pngs, scale: typeScale(shape) };
   } finally {
     await page.close();
   }

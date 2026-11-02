@@ -1,0 +1,106 @@
+{
+  "version": "0.1",
+  "kind": "evac-screen",
+  "municipality": {
+    "id": "17204",
+    "name": "輪島市"
+  },
+  "alert": {
+    "source": "jma",
+    "bulletin_id": "VPWW55-202610200711-08afb5e91cb5",
+    "hazard": "heavy_rain",
+    "level": 3,
+    "issued_at": "2026-10-20T07:11:00+09:00"
+  },
+  "shape": "pillar",
+  "template": "evac-prepare",
+  "cells": [
+    {
+      "id": "headline",
+      "role": "headline",
+      "priority": 1,
+      "text": {
+        "ja": "レベル３大雨警報",
+        "ja_easy": "レベル３ おおあめ けいほう",
+        "en": "Heavy Rain Warning Lv3",
+        "zh_hans": "3级暴雨警报",
+        "zh_hant": "3級大雨警報",
+        "ko": "레벨3 호우경보"
+      },
+      "pictogram": "heavy_rain",
+      "motion": "scale-in"
+    },
+    {
+      "id": "action",
+      "role": "action",
+      "priority": 1,
+      "text": {
+        "ja": "高齢者は避難",
+        "ja_easy": "おとしよりは にげてください",
+        "en": "Elderly: evacuate",
+        "zh_hans": "老年人请避难",
+        "zh_hant": "老年人請避難",
+        "ko": "고령자는 대피하세요"
+      },
+      "pictogram": "directions_run",
+      "motion": "pulse"
+    },
+    {
+      "id": "direction",
+      "role": "direction",
+      "priority": 2,
+      "text": {
+        "ja": "北西へ"
+      },
+      "pictogram": "arrow_forward",
+      "rotation": 225,
+      "motion": "static"
+    },
+    {
+      "id": "shelter",
+      "role": "shelter",
+      "priority": 2,
+      "text": {
+        "ja": "輪島市立港公民館"
+      },
+      "kind": "emergency_evacuation_site",
+      "pictogram": "emergency_evacuation_site",
+      "distance_m": 910,
+      "motion": "static"
+    },
+    {
+      "id": "languages",
+      "role": "languages",
+      "priority": 3,
+      "text": {
+        "ja": "高齢者は避難",
+        "ja_easy": "おとしよりは にげてください",
+        "en": "Elderly: evacuate",
+        "zh_hans": "老年人请避难",
+        "zh_hant": "老年人請避難",
+        "ko": "고령자는 대피하세요"
+      },
+      "motion": "static"
+    },
+    {
+      "id": "source",
+      "role": "source",
+      "priority": 9,
+      "text": {
+        "ja": "出典: 国土地理院 指定緊急避難場所データ / 気象庁 07:11"
+      },
+      "motion": "static"
+    }
+  ],
+  "palette": "cabinet-office-5",
+  "sources": [
+    {
+      "type": "gsi",
+      "file": "17204_2.csv"
+    },
+    {
+      "type": "jma",
+      "bulletin_id": "VPWW55-202610200711-08afb5e91cb5"
+    }
+  ]
+}

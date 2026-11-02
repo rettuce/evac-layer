@@ -50,3 +50,9 @@ test("the action does not borrow a municipal evacuation order name", async () =>
   assert.deepEqual(lintMunicipalOrderName("高齢者等は避難"), []);
   assert.deepEqual(lintMunicipalOrderName("危険な場所から避難"), []);
 });
+
+test("English text carries no Japanese script", async () => {
+  const { lintEnglishScript } = await import("../src/writer/rules.js");
+  assert.equal(lintEnglishScript("Wajima(輪島市) lifted")[0]?.match, "輪島市");
+  assert.deepEqual(lintEnglishScript("Wajima: advisory lifted"), []);
+});

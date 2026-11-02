@@ -6,37 +6,37 @@
         "role": "headline",
         "text": {
           "ja": "レベル３氾濫警報",
-          "ja_easy": "こよしがわ はんらん けいほう",
-          "en": "子吉川 Lv3 Flood Warning",
-          "zh_hans": "子吉川 3级泛滥警报",
-          "zh_hant": "子吉川 3級氾濫警報",
-          "ko": "子吉川(고요시강) 레벨3 범람경보"
+          "ja_easy": "こよしがわ あふれる けいほう",
+          "en": "Koyoshi River Lv3 Flood",
+          "zh_hans": "子吉川3级泛滥警报",
+          "zh_hant": "子吉川3級氾濫警報",
+          "ko": "고요시강 레벨3 범람경보"
         },
-        "basis": "警報 raw_title「子吉川レベル３氾濫警報」、areas[0].kind_name「レベル３氾濫警報」（publishing_office: 秋田河川国道事務所 秋田地方気象台）"
+        "basis": "警報 raw_title「子吉川レベル３氾濫警報」、areas[0].kind_name「レベル３氾濫警報」、level 3。前回の指摘に従い、en には漢字の「子吉川」を併記していない。"
       },
       {
         "role": "action",
         "text": {
           "ja": "高齢者は避難",
-          "ja_easy": "おとしよりは にげてください",
+          "ja_easy": "としよりは にげて ください",
           "en": "Elderly: evacuate",
-          "zh_hans": "老人请避难",
-          "zh_hant": "老人請避難",
-          "ko": "고령자는 대피"
+          "zh_hans": "老年人请避难",
+          "zh_hant": "老年人請避難",
+          "ko": "고령자는 대피하세요"
         },
-        "basis": "警報 level: 3（headline_text「警戒レベル３相当情報［洪水］」）とテンプレート evac-prepare の図記号 directions_run（レベル3では高齢者等が避難）。市町村の避難情報の名称は使わず行動として記載"
+        "basis": "警報 level 3（headline_text【警戒レベル３相当情報［洪水］】）と、図記号 directions_run（レベル3 では高齢者等が避難）。市町村の避難情報の名称は使わず、行動として書いた。"
       },
       {
         "role": "languages",
         "text": {
           "ja": "高齢者は避難",
-          "ja_easy": "おとしよりは にげてください",
+          "ja_easy": "としよりは にげて ください",
           "en": "Elderly: evacuate",
-          "zh_hans": "老人请避难",
-          "zh_hant": "老人請避難",
-          "ko": "고령자는 대피"
+          "zh_hans": "老年人请避难",
+          "zh_hant": "老年人請避難",
+          "ko": "고령자는 대피하세요"
         },
-        "basis": "action セルと同じ内容（警報 level: 3、図記号 directions_run）を各言語で表示"
+        "basis": "action セルと同じ内容。警報 level 3 と、図記号 directions_run（レベル3 では高齢者等が避難）。"
       }
     ]
   },
@@ -44,10 +44,18 @@
     {
       "stage": "writer VXKOii-202610211555-d5ccc7c6b547",
       "input": 3227,
-      "output": 1258,
+      "output": 1980,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.038068
+      "usd": 0.052508
+    },
+    {
+      "stage": "writer VXKOii-202610211555-d5ccc7c6b547",
+      "input": 3270,
+      "output": 1396,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.041
     }
   ],
   "lint": []

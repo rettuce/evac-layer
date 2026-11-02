@@ -80,3 +80,10 @@ export function lintMunicipalOrderName(text: string): LintFinding[] {
   const m = text.match(MUNICIPAL_ORDER_NAMES);
   return m ? [{ rule: "no-municipal-order-name", match: m[0] }] : [];
 }
+
+const JAPANESE_SCRIPT = /[\u3040-\u30ff\u3400-\u9fff]+/;
+
+export function lintEnglishScript(text: string): LintFinding[] {
+  const m = text.match(JAPANESE_SCRIPT);
+  return m ? [{ rule: "en-no-japanese-script", match: m[0] }] : [];
+}
