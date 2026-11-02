@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { DEFAULT_SWITCH_AT_MS, scenarioFrame, type ScenarioName } from '~~/layout/scenario'
 import { isShape, shapeForViewport } from '~~/layout/shapes'
 import type { EvacScreen } from '~~/layout/types'
+import type { ClockMode } from '~/composables/useScreenClock'
 
 const fixtures = import.meta.glob<EvacScreen>('../../fixtures/*.json', { eager: true, import: 'default' })
 
@@ -8,24 +10,98 @@ function fixtureByName(name: string): EvacScreen | undefined {
   return fixtures[`../../fixtures/${name}.json`]
 }
 
+function numberQuery(value: unknown, fallback: number): number {
+  const parsed = Number(value)
+  return value === undefined || Number.isNaN(parsed) ? fallback : parsed
+}
+
 const route = useRoute()
 const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
 const screen = computed(() => fixtureByName(layoutName.value))
-const variant = computed(() => Number(route.query.variant ?? 0) || 0)
+const variant = computed(() => numberQuery(route.query.variant, 0))
 const shape = computed(() => {
   const requested = route.query.shape
   return isShape(requested) ? requested : shapeForViewport(window.innerWidth, window.innerHeight)
 })
+
+const clockMode = computed<ClockMode>(() => (route.query.clock === 'virtual' ? 'virtual' : 'real'))
+const virtualT = computed(() => numberQuery(route.query.t, 0))
+const { elapsed, start } = useScreenClock(clockMode, virtualT)
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+const scenario = computed<ScenarioName | undefined>(() => {
+  if (route.query.mode !== 'scenario') return undefined
+  return route.query.scenario === 'ambient' ? 'ambient' : 'switch'
+})
+const switchAtMs = computed(() => numberQuery(route.query.t_switch, DEFAULT_SWITCH_AT_MS))
+const clearAtMs = computed(() => (route.query.t_clear === undefined ? undefined : numberQuery(route.query.t_clear, 0)))
+const frame = computed(() =>
+  scenario.value ? scenarioFrame(scenario.value, elapsed.value, switchAtMs.value, clearAtMs.value) : undefined,
+)
+
+const seed = computed(() => String(route.query.seed ?? layoutName.value))
+const siteName = computed(() => String(route.query.site_name ?? screen.value?.municipality.name ?? ''))
+const realStartEpoch = Date.now()
+const clockEpochMs = computed(() => {
+  if (clockMode.value === 'real') return realStartEpoch + elapsed.value
+  const issued = screen.value ? Date.parse(screen.value.alert.issued_at) : 0
+  return issued - switchAtMs.value + elapsed.value
+})
+
+if (scenario.value) start()
 </script>
 
 <template>
-  <EvacScreen v-if="screen" :screen="screen" :shape="shape" :variant="variant" />
-  <p v-else class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</p>
+  <div v-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>
+
+  <EvacScreen
+    v-else-if="!frame"
+    :screen="screen"
+    :shape="shape"
+    :variant="variant"
+    :elapsed-ms="elapsed"
+    :reduced-motion="reducedMotion"
+    :data-clock="clockMode"
+    @ready="start"
+  />
+
+  <div v-else class="scenario" :data-scenario="scenario" :data-clock="clockMode">
+    <AmbientLayer
+      v-show="frame.ambientVisible"
+      :seed="seed"
+      :elapsed-ms="elapsed"
+      :clock-epoch-ms="clockEpochMs"
+      :site-name="siteName"
+    />
+    <div
+      class="alert-layer"
+      :style="{ opacity: frame.alertVisible ? frame.alertOpacity : 0 }"
+      :data-visible="frame.alertVisible ? '1' : '0'"
+      data-layer="alert"
+    >
+      <EvacScreen
+        :screen="screen"
+        :shape="shape"
+        :variant="variant"
+        :elapsed-ms="frame.alertElapsedMs"
+        :reduced-motion="reducedMotion"
+      />
+    </div>
+    <div v-if="frame.black" class="black" data-layer="black" />
+  </div>
 </template>
 
 <style scoped>
 .missing {
   font-family: 'Noto Sans', sans-serif;
   padding: 48px;
+}
+.alert-layer,
+.black {
+  position: fixed;
+  inset: 0;
+}
+.black {
+  background: #000;
 }
 </style>
