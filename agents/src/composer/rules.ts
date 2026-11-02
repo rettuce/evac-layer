@@ -1,0 +1,81 @@
+import type { Shape, TemplateId } from "../../../app/layout/types";
+import type { Alert } from "../jma/parse.js";
+import { tsunamiRegionsFor } from "../jma/regions.js";
+import type { TsunamiCategory } from "../jma/codes.js";
+
+export class ComposerStop extends Error {}
+const stop = (msg: string): never => { throw new ComposerStop(msg); };
+
+export const SHAPE_ORDER: readonly Shape[] = ["16x9", "9x16", "32x9", "1x1"];
+export const LANGUAGES_REQUIRED_ON: readonly Shape[] = ["16x9", "9x16", "32x9"];
+
+export const TSUNAMI_DISPLAY_LEVEL: Record<TsunamiCategory, number | null> = {
+  major_warning: 4,
+  warning: 3,
+  advisory: 2,
+  forecast: 1,
+  cleared: 1,
+  none: null,
+};
+
+export const HAZARD_PICTOGRAM: Record<string, string> = {
+  tsunami: "tsunami",
+  flood: "flood",
+  inland_flood: "flood",
+  landslide: "landslide",
+  heavy_rain: "heavy_rain",
+  storm_surge: "storm_surge",
+  earthquake: "earthquake",
+};
+
+export const ACTION_PICTOGRAM: Record<string, string> = {
+  tsunami: "go_higher",
+  flood: "go_higher",
+  inland_flood: "go_higher",
+  storm_surge: "go_higher",
+  heavy_rain: "go_higher",
+  landslide: "directions_run",
+};
+
+// heavy_rain warnings drive inundation guidance, so shelters designated for inland flooding or floods qualify.
+export const SHELTER_HAZARDS: Record<string, string[]> = {
+  tsunami: ["tsunami"],
+  flood: ["flood"],
+  inland_flood: ["inland_flood"],
+  heavy_rain: ["inland_flood", "flood"],
+  landslide: ["landslide"],
+  storm_surge: ["storm_surge"],
+};
+
+export interface Situation { level: number; template: TemplateId; cleared: boolean }
+
+export function situationFor(alert: Alert, municipalityId: string): Situation {
+  if (alert.info_type === "cancelled") stop(`bulletin ${alert.bulletin_id} is a cancellation; nothing to compose`);
+  if (alert.hazard === "tsunami") {
+    const regions = new Set(tsunamiRegionsFor(municipalityId));
+    if (!regions.size) stop(`no tsunami forecast region is mapped for municipality ${municipalityId} (agents/src/jma/regions.ts)`);
+    const mine = alert.areas.filter((a) => regions.has(a.code));
+    if (!mine.length) stop(`bulletin ${alert.bulletin_id} does not cover the tsunami forecast region of ${municipalityId}`);
+    const rank: TsunamiCategory[] = ["major_warning", "warning", "advisory", "forecast", "cleared", "none"];
+    const kinds = mine.map((a) => (a.status === "cleared" ? "cleared" : categoryOfKind(a.kind_code)));
+    const top = rank.find((r) => kinds.includes(r))!;
+    if (top === "none") stop(`bulletin ${alert.bulletin_id} lists no tsunami category for ${municipalityId}`);
+    if (top === "cleared") return { level: 1, template: "all-clear", cleared: true };
+    if (top === "forecast") stop(`tsunami forecast (slight sea-level change) for ${municipalityId}: no evacuation screen`);
+    return { level: TSUNAMI_DISPLAY_LEVEL[top]!, template: "evac-now", cleared: false };
+  }
+  const mine = alert.areas.filter((a) => a.code_type === "city" && a.code.slice(0, 5) === municipalityId);
+  if (!mine.length) stop(`bulletin ${alert.bulletin_id} does not list municipality ${municipalityId}`);
+  if (mine.every((a) => a.status === "cleared")) return { level: 1, template: "all-clear", cleared: true };
+  const level = Math.max(...mine.map((a) => a.level ?? 0));
+  if (level >= 4) return { level, template: "evac-now", cleared: false };
+  if (level === 3) return { level, template: "evac-prepare", cleared: false };
+  return stop(`level ${level} for ${municipalityId}: below the evacuation threshold, no screen`);
+}
+
+const TSUNAMI_KIND_CATEGORY: Record<string, TsunamiCategory> = {
+  "51": "warning", "52": "major_warning", "53": "major_warning", "62": "advisory", "71": "forecast", "72": "forecast", "73": "forecast", "50": "cleared", "60": "cleared", "00": "none",
+};
+function categoryOfKind(code: string): TsunamiCategory {
+  return TSUNAMI_KIND_CATEGORY[code] ?? stop(`unknown tsunami kind code ${code}`);
+}

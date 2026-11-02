@@ -1,0 +1,18 @@
+{
+  "id": "17204",
+  "name": "輪島市",
+  "prefecture": "石川県",
+  "sources": [{ "type": "gsi", "file": "17204_2.csv", "title": "国土地理院 指定緊急避難場所データ", "year": null, "pages": null }],
+  "hazards": [],
+  "routes": [],
+  "cautions": [],
+  "shelters": [
+    { "name": "ホテル　ルートイン輪島", "kind": "emergency_evacuation_site", "address": "石川県輪島市マリンタウン1-2", "lat": 37.396135984268, "lng": 136.9050235542, "hazards_ok": ["tsunami"], "source": { "type": "gsi", "file": "17204_2.csv", "id": "E1720400001201" } },
+    { "name": "旧石川県輪島実業高等学校（格技場）", "kind": "emergency_evacuation_site", "address": "石川県輪島市稲舟町上野50", "lat": 37.391448608903, "lng": 136.9201708404, "hazards_ok": ["storm_surge"], "source": { "type": "gsi", "file": "17204_2.csv", "id": "E1720400002201" } },
+    { "name": "輪島市立輪島中学校（屋外運動場）", "kind": "emergency_evacuation_site", "address": "石川県輪島市河井町１１部39-1", "lat": 37.389584612079, "lng": 136.91255502347, "hazards_ok": ["storm_surge", "earthquake", "tsunami"], "source": { "type": "gsi", "file": "17204_2.csv", "id": "E1720400004201" } },
+    { "name": "輪島市健康ふれあい広場", "kind": "emergency_evacuation_site", "address": "石川県輪島市河井町１６部1-1", "lat": 37.3898908185, "lng": 136.90864806951, "hazards_ok": ["storm_surge", "earthquake", "tsunami"], "source": { "type": "gsi", "file": "17204_2.csv", "id": "E1720400005201" } }
+  ],
+  "contacts": [],
+  "conflicts": [],
+  "provenance": { "reader_version": "fixture", "model": "none" }
+}

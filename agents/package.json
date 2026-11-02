@@ -11,7 +11,8 @@
     "reader": "tsx src/reader/cli.ts",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "writer": "tsx src/writer/cli.ts"
+    "writer": "tsx src/writer/cli.ts",
+    "compose": "tsx src/composer/cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
