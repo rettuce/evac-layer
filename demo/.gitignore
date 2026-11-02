@@ -4,3 +4,5 @@ screens/*.png
 assets/textures/
 blender/__pycache__/
 capture/out/
+compose/audio/
+out/
