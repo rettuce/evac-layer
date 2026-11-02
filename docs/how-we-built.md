@@ -1,7 +1,5 @@
 # How we built it
 
-Draft from the agents seat; the commander finishes it.
-
 ## Seats
 
 EVAC LAYER was built by four Claude Code sessions working at the same time, each in its own git worktree and branch, while the author watched every tab and stepped in directly when needed.
@@ -34,4 +32,4 @@ Run over the recorded feed, this loop found 25 defects on its first Vision pass 
 - **Skills**: `evac-fanout`, `evac-verify` and `evac-contract` in `.claude/skills/`.
 - **Subagents**: used for parallel research, for example one subagent per municipality when surveying hazard-map PDFs.
 - **Hooks**: a PostToolUse hook that validates layouts against `schema/` and lints Writer records on every write is drafted but not enabled (it changes project settings and waits for approval).
-- **MCP**: the commander fills this in.
+- **MCP**: none in the product. The Reader, Writer and Vision Verifier call the Claude API through `@anthropic-ai/sdk`, and the Verifier's browser check drives Chrome with `puppeteer-core`, so the pipeline runs headless with no MCP server in the loop. During development the commander used the Claude in Chrome extension (an MCP server into the author's own browser) once, to search Pinterest for signage references before deciding how to show the alert level; that design was later dropped. `blender-mcp` was weighed for the 3D scenes and rejected in favour of plain `bpy` scripts, so the scene is reproducible from the repository (`demo/APPROACH.md`). Traffic between the seats is Claude Code's cross-session messaging, not MCP.
