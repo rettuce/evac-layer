@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evac-layer.dev/schema/shelters.schema.json",
+  "title": "EVAC LAYER shelters extracted from GSI open data",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["municipality_id", "name", "provenance", "counts", "shelters"],
+  "properties": {
+    "municipality_id": { "$ref": "common.schema.json#/$defs/municipalityId" },
+    "name": { "type": "string", "minLength": 1 },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publisher", "dataset", "license", "attribution", "edited", "notice_ja", "notice_url", "files"],
+      "properties": {
+        "publisher": { "const": "国土地理院" },
+        "dataset": { "type": "string" },
+        "license": { "const": "PDL1.0" },
+        "attribution": { "type": "string" },
+        "edited": { "type": "string" },
+        "notice_ja": { "type": "string" },
+        "notice_url": { "type": "string", "format": "uri" },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["file", "url", "retrieved", "sha256", "rows"],
+            "properties": {
+              "file": { "type": "string" },
+              "url": { "type": "string", "format": "uri" },
+              "retrieved": { "type": "string", "format": "date" },
+              "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+              "rows": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emergency_evacuation_site", "evacuation_shelter"],
+      "properties": {
+        "emergency_evacuation_site": { "type": "integer", "minimum": 0 },
+        "evacuation_shelter": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "shelters": { "type": "array", "items": { "$ref": "municipality.schema.json#/$defs/shelter" } }
+  }
+}

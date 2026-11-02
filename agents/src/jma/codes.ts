@@ -33,9 +33,12 @@ export const KIND_CODE_LEVEL: Record<BulletinCode, Record<string, number | null>
   VTSE41: {},
 };
 
+// Body Item/Kind/Status values seen in the official samples and in the recorded long feed (2026-10-11..11-02).
 export const VPWW_STATUS: Record<string, "present" | "cleared" | "none"> = {
   発表: "present",
   継続: "present",
+  警報から注意報: "present",
+  危険警報から注意報: "present",
   解除: "cleared",
   "発表警報・注意報はなし": "none",
 };

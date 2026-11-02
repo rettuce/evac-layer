@@ -4,8 +4,8 @@ import { Ajv2020, type ValidateFunction, type ErrorObject } from "ajv/dist/2020.
 import addFormatsModule from "ajv-formats";
 import { SCHEMA_DIR } from "./paths.js";
 
-export type SchemaName = "layout" | "alert" | "municipality";
-const SCHEMA_NAMES: SchemaName[] = ["layout", "alert", "municipality"];
+export type SchemaName = "layout" | "alert" | "municipality" | "shelters";
+const SCHEMA_NAMES: SchemaName[] = ["layout", "alert", "municipality", "shelters"];
 const addFormats = addFormatsModule as unknown as (ajv: Ajv2020) => void;
 
 export function readSchema(name: string): Record<string, unknown> {
@@ -29,6 +29,7 @@ export function inferSchema(doc: unknown): SchemaName {
   if (d.kind === "evac-screen") return "layout";
   if ("bulletin_id" in d && "code" in d) return "alert";
   if ("shelters" in d && "hazards" in d) return "municipality";
+  if ("shelters" in d && "municipality_id" in d) return "shelters";
   throw new Error("cannot infer schema: expected layout (kind=evac-screen), alert (bulletin_id+code) or municipality (shelters+hazards); pass --schema");
 }
 

@@ -88,3 +88,14 @@ test("demo municipalities map to tsunami forecast regions", () => {
   assert.deepEqual(tsunamiRegionsFor("22424"), ["380"]);
   assert.deepEqual(tsunamiRegionsFor("14100"), ["312"]);
 });
+
+const FEED = process.env.JMA_FEED_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/jma-feed";
+
+test("recorded feed: a warning-to-advisory step for 輪島市 parses as a downgrade", () => {
+  const file = path.join(FEED, "bodies/20261021/20261021061124_0_VPWW55_170000.xml");
+  if (!fs.existsSync(file)) throw new Error(`recorded bulletin ${file} not found. Set JMA_FEED_DIR.`);
+  const a = parseJmaXml(fs.readFileSync(file));
+  assert.ok(validateDoc(a, "alert").ok);
+  const wajima = area(a, "輪島市");
+  assert.deepEqual([wajima.level, wajima.status], [2, "downgraded"]);
+});
