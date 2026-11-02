@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '~~/layout/fit'
 import { PULSE_MIN_OPACITY, PULSE_PERIOD_MS, SCALE_IN_FROM, SCALE_IN_MS } from '~~/layout/motion'
-import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, inkOn, rgbCss } from '~~/layout/palette'
+import { CABINET_OFFICE_5, DARK_BAND, PAGE_BACKGROUND, PAGE_INK, contrastRatio, inkOn, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
-import { TEMPLATES } from '~~/layout/templates'
+import { resolveLayout } from '~~/layout/templates'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
 import { LANGUAGE_ROTATION_MS, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
 
@@ -11,6 +11,8 @@ const props = defineProps<{ screen: EvacScreen; shape: Shape; variant?: number }
 
 const FONT_FAMILIES = ['Noto Sans JP', 'Noto Sans', 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans KR']
 const FONT_WEIGHTS = [400, 700]
+const BAND_RULE_MIN_CONTRAST = 1.5
+const BAND_RULE_PX = 4
 
 const root = ref<HTMLElement>()
 const scale = ref(1)
@@ -19,12 +21,7 @@ const overflowing = ref<string[]>([])
 const ready = ref(false)
 const languageIndex = ref(0)
 
-const layout = computed(() => {
-  const template = TEMPLATES[props.screen.template]
-  if (!template) throw new Error(`template not implemented: ${props.screen.template}`)
-  const variants = template[props.shape]
-  return variants[props.variant ?? 0] ?? variants[0]!
-})
+const layout = computed(() => resolveLayout(props.screen.template, props.shape, props.variant))
 
 const initial = computed(() => initialPlacement(props.screen.cells, layout.value))
 const placed = computed(() => {
@@ -49,6 +46,7 @@ const rootStyle = computed(() => ({
   '--ink': rgbCss(PAGE_INK),
   '--band': rgbCss(band.value),
   '--band-ink': rgbCss(inkOn(band.value)),
+  '--band-rule': contrastRatio(band.value, PAGE_BACKGROUND) < BAND_RULE_MIN_CONTRAST ? BAND_RULE_PX : 0,
   '--dark-band': rgbCss(DARK_BAND),
   '--dark-band-ink': rgbCss(inkOn(DARK_BAND)),
   '--pulse-period': `${PULSE_PERIOD_MS}ms`,
