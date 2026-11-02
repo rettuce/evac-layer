@@ -1,4 +1,4 @@
-import type { Shape, TemplateId } from "../../../app/layout/types";
+import type { PanelShape, Shape, TemplateId } from "../../../app/layout/types";
 import type { Alert } from "../jma/parse.js";
 import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { TsunamiCategory } from "../jma/codes.js";
@@ -13,10 +13,9 @@ const stop = (msg: string): never => { throw new ComposerStop(msg); };
 
 // pillar wraps four faces of a column, each face repeating a 9:16 screen (contract v0, 18:03), so it borrows the
 // 9:16 cells, required roles and budgets; the renderer draws the faces.
-export type ComposerShape = Shape | "pillar";
-export const CELLS_OF: Record<ComposerShape, Shape> = { "16x9": "16x9", "9x16": "9x16", "32x9": "32x9", "1x1": "1x1", pillar: "9x16" };
-export const SHAPE_ORDER: readonly ComposerShape[] = ["16x9", "9x16", "32x9", "1x1", "pillar"];
-export const LANGUAGES_REQUIRED_ON: readonly ComposerShape[] = ["16x9", "9x16", "32x9", "pillar"];
+export const CELLS_OF: Record<Shape, PanelShape> = { "16x9": "16x9", "9x16": "9x16", "32x9": "32x9", "1x1": "1x1", pillar: "9x16" };
+export const SHAPE_ORDER: readonly Shape[] = ["16x9", "9x16", "32x9", "1x1", "pillar"];
+export const LANGUAGES_REQUIRED_ON: readonly Shape[] = ["16x9", "9x16", "32x9", "pillar"];
 
 export const TSUNAMI_DISPLAY_LEVEL: Record<TsunamiCategory, number | null> = {
   major_warning: 4,
