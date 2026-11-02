@@ -1,0 +1,139 @@
+import assert from 'node:assert/strict'
+import { type ChildProcess, spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { cp, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises'
+import { request } from 'node:http'
+import { createServer } from 'node:net'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { after, before, describe, test } from 'node:test'
+import { fileURLToPath } from 'node:url'
+
+const APP_DIR = fileURLToPath(new URL('..', import.meta.url))
+const SERVER_ENTRY = join(APP_DIR, '.output', 'server', 'index.mjs')
+const MUNICIPALITY = '00001'
+const BULLETIN = 'TEST-B1'
+const SITE = 'test-site'
+const READY_TIMEOUT_MS = 20000
+
+async function freePort(): Promise<number> {
+  return new Promise((resolve) => {
+    const server = createServer().listen(0, '127.0.0.1', () => {
+      const { port } = server.address() as { port: number }
+      server.close(() => resolve(port))
+    })
+  })
+}
+
+async function makeDataDir(): Promise<string> {
+  const data = join(await mkdtemp(join(tmpdir(), 'evac-data-')), 'data')
+  const layoutDir = join(data, 'layouts', MUNICIPALITY, BULLETIN)
+  await mkdir(layoutDir, { recursive: true })
+  await mkdir(join(data, 'sites'))
+  await cp(join(APP_DIR, 'fixtures', 'wajima-tsunami.json'), join(layoutDir, '16x9.json'))
+  await writeFile(
+    join(data, 'layouts', MUNICIPALITY, 'index.json'),
+    JSON.stringify({
+      municipality: MUNICIPALITY,
+      name: 'テスト市',
+      site: SITE,
+      entries: [{ issued_at: '2026-10-21T15:55:00+09:00', bulletin_id: BULLETIN, raw_title: 'test', municipality_level: 4, screen: true, template: 'evac-now', display_level: 4, layouts: [`data/layouts/${MUNICIPALITY}/${BULLETIN}/16x9.json`] }],
+    }),
+  )
+  await writeFile(join(data, 'sites', `${SITE}.json`), JSON.stringify({ id: SITE, municipality_id: MUNICIPALITY, lat: 0, lng: 0 }))
+  return data
+}
+
+async function startServer(env: Record<string, string>): Promise<{ base: string; child: ChildProcess }> {
+  const port = await freePort()
+  const child = spawn(process.execPath, [SERVER_ENTRY], { env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), ...env }, stdio: 'ignore' })
+  const base = `http://127.0.0.1:${port}`
+  const deadline = Date.now() + READY_TIMEOUT_MS
+  while (Date.now() < deadline) {
+    const up = await fetch(`${base}/screen`).then((r) => r.ok, () => false)
+    if (up) return { base, child }
+    await new Promise((resolve) => setTimeout(resolve, 200))
+  }
+  child.kill()
+  throw new Error(`production server did not start on ${base}`)
+}
+
+function postJson(base: string, path: string, body: unknown, headers: Record<string, string> = {}) {
+  return fetch(`${base}${path}`, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(body) })
+}
+
+function getWithHost(base: string, path: string, host: string): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const url = new URL(path, base)
+    request({ hostname: url.hostname, port: url.port, path: url.pathname, headers: { host } }, (res) => {
+      res.resume()
+      resolve(res.statusCode ?? 0)
+    }).on('error', reject).end()
+  })
+}
+
+const layoutPath = `/api/live-layout?municipality=${MUNICIPALITY}&bulletin=${BULLETIN}&shape=16x9`
+
+describe('production build', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first' }, () => {
+  let base = ''
+  let dataDir = ''
+  let child: ChildProcess | undefined
+
+  before(async () => {
+    dataDir = await makeDataDir()
+    ;({ base, child } = await startServer({ NUXT_DATA_DIR: dataDir, NUXT_ADMIN_TOKEN: '' }))
+  })
+  after(() => child?.kill())
+
+  test('live layout is gated by auto publish, then by approval', async () => {
+    const off = await fetch(`${base}${layoutPath}`)
+    assert.equal(off.status, 403)
+    assert.equal((await off.json()).data.reason, 'auto-publish-off')
+
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: SITE, auto_publish: true })).status, 200)
+    const unapproved = await fetch(`${base}${layoutPath}`)
+    assert.equal(unapproved.status, 403)
+    assert.equal((await unapproved.json()).data.reason, 'unapproved')
+
+    assert.equal((await postJson(base, '/api/admin/approve', { municipality: MUNICIPALITY, bulletin_id: BULLETIN, approved: true })).status, 200)
+    const ok = await fetch(`${base}${layoutPath}`)
+    assert.equal(ok.status, 200)
+    assert.equal((await ok.json()).kind, 'evac-screen')
+
+    const approvals = JSON.parse(await readFile(join(dataDir, 'approvals.json'), 'utf8'))
+    assert.equal(approvals.sites[SITE].auto_publish, true)
+    assert.equal(approvals.layouts[`${MUNICIPALITY}/${BULLETIN}`].approved, true)
+  })
+
+  test('the dev layout bridge does not exist in production', async () => {
+    const file = join(APP_DIR, 'fixtures', 'wajima-tsunami.json')
+    assert.equal((await fetch(`${base}/api/layout?file=${encodeURIComponent(file)}`)).status, 404)
+  })
+
+  test('local admin refuses cross-origin, non-JSON and rebound-host requests', async () => {
+    assert.equal((await fetch(`${base}/api/admin/catalog`)).status, 200)
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: SITE, auto_publish: false }, { origin: 'http://evil.example' })).status, 403)
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: SITE, auto_publish: false }, { 'sec-fetch-site': 'cross-site' })).status, 403)
+    const formPost = await fetch(`${base}/api/admin/site`, { method: 'POST', headers: { 'content-type': 'text/plain' }, body: JSON.stringify({ site_id: SITE, auto_publish: false }) })
+    assert.equal(formPost.status, 403)
+    assert.equal(await getWithHost(base, '/api/admin/catalog', 'evil.example'), 403)
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: 'unknown-site', auto_publish: true })).status, 404)
+  })
+})
+
+describe('production build with an admin token', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first' }, () => {
+  let base = ''
+  let child: ChildProcess | undefined
+
+  before(async () => {
+    ;({ base, child } = await startServer({ NUXT_DATA_DIR: await makeDataDir(), NUXT_ADMIN_TOKEN: 'test-token-123' }))
+  })
+  after(() => child?.kill())
+
+  test('admin API requires the Bearer token', async () => {
+    assert.equal((await fetch(`${base}/api/admin/catalog`)).status, 401)
+    assert.equal((await fetch(`${base}/api/admin/catalog`, { headers: { authorization: 'Bearer wrong' } })).status, 401)
+    assert.equal((await fetch(`${base}/api/admin/catalog`, { headers: { authorization: 'Bearer test-token-123' } })).status, 200)
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: SITE, auto_publish: true })).status, 401)
+  })
+})

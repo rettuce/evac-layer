@@ -2,6 +2,7 @@
 import { DEFAULT_REPLAY_SPEED, isMunicipalityId } from '~~/layout/replay'
 import { DEFAULT_SWITCH_AT_MS, scenarioFrame, type ScenarioName } from '~~/layout/scenario'
 import { isShape, shapeForViewport } from '~~/layout/shapes'
+import { isTrustedLayoutSrc } from '~~/layout/trust'
 import type { EvacScreen } from '~~/layout/types'
 import type { ClockMode } from '~/composables/useScreenClock'
 
@@ -18,13 +19,7 @@ function numberQuery(value: unknown, fallback: number): number {
 
 const route = useRoute()
 const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
-const LAYOUT_STORE_PREFIXES = ['/api/live-layout?', '/api/admin/preview-layout?']
 const ADMIN_TOKEN_STORAGE_KEY = 'evac-admin-token'
-
-function isTrustedLayoutSrc(value: unknown): value is string {
-  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) return false
-  return import.meta.dev || LAYOUT_STORE_PREFIXES.some((prefix) => value.startsWith(prefix))
-}
 
 function adminHeadersFor(url: string): Record<string, string> {
   if (!url.startsWith('/api/admin/')) return {}
@@ -35,7 +30,7 @@ function adminHeadersFor(url: string): Record<string, string> {
     return {}
   }
 }
-const src = computed(() => (isTrustedLayoutSrc(route.query.src) ? route.query.src : undefined))
+const src = computed(() => (isTrustedLayoutSrc(route.query.src, import.meta.dev) ? route.query.src : undefined))
 const srcRejected = computed(() => route.query.src !== undefined && !src.value)
 const remote = shallowRef<EvacScreen>()
 const remoteError = ref<string>()

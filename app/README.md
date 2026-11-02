@@ -10,6 +10,14 @@ pnpm -F app dev            # http://127.0.0.1:3150
 node scripts/shot.mjs      # four shapes at native size into app/shots/
 ```
 
+## Tests
+
+```sh
+pnpm -F app test   # nuxt build, then node --test app/test/*.test.ts (no extra dependencies)
+```
+
+`test/policies.test.ts` covers the pure rules (dev layout bridge paths, trusted `src`, admin access, the live approval gate); `test/server.test.ts` starts the production build twice on a free port with a temporary data directory and checks the gate, the admin refusals and the token mode end to end.
+
 ## Production build
 
 ```sh
