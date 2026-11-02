@@ -22,6 +22,7 @@ FONT_LICENSE_URL = "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sa
 FONT_PATH = FONT_DIR / "NotoSansJP-Bold.otf"
 
 CAPTION_SIZE_RATIO = 0.042
+SLATE_SIZE_RATIO = 0.03
 TITLE_SIZE_RATIO = 0.07
 SLATE_COLOR = "0x1b1b1f"
 ENCODE = ["-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p", "-an"]
@@ -71,11 +72,24 @@ def segment_filters(segment, work, width, height):
     return filters
 
 
-def slate_text(segment):
-    return f"CUT {segment['cut']}  {segment['kind']}  {segment['seconds']}s\n未着: {segment.get('src', '-')}"
+KIND_LABELS = {"3d": "3D（Blender）", "capture": "画面収録", "title": "タイトル"}
 
 
-def render_segment(segment, index, work, width, height, fps):
+def slate_text(segment, edl):
+    lines = [f"CUT {segment['cut']}  ·  {KIND_LABELS.get(segment['kind'], segment['kind'])}  ·  {segment['seconds']} 秒  ·  未着"]
+    if segment.get("slate"):
+        lines.append(segment["slate"])
+    if segment["kind"] == "capture" and edl.get("capture_spec"):
+        lines.append(edl["capture_spec"])
+    if segment.get("screens"):
+        lines.append(f"画面素材: demo/screens/<shape>_{segment['screens']}.mp4")
+    lines.append(f"→ {segment['src']}")
+    return "\n".join(lines)
+
+
+def render_segment(segment, index, work, edl):
+    width, height = edl["size"]
+    fps = edl["fps"]
     out = work / f"seg_{index:02d}.mp4"
     seconds = str(segment["seconds"])
     src = segment.get("src")
@@ -89,8 +103,8 @@ def render_segment(segment, index, work, width, height, fps):
     else:
         inputs = ["-f", "lavfi", "-i", f"color=c={SLATE_COLOR if src else 'black'}:s={width}x{height}:r={fps}"]
         if src:
-            size = round(height * CAPTION_SIZE_RATIO)
-            filters.insert(0, drawtext(write_text(work, f"slate_{segment['cut']}", slate_text(segment)), size, f"{size * 2}", box=False))
+            size = round(height * SLATE_SIZE_RATIO)
+            filters.insert(0, drawtext(write_text(work, f"slate_{segment['cut']}", slate_text(segment, edl)), size, f"{size * 2}", box=False))
         status = "slate" if src else "card"
     command = ["ffmpeg", "-y", "-loglevel", "error", *inputs, "-t", seconds]
     if filters:
@@ -118,7 +132,7 @@ def main():
     ensure_font()
     work = Path(tempfile.mkdtemp(prefix="evac-compose-"))
     try:
-        parts = [render_segment(segment, i, work, width, height, edl["fps"]) for i, segment in enumerate(edl["segments"])]
+        parts = [render_segment(segment, i, work, edl) for i, segment in enumerate(edl["segments"])]
         out_path = Path(args.out).resolve() if args.out else (HERE / edl["output"]).resolve()
         concat(parts, work, out_path)
     finally:
