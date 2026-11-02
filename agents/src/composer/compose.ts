@@ -3,7 +3,7 @@ import type { Alert } from "../jma/parse.js";
 import type { Lang } from "../writer/request.js";
 import { CHAR_BUDGETS } from "./budgets.js";
 import { shapeContract } from "./template.js";
-import { ACTION_PICTOGRAM, BudgetExceeded, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
+import { ACTION_PICTOGRAM, BudgetExceeded, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
 export interface WriterOutput { cells: WriterCell[] }
@@ -91,19 +91,19 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
   const { alert, municipality: m, site } = input;
   if (site.municipality_id !== m.id) stop(`site ${site.id} belongs to ${site.municipality_id}, not ${m.id}`);
   const situation = situationFor(alert, m.id);
-  const { shelter, distance_m } = pickShelter(m, site, alert.hazard);
-  const way = directionToward(site, shelter);
+  const guide = NO_SHELTER_TEMPLATES.has(situation.template) ? null : pickShelter(m, site, alert.hazard);
+  const way = guide ? directionToward(site, guide.shelter) : null;
   const hazardEntry = m.hazards.find((h) => h.type === alert.hazard);
   const pdfTitle = hazardEntry ? m.sources.find((s) => s.file === hazardEntry.source.file)?.title ?? hazardEntry.source.file : null;
-  const gsiFile = shelter.source.file;
+
   const sourceText = [
     pdfTitle ? `${m.name} ${pdfTitle} p.${hazardEntry!.source.page}` : null,
-    "国土地理院 指定緊急避難場所データ",
+    guide ? "国土地理院 指定緊急避難場所データ" : null,
     `気象庁 ${hhmm(alert.issued_at)}`,
   ].filter(Boolean).join(" / ");
   const sources = [
     ...(hazardEntry ? [{ type: "pdf" as const, file: hazardEntry.source.file, page: hazardEntry.source.page }] : []),
-    { type: "gsi" as const, file: gsiFile },
+    ...(guide ? [{ type: "gsi" as const, file: guide.shelter.source.file }] : []),
     { type: "jma" as const, bulletin_id: alert.bulletin_id },
   ];
 
@@ -119,8 +119,10 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     const add = (cell: LayoutCell) => { if (slots.has(cell.role)) cells.push(cell); };
     add({ id: "headline", role: "headline", priority: 1, text: text("headline") ?? stop("Writer output has no headline"), pictogram: HAZARD_PICTOGRAM[alert.hazard], motion: "scale-in" });
     add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: ACTION_PICTOGRAM[alert.hazard], motion: "pulse" });
-    add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: way.text_ja }, pictogram: "arrow_forward", rotation: way.rotation, motion: "static" });
-    add({ id: "shelter", role: "shelter", priority: 2, text: { ja: `${shelter.name}（指定緊急避難場所）` }, pictogram: "emergency_evacuation_site", distance_m, motion: "static" });
+    if (guide && way) {
+      add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: way.text_ja }, pictogram: "arrow_forward", rotation: way.rotation, motion: "static" });
+      add({ id: "shelter", role: "shelter", priority: 2, text: { ja: `${guide.shelter.name}（指定緊急避難場所）` }, pictogram: "emergency_evacuation_site", distance_m: guide.distance_m, motion: "static" });
+    }
     const languages = text("languages");
     if (languages) add({ id: "languages", role: "languages", priority: 3, text: languages, motion: "static" });
     else if (LANGUAGES_REQUIRED_ON.includes(shape)) stop(`Writer output has no languages cell, required on ${shape}`);
