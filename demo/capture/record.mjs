@@ -188,13 +188,33 @@ function verifyFrames(opts) {
   return [...new Set(frames)].filter((f) => f >= 0 && f < opts.frameCount).sort((a, b) => a - b)
 }
 
-async function maxPixelDelta(fileA, fileB) {
-  const { stderr } = await run('ffmpeg', [
-    '-hide_banner', '-i', fileA, '-i', fileB,
-    '-lavfi', '[0][1]blend=all_mode=difference,format=gray,signalstats,metadata=print:key=lavfi.signalstats.YMAX',
-    '-f', 'null', '-',
-  ])
-  return Number(stderr.match(/YMAX=(\d+)/)?.[1] ?? NaN)
+async function diffStats(fileA, fileB) {
+  const { stdout } = await run('ffmpeg', [
+    '-loglevel', 'error', '-i', fileA, '-i', fileB,
+    '-lavfi', '[0][1]blend=all_mode=difference,format=gray', '-f', 'rawvideo', '-',
+  ], { encoding: 'buffer', maxBuffer: 64 * 1024 * 1024 })
+  const { width } = await imageSize(fileA)
+  let max = 0
+  let pixels = 0
+  const box = { x0: Infinity, y0: Infinity, x1: -1, y1: -1 }
+  for (let i = 0; i < stdout.length; i++) {
+    if (stdout[i] === 0) continue
+    const x = i % width
+    const y = Math.floor(i / width)
+    max = Math.max(max, stdout[i])
+    pixels++
+    box.x0 = Math.min(box.x0, x)
+    box.y0 = Math.min(box.y0, y)
+    box.x1 = Math.max(box.x1, x)
+    box.y1 = Math.max(box.y1, y)
+  }
+  return { max, pixels, bbox: pixels ? `${box.x0},${box.y0}-${box.x1},${box.y1}` : '-' }
+}
+
+async function imageSize(file) {
+  const { stdout } = await run('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', file])
+  const [width, height] = stdout.trim().split(',').map(Number)
+  return { width, height }
 }
 
 // Re-shoots each sample time on a fresh page that jumps from t=0 straight to t through the same
@@ -211,8 +231,8 @@ async function verify(browser, opts, framesDir) {
     await page.close()
     const original = `${framesDir}${frameName(frame)}.png`
     const identical = (await readFile(original)).equals(await readFile(again))
-    const delta = identical ? 0 : await maxPixelDelta(original, again)
-    results.push({ frame: frame + 1, tMs: Math.round(frameTime(opts, frame)), identical, delta })
+    const diff = identical ? null : await diffStats(original, again)
+    results.push({ frame: frame + 1, tMs: Math.round(frameTime(opts, frame)), identical, diff })
   }
   return results
 }
@@ -254,7 +274,10 @@ async function main() {
   )
   if (approved) console.log(`APPROVED ${approved.length} bulletins + auto_publish for ${LIVE_SITE_ID}`)
   for (const c of checks) {
-    console.log(`VERIFY frame=${c.frame} t_ms=${c.tMs} ${c.identical ? 'identical' : `DIFFERS max_delta=${c.delta}`}`)
+    const verdict = c.identical
+      ? 'identical'
+      : `DIFFERS max_delta=${c.diff.max} pixels=${c.diff.pixels} bbox=${c.diff.bbox}`
+    console.log(`VERIFY frame=${c.frame} t_ms=${c.tMs} ${verdict}`)
   }
   if (checks.some((c) => !c.identical)) {
     console.log(`VERIFY FAILED ${checks.filter((c) => !c.identical).length}/${checks.length} frames differ`)
