@@ -17,7 +17,26 @@ function numberQuery(value: unknown, fallback: number): number {
 
 const route = useRoute()
 const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
-const screen = computed(() => fixtureByName(layoutName.value))
+const src = computed(() => (typeof route.query.src === 'string' ? route.query.src : undefined))
+const remote = shallowRef<EvacScreen>()
+const remoteError = ref<string>()
+
+watch(
+  src,
+  async (url) => {
+    remote.value = undefined
+    remoteError.value = undefined
+    if (!url) return
+    try {
+      remote.value = await $fetch<EvacScreen>(url)
+    } catch (error) {
+      remoteError.value = `failed to load ${url}: ${(error as Error).message}`
+    }
+  },
+  { immediate: true },
+)
+
+const screen = computed(() => (src.value ? remote.value : fixtureByName(layoutName.value)))
 const variant = computed(() => numberQuery(route.query.variant, 0))
 const shape = computed(() => {
   const requested = route.query.shape
@@ -52,7 +71,9 @@ if (scenario.value) start()
 </script>
 
 <template>
-  <div v-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>
+  <div v-if="remoteError" class="missing" data-error="src-load-failed">{{ remoteError }}</div>
+  <div v-else-if="src && !screen" class="missing" data-loading="src">loading {{ src }}</div>
+  <div v-else-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>
 
   <EvacScreen
     v-else-if="!frame"

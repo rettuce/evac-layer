@@ -1,8 +1,13 @@
+import { fileURLToPath } from 'node:url'
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-11-01',
   ssr: false,
   devServer: { host: '127.0.0.1', port: 3150 },
   devtools: { enabled: false },
+  runtimeConfig: {
+    repoRoot: fileURLToPath(new URL('..', import.meta.url)),
+  },
   css: [
     '@fontsource/noto-sans-jp/400.css',
     '@fontsource/noto-sans-jp/700.css',

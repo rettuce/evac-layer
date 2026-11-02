@@ -9,7 +9,7 @@
     "source": "jma",
     "bulletin_id": "<電文 ID>",
     "hazard": "tsunami",
-    "level": 5,
+    "level": 3,
     "issued_at": "2026-11-02T11:42:00+09:00"
   },
   "shape": "16x9",
@@ -47,7 +47,7 @@
       "role": "direction",
       "priority": 2,
       "text": {
-        "ja": "出口 B → 左 350m"
+        "ja": "出口 B → 左"
       },
       "pictogram": "arrow_forward",
       "rotation": 180,

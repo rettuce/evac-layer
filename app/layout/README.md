@@ -29,3 +29,15 @@ The root `.evac-screen` element carries `data-shape`, `data-template`, `data-var
 | `evac-prepare` | headline, action, shelter, languages, source | headline, action, shelter, source |
 | `all-clear` | headline, action, languages, source | headline, action, source |
 | `shelter-direction` | not defined yet (`TemplateNotDefinedError`) | |
+
+## `/screen` URL parameters
+
+| Parameter | Meaning |
+|---|---|
+| `shape` | `16x9` \| `9x16` \| `32x9` \| `1x1` (falls back to the viewport aspect) |
+| `layout` | fixture name in `app/fixtures/` (default `wajima-tsunami`) |
+| `src` | URL of a layout JSON to render instead of a fixture. In dev, `/api/layout?file=<absolute path>` serves `.json` files inside the repository (403 for anything else, 404 outside dev) |
+| `variant` | layout variant index for the template and shape (default 0) |
+| `clock=virtual&t=<ms>` | render the state at `t` only; `window.evacClock.set(ms)` steps time and resolves after the frame is committed |
+| `mode=scenario&scenario=switch&t_switch=<ms>[&t_clear=<ms>]` | ambient, then 300 ms black, then the alert; optional 1 s crossfade back |
+| `mode=scenario&scenario=ambient[&seed=…&site_name=…]` | ambient layer only |
