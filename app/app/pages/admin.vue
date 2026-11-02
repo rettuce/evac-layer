@@ -24,6 +24,34 @@ const PREVIEW_SHAPES: Shape[] = ['16x9', '32x9', '9x16', '1x1']
 const PREVIEW_HEIGHT_PX: Record<Shape, number> = { '16x9': 216, '32x9': 108, '9x16': 300, '1x1': 216 }
 const PREVIEW_AT_MS = 3000
 
+const TOKEN_STORAGE_KEY = 'evac-admin-token'
+
+const adminToken = ref('')
+const tokenDraft = ref('')
+const needsToken = ref(false)
+
+function adminHeaders(): Record<string, string> {
+  return adminToken.value ? { authorization: `Bearer ${adminToken.value}` } : {}
+}
+
+function readStoredToken(): string {
+  try {
+    return sessionStorage.getItem(TOKEN_STORAGE_KEY) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+function submitToken() {
+  adminToken.value = tokenDraft.value.trim()
+  try {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY, adminToken.value)
+  } catch {
+    // Without storage the token simply lives for this page view.
+  }
+  load()
+}
+
 const catalog = shallowRef<Catalog>()
 const loadError = ref<string>()
 const selected = ref<{ municipality: string; bulletin: string }>()
@@ -31,11 +59,15 @@ const saving = ref<string>()
 
 async function load() {
   try {
-    catalog.value = await $fetch<Catalog>('/api/admin/catalog')
+    catalog.value = await $fetch<Catalog>('/api/admin/catalog', { headers: adminHeaders() })
+    needsToken.value = false
+    loadError.value = undefined
     const first = catalog.value.municipalities.flatMap((m) => m.entries.filter((e) => e.screen).map((e) => ({ m: m.id, e })))[0]
     if (!selected.value && first) selected.value = { municipality: first.m, bulletin: first.e.bulletin_id }
   } catch (error) {
-    loadError.value = (error as Error).message
+    const status = (error as { statusCode?: number }).statusCode
+    needsToken.value = status === 401
+    loadError.value = needsToken.value ? undefined : (error as Error).message
   }
 }
 
@@ -63,19 +95,22 @@ function hhmm(iso: string) {
 async function setApproved(entry: CatalogEntry, approved: boolean) {
   if (!selected.value) return
   saving.value = entry.bulletin_id
-  await $fetch('/api/admin/approve', { method: 'POST', body: { municipality: selected.value.municipality, bulletin_id: entry.bulletin_id, approved } })
+  await $fetch('/api/admin/approve', { method: 'POST', headers: adminHeaders(), body: { municipality: selected.value.municipality, bulletin_id: entry.bulletin_id, approved } })
   await load()
   saving.value = undefined
 }
 
 async function setAutoPublish(siteId: string, autoPublish: boolean) {
   saving.value = siteId
-  await $fetch('/api/admin/site', { method: 'POST', body: { site_id: siteId, auto_publish: autoPublish } })
+  await $fetch('/api/admin/site', { method: 'POST', headers: adminHeaders(), body: { site_id: siteId, auto_publish: autoPublish } })
   await load()
   saving.value = undefined
 }
 
-onMounted(load)
+onMounted(() => {
+  adminToken.value = readStoredToken()
+  load()
+})
 </script>
 
 <template>
@@ -85,6 +120,11 @@ onMounted(load)
       <p v-if="catalog">承認は {{ catalog.approvals_file }} に記録</p>
     </header>
     <p v-if="loadError" class="error" data-error="catalog">{{ loadError }}</p>
+    <form v-if="needsToken" class="token" data-auth="required" @submit.prevent="submitToken">
+      <label for="admin-token">管理トークン</label>
+      <input id="admin-token" v-model="tokenDraft" type="password" autocomplete="off" required>
+      <button type="submit">開く</button>
+    </form>
 
     <template v-if="catalog">
       <nav class="list" aria-label="電文">
@@ -196,6 +236,11 @@ h2 { font-size: 15px; margin: 16px 0 8px; }
 .bar { grid-area: bar; display: flex; align-items: baseline; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
 .bar p, .muted, .note { color: var(--muted); margin: 0; font-size: 12px; }
 .error { color: #c00; }
+.token { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; padding: 24px 0; }
+.token input { padding: 6px 8px; border: 1px solid var(--line); font: inherit; }
+.token input:focus-visible { outline: 2px solid var(--accent); }
+.token button { padding: 6px 16px; border: 2px solid var(--accent); background: #fff; font: inherit; cursor: pointer; }
+.token button:hover { background: #f0f0f0; }
 .list { grid-area: list; overflow: auto; }
 .list ol { list-style: none; margin: 0; padding: 0; }
 .entry {
