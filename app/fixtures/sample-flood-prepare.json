@@ -14,5 +14,5 @@
     { "id": "source", "role": "source", "priority": 9, "text": { "ja": "出典: [自治体ハザードマップ p.N] / 気象庁 [hh:mm] 発表" }, "motion": "static" }
   ],
   "palette": "cabinet-office-5",
-  "sources": [ { "type": "pdf", "file": "[hazard-map].pdf", "page": 0 }, { "type": "jma", "bulletin_id": "<電文 ID>" } ]
+  "sources": [ { "type": "pdf", "file": "[hazard-map].pdf", "page": 1 }, { "type": "jma", "bulletin_id": "<電文 ID>" } ]
 }
