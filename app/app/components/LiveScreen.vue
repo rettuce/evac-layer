@@ -73,21 +73,27 @@ function tick() {
 
 async function loadLayouts() {
   const wanted = rows.value.filter((row) => row.screen && !(row.bulletin_id in layouts.value))
-  const loaded: Record<string, EvacScreen> = { ...layouts.value }
   const absent: string[] = []
   const gated: string[] = []
-  await Promise.all(
-    wanted.map(async (row) => {
+  const fetched = await Promise.all(
+    wanted.map(async (row): Promise<[string, EvacScreen | undefined]> => {
       const params = new URLSearchParams({ municipality: props.municipality, bulletin: row.bulletin_id, shape: props.shape })
       if (props.site) params.set('site', props.site)
       try {
-        loaded[row.bulletin_id] = await $fetch<EvacScreen>(`/api/live-layout?${params}`)
+        return [row.bulletin_id, await $fetch<EvacScreen>(`/api/live-layout?${params}`)]
       } catch (error) {
         if ((error as { statusCode?: number }).statusCode === 403) gated.push(row.bulletin_id)
         else absent.push(row.bulletin_id)
+        return [row.bulletin_id, undefined]
       }
     }),
   )
+  const fetchedById = new Map(fetched)
+  const loaded: Record<string, EvacScreen> = {}
+  for (const row of rows.value) {
+    const screen = layouts.value[row.bulletin_id] ?? fetchedById.get(row.bulletin_id)
+    if (screen) loaded[row.bulletin_id] = screen
+  }
   layouts.value = loaded
   missing.value = absent.sort()
   unapproved.value = gated.sort()
