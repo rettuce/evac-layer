@@ -21,7 +21,7 @@ Anything not listed here is internal and may change shape without notice. The si
 
 ## What the rendered screen reports
 
-The root `.evac-screen` element carries `data-shape`, `data-template`, `data-variant`, `data-level`, `data-ready="1"` once fonts are loaded and the fit loop has finished, `data-dropped="<cell id>:<reason>,..."` (reasons: `no-slot`, `duplicate-role`, `overflow`), `data-overflow="<cell id>:<lang>,..."` (what still overflows after every optional cell was dropped; `lang` is the text key that spilled — `ja` for the headline and other code-written text, `ja_easy` / `en` / `zh_hans` / `zh_hant` / `ko` for Writer text, `pictogram` when only the pictogram box spills; `screen` when the page itself overflows), `data-headline-scale="0.85"` when a 9:16 or 1:1 headline was stepped down and `data-missing-required`. Each cell carries `data-cell-id`, `data-role`, `data-priority` and `data-motion`.
+The root `.evac-screen` element carries `data-shape`, `data-template`, `data-variant`, `data-level`, `data-ready="1"` once fonts are loaded and the fit loop has finished, `data-dropped="<cell id>:<reason>,..."` (reasons: `no-slot`, `duplicate-role`, `overflow`), `data-overflow="<cell id>:<lang>,..."` (what still overflows after every optional cell was dropped; `lang` is the text key that spilled — `ja` for the headline and other code-written text, `ja_easy` / `en` / `zh_hans` / `zh_hant` / `ko` for Writer text, `pictogram` when only the pictogram box spills; `screen` when the page itself overflows), `data-headline-scale="0.85"` when a 9:16 or 1:1 headline was stepped down, `data-level-scale="<steps>:<current>"` for the warning-level scale (`5:4` = Cabinet Office level 4 of 5; tsunami uses its own `3:<n>` — 1 advisory, 2 warning, 3 major warning; absent on all-clear) and `data-missing-required`. Each cell carries `data-cell-id`, `data-role`, `data-priority` and `data-motion`.
 
 ## Templates
 
@@ -98,6 +98,7 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 
 ## Headline band
 
-- 16:9 and 32:9: the warning-level label sits beside the headline (32:9 below it, as before).
-- 9:16 and 1:1: the label sits under the headline inside the band, right-aligned, with the headline pictogram spanning both rows. The band is at least 200 (one headline line + label, with room above and below); the headline may take 2 lines (the band grows further only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
-- `all-clear` shows no level label: a cleared bulletin has no warning level, the white band is only the colour of level 1.
+- The warning level is shown as a scale (`LevelScale.vue`, `levelScaleFor`): five cells 1–5 on a white plate, the current one filled with its Cabinet Office colour and a large numeral, the others at 30 % tint with an outline; the title alternates 警戒レベル / Alert Level with the language rotation. Tsunami bulletins get three cells (注意報 / 警報 / 大津波警報) titled 津波 / Tsunami.
+- 16:9 and 32:9: the scale sits beside the headline (32:9 below it).
+- 9:16 and 1:1: the scale sits under the headline inside the band, right-aligned, with the headline pictogram spanning both rows. The band is at least 200 (one headline line + label, with room above and below); the headline may take 2 lines (the band grows further only then); if it still does not fit, its size steps down once to 0.85 × the derived size, and anything left is reported as overflow.
+- `all-clear` shows no level scale: a cleared bulletin has no warning level, the white band is only the colour of level 1.
