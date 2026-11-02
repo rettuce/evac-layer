@@ -19,10 +19,10 @@
       "wmo_code": "VXKO55",
       "raw_title": "子吉川レベル３氾濫警報",
       "municipality_level": 3,
-      "screen": true,
+      "screen": false,
       "template": "evac-prepare",
       "display_level": 3,
-      "outcome": "pass",
+      "outcome": "fail",
       "layouts": [
         "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/16x9.json",
         "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/9x16.json",
@@ -37,10 +37,10 @@
       "wmo_code": "VXKO55",
       "raw_title": "子吉川レベル４氾濫危険警報",
       "municipality_level": 4,
-      "screen": true,
+      "screen": false,
       "template": "evac-now",
       "display_level": 4,
-      "outcome": "pass",
+      "outcome": "fail",
       "layouts": [
         "data/layouts/05210/VXKOii-202610211815-e713da0e3c05/16x9.json",
         "data/layouts/05210/VXKOii-202610211815-e713da0e3c05/9x16.json",
@@ -56,7 +56,7 @@
       "raw_title": "子吉川レベル５氾濫特別警報",
       "municipality_level": 5,
       "screen": true,
-      "template": "evac-now",
+      "template": "secure-now",
       "display_level": 5,
       "outcome": "pass",
       "layouts": [
@@ -74,7 +74,7 @@
       "raw_title": "子吉川レベル５氾濫特別警報",
       "municipality_level": 5,
       "screen": true,
-      "template": "evac-now",
+      "template": "secure-now",
       "display_level": 5,
       "outcome": "pass",
       "layouts": [
@@ -92,7 +92,7 @@
       "raw_title": "子吉川レベル５氾濫特別警報",
       "municipality_level": 5,
       "screen": true,
-      "template": "evac-now",
+      "template": "secure-now",
       "display_level": 5,
       "outcome": "pass",
       "layouts": [

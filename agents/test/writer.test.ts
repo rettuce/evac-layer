@@ -35,3 +35,10 @@ test("placeholder text fits the strictest character budget of every shape", asyn
     }
   }
 });
+
+test("level 5 placeholder and lint keep evacuation wording out", async () => {
+  const { PLACEHOLDER_ACTION } = await import("../src/writer/placeholder.js");
+  const { lintLevel5 } = await import("../src/writer/rules.js");
+  for (const t of Object.values(PLACEHOLDER_ACTION["5"])) assert.deepEqual(lintLevel5(t), [], t);
+  assert.equal(lintLevel5("すぐ にげて")[0].rule, "level5-no-evacuation-wording");
+});
