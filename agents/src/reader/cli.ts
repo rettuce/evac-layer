@@ -10,6 +10,7 @@ import { addVisionClaims, collectClaims, renderClaims, type Citation, type Claim
 import { EXTRACTION_SCHEMA, toStructuredSchema, type Extraction } from "./extraction.js";
 import { readGsiCsv } from "./gsi.js";
 import { PRESETS } from "./presets.js";
+import { estimatePreset } from "./estimate.js";
 import { MODELS, costOf, estimateUsd, type CallUsage, type ModelKey } from "./pricing.js";
 import { STAGE1_SYSTEM, STAGE2_SYSTEM, stage1User } from "./prompts.js";
 import { checkTextLayer, type TextLayerReport } from "./textlayer.js";
@@ -30,6 +31,7 @@ const { values } = parseArgs({
     municipality: { type: "string", default: "17204" },
     model: { type: "string", default: "sonnet" },
     "dry-run": { type: "boolean", default: false },
+    estimate: { type: "boolean", default: false },
     "skip-unusable": { type: "boolean", default: false },
     "allow-suspect": { type: "string", multiple: true, default: [] },
     "allow-vision": { type: "boolean", default: false },
@@ -77,6 +79,19 @@ function assertFinished(msg: Anthropic.Message, stage: string) {
 }
 
 async function main() {
+  if (values.estimate) {
+    const ids = values.municipality === "all" ? Object.keys(PRESETS) : [values.municipality!];
+    const rows = ids.map((id) => estimatePreset(PRESETS[id] ?? stop(`no preset for municipality ${id}`)));
+    const usd = (r: (typeof rows)[number], m: "sonnet" | "haiku") => `$${r.usd[m].low.toFixed(2)}-${r.usd[m].high.toFixed(2)}`;
+    console.log("id     name        text(pdf/pages)  stage1 input tok   vision(pdf/pages)  vision tok   sonnet        haiku");
+    for (const r of rows) {
+      console.log(`${r.id}  ${r.name.padEnd(6, "　")}  ${`${r.text_pdfs}/${r.text_pages}`.padStart(15)}  ${`${r.stage1_input_tokens.low}-${r.stage1_input_tokens.high}`.padStart(16)}  ${`${r.vision_pdfs}/${r.vision_pages}`.padStart(17)}  ${String(r.vision_input_tokens).padStart(10)}   ${usd(r, "sonnet").padEnd(12)}  ${usd(r, "haiku")}`);
+    }
+    const total = (m: "sonnet" | "haiku", k: "low" | "high") => rows.reduce((n, r) => n + r.usd[m][k], 0);
+    console.log(`total  sonnet $${total("sonnet", "low").toFixed(2)}-${total("sonnet", "high").toFixed(2)}  haiku $${total("haiku", "low").toFixed(2)}-${total("haiku", "high").toFixed(2)}`);
+    console.log(JSON.stringify(rows));
+    return;
+  }
   const preset = PRESETS[values.municipality!] ?? stop(`no preset for municipality ${values.municipality}; known: ${Object.keys(PRESETS).join(", ")}`);
   const modelKey = values.model as ModelKey;
   const model = MODELS[modelKey] ?? stop(`--model must be sonnet or haiku, got ${values.model}`);

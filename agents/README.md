@@ -35,6 +35,10 @@ Highest level for the municipality in the replayable bulletins: 輪島市 level 
 
 ### What the real data caught
 
-- The 2026-10-21 20:15 and 21:15 Level 5 flood special warnings for 子吉川 listed 由利本荘市 under 浸水想定地区（氾濫発生情報）, keyed by the breach point instead of a water-level station, so the parser first derived no level for the city and the Composer would have shown nothing. The breach area now takes the forecast area's level, and a fixture of the nine real bulletins guards it.
-- Where a bulletin carries a level but none can be derived for the municipality, the Composer now stops with that reason instead of treating the city as below the evacuation threshold: disaster information never degrades silently.
-- The recorded feed also held status words absent from the official samples (警報から注意報, 危険警報から注意報); the parser stopped on them, and only the two words that actually occur were added.
+**A text layer that silently drops characters.** The 輪島市 tsunami hazard map has a text layer, but its CID fonts lack a ToUnicode map, so extraction loses glyphs (「最大津波 16.6m」 becomes 「最 津波 16.6m」, 「石川県」 becomes 「川県」). Character counts and script ratios both pass it, and the same symptom decodes fine in other PDFs, so the check marks such files `suspect` and stops; a person clears a file after a spot check, or `--allow-vision` reads the page images with `{method: "vision", cited_text: null}` provenance.
+
+**A Level 5 special warning that lost its level.** The 2026-10-21 20:15 and 21:15 子吉川 bulletins list 由利本荘市 under 浸水想定地区（氾濫発生情報）, keyed by the breach point rather than a water-level station, so the city got no level and the Composer would have shown nothing during a Level 5 warning. Breach areas now take the forecast area's level, a fixture of the nine real bulletins guards it, and wherever a level still cannot be derived the Composer stops with that reason instead of treating the city as below the threshold.
+
+**An all-clear for something never shown.** The first fan-out over the recorded feed produced nine all-clear screens out of 22 for advisories that had never been displayed (for example a Level 2 heavy-rain advisory lifted on 10-16). The Composer is stateless per bulletin, so the replay keeps, per hazard, whether a screen is showing, and an all-clear appears only after one was.
+
+The recorded feed also held status words absent from the official samples (警報から注意報, 危険警報から注意報); the parser stopped on them, and only the two words that actually occur were added.
