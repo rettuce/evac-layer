@@ -15,6 +15,11 @@ const pick = computed(() => pickAmbient(props.seed, props.clockEpochMs, props.sc
 // The ambient pillar is one picture round the column: the field and the D21 rules run across all four
 // faces at the face's scale, and the clock appears once, on the front face at eye height.
 function overlayFor(width: number, height: number) {
+  const geometry = overlayGeometryFor(width, height)
+  return pick.value.scene.drawsGrid ? { ...geometry, rules: [] } : geometry
+}
+
+function overlayGeometryFor(width: number, height: number) {
   if (props.shape !== 'pillar') return overlayGeometry(width, height, pick.value.corner)
   const front = overlayGeometry(PILLAR.faceWidth, height, pick.value.corner)
   const rules = overlayGeometry(width, height, pick.value.corner, front.scale).rules

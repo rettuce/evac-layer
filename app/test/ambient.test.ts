@@ -29,3 +29,12 @@ test('the D21 block sits on the outer margin in every corner and shape', () => {
   }
   assert.deepEqual(overlayGeometry(0, 0, 'top-left').rules, [])
 })
+
+test('clock-grid can be pinned, and adjacent hours never repeat a scene', () => {
+  assert.equal(pickAmbient('05210-demo-honjo-station', BASE, 'clock-grid').scene.id, 'clock-grid')
+  assert.equal(pickAmbient('05210-demo-honjo-station', BASE, 'clock-grid').scene.drawsGrid, true)
+  for (let h = 1; h < 48; h++) {
+    const previous = pickAmbient('05210-demo-honjo-station', BASE + (h - 1) * AMBIENT_SLOT_MS).scene.id
+    assert.notEqual(pickAmbient('05210-demo-honjo-station', BASE + h * AMBIENT_SLOT_MS).scene.id, previous)
+  }
+})

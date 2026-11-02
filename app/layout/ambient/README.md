@@ -4,7 +4,7 @@ What a screen shows while there is no alert: a generative scene on a canvas, wit
 
 ## How a frame is decided
 
-- `pickAmbient(siteKey, epochMs, pinnedSceneId?)` hashes `siteKey` and the hour slot `floor(epochMs / 3600 s)`. The hash picks the scene, the overlay corner (D21 variants A–D: top-left, top-right, bottom-left, bottom-right) and the scene seed. Adjacent hours never repeat a scene while more than one is registered (the base indices of the two slots are compared, so no state is kept).
+- `pickAmbient(siteKey, epochMs, pinnedSceneId?)` hashes `siteKey` and the hour slot `floor(epochMs / 3600 s)`. The hash picks the scene, the overlay corner (D21 variants A–D: top-left, top-right, bottom-left, bottom-right) and the scene seed. Adjacent hours never repeat a scene while more than one is registered: two scenes alternate, three or more come in per-site shuffled rounds (stateless; see `sceneIndex`).
 - `scene.render(ctx, t, seed, shape)` is a pure function of its arguments. `t` is the clock time in ms (virtual or real), so the same `t` draws the same picture. Scenes never read `Date.now()` or `Math.random()`.
 - The site key is `seed=` on `/screen` (default: the layout name) and, in live mode, the `site` query or else the municipality code.
 - `/screen?…&scene=<id>` pins a scene (demo recordings). Unknown ids fall back to the hourly pick. The corner still follows `t`, so a recording that must not change picks a fixed `t` range as well.
@@ -30,5 +30,6 @@ The overlay is drawn on the scene's canvas (`drawOverlay`, after `scene.render`)
 | id | name | reference | what changed |
 |---|---|---|---|
 | `color-planes` | 色面 | the colour-plane study (direction 2, `app/shots/ambient.html`) | 3–7 soft radial planes (count by shape) on a pale ground, low saturation, each drifting on its own 90–150 s period; Canvas 2D only, so no blur filter |
+| `clock-grid` | 時計と幾何 | direction 1 of the ambient study (`app/shots/ambient.html`, after wgl ss D21) | a dark-ink ground with the D21 modular grid drawn in paper-coloured rules across the whole canvas (one picture round a pillar); the hourly seed picks a design number (track subdivisions 1–3, module row height) and the emphasised cells; those cells breathe on a 60 s cosine (no blinking). Draws its own grid, so the clock overlay skips its rules (`drawsGrid`) |
 
 To add a scene: write `scenes/<name>.ts` exporting an `AmbientScene` (`id`, `name`, `ink: 'dark' | 'light'` for the overlay colour, `render`), add it to `AMBIENT_SCENES` in `registry.ts`, and add a row here with the reference and what was changed from it.
