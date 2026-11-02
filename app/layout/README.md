@@ -17,6 +17,7 @@ Anything not listed here is internal and may change shape without notice. The si
 | `TYPE_PX`, `LANGUAGE_ROTATION`, `LANGUAGE_ROTATION_MS` | `typography.ts` | the three type steps and the language rotation order and period |
 | `PULSE_PERIOD_MS`, `SCALE_IN_MS` | `motion.ts` | motion timing the Verifier can check frames against |
 | `liveLayoutGate(approvals, site, municipality, bulletinId)`, `layoutKey`, `Approvals`, `LiveLayoutGate` | `gate.ts` | the approval gate used by `/api/live-layout`: `'ok'` only for an approved bulletin at a site with auto publish on, otherwise `'auto-publish-off'` or `'unapproved'` (the 403 `data.reason`). `Approvals` is the shape of `data/approvals.json` |
+| `pickAmbient(siteKey, epochMs, sceneId?)`, `AMBIENT_SCENES`, `AmbientScene`, `overlayGeometry` | `ambient/index.ts` | the ambient layer: hourly deterministic pick of scene, D21 overlay corner and seed; scenes are pure `render(ctx, t, seed, shape)`. See `ambient/README.md` |
 
 ## What the rendered screen reports
 
@@ -57,7 +58,8 @@ Ready: `.evac-screen[data-ready="1"]`.
 |---|---|
 | `scenario=switch&t_switch=<ms>[&t_clear=<ms>]` | ambient until `t_switch`, 300 ms black, then the alert scales in; from `t_clear` a 1 s crossfade back to ambient |
 | `scenario=ambient` | ambient layer only |
-| `seed=<text>`, `site_name=<text>` | ambient colour seed (default: layout name) and the site label (default: municipality name) |
+| `seed=<text>`, `site_name=<text>` | ambient site key for the hourly pick (default: layout name) and the site label (default: municipality name) |
+| `scene=<id>` | pin the ambient scene (also in live mode); see `layout/ambient/README.md` |
 
 The alert layer is mounted hidden from the start, so `.evac-screen[data-ready="1"]` is also the ready signal here.
 

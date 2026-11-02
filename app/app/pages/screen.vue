@@ -72,6 +72,7 @@ const frame = computed(() =>
   scenario.value ? scenarioFrame(scenario.value, elapsed.value, switchAtMs.value, clearAtMs.value) : undefined,
 )
 
+const sceneQuery = computed(() => (typeof route.query.scene === 'string' ? route.query.scene : undefined))
 const seed = computed(() => String(route.query.seed ?? layoutName.value))
 const siteName = computed(() => String(route.query.site_name ?? screen.value?.municipality.name ?? ''))
 const realStartEpoch = Date.now()
@@ -101,6 +102,7 @@ if (scenario.value) start()
     :site="typeof route.query.site === 'string' ? route.query.site : undefined"
     :site-name="typeof route.query.site_name === 'string' ? route.query.site_name : undefined"
     :reset="route.query.reset !== undefined"
+    :scene="sceneQuery"
     :reduced-motion="reducedMotion"
     :data-clock="clockMode"
   />
@@ -124,9 +126,10 @@ if (scenario.value) start()
     <AmbientLayer
       v-show="frame.ambientVisible"
       :seed="seed"
-      :elapsed-ms="elapsed"
       :clock-epoch-ms="clockEpochMs"
       :site-name="siteName"
+      :shape="shape"
+      :scene="sceneQuery"
     />
     <div
       class="alert-layer"
