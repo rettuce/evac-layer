@@ -126,6 +126,7 @@ if (scenario.value) start()
   <div v-else class="scenario" :data-scenario="scenario" :data-clock="clockMode">
     <AmbientLayer
       v-show="frame.ambientVisible"
+      :active="frame.ambientVisible"
       :seed="seed"
       :clock-epoch-ms="clockEpochMs"
       :site-name="siteName"

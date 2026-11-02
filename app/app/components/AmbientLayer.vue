@@ -3,7 +3,7 @@ import { OUTAGE_NOTICE, clockSweep, drawOverlay, formatClockJst, labelFont, over
 import { PILLAR, pillarYForHeight } from '~~/layout/shapes'
 import type { Shape } from '~~/layout/types'
 
-const props = defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string }>()
+const props = withDefaults(defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string; active?: boolean }>(), { active: true })
 
 const TIME_GLYPHS = '0123456789:'
 const PILLAR_CLOCK_TOP_M = 2.0
@@ -21,15 +21,20 @@ function overlayFor(width: number, height: number) {
 
 function overlayGeometryFor(width: number, height: number) {
   if (props.shape !== 'pillar') return overlayGeometry(width, height, pick.value.corner)
-  const front = overlayGeometry(PILLAR.faceWidth, height, pick.value.corner)
+  const front = overlayGeometry(width / PILLAR.faces, height, pick.value.corner)
   const rules = overlayGeometry(width, height, pick.value.corner, front.scale).rules
-  return { ...front, rules, block: { ...front.block, top: pillarYForHeight(PILLAR_CLOCK_TOP_M), bottom: undefined } }
+  const top = pillarYForHeight(PILLAR_CLOCK_TOP_M) * (height / PILLAR.height)
+  return { ...front, rules, block: { ...front.block, top, bottom: undefined } }
 }
 
+// The backing store follows the device pixel ratio: a pillar captured at 0.5 is drawn at a quarter of
+// the pixels it would take at full size, and a 1x panel keeps its full resolution.
 function draw() {
   const el = canvas.value
-  const { width, height } = viewport.value
-  if (!el || width === 0 || !fontsReady.value) return
+  if (!el || viewport.value.width === 0 || !fontsReady.value || !props.active) return
+  const ratio = window.devicePixelRatio || 1
+  const width = Math.round(viewport.value.width * ratio)
+  const height = Math.round(viewport.value.height * ratio)
   if (el.width !== width || el.height !== height) {
     el.width = width
     el.height = height
@@ -65,7 +70,7 @@ onMounted(() => {
   loadFonts()
 })
 onBeforeUnmount(() => window.removeEventListener('resize', onResize))
-watch([() => props.clockEpochMs, () => props.shape, () => props.siteName, pick, viewport, fontsReady], draw, { flush: 'post' })
+watch([() => props.clockEpochMs, () => props.shape, () => props.siteName, () => props.active, pick, viewport, fontsReady], draw, { flush: 'post' })
 watch(() => props.siteName, () => document.fonts.load(labelFont(1), props.siteName).then(draw))
 </script>
 
