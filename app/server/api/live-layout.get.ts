@@ -1,5 +1,3 @@
-// Screens only ever show layouts an operator approved, and only at sites with auto publish on;
-// everything else stays on the ambient layer.
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const layoutQuery = parseLayoutQuery(query)

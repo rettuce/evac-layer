@@ -14,6 +14,12 @@ interface AgentsReplayFixture {
 
 const replayOrigins = new Map<string, number>()
 
+function sharedReplayOrigin(municipality: string, speed: number, reset: boolean): number {
+  const key = `${municipality}:${speed}`
+  if (reset || !replayOrigins.has(key)) replayOrigins.set(key, Date.now())
+  return replayOrigins.get(key)!
+}
+
 async function loadReplayIndex(municipality: string): Promise<ReplayIndex | undefined> {
   const index = await readJsonIfExists<LayoutIndexFile>(join(dataDir(), 'layouts', municipality, 'index.json'))
   if (index) return { municipality, name: index.name, rows: index.entries }
@@ -45,10 +51,8 @@ export default defineEventHandler(async (event): Promise<ReplayStatus> => {
   const replay = await loadReplayIndex(query.municipality)
   if (!replay) throw createError({ status: 404, statusText: 'Not Found', message: `no replay data for ${query.municipality}` })
 
-  // All screens polling the same municipality and speed share one origin, so they switch together.
-  const key = `${query.municipality}:${speed}`
-  if (query.reset !== undefined || !replayOrigins.has(key)) replayOrigins.set(key, Date.now())
-  const elapsedMs = query.t !== undefined ? Number(query.t) : Date.now() - replayOrigins.get(key)!
+  const origin = sharedReplayOrigin(query.municipality, speed, query.reset !== undefined)
+  const elapsedMs = query.t !== undefined ? Number(query.t) : Date.now() - origin
 
   return { ...replay, speed, elapsedMs, index: rowIndexAt(replay.rows, elapsedMs, speed) }
 })

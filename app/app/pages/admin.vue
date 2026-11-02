@@ -42,13 +42,18 @@ function readStoredToken(): string {
   }
 }
 
+function rememberTokenForThisTab(token: string): boolean {
+  try {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY, token)
+    return true
+  } catch {
+    return false
+  }
+}
+
 function submitToken() {
   adminToken.value = tokenDraft.value.trim()
-  try {
-    sessionStorage.setItem(TOKEN_STORAGE_KEY, adminToken.value)
-  } catch {
-    // Without storage the token simply lives for this page view.
-  }
+  rememberTokenForThisTab(adminToken.value)
   load()
 }
 
