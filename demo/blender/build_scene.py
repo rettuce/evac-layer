@@ -19,14 +19,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from layout import BACK_WALL_Y, CEILING_Z, COLUMN_SIZE, COLUMNS, EYE_Z, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW
 from looks import LOOKS, build_look
-from primitives import box, principled, vertical_plane
+from primitives import box, principled, spot_light, vertical_plane
 
 DEMO_DIR = Path(__file__).resolve().parent.parent
 SCREENS_DIR = DEMO_DIR / "screens"
 CACHE_DIR = DEMO_DIR / "cache"
 HDRI_PATH = DEMO_DIR / "assets" / "metro_vijzelgracht_1k.hdr"
 PLACEHOLDER_FONT = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
-CUTS = ("ambient", "switch", "alert")
+CUTS = ("ambient", "switch", "alert", "off", "test")
 
 INCH = 0.0254
 BEZEL_M = 0.02
@@ -37,6 +37,7 @@ LENS_MM = 35.0
 F_STOP = 2.8
 # Look B (35 downlights) and C (louvers) overflow the default 512 MB shadow pool.
 SHADOW_POOL_MB = "1536"
+NIGHT_LIGHT_COLOR = (0.82, 0.90, 1.0)
 
 
 def facing(yaw):
@@ -113,6 +114,30 @@ STILL_CAMERAS = {
 }
 
 
+# Storyboard 3D cuts: camera path as (location, target) keys spread evenly over the cut,
+# which screen recording to show, and a light multiplier (night = everything dimmed).
+SHOTS = {
+    "cut01": {
+        "seconds": 10, "screens": "off", "light_scale": 0.03, "lens": 35.0, "focus": "9x16",
+        "night_lights": [
+            (Vector((-2.8, -2.6, CEILING_Z - 0.2)), Vector((-4.5, 1.0, 1.4)), 600.0),
+            (Vector((1.5, 5.2, CEILING_Z - 0.2)), Vector((1.5, 9.0, 1.2)), 320.0),
+        ],
+        "path": [
+            (Vector((-0.8, -8.2, EYE_Z)), Vector((-3.0, 3.5, 2.6))),
+            (Vector((-2.4, -4.8, EYE_Z)), Vector((-4.0, 1.5, 2.2))),
+        ],
+    },
+    "cut02": {
+        "seconds": 10, "screens": "ambient", "light_scale": 1.0, "lens": 35.0, "focus": "32x9",
+        "path": [
+            (Vector((-6.2, -5.5, EYE_Z)), Vector((-4.5, 1.0, 2.0))),
+            (Vector((0.8, -6.2, EYE_Z)), Vector((0.5, 6.0, 2.8))),
+        ],
+    },
+}
+
+
 def parse_args():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser()
@@ -122,7 +147,10 @@ def parse_args():
     parser.add_argument("--fps", type=int, default=30)
     parser.add_argument("--samples", type=int, default=32)
     parser.add_argument("--look", choices=sorted(LOOKS), default="base")
-    parser.add_argument("--cut", choices=CUTS, help="read demo/screens/<shape>_<cut>.mp4")
+    parser.add_argument("--cut", choices=CUTS,
+                        help="read demo/screens/<shape>_<cut>.mp4; off = black screens, test = <shape>.mp4|png")
+    parser.add_argument("--shot", choices=sorted(SHOTS), help="storyboard 3D cut; sets seconds, screens, lights, camera")
+    parser.add_argument("--frame", type=int, default=1, help="frame rendered by --still")
     parser.add_argument("--still", help="render one frame from --cam to this PNG")
     parser.add_argument("--cam", choices=sorted(STILL_CAMERAS), default="hero")
     parser.add_argument("--stills-dir", default=str(DEMO_DIR / "renders" / "stills"))
@@ -133,7 +161,9 @@ def parse_args():
 
 
 def screen_source(shape, cut):
-    if cut:
+    if cut == "off":
+        return make_black(shape)
+    if cut and cut != "test":
         candidate = SCREENS_DIR / f"{shape}_{cut}.mp4"
         if not candidate.exists():
             raise FileNotFoundError(f"--cut {cut} needs {candidate}")
@@ -143,6 +173,15 @@ def screen_source(shape, cut):
         if candidate.exists():
             return candidate
     return make_placeholder(shape)
+
+
+def make_black(shape):
+    SCREENS_DIR.mkdir(parents=True, exist_ok=True)
+    out = SCREENS_DIR / f"{shape}_off.png"
+    width, height = SCREENS[shape]["pixels"]
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", f"color=c=black:s={width}x{height}",
+                    "-frames:v", "1", str(out)], check=True)
+    return out
 
 
 def make_placeholder(shape):
@@ -249,6 +288,33 @@ def build_dolly(frame_count):
     return key_frames
 
 
+def build_shot_camera(shot, frame_count):
+    location, target_location = shot["path"][0]
+    camera, target = add_camera(location, target_location, shot["lens"])
+    bpy.ops.object.empty_add(location=SCREENS[shot["focus"]]["center"])
+    camera.data.dof.focus_object = bpy.context.active_object
+    last = len(shot["path"]) - 1
+    for i, (location, target_location) in enumerate(shot["path"]):
+        frame = 1 + round(i * (frame_count - 1) / last)
+        camera.location = location
+        camera.keyframe_insert("location", frame=frame)
+        target.location = target_location
+        target.keyframe_insert("location", frame=frame)
+    return [1, (frame_count + 1) // 2, frame_count]
+
+
+def scale_lights(scale):
+    for obj in bpy.data.objects:
+        if obj.type == "LIGHT":
+            obj.data.energy *= scale
+    for mat in bpy.data.materials:
+        if mat.name.startswith("screen_") or not mat.node_tree:
+            continue
+        for node in mat.node_tree.nodes:
+            if node.type == "EMISSION":
+                node.inputs["Strength"].default_value *= scale
+
+
 def build_still_camera(name):
     spec = STILL_CAMERAS[name]
     screen = SCREENS[spec["focus"]]
@@ -289,15 +355,15 @@ def encode_mp4(frames_dir, fps, out_path):
     )
 
 
-def export_stills(frames_dir, key_frames, stills_dir):
+def export_stills(frames_dir, key_frames, stills_dir, names):
     stills_dir.mkdir(parents=True, exist_ok=True)
-    for frame, shape in zip(key_frames, SHOT_ORDER):
-        shutil.copyfile(frames_dir / f"{frame:04d}.png", stills_dir / f"shot_{shape}.png")
+    for frame, name in zip(key_frames, names):
+        shutil.copyfile(frames_dir / f"{frame:04d}.png", stills_dir / f"{name}.png")
 
 
-def render_still(path):
+def render_still(path, frame):
     scene = bpy.context.scene
-    scene.frame_set(1)
+    scene.frame_set(frame)
     scene.render.filepath = str(path)
     started = time.perf_counter()
     bpy.ops.render.render(write_still=True)
@@ -306,18 +372,31 @@ def render_still(path):
 
 def main():
     args = parse_args()
-    frame_count = max(2, round(args.seconds * args.fps))
+    shot = SHOTS.get(args.shot)
+    seconds = shot["seconds"] if shot else args.seconds
+    frame_count = max(2, round(seconds * args.fps))
+    cut = args.cut or (shot["screens"] if shot else None)
+    light_scale = shot["light_scale"] if shot else 1.0
     frames_dir = CACHE_DIR / "frames"
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
     wall = SCREENS["16x9"]
     half = wall["size"][0] / 2 + BEZEL_M
     look = build_look(args.look, (wall["center"].x - half, wall["center"].x + half))
-    sources = build_screens(frame_count, args.cut)
-    build_world(look["hdri_strength"])
-    key_frames = None if args.still else build_dolly(frame_count)
-    if args.still:
+    sources = build_screens(frame_count, cut)
+    build_world(look["hdri_strength"] * light_scale)
+    scale_lights(light_scale)
+    for i, (location, aim, energy) in enumerate(shot.get("night_lights", []) if shot else []):
+        light = spot_light(f"night_light_{i}", location, energy, NIGHT_LIGHT_COLOR, 38.0, 0.6)
+        light.rotation_euler = (aim - location).to_track_quat("-Z", "Y").to_euler()
+    if shot:
+        key_frames = build_shot_camera(shot, frame_count)
+        still_names = [f"{args.shot}_{frame:04d}" for frame in key_frames]
+    elif args.still:
         build_still_camera(args.cam)
+    else:
+        key_frames = build_dolly(frame_count)
+        still_names = [f"shot_{shape}" for shape in SHOT_ORDER]
     configure_render(args, frame_count, frames_dir)
 
     if args.save_blend:
@@ -328,8 +407,8 @@ def main():
         print(f"SCREEN {shape} {width:.3f}m x {height:.3f}m source={source.name}")
 
     if args.still:
-        elapsed = render_still(Path(args.still).resolve())
-        print(f"RENDER_STATS still look={args.look} cam={args.cam} res={args.width}x{args.height} "
+        elapsed = render_still(Path(args.still).resolve(), args.frame)
+        print(f"RENDER_STATS still look={args.look} shot={args.shot} cam={args.cam} frame={args.frame} res={args.width}x{args.height} "
               f"samples={args.samples} total_s={elapsed:.1f}")
         return
 
@@ -340,8 +419,8 @@ def main():
     bpy.ops.render.render(animation=True)
     elapsed = time.perf_counter() - started
     encode_mp4(frames_dir, args.fps, Path(args.out).resolve())
-    export_stills(frames_dir, key_frames, Path(args.stills_dir).resolve())
-    print(f"RENDER_STATS look={args.look} frames={frame_count} res={args.width}x{args.height} "
+    export_stills(frames_dir, key_frames, Path(args.stills_dir).resolve(), still_names)
+    print(f"RENDER_STATS look={args.look} shot={args.shot} frames={frame_count} res={args.width}x{args.height} "
           f"samples={args.samples} total_s={elapsed:.1f} per_frame_s={elapsed / frame_count:.2f}")
 
 
