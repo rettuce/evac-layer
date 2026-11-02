@@ -6,6 +6,12 @@ Turn the screens a city already has into evacuation guidance anyone can read.
 **スクリーンはもうある。**
 街にすでにあるスクリーンを、いちばん伝えなければならない瞬間に、誰にでも読める避難案内へ変える。
 
+![A level-4 flood warning on a 16:9 screen, drawn from a real JMA bulletin for Yurihonjo, Akita](docs/screens/lv4-16x9.png)
+
+[All screens — every shape and level, the pillar, the ambient layer and the switch →](docs/screens.md)
+
+Built from scratch during **Built with Claude: Japan 2026** (Nov 2–8, 2026). 
+
 Built from scratch during **Built with Claude: Japan 2026** (Nov 2–8, 2026). Status: Day 2 — the pipeline runs end to end on real data; the demo video and the remaining polish are in progress.
 
 [Demo video — coming Nov 8] · [日本語の概要](#日本語の概要)
