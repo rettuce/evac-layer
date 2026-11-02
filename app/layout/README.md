@@ -65,7 +65,8 @@ The alert layer is mounted hidden from the start, so `.evac-screen[data-ready="1
 | Parameter | Meaning |
 |---|---|
 | `municipality=<code>` | 5-digit code; reads `data/layouts/<code>/index.json` (or the agents replay fixture) |
-| `speed=<n>` | replay time compression (default 600; the demo uses 1200, 9 bulletins in 56 s) |
+| `speed=<n>` | replay time compression (default 600) |
+| `from=<ISO>&to=<ISO>` | replay only bulletins issued in this window; elapsed 0 is the first bulletin inside it. The demo uses `from=2026-10-21T11:00+09:00&to=2026-10-22T07:00+09:00&speed=1200` (05210: 9 bulletins in 56 s) |
 | `site=<id>` | site whose auto-publish switch gates the screen (default: `site` in index.json) |
 | `reset` | restart the shared replay origin for this municipality and speed |
 | `site_name=<text>` | ambient label (default: municipality name) |
@@ -83,7 +84,7 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 
 | Route | Access | Meaning |
 |---|---|---|
-| `GET /api/replay?municipality&speed[&t][&reset]` | public | replay rows and the current index |
+| `GET /api/replay?municipality&speed[&from][&to][&t][&reset]` | public | replay rows inside the window and the current index |
 | `GET /api/live-layout?municipality&bulletin&shape[&site]` | public, gated | layout JSON only for an approved bulletin at an auto-publish site; 403 with `data.reason` = `auto-publish-off` \| `unapproved` |
 | `GET /api/dashboard` | public | totals and per-municipality rows |
 | `GET /api/admin/catalog`, `GET /api/admin/preview-layout`, `POST /api/admin/approve`, `POST /api/admin/site` | admin | Bearer `NUXT_ADMIN_TOKEN` when set; otherwise local only (loopback address, local Host, not cross-site, JSON POST bodies). Writes go to `data/approvals.json` |

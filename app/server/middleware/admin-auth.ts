@@ -25,6 +25,11 @@ function isLocalBrowserSafe(event: Parameters<Parameters<typeof defineEventHandl
   return true
 }
 
+// nuxi dev relays requests to the Nitro worker, so in dev the client address is only in x-forwarded-for.
+function clientAddress(event: Parameters<Parameters<typeof defineEventHandler>[0]>[0]): string {
+  return getRequestIP(event, { xForwardedFor: import.meta.dev }) ?? ''
+}
+
 // Behind a reverse proxy every client looks like loopback, so such deployments must set NUXT_ADMIN_TOKEN.
 export default defineEventHandler((event) => {
   if (!event.path.startsWith('/api/admin/')) return
@@ -34,7 +39,7 @@ export default defineEventHandler((event) => {
     if (!sameToken(given, expected)) throw createError({ status: 401, statusText: 'Unauthorized' })
     return
   }
-  if (!LOOPBACK_ADDRESSES.has(event.node.req.socket.remoteAddress ?? '') || !isLocalBrowserSafe(event)) {
+  if (!LOOPBACK_ADDRESSES.has(clientAddress(event)) || !isLocalBrowserSafe(event)) {
     throw createError({ status: 403, statusText: 'Forbidden', message: 'admin API is local-only unless NUXT_ADMIN_TOKEN is set' })
   }
 })

@@ -100,6 +100,8 @@ if (scenario.value) start()
     :municipality="liveMunicipality"
     :shape="shape"
     :speed="liveSpeed"
+    :from="typeof route.query.from === 'string' ? route.query.from : undefined"
+    :to="typeof route.query.to === 'string' ? route.query.to : undefined"
     :virtual-elapsed-ms="clockMode === 'virtual' ? elapsed : undefined"
     :site="typeof route.query.site === 'string' ? route.query.site : undefined"
     :site-name="typeof route.query.site_name === 'string' ? route.query.site_name : undefined"

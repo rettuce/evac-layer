@@ -6,6 +6,8 @@ const props = defineProps<{
   municipality: string
   shape: Shape
   speed: number
+  from?: string
+  to?: string
   virtualElapsedMs?: number
   site?: string
   siteName?: string
@@ -49,6 +51,8 @@ const clockEpochMs = computed(() => replayClockEpochMs(rows.value, elapsed.value
 
 function replayUrl(extra: Record<string, string>) {
   const params = new URLSearchParams({ municipality: props.municipality, speed: String(props.speed), ...extra })
+  if (props.from) params.set('from', props.from)
+  if (props.to) params.set('to', props.to)
   return `/api/replay?${params}`
 }
 
