@@ -15,7 +15,8 @@
     "compose": "tsx src/composer/cli.ts",
     "verify": "tsx src/verifier/cli.ts",
     "pipeline": "tsx src/loop/cli.ts",
-    "shelters": "tsx src/reader/shelters-cli.ts"
+    "shelters": "tsx src/reader/shelters-cli.ts",
+    "replay": "tsx src/jma/replay.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
