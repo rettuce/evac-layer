@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { PILLAR, isShape } from '~~/layout/shapes'
+import { isShape } from '~~/layout/shapes'
 import { isBulletinId, isMunicipalityId } from '~~/layout/replay'
 
 const SITE_ID = /^[A-Za-z0-9_-]{1,80}$/
@@ -19,10 +19,7 @@ export function parseLayoutQuery(query: Record<string, unknown>): LayoutQuery {
 }
 
 export async function readLayout({ municipality, bulletin, shape }: LayoutQuery) {
-  const dir = join(dataDir(), 'layouts', municipality, bulletin)
-  const layout =
-    (await readJsonIfExists(join(dir, `${shape}.json`))) ??
-    (shape === 'pillar' ? await readJsonIfExists(join(dir, `${PILLAR.faceShape}.json`)) : undefined)
+  const layout = await readJsonIfExists(join(dataDir(), 'layouts', municipality, bulletin, `${shape}.json`))
   if (!layout) throw createError({ status: 404, statusText: 'Not Found', message: `no layout for ${bulletin} ${shape}` })
   return layout
 }

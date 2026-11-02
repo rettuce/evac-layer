@@ -105,9 +105,9 @@ Only bulletins that are approved and belong to a site with auto publish on are s
 
 ## Pillar (`shape=pillar`)
 
-- A square column wrapped in LED: logical canvas 6616 × 5834 = four faces of 1654 × 5834 side by side (face 0 is the front, then 1, 2, 3 to the right). The outer 37 px of each face lie on the rounded corner and carry no text.
-- Each face is a 9:16 screen drawn at scale 1 (`PILLAR` in `shapes.ts`; same pixel pitch as a 55" portrait panel, so the 9:16 type sizes apply). The band and the level ladder (on by default for the pillar) run edge to edge, so they close into rings round the column; text and pictograms repeat on every face.
+- A square column wrapped in LED from 0.40 m to 3.60 m above the floor: logical canvas 6616 × 5046 = four faces of 1654 × 5046 side by side (face 0 is the front, then 1, 2, 3 to the right). The outer 37 px of each face lie on the rounded corner and carry no text.
+- Each face uses the 9:16 template's cells and type sizes at scale 1 (`PILLAR` in `shapes.ts`; same pixel pitch as a 55" portrait panel), rearranged by `pillarFace`: band, ladder and a 960 px action pictogram fill the upper column (2.2–3.6 m); action text, easy Japanese, direction and shelter end at eye height (1.2 m, rows bottom-anchored); the source sits at 0.4–0.6 m. The band and the level ladder (on by default for the pillar) run edge to edge, so they close into rings round the column; text and pictograms repeat on every face.
 - The outer `.evac-screen` carries `data-shape="pillar"`, `data-faces="4"` and the state of face 0 (`data-overflow`, `data-dropped`, `data-level-scale`, …); it turns `data-ready="1"` when all four faces are fitted. Faces 1–3 are `aria-hidden`.
-- Draw at logical pixels and capture at `deviceScaleFactor: 0.5` → 3308 × 2917 (`scripts/shot.mjs` does this).
-- Layouts: `pillar.json` when the Composer writes one, otherwise the bulletin's `9x16.json` (`/api/live-layout?shape=pillar` falls back). The feed keeps the four panel shapes only.
+- Draw at logical pixels and capture at `deviceScaleFactor: 0.5` → 3308 × 2523 (`scripts/shot.mjs` does this).
+- Layouts: the Composer writes `pillar.json` (same cells as 9:16); live, feed and `/delivery` serve it like the other shapes.
 - Ambient: one colour field across the whole canvas, the D21 clock repeated on each face.

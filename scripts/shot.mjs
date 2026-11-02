@@ -18,7 +18,7 @@ const SHAPES = {
   '32x9': { width: 3840, height: 1080 },
   '1x1': { width: 1080, height: 1080 },
   // Drawn at logical pixels, captured at half size: the full 6616 x 5834 frame is 38 MP.
-  pillar: { width: 6616, height: 5834, deviceScaleFactor: 0.5 },
+  pillar: { width: 6616, height: 5046, deviceScaleFactor: 0.5 },
 }
 
 const READY_TIMEOUT_MS = 30000
