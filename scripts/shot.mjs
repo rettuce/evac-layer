@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
+import { parseArgs } from 'node:util'
 
 const require = createRequire(new URL('../app/package.json', import.meta.url))
 const puppeteer = require('puppeteer-core')
@@ -139,4 +140,47 @@ async function main() {
   }
 }
 
-await main()
+const FRAME_INTERVAL_MS = 1000 / 30
+
+const { values: args } = parseArgs({
+  options: {
+    frames: { type: 'boolean', default: false },
+    name: { type: 'string' },
+    shape: { type: 'string', default: '16x9' },
+    seconds: { type: 'string', default: '3' },
+    start: { type: 'string', default: '0' },
+    query: { type: 'string', default: '' },
+  },
+})
+
+async function recordFrames() {
+  const shape = args.shape
+  if (!(shape in SHAPES)) throw new Error(`unknown shape ${shape}`)
+  const frameCount = Math.round(Number(args.seconds) * 1000 / FRAME_INTERVAL_MS)
+  const startMs = Number(args.start)
+  const name = args.name ?? `${LAYOUT}-${shape}`
+  const dir = fileURLToPath(new URL(`../app/shots/frames/${name}/`, import.meta.url))
+  await mkdir(dir, { recursive: true })
+  const extra = args.query ? `&${args.query}` : ''
+  const url = `${screenUrl(shape)}&clock=virtual&t=${startMs}${extra}`
+
+  const browser = await puppeteer.launch({ executablePath: CHROME_PATH, headless: true })
+  const began = performance.now()
+  try {
+    const page = await browser.newPage()
+    await page.setViewport({ ...SHAPES[shape], deviceScaleFactor: 1 })
+    await page.goto(url, { waitUntil: 'networkidle0' })
+    await page.waitForSelector('.evac-screen[data-ready="1"]', { timeout: READY_TIMEOUT_MS })
+    for (let i = 0; i < frameCount; i++) {
+      const t = Math.round(startMs + i * FRAME_INTERVAL_MS)
+      await page.evaluate((ms) => window.evacClock.set(ms), t)
+      await page.screenshot({ path: `${dir}${String(i + 1).padStart(4, '0')}.png`, type: 'png' })
+    }
+  } finally {
+    await browser.close()
+  }
+  const seconds = (performance.now() - began) / 1000
+  console.log(`frames ${name}: ${frameCount} PNG in ${seconds.toFixed(1)} s -> app/shots/frames/${name}/ (${url})`)
+}
+
+await (args.frames ? recordFrames() : main())
