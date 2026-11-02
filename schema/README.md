@@ -25,3 +25,10 @@ Validate any document: `pnpm -F agents validate <file.json>` (schema inferred; `
 - Headline: ja 12 / ja_easy 18 / en 24 on every shape. The headline uses the JMA warning name verbatim, so the budget is set by the longest official name (ja「レベル４土砂災害危険警報」12, en "Major Tsunami Warning" 21), not by width; the renderer must fit it (two lines on 9x16 / 32x9 where needed).
 - Other cells: one line in the cell's track at the action/guide type sizes, with full-width ja ≈ 1 em and en ≈ 0.55 em per character, rounded down. To be replaced by measurements from `scripts/shot.mjs` after integration.
 - Over-budget text stops the Composer; it never truncates.
+
+## Revision loop (agents/src/loop/, `pnpm -F agents pipeline`)
+
+- Compose → verify → send findings back to the Writer → recompose, up to 3 attempts. Findings a rewrite can fix: `over-budget`, `font-size`, `overflow`, `distance-duplicated`. Anything else (a missing required cell, flicker) stops the loop at once, because rewriting text cannot fix it.
+- The `static` Verifier checks what needs no rendering (layout schema, duplicated distance). Font size, overflow and flicker need the browser Verifier, which joins the loop once `/screen` accepts an arbitrary layout via `?src=`.
+- Report: `data/reports/<municipality>-<bulletin_id>/report.json` (every attempt with its Writer source and findings, outcome and reason) plus `layouts/<shape>.json` from the last attempt.
+- Until the API key is in place, Writer revisions come from fixture files (`--revisions`); without them the live reviser declines rather than inventing text.

@@ -1,0 +1,47 @@
+{
+  "cells": [
+    {
+      "role": "headline",
+      "text": {
+        "ja": "津波注意報",
+        "ja_easy": "つなみ ちゅういほう",
+        "en": "Tsunami Advisory",
+        "zh_hans": "海啸注意报",
+        "zh_hant": "海嘯注意報",
+        "ko": "쓰나미 주의보"
+      },
+      "basis": "alert.areas[石川県能登].kind_name"
+    },
+    {
+      "role": "action",
+      "text": {
+        "ja": "海から離れて",
+        "ja_easy": "うみから はなれて",
+        "en": "Leave the coast",
+        "zh_hans": "远离海边",
+        "zh_hant": "遠離海邊",
+        "ko": "바다에서 떨어지세요"
+      },
+      "basis": "alert.tsunami.highest_category=advisory"
+    },
+    {
+      "role": "direction",
+      "text": {
+        "ja": "左へ 800m"
+      },
+      "basis": "site.direction"
+    },
+    {
+      "role": "languages",
+      "text": {
+        "ja": "海から離れて",
+        "ja_easy": "うみから はなれて",
+        "en": "Leave the coast",
+        "zh_hans": "远离海边",
+        "zh_hant": "遠離海邊",
+        "ko": "바다에서 떨어지세요"
+      },
+      "basis": "action"
+    }
+  ]
+}
