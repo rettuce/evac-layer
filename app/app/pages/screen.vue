@@ -18,10 +18,13 @@ function numberQuery(value: unknown, fallback: number): number {
 
 const route = useRoute()
 const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
-// Guidance screens must never show a document from an arbitrary origin, so src is a
-// dev-only bridge for the Verifier and accepts same-origin paths only.
+// Guidance screens must never show a document from an arbitrary origin. In dev any same-origin
+// path is allowed for the Verifier; production only accepts the pre-generated layout store.
+const PRODUCTION_SRC_PREFIX = '/api/live-layout?'
+
 function isAllowedSrc(value: unknown): value is string {
-  return import.meta.dev && typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) return false
+  return import.meta.dev || value.startsWith(PRODUCTION_SRC_PREFIX)
 }
 const src = computed(() => (isAllowedSrc(route.query.src) ? route.query.src : undefined))
 const srcRejected = computed(() => route.query.src !== undefined && !src.value)
@@ -94,7 +97,7 @@ if (scenario.value) start()
     :reduced-motion="reducedMotion"
     :data-clock="clockMode"
   />
-  <div v-else-if="srcRejected" class="missing" data-error="src-rejected">src must be a same-origin path (dev only)</div>
+  <div v-else-if="srcRejected" class="missing" data-error="src-rejected">src must be a same-origin path (production: /api/live-layout only)</div>
   <div v-else-if="remoteError" class="missing" data-error="src-load-failed">{{ remoteError }}</div>
   <div v-else-if="src && !screen" class="missing" data-loading="src">loading {{ src }}</div>
   <div v-else-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>
