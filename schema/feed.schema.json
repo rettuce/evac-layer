@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evac-layer.dev/schema/feed.schema.json",
+  "title": "EVAC LAYER site feed (GET /api/feed/<site_id>, webhook body)",
+  "description": "What one site should show now. Only approved bulletins at sites with auto publish on ever appear as state=alert; everything else is ambient.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feed_version", "site", "state", "alert", "bulletin_id", "issued_at", "layouts", "assets", "sources", "approved_at"],
+  "properties": {
+    "feed_version": { "const": "0.1" },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "municipality_id"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,80}$" },
+        "municipality_id": { "$ref": "common.schema.json#/$defs/municipalityId" },
+        "name": { "type": "string" }
+      }
+    },
+    "state": { "enum": ["ambient", "alert"] },
+    "alert": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "bulletin_id", "hazard", "level", "issued_at", "template"],
+          "properties": {
+            "source": { "const": "jma" },
+            "bulletin_id": { "type": "string", "minLength": 1 },
+            "hazard": { "$ref": "common.schema.json#/$defs/hazard" },
+            "level": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "issued_at": { "type": "string", "format": "date-time" },
+            "template": { "enum": ["evac-now", "evac-prepare", "shelter-direction", "all-clear", "secure-now"] }
+          }
+        }
+      ]
+    },
+    "bulletin_id": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] },
+    "issued_at": { "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] },
+    "layouts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "16x9": { "$ref": "layout.schema.json" },
+        "9x16": { "$ref": "layout.schema.json" },
+        "32x9": { "$ref": "layout.schema.json" },
+        "1x1": { "$ref": "layout.schema.json" }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "16x9": { "$ref": "#/$defs/asset" },
+        "9x16": { "$ref": "#/$defs/asset" },
+        "32x9": { "$ref": "#/$defs/asset" },
+        "1x1": { "$ref": "#/$defs/asset" }
+      }
+    },
+    "sources": { "type": "array", "items": { "$ref": "layout.schema.json#/$defs/source" } },
+    "approved_at": { "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "state": { "type": "string", "const": "ambient" } }, "required": ["state"] },
+      "then": {
+        "properties": {
+          "alert": { "type": "null" },
+          "bulletin_id": { "type": "null" },
+          "layouts": { "type": "object", "maxProperties": 0 },
+          "assets": { "type": "object", "maxProperties": 0 }
+        }
+      },
+      "else": {
+        "properties": {
+          "alert": { "type": "object" },
+          "bulletin_id": { "type": "string" },
+          "approved_at": { "type": "string" },
+          "layouts": { "type": "object", "minProperties": 1 }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["png", "html"],
+      "properties": {
+        "png": { "type": "string", "format": "uri-reference" },
+        "html": { "type": "string", "format": "uri-reference" }
+      }
+    }
+  }
+}
