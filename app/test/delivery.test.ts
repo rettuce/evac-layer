@@ -164,7 +164,9 @@ describe('webhook', { skip }, () => {
     await approve(base, true)
     const alert = await nextDelivery(1)
     assert.equal(alert.headers['x-evaclayer-event'], 'alert')
-    assert.equal(alert.headers['x-evaclayer-signature'], `sha256=${createHmac('sha256', SECRET).update(alert.body).digest('hex')}`)
+    const signed = `${alert.headers['x-evaclayer-timestamp']}.${alert.headers['x-evaclayer-delivery']}.alert.${alert.body}`
+    assert.equal(alert.headers['x-evaclayer-signature'], `sha256=${createHmac('sha256', SECRET).update(signed).digest('hex')}`)
+    assert.ok(Math.abs(Number(alert.headers['x-evaclayer-timestamp']) - Date.now() / 1000) < 60)
     assert.equal(JSON.parse(alert.body).bulletin_id, BULLETIN)
     assert.equal(alert.body, await (await fetch(`${base}/api/feed/${SITE}`)).text())
 
@@ -172,5 +174,6 @@ describe('webhook', { skip }, () => {
     const clear = await nextDelivery(2)
     assert.equal(clear.headers['x-evaclayer-event'], 'clear')
     assert.equal(JSON.parse(clear.body).state, 'ambient')
+    assert.notEqual(clear.headers['x-evaclayer-delivery'], alert.headers['x-evaclayer-delivery'])
   })
 })

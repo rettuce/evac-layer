@@ -104,7 +104,7 @@ test('dev trusts only the forwarded address appended by a local relay', () => {
 })
 
 test('webhook targets: only public addresses over http(s)', () => {
-  for (const address of ['127.0.0.1', '10.1.2.3', '172.20.0.1', '192.168.0.92', '169.254.169.254', '100.64.0.1', '0.0.0.0', '::1', 'fd00::1', 'fe80::1', '::ffff:127.0.0.1', '::ffff:7f00:1', '::ffff:c0a8:5c']) {
+  for (const address of ['127.0.0.1', '10.1.2.3', '172.20.0.1', '192.168.0.92', '169.254.169.254', '100.64.0.1', '0.0.0.0', '::1', 'fd00::1', 'fe80::1', '::ffff:127.0.0.1', '::ffff:7f00:1', '::ffff:c0a8:5c', '::7f00:1', '2002:c0a8:5c::1', '2001:0:4136:e378::1', '64:ff9b::7f00:1', '2001:db8::1']) {
     assert.equal(isPublicAddress(address), false, address)
   }
   for (const address of ['8.8.8.8', '133.242.0.1', '2001:4860:4860::8888']) assert.equal(isPublicAddress(address), true, address)

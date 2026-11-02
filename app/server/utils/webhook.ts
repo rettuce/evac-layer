@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto'
+import { createHmac, randomUUID } from 'node:crypto'
 import { lookup, type LookupAddress } from 'node:dns'
 import { promises as dns } from 'node:dns'
 import { request as httpRequest } from 'node:http'
@@ -12,8 +12,16 @@ export function webhookAllowsPrivate(): boolean {
   return String(useRuntimeConfig().webhookAllowPrivate) === '1'
 }
 
-export function signWebhookBody(secret: string, body: string): string {
-  return `sha256=${createHmac('sha256', secret).update(body).digest('hex')}`
+export interface WebhookSignatureInput {
+  timestamp: string
+  delivery: string
+  event: FeedEvent
+  body: string
+}
+
+// The timestamp, delivery id and event are signed with the body so a captured "clear" cannot be replayed later to take down a live alert.
+export function signWebhook(secret: string, { timestamp, delivery, event, body }: WebhookSignatureInput): string {
+  return `sha256=${createHmac('sha256', secret).update(`${timestamp}.${delivery}.${event}.${body}`).digest('hex')}`
 }
 
 function blockedAddressError(host: string, address: string): Error {
@@ -45,6 +53,7 @@ export async function postWebhook(url: string, secret: string, event: FeedEvent,
   const target = new URL(url)
   const allowPrivate = webhookAllowsPrivate()
   await assertWebhookTarget(target, allowPrivate)
+  const signed: WebhookSignatureInput = { timestamp: String(Math.floor(Date.now() / 1000)), delivery: randomUUID(), event, body }
   const send = target.protocol === 'https:' ? httpsRequest : httpRequest
   return new Promise((resolve, reject) => {
     const req = send(
@@ -58,7 +67,9 @@ export async function postWebhook(url: string, secret: string, event: FeedEvent,
           'Content-Length': Buffer.byteLength(body),
           'User-Agent': 'EVAC-LAYER-webhook/0.1',
           'X-EvacLayer-Event': event,
-          'X-EvacLayer-Signature': signWebhookBody(secret, body),
+          'X-EvacLayer-Timestamp': signed.timestamp,
+          'X-EvacLayer-Delivery': signed.delivery,
+          'X-EvacLayer-Signature': signWebhook(secret, signed),
         },
       },
       (res) => {

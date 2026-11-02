@@ -19,15 +19,12 @@ for (const [network, prefix] of [
 ] as const) {
   NON_PUBLIC.addSubnet(network, prefix, 'ipv4')
 }
+const GLOBAL_UNICAST_V6 = new BlockList()
+GLOBAL_UNICAST_V6.addSubnet('2000::', 3, 'ipv6')
 for (const [network, prefix] of [
-  ['::', 128],
-  ['::1', 128],
-  ['64:ff9b::', 96],
-  ['100::', 64],
+  ['2001::', 32],
   ['2001:db8::', 32],
-  ['fc00::', 7],
-  ['fe80::', 10],
-  ['ff00::', 8],
+  ['2002::', 16],
 ] as const) {
   NON_PUBLIC.addSubnet(network, prefix, 'ipv6')
 }
@@ -44,12 +41,14 @@ function unmapIpv4(address: string): string | undefined {
 }
 
 // BlockList matches IPv6 rules against IPv4 addresses too, so IPv4-mapped IPv6 is unmapped here instead of listed.
+// IPv6 is public only inside global unicast, minus the transition ranges (Teredo, 6to4) that can embed a LAN IPv4 address.
 export function isPublicAddress(address: string): boolean {
   const family = isIP(address)
   if (family === 0) return false
   const mapped = family === 6 ? unmapIpv4(address) : undefined
   if (mapped) return isPublicAddress(mapped)
-  return !NON_PUBLIC.check(address, family === 4 ? 'ipv4' : 'ipv6')
+  if (family === 4) return !NON_PUBLIC.check(address, 'ipv4')
+  return GLOBAL_UNICAST_V6.check(address, 'ipv6') && !NON_PUBLIC.check(address, 'ipv6')
 }
 
 export type WebhookUrlCheck = { ok: true; url: URL } | { ok: false; reason: string }
