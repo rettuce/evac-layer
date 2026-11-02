@@ -21,7 +21,6 @@ function sortedRecord<T>(record: Record<string, T>): Record<string, T> {
   return Object.fromEntries(Object.entries(record).sort(([a], [b]) => a.localeCompare(b)))
 }
 
-// Sorted keys keep the committed file stable, so a diff shows only real approval changes.
 export async function writeApprovals(approvals: Approvals): Promise<void> {
   const stable: Approvals = { version: '0.1', layouts: sortedRecord(approvals.layouts), sites: sortedRecord(approvals.sites) }
   await writeFile(approvalsFile(), `${JSON.stringify(stable, null, 2)}\n`)

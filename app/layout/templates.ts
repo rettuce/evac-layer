@@ -105,9 +105,7 @@ const SQUARE: ShapeLayout = {
   inline: ['direction'],
 }
 
-// Before an evacuation order people need to know where to go more than which way to turn,
-// so evac-prepare keeps the shelter and lets the direction cell drop first.
-function preparing(layout: ShapeLayout): ShapeLayout {
+function requireShelterInsteadOfDirection(layout: ShapeLayout): ShapeLayout {
   const required: Role[] = layout.required.map((role) => (role === 'direction' ? 'shelter' : role))
   return { ...layout, required: [...new Set(required)] }
 }
@@ -169,10 +167,10 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
     '1x1': [SQUARE],
   },
   'evac-prepare': {
-    '16x9': [preparing(LANDSCAPE)],
-    '9x16': [preparing(PORTRAIT)],
-    '32x9': [preparing(RIBBON), preparing(RIBBON_WIDE_DIRECTION)],
-    '1x1': [preparing(SQUARE)],
+    '16x9': [requireShelterInsteadOfDirection(LANDSCAPE)],
+    '9x16': [requireShelterInsteadOfDirection(PORTRAIT)],
+    '32x9': [requireShelterInsteadOfDirection(RIBBON), requireShelterInsteadOfDirection(RIBBON_WIDE_DIRECTION)],
+    '1x1': [requireShelterInsteadOfDirection(SQUARE)],
   },
   'secure-now': {
     '16x9': [SECURE_LANDSCAPE],

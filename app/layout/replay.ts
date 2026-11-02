@@ -52,15 +52,14 @@ export interface LiveFrame {
   ambientVisible: boolean
 }
 
-// `hasLayout` says which bulletins have a screen to show; everything else stays ambient.
 export function liveFrame(
   rows: ReplayRow[],
   elapsedMs: number,
   speed: number,
-  hasLayout: (bulletinId: string) => boolean,
+  hasScreenFor: (bulletinId: string) => boolean,
 ): LiveFrame {
   const index = rowIndexAt(rows, elapsedMs, speed)
-  const showable = (i: number) => i >= 0 && rows[i]!.screen && hasLayout(rows[i]!.bulletin_id)
+  const showable = (i: number) => i >= 0 && rows[i]!.screen && hasScreenFor(rows[i]!.bulletin_id)
   const sinceRow = elapsedMs - rowStartMs(rows, index, speed)
 
   if (showable(index)) {

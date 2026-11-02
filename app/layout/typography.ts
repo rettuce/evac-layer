@@ -2,11 +2,14 @@ import { BASE_SHORT_SIDE_PX, UNIT_PX } from './shapes'
 import type { LangKey, ShelterKind } from './types'
 
 // Signage rule of thumb: 1 inch of letter height per 10 ft of viewing distance.
-// No normative standard (JIS / ISO) was found for screens, so this stays a named, replaceable constant.
 export const LETTER_HEIGHT_PER_VIEW_DISTANCE = 1 / 120
 
-// A 55-inch 16:9 panel is 685 mm tall; its 1080 px short side is the design base.
-export const REFERENCE_PANEL_SHORT_SIDE_MM = 685
+const MM_PER_INCH = 25.4
+export const REFERENCE_PANEL_DIAGONAL_IN = 55
+export const REFERENCE_PANEL_ASPECT = { long: 16, short: 9 } as const
+export const REFERENCE_PANEL_SHORT_SIDE_MM =
+  (REFERENCE_PANEL_DIAGONAL_IN * MM_PER_INCH * REFERENCE_PANEL_ASPECT.short) /
+  Math.hypot(REFERENCE_PANEL_ASPECT.long, REFERENCE_PANEL_ASPECT.short)
 export const MM_PER_DESIGN_PX = REFERENCE_PANEL_SHORT_SIDE_MM / BASE_SHORT_SIDE_PX
 
 export const VIEW_DISTANCE_M = {
@@ -35,7 +38,6 @@ export const TYPE_PX: Record<TypeStep, number> = {
   fine: fontPxForViewDistance(VIEW_DISTANCE_M.fine),
 }
 
-// The shelter mark sits beside a guide-size name and must read as a symbol, not a bullet.
 export const SHELTER_PICTOGRAM_RATIO = 1.6
 export const SHELTER_PICTOGRAM_PX = Math.round(TYPE_PX.guide * SHELTER_PICTOGRAM_RATIO)
 
@@ -67,7 +69,7 @@ export const LANG_LABEL: Record<LangKey, string> = {
 }
 
 // Fixed vocabulary from the Disaster Countermeasures Basic Act categories; the Writer never rewrites it.
-export const SHELTER_KIND_LABEL: Record<ShelterKind, Partial<Record<LangKey, string>> & { ja: string; en: string }> = {
+export const SHELTER_KIND_LABEL: Readonly<Record<ShelterKind, Readonly<Partial<Record<LangKey, string>> & { ja: string; en: string }>>> = {
   emergency_evacuation_site: {
     ja: '指定緊急避難場所',
     en: 'Emergency evacuation site',

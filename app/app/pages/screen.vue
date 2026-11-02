@@ -18,14 +18,12 @@ function numberQuery(value: unknown, fallback: number): number {
 
 const route = useRoute()
 const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
-// Guidance screens must never show a document from an arbitrary origin. In dev any same-origin
-// path is allowed for the Verifier; production only accepts the pre-generated layout store.
-const PRODUCTION_SRC_PREFIXES = ['/api/live-layout?', '/api/admin/preview-layout?']
+const LAYOUT_STORE_PREFIXES = ['/api/live-layout?', '/api/admin/preview-layout?']
 const ADMIN_TOKEN_STORAGE_KEY = 'evac-admin-token'
 
-function isAllowedSrc(value: unknown): value is string {
+function isTrustedLayoutSrc(value: unknown): value is string {
   if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) return false
-  return import.meta.dev || PRODUCTION_SRC_PREFIXES.some((prefix) => value.startsWith(prefix))
+  return import.meta.dev || LAYOUT_STORE_PREFIXES.some((prefix) => value.startsWith(prefix))
 }
 
 function adminHeadersFor(url: string): Record<string, string> {
@@ -37,7 +35,7 @@ function adminHeadersFor(url: string): Record<string, string> {
     return {}
   }
 }
-const src = computed(() => (isAllowedSrc(route.query.src) ? route.query.src : undefined))
+const src = computed(() => (isTrustedLayoutSrc(route.query.src) ? route.query.src : undefined))
 const srcRejected = computed(() => route.query.src !== undefined && !src.value)
 const remote = shallowRef<EvacScreen>()
 const remoteError = ref<string>()

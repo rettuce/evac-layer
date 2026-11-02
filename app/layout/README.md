@@ -33,13 +33,58 @@ The root `.evac-screen` element carries `data-shape`, `data-template`, `data-var
 
 ## `/screen` URL parameters
 
+Common to every mode:
+
 | Parameter | Meaning |
 |---|---|
-| `shape` | `16x9` \| `9x16` \| `32x9` \| `1x1` (falls back to the viewport aspect) |
-| `layout` | fixture name in `app/fixtures/` (default `wajima-tsunami`) |
-| `src` | dev only: same-origin path (starting with `/`) of a layout JSON to render instead of a fixture; anything else shows `data-error="src-rejected"`. In dev, `/api/layout?file=<absolute path>` serves `.json` files inside the repository (403 for anything else, 404 outside dev) |
-| `variant` | layout variant index for the template and shape (default 0) |
-| `clock=virtual&t=<ms>` | render the state at `t` only; `window.evacClock.set(ms)` steps time and resolves after the frame is committed |
-| `mode=scenario&scenario=switch&t_switch=<ms>[&t_clear=<ms>]` | ambient, then 300 ms black, then the alert; optional 1 s crossfade back |
-| `mode=scenario&scenario=ambient[&seed=…&site_name=…]` | ambient layer only |
-| `mode=live&municipality=<code>[&speed=600&reset&clock=virtual&t=…&site_name=…]` | replay the municipality's bulletins in compressed time and show the pre-generated layout for the current one (`data/layouts/<code>/index.json` + `<bulletin>/<shape>.json`); all screens polling the same municipality and speed switch together. Only approved bulletins at a site with auto publish on are shown (`&site=<id>`, default from index.json). Root `[data-mode="live"]` carries `data-ready`, `data-live-index`, `data-bulletin`, `data-showing`, `data-missing-layout`, `data-unapproved` |
+| `shape` | `16x9` \| `9x16` \| `32x9` \| `1x1`; falls back to the viewport aspect |
+| `clock=virtual&t=<ms>` | render the state at `t` only (no wall clock, no rAF-driven motion). `window.evacClock.set(ms)` steps time without reloading and resolves once the frame is committed; `window.evacClock.now()` reads it back. Defined only in virtual mode |
+
+### Alert screen (default mode)
+
+| Parameter | Meaning |
+|---|---|
+| `layout=<name>` | fixture in `app/fixtures/` (default `wajima-tsunami`) |
+| `src=<path>` | render a layout JSON fetched from a same-origin path instead of a fixture. Dev: any path starting with `/` (e.g. `/api/layout?file=<absolute path>` for a `.json` inside the repository). Production: only `/api/live-layout?…` and `/api/admin/preview-layout?…`. Rejected values show `[data-error="src-rejected"]`; fetch failures `[data-error="src-load-failed"]` |
+| `variant=<n>` | layout variant for the template and shape (default 0; 32x9 `evac-now` has 1 = wide direction) |
+
+Ready: `.evac-screen[data-ready="1"]`.
+
+### Scenario (`mode=scenario`)
+
+| Parameter | Meaning |
+|---|---|
+| `scenario=switch&t_switch=<ms>[&t_clear=<ms>]` | ambient until `t_switch`, 300 ms black, then the alert scales in; from `t_clear` a 1 s crossfade back to ambient |
+| `scenario=ambient` | ambient layer only |
+| `seed=<text>`, `site_name=<text>` | ambient colour seed (default: layout name) and the site label (default: municipality name) |
+
+The alert layer is mounted hidden from the start, so `.evac-screen[data-ready="1"]` is also the ready signal here.
+
+### Live replay (`mode=live`)
+
+| Parameter | Meaning |
+|---|---|
+| `municipality=<code>` | 5-digit code; reads `data/layouts/<code>/index.json` (or the agents replay fixture) |
+| `speed=<n>` | replay time compression (default 600; the demo uses 1200, 9 bulletins in 56 s) |
+| `site=<id>` | site whose auto-publish switch gates the screen (default: `site` in index.json) |
+| `reset` | restart the shared replay origin for this municipality and speed |
+| `site_name=<text>` | ambient label (default: municipality name) |
+
+Only bulletins that are approved and belong to a site with auto publish on are shown; others stay ambient. All screens polling the same municipality and speed switch together. Ready: `[data-mode="live"][data-ready="1"]`. State attributes on that root: `data-live-index`, `data-bulletin`, `data-showing`, `data-missing-layout` (no file), `data-unapproved` (gated), `data-unapproved-count`.
+
+## Other pages
+
+| URL | Meaning |
+|---|---|
+| `/admin` | municipality picker, bulletin list, four-shape previews, Verifier result, approval and per-site auto publish. Ready: `.admin[data-ready="1"]`; asks for the admin token when the server has one |
+| `/dashboard[?clock=virtual&t=<ms>]` | totals over `data/` with a count-up. Ready: `.dashboard[data-ready="1"]` |
+
+## Server API
+
+| Route | Access | Meaning |
+|---|---|---|
+| `GET /api/replay?municipality&speed[&t][&reset]` | public | replay rows and the current index |
+| `GET /api/live-layout?municipality&bulletin&shape[&site]` | public, gated | layout JSON only for an approved bulletin at an auto-publish site; 403 with `data.reason` = `auto-publish-off` \| `unapproved` |
+| `GET /api/dashboard` | public | totals and per-municipality rows |
+| `GET /api/admin/catalog`, `GET /api/admin/preview-layout`, `POST /api/admin/approve`, `POST /api/admin/site` | admin | Bearer `NUXT_ADMIN_TOKEN` when set; otherwise local only (loopback address, local Host, not cross-site, JSON POST bodies). Writes go to `data/approvals.json` |
+| `GET /api/layout?file=<absolute path>` | dev only | any `.json` inside the repository, for the Verifier; 404 in production |
