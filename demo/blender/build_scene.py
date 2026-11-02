@@ -21,6 +21,7 @@ from layout import (
     BACK_WALL_Y, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
     HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIGHT_WALL_X,
 )
+from led_wrap import build_led_wrap
 from looks import LOOKS, build_look
 from primitives import box, principled, spot_light, vertical_plane
 
@@ -64,8 +65,10 @@ def pillar_face_center(height_z):
 COLUMN_CLAD_HALF = COLUMN_SIZE / 2 + COLUMN_CLAD_M
 PORTRAIT_SIZE = panel_from_diagonal(55, 9, 16)
 SQUARE_M = 0.75
-PORTRAIT_BOTTOM_Z = 1.3
-PORTRAIT_Z = PORTRAIT_BOTTOM_Z + PORTRAIT_SIZE[1] / 2
+COLUMN_LED_BOTTOM_Z = 1.3
+COLUMN_LED_TOP_Z = CEILING_Z - 0.2
+COLUMN_LED_RADIUS = 0.03
+COLUMN_LED_MID_Z = (COLUMN_LED_BOTTOM_Z + COLUMN_LED_TOP_Z) / 2
 COLUMN_BASE_SQUARE_Z = 0.8
 RIBBON_SIZE = panel_from_width(6.0, 32, 9)
 RIBBON_Z = 3.95
@@ -100,9 +103,8 @@ FRONT_COLUMNS = [(x, y) for x, y in COLUMNS if y == min(cy for _, cy in COLUMNS)
 # Each shape is mounted flush in several surfaces; the first mount is the one cameras aim at.
 # yaw: rotation about Z; yaw 0 means the screen faces -Y (toward the camera side of the concourse).
 SCREENS = {
-    "9x16": screen_spec(PORTRAIT_SIZE, (1080, 1920),
-                        [column_front(x, y, PORTRAIT_Z) for x, y in COLUMNS]
-                        + [column_aisle_side(x, y, PORTRAIT_Z) for x, y in COLUMNS]),
+    "9x16": {**screen_spec(PORTRAIT_SIZE, (1080, 1920), [column_front(*COLUMNS[0], COLUMN_LED_MID_Z)]),
+             "mounts": [], "wraps": COLUMNS},
     "16x9": screen_spec(panel_from_diagonal(75, 16, 9), (1920, 1080),
                         [(Vector((x, BACK_WALL_Y, WALL_16X9_Z)), 0.0) for x in WALL_16X9_XS]),
     "32x9": screen_spec(RIBBON_SIZE, (3840, 1080),
@@ -260,6 +262,9 @@ def build_screens(frame_count, cut):
             vertical_plane(f"joint_{shape}_{i}", surface + normal * (FLUSH_EPS_M / 2),
                            width + 2 * JOINT_M, height + 2 * JOINT_M, yaw, joint)
             vertical_plane(f"screen_{shape}_{i}", surface + normal * FLUSH_EPS_M, width, height, yaw, material)
+        for i, (x, y) in enumerate(spec.get("wraps", [])):
+            build_led_wrap(f"led_wrap_{i}", (x, y), COLUMN_CLAD_HALF + FLUSH_EPS_M, COLUMN_LED_RADIUS,
+                           COLUMN_LED_BOTTOM_Z, COLUMN_LED_TOP_Z, material, width / height)
     build_screen_housings()
     return sources
 
@@ -268,7 +273,8 @@ def build_screen_housings():
     cladding = principled("column_cladding", (0.035, 0.035, 0.038), 0.32, metallic=0.7)
     side = 2 * COLUMN_CLAD_HALF
     for i, (x, y) in enumerate(COLUMNS):
-        box(f"column_cladding_{i}", (x, y, COLUMN_CLAD_TOP_Z / 2), (side, side, COLUMN_CLAD_TOP_Z), cladding)
+        for part, (z0, z1) in enumerate([(0.0, COLUMN_LED_BOTTOM_Z), (COLUMN_LED_TOP_Z, COLUMN_CLAD_TOP_Z)]):
+            box(f"column_cladding_{i}_{part}", (x, y, (z0 + z1) / 2), (side, side, z1 - z0), cladding)
     headwall = principled("headwall", (0.09, 0.09, 0.095), 0.55)
     height = CEILING_Z - HEADWALL_BOTTOM_Z
     width = RIGHT_WALL_X - LEFT_WALL_X
