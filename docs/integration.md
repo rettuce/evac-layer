@@ -24,7 +24,16 @@ curl -s -X POST https://<host>/api/admin/subscriptions \
   -d '{"site_id":"05210-demo-honjo-station","url":"https://cms.example/hooks/evac","secret":"<shared secret>"}'
 ```
 
-Each delivery carries `X-EvacLayer-Event: alert` or `clear` and `X-EvacLayer-Signature: sha256=<hex HMAC-SHA256 of the raw body with your secret>`. Verify the signature before acting; reject anything that does not match. Failed deliveries are retried five times with exponential backoff.
+Each delivery carries four headers: `X-EvacLayer-Event: alert` or `clear`, `X-EvacLayer-Timestamp` (Unix seconds), `X-EvacLayer-Delivery` (a UUID per delivery) and `X-EvacLayer-Signature: sha256=<hex HMAC-SHA256(secret, "<timestamp>.<delivery>.<event>.<raw body>")>`. Before acting, verify the signature, reject a timestamp older than 5 minutes and reject a delivery id you have already seen; otherwise a captured `clear` could be replayed to take down a live alert. Failed deliveries are retried five times (1, 2, 4, 8, 16 s) and a newer state cancels pending retries. Targets must be `http(s)`; URLs that resolve to loopback, private, link-local or other non-public ranges are refused (set `NUXT_WEBHOOK_ALLOW_PRIVATE=1` for a CMS on the same LAN), and redirects are not followed.
+
+```js
+// receiver (Node)
+const expected = 'sha256=' + createHmac('sha256', secret)
+  .update(`${req.headers['x-evaclayer-timestamp']}.${req.headers['x-evaclayer-delivery']}.${req.headers['x-evaclayer-event']}.${rawBody}`)
+  .digest('hex')
+```
+
+A minimal signage client that works from the feed alone is in [`examples/minimal-cms`](../examples/minimal-cms/README.md).
 
 ## 3. Static export — files only
 

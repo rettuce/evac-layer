@@ -8,46 +8,46 @@
           "ja": "レベル３土砂災害警報",
           "ja_easy": "レベル３ どしゃさいがい けいほう",
           "en": "Landslide Warning Lv.3",
-          "zh_hans": "3级泥石流灾害警报",
-          "zh_hant": "3級土石災害警報",
+          "zh_hans": "3级土砂灾害警报",
+          "zh_hant": "3級土砂災害警報",
           "ko": "레벨3 토사재해 경보"
         },
-        "basis": "警報 areas[0].kind_name「レベル３土砂災害警報」（輪島市、level 3、status upgraded）。ja は警報名をそのまま使用"
+        "basis": "警報 areas[0].kind_name「レベル３土砂災害警報」（level 3, status upgraded）と areas[0].name「輪島市」。金沢地方気象台 2026-10-21T13:04 発表 VPWW56-202610211304-1ebf37f5ab8a。自治体知識ファイルには土砂災害の項目がないため使用していない。"
       },
       {
         "role": "action",
         "text": {
-          "ja": "避難の準備",
-          "ja_easy": "にげる じゅんびを して",
-          "en": "Get ready to leave",
-          "zh_hans": "做好避难准备",
-          "zh_hant": "做好避難準備",
-          "ko": "대피 준비를 하세요"
+          "ja": "高齢者は避難",
+          "ja_easy": "おとしよりは にげて",
+          "en": "Elderly: evacuate",
+          "zh_hans": "老年人请避难",
+          "zh_hant": "老年人請避難",
+          "ko": "고령자는 대피하세요"
         },
-        "basis": "警報 level 3 と headline_text「能登では、土砂災害に警戒してください。」、テンプレート evac-prepare（表示レベル3）。自治体知識ファイルに土砂災害の避難先の記載なし（hazards 空）のため避難所名は書かない"
+        "basis": "警報 level 3（areas[0].level 3）と、テンプレート evac-prepare の図記号 directions_run の意味「レベル3では高齢者等が避難し、ほかの人は避難の準備をする」。文字数予算（ja 6字）のため高齢者が避難する部分だけを書いた。避難情報の名称「高齢者等避難」は使っていない。自治体知識ファイルには避難行動の項目がない。"
       },
       {
         "role": "languages",
         "text": {
-          "ja": "避難の準備",
-          "ja_easy": "にげる じゅんびを して",
-          "en": "Prepare to evacuate",
-          "zh_hans": "做好避难准备",
-          "zh_hant": "做好避難準備",
-          "ko": "대피 준비를 하세요"
+          "ja": "高齢者は避難",
+          "ja_easy": "おとしよりは にげて",
+          "en": "Elderly: evacuate",
+          "zh_hans": "老年人请避难",
+          "zh_hant": "老年人請避難",
+          "ko": "고령자는 대피하세요"
         },
-        "basis": "action セルと同じ内容（警報 level 3、headline_text、テンプレート evac-prepare）を各言語で表示"
+        "basis": "action セルと同じ内容（警報 level 3 と図記号 directions_run の意味）を各言語で書いた。"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VPWW56-202610211304-1ebf37f5ab8a",
-      "input": 4755,
-      "output": 1295,
+      "input": 4932,
+      "output": 2079,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.04492
+      "usd": 0.061308
     }
   ],
   "lint": []

@@ -32,9 +32,18 @@ async function open(browser: Browser, url: string, shape: Shape, reducedMotion: 
   return page;
 }
 
-export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape) {
+// Wider than 2:1 is captured as two halves so that downscaling to the API's 1568 px edge keeps text legible.
+async function capture(page: Page, shape: Shape): Promise<string[]> {
+  const { width, height } = SHAPES[shape];
+  if (width / height <= 2) return [Buffer.from(await page.screenshot({ type: "png" })).toString("base64")];
+  const half = width / 2;
+  return Promise.all([0, half].map(async (x) => Buffer.from(await page.screenshot({ type: "png", clip: { x, y: 0, width: half, height } })).toString("base64")));
+}
+
+export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape, opts: { capture?: boolean } = {}) {
   const page = await open(browser, screenUrl(t, shape), shape, true);
   try {
+    const pngs = opts.capture ? await capture(page, shape) : [];
     const state = await page.$eval(".evac-screen", (el): ScreenState => {
       const d = (el as HTMLElement).dataset;
       return { shape: d.shape ?? "", template: d.template ?? "", variant: d.variant ?? "", level: d.level ?? "", dropped: d.dropped ?? "", overflow: d.overflow ?? null, missing_required: d.missingRequired ?? null };
@@ -62,7 +71,7 @@ export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape
       els.map((el) => ({ id: (el as HTMLElement).dataset.cellId!, role: (el as HTMLElement).dataset.role as CellText["role"], text: (el as HTMLElement).innerText.replace(/\s+/g, " ").trim() })),
     );
     const { width, height } = SHAPES[shape];
-    return { state, samples, cells, scale: Math.min(width, height) / TYPE_BASE_SHORT_SIDE_PX };
+    return { state, samples, cells, pngs, scale: Math.min(width, height) / TYPE_BASE_SHORT_SIDE_PX };
   } finally {
     await page.close();
   }

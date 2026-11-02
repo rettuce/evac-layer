@@ -76,3 +76,14 @@ test("an overflowing shelter cell is not sent back to the Writer", async () => {
   assert.equal(r.attempts.length, 1);
   assert.match(r.reason!, /overflow\[shelter\]/);
 });
+
+test("an action text that contradicts its pictogram goes back to the Writer; a headline pictogram does not", async () => {
+  const misuse = (cell: string): Verifier => ({ name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "pictogram-misuse", cell_id: cell, detail: "text and pictogram disagree" }] })) });
+  const clean = fxPath("writer-tsunami-advisory.json");
+  const action = await runLoop({ ...base(), verifier: misuse("action"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean, clean]), maxAttempts: 2 });
+  assert.equal(action.attempts.length, 2);
+  assert.match(action.reason!, /after 2 attempts/);
+  const headline = await runLoop({ ...base(), verifier: misuse("headline"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });
+  assert.equal(headline.attempts.length, 1);
+  assert.match(headline.reason!, /not fixable/);
+});

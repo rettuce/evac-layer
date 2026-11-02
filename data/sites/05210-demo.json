@@ -4,5 +4,11 @@
   "lat": 39.38633978,
   "lng": 140.0563304,
   "facing_deg": 0,
-  "note": "Illustrative demo screen near 羽後本荘駅 (coordinates of a GSI-listed facility there); the viewer is assumed to face north. Not a real installation."
+  "note": "Illustrative demo screen near 羽後本荘駅 (coordinates of a GSI-listed facility there); the viewer is assumed to face north. Not a real installation.",
+  "replay": {
+    "municipality": "05210",
+    "from": "2026-10-21T11:00+09:00",
+    "to": "2026-10-22T07:00+09:00",
+    "speed": 1200
+  }
 }

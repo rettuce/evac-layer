@@ -1,0 +1,72 @@
+import type Anthropic from "@anthropic-ai/sdk";
+import type { Alert } from "../jma/parse.js";
+import { MODELS, costOf, type CallUsage, type ModelKey } from "../reader/pricing.js";
+import type { Finding } from "./checks.js";
+
+export const VISION_VERIFY_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["findings", "three_second_note"],
+  properties: {
+    findings: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["check", "cell_id", "reason"],
+        properties: {
+          check: { enum: ["bulletin-mismatch", "pictogram-misuse", "missing-source"] },
+          cell_id: { type: "string", description: "id of the offending cell from the layout JSON, or empty if it concerns the whole screen" },
+          reason: { type: "string" },
+        },
+      },
+    },
+    three_second_note: { type: "string", description: "Whether a person with no background would know what to do within three seconds, and why. Not a finding." },
+  },
+} as const;
+
+const SYSTEM = `あなたは避難案内サイネージの検査係です。描画された画面の画像と、その画面のレイアウト JSON、元になった気象庁の電文の要点を受け取ります。画面に見えているものだけを根拠に、次の 3 つを判定します。見えないもの・推測は判定に使いません。問題が無ければ findings は空にします。
+- bulletin-mismatch: 画面の災害種別・警戒レベル・警報名・行動が、電文と矛盾している（例: 電文は洪水なのに津波と書いてある、電文のレベルと画面のレベル表示が違う、解除なのに避難を促している）。言い換えや省略は矛盾ではない
+- pictogram-misuse: 図記号が災害種別や行動と合っていない（例: 洪水の画面に津波の図記号、上へ逃げる画面に横へ逃げる図記号）。図記号 ID の意味はユーザー入力に書く
+- missing-source: 出典行（気象庁の発表時刻など）が画面に見えない、または読めない
+three_second_note には、前提知識のない人が 3 秒で何をすればよいか分かるかを 1〜2 文で書く。これは所見で、findings には入れない。`;
+
+const PICTOGRAMS = "図記号 ID: tsunami=津波, flood=洪水・浸水, landslide=土砂災害, heavy_rain=大雨, storm_surge=高潮, earthquake=地震, go_higher=高い所・上の階へ, directions_run=避難する（走る人）, arrow_forward=方向（rotation で向き）, emergency_evacuation_site=指定緊急避難場所, evacuation_shelter=指定避難所, safe_here=ここは安全";
+
+export interface VisionVerdict { findings: Finding[]; note: string; usage: CallUsage }
+
+export async function visionCheck(args: {
+  client: Anthropic; model: ModelKey; pngs: string[]; layout: unknown; alert: Alert; municipalityId: string;
+}): Promise<VisionVerdict> {
+  const l = args.layout as { cells: { id: string; role: string; text: { ja: string }; pictogram?: string; rotation?: number }[]; template: string; alert: { level: number; hazard: string } };
+  const mine = args.alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === args.municipalityId : true));
+  const bulletin = {
+    hazard: args.alert.hazard,
+    title: args.alert.raw_title,
+    headline_text: args.alert.headline_text,
+    issued_at: args.alert.issued_at,
+    municipality_areas: mine.map((a) => ({ name: a.name, kind_name: a.kind_name, level: a.level, status: a.status })),
+  };
+  const layoutBrief = { template: l.template, display_level: l.alert.level, cells: l.cells.map((c) => ({ id: c.id, role: c.role, ja: c.text.ja, pictogram: c.pictogram, rotation: c.rotation })) };
+  const msg = await args.client.messages.stream({
+    model: MODELS[args.model].id,
+    max_tokens: 8_000,
+    system: SYSTEM,
+    output_config: { effort: "medium", format: { type: "json_schema", schema: VISION_VERIFY_SCHEMA as unknown as Record<string, unknown> } },
+    messages: [{
+      role: "user",
+      content: [
+        ...args.pngs.map((data) => ({ type: "image" as const, source: { type: "base64" as const, media_type: "image/png" as const, data } })),
+        { type: "text" as const, text: [`画面画像は ${args.pngs.length} 枚（横長の画面は左右に分割）。`, PICTOGRAMS, `## 電文の要点\n${JSON.stringify(bulletin, null, 1)}`, `## レイアウト JSON（要点）\n${JSON.stringify(layoutBrief, null, 1)}`].join("\n\n") },
+      ],
+    }],
+  }).finalMessage();
+  if (msg.stop_reason === "refusal" || msg.stop_reason === "max_tokens") throw new Error(`vision verifier stopped: ${msg.stop_reason}`);
+  const text = msg.content.find((b): b is Anthropic.TextBlock => b.type === "text")?.text ?? "{}";
+  const out = JSON.parse(text) as { findings: { check: Finding["check"]; cell_id: string; reason: string }[]; three_second_note: string };
+  return {
+    findings: out.findings.map((f) => ({ check: f.check, ...(f.cell_id ? { cell_id: f.cell_id } : {}), detail: `vision: ${f.reason}` })),
+    note: out.three_second_note,
+    usage: costOf(args.model, "vision-verify", msg.usage),
+  };
+}

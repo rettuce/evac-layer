@@ -6,48 +6,48 @@
         "role": "headline",
         "text": {
           "ja": "レベル２大雨注意報",
-          "ja_easy": "おおあめ ちゅういほう おわりました",
-          "en": "Rain advisory lifted",
-          "zh_hans": "2级大雨注意报 解除",
-          "zh_hant": "2級大雨注意報 解除",
-          "ko": "2단계 호우주의보 해제"
+          "ja_easy": "おおあめ ちゅういほう おわりです",
+          "en": "Heavy Rain Advisory Over",
+          "zh_hans": "大雨注意报已解除",
+          "zh_hant": "大雨注意報已解除",
+          "ko": "호우주의보 해제"
         },
-        "basis": "Alert areas[0] (輪島市, code 1720400): kind_name「レベル２大雨注意報」, status \"cleared\"; bulletin raw_title「石川県大雨警報・注意報」 (金沢地方気象台, issued 2026-10-21T19:42+09:00)"
+        "basis": "Alert VPWW55 for 輪島市 (code 1720400): kind_name 'レベル２大雨注意報', status 'cleared'. Issued 2026-10-21T19:42+09:00 by 金沢地方気象台. The warning name is used unchanged."
       },
       {
         "role": "action",
         "text": {
-          "ja": "川の増水に注意",
-          "ja_easy": "かわの みずに ちゅうい",
-          "en": "Watch river levels",
-          "zh_hans": "注意河水上涨",
-          "zh_hant": "注意河水上漲",
-          "ko": "하천 증수 주의"
+          "ja": "避難は不要です",
+          "ja_easy": "にげなくて いいです",
+          "en": "No need to leave",
+          "zh_hans": "无需避难",
+          "zh_hant": "無需避難",
+          "ko": "대피할 필요 없음"
         },
-        "basis": "Alert headline_text「石川県では、低い土地の浸水や河川の増水に注意してください。」 (prefecture-wide text; the budget allows only the river part; the low-land flooding part is omitted)"
+        "basis": "Alert areas[輪島市].status 'cleared' for レベル２大雨注意報. This matches the all-clear template's safe_here pictogram, which means evacuation is no longer needed. No hazard or shelter entries in the 輪島市 knowledge file apply. Its cautions concern the tsunami map (tsunami_hm_wajima.pdf p.1) and shelter capacity (shitei_hinanjo.pdf p.1), so they are not used."
       },
       {
         "role": "languages",
         "text": {
-          "ja": "川の増水に注意",
-          "ja_easy": "かわの みずに ちゅうい",
-          "en": "Watch river levels",
-          "zh_hans": "注意河水上涨",
-          "zh_hant": "注意河水上漲",
-          "ko": "하천 증수 주의"
+          "ja": "避難は不要です",
+          "ja_easy": "にげなくて いいです",
+          "en": "No need to leave",
+          "zh_hans": "无需避难",
+          "zh_hant": "無需避難",
+          "ko": "대피할 필요 없음"
         },
-        "basis": "Same content as the action cell: alert headline_text「石川県では、低い土地の浸水や河川の増水に注意してください。」"
+        "basis": "The same content as the action cell, in each language. It rests on alert areas[輪島市].status 'cleared' for レベル２大雨注意報 and the safe_here pictogram."
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VPWW55-202610211942-7720a18f5cfa",
-      "input": 4761,
-      "output": 2318,
+      "input": 4835,
+      "output": 1969,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.065404
+      "usd": 0.05872
     }
   ],
   "lint": []

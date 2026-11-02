@@ -10,6 +10,8 @@ import { writeReport } from "./report.js";
 import { fixtureReviser, liveWriterReviser } from "./revisers.js";
 import { staticVerifier } from "./static-verifier.js";
 import { browserVerifier } from "./browser-verifier.js";
+import Anthropic from "@anthropic-ai/sdk";
+import { requireApiKey } from "../apikey.js";
 
 const { values } = parseArgs({
   options: {
@@ -42,11 +44,15 @@ const alert = parseJmaXml(fs.readFileSync(resolveUserPath(values.alert)));
 const municipality = loaded.municipality;
 const reviser = values.revisions!.length ? fixtureReviser(values.revisions!.map(resolveUserPath)) : liveWriterReviser;
 const maxAttempts = Number(values["max-attempts"]);
-if (values.verifier !== "static" && values.verifier !== "browser") {
-  console.error("--verifier must be static or browser");
+if (!["static", "browser", "vision"].includes(values.verifier!)) {
+  console.error("--verifier must be static, browser or vision");
   process.exit(2);
 }
-const browser = values.verifier === "browser" ? browserVerifier({ baseUrl: values["base-url"]! }) : undefined;
+const visionUsage: import("../reader/pricing.js").CallUsage[] = [];
+if (values.verifier === "vision") requireApiKey();
+const browser = values.verifier === "browser" || values.verifier === "vision"
+  ? browserVerifier({ baseUrl: values["base-url"]!, ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) })
+  : undefined;
 const verifier = browser ?? staticVerifier;
 const result = await runLoop({
   alert, municipality, site: read<Site>(values.site), writer: read<WriterOutput>(values.writer), writerSource: `fixture:${path.basename(values.writer)}`,

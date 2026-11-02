@@ -19,13 +19,17 @@ const replay = JSON.parse(fs.readFileSync(resolveUserPath(values.replay), "utf8"
 const site = JSON.parse(fs.readFileSync(resolveUserPath(values.site), "utf8")) as Site;
 if (values.writer === "live") requireApiKey();
 const writer = values.writer === "live" ? { client: new Anthropic(), model: values["writer-model"] as WriterModel } : undefined;
-const browser = values.verifier === "browser" ? browserVerifier({ baseUrl: values["base-url"]! }) : undefined;
+const visionUsage: import("../reader/pricing.js").CallUsage[] = [];
+if (values.verifier === "vision") requireApiKey();
+const browser = values.verifier === "browser" || values.verifier === "vision"
+  ? browserVerifier({ baseUrl: values["base-url"]!, ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) })
+  : undefined;
 try {
   const summary = await runReplay({
     municipalityId: replay.municipality, entries: replay.entries, site, verifier: browser ?? staticVerifier, writer,
     onEvent: (e) => console.log(`${e.issued_at}  ${(e.template ?? "no screen").padEnd(12)} ${e.level ? `L${e.level}` : "  "}  ${e.outcome}${e.reason ? ` — ${e.reason}` : ""}`),
   });
-  console.log(JSON.stringify(summary));
+  console.log(JSON.stringify({ ...summary, vision_usd: visionUsage.reduce((n, u) => n + u.usd, 0), vision_checks: visionUsage.length }));
 } finally {
   await browser?.close();
 }

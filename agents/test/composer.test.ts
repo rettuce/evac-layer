@@ -57,7 +57,7 @@ test("a shelter named in a conflict is never chosen", () => {
 
 test("text over the shape budget stops composition instead of truncating", () => {
   const long = structuredClone(writer);
-  long.cells[0].text.ja = "津波注意報が発表されました";
+  long.cells[1].text.ja = "ただちに海岸から離れて高台へ";
   assert.throws(() => compose({ alert: advisory(), municipality, site, writer: long }), ComposerStop);
 });
 
@@ -70,4 +70,19 @@ test("a city the bulletin lists without a level stops instead of falling below t
   const alert = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "16_11_03_260312_VXKOii.xml")));
   assert.equal(alert.areas.find((a) => a.name === "村山市")?.level, null);
   assert.throws(() => compose({ alert, municipality: { ...municipality, id: "06208" }, site: { ...site, municipality_id: "06208" }, writer }), /gives no level for 村山市/);
+});
+
+test("action pictogram follows the template, and a cleared VPWW headline says 解除", async () => {
+  const { actionPictogram } = await import("../src/composer/rules.js");
+  assert.equal(actionPictogram("flood", "all-clear"), "safe_here");
+  assert.equal(actionPictogram("flood", "evac-now"), "directions_run");
+  assert.equal(actionPictogram("heavy_rain", "evac-prepare"), "directions_run");
+  assert.equal(actionPictogram("landslide", "evac-prepare"), "directions_run");
+  assert.equal(actionPictogram("flood", "secure-now"), "go_higher");
+  assert.equal(actionPictogram("tsunami", "evac-now"), "go_higher");
+  const { headlineFor } = await import("../src/composer/compose.js");
+  const FEED = process.env.JMA_FEED_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/jma-feed";
+  const file = path.join(FEED, "bodies/20261021/20261021150027_0_VPWW56_170000.xml");
+  if (!fs.existsSync(file)) throw new Error(`recorded bulletin ${file} not found. Set JMA_FEED_DIR.`);
+  assert.equal(headlineFor(parseJmaXml(fs.readFileSync(file)), "17204"), "レベル２土砂災害注意報解除");
 });
