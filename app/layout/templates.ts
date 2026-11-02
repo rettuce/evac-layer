@@ -1,4 +1,5 @@
 import type { Role, Shape, ShapeLayout, TemplateDef, TemplateId } from './types'
+import { SHELTER_PICTOGRAM_PX } from './typography'
 
 const M = 48
 const G = 24
@@ -6,7 +7,7 @@ const BAND = 176
 
 const LANDSCAPE: ShapeLayout = {
   id: 'split',
-  columns: [M, '3fr', M, '2fr', M],
+  columns: [M, '5fr', M, '4fr', M],
   rows: [BAND, M, '1fr', G, '1fr', G, 'auto', 16, 'auto', 40],
   areas: [
     'headline headline headline headline headline',
@@ -21,7 +22,7 @@ const LANDSCAPE: ShapeLayout = {
     '. . . . .',
   ],
   required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
-  pictogramPx: { headline: 112, action: 192, direction: 192, shelter: 64 },
+  pictogramPx: { headline: 112, action: 192, direction: 192, shelter: SHELTER_PICTOGRAM_PX },
 }
 
 const PORTRAIT: ShapeLayout = {
@@ -43,7 +44,7 @@ const PORTRAIT: ShapeLayout = {
     '. . .',
   ],
   required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
-  pictogramPx: { headline: 112, action: 320, direction: 192, shelter: 64 },
+  pictogramPx: { headline: 112, action: 320, direction: 192, shelter: SHELTER_PICTOGRAM_PX },
 }
 
 const RIBBON: ShapeLayout = {
@@ -59,7 +60,7 @@ const RIBBON: ShapeLayout = {
     'headline languages languages languages languages languages languages languages',
   ],
   required: ['headline', 'action', 'direction', 'languages', 'source'],
-  pictogramPx: { headline: 160, action: 288, direction: 288, shelter: 96 },
+  pictogramPx: { headline: 160, action: 288, direction: 288, shelter: SHELTER_PICTOGRAM_PX },
   darkBand: ['languages'],
 }
 
@@ -76,7 +77,7 @@ const RIBBON_WIDE_DIRECTION: ShapeLayout = {
     'headline shelter shelter languages languages languages',
   ],
   required: ['headline', 'action', 'direction', 'languages', 'source'],
-  pictogramPx: { headline: 160, action: 288, direction: 320, shelter: 96 },
+  pictogramPx: { headline: 160, action: 288, direction: 320, shelter: SHELTER_PICTOGRAM_PX },
   darkBand: ['shelter', 'languages'],
   inline: ['direction', 'shelter'],
 }
@@ -100,7 +101,7 @@ const SQUARE: ShapeLayout = {
     '. . .',
   ],
   required: ['headline', 'action', 'direction', 'source'],
-  pictogramPx: { headline: 112, action: 160, direction: 128, shelter: 64 },
+  pictogramPx: { headline: 112, action: 160, direction: 128, shelter: SHELTER_PICTOGRAM_PX },
   inline: ['direction'],
 }
 
@@ -153,6 +154,13 @@ const CLEAR_SQUARE: ShapeLayout = {
   pictogramPx: { headline: 112, action: 160 },
 }
 
+// Level 5 (secure safety now) is the stage where leaving may itself be dangerous, so the
+// screen drops shelter and direction and gives the whole body to the action.
+const SECURE_LANDSCAPE: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 320 } }
+const SECURE_PORTRAIT: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 480 } }
+const SECURE_RIBBON: ShapeLayout = { ...CLEAR_RIBBON, id: 'secure-columns', pictogramPx: { headline: 160, action: 384 } }
+const SECURE_SQUARE: ShapeLayout = { ...CLEAR_SQUARE, id: 'secure-square', pictogramPx: { headline: 112, action: 240 } }
+
 export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   'evac-now': {
     '16x9': [LANDSCAPE],
@@ -165,6 +173,12 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
     '9x16': [preparing(PORTRAIT)],
     '32x9': [preparing(RIBBON), preparing(RIBBON_WIDE_DIRECTION)],
     '1x1': [preparing(SQUARE)],
+  },
+  'secure-now': {
+    '16x9': [SECURE_LANDSCAPE],
+    '9x16': [SECURE_PORTRAIT],
+    '32x9': [SECURE_RIBBON],
+    '1x1': [SECURE_SQUARE],
   },
   'all-clear': {
     '16x9': [CLEAR_STACK],
