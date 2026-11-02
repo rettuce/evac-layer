@@ -154,6 +154,13 @@ const CLEAR_SQUARE: ShapeLayout = {
   pictogramPx: { headline: 112, action: 160 },
 }
 
+// Level 5 (secure safety now) is the stage where leaving may itself be dangerous, so the
+// screen drops shelter and direction and gives the whole body to the action.
+const SECURE_LANDSCAPE: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 320 } }
+const SECURE_PORTRAIT: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 480 } }
+const SECURE_RIBBON: ShapeLayout = { ...CLEAR_RIBBON, id: 'secure-columns', pictogramPx: { headline: 160, action: 384 } }
+const SECURE_SQUARE: ShapeLayout = { ...CLEAR_SQUARE, id: 'secure-square', pictogramPx: { headline: 112, action: 240 } }
+
 export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   'evac-now': {
     '16x9': [LANDSCAPE],
@@ -166,6 +173,12 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
     '9x16': [preparing(PORTRAIT)],
     '32x9': [preparing(RIBBON), preparing(RIBBON_WIDE_DIRECTION)],
     '1x1': [preparing(SQUARE)],
+  },
+  'secure-now': {
+    '16x9': [SECURE_LANDSCAPE],
+    '9x16': [SECURE_PORTRAIT],
+    '32x9': [SECURE_RIBBON],
+    '1x1': [SECURE_SQUARE],
   },
   'all-clear': {
     '16x9': [CLEAR_STACK],

@@ -27,6 +27,7 @@ The root `.evac-screen` element carries `data-shape`, `data-template`, `data-var
 |---|---|---|
 | `evac-now` | headline, action, direction, shelter (not on 32x9), languages, source | headline, action, direction, source |
 | `evac-prepare` | headline, action, shelter, languages, source | headline, action, shelter, source |
+| `secure-now` | headline, action, languages, source (no shelter or direction slot) | headline, action, source |
 | `all-clear` | headline, action, languages, source | headline, action, source |
 | `shelter-direction` | not defined yet (`TemplateNotDefinedError`) | |
 

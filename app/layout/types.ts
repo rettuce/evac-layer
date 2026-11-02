@@ -1,6 +1,6 @@
 export type Shape = '16x9' | '9x16' | '32x9' | '1x1'
 export type ShapeClass = 'landscape' | 'portrait' | 'ribbon' | 'square'
-export type TemplateId = 'evac-now' | 'evac-prepare' | 'shelter-direction' | 'all-clear'
+export type TemplateId = 'evac-now' | 'evac-prepare' | 'secure-now' | 'shelter-direction' | 'all-clear'
 export type Role =
   | 'headline'
   | 'hazard'
