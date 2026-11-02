@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 look="${LOOK:-C}"
-pip_width=600
+pip_width=540
 pip_margin=48
 for cut in "$@"; do
   out="demo/renders/${cut}.mp4"
