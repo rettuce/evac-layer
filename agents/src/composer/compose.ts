@@ -3,7 +3,7 @@ import type { Alert } from "../jma/parse.js";
 import type { Lang } from "../writer/request.js";
 import { CHAR_BUDGETS } from "./budgets.js";
 import { shapeContract } from "./template.js";
-import { ACTION_PICTOGRAM, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
+import { ACTION_PICTOGRAM, BudgetExceeded, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
 export interface WriterOutput { cells: WriterCell[] }
@@ -62,7 +62,7 @@ function checkBudget(shape: Shape, cell: WriterCell) {
   const budget = CHAR_BUDGETS[shape].find((b) => b.role === cell.role);
   for (const [lang, max] of Object.entries(budget?.max_chars ?? {})) {
     const t = cell.text[lang as Lang];
-    if (t !== undefined && [...t].length > max!) stop(`${shape} ${cell.role}.${lang} has ${[...t].length} chars, budget ${max}: "${t}"`);
+    if (t !== undefined && [...t].length > max!) throw new BudgetExceeded(shape, cell.role, lang, [...t].length, max!, t);
   }
 }
 

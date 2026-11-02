@@ -4,6 +4,11 @@ import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { TsunamiCategory } from "../jma/codes.js";
 
 export class ComposerStop extends Error {}
+export class BudgetExceeded extends ComposerStop {
+  constructor(readonly shape: string, readonly role: string, readonly lang: string, readonly length: number, readonly max: number, readonly text: string) {
+    super(`${shape} ${role}.${lang} has ${length} chars, budget ${max}: "${text}"`);
+  }
+}
 const stop = (msg: string): never => { throw new ComposerStop(msg); };
 
 export const SHAPE_ORDER: readonly Shape[] = ["16x9", "9x16", "32x9", "1x1"];
