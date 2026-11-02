@@ -1,3 +1,5 @@
+import { liveLayoutGate } from '~~/layout/gate'
+
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const layoutQuery = parseLayoutQuery(query)

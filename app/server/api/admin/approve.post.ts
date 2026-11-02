@@ -1,3 +1,4 @@
+import { layoutKey } from '~~/layout/gate'
 import { isBulletinId, isMunicipalityId } from '~~/layout/replay'
 
 export default defineEventHandler(async (event) => {

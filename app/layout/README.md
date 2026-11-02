@@ -16,6 +16,7 @@ Anything not listed here is internal and may change shape without notice. The si
 | `CABINET_OFFICE_5`, `LEVEL_LABEL_JA`, `contrastRatio`, `relativeLuminance`, `inkOn` | `palette.ts` | level colors (Cabinet Office 2020) and the WCAG contrast math the renderer uses for band text |
 | `TYPE_PX`, `LANGUAGE_ROTATION`, `LANGUAGE_ROTATION_MS` | `typography.ts` | the three type steps and the language rotation order and period |
 | `PULSE_PERIOD_MS`, `SCALE_IN_MS` | `motion.ts` | motion timing the Verifier can check frames against |
+| `liveLayoutGate(approvals, site, municipality, bulletinId)`, `layoutKey`, `Approvals`, `LiveLayoutGate` | `gate.ts` | the approval gate used by `/api/live-layout`: `'ok'` only for an approved bulletin at a site with auto publish on, otherwise `'auto-publish-off'` or `'unapproved'` (the 403 `data.reason`). `Approvals` is the shape of `data/approvals.json` |
 
 ## What the rendered screen reports
 

@@ -1,4 +1,8 @@
-import type { Approvals } from './approvals'
+export interface Approvals {
+  version: '0.1'
+  layouts: Record<string, { approved: boolean; updated_at: string }>
+  sites: Record<string, { auto_publish: boolean; updated_at: string }>
+}
 
 export function layoutKey(municipality: string, bulletinId: string): string {
   return `${municipality}/${bulletinId}`
