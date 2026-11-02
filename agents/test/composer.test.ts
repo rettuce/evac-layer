@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { compose, pickShelter, type Municipality, type Site, type WriterOutput } from "../src/composer/compose.js";
 import { ComposerStop } from "../src/composer/rules.js";
-import { TEMPLATES, areaRoles } from "../../app/layout/templates";
+import { shapeContract } from "../src/composer/template.js";
 import { parseJmaXml } from "../src/jma/parse.js";
 import { formatErrors, validateDoc } from "../src/schemas.js";
 import { AGENTS_DIR } from "../src/paths.js";
@@ -40,7 +40,7 @@ test("shelter is the nearest undisputed tsunami site; distance appears once, on 
 
 test("every emitted cell has a slot in the render template", () => {
   for (const screen of compose({ alert: advisory(), municipality, site, writer })) {
-    const slots = areaRoles(TEMPLATES["evac-now"]![screen.shape]);
+    const { slots } = shapeContract("evac-now", screen.shape);
     for (const c of screen.cells) assert.ok(slots.has(c.role), `${screen.shape} ${c.role}`);
   }
 });

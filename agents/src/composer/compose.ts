@@ -1,8 +1,8 @@
 import type { LayoutCell, Shape } from "../../../app/layout/types";
-import { TEMPLATES, areaRoles } from "../../../app/layout/templates";
 import type { Alert } from "../jma/parse.js";
 import type { Lang } from "../writer/request.js";
 import { CHAR_BUDGETS } from "./budgets.js";
+import { shapeContract } from "./template.js";
 import { ACTION_PICTOGRAM, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
@@ -70,7 +70,6 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
   const { alert, municipality: m, site } = input;
   if (site.municipality_id !== m.id) stop(`site ${site.id} belongs to ${site.municipality_id}, not ${m.id}`);
   const situation = situationFor(alert, m.id);
-  const template = TEMPLATES[situation.template] ?? stop(`template ${situation.template} is not defined in app/layout/templates.ts`);
   const { shelter, distance_m } = pickShelter(m, site, alert.hazard);
   const hazardEntry = m.hazards.find((h) => h.type === alert.hazard);
   const pdfTitle = hazardEntry ? m.sources.find((s) => s.file === hazardEntry.source.file)?.title ?? hazardEntry.source.file : null;
@@ -87,8 +86,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
   ];
 
   return SHAPE_ORDER.map((shape) => {
-    const layout = template[shape];
-    const slots = areaRoles(layout);
+    const { slots, required } = shapeContract(situation.template, shape);
     const w = writerFor(input.writer, shape);
     const text = (role: string) => {
       const c = w.cells.find((x) => x.role === role);
@@ -107,7 +105,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     add({ id: "source", role: "source", priority: 9, text: { ja: `出典: ${sourceText}` }, motion: "static" });
 
     const present = new Set(cells.map((c) => c.role));
-    const missing = layout.required.filter((r) => !present.has(r));
+    const missing = [...required].filter((r) => !present.has(r));
     if (missing.length) stop(`${shape}: required cells missing: ${missing.join(", ")}`);
     return {
       version: "0.1",
