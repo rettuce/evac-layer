@@ -94,3 +94,29 @@ test("Wajima GSI CSVs load with hazard columns", { skip: !fs.existsSync(path.joi
   assert.deepEqual(route.hazards_ok, ["tsunami"]);
   assert.equal(readGsiCsv(path.join(RAW_DIR, "gsi-shelters/17204_1.csv")).length, 37);
 });
+
+test("vision facts carry the page the code sent and no quotable text", async () => {
+  const { addVisionClaims } = await import("../src/reader/claims.js");
+  const { claims, citations } = collectClaims([block("[施設:岩城中学校] 洪水", 1)], ["list.pdf"]);
+  addVisionClaims(claims, citations, "map.pdf", 2, ["[災害:洪水] 子吉川の想定最大規模降雨 330mm", " "]);
+  assert.equal(claims.length, 2);
+  assert.deepEqual(citations.get("C2"), { file: "map.pdf", page: 2, method: "vision", cited_text: null });
+  const doc = assemble({
+    id: "05210", name: "由利本荘市", prefecture: "秋田県", model: "m", readerVersion: "t",
+    extraction: { documents: [], hazards: [{ type: "flood", areas: ["本荘地域"], notes_ja: "想定最大規模降雨 330mm", citation_id: "C2" }], routes: [], cautions: [], contacts: [], shelter_mentions: [] },
+    citations, shelters: [],
+    pdfSources: [{ type: "pdf", file: "list.pdf", title: "l", year: null, pages: 3 }, { type: "pdf", file: "map.pdf", title: "m", year: null, pages: 13 }],
+    gsiSources: [],
+  });
+  assert.equal(doc.hazards[0].source.method, "vision");
+  const v = validateDoc(doc, "municipality");
+  assert.ok(v.ok, formatErrors(v.errors));
+});
+
+test("pages are split into tiles no larger than the API's unscaled edge", async () => {
+  const { planTiles, TILE_PX, RENDER_LONG_EDGE_PX } = await import("../src/reader/vision.js");
+  const tiles = planTiles([{ page: 1, w: 841.89, h: 595.276 }], "/tmp/x");
+  assert.equal(tiles.length, 4);
+  assert.ok(tiles.every((t) => t.w <= TILE_PX && t.h <= TILE_PX));
+  assert.equal(Math.max(...tiles.map((t) => t.x + t.w)), RENDER_LONG_EDGE_PX);
+});
