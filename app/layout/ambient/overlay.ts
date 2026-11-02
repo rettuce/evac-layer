@@ -16,8 +16,10 @@ export const OUTAGE_NOTICE = {
   ja: '停電時は館内放送・ラジオの指示に従ってください',
   en: 'In a power outage, follow staff announcements and radio',
 } as const
-const NOTICE_TO_TIME = 0.22
+const NOTICE_TO_TIME = 0.14
 const NOTICE_LINE = 1.3
+// Quieter than the site name: the notice matters before an outage, the site name every day.
+const NOTICE_ALPHA = 0.7
 const NOTICE_GAP = 8
 export const D21_TRACK_GAP = 24
 const RULE_ALPHA = 0.14
@@ -162,6 +164,7 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, geometry: OverlayGeom
 
   ctx.letterSpacing = '0px'
   const noticeTop = top + (D21_TYPE.label.line + D21_LABEL_GAP) * scale
+  ctx.globalAlpha = NOTICE_ALPHA
   notice.forEach((line, i) => {
     ctx.font = line.font
     ctx.fillText(line.text, textX, noticeTop + (i + 0.5) * noticeLine)

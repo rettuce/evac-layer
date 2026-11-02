@@ -21,7 +21,7 @@ const DESIGNS = [
 const EMPHASIS_CELLS = { min: 3, max: 7 }
 
 function d21ScaleFor(width: number, height: number, shape: Shape): number {
-  const faceWidth = shape === 'pillar' ? PILLAR.faceWidth : width
+  const faceWidth = shape === 'pillar' ? width / PILLAR.faces : width
   return Math.min(faceWidth, height) / D21_BASE_SHORT_SIDE_PX
 }
 

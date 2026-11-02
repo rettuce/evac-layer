@@ -195,6 +195,7 @@ onBeforeUnmount(() => {
   >
     <AmbientLayer
       v-show="frame.ambientVisible"
+      :active="frame.ambientVisible"
       :seed="site ?? municipality"
       :clock-epoch-ms="clockEpochMs"
       :site-name="siteName ?? status?.name ?? ''"
