@@ -10,7 +10,7 @@ export const SHAPES: Record<Shape, { cls: ShapeClass; width: number; height: num
   '9x16': { cls: 'portrait', width: 1080, height: 1920 },
   '32x9': { cls: 'ribbon', width: 3840, height: 1080 },
   '1x1': { cls: 'square', width: 1080, height: 1080 },
-  pillar: { cls: 'pillar', width: 6616, height: 5834 },
+  pillar: { cls: 'pillar', width: 6616, height: 5046 },
 }
 
 const RIBBON_MIN_ASPECT = 2.6
@@ -33,20 +33,16 @@ export function designScale(width: number, height: number): number {
   return Math.min(width, height) / BASE_SHORT_SIDE_PX
 }
 
-export const PANEL_SHAPES: readonly PanelShape[] = ['16x9', '9x16', '32x9', '1x1']
-
-// A 1.062 m square column wrapped in LED from 1.3 m to 5.0 m, at the pixel pitch of a 55" portrait
-// panel (1577 px/m): four faces of 1654 px side by side, the outer 37 px of each on the rounded corner.
+// A 1.062 m square column wrapped in LED from 0.40 m to 3.60 m above the floor, at the pixel pitch of a
+// 55" portrait panel (1577 px/m): four faces of 1654 px side by side, the outer 37 px of each on the rounded corner.
 export const PILLAR = {
   faces: 4,
   faceWidth: 1654,
-  height: 5834,
+  height: 5046,
+  pxPerMetre: 1577,
+  floorMetres: 0.4,
   cornerPx: 37,
   faceShape: '9x16' as PanelShape,
   faceScale: 1,
   outputScale: 0.5,
 } as const
-
-export function isPanelShape(value: unknown): value is PanelShape {
-  return typeof value === 'string' && (PANEL_SHAPES as readonly string[]).includes(value)
-}

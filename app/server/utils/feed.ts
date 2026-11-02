@@ -3,10 +3,10 @@ import { join } from 'node:path'
 import { alertFeed, ambientFeed, type Feed, type FeedAsset, type FeedSite } from '~~/layout/feed'
 import { layoutKey, liveLayoutGate } from '~~/layout/gate'
 import { DEFAULT_REPLAY_SPEED, currentBulletinAt, rowsInWindow, type ReplayWindow } from '~~/layout/replay'
-import { PANEL_SHAPES, isShape } from '~~/layout/shapes'
+import { SHAPES, isShape } from '~~/layout/shapes'
 import type { EvacScreen, Shape } from '~~/layout/types'
 
-const ALL_SHAPES = PANEL_SHAPES
+const ALL_SHAPES = Object.keys(SHAPES) as Shape[]
 
 export function distDir(): string {
   const config = useRuntimeConfig()

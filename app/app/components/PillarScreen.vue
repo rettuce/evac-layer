@@ -67,7 +67,7 @@ watch(
     >
       <EvacScreen
         :screen="screen"
-        :shape="PILLAR.faceShape"
+        shape="pillar"
         :variant="variant"
         :elapsed-ms="elapsedMs"
         :reduced-motion="reducedMotion"

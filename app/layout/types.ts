@@ -67,6 +67,7 @@ export interface ShapeLayout {
   pictogramPx: Partial<Record<Role, number>>
   darkBand?: Role[]
   inline?: Role[]
+  hero?: { role: Role; px: number }
 }
 
 export type TemplateDef = Record<PanelShape, ShapeLayout[]>

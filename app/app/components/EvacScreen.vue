@@ -32,7 +32,7 @@ const overflowDropped = ref<DroppedCell[]>([])
 const overflow = ref('')
 const levelScale = computed(() => levelScaleFor(props.screen.template, props.screen.alert.hazard, props.screen.alert.level))
 const headlineScale = ref(1)
-const stackedHeadline = computed(() => ['portrait', 'square'].includes(SHAPES[props.shape].cls))
+const stackedHeadline = computed(() => ['portrait', 'square', 'pillar'].includes(SHAPES[props.shape].cls))
 const ready = ref(false)
 
 const shapeClass = computed(() => SHAPES[props.shape].cls)
@@ -50,6 +50,7 @@ const placed = computed(() => {
 })
 const dropped = computed(() => [...initial.value.dropped, ...overflowDropped.value])
 const missing = computed(() => missingRequired(initial.value.placed, layout.value))
+const heroCell = computed(() => (layout.value.hero ? placed.value.find((cell) => cell.role === layout.value.hero!.role) : undefined))
 
 const band = computed(() => CABINET_OFFICE_5[props.screen.alert.level])
 
@@ -246,6 +247,9 @@ watch(() => [props.screen, props.shape, props.variant], fit)
       :size-px="ladderSizePx(ladderMode!, shapeClass)"
       :language-index="language.index"
     />
+    <div v-if="layout.hero && heroCell?.pictogram" class="hero-pictogram" :style="{ gridArea: 'hero' }">
+      <PictogramMark :id="heroCell.pictogram" :size-px="layout.hero.px" />
+    </div>
     <section
       v-for="cell in placed"
       :key="cell.id"
@@ -269,3 +273,10 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     </section>
   </main>
 </template>
+
+<style scoped>
+.hero-pictogram {
+  display: grid;
+  place-items: center;
+}
+</style>

@@ -1,4 +1,5 @@
-import type { Role, Shape, ShapeLayout, TemplateDef, TemplateId } from './types'
+import type { Role, Shape, ShapeLayout, TemplateDef, TemplateId, Track } from './types'
+import { LADDER_H_PX } from './ladder'
 import { PILLAR } from './shapes'
 import { SHELTER_PICTOGRAM_PX } from './typography'
 
@@ -194,6 +195,45 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   },
 }
 
+// Pillar faces read best at eye height: the reading rows end 1.2 m above the floor and the source sits
+// at 0.4–0.6 m, while the band, ladder and one large action pictogram take the upper part of the column.
+const PILLAR_EYE_LOW_M = 1.2
+const PILLAR_EYE_HIGH_M = 2.2
+const PILLAR_SOURCE_TOP_M = 0.6
+const PILLAR_HERO_PX = 960
+const PILLAR_BODY_ORDER: Role[] = ['action', 'languages', 'direction', 'shelter']
+
+function pillarRowPx(fromMetres: number, toMetres: number): number {
+  return Math.round((toMetres - fromMetres) * PILLAR.pxPerMetre)
+}
+
+function pillarFace(layout: ShapeLayout): ShapeLayout {
+  const roles = areaRoles(layout)
+  const topMetres = PILLAR.floorMetres + PILLAR.height / PILLAR.pxPerMetre
+  const heroRow = pillarRowPx(PILLAR_EYE_HIGH_M, topMetres) - STACKED_BAND_MIN_PX - LADDER_H_PX.pillar
+  const rows: Track[] = [layout.rows[0]!, heroRow, '1fr']
+  const areas = ['headline headline headline', '. hero .', '. . .']
+  PILLAR_BODY_ORDER.filter((role) => roles.has(role)).forEach((role, i) => {
+    if (i > 0) {
+      rows.push(G)
+      areas.push('. . .')
+    }
+    rows.push('auto')
+    areas.push(`. ${role} .`)
+  })
+  rows.push(pillarRowPx(PILLAR_SOURCE_TOP_M, PILLAR_EYE_LOW_M), pillarRowPx(PILLAR.floorMetres, PILLAR_SOURCE_TOP_M))
+  areas.push('. . .', '. source .')
+  return {
+    ...layout,
+    id: `pillar-${layout.id}`,
+    columns: [M, '1fr', M],
+    rows,
+    areas,
+    pictogramPx: { ...layout.pictogramPx, action: 0 },
+    hero: { role: 'action', px: PILLAR_HERO_PX },
+  }
+}
+
 export function areaRoles(layout: ShapeLayout): Set<string> {
   return new Set(layout.areas.flatMap((row) => row.split(/\s+/)).filter((name) => name !== '.'))
 }
@@ -220,7 +260,8 @@ export function definedTemplates(): TemplateId[] {
 export function resolveLayout(templateId: TemplateId, shape: Shape, variant = 0): ShapeLayout {
   const variants = TEMPLATES[templateId]?.[shape === 'pillar' ? PILLAR.faceShape : shape]
   if (!variants?.length) throw new TemplateNotDefinedError(templateId, shape)
-  return variants[variant] ?? variants[0]!
+  const layout = variants[variant] ?? variants[0]!
+  return shape === 'pillar' ? pillarFace(layout) : layout
 }
 
 export function resolveTemplate(templateId: TemplateId, shape: Shape): ResolvedTemplate {
