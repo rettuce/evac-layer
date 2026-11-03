@@ -41,7 +41,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   // A clearance only means something to people who saw the warning; per hazard, all-clear follows a shown screen.
   const showing = new Set<string>();
   for (const e of args.entries) {
-    const row = { issued_at: e.issued_at, bulletin_id: e.bulletin_id, wmo_code: e.wmo_code, raw_title: e.alert.raw_title, municipality_level: e.municipality_level };
+    const row = { issued_at: e.issued_at, bulletin_id: e.bulletin_id, wmo_code: e.wmo_code, raw_title: e.alert.raw_title, municipality_level: e.municipality_level, file: e.file };
     let situation;
     try {
       situation = situationFor(e.alert, municipality.id);

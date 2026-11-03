@@ -1,0 +1,74 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "津波注意報",
+          "ja_easy": "くんれん つなみ ちゅういほう",
+          "en": "DRILL: Tsunami Advisory",
+          "zh_hans": "演习：海啸注意报",
+          "zh_hant": "演習：海嘯注意報",
+          "ko": "훈련: 쓰나미 주의보",
+          "th": "การฝึกซ้อม:ประกาศเฝ้าระวังสึนามิ",
+          "vi": "Diễn tập: Chú ý sóng thần",
+          "fil": "Pagsasanay: Abiso sa Tsunami",
+          "id": "Latihan: Imbauan Waspada Tsunami"
+        },
+        "basis": "警報 areas[0].kind_name「津波注意報」（石川県能登, status continued）と headline_text 冒頭「＊＊＊これは訓練です＊＊＊」。警報名は気象庁電文のまま。タイ語は括弧記号を使わずタイ文字とコロンのみで表記"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "ただちに高い所へ",
+          "ja_easy": "すぐ たかい ところへ",
+          "en": "Go to high ground",
+          "zh_hans": "立即前往高处",
+          "zh_hant": "立即前往高處",
+          "ko": "즉시 높은 곳으로",
+          "th": "ขึ้นที่สูงทันที",
+          "vi": "Lên chỗ cao ngay",
+          "fil": "Umakyat agad sa mataas",
+          "id": "Segera ke tempat tinggi"
+        },
+        "basis": "警報 headline_text「ただちに避難してください」と hazard「tsunami」。図記号 go_higher（いまいる場所から高い所へ上がる）と同じ意味の行動として記述。警戒レベル5ではない（level null）"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "ただちに高い所へ",
+          "ja_easy": "すぐ たかい ところへ",
+          "en": "Go to high ground",
+          "zh_hans": "立即前往高处",
+          "zh_hant": "立即前往高處",
+          "ko": "즉시 높은 곳으로",
+          "th": "ขึ้นที่สูงทันที",
+          "vi": "Lên chỗ cao ngay",
+          "fil": "Umakyat agad sa mataas",
+          "id": "Segera ke tempat tinggi"
+        },
+        "basis": "action セルと同じ内容（警報 headline_text「ただちに避難してください」、hazard「tsunami」、図記号 go_higher）を各言語で表示"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VTSE41-201609010726-05a7380a3e46",
+      "input": 5558,
+      "output": 2726,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.076752
+    },
+    {
+      "stage": "writer VTSE41-201609010726-05a7380a3e46",
+      "input": 5597,
+      "output": 1955,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.061488
+    }
+  ],
+  "lint": []
+}

@@ -1,0 +1,90 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "津波注意報解除",
+          "ja_easy": "くんれん つなみの しらせ おわり",
+          "en": "DRILL: Tsunami all clear",
+          "zh_hans": "演练：海啸警报和注意报解除",
+          "zh_hant": "演練：海嘯警報和注意報解除",
+          "ko": "훈련: 쓰나미 경보·주의보 해제",
+          "th": "การฝึกซ้อม:ยกเลิกคำเตือนและคำแนะนำสึนามิ",
+          "vi": "DIỄN TẬP: Dỡ bỏ cảnh báo và chú ý sóng thần",
+          "fil": "PAGSASANAY: Inalis ang babala at abiso sa tsunami",
+          "id": "LATIHAN: Peringatan dan imbauan tsunami dicabut"
+        },
+        "basis": "警報 headline_text「＊＊＊これは訓練です＊＊＊ 大津波警報・津波警報を解除しました。」と areas[0]（石川県能登）kind_name「津波注意報解除」・status「cleared」。電文全体の警報解除と当該区域の注意報解除の両方を示し、訓練であることを明記。"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "避難の必要なし",
+          "ja_easy": "にげなくて だいじょうぶです",
+          "en": "No need to flee",
+          "zh_hans": "无需避难",
+          "zh_hant": "無需避難",
+          "ko": "대피할 필요 없음",
+          "th": "ไม่ต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
+        },
+        "basis": "警報 areas[0] status「cleared」（津波注意報解除）と headline_text（大津波警報・津波警報を解除）。テンプレート all-clear の図記号 safe_here（避難の必要がなくなったこと）に合わせた行動。自治体知識ファイルの内容は使用せず。"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "避難の必要なし",
+          "ja_easy": "にげなくて だいじょうぶです",
+          "en": "No need to flee",
+          "zh_hans": "无需避难",
+          "zh_hant": "無需避難",
+          "ko": "대피할 필요 없음",
+          "th": "ไม่ต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
+        },
+        "basis": "action セルと同じ内容（警報 areas[0] status「cleared」、headline_text の警報解除、図記号 safe_here）を各言語で表示。"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VTSE41-201609010955-5a813306d772",
+      "input": 5526,
+      "output": 2722,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.076544
+    },
+    {
+      "stage": "writer VTSE41-201609010955-5a813306d772",
+      "input": 5565,
+      "output": 2732,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.0769
+    },
+    {
+      "stage": "writer VTSE41-201609010955-5a813306d772",
+      "input": 5805,
+      "output": 2750,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.07822
+    },
+    {
+      "stage": "writer VTSE41-201609010955-5a813306d772",
+      "input": 5743,
+      "output": 2767,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.078312
+    }
+  ],
+  "lint": []
+}

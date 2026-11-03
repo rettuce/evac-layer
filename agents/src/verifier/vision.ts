@@ -1,4 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
+import { tsunamiRegionsFor } from "../jma/regions.js";
+import { TSUNAMI_DISPLAY_LEVEL } from "../composer/rules.js";
 import type { Alert } from "../jma/parse.js";
 import { MODELS, costOf, type CallUsage, type ModelKey } from "../reader/pricing.js";
 import type { Finding } from "./checks.js";
@@ -25,8 +27,9 @@ export const VISION_VERIFY_SCHEMA = {
   },
 } as const;
 
+const TSUNAMI_RULE = `大津波警報=${TSUNAMI_DISPLAY_LEVEL.major_warning}・津波警報=${TSUNAMI_DISPLAY_LEVEL.warning}・津波注意報=${TSUNAMI_DISPLAY_LEVEL.advisory}`;
 const SYSTEM = `あなたは避難案内サイネージの検査係です。描画された画面の画像と、その画面のレイアウト JSON、元になった気象庁の電文の要点を受け取ります。画面に見えているものだけを根拠に、次の 3 つを判定します。見えないもの・推測は判定に使いません。問題が無ければ findings は空にします。
-- bulletin-mismatch: 画面の災害種別・警戒レベル・警報名・行動が、電文と矛盾している（例: 電文は洪水なのに津波と書いてある、電文のレベルと画面のレベル表示が違う、解除なのに避難を促している）。言い換えや省略は矛盾ではない
+- bulletin-mismatch: 画面の災害種別・警戒レベル・警報名・行動が、電文と矛盾している（例: 電文は洪水なのに津波と書いてある、電文のレベルと画面のレベル表示が違う、解除なのに避難を促している）。言い換えや省略は矛盾ではない。municipality_areas はこの自治体に当たる区域だけで、電文の他の区域の警報は判定に使わない。津波の display_level は警報種別から規則で決まる（${TSUNAMI_RULE}）ので、電文に level 欄が無くても矛盾ではない
 - pictogram-misuse: 図記号が災害種別や行動と合っていない（例: 洪水の画面に津波の図記号、上へ逃げる画面に横へ逃げる図記号）。図記号 ID の意味はユーザー入力に書く
 - missing-source: 出典行（気象庁の発表時刻と自治体名）が画面に見えない、または読めない
 three_second_note には、前提知識のない人が 3 秒で何をすればよいか分かるかを 1〜2 文で書く。これは所見で、findings には入れない。`;
@@ -40,7 +43,10 @@ export async function visionCheck(args: {
   client: Anthropic; model: ModelKey; pngs: string[]; layout: unknown; alert: Alert; municipalityId: string;
 }): Promise<VisionVerdict> {
   const l = args.layout as { cells: { id: string; role: string; text: { ja: string }; pictogram?: string; rotation?: number }[]; template: string; alert: { level: number; hazard: string } };
-  const mine = args.alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === args.municipalityId : true));
+  // Tsunami bulletins list every forecast region in the country; Vision must judge the screen against this
+  // municipality's region only, as the Composer does.
+  const regions = new Set(tsunamiRegionsFor(args.municipalityId));
+  const mine = args.alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === args.municipalityId : regions.has(a.code)));
   const bulletin = {
     hazard: args.alert.hazard,
     title: args.alert.raw_title,
