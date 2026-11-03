@@ -4,7 +4,7 @@ import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { Lang } from "../writer/request.js";
 import { budgetsFor } from "./budgets.js";
 import { shapeContract } from "./template.js";
-import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
+import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, MONTH_EN, MUNICIPALITY_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
 export interface WriterOutput { cells: WriterCell[] }
@@ -82,9 +82,13 @@ export function headlineFor(alert: Alert, municipalityId: string): string {
   return alert.raw_title;
 }
 
-function hhmm(iso: string): string {
-  const m = iso.match(/T(\d{2}):(\d{2})/) ?? stop(`issued_at ${iso} has no time`);
-  return `${m[1]}:${m[2]}`;
+// The screen names only the issuer, its time and the municipality; the PDF page, the GSI file and the bulletin id stay in
+// layout.sources[] (and so in the feed, the export manifest and the admin screen), where a reader can follow them.
+function sourceLine(issuedAt: string, m: Municipality): { ja: string; en?: string } {
+  const t = issuedAt.match(/^\d{4}-(\d{2})-(\d{2})T(\d{2}):(\d{2})/) ?? stop(`issued_at ${issuedAt} has no date and time`);
+  const [month, day, hhmm] = [Number(t[1]), Number(t[2]), `${t[3]}:${t[4]}`];
+  const en = MUNICIPALITY_EN[m.id];
+  return { ja: `気象庁 ${month}/${day} ${hhmm} 発表・${m.name}`, ...(en ? { en: `JMA ${hhmm}, ${MONTH_EN[month - 1]} ${day} · ${en}` } : {}) };
 }
 
 function writerFor(writer: WriterOutput | Partial<Record<PanelShape, WriterOutput>>, shape: PanelShape): WriterOutput {
@@ -108,13 +112,8 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
   const guide = NO_SHELTER_TEMPLATES.has(situation.template) ? null : pickShelter(m, site, alert.hazard);
   const way = guide ? directionToward(site, guide.shelter) : null;
   const hazardEntry = m.hazards.find((h) => h.type === alert.hazard);
-  const pdfTitle = hazardEntry ? m.sources.find((s) => s.file === hazardEntry.source.file)?.title ?? hazardEntry.source.file : null;
 
-  const sourceText = [
-    pdfTitle ? `${m.name} ${pdfTitle} p.${hazardEntry!.source.page}` : null,
-    guide ? "国土地理院 指定緊急避難場所データ" : null,
-    `気象庁 ${hhmm(alert.issued_at)}`,
-  ].filter(Boolean).join(" / ");
+  const sourceText = sourceLine(alert.issued_at, m);
   const sources = [
     ...(hazardEntry ? [{ type: "pdf" as const, file: hazardEntry.source.file, page: hazardEntry.source.page }] : []),
     ...(guide ? [{ type: "gsi" as const, file: guide.shelter.source.file }] : []),
@@ -142,7 +141,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     const languages = text("languages");
     if (languages) add({ id: "languages", role: "languages", priority: 3, text: languages, motion: "static" });
     else if (LANGUAGES_REQUIRED_ON.includes(shape)) stop(`Writer output has no languages cell, required on ${shape}`);
-    add({ id: "source", role: "source", priority: 9, text: { ja: `出典: ${sourceText}` }, motion: "static" });
+    add({ id: "source", role: "source", priority: 9, text: sourceText, motion: "static" });
 
     const present = new Set(cells.map((c) => c.role));
     const missing = [...required].filter((r) => !present.has(r));

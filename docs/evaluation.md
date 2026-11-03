@@ -6,7 +6,7 @@ Numbers from the pipeline runs of 2026-11-02 over the recorded JMA feed (2026-10
 
 | Municipality | Recorded bulletins | Screens | Layouts (× 5 shapes) | Why no more screens |
 |---|---|---|---|---|
-| 由利本荘市 05210 | 61 | 6 | 30 | level 2 or lower, or an all-clear for something never shown (`data/layouts/05210/index.json`) |
+| 由利本荘市 05210 | 62 | 6 | 30 | level 2 or lower, or an all-clear for something never shown (`data/layouts/05210/index.json`) |
 | 輪島市 17204 | 39 | 7 | 35 | same (`data/layouts/17204/index.json`) |
 | 柏崎市 15205 | 74 | 3 | 15 | same (`data/layouts/15205/index.json`) |
 | 吉田町 22424 | 20 | 0 | 0 | highest level in the period was 2 |

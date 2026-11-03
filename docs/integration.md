@@ -75,6 +75,6 @@ MOJUR includes EVAC LAYER as a standard module. It uses the same generic HTTP su
 
 ## What every integration must keep
 
-- Show the sources line as delivered (municipal PDF page, GSI evacuation site data, JMA bulletin time). GSI data requires its attribution and the notice that facility details should be confirmed with the municipality.
+- Keep `sources` in the feed as delivered (municipal PDF page, GSI evacuation site data, JMA bulletin id). The screen itself names only the issuer, its time and the municipality; the full attribution may live on the receiving system's information screen. GSI data requires its attribution and the notice that facility details should be confirmed with the municipality.
 - Do not edit warning names or levels: the headline is the JMA warning name, used verbatim.
 - Do not add blinking. Motion is limited to one scale-in on appearance and a brightness pulse at or below 1 Hz.

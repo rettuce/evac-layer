@@ -103,3 +103,7 @@ const TSUNAMI_KIND_CATEGORY: Record<string, TsunamiCategory> = {
 function categoryOfKind(code: string): TsunamiCategory {
   return TSUNAMI_KIND_CATEGORY[code] ?? stop(`unknown tsunami kind code ${code}`);
 }
+
+// English for the source line only; the Writer never sees the municipality name, so romanisation lives here.
+export const MUNICIPALITY_EN: Record<string, string> = { "05210": "Yurihonjo", "17204": "Wajima", "15205": "Kashiwazaki", "22424": "Yoshida", "14100": "Yokohama" };
+export const MONTH_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;

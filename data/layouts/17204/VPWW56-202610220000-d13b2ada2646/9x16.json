@@ -64,7 +64,8 @@
       "role": "source",
       "priority": 9,
       "text": {
-        "ja": "出典: 国土地理院 指定緊急避難場所データ / 気象庁 00:00"
+        "ja": "気象庁 10/22 00:00 発表・輪島市",
+        "en": "JMA 00:00, Oct 22 · Wajima"
       },
       "motion": "static"
     }
