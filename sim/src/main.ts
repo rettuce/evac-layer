@@ -2,7 +2,7 @@ import { PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js'
 import { CameraRig, FILM_GAUGE_MM, presetsFromGltf } from './cameras'
-import { createDisplay, setContent, type Display } from './displays'
+import { createDisplay, setContent, updateZoom, type Display } from './displays'
 import { applyRenderMode, loadRoom, type RenderMode } from './room'
 import { loadCrops, type Content } from './screenUrl'
 import { buildUi, fpsMeter } from './ui'
@@ -58,9 +58,13 @@ buildUi(document.getElementById('ui')!, presets, INITIAL, {
   onCamera: (preset) => rig.flyTo(preset),
 })
 
+// Exposed for browser-side checks (camera flights, fps sampling) from DevTools or a test script.
+Object.assign(window, { sim: { camera, controls, displays, room } })
+
 const fps = fpsMeter(document.getElementById('fps')!)
 webgl.setAnimationLoop((nowMs) => {
   controls.update()
+  updateZoom(displays, camera, innerHeight)
   webgl.render(scene, camera)
   css3d.render(scene, camera)
   fps(nowMs)

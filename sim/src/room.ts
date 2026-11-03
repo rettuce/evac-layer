@@ -40,7 +40,8 @@ async function makePiece(mesh: Mesh): Promise<RoomPiece> {
   }
   const edges = new LineSegments(new EdgesGeometry(mesh.geometry, EDGE_THRESHOLD_DEG), wireMaterial)
   edges.visible = false
-  mesh.add(edges)
+  edges.applyMatrix4(mesh.matrix)
+  mesh.parent!.add(edges)
   return { mesh, edges, materials }
 }
 
@@ -63,5 +64,4 @@ export function applyRenderMode(room: Room, mode: RenderMode): void {
     piece.edges.visible = mode === 'wire'
     if (mode !== 'wire') piece.mesh.material = piece.materials[mode]
   }
-  if (mode === 'wire') for (const piece of room.pieces) piece.mesh.visible = true
 }

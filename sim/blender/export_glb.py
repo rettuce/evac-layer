@@ -3,7 +3,8 @@
 blender -b -P sim/blender/export_glb.py [-- --size 2048 --floor-size 4096 --ao-samples 64]
 
 Writes sim/public/room.glb (baked colour embedded, display faces and cameras with extras),
-sim/public/tex/<group>_ao.jpg (ambient occlusion, referenced from each mesh's extras.ao) and
+sim/public/tex/<group>_ao.jpg (ambient occlusion, referenced from each mesh's extras.ao; the colour images
+are embedded in the glb and their files removed after the export) and
 sim/public/crops.json (build_scene.py --crops-json: each window's canvas crop, shape and seam, which the
 viewer reads in preference to the extras so a crop change needs no re-bake).
 """
@@ -298,6 +299,8 @@ def main():
         export_lights=False, export_yup=True, export_materials="EXPORT", export_image_format="AUTO",
         export_jpeg_quality=JPEG_QUALITY, use_selection=False,
     )
+    for color_path in TEX_DIR.glob("*_color.jpg"):
+        color_path.unlink()
     print(f"EXPORT {out} bytes={out.stat().st_size} cameras={len(ns['STILL_CAMERAS'])} displays={len(extras)}")
 
 

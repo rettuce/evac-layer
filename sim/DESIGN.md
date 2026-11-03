@@ -59,8 +59,29 @@ before rendering) to reuse its geometry, cameras and the elevation crops without
 The AO image is referenced from the glTF only through `extras.ao` (file name) so the viewer can
 switch between colour×AO, white×AO and wire without a second material set in the file.
 
+## What the first run taught (2026-11-04)
+
+- **22 iframes at page size: 6 fps.** The 16 pillar faces each ran a 6616×5046 page, and the ambient
+  canvas is sized to the page × devicePixelRatio. Without the pillars: 97 fps; without any iframe: 120 fps.
+  CSS `zoom` on a wrapper div lowers the devicePixelRatio the page sees, so the page rasters at the size it
+  is drawn: pillars at zoom 0.25 → 94 fps. The zoom is now chosen per face every frame from its projected
+  height (`updateZoom`: ladder 0.125 / 0.25 / 0.5 / 1, pillars capped at 0.5), and the `CSS3DObject`
+  scale compensates. `zoom` goes on an inner div, not on the CSS3D element, because zoom also scales the
+  transform's translation.
+- **Black blocks and bands on the wall panels were z-fighting**, not a raster problem: the bezel plane
+  (`joint_*`) sits 0.5 mm behind each display face, and from the hero distance (17 m) the depth buffer could
+  not separate them. `polygonOffset -4/-4` on the hole material fixes it; a plain-page test of the same
+  iframe at zoom 0.125–0.5 never showed the artifact, which is what ruled the compositor out.
+- **EVAC LAYER showed the calm screen** until the flood bulletins were approved: live screens only show
+  approved bulletins and `data/approvals.json` is gitignored. `sim/scripts/approve-live.sh` does what
+  `demo/capture/record.mjs` does before a recording, through the loopback-only admin API.
+- Camera flights: position and focal length sampled every 100 ms follow the ease-in-out curve over 1.2 s.
+
 ## Not done / open
 
 - Lights are not baked (no `COMBINED`): the view is unlit albedo × AO, which is what the spec's three
-  modes need and keeps the bake deterministic and fast.
+  modes need and keeps the bake deterministic and fast (whole bake 80 s on Metal: AO 64 spp, floor 4096).
+- The four iframes of a column start their clocks when each page is ready, so the language band of the
+  four faces can be offset by the load-time difference; the replay clock itself is shared by the server
+  (`sharedReplayOrigin`), so the shown bulletin is the same on every face.
 - `demo/blender/build_scene.py` is not modified. If D-7 changes crops or UVs, re-run the export.

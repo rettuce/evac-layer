@@ -10,12 +10,20 @@ and drawn unlit; the 22 display faces (4 pillars × 4 faces, 3 ribbon panels, 3 
 # 1. the app that serves /screen (any free port; 3150–3152 are used by other worktrees)
 cd app && pnpm dev --port 3153
 
-# 2. the simulator (standalone package: not in the pnpm workspace)
+# 2. once per app checkout: approve the flood bulletins the EVAC LAYER content replays
+#    (live screens only show approved bulletins; data/approvals.json is gitignored)
+sim/scripts/approve-live.sh http://127.0.0.1:3153
+
+# 3. the simulator (standalone package: not in the pnpm workspace)
 cd sim && pnpm install --ignore-workspace
 cp .env.example .env            # VITE_SCREEN_ORIGIN=http://127.0.0.1:3153
 pnpm dev                        # http://127.0.0.1:3160
 pnpm build                      # type-check + sim/dist/
 ```
+
+Measured 2026-11-04 (M-series Mac, Chrome, 1920×1080, DPR 1): `Textured` with EVAC LAYER on all 22 faces
+60–65 fps at `hero`, 100–120 fps at `wide-a` / `wall-final`; the first 10–15 s after a content switch run
+at ~10 fps while the 22 pages load. `sim/DESIGN.md` has what made the difference.
 
 UI (top left): content `平常時` / `EVAC LAYER` (由利本荘市, the 2026-10-21 flood replayed at real speed from
 just before the level-4 bulletin); render `Textured` (baked colour × AO) / `AO` (white × AO) / `Wire` (edges
