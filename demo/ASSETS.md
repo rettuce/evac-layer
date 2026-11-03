@@ -24,3 +24,5 @@
 ナレーションの自動音声（試作・`demo/out/tts/`・gitignore）:
 - macOS `say` の System Voices（Kyoko）: macOS ソフトウェア使用許諾契約 §2F により、個人的・非商用の制作にのみ使える。「営利・非営利・公開共有の文脈」での録音・公開・再配布は不可。提出映像には使わず、試聴用の比較にとどめる
 - VOICEVOX（未導入）: ソフトウェア規約 https://voicevox.hiroshiba.jp/term/ では商用・非商用とも利用可で、「VOICEVOX を利用したことがわかる」クレジットが必要。ただし音声ライブラリ（キャラクター）ごとに別の規約があり、使うキャラクターの規約も確認する必要がある
+
+地図（カット 5c・`compose/cut05c.py`）: OpenStreetMap 標準タイル zoom 16 https://tile.openstreetmap.org/ （© OpenStreetMap contributors・データは ODbL 1.0・https://www.openstreetmap.org/copyright）。タイル利用ポリシーに従い、アプリ名入りの User-Agent で 1 枚ずつ一度だけ取得して `cache/osm/`（gitignore）に置く。画面左上に「地図: © OpenStreetMap contributors にディスプレイと避難場所の位置を追記」をカットの間ずっと表示する。ディスプレイと避難場所の座標は国土地理院 指定緊急避難場所データ（`data/municipalities/05210.shelters.json`）。

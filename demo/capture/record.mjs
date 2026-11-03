@@ -44,7 +44,16 @@ const LIVE_READY = '[data-mode="live"][data-ready="1"]'
 const LIVE_EVENTS_MS = [13100, 20100, 24600, 26100, 29100, 44350]
 const LIVE_SITE_ID = '05210-demo-honjo-station'
 
+// Cut 5c cuts between four sites showing the same bulletin; they share one virtual clock, 2.5 s each.
+const SITE_SLUGS = ['honjo-station', 'tsurumai-kaikan', 'yuri-hs-ground', 'ishiwaki-park']
+const SITE_SECONDS = 2.5
+const SITE_CUTS = Object.fromEntries(SITE_SLUGS.map((slug, i) => [`site-${slug}`, {
+  seconds: SITE_SECONDS, startMs: i * SITE_SECONDS * 1000,
+  query: { src: `demo/sites/${slug}/16x9.json` }, ready: READY_SELECTOR, events: [],
+}]))
+
 const CUTS = {
+  ...SITE_CUTS,
   ambient: { seconds: 12, startMs: 0, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   switch: { seconds: 27, startMs: 5000, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
