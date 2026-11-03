@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { CABINET_OFFICE_5, contrastRatio, inkOn, rgbCss } from '../app/layout/palette.ts'
@@ -14,6 +14,7 @@ const CHROME_PATH = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/
 const WIDTH = 1920
 const MARGIN = 64
 const MAX_BYTES = 300 * 1024
+const OUT_DIR = `${fileURLToPath(new URL('..', import.meta.url))}app/shots/coverage/`
 const WCAG_AA = 4.5
 const MUNICIPALITY = '05210'
 const BULLETIN = 'VXKOii-202610211815-e713da0e3c05'
@@ -241,18 +242,19 @@ function fontLinks() {
 
 async function writeSheet(page, name, svg) {
   const height = Number(svg.match(/viewBox="0 0 \d+ (\d+)"/)[1])
-  await writeFile(`${ROOT}docs/${name}.svg`, svg)
+  await writeFile(`${OUT_DIR}${name}.svg`, svg)
   const htmlPath = `${ROOT}tmp/${name}.html`
   await writeFile(htmlPath, `<!doctype html><meta charset="utf-8">${fontLinks()}<style>body{margin:0;background:#fff}</style>${svg}`)
   await page.setViewport({ width: WIDTH, height, deviceScaleFactor: 1 })
   await page.goto(pathToFileURL(htmlPath).href, { waitUntil: 'networkidle0' })
   await page.evaluate(() => document.fonts.ready)
   const png = await fitUnder(page, Buffer.from(await page.screenshot({ type: 'png' })), MAX_BYTES)
-  if (png.length > MAX_BYTES) throw new Error(`docs/${name}.png is ${png.length} bytes, over ${MAX_BYTES}`)
-  await writeFile(`${ROOT}docs/${name}.png`, png)
-  console.log(`docs/${name}.png ${WIDTH}x${height} ${png.length} B · .svg ${Buffer.byteLength(svg)} B`)
+  if (png.length > MAX_BYTES) throw new Error(`${name}.png is ${png.length} bytes, over ${MAX_BYTES}`)
+  await writeFile(`${OUT_DIR}${name}.png`, png)
+  console.log(`app/shots/coverage/${name}.png ${WIDTH}x${height} ${png.length} B · .svg ${Buffer.byteLength(svg)} B`)
 }
 
+await mkdir(OUT_DIR, { recursive: true })
 const ids = await pictogramIds()
 const layout = JSON.parse(await readFile(`${ROOT}${EXAMPLE_LAYOUT}`, 'utf8'))
 const action = layout.cells.find((c) => c.role === 'action').text
