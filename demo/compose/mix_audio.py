@@ -2,6 +2,9 @@
 
 python3 demo/compose/mix_audio.py --sfx-dir <Adobe Audition SFX folder> [--video demo/renders/evac-layer-demo.mp4]
 
+Narration is either one 179 s demo/compose/audio/narration.wav, or one take per cut in
+demo/compose/audio/narration/cutNN.wav (names from narration_filename) placed at that cut's start.
+
 Adobe Audition SFX may be used inside a production but not handed out on their own, so the source WAVs are
 copied into demo/compose/audio/ (gitignored) and only the mix leaves this machine, inside the video.
 """
@@ -36,6 +39,12 @@ BEEPS = [("5", 8.1), ("5", 15.1), ("5", 19.6)]
 DRONE_FROM = ("5", 8.1)
 DRONE_UNTIL_END_OF = "8"
 NARRATION = AUDIO_DIR / "narration.wav"
+NARRATION_DIR = AUDIO_DIR / "narration"
+
+
+def narration_filename(cut):
+    number, suffix = re.fullmatch(r"(\d+)(\D*)", cut).groups()
+    return f"cut{int(number):02d}{suffix}.wav"
 
 
 def ensure_sources(sfx_dir):
@@ -77,7 +86,41 @@ def ensure_narration(total):
                         "-t", f"{total:.3f}", str(NARRATION)], check=True)
 
 
-def build_mix(paths, starts, total, out):
+def duration(path):
+    result = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+                            capture_output=True, text=True, check=True)
+    return float(result.stdout)
+
+
+def narration_track(edl, starts, total, out):
+    narrated = [s["cut"] for s in edl["segments"] if s.get("narration_ja")]
+    by_name = {narration_filename(cut): cut for cut in narrated}
+    found = sorted(NARRATION_DIR.glob("*.wav")) if NARRATION_DIR.is_dir() else []
+    for path in found:
+        if path.name not in by_name:
+            print(f"NARRATION ignored {path.name}: no narrated cut has that name")
+    takes = [(path, by_name[path.name]) for path in found if path.name in by_name]
+    if not takes:
+        ensure_narration(total)
+        return NARRATION
+    ends = {cut: (starts[narrated[i + 1]][0] if i + 1 < len(narrated) else total) for i, cut in enumerate(narrated)}
+    inputs, chains = [], []
+    for i, (path, cut) in enumerate(takes):
+        start = starts[cut][0]
+        if start + duration(path) > ends[cut]:
+            print(f"NARRATION overrun {path.name}: {duration(path):.1f}s from {start:.0f}s runs past {ends[cut]:.0f}s")
+        inputs += ["-i", str(path)]
+        chains.append(f"[{i}:a]aresample={RATE},aformat=channel_layouts=mono,pan=stereo|c0=c0|c1=c0,"
+                      f"adelay={start * 1000:.0f}:all=1[n{i}]")
+    graph = ";".join(chains) + f";{''.join(f'[n{i}]' for i in range(len(takes)))}amix=inputs={len(takes)}:normalize=0:" \
+        f"duration=longest,apad=whole_dur={total},atrim=0:{total}[out]"
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", graph, "-map", "[out]",
+                    "-ar", str(RATE), "-ac", "2", str(out)], check=True)
+    print(f"NARRATION {len(takes)}/{len(narrated)} takes from {NARRATION_DIR}")
+    return out
+
+
+def build_mix(paths, narration, starts, total, out):
     inputs, chains, labels = [], [], []
 
     def add(path, filters, label):
@@ -103,7 +146,7 @@ def build_mix(paths, starts, total, out):
         at = starts[cut][0] + offset
         add(paths["beep"], f"volume={beep_gain:.2f}dB,adelay={at * 1000:.0f}:all=1", f"beep{i}")
 
-    add(NARRATION, "anull", "narration")
+    add(narration, "anull", "narration")
     graph = ";".join(chains) + f";{''.join(labels)}amix=inputs={len(labels)}:normalize=0:duration=longest," \
         f"apad=whole_dur={total},atrim=0:{total}[mix]"
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", graph, "-map", "[mix]",
@@ -130,11 +173,11 @@ def main():
     edl = json.loads(Path(args.edl).read_text(encoding="utf-8"))
     starts, total = cut_starts(edl)
     paths = ensure_sources(args.sfx_dir)
-    ensure_narration(total)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="evac-mix-"))
     try:
-        build_mix(paths, starts, total, work / "raw.wav")
+        narration = narration_track(edl, starts, total, work / "narration.wav")
+        build_mix(paths, narration, starts, total, work / "raw.wav")
         mix = OUT_DIR / "evac-layer-demo-v1-mix.wav"
         lufs = limit(work / "raw.wav", mix)
     finally:

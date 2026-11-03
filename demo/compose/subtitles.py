@@ -2,8 +2,8 @@
 
 python3 demo/compose/subtitles.py [--with-narration]
 
-- demo/compose/narration.md: per cut, start, the time the line may take, the Japanese line, its length and
-  whether it fits at 300 characters a minute, and the caption it sits under
+- demo/compose/narration.md: the recording sheet, one take per narrated cut: file name, the Japanese line,
+  the time it may take, and its length against what fits at 300 characters a minute
 - demo/out/evac-layer-demo-v2.en.srt: English for every caption and title card (and, with --with-narration,
   the narration once it is recorded), as a separate track; nothing is burned into the picture
 """
@@ -12,6 +12,8 @@ import argparse
 import json
 import re
 from pathlib import Path
+
+from mix_audio import narration_filename
 
 HERE = Path(__file__).resolve().parent
 CHARS_PER_SECOND = 300 / 60
@@ -44,27 +46,38 @@ def english_lines(text):
     return "\n".join(line for line in text.split("\n") if not CJK.search(line))
 
 
+RECORDING_GUIDE = [
+    "1. 静かな部屋で、外付けマイクで録る（エアコン・PC のファンを止める）",
+    "2. 1 カット 1 ファイル。ファイル名は下の表のとおり `demo/compose/audio/narration/` に置く",
+    "3. WAV・48 kHz・モノラルが既定（違う形式でも `mix_audio.py` が変換する）",
+    "4. 文末で 0.5 秒置いてから止める。「使える秒数」を超えないこと",
+    "5. 言い直したら最後のテイクだけ残す（ファイルを上書きする）",
+]
+
+
 def caption_of(seg):
     return seg.get("caption") or seg.get("title") or ""
 
 
 def write_narration(windows, out):
     lines = [
-        "# ナレーション台本（下書き）",
+        "# ナレーション録音台本",
         "",
-        "`demo/compose/edl.json` の `narration_ja` / `narration_en` から `subtitles.py` が生成する。話速 300 字/分（5 字/秒）で、"
-        "そのカットの開始から次にナレーションのあるカットの開始までに収まるかを「字数／上限」で示す。"
-        "録音は `demo/compose/audio/narration.wav`（全長 179 s・-18 LUFS 目安）として置けば `mix_audio.py` が載せる。",
+        *RECORDING_GUIDE,
         "",
-        "| カット | 開始 | 使える秒数 | 読み上げ文 | 字数／上限 | テロップ |",
-        "|---|---|---|---|---|---|",
+        "`demo/compose/edl.json` の `narration_ja` から `subtitles.py` が生成する。話速 300 字/分（5 字/秒）で、"
+        "そのカットの開始から次にナレーションのあるカットの開始までを「使える秒数」とし、上限の字数を示す。"
+        "置いたファイルは `mix_audio.py` がそのカットの開始秒に載せる。",
+        "",
+        "| ファイル名 | 読み上げ文 | 使える秒数 | 字数／上限 |",
+        "|---|---|---|---|",
     ]
     for start, window, seg in windows:
         text = seg["narration_ja"]
         limit = int(window * CHARS_PER_SECOND)
         mark = "" if spoken_length(text) <= limit else "（超過）"
-        caption = caption_of(seg).replace("\n", " / ")
-        lines.append(f"| {seg['cut']} | {start:.0f} s | {window:.0f} s | {text} | {spoken_length(text)}／{limit}{mark} | {caption} |")
+        lines.append(f"| `narration/{narration_filename(seg['cut'])}` | {text} | {window:.0f} s（{start:.0f} s から） "
+                     f"| {spoken_length(text)}／{limit}{mark} |")
     lines += ["", "## 英訳（字幕用）", ""]
     lines += [f"- {seg['cut']}: {seg['narration_en']}" for _, _, seg in windows]
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")

@@ -40,7 +40,7 @@
     {
       "cut": "1",
       "kind": "3d",
-      "seconds": 10,
+      "seconds": 15,
       "src": "../renders/cut01.mp4",
       "caption": "2024.1.1 能登半島地震。\nどこへ逃げればよいか判断が難しかった来訪者がいた（上越市の検証）",
       "screens": null,
@@ -52,7 +52,7 @@
     {
       "cut": "2",
       "kind": "3d",
-      "seconds": 10,
+      "seconds": 13,
       "src": "../renders/cut02.mp4",
       "caption": "駅と街のスクリーンを作ってきた。\n災害のとき、このスクリーンは何も言わなかった",
       "screens": "ambient",
@@ -64,7 +64,7 @@
     {
       "cut": "2b",
       "kind": "title",
-      "seconds": 3,
+      "seconds": 5,
       "title": "黙らない画面\nScreens that don't go silent",
       "narration_ja": "黙らないスクリーンを。スクリーンは、もうあります。",
       "narration_en": "Screens that don't go silent. The screens are already there."
@@ -72,26 +72,42 @@
     {
       "cut": "2c",
       "kind": "title",
-      "seconds": 3,
+      "seconds": 5,
       "title": "スクリーンはもうある。\nThe screens are already there."
+    },
+    {
+      "cut": "2d",
+      "kind": "title",
+      "seconds": 4,
+      "title": "スクリーンは、自分の場所を知っている。\nEach screen knows where it stands."
     },
     {
       "cut": "3",
       "kind": "capture",
-      "seconds": 25,
+      "seconds": 12,
       "src": "../capture/out/cut03.mp4",
       "slate": "管理画面: 自治体 PDF をドロップ → Reader が構造化 → citations 付き JSON が流れる",
-      "narration_ja": "まず、自治体のハザードマップを読みます。文字の壊れた PDF は止めて、ページの画像から読み直します。輪島の最大津波高は 8.3 m。どの数字にも出典のページが付きます。",
-      "narration_en": "First, it reads the city's hazard maps. A PDF with broken text is stopped and read again from the page image. Wajima's maximum tsunami height: 8.3 m. Every figure carries its source page."
+      "narration_ja": "自治体のハザードマップを読みます。文字の壊れた PDF は画像から読み直し、どの数字にも出典のページが付きます。",
+      "narration_en": "It reads the city's hazard maps. A PDF with broken text is read again from the page image, and every figure carries its source page."
     },
     {
       "cut": "4",
       "kind": "capture",
-      "seconds": 20,
+      "seconds": 12,
       "src": "../capture/out/cut04.mp4",
       "slate": "Writer: やさしい日本語 → 4 言語 / Composer: テンプレ番号と必須セル",
       "narration_ja": "スクリーンは自分の位置を知っています。そこから市町村と、最寄りの避難場所を引きます。警報が届くと、やさしい日本語と英語・中国語・韓国語の文を書き、5 つのスクリーンの形に割り付けます。",
       "narration_en": "Each screen knows where it stands. From there it finds its municipality and the nearest evacuation site. When a warning arrives, it writes the text in easy Japanese, English, Chinese and Korean, and lays it out for five screen shapes."
+    },
+    {
+      "cut": "5c",
+      "kind": "capture",
+      "seconds": 10,
+      "src": "../capture/out/cut05c.mp4",
+      "slate": "同じ警報の画面を 2 か所で並べる（駅前は南西へ 570 m・もう一つの場所は東へ 160 m）",
+      "caption": "同じ警報。場所が違えば、行き先も方向も違う。\nSame warning. Different place, different way out.",
+      "narration_ja": "同じ警報でも、場所が違えば行き先も方向も違います。駅前は南西へ 570 m、もう一つの場所は東へ 160 m。",
+      "narration_en": "The same warning, but a different place means a different destination and direction: 570 m southwest from the station, 160 m east from the other site."
     },
     {
       "cut": "5",
@@ -116,7 +132,7 @@
     {
       "cut": "6",
       "kind": "capture",
-      "seconds": 20,
+      "seconds": 10,
       "src": "../capture/out/cut06.mp4",
       "slate": "Verifier がスクリーンショットを読み「文字高さ不足」「点滅頻度超過」を差し戻し → 修正版が通る",
       "narration_ja": "生成した案内は、検査役が画像で読みます。方向の欄に距離が重なっていれば差し戻し、直した版が通るまで出しません。",
@@ -125,11 +141,21 @@
     {
       "cut": "7",
       "kind": "capture",
-      "seconds": 25,
+      "seconds": 15,
       "src": "../capture/out/cut07.mp4",
       "slate": "fan-out: 20 自治体が並列で処理され、ダッシュボードの数字が積み上がる",
       "narration_ja": "5 つの自治体、198 本の電文。画面を出す 16 本から、80 のレイアウトを作りました。検査が見つけた 41 件の問題は、すべて直しています。",
       "narration_en": "Five municipalities, 198 bulletins. From the 16 that call for a screen, 80 layouts. All 41 problems the inspection found have been fixed."
+    },
+    {
+      "cut": "7b",
+      "kind": "capture",
+      "seconds": 10,
+      "src": "../capture/out/cut07b.mp4",
+      "slate": "5 自治体それぞれの施設の案内画面を並べる",
+      "caption": "5 つの自治体。それぞれの資料から、それぞれの場所へ。\nFive municipalities, each from its own documents.",
+      "narration_ja": "5 つの自治体。それぞれの資料から、それぞれの場所の案内を作りました。",
+      "narration_en": "Five municipalities. From each one's own documents, guidance for each place."
     },
     {
       "cut": "8",
@@ -144,7 +170,7 @@
     {
       "cut": "9",
       "kind": "composite",
-      "seconds": 10,
+      "seconds": 15,
       "src": "../renders/cut09.mp4",
       "slate": "3D ヒーロー画角の 4 画面が Lv5 secure-now（look 確定後に cut09 として作る）\n右下に examples/minimal-cms の収録を小窓で重ねる（webhook ログ 2〜3 行 → PNG 表示）",
       "title": "どの画面にも\nAny screen.",

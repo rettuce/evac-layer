@@ -6,3 +6,4 @@ blender/__pycache__/
 capture/out/
 compose/audio/
 out/
+__pycache__/
