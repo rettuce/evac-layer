@@ -1,11 +1,11 @@
 """Draws docs/diagrams/system.svg: five columns, three rows, hand-placed."""
 from pathlib import Path
 
-W, H = 1600, 1000
+W, H = 1600, 870
 CW, CH = 250, 116
 BAND = 36
 COLS = [70, 380, 690, 1000, 1310]
-ROWS = [150, 480, 810]
+ROWS = [150, 410, 670]
 KINDS = {
     "claude": ("#f1e9ff", "#6d3fc4", "#d4c2ff", "Claude が読む・書く・見る"),
     "human": ("#fff3d6", "#b45309", "#ffd38f", "人が決める"),
@@ -115,10 +115,10 @@ left(3, 2, 2, "検査 pass")
 left(2, 1, 2)
 left(1, 0, 2)
 
-arrow(cx(2), ROWS[0] + CH, cx(3) - 40, ROWS[1], "読む", mid=ROWS[0] + CH + 80)
-arrow(cx(4), ROWS[0] + CH, cx(3) + 40, ROWS[1], "位置から引く", mid=ROWS[0] + CH + 110)
+arrow(cx(2), ROWS[0] + CH, cx(3) - 40, ROWS[1], "読む", mid=ROWS[0] + CH + 50)
+arrow(cx(4), ROWS[0] + CH, cx(3) + 40, ROWS[1], "位置から引く", mid=ROWS[0] + CH + 50)
 arrow(cx(4), ROWS[1] + CH, cx(4), ROWS[2])
-arrow(cx(3) - 60, ROWS[2], cx(2) + 40, ROWS[1] + CH, "指摘を差し戻す（最大 3 回）", dashed=True, color="#6d3fc4", mid=ROWS[1] + CH + 95)
+arrow(cx(3) - 60, ROWS[2], cx(2) + 40, ROWS[1] + CH, "指摘を差し戻す（最大 3 回）", dashed=True, color="#6d3fc4", mid=ROWS[1] + CH + 50)
 
 svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="'Noto Sans JP','Hiragino Sans','Yu Gothic',sans-serif">
 <defs>
