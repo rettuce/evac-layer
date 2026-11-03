@@ -2,7 +2,7 @@
 import { DEFAULT_REPLAY_SPEED, isMunicipalityId } from '~~/layout/replay'
 import { DEFAULT_SWITCH_AT_MS, scenarioFrame, type ScenarioName } from '~~/layout/scenario'
 import { isShape, shapeForViewport } from '~~/layout/shapes'
-import { isTrustedLayoutSrc } from '~~/layout/trust'
+import { resolveLayoutSrc } from '~~/layout/trust'
 import type { EvacScreen } from '~~/layout/types'
 import type { ClockMode } from '~/composables/useScreenClock'
 
@@ -30,7 +30,8 @@ function adminHeadersFor(url: string): Record<string, string> {
     return {}
   }
 }
-const src = computed(() => (isTrustedLayoutSrc(route.query.src, import.meta.dev) ? route.query.src : undefined))
+const layoutSource = computed(() => resolveLayoutSrc(route.query.src, import.meta.dev))
+const src = computed(() => layoutSource.value?.url)
 const srcRejected = computed(() => route.query.src !== undefined && !src.value)
 const remote = shallowRef<EvacScreen>()
 const remoteError = ref<string>()
@@ -120,6 +121,7 @@ if (scenario.value) start()
     :elapsed-ms="elapsed"
     :reduced-motion="reducedMotion"
     :data-clock="clockMode"
+    :data-source="layoutSource?.origin === 'demo-sites' ? 'demo-sites' : undefined"
     @ready="start"
   />
 
@@ -145,6 +147,7 @@ if (scenario.value) start()
         :variant="variant"
         :elapsed-ms="frame.alertElapsedMs"
         :reduced-motion="reducedMotion"
+        :data-source="layoutSource?.origin === 'demo-sites' ? 'demo-sites' : undefined"
       />
     </div>
     <div v-if="frame.black" class="black" data-layer="black" />

@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { isTrustedLayoutSrc } from '../layout/trust.ts'
+import { isDemoSitePath, isTrustedLayoutSrc, resolveLayoutSrc } from '../layout/trust.ts'
 import { adminAccess, clientAddressFor, type AdminRequest } from '../server/utils/adminPolicy.ts'
 import { liveLayoutGate } from '../layout/gate.ts'
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
@@ -42,6 +42,17 @@ test('production screens accept only the layout store as src', () => {
   }
   assert.equal(isTrustedLayoutSrc('/api/layout?file=/x.json', true), true)
   assert.equal(isTrustedLayoutSrc('//evil.example/x.json', true), false)
+})
+
+test('demo/sites layouts resolve in production, and nothing outside demo/sites does', () => {
+  assert.deepEqual(resolveLayoutSrc('demo/sites/tsurumai-kaikan/16x9.json', false), {
+    url: '/api/demo-site-layout?path=demo%2Fsites%2Ftsurumai-kaikan%2F16x9.json',
+    origin: 'demo-sites',
+  })
+  assert.equal(isDemoSitePath('demo/sites/tsurumai-kaikan/16x9.json'), true)
+  for (const path of ['demo/sites/../../.env.json', 'demo/sites/a/../../b.json', '/demo/sites/a/16x9.json', 'data/sites/a.json', 'demo/sites/a/16x9.txt', 'demo/sites//a.json', 'demo/sites/a\\..\\b.json', undefined]) {
+    assert.equal(isDemoSitePath(path), false, String(path))
+  }
 })
 
 const localPost: AdminRequest = {
