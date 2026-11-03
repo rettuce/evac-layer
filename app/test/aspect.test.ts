@@ -19,12 +19,12 @@ const READY_MS = 30000
 
 const skip = (!existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first') || (!existsSync(CHROME_PATH) && `no Chrome at ${CHROME_PATH}`)
 
-test('aspect queries resolve to a viewport and its family', () => {
+test('aspect queries resolve to a viewport and its base shape', () => {
   assert.deepEqual(viewportFromQuery(undefined, undefined, '4:3'), { width: 1440, height: 1080 })
   assert.deepEqual(viewportFromQuery(undefined, undefined, '10:16'), { width: 1080, height: 1728 })
   assert.deepEqual(viewportFromQuery('1366', '768', '4:3'), { width: 1366, height: 768 })
   for (const bad of ['4/3', '0:1', '-4:3', 'x', '4:3:2']) assert.equal(viewportFromQuery(undefined, undefined, bad), undefined, bad)
-  const boundaries: [number, Shape][] = [[2800, '32x9'], [2799, '16x9'], [1400, '16x9'], [1399, '1x1'], [751, '1x1'], [750, '9x16']]
+  const boundaries: [number, Shape][] = [[2800, '32x9'], [2799, '16x9'], [1250, '16x9'], [1249, '1x1'], [751, '1x1'], [750, '9x16']]
   for (const [width, family] of boundaries) assert.equal(shapeForViewport(width, 1000), family, `${width}:1000`)
 })
 
@@ -62,7 +62,7 @@ describe('any aspect keeps the guidance', { skip }, () => {
     }
   }
 
-  test('no overflow and no missing cell at any aspect, and no family drops more than at its own aspect', async () => {
+  test('no overflow and no missing cell at any aspect, and no base shape drops more than at its own aspect', async () => {
     const nativeDropped = new Map<string, Set<string>>()
     for (const [shape, aspect] of Object.entries(NATIVE)) {
       const state = await render(aspect)

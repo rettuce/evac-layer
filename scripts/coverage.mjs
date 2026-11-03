@@ -127,7 +127,7 @@ async function hazardsSheet() {
     const ink = rgbCss(inkRgb)
     parts.push(`<rect x="${left}" y="${levelsY + 24}" width="${boxWidth}" height="120" fill="${rgbCss(background)}" stroke="${level === 1 ? RULE : 'none'}"/>`)
     parts.push(text(left + 20, levelsY + 80, `警戒レベル${level}`, { size: 32, weight: 700, fill: ink }))
-    parts.push(text(left + 20, levelsY + 124, `文字 ${ratio.toFixed(1)} : 1`, { size: 20, fill: ink, font: FONT.en }))
+    parts.push(text(left + 20, levelsY + 124, `コントラスト比 ${ratio.toFixed(1)} : 1`, { size: 20, fill: ink, font: FONT.en }))
   }
   parts.push(text(MARGIN, levelsY + 184, '内閣府 2020 年改定の原典色。帯の文字は自動で白／黒を選び、すべて 4.5 : 1 以上（WCAG AA）', { size: 20, fill: SUB }))
   return sheet(levelsY + 224, parts)
@@ -163,7 +163,7 @@ async function pictogramsSheet(ids, action) {
   }
   const original = ids.length - MATERIAL_PICTOGRAMS.length - 1
   parts.push(text(MARGIN, y + 356, `Material Symbols ${MATERIAL_PICTOGRAMS.length} 種（Apache-2.0）・方向の矢印は Material の形をもとに再描画`, { size: 17, fill: SUB }))
-  parts.push(text(MARGIN, y + 380, `ほか ${original} 種は EVAC LAYER の自作。台風・高潮・地震は図記号のみ用意（電文の取り込みは 4 種別）`, { size: 17, fill: SUB }))
+  parts.push(text(MARGIN, y + 380, `ほか ${original} 種は EVAC LAYER の自作。台風・高潮・地震は図記号だけを用意している（気象庁の電文から画面を作れるのは大雨・土砂災害・洪水・津波）`, { size: 17, fill: SUB }))
   const right = 1000
   parts.push(heading(right, y, '言語', 'Languages — level 4 action text'))
   for (const [i, [key, label]] of LANGUAGES.entries()) {
@@ -198,7 +198,7 @@ async function pillarThumb() {
 
 function shapesSheet(thumbs) {
   const parts = [titled(MARGIN, 96, 'どんな画角でも、同じ案内。', 'Any aspect, the same guidance.', 44, 24)]
-  parts.push(text(MARGIN, 140, `同じ電文（由利本荘・警戒レベル 4）を ${thumbs.length} の画角で描いたもの。比率から 4 つの族（32:9・16:9・1:1・9:16）を選び、族の基準画面が収まる大きさで伸縮する`, { size: 20, fill: SUB }))
+  parts.push(text(MARGIN, 140, `同じ電文（由利本荘・警戒レベル 4）を ${thumbs.length} の画角で描いたもの。画面の縦横比にいちばん近い基準形状（32:9・16:9・1:1・9:16）を選び、その配置を画面に合わせて伸縮する`, { size: 20, fill: SUB }))
   let x = MARGIN
   let y = 176
   for (const thumb of thumbs) {
@@ -211,11 +211,11 @@ function shapesSheet(thumbs) {
     parts.push(`<rect x="${x}" y="${y}" width="${width}" height="${THUMB_HEIGHT}" fill="none" stroke="${RULE}"/>`)
     const native = NATIVE_ASPECTS.has(thumb.aspect) || thumb.family === 'pillar'
     parts.push(text(x, y + THUMB_HEIGHT + 30, thumb.aspect, { size: 22, weight: 700, font: FONT.en }))
-    if (!native) parts.push(text(x, y + THUMB_HEIGHT + 52, `${thumb.family} 族`, { size: 16, fill: SUB, font: FONT.en }))
+    if (!native) parts.push(text(x, y + THUMB_HEIGHT + 52, `基準形状 ${thumb.family.replace('x', ':')}`, { size: 16, fill: SUB, font: FONT.en }))
     x += width + THUMB_GAP
   }
   const bottom = y + THUMB_ROW
-  parts.push(text(MARGIN, bottom + 16, '1:1 族（1:1・4:3・5:4・4:5）は、任意のセル（言語の並記・避難場所）を優先順位で省く。必須のセルはすべての画角で表示される', { size: 18, fill: SUB }))
+  parts.push(text(MARGIN, bottom + 16, '基準形状が 1:1 の画面（1:1・4:5）では、優先度の低い言語の並記を省く（1:1 では避難場所も省く）。4:3・5:4 は 16:9 を基準にするので避難場所まで表示する。必須の項目はどの画角でも表示される', { size: 18, fill: SUB }))
   return sheet(bottom + 48, parts)
 }
 
