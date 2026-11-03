@@ -23,6 +23,8 @@ export default defineNuxtConfig({
     '@fontsource/noto-sans-tc/700.css',
     '@fontsource/noto-sans-kr/400.css',
     '@fontsource/noto-sans-kr/700.css',
+    '@fontsource/noto-sans-thai/400.css',
+    '@fontsource/noto-sans-thai/700.css',
     '~/assets/screen.css',
   ],
   app: {

@@ -49,7 +49,7 @@ const PORTRAIT: ShapeLayout = {
     '. . .',
   ],
   required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
-  pictogramPx: { headline: 112, action: 320, direction: 192, shelter: SHELTER_PICTOGRAM_PX },
+  pictogramPx: { headline: 112, action: 256, direction: 192, shelter: SHELTER_PICTOGRAM_PX },
 }
 
 const RIBBON: ShapeLayout = {
