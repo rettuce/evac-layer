@@ -32,7 +32,6 @@ const VARIANTS = {
   'lv4-flood': { query: preview('05210', 'VXKOii-202610211815-e713da0e3c05'), t: T_EASY_EN_MS },
   'lv4-flood-ko-th': { query: preview('05210', 'VXKOii-202610211815-e713da0e3c05'), t: T_KO_TH_MS },
   'lv5-flood': { query: preview('05210', 'VXKOii-202610211945-a25f8f3aba7d'), t: T_EASY_EN_MS },
-  'tsunami-wajima': { query: () => ({ layout: 'wajima-tsunami' }), t: T_EASY_EN_MS },
   'clear': { query: preview('05210', 'VXKOii-202610220620-74a7831c8a40'), t: T_EASY_EN_MS },
 }
 
