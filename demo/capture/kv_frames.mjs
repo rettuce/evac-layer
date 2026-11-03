@@ -21,9 +21,9 @@ const SHAPES = {
   '32x9': { width: 3840, height: 1080, windows: ['32x9_0', '32x9_1', '32x9_2'] },
   pillar: { width: 6616, height: 5046, scale: 0.5, windows: ['pillar_0', 'pillar_1', 'pillar_2', 'pillar_3'] },
 }
-// The language band shows two languages per 2.5 s from appearance: t = 1 s is easy Japanese and English,
-// t = 6 s is Korean and Thai.
-const T_EASY_EN_MS = 1000
+// The language band shows two languages per 2.5 s from appearance; stills use t = 13.5 s (easy Japanese
+// and English, one full rotation after the band has settled; the rule of scripts/screens.mjs), t = 6 s is Korean and Thai.
+const T_EASY_EN_MS = 13500
 const T_KO_TH_MS = 6000
 const preview = (municipality, bulletin) => (shape) =>
   ({ src: `/api/admin/preview-layout?${new URLSearchParams({ municipality, bulletin, shape })}` })
@@ -33,6 +33,7 @@ const VARIANTS = {
   'lv4-flood-ko-th': { query: preview('05210', 'VXKOii-202610211815-e713da0e3c05'), t: T_KO_TH_MS },
   'lv5-flood': { query: preview('05210', 'VXKOii-202610211945-a25f8f3aba7d'), t: T_EASY_EN_MS },
   'clear': { query: preview('05210', 'VXKOii-202610220620-74a7831c8a40'), t: T_EASY_EN_MS },
+  'tsunami-drill': { query: preview('22424', 'VTSE41-201609010713-ff3dd5d5c94f'), t: T_EASY_EN_MS },
 }
 
 const { values } = parseArgs({ options: { 'base-url': { type: 'string', default: process.env.EVAC_URL ?? 'http://127.0.0.1:3151' } } })
