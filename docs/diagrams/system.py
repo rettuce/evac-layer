@@ -1,11 +1,11 @@
 """Draws docs/diagrams/system.svg: five columns, three rows, hand-placed."""
 from pathlib import Path
 
-W, H = 1600, 960
+W, H = 1600, 1000
 CW, CH = 250, 116
 BAND = 36
 COLS = [70, 380, 690, 1000, 1310]
-ROWS = [110, 440, 770]
+ROWS = [150, 480, 810]
 KINDS = {
     "claude": ("#f1e9ff", "#6d3fc4", "#d4c2ff", "Claude が読む・書く・見る"),
     "human": ("#fff3d6", "#b45309", "#ffd38f", "人が決める"),
