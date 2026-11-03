@@ -33,8 +33,8 @@ const SCENES = ['color-planes', 'clock-grid']
 const SWITCH_AT_MS = 12000
 const SWITCH_FRAMES_MS = [11500, 11800, 12100, 12400, 12700, 13000]
 const READY_TIMEOUT_MS = 30000
-// One second into a language pair (2.5 s each), so the band has finished fading in.
-const ALERT_AT_MS = 6000
+// One second into the first language pair (easy Japanese + English) of the second round.
+const ALERT_AT_MS = 13500
 
 function scaleFor(shape, width) {
   return shape === 'pillar' ? PILLAR_SCALE : Math.min(1, GALLERY_WIDTH / width)

@@ -41,7 +41,7 @@ const currentGroup = computed(() => (languageGroups.value.length ? props.languag
     <template v-else-if="cell.role === 'action'">
       <p class="t-action action-text">{{ cell.text.ja }}</p>
       <div class="action-sub">
-        <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" />
+        <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" align-bottom />
         <p v-if="cell.text.ja_easy && easyInAction" class="t-guide" lang="ja" data-lang="ja_easy">{{ cell.text.ja_easy }}</p>
       </div>
     </template>
@@ -179,14 +179,22 @@ p {
   align-items: center;
   gap: calc(24 * var(--px));
 }
+.action-sub {
+  margin-top: auto;
+  align-items: flex-end;
+}
 .shelter-text {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(16 * var(--px));
 }
 .shelter-kind {
   opacity: var(--shelter-kind-opacity);
 }
 .distance {
   flex: none;
+  margin-left: auto;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -202,7 +210,7 @@ p {
   grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
-  gap: calc(8 * var(--px));
+  gap: calc(16 * var(--px));
   visibility: hidden;
 }
 .lang-line {
@@ -215,7 +223,7 @@ p {
 }
 .lang-label {
   flex: none;
-  min-width: calc(200 * var(--px));
+  width: calc(256 * var(--px));
   opacity: var(--lang-label-opacity);
 }
 </style>

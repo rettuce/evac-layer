@@ -192,7 +192,7 @@ async function renderThumb(page, base, aspect) {
   const family = shapeForViewport(width, height)
   await page.setViewport({ width, height, deviceScaleFactor: (THUMB_HEIGHT * 2) / height })
   const src = encodeURIComponent(`/api/admin/preview-layout?municipality=${MUNICIPALITY}&bulletin=${BULLETIN}&shape=${family}`)
-  await page.goto(`${base}/screen?aspect=${aspect}&clock=virtual&t=6000&src=${src}`, { waitUntil: 'networkidle0' })
+  await page.goto(`${base}/screen?aspect=${aspect}&clock=virtual&t=13500&src=${src}`, { waitUntil: 'networkidle0' })
   await page.waitForSelector('.evac-screen[data-ready="1"]', { timeout: READY_TIMEOUT_MS })
   const state = await page.$eval('.evac-screen', (el) => ({
     overflow: el.dataset.overflow ?? '',
