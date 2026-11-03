@@ -45,3 +45,12 @@ test("a drill bulletin is flagged for every headline language without a drill ma
   assert.deepEqual(judgeDrill(cells, "drill").map((f) => f.lang), ["ja_easy", "th"]);
   assert.deepEqual(judgeDrill(cells, "normal"), []);
 });
+
+test("on a drill, action and languages must carry the marker in every language but ja", () => {
+  const cells = [
+    { id: "headline", role: "headline", text: { ja: "【訓練】津波注意報", en: "DRILL: Tsunami Advisory" } },
+    { id: "action", role: "action", text: { ja: "高い所へ", ja_easy: "くんれん たかい ところへ", en: "Go higher" } },
+    { id: "languages", role: "languages", text: { ja: "高い所へ", ja_easy: "くんれん たかい ところへ", en: "Drill: go higher" } },
+  ];
+  assert.deepEqual(judgeDrill(cells, "drill").map((f) => `${f.cell_id}:${f.lang}`), ["action:en"]);
+});

@@ -20,15 +20,15 @@
       "role": "action",
       "text": {
         "ja": "海から離れて",
-        "ja_easy": "うみから はなれて",
-        "en": "Leave the coast",
-        "zh_hans": "远离海边",
-        "zh_hant": "遠離海邊",
-        "ko": "바다에서 떨어지세요",
-        "th": "อพยพ",
-        "vi": "Leave the coast",
-        "fil": "Leave the coast",
-        "id": "Leave the coast"
+        "ja_easy": "くんれん たかい ところへ",
+        "en": "Drill: go higher",
+        "zh_hans": "演习：前往高处",
+        "zh_hant": "演習：前往高處",
+        "ko": "훈련: 높은 곳으로",
+        "th": "ฝึกซ้อม ขึ้นที่สูง",
+        "vi": "Diễn tập: lên cao",
+        "fil": "Pagsasanay: umakyat",
+        "id": "Latihan: naik"
       },
       "basis": "alert.tsunami.highest_category=advisory"
     },
@@ -47,15 +47,15 @@
       "role": "languages",
       "text": {
         "ja": "海から離れて",
-        "ja_easy": "うみから はなれて",
-        "en": "Leave the coast",
-        "zh_hans": "远离海边",
-        "zh_hant": "遠離海邊",
-        "ko": "바다에서 떨어지세요",
-        "th": "อพยพ",
-        "vi": "Leave the coast",
-        "fil": "Leave the coast",
-        "id": "Leave the coast"
+        "ja_easy": "くんれん たかい ところへ",
+        "en": "Drill: go higher",
+        "zh_hans": "演习：前往高处",
+        "zh_hant": "演習：前往高處",
+        "ko": "훈련: 높은 곳으로",
+        "th": "ฝึกซ้อม ขึ้นที่สูง",
+        "vi": "Diễn tập: lên cao",
+        "fil": "Pagsasanay: umakyat",
+        "id": "Latihan: naik"
       },
       "basis": "action"
     }

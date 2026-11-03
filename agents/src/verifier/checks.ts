@@ -82,11 +82,13 @@ export const DRILL_MARKERS: Record<string, RegExp> = {
 
 // A drill bulletin must be recognisable as one in every language on the headline, or a reader of one language
 // takes a drill for the real thing.
+// The headline says it in every language; action and languages (the band a reader of one language watches) say it
+// in every language but ja, whose reader has the headline and whose action budget is the smallest.
 export function judgeDrill(cells: { id: string; role: string; text: Record<string, string | undefined> }[], status: string): Finding[] {
   if (status !== "drill") return [];
-  const headline = cells.find((c) => c.role === "headline");
-  if (!headline) return [];
-  return Object.entries(headline.text)
-    .filter(([lang, text]) => text !== undefined && DRILL_MARKERS[lang] && !DRILL_MARKERS[lang].test(text))
-    .map(([lang]) => ({ check: "drill-marker" as const, cell_id: headline.id, lang, detail: `drill bulletin, but the ${lang} headline does not say so` }));
+  return cells
+    .filter((c) => c.role === "headline" || c.role === "action" || c.role === "languages")
+    .flatMap((c) => Object.entries(c.text)
+      .filter(([lang, text]) => text !== undefined && DRILL_MARKERS[lang] && !(c.role !== "headline" && lang === "ja") && !DRILL_MARKERS[lang].test(text))
+      .map(([lang]) => ({ check: "drill-marker" as const, cell_id: c.id, lang, detail: `drill bulletin, but the ${lang} ${c.role} does not say so` })));
 }
