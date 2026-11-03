@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/evac-layer-logo-1line-black.svg">
+  <img alt="EVAC LAYER" src="docs/brand/evac-layer-logo-1line-white.svg" width="420">
+</picture>
+
 # EVAC LAYER
 
 **スクリーンはもうある。**
