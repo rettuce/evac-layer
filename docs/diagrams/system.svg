@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="870" viewBox="0 0 1600 870" font-family="'Noto Sans JP','Hiragino Sans','Yu Gothic',sans-serif">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/></marker>
+<marker id="ahp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6d3fc4"/></marker>
+</defs>
+<rect width="1600" height="870" fill="#ffffff"/>
+<text x="46" y="40" font-size="22" font-weight="700" fill="#1a1a1a">EVAC LAYER の仕組み</text>
+<rect x="640" y="25" width="36" height="24" rx="4" fill="#f1e9ff" stroke="#6d3fc4" stroke-width="1.2"/>
+<path d="M 644,25 H 672 Q 676,25 676,29 V 34 H 640 V 29 Q 640,25 644,25 Z" fill="#d4c2ff"/>
+<text x="684" y="43" font-size="13.5" fill="#333">Claude が読む・書く・見る</text>
+<rect x="928.0" y="25" width="36" height="24" rx="4" fill="#fff3d6" stroke="#b45309" stroke-width="1.2"/>
+<path d="M 932.0,25 H 960.0 Q 964.0,25 964.0,29 V 34 H 928.0 V 29 Q 928.0,25 932.0,25 Z" fill="#ffd38f"/>
+<text x="972.0" y="43" font-size="13.5" fill="#333">人が決める</text>
+<rect x="1067.5" y="25" width="36" height="24" rx="4" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<path d="M 1071.5,25 H 1099.5 Q 1103.5,25 1103.5,29 V 34 H 1067.5 V 29 Q 1067.5,25 1071.5,25 Z" fill="#e4e4e4"/>
+<text x="1111.5" y="43" font-size="13.5" fill="#333">コード（決まった処理）</text>
+<rect x="1288.0" y="25" width="36" height="24" rx="4" fill="#f6f6f3" stroke="#8a8a8a" stroke-width="1.2"/>
+<path d="M 1292.0,25 H 1320.0 Q 1324.0,25 1324.0,29 V 34 H 1288.0 V 29 Q 1288.0,25 1292.0,25 Z" fill="#dddbd4"/>
+<text x="1332.0" y="43" font-size="13.5" fill="#333">データ</text>
+<rect x="46" y="98" width="918" height="196" rx="12" fill="#fbfbfa" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="62" y="128" font-size="17" font-weight="700" fill="#333">平時（あらかじめ・自治体ごとに 1 回）</text>
+<rect x="1286" y="98" width="298" height="196" rx="12" fill="#fbfbfa" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="1302" y="128" font-size="17" font-weight="700" fill="#333">スクリーンの登録（1 枚 1 回）</text>
+<rect x="46" y="358" width="1538" height="196" rx="12" fill="#fbfbfa" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="62" y="388" font-size="17" font-weight="700" fill="#333">有事（電文が届いたら・自動）</text>
+<rect x="976" y="618" width="608" height="196" rx="12" fill="#fbfbfa" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="992" y="648" font-size="17" font-weight="700" fill="#333">検査（画面ごとに 3 段）</text>
+<rect x="46" y="618" width="918" height="196" rx="12" fill="#fbfbfa" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="6 4"/>
+<text x="62" y="648" font-size="17" font-weight="700" fill="#333">承認と配信</text>
+<rect x="70" y="150" width="250" height="116" rx="8" fill="#f6f6f3" stroke="#8a8a8a" stroke-width="1.5"/>
+<path d="M 78,150 H 312 Q 320,150 320,158 V 186 H 70 V 158 Q 70,150 78,150 Z" fill="#dddbd4"/>
+<line x1="70" y1="186" x2="320" y2="186" stroke="#8a8a8a" stroke-width="1"/>
+<text x="195.0" y="175" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">自治体の資料</text>
+<text x="195.0" y="221.0" text-anchor="middle" font-size="13.5" fill="#333">ハザードマップ PDF</text>
+<text x="195.0" y="241.0" text-anchor="middle" font-size="13.5" fill="#333">国土地理院の避難場所データ</text>
+<rect x="380" y="150" width="250" height="116" rx="8" fill="#f1e9ff" stroke="#6d3fc4" stroke-width="1.5"/>
+<path d="M 388,150 H 622 Q 630,150 630,158 V 186 H 380 V 158 Q 380,150 388,150 Z" fill="#d4c2ff"/>
+<line x1="380" y1="186" x2="630" y2="186" stroke="#6d3fc4" stroke-width="1"/>
+<text x="505.0" y="175" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">Reader</text>
+<text x="505.0" y="221.0" text-anchor="middle" font-size="13.5" fill="#333">Claude</text>
+<text x="505.0" y="241.0" text-anchor="middle" font-size="13.5" fill="#333">出典ページつきで読む</text>
+<rect x="690" y="150" width="250" height="116" rx="8" fill="#f6f6f3" stroke="#8a8a8a" stroke-width="1.5"/>
+<path d="M 698,150 H 932 Q 940,150 940,158 V 186 H 690 V 158 Q 690,150 698,150 Z" fill="#dddbd4"/>
+<line x1="690" y1="186" x2="940" y2="186" stroke="#8a8a8a" stroke-width="1"/>
+<text x="815.0" y="175" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">municipality.json</text>
+<text x="815.0" y="231.0" text-anchor="middle" font-size="13.5" fill="#333">危険箇所・避難場所・出典</text>
+<rect x="1310" y="150" width="250" height="116" rx="8" fill="#f6f6f3" stroke="#8a8a8a" stroke-width="1.5"/>
+<path d="M 1318,150 H 1552 Q 1560,150 1560,158 V 186 H 1310 V 158 Q 1310,150 1318,150 Z" fill="#dddbd4"/>
+<line x1="1310" y1="186" x2="1560" y2="186" stroke="#8a8a8a" stroke-width="1"/>
+<text x="1435.0" y="175" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">site.json</text>
+<text x="1435.0" y="231.0" text-anchor="middle" font-size="13.5" fill="#333">緯度経度・向き・市町村コード</text>
+<path d="M 320,208.0 L 380,208.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M 630,208.0 L 690,208.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="70" y="410" width="250" height="116" rx="8" fill="#f6f6f3" stroke="#8a8a8a" stroke-width="1.5"/>
+<path d="M 78,410 H 312 Q 320,410 320,418 V 446 H 70 V 418 Q 70,410 78,410 Z" fill="#dddbd4"/>
+<line x1="70" y1="446" x2="320" y2="446" stroke="#8a8a8a" stroke-width="1"/>
+<text x="195.0" y="435" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">気象庁 防災情報 XML</text>
+<text x="195.0" y="491.0" text-anchor="middle" font-size="13.5" fill="#333">大雨・土砂災害・洪水・津波</text>
+<rect x="380" y="410" width="250" height="116" rx="8" fill="#ffffff" stroke="#555555" stroke-width="1.5"/>
+<path d="M 388,410 H 622 Q 630,410 630,418 V 446 H 380 V 418 Q 380,410 388,410 Z" fill="#e4e4e4"/>
+<line x1="380" y1="446" x2="630" y2="446" stroke="#555555" stroke-width="1"/>
+<text x="505.0" y="435" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">parser</text>
+<text x="505.0" y="491.0" text-anchor="middle" font-size="13.5" fill="#333">警報・警戒レベル・対象地域</text>
+<rect x="690" y="410" width="250" height="116" rx="8" fill="#f1e9ff" stroke="#6d3fc4" stroke-width="1.5"/>
+<path d="M 698,410 H 932 Q 940,410 940,418 V 446 H 690 V 418 Q 690,410 698,410 Z" fill="#d4c2ff"/>
+<line x1="690" y1="446" x2="940" y2="446" stroke="#6d3fc4" stroke-width="1"/>
+<text x="815.0" y="435" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">Writer</text>
+<text x="815.0" y="481.0" text-anchor="middle" font-size="13.5" fill="#333">Claude</text>
+<text x="815.0" y="501.0" text-anchor="middle" font-size="13.5" fill="#333">やさしい日本語・英・中・韓</text>
+<rect x="1000" y="410" width="250" height="116" rx="8" fill="#ffffff" stroke="#555555" stroke-width="1.5"/>
+<path d="M 1008,410 H 1242 Q 1250,410 1250,418 V 446 H 1000 V 418 Q 1000,410 1008,410 Z" fill="#e4e4e4"/>
+<line x1="1000" y1="446" x2="1250" y2="446" stroke="#555555" stroke-width="1"/>
+<text x="1125.0" y="435" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">Composer</text>
+<text x="1125.0" y="481.0" text-anchor="middle" font-size="13.5" fill="#333">最寄りの避難場所</text>
+<text x="1125.0" y="501.0" text-anchor="middle" font-size="13.5" fill="#333">方向・距離・図記号・優先順位</text>
+<rect x="1310" y="410" width="250" height="116" rx="8" fill="#f6f6f3" stroke="#8a8a8a" stroke-width="1.5"/>
+<path d="M 1318,410 H 1552 Q 1560,410 1560,418 V 446 H 1310 V 418 Q 1310,410 1318,410 Z" fill="#dddbd4"/>
+<line x1="1310" y1="446" x2="1560" y2="446" stroke="#8a8a8a" stroke-width="1"/>
+<text x="1435.0" y="435" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">layout JSON</text>
+<text x="1435.0" y="491.0" text-anchor="middle" font-size="13.5" fill="#333">5 つの基準形状</text>
+<path d="M 320,468.0 L 380,468.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M 630,468.0 L 690,468.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M 940,468.0 L 1000,468.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M 1250,468.0 L 1310,468.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="1310" y="670" width="250" height="116" rx="8" fill="#ffffff" stroke="#555555" stroke-width="1.5"/>
+<path d="M 1318,670 H 1552 Q 1560,670 1560,678 V 706 H 1310 V 678 Q 1310,670 1318,670 Z" fill="#e4e4e4"/>
+<line x1="1310" y1="706" x2="1560" y2="706" stroke="#555555" stroke-width="1"/>
+<text x="1435.0" y="695" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">Renderer</text>
+<text x="1435.0" y="741.0" text-anchor="middle" font-size="13.5" fill="#333">Nuxt</text>
+<text x="1435.0" y="761.0" text-anchor="middle" font-size="13.5" fill="#333">同じ入力なら同じ画面</text>
+<rect x="1000" y="670" width="250" height="116" rx="8" fill="#f1e9ff" stroke="#6d3fc4" stroke-width="1.5"/>
+<path d="M 1008,670 H 1242 Q 1250,670 1250,678 V 706 H 1000 V 678 Q 1000,670 1008,670 Z" fill="#d4c2ff"/>
+<line x1="1000" y1="706" x2="1250" y2="706" stroke="#6d3fc4" stroke-width="1"/>
+<text x="1125.0" y="695" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">Verifier</text>
+<text x="1125.0" y="741.0" text-anchor="middle" font-size="13.5" fill="#333">規則・ブラウザ DOM</text>
+<text x="1125.0" y="761.0" text-anchor="middle" font-size="13.5" fill="#333">Vision（Claude）</text>
+<rect x="690" y="670" width="250" height="116" rx="8" fill="#fff3d6" stroke="#b45309" stroke-width="1.5"/>
+<path d="M 698,670 H 932 Q 940,670 940,678 V 706 H 690 V 678 Q 690,670 698,670 Z" fill="#ffd38f"/>
+<line x1="690" y1="706" x2="940" y2="706" stroke="#b45309" stroke-width="1"/>
+<text x="815.0" y="695" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">運営者が平時に承認</text>
+<text x="815.0" y="751.0" text-anchor="middle" font-size="13.5" fill="#333">自動配信を入れる／切る</text>
+<rect x="380" y="670" width="250" height="116" rx="8" fill="#ffffff" stroke="#555555" stroke-width="1.5"/>
+<path d="M 388,670 H 622 Q 630,670 630,678 V 706 H 380 V 678 Q 380,670 388,670 Z" fill="#e4e4e4"/>
+<line x1="380" y1="706" x2="630" y2="706" stroke="#555555" stroke-width="1"/>
+<text x="505.0" y="695" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">イベント発火</text>
+<text x="505.0" y="741.0" text-anchor="middle" font-size="13.5" fill="#333">alert / clear のイベント</text>
+<text x="505.0" y="761.0" text-anchor="middle" font-size="13.5" fill="#333">feed・webhook・静的ファイル</text>
+<rect x="70" y="670" width="250" height="116" rx="8" fill="#f6f6f3" stroke="#8a8a8a" stroke-width="1.5"/>
+<path d="M 78,670 H 312 Q 320,670 320,678 V 706 H 70 V 678 Q 70,670 78,670 Z" fill="#dddbd4"/>
+<line x1="70" y1="706" x2="320" y2="706" stroke="#8a8a8a" stroke-width="1"/>
+<text x="195.0" y="695" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">どのスクリーンでも</text>
+<text x="195.0" y="741.0" text-anchor="middle" font-size="13.5" fill="#333">自社のサイネージも</text>
+<text x="195.0" y="761.0" text-anchor="middle" font-size="13.5" fill="#333">他社の CMS も</text>
+<path d="M 1310,728.0 L 1250,728.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M 1000,728.0 L 940,728.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="917.2" y="717.0" width="105.60000000000001" height="22" rx="4" fill="#ffffff" stroke="#555" stroke-width="0.8"/>
+<text x="970.0" y="733.0" text-anchor="middle" font-size="12.5" fill="#555">検査 pass</text>
+<path d="M 690,728.0 L 630,728.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M 380,728.0 L 320,728.0" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M 815.0,266 L 815.0,316 L 1085.0,316 L 1085.0,410" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="929.2" y="305" width="41.6" height="22" rx="4" fill="#ffffff" stroke="#555" stroke-width="0.8"/>
+<text x="950.0" y="321" text-anchor="middle" font-size="12.5" fill="#555">読む</text>
+<path d="M 1435.0,266 L 1435.0,316 L 1165.0,316 L 1165.0,410" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<rect x="1253.6" y="305" width="92.80000000000001" height="22" rx="4" fill="#ffffff" stroke="#555" stroke-width="0.8"/>
+<text x="1300.0" y="321" text-anchor="middle" font-size="12.5" fill="#555">位置から引く</text>
+<path d="M 1435.0,526 L 1435.0,670" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#ah)"/>
+<path d="M 1065.0,670 L 1065.0,576 L 855.0,576 L 855.0,526" fill="none" stroke="#6d3fc4" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#ahp)"/>
+<rect x="856.0" y="565" width="208.0" height="22" rx="4" fill="#ffffff" stroke="#6d3fc4" stroke-width="0.8"/>
+<text x="960.0" y="581" text-anchor="middle" font-size="12.5" fill="#6d3fc4">指摘を差し戻す（最大 3 回）</text>
+</svg>

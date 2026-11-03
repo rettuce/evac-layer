@@ -28,7 +28,7 @@ export const VISION_VERIFY_SCHEMA = {
 const SYSTEM = `あなたは避難案内サイネージの検査係です。描画された画面の画像と、その画面のレイアウト JSON、元になった気象庁の電文の要点を受け取ります。画面に見えているものだけを根拠に、次の 3 つを判定します。見えないもの・推測は判定に使いません。問題が無ければ findings は空にします。
 - bulletin-mismatch: 画面の災害種別・警戒レベル・警報名・行動が、電文と矛盾している（例: 電文は洪水なのに津波と書いてある、電文のレベルと画面のレベル表示が違う、解除なのに避難を促している）。言い換えや省略は矛盾ではない
 - pictogram-misuse: 図記号が災害種別や行動と合っていない（例: 洪水の画面に津波の図記号、上へ逃げる画面に横へ逃げる図記号）。図記号 ID の意味はユーザー入力に書く
-- missing-source: 出典行（気象庁の発表時刻など）が画面に見えない、または読めない
+- missing-source: 出典行（気象庁の発表時刻と自治体名）が画面に見えない、または読めない
 three_second_note には、前提知識のない人が 3 秒で何をすればよいか分かるかを 1〜2 文で書く。これは所見で、findings には入れない。`;
 
 const PICTOGRAMS = "図記号 ID: tsunami=津波, flood=洪水・浸水, landslide=土砂災害, heavy_rain=大雨, storm_surge=高潮, earthquake=地震, go_higher=高い所・上の階へ, directions_run=避難する（走る人）, arrow_forward=方向（rotation で向き）, emergency_evacuation_site=指定緊急避難場所, evacuation_shelter=指定避難所, safe_here=ここは安全";

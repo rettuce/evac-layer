@@ -61,11 +61,11 @@
       "role": "shelter",
       "priority": 2,
       "text": {
-        "ja": "文化会館アルフォーレ"
+        "ja": "産業文化会館"
       },
       "kind": "emergency_evacuation_site",
       "pictogram": "emergency_evacuation_site",
-      "distance_m": 0,
+      "distance_m": 230,
       "motion": "static"
     },
     {
@@ -87,7 +87,8 @@
       "role": "source",
       "priority": 9,
       "text": {
-        "ja": "出典: 柏崎市 柏崎市土砂災害ハザードマップ（保存版） p.1 / 国土地理院 指定緊急避難場所データ / 気象庁 16:53"
+        "ja": "気象庁 10/31 16:53 発表・柏崎市",
+        "en": "JMA 16:53, Oct 31 · Kashiwazaki"
       },
       "motion": "static"
     }

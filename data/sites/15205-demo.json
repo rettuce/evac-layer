@@ -1,8 +1,8 @@
 {
   "id": "15205-demo",
   "municipality_id": "15205",
-  "lat": 37.365351738142,
-  "lng": 138.56020316626,
+  "lat": 37.364452,
+  "lng": 138.554932,
   "facing_deg": 0,
-  "note": "Illustrative demo screen at the coordinates of a GSI-listed facility (文化会館アルフォーレ); the viewer is assumed to face north. Not a real installation."
+  "note": "Illustrative demo screen near 柏崎駅 (centroid of 駅前一丁目 from the GSI address search, not a GSI-listed facility); the viewer is assumed to face north. Not a real installation."
 }

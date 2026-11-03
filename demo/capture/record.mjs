@@ -44,10 +44,43 @@ const LIVE_READY = '[data-mode="live"][data-ready="1"]'
 const LIVE_EVENTS_MS = [13100, 20100, 24600, 26100, 29100, 44350]
 const LIVE_SITE_ID = '05210-demo-honjo-station'
 
+// Cut 5c brings each of four sites' screens in after the map moves, so each starts at its own t = 0 (scale-in).
+const SITE_SLUGS = ['honjo-station', 'tsurumai-kaikan', 'yuri-hs-ground', 'ishiwaki-park']
+const SITE_SECONDS = 2.5
+const SITE_CUTS = Object.fromEntries(SITE_SLUGS.map((slug) => [`site-${slug}`, {
+  seconds: SITE_SECONDS, startMs: 0,
+  query: { src: `demo/sites/${slug}/16x9.json` }, ready: READY_SELECTOR, events: [],
+}]))
+
+// Cut 7b sets five municipalities side by side: three bulletins from data/layouts through the local-only
+// admin preview, and two municipalities on a quiet day (no bulletin in the window, so the calm layer shows).
+const MUNICIPALITY_SECONDS = 10
+const preview = (municipality, bulletin) => ({
+  seconds: MUNICIPALITY_SECONDS, startMs: 0, ready: READY_SELECTOR, events: [],
+  query: { src: `/api/admin/preview-layout?${new URLSearchParams({ municipality, bulletin, shape: '16x9' })}` },
+})
+const quiet = (municipality) => ({
+  seconds: MUNICIPALITY_SECONDS, startMs: 0, ready: LIVE_READY, events: [], approve: false,
+  query: { ...LIVE, municipality, from: '2026-10-15T00:00+09:00', to: '2026-10-15T06:00+09:00' },
+})
+const MUNICIPALITY_CUTS = {
+  'muni-05210': preview('05210', 'VXKOii-202610211815-e713da0e3c05'),
+  'muni-17204': preview('17204', 'VPWW56-202610211304-1ebf37f5ab8a'),
+  'muni-15205': preview('15205', 'VPWW56-202610311653-b3fa1b3a2ced'),
+  'muni-22424': quiet('22424'),
+  'muni-14100': quiet('14100'),
+}
+
 const CUTS = {
+  ...SITE_CUTS,
+  ...MUNICIPALITY_CUTS,
   ambient: { seconds: 12, startMs: 0, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   switch: { seconds: 27, startMs: 5000, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
+  // The dashboard counts up in about 4 s of its own clock; a quarter rate stretches that over the cut.
+  dashboard: { seconds: 25, startMs: 0, rate: 0.25, page: '/dashboard', query: {}, ready: '.dashboard[data-ready="1"]', events: [] },
+  // Four times the dashboard's own clock settles the numbers within the first second, then they hold.
+  'dashboard-final': { seconds: 6, startMs: 0, rate: 4, page: '/dashboard', query: {}, ready: '.dashboard[data-ready="1"]', events: [] },
   'fixture-alert': { seconds: 27, startMs: 0, query: { layout: 'wajima-tsunami' }, ready: READY_SELECTOR, events: [] },
   'scenario-ambient': { seconds: 12, startMs: 0, query: { ...SCENARIO, scenario: 'ambient' }, ready: READY_SELECTOR, events: [] },
   'scenario-switch': {
@@ -93,7 +126,7 @@ function frameUrl(opts, tMs) {
     ...CUTS[opts.cut].query,
   })
   if (opts['site-name'] && opts.cut !== 'alert') params.set('site_name', opts['site-name'])
-  return `${opts['base-url']}/screen?${params}`
+  return `${opts['base-url']}${CUTS[opts.cut].page ?? '/screen'}?${params}`
 }
 
 // Prefer an in-page clock hook when the renderer exposes one; a full navigation per frame is the fallback.
@@ -126,7 +159,7 @@ async function seekOnce(page, opts, tMs) {
 }
 
 const frameName = (frame) => String(frame + 1).padStart(5, '0')
-const frameTime = (opts, frame) => opts.startMs + (frame * 1000) / opts.fps
+const frameTime = (opts, frame) => opts.startMs + ((frame * 1000) / opts.fps) * (CUTS[opts.cut].rate ?? 1)
 
 async function openPage(browser, opts, tMs) {
   const page = await browser.newPage()
@@ -142,8 +175,8 @@ async function openPage(browser, opts, tMs) {
 // Live screens only show approved bulletins and read approvals once on mount, so approve every
 // bulletin that becomes a screen (and turn auto-publish on) before the first page opens.
 async function approveLive(browser, opts) {
-  const { query } = CUTS[opts.cut]
-  if (query.mode !== 'live') return null
+  const { query, approve } = CUTS[opts.cut]
+  if (query.mode !== 'live' || approve === false) return null
   const { mode, ...replayQuery } = query
   const replayPath = `/api/replay?${new URLSearchParams(replayQuery)}`
   const page = await browser.newPage()
@@ -185,7 +218,7 @@ function verifyFrames(opts) {
   const { startMs } = opts
   const { events } = CUTS[opts.cut]
   for (const eventMs of events) {
-    const eventFrame = Math.round(((eventMs - startMs) / 1000) * opts.fps)
+    const eventFrame = Math.round(((eventMs - startMs) / 1000 / (CUTS[opts.cut].rate ?? 1)) * opts.fps)
     frames.push(eventFrame - 1, eventFrame)
   }
   return [...new Set(frames)].filter((f) => f >= 0 && f < opts.frameCount).sort((a, b) => a - b)

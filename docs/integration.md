@@ -4,6 +4,30 @@ EVAC LAYER turns an official JMA warning into approved emergency screens for fou
 
 The payload is fixed by [`schema/feed.schema.json`](../schema/feed.schema.json): the site, `state` (`ambient` | `alert`), the alert (hazard, Cabinet Office level, template), the four layout JSONs, PNG/HTML asset URLs, the sources (municipal PDF page, GSI data, JMA bulletin id) and `approved_at`.
 
+## 0. Register the screen
+
+A screen is one JSON file in `data/sites/`, and the only thing it has to know is where it stands:
+
+```json
+{
+  "id": "05210-demo-honjo-station",
+  "municipality_id": "05210",
+  "lat": 39.38633978,
+  "lng": 140.0563304,
+  "facing_deg": 0
+}
+```
+
+`facing_deg` is the compass direction the viewer faces when looking at the screen; the arrow to the evacuation site is rotated against it. From these coordinates the Composer picks the nearest GSI designated evacuation site and writes its name, direction and distance into every layout for this screen. The municipality code is written by hand today; it selects which bulletins apply and which hazard-map knowledge file the Reader produced.
+
+Then generate and approve the set once, in calm times:
+
+```sh
+pnpm -F agents fanout --municipalities 05210 --verifier vision --writer live   # every recorded bulletin → layouts for every shape
+```
+
+Open `/admin`, review the screens and approve the set, then switch automatic delivery on for the site (`POST /api/admin/site` with `{"site_id": "...", "auto_publish": true}`). From here on the screen receives guidance for its own spot through any of the three ways below.
+
 ## 1. Pull — poll a feed
 
 Poll `GET /api/feed/<site_id>` every few seconds. It returns what the site should show now. Send the last `ETag` back as `If-None-Match`; an unchanged state answers `304` with no body, so polling is cheap. No authentication: the feed only ever contains approved, public information.
@@ -45,12 +69,12 @@ pnpm -F agents export --site 05210-demo-honjo-station --out dist/
 
 This writes `dist/<site>/<bulletin_id>/<shape>.{json,png,html}` and `dist/<site>/manifest.json` (fixed by [`schema/export-manifest.schema.json`](../schema/export-manifest.schema.json)). PNGs are rendered at the panel's native size. Each HTML file is self-contained: styles, pictograms and only the font subsets the screen uses are embedded, so it opens offline and matches the PNG pixel for pixel (the language rotation is frozen on the language shown at capture). Screens are read through the same approval gate as the live feed; unapproved bulletins are skipped with the reason.
 
-## In a MOJUR installation
+## In the author's own installations
 
-MOJUR includes EVAC LAYER as a standard module. It uses the same generic HTTP surface as any other system: it receives the approved screen URLs and an insert / clear event (the webhook above, or the feed), shows the emergency layer over the ambient content, and removes it on `clear`. Nothing in EVAC LAYER depends on MOJUR, and nothing MOJUR-specific is needed to build your own emergency layer.
+The signage systems the author runs in venues take EVAC LAYER through this same generic HTTP surface: they receive the approved screen URLs and an `alert` / `clear` event (the webhook above, or the feed), show the emergency layer over the ambient content, and remove it on `clear`. Nothing in EVAC LAYER depends on any particular signage system, and nothing system-specific is needed to build your own emergency layer.
 
 ## What every integration must keep
 
-- Show the sources line as delivered (municipal PDF page, GSI evacuation site data, JMA bulletin time). GSI data requires its attribution and the notice that facility details should be confirmed with the municipality.
+- Keep `sources` in the feed as delivered (municipal PDF page, GSI evacuation site data, JMA bulletin id). The screen itself names only the issuer, its time and the municipality; the full attribution may live on the receiving system's information screen. GSI data requires its attribution and the notice that facility details should be confirmed with the municipality.
 - Do not edit warning names or levels: the headline is the JMA warning name, used verbatim.
 - Do not add blinking. Motion is limited to one scale-in on appearance and a brightness pulse at or below 1 Hz.

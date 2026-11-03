@@ -2,9 +2,12 @@
 
 blender -b -P demo/blender/build_scene.py -- --out demo/renders/test.mp4 --seconds 5 --res 1280x720
 blender -b -P demo/blender/build_scene.py -- --look A --still demo/renders/look_A.png
+blender -b -P demo/blender/build_scene.py -- --look C --cams hero,near-column --stills-dir demo/renders/stills
+blender -b -P demo/blender/build_scene.py -- --look C --cut switch --seconds 27 --frame 555 --still x.png --verify-colors
 """
 
 import argparse
+import json
 import math
 import shutil
 import subprocess
@@ -18,13 +21,14 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from layout import (
-    BACK_WALL_Y, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
-    HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIBBON_PANEL_H, RIBBON_PANEL_W,
+    BACK_WALL_Y, elevation_canvas, elevation_crop, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
+    HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, RIBBON_PANEL_H, RIBBON_PANEL_W,
     RIGHT_WALL_X,
 )
 from led_wrap import build_led_wrap
 from looks import LOOKS, build_look
-from primitives import box, principled, spot_light, vertical_plane
+from primitives import box, principled, vertical_plane
+from verify_colors import report_screen_colors
 
 DEMO_DIR = Path(__file__).resolve().parent.parent
 SCREENS_DIR = DEMO_DIR / "screens"
@@ -36,13 +40,14 @@ CUTS = ("ambient", "switch", "alert", "off", "test")
 INCH = 0.0254
 JOINT_M = 0.003
 FLUSH_EPS_M = 0.001
-SCREEN_EMISSION = 3.0
-SCREEN_GLASS_ROUGHNESS = 0.06
+# With the Standard view transform an unlit emission of 1.0 shows the recording's own sRGB values.
+SCREEN_EMISSION = 1.0
+# Standard has no highlight roll-off, so the room (not the screens) is dimmed to keep the floor from clipping.
+ROOM_LIGHT_SCALE = 0.55
 LENS_MM = 35.0
 F_STOP = 2.8
 # Look B (35 downlights) and C (louvers) overflow the default 512 MB shadow pool.
 SHADOW_POOL_MB = "1536"
-NIGHT_LIGHT_COLOR = (0.82, 0.90, 1.0)
 
 
 def facing(yaw):
@@ -54,11 +59,6 @@ def panel_from_diagonal(diagonal_in, aspect_w, aspect_h):
     return aspect_w * unit, aspect_h * unit
 
 
-def pillar_face_center(height_z):
-    front = Matrix.Rotation(PILLAR_YAW, 3, "Z") @ Vector((0.0, -PILLAR_SIZE[1] / 2, 0.0))
-    return Vector((PILLAR_CENTER.x, PILLAR_CENTER.y, height_z)) + front
-
-
 COLUMN_CLAD_HALF = COLUMN_SIZE / 2 + COLUMN_CLAD_M
 COLUMN_LED_BOTTOM_Z = 0.4
 COLUMN_LED_TOP_Z = 3.6
@@ -67,10 +67,22 @@ COLUMN_LED_MID_Z = (COLUMN_LED_BOTTOM_Z + COLUMN_LED_TOP_Z) / 2
 COLUMN_LED_PERIMETER = 8 * (COLUMN_SIZE / 2 + COLUMN_CLAD_M - COLUMN_LED_RADIUS) + 2 * math.pi * COLUMN_LED_RADIUS
 RIBBON_SIZE = (RIBBON_PANEL_W, RIBBON_PANEL_H)
 RIBBON_Z = HEADWALL_BOTTOM_Z + RIBBON_PANEL_H / 2
-RIBBON_CENTER_X = 1.0
-WALL_16X9_Z = 2.0
-# x positions on the back wall chosen so the back columns do not hide them from the hero camera.
-WALL_16X9_XS = [1.9, -2.3, -8.0, 7.8]
+# The middle ribbon panel sits on the hero camera axis (x = 0), so the three repeats read as centred.
+RIBBON_CENTER_X = 0.0
+BACK_WALL_SCREEN_Z = 2.0
+BACK_WALL_9X16 = panel_from_diagonal(120, 9, 16)
+BACK_WALL_9X16_COUNT = 3
+
+
+def back_wall_mounts():
+    """Portrait screens with equal gaps (column face to screen included) between the two back columns."""
+    inner = COLUMNS[3][0] - COLUMN_CLAD_HALF
+    width = BACK_WALL_9X16[0]
+    gap = (2 * inner - BACK_WALL_9X16_COUNT * width) / (BACK_WALL_9X16_COUNT + 1)
+    return [(Vector((-inner + gap * (i + 1) + width * (i + 0.5), BACK_WALL_Y, BACK_WALL_SCREEN_Z)), 0.0)
+            for i in range(BACK_WALL_9X16_COUNT)]
+
+
 HEADWALL_FRONT_Y = HEADWALL_Y - HEADWALL_DEPTH / 2
 
 
@@ -94,14 +106,13 @@ SCREENS = {
     "pillar": {**screen_spec((COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z), (3308, 2524),
                              [column_front(*COLUMNS[0], COLUMN_LED_MID_Z)]),
                "mounts": [], "wraps": COLUMNS},
-    "16x9": screen_spec(panel_from_diagonal(75, 16, 9), (1920, 1080),
-                        [(Vector((x, BACK_WALL_Y, WALL_16X9_Z)), 0.0) for x in WALL_16X9_XS]),
+    "9x16": screen_spec(BACK_WALL_9X16, (1080, 1920), back_wall_mounts()),
     "32x9": screen_spec(RIBBON_SIZE, (3840, 1080),
                         [(Vector((x, HEADWALL_FRONT_Y, RIBBON_Z)), 0.0) for x in ribbon_xs()]),
-    "1x1": {**screen_spec((0.9, 0.9), (1080, 1080), [(pillar_face_center(1.6), PILLAR_YAW)]), "mounts": []},
 }
+BACK_WALL_SHAPES = ("9x16",)
 
-SHOT_ORDER = ["pillar", "16x9", "32x9", "1x1"]
+SHOT_ORDER = ["pillar", "9x16", "32x9"]
 CAMERA_WAYPOINTS = [
     Vector((-5.5, -3.5, EYE_Z)),
     Vector((-0.5, 3.5, EYE_Z + 0.1)),
@@ -116,62 +127,79 @@ def in_front_of(shape, distance, angle_deg, height):
     return Vector((spec["center"].x + offset.x, spec["center"].y + offset.y, height))
 
 
+# The wide shot looks straight down the concourse axis: ribbon, four columns and the back wall, symmetric.
+HERO_LOCATION = Vector((0.0, -8.6, EYE_Z))
+HERO_TARGET = Vector((0.0, BACK_WALL_Y, 2.3))
+HERO_LENS_MM = 28.0
+
+
+CLOSE_LENS_MM = 35.0
+# Close-ups frame the lower part of each surface, where the source line sits.
+CLOSE_COLUMN_Z = 1.35
+CLOSE_RIBBON_X = -1.2
+CLOSE_WALL_Z = 1.5
+
+
+def along_axis(y):
+    return Vector((HERO_LOCATION.x, y, HERO_LOCATION.z)), HERO_TARGET
+
+
 # Near cameras sit at a horizontal distance from the screen, rotated off its normal so the
 # concourse behind falls out of focus at f/2.8.
 STILL_CAMERAS = {
-    "hero": {"location": Vector((-1.5, -7.5, EYE_Z)), "target": Vector((-2.6, 4.0, 2.4)), "focus": "pillar", "lens": 35.0},
+    "hero": {"location": HERO_LOCATION, "target": HERO_TARGET, "focus": "pillar", "lens": HERO_LENS_MM},
     "near-column": {"location": in_front_of("pillar", 1.5, -35, EYE_Z), "focus": "pillar", "lens": 24.0, "aim_shift": 0.3},
-    "near-wall": {"location": in_front_of("16x9", 2.0, 30, EYE_Z), "focus": "16x9", "lens": 28.0, "aim_shift": -0.3},
     "near-ribbon": {"location": in_front_of("32x9", 3.5, -25, EYE_Z), "focus": "32x9", "lens": 24.0, "aim_shift": 0.0},
-    "near-pillar": {"location": in_front_of("1x1", 1.5, 30, EYE_Z), "focus": "1x1", "lens": 28.0, "aim_shift": -0.3},
 }
 
 
 # Storyboard 3D cuts: camera path as (location, target) keys spread evenly over the cut,
 # which screen recording to show, and a light multiplier (night = everything dimmed).
+COLUMN_FACE_Y = COLUMNS[0][1] - COLUMN_CLAD_HALF
+RIBBON_FACE = Vector((RIBBON_CENTER_X, HEADWALL_FRONT_Y, RIBBON_Z))
+WALL_FACE_Y = BACK_WALL_Y
+
+
+def facing_push(target, start_m, end_m):
+    """A slow push-in square to a surface that faces -Y."""
+    return [(target - Vector((0.0, start_m, 0.0)), target), (target - Vector((0.0, end_m, 0.0)), target)]
+
+
 SHOTS = {
     "cut01": {
-        "seconds": 10, "screens": "off", "light_scale": 0.03, "lens": 35.0, "focus": "pillar",
-        "night_lights": [
-            (Vector((-2.8, -2.6, CEILING_Z - 0.2)), Vector((-4.5, 1.0, 1.4)), 600.0),
-            (Vector((1.5, 5.2, CEILING_Z - 0.2)), Vector((1.5, 9.0, 1.2)), 320.0),
-        ],
-        "path": [
-            (Vector((-0.8, -8.2, EYE_Z)), Vector((-3.0, 3.5, 2.6))),
-            (Vector((-2.4, -4.8, EYE_Z)), Vector((-4.0, 1.5, 2.2))),
-        ],
+        "seconds": 10, "screens": "off", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar", "clay": True,
+        "path": [along_axis(-8.6), along_axis(-6.8)],
     },
     "cut02": {
-        "seconds": 10, "screens": "ambient", "light_scale": 1.0, "lens": 35.0, "focus": "32x9",
-        "path": [
-            (Vector((-6.2, -5.5, EYE_Z)), Vector((-4.5, 1.0, 2.0))),
-            (Vector((0.8, -6.2, EYE_Z)), Vector((0.5, 6.0, 2.8))),
-        ],
+        "seconds": 8, "screens": "ambient", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "32x9",
+        "path": [(Vector((-0.7, -8.6, EYE_Z)), Vector((-0.7, BACK_WALL_Y, 2.3))),
+                 (Vector((0.7, -8.6, EYE_Z)), Vector((0.7, BACK_WALL_Y, 2.3)))],
     },
     "cut05": {
-        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": 30.0, "focus": "pillar",
-        "path": [
-            (Vector((-6.0, -7.2, EYE_Z)), Vector((-0.5, 4.5, 2.6))),
-            (Vector((-2.5, -7.8, EYE_Z)), Vector((-1.5, 4.5, 2.5))),
-            (Vector((1.5, -7.0, EYE_Z)), Vector((-2.5, 4.0, 2.4))),
-        ],
+        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
+        "path": [along_axis(-8.6), along_axis(-6.8)],
     },
-    "cut08": {
-        "seconds": 18, "screens": "alert", "light_scale": 1.0, "lens": 35.0, "focus": "pillar",
-        "path": [
-            (Vector((-1.5, -7.5, EYE_Z)), Vector((-2.6, 4.0, 2.4))),
-            (Vector((-2.6, -3.0, 1.5)), Vector((-4.3, 1.0, 1.6))),
-            (Vector((-3.5, -0.5, 1.0)), Vector((-4.5, 0.97, 0.75))),
-        ],
+    "cut08a": {
+        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
+        "path": facing_push(Vector((COLUMNS[0][0], COLUMN_FACE_Y, CLOSE_COLUMN_Z)), 3.0, 2.6),
+    },
+    "cut08b": {
+        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
+        "path": facing_push(RIBBON_FACE + Vector((CLOSE_RIBBON_X, 0.0, 0.0)), 3.6, 3.2),
+    },
+    "cut08c": {
+        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
+        "path": facing_push(Vector((0.0, WALL_FACE_Y, CLOSE_WALL_Z)), 3.0, 2.6),
     },
     "cut09": {
-        "seconds": 10, "screens": "alert", "light_scale": 1.0, "lens": 35.0, "focus": "pillar",
-        "path": [
-            (Vector((-1.5, -7.5, EYE_Z)), Vector((-2.6, 4.0, 2.4))),
-            (Vector((-1.4, -6.7, EYE_Z)), Vector((-2.6, 4.0, 2.4))),
-        ],
+        "seconds": 10, "screens": "alert", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
+        "path": [along_axis(-8.6), along_axis(-7.9)],
     },
 }
+CLAY_ALBEDO = 0.85
+# Screens a shade darker than the room, so the silent panels still read in the white world.
+CLAY_SCREEN_ALBEDO = 0.55
+CLAY_WORLD = 1.15
 
 
 def parse_args():
@@ -190,6 +218,12 @@ def parse_args():
     parser.add_argument("--still", help="render one frame from --cam to this PNG")
     parser.add_argument("--cam", choices=sorted(STILL_CAMERAS), default="hero")
     parser.add_argument("--stills-dir", default=str(DEMO_DIR / "renders" / "stills"))
+    parser.add_argument("--cams", help="comma-separated still cameras, each rendered to --stills-dir/<layout>_<cam>.png")
+    parser.add_argument("--verify-colors", action="store_true",
+                        help="after --still, compare flat screen areas in the render with the recording's frame")
+    parser.add_argument("--clay-screen-albedo", type=float, default=CLAY_SCREEN_ALBEDO,
+                        help="screen surfaces in the clay shot (CLAY_ALBEDO makes them vanish into the room)")
+    parser.add_argument("--crops-json", help="write each screen's window on the elevation canvas to this file and exit")
     parser.add_argument("--save-blend", action="store_true")
     args = parser.parse_args(argv)
     args.width, args.height = (int(v) for v in args.res.lower().split("x"))
@@ -239,8 +273,11 @@ def make_placeholder(shape):
 
 
 def screen_material(shape, source, frame_count):
+    """Emission only: the screen shows its recording and takes no light or reflection from the room."""
     mat = bpy.data.materials.new(f"screen_{shape}")
+    mat.use_nodes = True
     nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    nodes.clear()
     tex = nodes.new("ShaderNodeTexImage")
     tex.image = bpy.data.images.load(str(source))
     tex.extension = "CLIP"
@@ -252,11 +289,11 @@ def screen_material(shape, source, frame_count):
         user.frame_duration = min(tex.image.frame_duration, frame_count) or frame_count
         user.use_cyclic = True
         user.use_auto_refresh = True
-    bsdf = nodes["Principled BSDF"]
-    bsdf.inputs["Base Color"].default_value = (0.0, 0.0, 0.0, 1.0)
-    bsdf.inputs["Roughness"].default_value = SCREEN_GLASS_ROUGHNESS
-    bsdf.inputs["Emission Strength"].default_value = SCREEN_EMISSION
-    links.new(tex.outputs["Color"], bsdf.inputs["Emission Color"])
+    emission = nodes.new("ShaderNodeEmission")
+    emission.inputs["Strength"].default_value = SCREEN_EMISSION
+    output = nodes.new("ShaderNodeOutputMaterial")
+    links.new(tex.outputs["Color"], emission.inputs["Color"])
+    links.new(emission.outputs["Emission"], output.inputs["Surface"])
     return mat
 
 
@@ -339,7 +376,7 @@ def build_dolly(frame_count):
 def build_shot_camera(shot, frame_count):
     location, target_location = shot["path"][0]
     camera, target = add_camera(location, target_location, shot["lens"])
-    bpy.ops.object.empty_add(location=SCREENS[shot["focus"]]["center"])
+    bpy.ops.object.empty_add(location=SCREENS[shot["focus"]]["center"] if "focus" in shot else shot["path"][0][1])
     camera.data.dof.focus_object = bpy.context.active_object
     last = len(shot["path"]) - 1
     for i, (location, target_location) in enumerate(shot["path"]):
@@ -349,6 +386,31 @@ def build_shot_camera(shot, frame_count):
         target.location = target_location
         target.keyframe_insert("location", frame=frame)
     return [1, (frame_count + 1) // 2, frame_count]
+
+
+def clay_material(name, albedo):
+    mat = principled(name, (albedo,) * 3, 1.0)
+    mat.node_tree.nodes["Principled BSDF"].inputs["Specular IOR Level"].default_value = 0.0
+    return mat
+
+
+def make_clay(screen_albedo):
+    """White diffuse everywhere, lit only by a uniform white world, so the room reads as form and occlusion."""
+    clay = clay_material("clay", CLAY_ALBEDO)
+    screen = clay_material("clay_screen", screen_albedo)
+    for obj in list(bpy.data.objects):
+        if obj.type == "LIGHT":
+            bpy.data.objects.remove(obj)
+        elif obj.type == "MESH":
+            obj.data.materials.clear()
+            obj.data.materials.append(screen if obj.name.startswith(("screen_", "led_wrap_")) else clay)
+    world = bpy.context.scene.world
+    world.node_tree.nodes.clear()
+    background = world.node_tree.nodes.new("ShaderNodeBackground")
+    background.inputs["Color"].default_value = (1.0, 1.0, 1.0, 1.0)
+    background.inputs["Strength"].default_value = CLAY_WORLD
+    output = world.node_tree.nodes.new("ShaderNodeOutputWorld")
+    world.node_tree.links.new(background.outputs["Background"], output.inputs["Surface"])
 
 
 def scale_lights(scale):
@@ -365,12 +427,34 @@ def scale_lights(scale):
 
 def build_still_camera(name):
     spec = STILL_CAMERAS[name]
-    screen = SCREENS[spec["focus"]]
-    focus_point = screen["center"]
-    tangent = Matrix.Rotation(screen["yaw"], 3, "Z") @ Vector((1.0, 0.0, 0.0))
-    target = spec.get("target", focus_point + tangent * spec.get("aim_shift", 0.0))
+    if "focus" in spec:
+        screen = SCREENS[spec["focus"]]
+        focus_point = screen["center"]
+        tangent = Matrix.Rotation(screen["yaw"], 3, "Z") @ Vector((1.0, 0.0, 0.0))
+        target = spec.get("target", focus_point + tangent * spec.get("aim_shift", 0.0))
+    else:
+        focus_point = target = spec["target"]
     camera, _ = add_camera(spec["location"], target, spec["lens"])
     camera.data.dof.focus_distance = (focus_point - spec["location"]).length
+    return camera
+
+
+def canvas_crops():
+    """Each screen's window on the elevation canvas; a column's LED band is its four faces laid side by side."""
+    crops = {}
+    for i, (x, _) in enumerate(COLUMNS):
+        crops[f"pillar_{i}"] = elevation_crop(x, COLUMN_LED_MID_Z, COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z)
+    for shape in ("32x9", "9x16"):
+        width, height = SCREENS[shape]["size"]
+        for i, (center, _) in enumerate(SCREENS[shape]["mounts"]):
+            crops[f"{shape}_{i}"] = elevation_crop(center.x, center.z, width, height)
+    width, height = elevation_canvas()
+    return {"canvas": [width, height], "crops": {name: list(box) for name, box in crops.items()}}
+
+
+def verify_screen_colors(png, frame, sources):
+    flat = {shape: SCREENS[shape] for shape in ("9x16", "32x9")}
+    report_screen_colors(png, frame, sources, flat, FLUSH_EPS_M, CACHE_DIR)
 
 
 def shot_frames(frame_count):
@@ -389,7 +473,10 @@ def configure_render(args, frame_count, frames_dir):
     scene.render.resolution_percentage = 100
     scene.render.fps = args.fps
     scene.frame_start, scene.frame_end = 1, frame_count
-    scene.view_settings.view_transform = "AgX"
+    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.look = "None"
+    scene.view_settings.exposure = 0.0
+    scene.view_settings.gamma = 1.0
     scene.render.image_settings.file_format = "PNG"
     scene.render.filepath = str(frames_dir / "####")
 
@@ -420,27 +507,30 @@ def render_still(path, frame):
 
 def main():
     args = parse_args()
+    if args.crops_json:
+        Path(args.crops_json).write_text(json.dumps(canvas_crops(), indent=2) + "\n")
+        print(f"CROPS {args.crops_json}")
+        return
     shot = SHOTS.get(args.shot)
     seconds = shot["seconds"] if shot else args.seconds
     frame_count = max(2, round(seconds * args.fps))
     cut = args.cut or (shot["screens"] if shot else None)
-    light_scale = shot["light_scale"] if shot else 1.0
+    light_scale = (shot["light_scale"] if shot else 1.0) * ROOM_LIGHT_SCALE
     frames_dir = CACHE_DIR / "frames"
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    wall = SCREENS["16x9"]
-    half = wall["size"][0] / 2 + JOINT_M
-    look = build_look(args.look, [(center.x - half, center.x + half) for center, _ in wall["mounts"]])
+    back_wall_clear = [(center.x - SCREENS[shape]["size"][0] / 2 - JOINT_M, center.x + SCREENS[shape]["size"][0] / 2 + JOINT_M)
+                       for shape in BACK_WALL_SHAPES for center, _ in SCREENS[shape]["mounts"]]
+    look = build_look(args.look, back_wall_clear)
     sources = build_screens(frame_count, cut)
     build_world(look["hdri_strength"] * light_scale)
     scale_lights(light_scale)
-    for i, (location, aim, energy) in enumerate(shot.get("night_lights", []) if shot else []):
-        light = spot_light(f"night_light_{i}", location, energy, NIGHT_LIGHT_COLOR, 38.0, 0.6)
-        light.rotation_euler = (aim - location).to_track_quat("-Z", "Y").to_euler()
+    if shot and shot.get("clay"):
+        make_clay(args.clay_screen_albedo)
     if shot:
         key_frames = build_shot_camera(shot, frame_count)
         still_names = [f"{args.shot}_{frame:04d}" for frame in key_frames]
-    elif args.still:
+    elif args.still or args.cams:
         build_still_camera(args.cam)
     else:
         key_frames = build_dolly(frame_count)
@@ -454,10 +544,20 @@ def main():
         width, height = SCREENS[shape]["size"]
         print(f"SCREEN {shape} {width:.3f}m x {height:.3f}m source={source.name}")
 
+    if args.cams:
+        stills_dir = Path(args.stills_dir).resolve()
+        for name in args.cams.split(","):
+            build_still_camera(name)
+            elapsed = render_still(stills_dir / f"{name}.png", args.frame)
+            print(f"RENDER_STATS still look={args.look} cam={name} total_s={elapsed:.1f}")
+        return
+
     if args.still:
         elapsed = render_still(Path(args.still).resolve(), args.frame)
         print(f"RENDER_STATS still look={args.look} shot={args.shot} cam={args.cam} frame={args.frame} res={args.width}x{args.height} "
               f"samples={args.samples} total_s={elapsed:.1f}")
+        if args.verify_colors:
+            verify_screen_colors(Path(args.still).resolve(), args.frame, sources)
         return
 
     if frames_dir.exists():

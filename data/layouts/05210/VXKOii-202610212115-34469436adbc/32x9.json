@@ -64,7 +64,8 @@
       "role": "source",
       "priority": 9,
       "text": {
-        "ja": "出典: 由利本荘市 洪水・土砂災害マップ 北部 p.1 / 気象庁 21:15"
+        "ja": "気象庁 10/21 21:15 発表・由利本荘市",
+        "en": "JMA 21:15, Oct 21 · Yurihonjo"
       },
       "motion": "static"
     }

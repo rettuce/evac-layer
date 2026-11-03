@@ -1,0 +1,8 @@
+{
+  "id": "05210-demo-ishiwaki-park",
+  "municipality_id": "05210",
+  "lat": 39.39784308,
+  "lng": 140.0479455,
+  "facing_deg": 0,
+  "note": "Illustrative demo screen at the coordinates of a GSI-listed facility (石脇公園グラウンド, GSI id E0521000072201); the viewer is assumed to face north. Not a real installation."
+}

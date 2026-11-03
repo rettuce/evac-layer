@@ -6,9 +6,9 @@ Numbers from the pipeline runs of 2026-11-02 over the recorded JMA feed (2026-10
 
 | Municipality | Recorded bulletins | Screens | Layouts (× 5 shapes) | Why no more screens |
 |---|---|---|---|---|
-| 由利本荘市 05210 | 61 | 6 | 30 | level 2 or lower, or an all-clear for something never shown (`data/layouts/05210/index.json`) |
+| 由利本荘市 05210 | 62 | 6 | 30 | level 2 or lower, or an all-clear for something never shown (`data/layouts/05210/index.json`) |
 | 輪島市 17204 | 39 | 7 | 35 | same (`data/layouts/17204/index.json`) |
-| 柏崎市 15205 | 73 | 3 | 15 | same (`data/layouts/15205/index.json`) |
+| 柏崎市 15205 | 74 | 3 | 15 | same (`data/layouts/15205/index.json`) |
 | 吉田町 22424 | 20 | 0 | 0 | highest level in the period was 2 |
 | 横浜市 14100 | 5 | 0 | 0 | no warning in force for the city |
 
@@ -30,6 +30,7 @@ A finding is one check failing on one shape of one screen, on the first attempt.
 | 8 | 05210, 17204 | 13 | 5 | 1 | bulletin-mismatch 1 | pillar checked in the browser and by Vision |
 | 9 | 05210, 17204 | 13 | 5 | 1 | bulletin-mismatch 1 | no Japanese script in English text (0cacb31) |
 | 10 | 15205 | 3 | 5 | 0 | — | 柏崎市 added |
+| 11 | 15205 | 3 | 5 | 0 | — | 柏崎 demo site moved off the evacuation site it sat on (nearest was 0 m) |
 
 Every finding in runs 1 and 2 was a real defect: the Composer or the renderer was changed, and the next run no longer reported it (the `fix` field in each findings file). The overflows in runs 3 and 4 were the renderer's header bar; once it was fixed, run 5 passed every screen on the first attempt without calling the Writer.
 
@@ -72,10 +73,10 @@ From `agents/README.md` (Reader runs, 2026-11-02):
 
 | | Value | How |
 |---|---|---|
-| Vision, per check (one shape of one screen) | $0.0111 | $5.319 over 479 checks, runs 1–10 |
+| Vision, per check (one shape of one screen) | $0.0111 | $5.476 over 494 checks, runs 1–11 |
 | Writer, per bulletin, one call | $0.167–$0.170 | 柏崎市, three bulletins, Opus 5.5 (`data/writer/15205/`) |
 | New screen, steady state (Writer once + Vision on 5 shapes) | $0.222 | 柏崎市 run: Writer $0.506 + Vision $0.160 over 3 screens |
-| Development total so far | about $11.46 | Reader $2.881 + Writer about $3.26 + Vision $5.319 |
+| Development total so far | about $11.62 | Reader $2.881 + Writer about $3.26 + Vision $5.476 |
 | Development total per screen shown | about $0.72 | over the 16 screens, including every re-run while the defects above were fixed |
 
 The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596 and $0.506) comes from the fan-out output and the agents seat log. Per-call Writer usage is kept only for the latest generation of each bulletin (`data/writer/`, $1.527 now), so the earlier part is not verifiable from the repository alone.

@@ -97,3 +97,11 @@ test("pillar carries the 9:16 cells and is validated as a layout", async () => {
   assert.ok(validateDoc(pillar, "layout").ok);
   assert.equal(validateDoc({ ...pillar, cells: pillar.cells.filter((c) => c.role !== "languages") }, "layout").ok, false);
 });
+
+test("the source cell names the issuer, its time and the municipality; the details stay in sources[]", () => {
+  const [landscape] = compose({ alert: advisory(), municipality, site, writer });
+  const source = landscape.cells.find((c) => c.id === "source")!;
+  assert.match(source.text.ja, /^気象庁 \d{1,2}\/\d{1,2} \d{2}:\d{2} 発表・輪島市$/);
+  assert.match(source.text.en!, /^JMA \d{2}:\d{2}, [A-Z][a-z]{2} \d{1,2} · Wajima$/);
+  assert.ok(landscape.sources.some((s) => s.type === "jma" && s.bulletin_id === landscape.alert.bulletin_id));
+});
