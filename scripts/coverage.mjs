@@ -72,7 +72,8 @@ const NATIVE_ASPECTS = new Set(['32:9', '16:9', '1:1', '9:16'])
 const PILLAR_ASPECT = 6616 / 5046
 const THUMB_HEIGHT = 170
 const THUMB_GAP = 28
-const THUMB_ROW = THUMB_HEIGHT + 64
+const TITLE_BASELINE = 96
+const SPACE = { titleToSection: 108, headingToBody: 36, row: 24, section: 96, beforeNote: 72, noteLine: 30, bottom: 64 }
 
 function esc(text) {
   return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -100,24 +101,28 @@ async function pictogramSvg(id, x, y, size, color) {
 }
 
 async function hazardsSheet() {
-  const parts = [titled(MARGIN, 96, 'EVAC LAYER が扱う災害情報', 'Hazards and warning levels', 44, 24)]
-  const y = 168
+  const parts = [titled(MARGIN, TITLE_BASELINE, 'EVAC LAYER が扱う災害情報', 'Hazards and warning levels', 44, 24)]
+  const bandHeight = 68
   const bandWidth = 760
+  let y = TITLE_BASELINE + SPACE.titleToSection
   parts.push(heading(MARGIN, y, '災害の種別', 'Hazards from JMA bulletins'))
-  for (const [i, hazard] of HAZARDS.entries()) {
-    const top = y + 24 + i * 84
+  y += SPACE.headingToBody
+  for (const hazard of HAZARDS) {
     const background = CABINET_OFFICE_5[hazard.level]
     const ink = rgbCss(inkOn(background))
-    parts.push(`<rect x="${MARGIN}" y="${top}" width="${bandWidth}" height="68" fill="${rgbCss(background)}"/>`)
-    parts.push(await pictogramSvg(hazard.pictogram, MARGIN + 16, top + 10, 48, ink))
-    parts.push(text(MARGIN + 80, top + 46, hazard.headline, { size: 30, weight: 700, fill: ink }))
-    parts.push(text(MARGIN + bandWidth + 32, top + 32, hazard.ja, { size: 26, weight: 700 }))
-    parts.push(text(MARGIN + bandWidth + 32, top + 60, `${hazard.en} · 気象庁 ${hazard.jma}`, { size: 20, fill: SUB, font: FONT.en }))
+    parts.push(`<rect x="${MARGIN}" y="${y}" width="${bandWidth}" height="${bandHeight}" fill="${rgbCss(background)}"/>`)
+    parts.push(await pictogramSvg(hazard.pictogram, MARGIN + 16, y + 10, 48, ink))
+    parts.push(text(MARGIN + 80, y + 46, hazard.headline, { size: 30, weight: 700, fill: ink }))
+    parts.push(text(MARGIN + bandWidth + 32, y + 30, hazard.ja, { size: 26, weight: 700 }))
+    parts.push(text(MARGIN + bandWidth + 32, y + 60, `${hazard.en} · 気象庁 ${hazard.jma}`, { size: 20, fill: SUB, font: FONT.en }))
+    y += bandHeight + SPACE.row
   }
-  const levelsY = 572
+  y += SPACE.section - SPACE.row
   const gap = 16
+  const boxHeight = 120
   const boxWidth = (WIDTH - MARGIN * 2 - gap * 4) / 5
-  parts.push(heading(MARGIN, levelsY, '警戒レベル 1〜5', 'Cabinet Office warning levels'))
+  parts.push(heading(MARGIN, y, '警戒レベル 1〜5', 'Cabinet Office warning levels'))
+  y += SPACE.headingToBody
   for (const level of [5, 4, 3, 2, 1]) {
     const background = CABINET_OFFICE_5[level]
     const inkRgb = inkOn(background)
@@ -125,12 +130,13 @@ async function hazardsSheet() {
     if (ratio < WCAG_AA) throw new Error(`level ${level} band ink contrast ${ratio.toFixed(2)} is below ${WCAG_AA}:1`)
     const left = MARGIN + (5 - level) * (boxWidth + gap)
     const ink = rgbCss(inkRgb)
-    parts.push(`<rect x="${left}" y="${levelsY + 24}" width="${boxWidth}" height="120" fill="${rgbCss(background)}" stroke="${level === 1 ? RULE : 'none'}"/>`)
-    parts.push(text(left + 20, levelsY + 80, `警戒レベル${level}`, { size: 32, weight: 700, fill: ink }))
-    parts.push(text(left + 20, levelsY + 124, `コントラスト比 ${ratio.toFixed(1)} : 1`, { size: 20, fill: ink, font: FONT.en }))
+    parts.push(`<rect x="${left}" y="${y}" width="${boxWidth}" height="${boxHeight}" fill="${rgbCss(background)}" stroke="${level === 1 ? RULE : 'none'}"/>`)
+    parts.push(text(left + 20, y + 56, `警戒レベル${level}`, { size: 32, weight: 700, fill: ink }))
+    parts.push(text(left + 20, y + 100, `コントラスト比 ${ratio.toFixed(1)} : 1`, { size: 20, fill: ink, font: FONT.en }))
   }
-  parts.push(text(MARGIN, levelsY + 184, '内閣府 2020 年改定の原典色。帯の文字は自動で白／黒を選び、すべて 4.5 : 1 以上（WCAG AA）', { size: 20, fill: SUB }))
-  return sheet(levelsY + 224, parts)
+  y += boxHeight + SPACE.beforeNote
+  parts.push(text(MARGIN, y, '内閣府 2020 年改定の原典色。帯の文字は自動で白／黒を選び、すべて 4.5 : 1 以上（WCAG AA）', { size: 20, fill: SUB }))
+  return sheet(y + SPACE.bottom, parts)
 }
 
 async function pictogramIds() {
@@ -142,36 +148,42 @@ async function pictogramIds() {
 }
 
 async function pictogramsSheet(ids, action) {
-  const parts = [titled(MARGIN, 96, 'EVAC LAYER が扱う災害情報', 'Pictograms and languages', 44, 24)]
-  const y = 168
+  const parts = [titled(MARGIN, TITLE_BASELINE, 'EVAC LAYER が扱う災害情報', 'Pictograms and languages', 44, 24)]
+  const top = TITLE_BASELINE + SPACE.titleToSection
   const cell = 124
-  parts.push(heading(MARGIN, y, `図記号 ${ids.length} 種`, 'Pictograms'))
+  const rowHeight = 140
+  parts.push(heading(MARGIN, top, `図記号 ${ids.length} 種`, 'Pictograms'))
   const rows = [
     ['災害', HAZARD_PICTOGRAMS],
     ['行動・場所', ids.filter((id) => !HAZARD_PICTOGRAMS.includes(id))],
   ]
-  for (const [r, [label, row]] of rows.entries()) {
-    const top = y + 36 + r * 162
-    parts.push(text(MARGIN, top, label, { size: 18, weight: 700, fill: SUB }))
+  let y = top + SPACE.headingToBody + 12
+  let lastRowTop = y
+  for (const [label, row] of rows) {
+    lastRowTop = y
+    parts.push(text(MARGIN, y, label, { size: 18, weight: 700, fill: SUB }))
     for (const [i, id] of row.entries()) {
       const [ja, en] = PICTOGRAM_MEANING[id]
       const center = MARGIN + i * cell + cell / 2
-      parts.push(await pictogramSvg(id, center - 32, top + 14, 64, INK))
-      parts.push(text(center, top + 108, ja, { size: ja.length > 5 ? 15 : 20, weight: 700, anchor: 'middle' }))
-      parts.push(text(center, top + 130, en, { size: 15, fill: SUB, font: FONT.en, anchor: 'middle' }))
+      parts.push(await pictogramSvg(id, center - 32, y + 20, 64, INK))
+      parts.push(text(center, y + 114, ja, { size: ja.length > 5 ? 15 : 20, weight: 700, anchor: 'middle' }))
+      parts.push(text(center, y + 138, en, { size: 15, fill: SUB, font: FONT.en, anchor: 'middle' }))
     }
+    y += rowHeight + SPACE.section / 2
   }
+  y = lastRowTop + rowHeight + SPACE.beforeNote
   const original = ids.length - MATERIAL_PICTOGRAMS.length - 1
-  parts.push(text(MARGIN, y + 356, `Material Symbols ${MATERIAL_PICTOGRAMS.length} 種（Apache-2.0）・方向の矢印は Material の形をもとに再描画`, { size: 17, fill: SUB }))
-  parts.push(text(MARGIN, y + 380, `ほか ${original} 種は EVAC LAYER の自作。台風・高潮・地震は図記号だけを用意している（気象庁の電文から画面を作れるのは大雨・土砂災害・洪水・津波）`, { size: 17, fill: SUB }))
+  parts.push(text(MARGIN, y, `Material Symbols ${MATERIAL_PICTOGRAMS.length} 種（Apache-2.0）・方向の矢印は Material の形をもとに再描画`, { size: 17, fill: SUB }))
+  y += SPACE.noteLine
+  parts.push(text(MARGIN, y, `ほか ${original} 種は EVAC LAYER の自作。台風・高潮・地震は図記号だけを用意している（気象庁の電文から画面を作れるのは大雨・土砂災害・洪水・津波）`, { size: 17, fill: SUB }))
   const right = 1000
-  parts.push(heading(right, y, '言語', 'Languages — level 4 action text'))
+  parts.push(heading(right, top, '言語', 'Languages — level 4 action text'))
   for (const [i, [key, label]] of LANGUAGES.entries()) {
-    const baseline = y + 62 + i * 52
+    const baseline = top + SPACE.headingToBody + 42 + i * 64
     parts.push(text(right, baseline, label, { size: 20, fill: SUB, font: FONT[key] ?? FONT.ja }))
     parts.push(text(right + 180, baseline, action[key], { size: 32, weight: 700, font: FONT[key] ?? FONT.ja }))
   }
-  return sheet(y + 420, parts)
+  return sheet(y + SPACE.bottom, parts)
 }
 
 async function renderThumb(page, base, aspect) {
@@ -197,26 +209,28 @@ async function pillarThumb() {
 }
 
 function shapesSheet(thumbs) {
-  const parts = [titled(MARGIN, 96, 'どんな画角でも、同じ案内。', 'Any aspect, the same guidance.', 44, 24)]
-  parts.push(text(MARGIN, 140, `同じ電文（由利本荘・警戒レベル 4）を ${thumbs.length} の画角で描いたもの。画面の縦横比にいちばん近い基準形状（32:9・16:9・1:1・9:16）を選び、その配置を画面に合わせて伸縮する`, { size: 20, fill: SUB }))
+  const parts = [titled(MARGIN, TITLE_BASELINE, 'どんな画角でも、同じ案内。', 'Any aspect, the same guidance.', 44, 24)]
+  parts.push(text(MARGIN, TITLE_BASELINE + 54, `同じ電文（由利本荘・警戒レベル 4）を ${thumbs.length} の画角で描いたもの。画面の縦横比にいちばん近い基準形状（32:9・16:9・1:1・9:16）を選び、その配置を画面に合わせて伸縮する`, { size: 20, fill: SUB }))
+  const labelHeight = 62
+  const rowStep = THUMB_HEIGHT + labelHeight + SPACE.section / 2
   let x = MARGIN
-  let y = 176
+  let y = TITLE_BASELINE + SPACE.titleToSection
   for (const thumb of thumbs) {
     const width = Math.round(THUMB_HEIGHT * thumb.ratio)
     if (x + width > WIDTH - MARGIN) {
       x = MARGIN
-      y += THUMB_ROW
+      y += rowStep
     }
     parts.push(`<image x="${x}" y="${y}" width="${width}" height="${THUMB_HEIGHT}" href="${thumb.href}" preserveAspectRatio="none"/>`)
     parts.push(`<rect x="${x}" y="${y}" width="${width}" height="${THUMB_HEIGHT}" fill="none" stroke="${RULE}"/>`)
     const native = NATIVE_ASPECTS.has(thumb.aspect) || thumb.family === 'pillar'
-    parts.push(text(x, y + THUMB_HEIGHT + 30, thumb.aspect, { size: 22, weight: 700, font: FONT.en }))
-    if (!native) parts.push(text(x, y + THUMB_HEIGHT + 52, `基準形状 ${thumb.family.replace('x', ':')}`, { size: 16, fill: SUB, font: FONT.en }))
+    parts.push(text(x, y + THUMB_HEIGHT + 32, thumb.aspect, { size: 22, weight: 700, font: FONT.en }))
+    if (!native) parts.push(text(x, y + THUMB_HEIGHT + labelHeight - 4, `基準形状 ${thumb.family.replace('x', ':')}`, { size: 16, fill: SUB }))
     x += width + THUMB_GAP
   }
-  const bottom = y + THUMB_ROW
-  parts.push(text(MARGIN, bottom + 16, '基準形状が 1:1 の画面（1:1・4:5）では、優先度の低い言語の並記を省く（1:1 では避難場所も省く）。4:3・5:4 は 16:9 を基準にするので避難場所まで表示する。必須の項目はどの画角でも表示される', { size: 18, fill: SUB }))
-  return sheet(bottom + 48, parts)
+  y += THUMB_HEIGHT + labelHeight + SPACE.beforeNote
+  parts.push(text(MARGIN, y, '基準形状が 1:1 の画面（1:1・4:5）では、優先度の低い言語の並記を省く（1:1 では避難場所も省く）。4:3・5:4 は 16:9 を基準にするので避難場所まで表示する。必須の項目はどの画角でも表示される', { size: 18, fill: SUB }))
+  return sheet(y + SPACE.bottom, parts)
 }
 
 function fontLinks() {
