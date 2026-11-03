@@ -29,7 +29,7 @@ export const VISION_VERIFY_SCHEMA = {
 
 const TSUNAMI_RULE = `大津波警報=${TSUNAMI_DISPLAY_LEVEL.major_warning}・津波警報=${TSUNAMI_DISPLAY_LEVEL.warning}・津波注意報=${TSUNAMI_DISPLAY_LEVEL.advisory}`;
 const SYSTEM = `あなたは避難案内サイネージの検査係です。描画された画面の画像と、その画面のレイアウト JSON、元になった気象庁の電文の要点を受け取ります。画面に見えているものだけを根拠に、次の 3 つを判定します。見えないもの・推測は判定に使いません。問題が無ければ findings は空にします。
-- bulletin-mismatch: 画面の災害種別・警戒レベル・警報名・行動が、電文と矛盾している（例: 電文は洪水なのに津波と書いてある、電文のレベルと画面のレベル表示が違う、解除なのに避難を促している）。言い換えや省略は矛盾ではない。municipality_areas はこの自治体に当たる区域だけで、電文の他の区域の警報は判定に使わない。津波の display_level は警報種別から規則で決まる（${TSUNAMI_RULE}）ので、電文に level 欄が無くても矛盾ではない。status が drill（訓練電文）なら、見出し（headline）の「【訓練】」「DRILL」等の訓練表記は正しい表示。action・languages セルは ja 以外の言語に訓練語を持ち、ja の action には入れない契約（ja は見出しで示す）なので、ja の action に無いことは矛盾にしない。津波の区域が警報・注意報から津波予報（若干の海面変動・status downgraded）に下がった電文は解除画面で、見出しは「〈直前の警報名〉解除」、行動は「海に入らない・海岸に近づかない」の注意文、図記号は tsunami。これは解除と矛盾しない
+- bulletin-mismatch: 画面の災害種別・警戒レベル・警報名・行動が、電文と矛盾している（例: 電文は洪水なのに津波と書いてある、電文のレベルと画面のレベル表示が違う、解除なのに避難を促している）。言い換えや省略は矛盾ではない。municipality_areas はこの自治体に当たる区域だけで、電文の他の区域の警報は判定に使わない。津波の display_level は警報種別から規則で決まる（${TSUNAMI_RULE}）ので、電文に level 欄が無くても矛盾ではない。status が drill（訓練電文）なら、見出し（headline）の「【訓練】」「DRILL」等の訓練表記は正しい表示。action・languages セルは ja 以外の言語に訓練語を持ち、ja の action には入れない契約（ja は見出しで示す）なので、ja の action に無いことは矛盾にしない。津波の区域が警報・注意報から津波予報（若干の海面変動・status downgraded）に下がった電文は解除画面で、見出しは「〈直前の警報名〉解除」、行動は「海に入らない・海岸に近づかない」の注意文、行動の図記号は解除の safe_here（災害種別は見出しの図記号が担う）。この組み合わせは解除とも図記号とも矛盾しない
 - pictogram-misuse: 図記号が災害種別や行動と合っていない（例: 洪水の画面に津波の図記号、上へ逃げる画面に横へ逃げる図記号）。図記号 ID の意味はユーザー入力に書く
 - missing-source: 出典行（気象庁の発表時刻と自治体名）が画面に見えない、または読めない
 three_second_note には、前提知識のない人が 3 秒で何をすればよいか分かるかを 1〜2 文で書く。これは所見で、findings には入れない。`;

@@ -129,7 +129,7 @@ test("a region downgraded to a tsunami forecast gets an all-clear naming the war
   const [landscape] = compose({ alert: downgraded, municipality: shizuoka, site: { ...site, municipality_id: "22424" }, writer });
   assert.equal(landscape.template, "all-clear");
   assert.equal(landscape.cells.find((cell) => cell.id === "headline")!.text.ja, "【訓練】大津波警報解除");
-  assert.equal(landscape.cells.find((cell) => cell.id === "action")!.pictogram, "tsunami");
+  assert.equal(landscape.cells.find((cell) => cell.id === "action")!.pictogram, "safe_here");
 });
 
 test("a tsunami forecast that arrives on its own still composes nothing", () => {
