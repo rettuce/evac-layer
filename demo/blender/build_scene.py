@@ -260,6 +260,7 @@ def parse_args():
                         help="after --still, compare flat screen areas in the render with the recording's frame")
     parser.add_argument("--clay-screen-albedo", type=float, default=CLAY_SCREEN_ALBEDO,
                         help="screen surfaces in the clay shot (CLAY_ALBEDO makes them vanish into the room)")
+    parser.add_argument("--canvas-dir", help="per-window stills from demo/capture/canvas_stills.mjs")
     parser.add_argument("--crops-json", help="write each screen's window on the elevation canvas to this file and exit")
     parser.add_argument("--save-blend", action="store_true")
     args = parser.parse_args(argv)
@@ -334,21 +335,27 @@ def screen_material(shape, source, frame_count):
     return mat
 
 
-def build_screens(frame_count, cut):
+def build_screens(frame_count, cut, canvas_dir=None):
+    """canvas_dir: one still per window (<shape>_<i>.png, pillar_<i>.png) cut from a single room canvas."""
     joint = principled("joint", (0.004, 0.004, 0.004), 0.5)
     sources = {}
+
+    def window_material(name, shared):
+        return screen_material(name, Path(canvas_dir) / f"{name}.png", frame_count) if canvas_dir else shared
+
     for shape, spec in SCREENS.items():
         width, height = spec["size"]
         sources[shape] = screen_source(shape, cut)
-        material = screen_material(shape, sources[shape], frame_count)
+        shared = screen_material(shape, sources[shape], frame_count)
         for i, (surface, yaw) in enumerate(spec["mounts"]):
+            material = window_material(f"{shape}_{i}", shared)
             normal = facing(yaw)
             vertical_plane(f"joint_{shape}_{i}", surface + normal * (FLUSH_EPS_M / 2),
                            width + 2 * JOINT_M, height + 2 * JOINT_M, yaw, joint)
             vertical_plane(f"screen_{shape}_{i}", surface + normal * FLUSH_EPS_M, width, height, yaw, material)
         for i, (x, y) in enumerate(spec.get("wraps", [])):
             build_led_wrap(f"led_wrap_{i}", (x, y), COLUMN_CLAD_HALF + FLUSH_EPS_M, COLUMN_LED_RADIUS,
-                           COLUMN_LED_BOTTOM_Z, COLUMN_LED_TOP_Z, material)
+                           COLUMN_LED_BOTTOM_Z, COLUMN_LED_TOP_Z, window_material(f"pillar_{i}", shared))
     build_screen_housings()
     return sources
 
@@ -605,7 +612,7 @@ def main():
     back_wall_clear = [(center.x - SCREENS[shape]["size"][0] / 2 - JOINT_M, center.x + SCREENS[shape]["size"][0] / 2 + JOINT_M)
                        for shape in BACK_WALL_SHAPES for center, _ in SCREENS[shape]["mounts"]]
     look = build_look(args.look, back_wall_clear)
-    sources = build_screens(frame_count, cut)
+    sources = build_screens(frame_count, cut, args.canvas_dir)
     build_world(look["hdri_strength"] * light_scale)
     scale_lights(light_scale)
     if shot and shot.get("clay"):
