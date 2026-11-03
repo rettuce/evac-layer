@@ -209,6 +209,11 @@ WIDE_OPTIONS = {
     "wide-c": {"location": Vector((0.0, -8.4, 1.2)), "target": Vector((-0.6, 6.0, 2.6)), "lens": 28.0},
 }
 STILL_CAMERAS.update(WIDE_OPTIONS)
+KV_RAISE_M = 0.4
+STILL_CAMERAS.update({
+    "wide-a-high": {**WIDE_OPTIONS["wide-a"], "location": WIDE_OPTIONS["wide-a"]["location"] + Vector((0.0, 0.0, KV_RAISE_M))},
+    "wide-a-28": {**WIDE_OPTIONS["wide-a"], "lens": 28.0},
+})
 
 
 def push_from(name, metres=CLOSE_PUSH_M):
@@ -292,6 +297,7 @@ def parse_args():
                         help="after --still, compare flat screen areas in the render with the recording's frame")
     parser.add_argument("--clay-screen-albedo", type=float, default=CLAY_SCREEN_ALBEDO,
                         help="screen surfaces in the clay shot (CLAY_ALBEDO makes them vanish into the room)")
+    parser.add_argument("--room-light", type=float, default=1.0, help="extra factor on the room lighting (screens unaffected)")
     parser.add_argument("--canvas-dir", help="per-window stills from demo/capture/canvas_stills.mjs")
     parser.add_argument("--crops-json", help="write each screen's window on the elevation canvas to this file and exit")
     parser.add_argument("--save-blend", action="store_true")
@@ -379,6 +385,8 @@ def build_screens(frame_count, cut, canvas_dir=None):
         width, height = spec["size"]
         sources[shape] = screen_source(shape, cut)
         shared = screen_material(shape, sources[shape], frame_count)
+        if canvas_dir and spec["mounts"]:
+            sources[shape] = Path(canvas_dir) / f"{shape}_0.png"
         for i, (surface, yaw) in enumerate(spec["mounts"]):
             material = window_material(f"{shape}_{i}", shared)
             normal = facing(yaw)
@@ -638,7 +646,7 @@ def main():
     seconds = shot["seconds"] if shot else args.seconds
     frame_count = max(2, round(seconds * args.fps))
     cut = args.cut or (shot["screens"] if shot else None)
-    light_scale = (shot["light_scale"] if shot else 1.0) * ROOM_LIGHT_SCALE
+    light_scale = (shot["light_scale"] if shot else 1.0) * ROOM_LIGHT_SCALE * args.room_light
     frames_dir = CACHE_DIR / "frames"
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
