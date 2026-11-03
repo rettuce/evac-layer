@@ -128,6 +128,8 @@ describe('production build serving demo/sites layouts', { skip: !existsSync(SERV
     for (const path of ['demo/sites/../secret.json', 'demo/sites/tsurumai-kaikan/../../../secret.json', '/secret.json', 'secret.json']) {
       assert.equal((await at(path)).status, 400, path)
     }
-    assert.equal((await at('demo/sites/missing/16x9.json')).status, 404)
+    const missing = await at('demo/sites/missing/16x9.json')
+    assert.equal(missing.status, 404)
+    assert.doesNotMatch(await missing.text(), /evac-repo-/)
   })
 })
