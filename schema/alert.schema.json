@@ -119,6 +119,11 @@
             "cleared",
             "none"
           ]
+        },
+        "last_kind_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "VTSE41 LastKind name: the category the region held before this bulletin"
         }
       }
     },

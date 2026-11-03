@@ -68,10 +68,11 @@ export async function writeCells(args: {
 }): Promise<{ output: WriterOutput; usage: CallUsage; lint: LintFinding[] }> {
   const budgets = strictestBudgets(args.situation.template, ["16x9", "9x16", "32x9", "1x1"]).filter((b) => (WRITER_ROLES as readonly string[]).includes(b.role));
   const ctx = writerContext(args.alert, args.municipality, args.municipalityId);
-  const picto = actionPictogram(args.alert.hazard, args.situation.template);
+  const picto = actionPictogram(args.alert.hazard, args.situation.template, args.situation.caution);
   const instructions = [
     `テンプレート: ${args.situation.template}（表示レベル ${args.situation.level}${args.situation.cleared ? "・解除" : ""}）。書くセルは ${WRITER_ROLES.join("・")} だけ。languages は action と同じ内容を各言語で。`,
     `action セルには図記号 ${picto}（${ACTION_PICTOGRAM_MEANING_JA[picto]}）が付く。action はこの図記号と同じ意味の行動として書く。`,
+    ...(args.situation.caution === "sea_level_change" ? ["この電文で警報・注意報は津波予報（若干の海面変動）に下がった。headline は解除、action は「海に入らない・海岸に近づかない」の意味で書く。"] : []),
     ...(args.feedback?.length ? ["前回の出力への指摘（すべて直すこと）:", ...args.feedback.map((f) => `- ${f}`)] : []),
   ].join("\n");
   const msg = await args.client.messages.stream({

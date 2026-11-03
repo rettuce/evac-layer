@@ -40,7 +40,8 @@ export const HAZARD_PICTOGRAM: Record<string, string> = {
 // rising water or a tsunami means going up, levels 3 and 4 mean evacuating (level 3 is 高齢者等避難), and an
 // all-clear asks for nothing. The Writer is told the meaning so the action text cannot contradict the pictogram
 // (both mismatches were found by the Vision Verifier on the 2026-10 replay).
-export function actionPictogram(hazard: string, template: string): string {
+export function actionPictogram(hazard: string, template: string, caution?: Situation["caution"]): string {
+  if (caution === "sea_level_change") return "tsunami";
   if (template === "all-clear") return "safe_here";
   if (hazard === "tsunami" || template === "secure-now") return "go_higher";
   return "directions_run";
@@ -48,6 +49,7 @@ export function actionPictogram(hazard: string, template: string): string {
 
 export const ACTION_PICTOGRAM_MEANING_JA: Record<string, string> = {
   safe_here: "解除。避難の必要がなくなったことを伝える。注意や警戒の呼びかけは書かない",
+  tsunami: "警報・注意報は解除されたが海面変動が続く。海に入らない・海岸に近づかない。『安全』『避難不要』とは書かない",
   go_higher: "いまいる場所から高い所へ上がる",
   directions_run: "危険な場所から避難する（レベル3 では高齢者等が避難し、ほかの人は避難の準備をする）",
 };
@@ -62,7 +64,8 @@ export const SHELTER_HAZARDS: Record<string, string[]> = {
   storm_surge: ["storm_surge"],
 };
 
-export interface Situation { level: number; template: TemplateId; cleared: boolean }
+// caution: the warning ended but slight sea-level change continues; the all-clear tells people to stay off the coast.
+export interface Situation { level: number; template: TemplateId; cleared: boolean; caution?: "sea_level_change" }
 
 // Cabinet Office level 5 (緊急安全確保): moving to a shelter may itself be dangerous, so the screen gives no
 // shelter or direction and asks for immediate safety where people are.
@@ -80,7 +83,10 @@ export function situationFor(alert: Alert, municipalityId: string): Situation {
     const top = rank.find((r) => kinds.includes(r))!;
     if (top === "none") stop(`bulletin ${alert.bulletin_id} lists no tsunami category for ${municipalityId}`);
     if (top === "cleared") return { level: 1, template: "all-clear", cleared: true };
-    if (top === "forecast") stop(`tsunami forecast (slight sea-level change) for ${municipalityId}: no evacuation screen`);
+    if (top === "forecast") {
+      if (tsunamiDowngradedFrom(mine)) return { level: 1, template: "all-clear", cleared: true, caution: "sea_level_change" };
+      stop(`tsunami forecast (slight sea-level change) for ${municipalityId}: no evacuation screen`);
+    }
     return { level: TSUNAMI_DISPLAY_LEVEL[top]!, template: "evac-now", cleared: false };
   }
   const mine = alert.areas.filter((a) => a.code_type === "city" && a.code.slice(0, 5) === municipalityId);
@@ -111,3 +117,20 @@ export const MONTH_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
 // A JMA drill bulletin (Control/Status 訓練) is shown with the marker in every language's headline; ja is the
 // Composer's, the other nine are the Writer's and the Verifier checks them (verifier/checks.ts DRILL_MARKERS).
 export const DRILL_PREFIX_JA = "【訓練】";
+
+// A region that drops from a warning or advisory to a forecast (slight sea-level change) has its warning ended:
+// the screen it was shown must be cleared, and the headline names what ended. A forecast that arrives on its own
+// never showed anything, so it clears nothing (situationFor stops).
+export function tsunamiDowngradedFrom(mine: Alert["areas"]): string | null {
+  const dropped = mine.find((a) => a.status === "downgraded" && categoryOfKind(a.kind_code) === "forecast" && a.last_kind_name);
+  return dropped?.last_kind_name?.replace(/：発表$/, "") ?? null;
+}
+
+export function tsunamiClearedFrom(alert: Alert, municipalityId: string): string | null {
+  if (alert.hazard !== "tsunami") return null;
+  const regions = new Set(tsunamiRegionsFor(municipalityId));
+  const mine = alert.areas.filter((a) => regions.has(a.code));
+  const rank: TsunamiCategory[] = ["major_warning", "warning", "advisory", "forecast", "cleared", "none"];
+  const kinds = mine.map((a) => (a.status === "cleared" ? "cleared" : categoryOfKind(a.kind_code)));
+  return rank.find((r) => kinds.includes(r)) === "forecast" ? tsunamiDowngradedFrom(mine) : null;
+}

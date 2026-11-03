@@ -19,6 +19,7 @@ The layout JSON is the intermediate form: the Composer writes it, the renderer d
 ## Rules the parts rely on
 
 - A drill bulletin (Control/Status 訓練, `alert.status: "drill"`) carries a drill word in every language of the headline (ja: 【訓練】 prefix, by code) and in every language but ja of `action` / `languages`; the Verifier's `drill-marker` check sends the Writer back otherwise.
+- A tsunami region downgraded from a warning or advisory to 津波予報（若干の海面変動） gets an all-clear screen: headline 「〈last warning name〉解除」, action "stay out of the sea, away from the coast" with the `tsunami` pictogram (`situation.caution: "sea_level_change"`). A forecast that arrives on its own shows nothing.
 - The headline is the JMA warning name verbatim, set by code (Meteorological Service Act art. 23), with 解除 appended on an all-clear. The Writer writes the other languages only.
 - Level 5 (`secure-now`) never shows a shelter or a direction and never uses evacuation wording: moving may itself be dangerous.
 - An all-clear appears only for a warning that was shown on screen.
