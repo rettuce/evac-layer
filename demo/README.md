@@ -44,8 +44,8 @@
 5. **合成する**: `python3 demo/compose/compose.py` → `demo/renders/evac-layer-demo.mp4`。素材が無いカットはスレート、3D が無いカットは 4 形状を並べたプレビューになる
 6. **音を載せる**: `python3 demo/compose/mix_audio.py --sfx-dir <Adobe Audition SFX> --out demo/out/evac-layer-demo-v2.mp4`
    - 環境音 -30 LUFS・カット 5 の切替の電子音・ドローン -26 LUFS。-18 LUFS はナレーション用に空けてある
-   - ナレーションは `demo/compose/audio/narration.wav`（179 s）を置けば入る。台本は `compose/narration.md`
-7. **字幕と台本を書き出す**: `python3 demo/compose/subtitles.py [--with-narration]` → `compose/narration.md` と英語字幕 `demo/out/evac-layer-demo-v2.en.srt`（焼き込まない）
+   - ナレーションは、カット別の録音を `demo/compose/audio/narration/cutNN.wav`（ファイル名は `compose/narration.md` の録音台本の表）に置けば各カットの開始秒に入る。179 s の `narration.wav` 1 本でもよい。カット別のファイルがあればそちらを使う
+7. **字幕と台本を書き出す**: `python3 demo/compose/subtitles.py [--with-narration]` → `compose/narration.md`（録音台本）と英語字幕 `demo/out/evac-layer-demo-v2.en.srt`（焼き込まない）
 
 ## 所要時間（M 系 Mac・2026-11-03 実測）
 
