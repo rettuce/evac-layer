@@ -6,56 +6,68 @@
         "role": "headline",
         "text": {
           "ja": "レベル５氾濫特別警報",
-          "ja_easy": "こよしがわが あふれています",
-          "en": "Koyoshi R. Level 5 Flood",
+          "ja_easy": "こよしがわが あふれました",
+          "en": "Koyoshi R. Flood Level 5",
           "zh_hans": "子吉川5级泛滥特别警报",
           "zh_hant": "子吉川5級氾濫特別警報",
-          "ko": "고요시강(子吉川) 레벨5 범람 특별경보"
+          "ko": "고요시강 레벨5 범람 특별경보",
+          "th": "แม่น้ำโคโยชิประกาศเตือนภัยน้ำท่วมพิเศษระดับ5",
+          "vi": "Sông Koyoshi: Cảnh báo đặc biệt lũ tràn cấp 5",
+          "fil": "Ilog Koyoshi: Espesyal na Babala sa Baha Antas 5",
+          "id": "Sungai Koyoshi: Peringatan Khusus Banjir Level 5"
         },
-        "basis": "警報 raw_title「子吉川レベル５氾濫特別警報」、areas[0].kind_name「レベル５氾濫特別警報」、headline_text「《氾濫発生》子吉川では、越水による氾濫が発生」"
+        "basis": "警報 raw_title「子吉川レベル５氾濫特別警報」、level 5。ja_easy は headline_text「《氾濫発生》子吉川では、越水による氾濫が発生」を平易化（文字数予算18以内）"
       },
       {
         "role": "action",
         "text": {
-          "ja": "すぐ高い所へ上がって",
-          "ja_easy": "たかい ところへ あがって",
-          "en": "Go up high now",
-          "zh_hans": "立即往高处去",
-          "zh_hant": "立即往高處去",
-          "ko": "지금 높은 곳으로"
+          "ja": "すぐ高い所へ上がる",
+          "ja_easy": "すぐ たかい ところへ",
+          "en": "Go higher now",
+          "zh_hans": "立即到高处",
+          "zh_hant": "立即到高處",
+          "ko": "즉시 높은 곳으로",
+          "th": "ขึ้นที่สูงทันที",
+          "vi": "Lên chỗ cao ngay",
+          "fil": "Umakyat sa mataas ngayon",
+          "id": "Segera ke tempat tinggi"
         },
-        "basis": "警報 level 5（警戒レベル５相当・氾濫発生）とテンプレート secure-now の図記号 go_higher（いまいる場所から高い所へ上がる）。レベル5のため移動避難ではなくその場で高い所へ上がる行動として記載"
+        "basis": "警報 level 5（警戒レベル５相当・氾濫発生）。テンプレート secure-now の図記号 go_higher（いまいる場所から高い所へ上がる）と同じ行動。レベル5の取り決めにより「にげる」「ひなん」は使わない"
       },
       {
         "role": "languages",
         "text": {
-          "ja": "すぐ高い所へ上がって",
-          "ja_easy": "たかい ところへ あがって",
-          "en": "Go up high now",
-          "zh_hans": "立即往高处去",
-          "zh_hant": "立即往高處去",
-          "ko": "지금 높은 곳으로"
+          "ja": "すぐ高い所へ上がる",
+          "ja_easy": "すぐ たかい ところへ",
+          "en": "Go higher now",
+          "zh_hans": "立即到高处",
+          "zh_hant": "立即到高處",
+          "ko": "즉시 높은 곳으로",
+          "th": "ขึ้นที่สูงทันที",
+          "vi": "Lên chỗ cao ngay",
+          "fil": "Umakyat sa mataas ngayon",
+          "id": "Segera ke tempat tinggi"
         },
-        "basis": "action セルと同内容（警報 level 5 と図記号 go_higher）"
+        "basis": "action セルと同じ内容（警報 level 5、図記号 go_higher）を各言語で表示"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VXKOii-202610212015-979f11623ff9",
-      "input": 3225,
-      "output": 2146,
+      "input": 3523,
+      "output": 2453,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.05582
+      "usd": 0.063152
     },
     {
       "stage": "writer VXKOii-202610212015-979f11623ff9",
-      "input": 3268,
-      "output": 1686,
+      "input": 3604,
+      "output": 2825,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.046792
+      "usd": 0.070916
     }
   ],
   "lint": []

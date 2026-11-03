@@ -8,46 +8,58 @@
           "ja": "レベル２大雨注意報",
           "ja_easy": "おおあめ ちゅういほう おわり",
           "en": "Heavy rain advisory over",
-          "zh_hans": "轮岛市（輪島市）大雨注意报 解除",
-          "zh_hant": "輪島市 大雨注意報 解除",
-          "ko": "와지마시(輪島市) 호우주의보 해제"
+          "zh_hans": "大雨注意报 解除",
+          "zh_hant": "大雨注意報 解除",
+          "ko": "호우주의보 해제",
+          "th": "ยกเลิกประกาศเตือนฝนตกหนัก",
+          "vi": "Đã hủy tin chú ý mưa lớn",
+          "fil": "Inalis na ang abiso sa malakas na ulan",
+          "id": "Imbauan hujan lebat dicabut"
         },
-        "basis": "警報 areas[0]: name「輪島市」, kind_name「レベル２大雨注意報」, status「cleared」; headline_text「注意報を解除します。」(金沢地方気象台, 2026-10-20T11:41+09:00)"
+        "basis": "警報 areas[0]（輪島市）kind_name「レベル２大雨注意報」status「cleared」、headline_text「注意報を解除します。」、raw_title「石川県大雨警報・注意報」"
       },
       {
         "role": "action",
         "text": {
           "ja": "避難の必要なし",
           "ja_easy": "にげなくて だいじょうぶです",
-          "en": "Need not evacuate",
+          "en": "No need to flee",
           "zh_hans": "无需避难",
           "zh_hant": "無需避難",
-          "ko": "대피할 필요 없음"
+          "ko": "대피할 필요 없음",
+          "th": "ไม่ต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
         },
-        "basis": "警報 areas[0].status「cleared」(輪島市の大雨注意報解除) と all-clear テンプレートの図記号 safe_here(避難の必要がなくなったことを伝える)。知識ファイルの項目は使用せず"
+        "basis": "警報 areas[0] status「cleared」（大雨注意報の解除）とテンプレート all-clear の図記号 safe_here（避難の必要がなくなったことを伝える）。知識ファイルの事実は使用していない"
       },
       {
         "role": "languages",
         "text": {
           "ja": "避難の必要なし",
           "ja_easy": "にげなくて だいじょうぶです",
-          "en": "Need not evacuate",
+          "en": "No need to flee",
           "zh_hans": "无需避难",
           "zh_hant": "無需避難",
-          "ko": "대피할 필요 없음"
+          "ko": "대피할 필요 없음",
+          "th": "ไม่ต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
         },
-        "basis": "action セルと同じ内容(警報 areas[0].status「cleared」と図記号 safe_here)"
+        "basis": "action セルと同じ内容（警報 areas[0] status「cleared」と図記号 safe_here）を各言語で表示"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VPWW55-202610201141-6bb4c931f4d3",
-      "input": 4818,
-      "output": 1563,
+      "input": 5215,
+      "output": 2218,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.050532
+      "usd": 0.06522
     }
   ],
   "lint": []

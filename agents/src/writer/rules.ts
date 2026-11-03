@@ -87,3 +87,25 @@ export function lintEnglishScript(text: string): LintFinding[] {
   const m = text.match(JAPANESE_SCRIPT);
   return m ? [{ rule: "en-no-japanese-script", match: m[0] }] : [];
 }
+
+const THAI_SCRIPT_ONLY = /[^\u0E00-\u0E7F0-9\s.,:;!?()\/\-–—·%]/;
+
+export function lintThaiScript(text: string): LintFinding[] {
+  const m = text.match(THAI_SCRIPT_ONLY);
+  return m ? [{ rule: "th-thai-script-only", match: m[0] }] : [];
+}
+
+export function lintLatinScript(text: string): LintFinding[] {
+  const m = text.match(JAPANESE_SCRIPT);
+  return m ? [{ rule: "latin-no-japanese-script", match: m[0] }] : [];
+}
+
+// Simplified-only forms that a Traditional Chinese line must not contain; the table covers the characters the
+// warnings vocabulary actually uses (place, danger, evacuate, warning, level, flood, tsunami, shelter, floor).
+const SIMPLIFIED_ONLY = "处发应实险离开关区这请从远时马灾点东让边层楼场国门们后预报级准备泛滥啸难电气确认声响动观测线";
+const SIMPLIFIED_GLYPH = new RegExp(`[${SIMPLIFIED_ONLY}]`);
+
+export function lintTraditionalScript(text: string): LintFinding[] {
+  const m = text.match(SIMPLIFIED_GLYPH);
+  return m ? [{ rule: "zh-hant-no-simplified-glyph", match: m[0] }] : [];
+}

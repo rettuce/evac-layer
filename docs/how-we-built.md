@@ -24,7 +24,7 @@ Run over the recorded feed, this loop found 25 defects on its first Vision pass 
 ## Claude in the pipeline
 
 - **Reader**: Sonnet 5.5 turns municipal hazard-map PDFs into knowledge files, with citations and structured outputs. When a PDF's text layer drops characters, it reads the page images instead.
-- **Writer**: Opus 5.5 writes the action text in six languages within per-shape character budgets. Its output passes deterministic lints and is cached so that the same alert gives the same screen.
+- **Writer**: Opus 5.5 writes the action text in ten languages within per-shape character budgets. Its output passes deterministic lints and is cached so that the same alert gives the same screen.
 - **Verifier (Vision)**: Sonnet 5.5 compares each rendered shape with its bulletin.
 
 ## Claude Code features

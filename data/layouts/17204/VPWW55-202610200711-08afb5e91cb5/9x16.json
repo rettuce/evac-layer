@@ -22,10 +22,14 @@
       "text": {
         "ja": "レベル３大雨警報",
         "ja_easy": "レベル３ おおあめ けいほう",
-        "en": "Heavy Rain Warning Lv3",
+        "en": "Heavy Rain Warning Lv 3",
         "zh_hans": "3级暴雨警报",
         "zh_hant": "3級大雨警報",
-        "ko": "레벨3 호우경보"
+        "ko": "레벨3 호우경보",
+        "th": "คำเตือนฝนตกหนักระดับ3",
+        "vi": "Cảnh báo mưa lớn cấp 3",
+        "fil": "Babala sa Malakas na Ulan Lv 3",
+        "id": "Peringatan Hujan Lebat Lv 3"
       },
       "pictogram": "heavy_rain",
       "motion": "scale-in"
@@ -36,11 +40,15 @@
       "priority": 1,
       "text": {
         "ja": "高齢者は避難",
-        "ja_easy": "おとしよりは にげてください",
+        "ja_easy": "おとしより は にげて",
         "en": "Elderly: evacuate",
         "zh_hans": "老年人请避难",
-        "zh_hant": "老年人請避難",
-        "ko": "고령자는 대피하세요"
+        "zh_hant": "長者請避難",
+        "ko": "고령자는 대피",
+        "th": "ผู้สูงอายุอพยพ",
+        "vi": "Người cao tuổi sơ tán",
+        "fil": "Lumikas ang matatanda",
+        "id": "Lansia harap mengungsi"
       },
       "pictogram": "directions_run",
       "motion": "pulse"
@@ -74,11 +82,15 @@
       "priority": 3,
       "text": {
         "ja": "高齢者は避難",
-        "ja_easy": "おとしよりは にげてください",
+        "ja_easy": "おとしより は にげて",
         "en": "Elderly: evacuate",
         "zh_hans": "老年人请避难",
-        "zh_hant": "老年人請避難",
-        "ko": "고령자는 대피하세요"
+        "zh_hant": "長者請避難",
+        "ko": "고령자는 대피",
+        "th": "ผู้สูงอายุอพยพ",
+        "vi": "Người cao tuổi sơ tán",
+        "fil": "Lumikas ang matatanda",
+        "id": "Lansia harap mengungsi"
       },
       "motion": "static"
     },
