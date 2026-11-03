@@ -26,10 +26,10 @@
         "zh_hans": "演习：海啸注意报",
         "zh_hant": "演習：海嘯注意報",
         "ko": "훈련: 쓰나미 주의보",
-        "th": "ฝึกซ้อม:ประกาศเฝ้าระวังสึนามิ",
-        "vi": "[diễn tập] Khuyến cáo sóng thần",
-        "fil": "[pagsasanay] Abiso sa Tsunami",
-        "id": "[latihan] Imbauan Tsunami"
+        "th": "ฝึกซ้อม: ประกาศเฝ้าระวังสึนามิ",
+        "vi": "Khuyến cáo sóng thần (diễn tập)",
+        "fil": "Abiso sa tsunami (pagsasanay)",
+        "id": "Imbauan waspada tsunami (latihan)"
       },
       "pictogram": "tsunami",
       "motion": "scale-in"
@@ -39,16 +39,16 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "すぐ高い所へ",
-        "ja_easy": "すぐ たかい ところへ",
-        "en": "Go higher now",
-        "zh_hans": "立即前往高处",
-        "zh_hant": "立即前往高處",
-        "ko": "즉시 높은 곳으로",
-        "th": "ไปที่สูงทันที",
-        "vi": "Lên chỗ cao ngay",
-        "fil": "Umakyat agad sa mataas",
-        "id": "Segera ke tempat tinggi"
+        "ja": "高い所へ避難",
+        "ja_easy": "くんれん たかい ところへ",
+        "en": "DRILL: Go higher",
+        "zh_hans": "演习：快到高处",
+        "zh_hant": "演習：快到高處",
+        "ko": "훈련: 높은 곳으로",
+        "th": "ฝึกซ้อม:ขึ้นที่สูง",
+        "vi": "Lên chỗ cao (diễn tập)",
+        "fil": "Umakyat (pagsasanay)",
+        "id": "Naik ke atas (latihan)"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -81,16 +81,16 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "すぐ高い所へ",
-        "ja_easy": "すぐ たかい ところへ",
-        "en": "Go higher now",
-        "zh_hans": "立即前往高处",
-        "zh_hant": "立即前往高處",
-        "ko": "즉시 높은 곳으로",
-        "th": "ไปที่สูงทันที",
-        "vi": "Lên chỗ cao ngay",
-        "fil": "Umakyat agad sa mataas",
-        "id": "Segera ke tempat tinggi"
+        "ja": "高い所へ避難",
+        "ja_easy": "くんれん たかい ところへ",
+        "en": "DRILL: Go higher",
+        "zh_hans": "演习：快到高处",
+        "zh_hant": "演習：快到高處",
+        "ko": "훈련: 높은 곳으로",
+        "th": "ฝึกซ้อม:ขึ้นที่สูง",
+        "vi": "Lên chỗ cao (diễn tập)",
+        "fil": "Umakyat (pagsasanay)",
+        "id": "Naik ke atas (latihan)"
       },
       "motion": "static"
     },

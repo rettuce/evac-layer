@@ -11,6 +11,656 @@
     {
       "n": 1,
       "writer_source": "writer-cache",
+      "findings": [
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy action does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "en",
+          "detail": "drill bulletin, but the en action does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans action does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant action does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko action does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "th",
+          "detail": "drill bulletin, but the th action does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi action does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil action does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "id",
+          "detail": "drill bulletin, but the id action does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy languages does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "en",
+          "detail": "drill bulletin, but the en languages does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans languages does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant languages does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko languages does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "th",
+          "detail": "drill bulletin, but the th languages does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi languages does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil languages does not say so"
+        },
+        {
+          "shape": "16x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "id",
+          "detail": "drill bulletin, but the id languages does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy action does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "en",
+          "detail": "drill bulletin, but the en action does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans action does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant action does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko action does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "th",
+          "detail": "drill bulletin, but the th action does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi action does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil action does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "id",
+          "detail": "drill bulletin, but the id action does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy languages does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "en",
+          "detail": "drill bulletin, but the en languages does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans languages does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant languages does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko languages does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "th",
+          "detail": "drill bulletin, but the th languages does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi languages does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil languages does not say so"
+        },
+        {
+          "shape": "9x16",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "id",
+          "detail": "drill bulletin, but the id languages does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy action does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "en",
+          "detail": "drill bulletin, but the en action does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans action does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant action does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko action does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "th",
+          "detail": "drill bulletin, but the th action does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi action does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil action does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "id",
+          "detail": "drill bulletin, but the id action does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy languages does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "en",
+          "detail": "drill bulletin, but the en languages does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans languages does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant languages does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko languages does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "th",
+          "detail": "drill bulletin, but the th languages does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi languages does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil languages does not say so"
+        },
+        {
+          "shape": "32x9",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "id",
+          "detail": "drill bulletin, but the id languages does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy action does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "en",
+          "detail": "drill bulletin, but the en action does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans action does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant action does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko action does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "th",
+          "detail": "drill bulletin, but the th action does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi action does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil action does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "id",
+          "detail": "drill bulletin, but the id action does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy languages does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "en",
+          "detail": "drill bulletin, but the en languages does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans languages does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant languages does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko languages does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "th",
+          "detail": "drill bulletin, but the th languages does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi languages does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil languages does not say so"
+        },
+        {
+          "shape": "1x1",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "id",
+          "detail": "drill bulletin, but the id languages does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy action does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "en",
+          "detail": "drill bulletin, but the en action does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans action does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant action does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko action does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "th",
+          "detail": "drill bulletin, but the th action does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi action does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil action does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "action",
+          "lang": "id",
+          "detail": "drill bulletin, but the id action does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ja_easy",
+          "detail": "drill bulletin, but the ja_easy languages does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "en",
+          "detail": "drill bulletin, but the en languages does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hans",
+          "detail": "drill bulletin, but the zh_hans languages does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "zh_hant",
+          "detail": "drill bulletin, but the zh_hant languages does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "ko",
+          "detail": "drill bulletin, but the ko languages does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "th",
+          "detail": "drill bulletin, but the th languages does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "vi",
+          "detail": "drill bulletin, but the vi languages does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "fil",
+          "detail": "drill bulletin, but the fil languages does not say so"
+        },
+        {
+          "shape": "pillar",
+          "check": "drill-marker",
+          "cell_id": "languages",
+          "lang": "id",
+          "detail": "drill bulletin, but the id languages does not say so"
+        }
+      ],
+      "screens_ok": {
+        "16x9": false,
+        "9x16": false,
+        "32x9": false,
+        "1x1": false,
+        "pillar": false
+      },
+      "notes": {
+        "16x9": "はい。大きな「高い所へ上がる」と上向き矢印の図記号で、津波なので高い所へ逃げるとすぐ分かり、右の「北東へ 230m」の矢印で避難先の方向も分かります。",
+        "9x16": "黄色の見出しで訓練の津波注意報と分かり、大きな「高い所へ上がる」と上向き矢印の図、北東への矢印と避難場所名で、3秒あれば高い所へ北東方向に向かうと理解できる。",
+        "32x9": "分かる。「高い所へ上がる」が大きく表示され、上向き矢印と建物の図記号、北東を指す矢印と避難場所名・距離で、何をどちらへ向かうかがすぐ伝わる。",
+        "1x1": "黄色の見出しの津波の図記号と「高い所へ上がる」の大きな文字、上向き矢印で、高い所へ逃げればよいと3秒で分かる。右上向き矢印と「北東へ」で方向も示され、迷わない。",
+        "pillar": "分かる。上向き矢印と高い建物の大きな図記号と「高い所へ上がる」の大きな文字で、津波なので高い所へ逃げると直感でき、北東の矢印と避難場所名・230 m も見える。"
+      }
+    },
+    {
+      "n": 2,
+      "writer_source": "writer-api:opus",
       "findings": [],
       "screens_ok": {
         "16x9": true,
@@ -20,11 +670,11 @@
         "pillar": true
       },
       "notes": {
-        "16x9": "「高い所へ上がる」の大きな文字と上向き矢印の図記号で、高い所へ避難することがすぐ分かる。右側の北東向き矢印と「230 m」で行き先と距離も分かり、見出しに【訓練】とあるので訓練だと気づける。",
-        "9x16": "分かる。大きな文字「高い所へ上がる」と上向き矢印、北東を指す矢印、避難場所名と距離230 mが並んでいて、北東の高台へ向かえばよいと3秒で読み取れる。見出しの【訓練】表示で訓練だと分かり、津波注意報の黄色とレベル2も一目で伝わる。",
-        "32x9": "分かる。黄色の地に「津波注意報」と大きな「高い所へ上がる」、上向き矢印とビルの図記号があり、右の画面では北東向きの矢印と避難場所までの距離 230 m も見えるので、高い所へ向かう行動と方向が3秒で伝わる。",
-        "1x1": "分かる。「高い所へ上がる」が大きく表示され、上向き矢印の図記号と「北東へ」の矢印も付いているので、背景知識がなくても高い所へ北東方向に向かえばよいと3秒で読み取れる。",
-        "pillar": "はい。黄色い見出しで津波注意報の訓練と分かり、大きな「高い所へ上がる」の文字と上向き矢印、北東への矢印と避難場所名で、高い所へ向かう行動がすぐ分かります。"
+        "16x9": "はい。黄色の見出しの津波の図記号と「高い所へ移動」の大きな文字、上向き矢印の図記号で、高い所へ逃げるとすぐ分かります。右側の北東向き矢印と「230 m」で避難場所の方向も分かります。",
+        "9x16": "大きな「高い所へ移動」と上向き矢印の図記号で、高い所へ逃げるべきことはすぐ分かる。北東の矢印と避難場所名・230mも続くので行き先も把握でき、見出しに【訓練】とあるため訓練だと気づける。",
+        "32x9": "はい。大きな「高い所へ移動」と上向き矢印の図記号、津波の図記号が目に入り、北東の避難場所へ向かう矢印と距離230 mも示されているので、何をすべきかすぐ分かります。ただし【訓練】の表示は見出しにあるだけで小さめなので、訓練だと気づくには少し時間がかかります。",
+        "1x1": "分かる。「高い所へ移動」が大きく出ていて、下の矢印と「北東へ」で向かう方角も示されているので、3秒で次の行動が読み取れる。上部の【訓練】表示で訓練だと分かる。",
+        "pillar": "大きな上向き矢印と「高い所へ移動」の文字、北東への矢印で、津波に備えて高い所へ向かえばよいと3秒で分かる。ただし津波注意報(レベル2)の訓練表示なので、緊急性は高くなく落ち着いて行動すればよい。"
       }
     }
   ],

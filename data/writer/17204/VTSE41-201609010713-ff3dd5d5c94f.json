@@ -6,68 +6,60 @@
         "role": "headline",
         "text": {
           "ja": "津波注意報",
-          "ja_easy": "つなみ ちゅういほう（くんれん）",
-          "en": "Tsunami Advisory (Drill)",
-          "zh_hans": "海啸注意报（演习）",
-          "zh_hant": "海嘯注意報（演習）",
-          "ko": "쓰나미 주의보(훈련)",
-          "th": "การฝึกซ้อมประกาศเฝ้าระวังสึนามิ",
-          "vi": "Chú ý sóng thần (diễn tập)",
-          "fil": "Tsunami Advisory (Pagsasanay)",
-          "id": "Imbauan Tsunami (Latihan)"
+          "ja_easy": "くんれん つなみ ちゅういほう",
+          "en": "DRILL: Tsunami Advisory",
+          "zh_hans": "演习：海啸注意报",
+          "zh_hant": "演習：海嘯注意報",
+          "ko": "훈련: 쓰나미 주의보",
+          "th": "ฝึกซ้อม:ประกาศเฝ้าระวังสึนามิ",
+          "vi": "diễn tập: Chú ý sóng thần",
+          "fil": "pagsasanay: Abiso sa tsunami",
+          "id": "latihan: Imbauan waspada tsunami"
         },
-        "basis": "警報 areas[0].kind_name「津波注意報」（石川県能登, code 360）。訓練であることは headline_text「＊＊＊これは訓練です＊＊＊」による"
+        "basis": "alert.areas[0].kind_name「津波注意報」(石川県能登, code 360) をそのまま使用。alert.status = drill のため【訓練】と各言語の訓練語を付加。"
       },
       {
         "role": "action",
         "text": {
-          "ja": "高い所へ上がる",
-          "ja_easy": "たかい ところへ あがって",
-          "en": "Go to high ground",
-          "zh_hans": "前往高处",
-          "zh_hant": "前往高處",
-          "ko": "높은 곳으로 이동",
-          "th": "ขึ้นไปที่สูง",
-          "vi": "Lên chỗ cao",
-          "fil": "Umakyat sa mataas",
-          "id": "Naik ke tempat tinggi"
+          "ja": "高い所へ移動",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：去高处",
+          "zh_hant": "演習：去高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม:ไปที่สูง",
+          "vi": "diễn tập: Lên chỗ cao",
+          "fil": "pagsasanay: Umakyat",
+          "id": "latihan: Naik ke atas"
         },
-        "basis": "警報 hazard「tsunami」・areas[0].kind_name「津波注意報」と、テンプレート evac-now の図記号 go_higher（いまいる場所から高い所へ上がる）"
+        "basis": "alert.hazard = tsunami、alert.areas[0].kind_name「津波注意報」に対し、テンプレート evac-now の図記号 go_higher（高い所へ上がる）と同じ意味の行動。alert.status = drill のため ja 以外に訓練語を付加。"
       },
       {
         "role": "languages",
         "text": {
-          "ja": "高い所へ上がる",
-          "ja_easy": "たかい ところへ あがって",
-          "en": "Go to high ground",
-          "zh_hans": "前往高处",
-          "zh_hant": "前往高處",
-          "ko": "높은 곳으로 이동",
-          "th": "ขึ้นไปที่สูง",
-          "vi": "Lên chỗ cao",
-          "fil": "Umakyat sa mataas",
-          "id": "Naik ke tempat tinggi"
+          "ja": "高い所へ移動",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：去高处",
+          "zh_hant": "演習：去高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม:ไปที่สูง",
+          "vi": "diễn tập: Lên chỗ cao",
+          "fil": "pagsasanay: Umakyat",
+          "id": "latihan: Naik ke atas"
         },
-        "basis": "action セルと同じ内容（警報 areas[0].kind_name「津波注意報」と図記号 go_higher）を各言語で表示"
+        "basis": "action セルと同じ内容（図記号 go_higher、alert.hazard = tsunami、alert.areas[0].kind_name「津波注意報」）。alert.status = drill のため ja 以外の全言語に訓練語を付加。"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VTSE41-201609010713-ff3dd5d5c94f",
-      "input": 5548,
-      "output": 2126,
+      "input": 8793,
+      "output": 2220,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.064712
-    },
-    {
-      "stage": "writer VTSE41-201609010713-ff3dd5d5c94f",
-      "input": 5587,
-      "output": 2085,
-      "cache_write": 0,
-      "cache_read": 0,
-      "usd": 0.064048
+      "usd": 0.079572
     }
   ],
   "lint": []

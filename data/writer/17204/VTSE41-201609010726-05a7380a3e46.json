@@ -11,55 +11,55 @@
           "zh_hans": "演习：海啸注意报",
           "zh_hant": "演習：海嘯注意報",
           "ko": "훈련: 쓰나미 주의보",
-          "th": "ฝึกซ้อม:ประกาศเฝ้าระวังสึนามิ",
-          "vi": "[diễn tập] Khuyến cáo sóng thần",
-          "fil": "[pagsasanay] Abiso sa Tsunami",
-          "id": "[latihan] Imbauan Tsunami"
+          "th": "ฝึกซ้อม: ประกาศเฝ้าระวังสึนามิ",
+          "vi": "Khuyến cáo sóng thần (diễn tập)",
+          "fil": "Abiso sa tsunami (pagsasanay)",
+          "id": "Imbauan waspada tsunami (latihan)"
         },
-        "basis": "alert.areas[0].kind_name「津波注意報」(石川県能登, code 360, status continued)。alert.status=drill のため、全言語に訓練の語を入れた。headline_text 冒頭「＊＊＊これは訓練です＊＊＊」とも一致。指摘への対応: 訓練の表記はすべての言語でこの見出しセルに出す。action と languages には訓練の語を入れない取り決めのため、そちらには入れていない。"
+        "basis": "The warning name is the alert areas[0].kind_name「津波注意報」for 石川県能登 (code 360). The drill marker comes from alert.status = drill and the headline_text「＊＊＊これは訓練です＊＊＊」. The ja uses the JMA warning name unchanged."
       },
       {
         "role": "action",
         "text": {
-          "ja": "すぐ高い所へ",
-          "ja_easy": "すぐ たかい ところへ",
-          "en": "Go higher now",
-          "zh_hans": "立即前往高处",
-          "zh_hant": "立即前往高處",
-          "ko": "즉시 높은 곳으로",
-          "th": "ไปที่สูงทันที",
-          "vi": "Lên chỗ cao ngay",
-          "fil": "Umakyat agad sa mataas",
-          "id": "Segera ke tempat tinggi"
+          "ja": "高い所へ避難",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：快到高处",
+          "zh_hant": "演習：快到高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม:ขึ้นที่สูง",
+          "vi": "Lên chỗ cao (diễn tập)",
+          "fil": "Umakyat (pagsasanay)",
+          "id": "Naik ke atas (latihan)"
         },
-        "basis": "alert.headline_text「ただちに避難してください」と、図記号 go_higher（いまいる場所から高い所へ上がる）を行動として書いた。訓練の語は取り決めにより入れず、headline に示している。"
+        "basis": "Based on alert.headline_text「ただちに避難してください」. Matches the go_higher pictogram (move up to a high place). Not level 5 (alert.level is null). Drill marker from alert.status = drill in all non-ja languages; ja shows it in the headline【訓練】."
       },
       {
         "role": "languages",
         "text": {
-          "ja": "すぐ高い所へ",
-          "ja_easy": "すぐ たかい ところへ",
-          "en": "Go higher now",
-          "zh_hans": "立即前往高处",
-          "zh_hant": "立即前往高處",
-          "ko": "즉시 높은 곳으로",
-          "th": "ไปที่สูงทันที",
-          "vi": "Lên chỗ cao ngay",
-          "fil": "Umakyat agad sa mataas",
-          "id": "Segera ke tempat tinggi"
+          "ja": "高い所へ避難",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：快到高处",
+          "zh_hant": "演習：快到高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม:ขึ้นที่สูง",
+          "vi": "Lên chỗ cao (diễn tập)",
+          "fil": "Umakyat (pagsasanay)",
+          "id": "Naik ke atas (latihan)"
         },
-        "basis": "action セルと同じ内容を各言語で書いた（根拠: alert.headline_text「ただちに避難してください」と図記号 go_higher）。訓練の表記は取り決めにより languages には入れず、全言語の headline セルに示している。"
+        "basis": "Same content as the action cell. Based on alert.headline_text「ただちに避難してください」 and the go_higher pictogram. Drill marker from alert.status = drill."
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VTSE41-201609010726-05a7380a3e46",
-      "input": 6151,
-      "output": 2061,
+      "input": 8803,
+      "output": 2647,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.065824
+      "usd": 0.088152
     }
   ],
   "lint": []
