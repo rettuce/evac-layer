@@ -22,6 +22,14 @@ const BULLETINS = [
   ['lv5', 'VXKOii-202610211945-a25f8f3aba7d'],
   ['clear', 'VXKOii-202610220620-74a7831c8a40'],
 ]
+// The official JMA sample tsunami bulletins (marked as a drill) for Yoshida, Shizuoka: the major warning
+// on the two widest shapes and the all-clear.
+const TSUNAMI_MUNICIPALITY = '22424'
+const TSUNAMI = [
+  ['tsunami-major', 'VTSE41-201609010713-ff3dd5d5c94f', ['16x9', '32x9']],
+  ['tsunami-clear', 'VTSE41-201609010955-5a813306d772', ['16x9']],
+]
+const SITE_FILE = 'demo/sites/honjo-station/site.json'
 const SHAPES = {
   '16x9': [1920, 1080],
   '9x16': [1080, 1920],
@@ -40,8 +48,8 @@ function scaleFor(shape, width) {
   return shape === 'pillar' ? PILLAR_SCALE : Math.min(1, GALLERY_WIDTH / width)
 }
 
-function previewSrc(bulletin, shape) {
-  return encodeURIComponent(`/api/admin/preview-layout?municipality=${MUNICIPALITY}&bulletin=${bulletin}&shape=${shape}`)
+function previewSrc(bulletin, shape, municipality = MUNICIPALITY) {
+  return encodeURIComponent(`/api/admin/preview-layout?municipality=${municipality}&bulletin=${bulletin}&shape=${shape}`)
 }
 
 async function capture(page, url, shape, ready, scale) {
@@ -59,8 +67,8 @@ async function save(page, name, png) {
   return { name, size: bytes.length }
 }
 
-async function layoutInfo(bulletin) {
-  const layout = JSON.parse(await readFile(`${ROOT}data/layouts/${MUNICIPALITY}/${bulletin}/16x9.json`, 'utf8'))
+async function layoutInfo(bulletin, municipality = MUNICIPALITY) {
+  const layout = JSON.parse(await readFile(`${ROOT}data/layouts/${municipality}/${bulletin}/16x9.json`, 'utf8'))
   const cell = (role) => layout.cells.find((c) => c.role === role)
   return {
     issued: layout.alert.issued_at.slice(0, 16).replace('T', ' '),
@@ -99,8 +107,8 @@ function markdown(infos, files) {
   const lines = [
     '# Screens',
     '',
-    'Every screen below is drawn from a real bulletin of the Japan Meteorological Agency (Yurihonjo, Akita, 21–22 Oct 2026: the Koyoshi River flood sequence). The wording is written by the Writer agent from the municipal hazard map and checked by the Verifier (static, browser and vision).',
-    '全部、気象庁の実際の電文（秋田県由利本荘市・2026-10-21〜22 の子吉川の洪水）から作った画面です。文言は Writer が自治体のハザードマップから書き、Verifier（静的・ブラウザ・画像）が検査しています。',
+    'Every screen below is drawn from a bulletin of the Japan Meteorological Agency: the Koyoshi River flood sequence in Yurihonjo, Akita (21–22 Oct 2026, real bulletins), and the official sample tsunami bulletins for Yoshida, Shizuoka (a drill, so every screen says so). The wording is written by the Writer agent from the municipal hazard map and checked by the Verifier (static, browser and vision). Stills are taken 13.5 s in, while the language band shows easy Japanese and English.',
+    '気象庁の電文から作った画面です。秋田県由利本荘市の子吉川の洪水（2026-10-21〜22 の実際の電文）と、静岡県吉田町の津波（気象庁の公式サンプル電文。訓練なので画面にも【訓練】と出ます）。文言は Writer が自治体のハザードマップから書き、Verifier（静的・ブラウザ・画像）が検査しています。言語帯は、やさしい日本語と英語が出ている 13.5 秒の時点で撮っています。',
     '',
     'Regenerate with `pnpm -F app screens` (production build, loopback admin preview).',
     '',
@@ -115,11 +123,19 @@ function markdown(infos, files) {
       lines.push(`${info.issued} JST · ${info.headline} · ${info.level} — source line: ${info.source}`, '')
     }
   }
+  lines.push('## Tsunami (Yoshida, Shizuoka — official sample bulletins, drill)', '')
+  for (const [key, , shapes] of TSUNAMI) {
+    const info = infos[key]
+    for (const shape of shapes) {
+      lines.push(`![${info.headline} (${shape})](screens/${key}-${shape}.png)`, '')
+      lines.push(`${info.issued} JST · ${info.headline} · ${info.level} — source line: ${info.source}`, '')
+    }
+  }
   lines.push('## Ambient (no alert)', '')
   for (const scene of SCENES) {
     for (const shape of ['16x9', 'pillar']) {
       lines.push(`![ambient ${scene} (${shape})](screens/ambient-${scene}-${shape}.png)`, '')
-      lines.push(`Ambient scene \`${scene}\` on ${shape}${shape === 'pillar' ? ' (the whole column as one picture, shown at 1280 wide)' : ''}; the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).`, '')
+      lines.push(`Ambient scene \`${scene}\` on ${shape}${shape === 'pillar' ? ' (the whole column as one picture, shown at 1280 wide)' : ''}; the clock, the site name and its coordinates sit in one corner (once on the front face of a pillar).`, '')
     }
   }
   lines.push('## Switch (ambient → alert)', '')
@@ -143,11 +159,19 @@ async function main() {
         files.push(await save(page, `${key}-${shape}`))
       }
     }
+    for (const [key, bulletin, shapes] of TSUNAMI) {
+      infos[key] = await layoutInfo(bulletin, TSUNAMI_MUNICIPALITY)
+      for (const shape of shapes) {
+        await capture(page, `${base}/screen?shape=${shape}&clock=virtual&t=${ALERT_AT_MS}&src=${previewSrc(bulletin, shape, TSUNAMI_MUNICIPALITY)}`, shape, '.evac-screen[data-ready="1"]')
+        files.push(await save(page, `${key}-${shape}`))
+      }
+    }
+    const site = JSON.parse(await readFile(`${ROOT}${SITE_FILE}`, 'utf8'))
     for (const scene of SCENES) {
       for (const shape of ['16x9', 'pillar']) {
         await capture(
           page,
-          `${base}/screen?shape=${shape}&clock=virtual&t=4000&mode=scenario&scenario=ambient&scene=${scene}&site_name=${encodeURIComponent(SITE_NAME)}&src=${previewSrc(BULLETINS[1][1], shape)}`,
+          `${base}/screen?shape=${shape}&clock=virtual&t=4000&mode=scenario&scenario=ambient&scene=${scene}&site_name=${encodeURIComponent(SITE_NAME)}&lat=${site.lat}&lng=${site.lng}&src=${previewSrc(BULLETINS[1][1], shape)}`,
           shape,
           '[data-layer="ambient"][data-ready="1"]',
           Math.min(1, GALLERY_WIDTH / SHAPES[shape][0]),

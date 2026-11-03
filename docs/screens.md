@@ -1,7 +1,7 @@
 # Screens
 
-Every screen below is drawn from a real bulletin of the Japan Meteorological Agency (Yurihonjo, Akita, 21–22 Oct 2026: the Koyoshi River flood sequence). The wording is written by the Writer agent from the municipal hazard map and checked by the Verifier (static, browser and vision).
-全部、気象庁の実際の電文（秋田県由利本荘市・2026-10-21〜22 の子吉川の洪水）から作った画面です。文言は Writer が自治体のハザードマップから書き、Verifier（静的・ブラウザ・画像）が検査しています。
+Every screen below is drawn from a bulletin of the Japan Meteorological Agency: the Koyoshi River flood sequence in Yurihonjo, Akita (21–22 Oct 2026, real bulletins), and the official sample tsunami bulletins for Yoshida, Shizuoka (a drill, so every screen says so). The wording is written by the Writer agent from the municipal hazard map and checked by the Verifier (static, browser and vision). Stills are taken 13.5 s in, while the language band shows easy Japanese and English.
+気象庁の電文から作った画面です。秋田県由利本荘市の子吉川の洪水（2026-10-21〜22 の実際の電文）と、静岡県吉田町の津波（気象庁の公式サンプル電文。訓練なので画面にも【訓練】と出ます）。文言は Writer が自治体のハザードマップから書き、Verifier（静的・ブラウザ・画像）が検査しています。言語帯は、やさしい日本語と英語が出ている 13.5 秒の時点で撮っています。
 
 Regenerate with `pnpm -F app screens` (production build, loopback admin preview).
 
@@ -95,23 +95,37 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁 10/22 06:20 発表・由利本荘市
 
+## Tsunami (Yoshida, Shizuoka — official sample bulletins, drill)
+
+![【訓練】大津波警報 (16x9)](screens/tsunami-major-16x9.png)
+
+2016-09-01 07:13 JST · 【訓練】大津波警報 · 警戒レベル4 — source line: 気象庁 9/1 07:13 発表・吉田町
+
+![【訓練】大津波警報 (32x9)](screens/tsunami-major-32x9.png)
+
+2016-09-01 07:13 JST · 【訓練】大津波警報 · 警戒レベル4 — source line: 気象庁 9/1 07:13 発表・吉田町
+
+![【訓練】大津波警報解除 (16x9)](screens/tsunami-clear-16x9.png)
+
+2016-09-01 09:55 JST · 【訓練】大津波警報解除 · 解除 — source line: 気象庁 9/1 09:55 発表・吉田町
+
 ## Ambient (no alert)
 
 ![ambient quad-subdivision (16x9)](screens/ambient-quad-subdivision-16x9.png)
 
-Ambient scene `quad-subdivision` on 16x9; the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+Ambient scene `quad-subdivision` on 16x9; the clock, the site name and its coordinates sit in one corner (once on the front face of a pillar).
 
 ![ambient quad-subdivision (pillar)](screens/ambient-quad-subdivision-pillar.png)
 
-Ambient scene `quad-subdivision` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+Ambient scene `quad-subdivision` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and its coordinates sit in one corner (once on the front face of a pillar).
 
 ![ambient module-field (16x9)](screens/ambient-module-field-16x9.png)
 
-Ambient scene `module-field` on 16x9; the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+Ambient scene `module-field` on 16x9; the clock, the site name and its coordinates sit in one corner (once on the front face of a pillar).
 
 ![ambient module-field (pillar)](screens/ambient-module-field-pillar.png)
 
-Ambient scene `module-field` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+Ambient scene `module-field` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and its coordinates sit in one corner (once on the front face of a pillar).
 
 ## Switch (ambient → alert)
 
