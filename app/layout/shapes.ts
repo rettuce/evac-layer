@@ -13,10 +13,11 @@ export const SHAPES: Record<Shape, { cls: ShapeClass; width: number; height: num
   pillar: { cls: 'pillar', width: 6616, height: 5046 },
 }
 
-// Families meet near the geometric mean of their native aspects, so the fitted native canvas never drops
-// below 0.75 of its size (9:16 at 3:4, 16:9 and 32:9 at their lower bounds) and 1:1 never shrinks.
+// Base shapes meet near the geometric mean of their native aspects, except that 16:9 reaches down to 5:4: the
+// 1:1 base shape drops the shelter cell, and "how far, which way" must survive on 4:3 monitors. The fitted
+// native canvas never drops below 0.70 of its size (16:9 at 5:4) and 1:1 never shrinks.
 const RIBBON_MIN_ASPECT = 2.8
-const LANDSCAPE_MIN_ASPECT = 1.4
+const LANDSCAPE_MIN_ASPECT = 1.25
 const PORTRAIT_MAX_ASPECT = 0.75
 const MAX_VIEWPORT_PX = 16384
 
@@ -32,8 +33,8 @@ export function shapeForViewport(width: number, height: number): Shape {
   return '1x1'
 }
 
-// The family's native canvas is fitted inside the screen, so every track has at least its native room
-// and a layout that fits at the native size fits at any aspect of the family.
+// The base shape's native canvas is fitted inside the screen, so every track has at least its native room
+// and a layout that fits at the native size fits at any aspect the base shape serves.
 export function designScale(width: number, height: number, shape: Shape): number {
   return Math.min(width / SHAPES[shape].width, height / SHAPES[shape].height)
 }

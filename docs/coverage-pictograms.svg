@@ -55,7 +55,7 @@
 <text x="870" y="474" font-family="'Noto Sans JP', sans-serif" font-size="20" font-weight="700" fill="#000" text-anchor="middle">解除・安全</text>
 <text x="870" y="496" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="15" font-weight="400" fill="#555" text-anchor="middle">All clear</text>
 <text x="64" y="524" font-family="'Noto Sans JP', sans-serif" font-size="17" font-weight="400" fill="#555">Material Symbols 6 種（Apache-2.0）・方向の矢印は Material の形をもとに再描画</text>
-<text x="64" y="548" font-family="'Noto Sans JP', sans-serif" font-size="17" font-weight="400" fill="#555">ほか 7 種は EVAC LAYER の自作。台風・高潮・地震は図記号のみ用意（電文の取り込みは 4 種別）</text>
+<text x="64" y="548" font-family="'Noto Sans JP', sans-serif" font-size="17" font-weight="400" fill="#555">ほか 7 種は EVAC LAYER の自作。台風・高潮・地震は図記号だけを用意している（気象庁の電文から画面を作れるのは大雨・土砂災害・洪水・津波）</text>
 <text x="1000" y="168" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="#000">言語<tspan dx="16" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Languages — level 4 action text</tspan></text>
 <text x="1000" y="230" font-family="'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">日本語</text>
 <text x="1180" y="230" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="#000">危険な場所から避難</text>

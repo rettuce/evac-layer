@@ -26,18 +26,18 @@
 <text x="64" y="572" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="#000">警戒レベル 1〜5<tspan dx="16" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Cabinet Office warning levels</tspan></text>
 <rect x="64" y="596" width="345.6" height="120" fill="rgb(12 0 12)" stroke="none"/>
 <text x="84" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(255 255 255)">警戒レベル5</text>
-<text x="84" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(255 255 255)">文字 20.6 : 1</text>
+<text x="84" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(255 255 255)">コントラスト比 20.6 : 1</text>
 <rect x="425.6" y="596" width="345.6" height="120" fill="rgb(170 0 170)" stroke="none"/>
 <text x="445.6" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(255 255 255)">警戒レベル4</text>
-<text x="445.6" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(255 255 255)">文字 6.4 : 1</text>
+<text x="445.6" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(255 255 255)">コントラスト比 6.4 : 1</text>
 <rect x="787.2" y="596" width="345.6" height="120" fill="rgb(255 40 0)" stroke="none"/>
 <text x="807.2" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(0 0 0)">警戒レベル3</text>
-<text x="807.2" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">文字 5.6 : 1</text>
+<text x="807.2" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">コントラスト比 5.6 : 1</text>
 <rect x="1148.8000000000002" y="596" width="345.6" height="120" fill="rgb(242 231 0)" stroke="none"/>
 <text x="1168.8000000000002" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(0 0 0)">警戒レベル2</text>
-<text x="1168.8000000000002" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">文字 16.2 : 1</text>
+<text x="1168.8000000000002" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">コントラスト比 16.2 : 1</text>
 <rect x="1510.4" y="596" width="345.6" height="120" fill="rgb(255 255 255)" stroke="#d0d0d0"/>
 <text x="1530.4" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(0 0 0)">警戒レベル1</text>
-<text x="1530.4" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">文字 21.0 : 1</text>
+<text x="1530.4" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">コントラスト比 21.0 : 1</text>
 <text x="64" y="756" font-family="'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">内閣府 2020 年改定の原典色。帯の文字は自動で白／黒を選び、すべて 4.5 : 1 以上（WCAG AA）</text>
 </svg>
