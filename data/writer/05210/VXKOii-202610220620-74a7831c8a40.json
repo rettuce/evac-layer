@@ -6,48 +6,60 @@
         "role": "headline",
         "text": {
           "ja": "レベル２氾濫注意報解除",
-          "ja_easy": "こよしがわ ちゅういほう おわり",
-          "en": "Koyoshi R. flood cleared",
-          "zh_hans": "子吉川(子吉川)2级泛滥注意报解除",
-          "zh_hant": "子吉川(子吉川)2級氾濫注意報解除",
-          "ko": "고요시강(子吉川) 레벨2 범람주의보 해제"
+          "ja_easy": "こよしがわ みずの ちゅうい おわり",
+          "en": "Koyoshi flood alert over",
+          "zh_hans": "子吉川2级泛滥注意报解除",
+          "zh_hant": "子吉川2級氾濫注意報解除",
+          "ko": "고요시강 레벨2 범람주의보 해제",
+          "th": "ยกเลิกประกาศเฝ้าระวังน้ำล้นตลิ่งระดับ2แม่น้ำโคโยชิ",
+          "vi": "Dỡ bỏ cảnh báo lũ cấp 2 sông Koyoshi",
+          "fil": "Tapos na ang abiso sa pagbaha Antas 2 ng Ilog Koyoshi",
+          "id": "Peringatan banjir Level 2 Sungai Koyoshi dicabut"
         },
-        "basis": "警報 raw_title「子吉川レベル２氾濫注意報解除」、areas[0].kind_name「レベル２氾濫注意報解除」status=cleared、headline_text「〔解除〕子吉川では、氾濫注意水位を下回る」（秋田河川国道事務所 秋田地方気象台、2026-10-22T06:20+09:00）"
+        "basis": "警報 raw_title「子吉川レベル２氾濫注意報解除」、areas[0].kind_name「レベル２氾濫注意報解除」status=cleared、headline_text「〔解除〕子吉川では、氾濫注意水位を下回る」"
       },
       {
         "role": "action",
         "text": {
-          "ja": "避難の必要なし",
-          "ja_easy": "にげなくて だいじょうぶ",
+          "ja": "避難は不要です",
+          "ja_easy": "にげなくて だいじょうぶです",
           "en": "No need to leave",
           "zh_hans": "无需避难",
           "zh_hant": "無需避難",
-          "ko": "대피할 필요 없음"
+          "ko": "대피할 필요 없음",
+          "th": "ไม่ต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Hindi kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
         },
-        "basis": "警報 areas[0].status=cleared（由利本荘市、レベル２氾濫注意報解除）と、テンプレート all-clear の図記号 safe_here（解除。避難の必要がなくなったことを伝える）。知識ファイルの cautions は解除時の注意喚起にあたるため使用せず"
+        "basis": "警報 info_type=issued・areas[0].status=cleared（由利本荘市のレベル２氾濫注意報解除）とテンプレート all-clear の図記号 safe_here（避難の必要がなくなったことを伝える）。知識ファイルの注意事項は解除画面では使用せず"
       },
       {
         "role": "languages",
         "text": {
-          "ja": "避難の必要なし",
-          "ja_easy": "にげなくて だいじょうぶ",
+          "ja": "避難は不要です",
+          "ja_easy": "にげなくて だいじょうぶです",
           "en": "No need to leave",
           "zh_hans": "无需避难",
           "zh_hant": "無需避難",
-          "ko": "대피할 필요 없음"
+          "ko": "대피할 필요 없음",
+          "th": "ไม่ต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Hindi kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
         },
-        "basis": "action セルと同じ内容（警報 areas[0].status=cleared と図記号 safe_here の意味）を各言語で表示"
+        "basis": "action セルと同じ内容（警報 areas[0].status=cleared、図記号 safe_here）を各言語で表示"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VXKOii-202610220620-74a7831c8a40",
-      "input": 3092,
-      "output": 1761,
+      "input": 3489,
+      "output": 2641,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.047588
+      "usd": 0.066776
     }
   ],
   "lint": []

@@ -23,9 +23,13 @@
         "ja": "レベル３大雨警報",
         "ja_easy": "レベル３ おおあめ けいほう",
         "en": "Lv3 Heavy Rain Warning",
-        "zh_hans": "轮岛市（輪島市）3级暴雨警报",
-        "zh_hant": "輪島市 3級大雨警報",
-        "ko": "와지마시(輪島市) 레벨3 호우경보"
+        "zh_hans": "3级大雨警报",
+        "zh_hant": "3級大雨警報",
+        "ko": "레벨3 호우경보",
+        "th": "คำเตือนฝนตกหนักระดับ3",
+        "vi": "Cảnh báo mưa lớn cấp 3",
+        "fil": "Babala sa Malakas na Ulan, Antas 3",
+        "id": "Peringatan Hujan Lebat Level 3"
       },
       "pictogram": "heavy_rain",
       "motion": "scale-in"
@@ -35,12 +39,16 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "避難の準備",
-        "ja_easy": "にげる じゅんびを します",
-        "en": "Prepare to leave",
-        "zh_hans": "做好避难准备",
-        "zh_hant": "做好避難準備",
-        "ko": "대피 준비"
+        "ja": "高齢者は避難",
+        "ja_easy": "おとしよりは にげて",
+        "en": "Elderly: evacuate",
+        "zh_hans": "老人请避难",
+        "zh_hant": "老人請避難",
+        "ko": "고령자는 대피",
+        "th": "ผู้สูงอายุอพยพ",
+        "vi": "Người già hãy sơ tán",
+        "fil": "Lumikas ang matatanda",
+        "id": "Lansia harap mengungsi"
       },
       "pictogram": "directions_run",
       "motion": "pulse"
@@ -73,12 +81,16 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "避難の準備",
-        "ja_easy": "にげる じゅんびを します",
-        "en": "Prepare to leave",
-        "zh_hans": "做好避难准备",
-        "zh_hant": "做好避難準備",
-        "ko": "대피 준비"
+        "ja": "高齢者は避難",
+        "ja_easy": "おとしよりは にげて",
+        "en": "Elderly: evacuate",
+        "zh_hans": "老人请避难",
+        "zh_hant": "老人請避難",
+        "ko": "고령자는 대피",
+        "th": "ผู้สูงอายุอพยพ",
+        "vi": "Người già hãy sơ tán",
+        "fil": "Lumikas ang matatanda",
+        "id": "Lansia harap mengungsi"
       },
       "motion": "static"
     },

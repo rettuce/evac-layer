@@ -6,48 +6,60 @@
         "role": "headline",
         "text": {
           "ja": "レベル２土砂災害注意報",
-          "ja_easy": "どしゃくずれ ちゅういほう おわり",
+          "ja_easy": "どしゃさいがい ちゅういほう おわり",
           "en": "Landslide advisory ended",
-          "zh_hans": "土砂灾害注意报解除",
-          "zh_hant": "土砂災害注意報解除",
-          "ko": "토사재해 주의보 해제"
+          "zh_hans": "2级土石灾害注意报解除",
+          "zh_hant": "2級土石災害注意報解除",
+          "ko": "레벨2 토사재해 주의보 해제",
+          "th": "ยกเลิกประกาศเฝ้าระวังดินถล่มระดับ2",
+          "vi": "Hủy cảnh báo sạt lở đất cấp 2",
+          "fil": "Tapos na ang abiso sa pagguho ng lupa (Antas 2)",
+          "id": "Peringatan dini tanah longsor Level 2 dicabut"
         },
-        "basis": "警報 areas[0].kind_name「レベル２土砂災害注意報」（輪島市 1720400）と areas[0].status「cleared」、headline_text「注意報を解除します。」（金沢地方気象台、2026-10-22T00:00+09:00）。ja の文字数予算12字のため「レベル２」を省いた（警報名＋「解除」は13字）。"
+        "basis": "警報 areas[0].kind_name「レベル２土砂災害注意報」、areas[0].status「cleared」、headline_text「注意報を解除します。」（金沢地方気象台・輪島市）"
       },
       {
         "role": "action",
         "text": {
-          "ja": "注意報は解除済み",
-          "ja_easy": "ちゅういほうは おわりました",
-          "en": "Advisory lifted",
-          "zh_hans": "注意报已解除",
-          "zh_hant": "注意報已解除",
-          "ko": "주의보 해제됨"
+          "ja": "避難は不要です",
+          "ja_easy": "にげなくて だいじょうぶです",
+          "en": "No need to leave",
+          "zh_hans": "无需避难",
+          "zh_hant": "無需避難",
+          "ko": "대피할 필요 없음",
+          "th": "ไม่ต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
         },
-        "basis": "警報 headline_text「注意報を解除します。」と areas[0].status「cleared」。警報にも自治体知識ファイルにも解除後の行動の指示はないため、解除の事実だけを書いた。"
+        "basis": "警報 areas[0].status「cleared」（注意報解除）とテンプレート all-clear の図記号 safe_here（避難の必要がなくなった）。知識ファイルの事実は使用せず"
       },
       {
         "role": "languages",
         "text": {
-          "ja": "注意報は解除済み",
-          "ja_easy": "ちゅういほうは おわりました",
-          "en": "Advisory lifted",
-          "zh_hans": "注意报已解除",
-          "zh_hant": "注意報已解除",
-          "ko": "주의보 해제됨"
+          "ja": "避難は不要です",
+          "ja_easy": "にげなくて だいじょうぶです",
+          "en": "No need to leave",
+          "zh_hans": "无需避难",
+          "zh_hant": "無需避難",
+          "ko": "대피할 필요 없음",
+          "th": "ไม่ต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
         },
-        "basis": "action セルと同じ内容（警報 headline_text「注意報を解除します。」と areas[0].status「cleared」）を各言語で表示。"
+        "basis": "action セルと同じ内容（警報 areas[0].status「cleared」、図記号 safe_here）"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VPWW56-202610220000-d13b2ada2646",
-      "input": 4743,
-      "output": 1812,
+      "input": 5214,
+      "output": 1975,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.055212
+      "usd": 0.060356
     }
   ],
   "lint": []

@@ -22,10 +22,14 @@
       "text": {
         "ja": "レベル３土砂災害警報",
         "ja_easy": "レベル３ どしゃさいがい けいほう",
-        "en": "Landslide Warning Lv.3",
-        "zh_hans": "3级土砂灾害警报",
-        "zh_hant": "3級土砂災害警報",
-        "ko": "레벨3 토사재해 경보"
+        "en": "Lv.3 Landslide Warning",
+        "zh_hans": "3级泥石流灾害警报",
+        "zh_hant": "3級土石災害警報",
+        "ko": "레벨3 토사재해 경보",
+        "th": "คำเตือนภัยดินถล่มระดับ3",
+        "vi": "Cảnh báo sạt lở đất cấp 3",
+        "fil": "Babala sa Pagguho ng Lupa Lv.3",
+        "id": "Peringatan Tanah Longsor Lv.3"
       },
       "pictogram": "landslide",
       "motion": "scale-in"
@@ -36,11 +40,15 @@
       "priority": 1,
       "text": {
         "ja": "高齢者は避難",
-        "ja_easy": "おとしよりは にげて",
+        "ja_easy": "おとしよりは にげてください",
         "en": "Elderly: evacuate",
         "zh_hans": "老年人请避难",
         "zh_hant": "老年人請避難",
-        "ko": "고령자는 대피하세요"
+        "ko": "고령자는 대피",
+        "th": "ผู้สูงอายุให้อพยพ",
+        "vi": "Người cao tuổi sơ tán",
+        "fil": "Lumikas ang matatanda",
+        "id": "Lansia, mengungsilah"
       },
       "pictogram": "directions_run",
       "motion": "pulse"
@@ -74,11 +82,15 @@
       "priority": 3,
       "text": {
         "ja": "高齢者は避難",
-        "ja_easy": "おとしよりは にげて",
+        "ja_easy": "おとしよりは にげてください",
         "en": "Elderly: evacuate",
         "zh_hans": "老年人请避难",
         "zh_hant": "老年人請避難",
-        "ko": "고령자는 대피하세요"
+        "ko": "고령자는 대피",
+        "th": "ผู้สูงอายุให้อพยพ",
+        "vi": "Người cao tuổi sơ tán",
+        "fil": "Lumikas ang matatanda",
+        "id": "Lansia, mengungsilah"
       },
       "motion": "static"
     },

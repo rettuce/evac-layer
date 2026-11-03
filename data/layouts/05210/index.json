@@ -266,7 +266,7 @@
       "template": "evac-prepare",
       "display_level": 3,
       "outcome": "pass",
-      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
         "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/16x9.json",
         "data/layouts/05210/VXKOii-202610211555-d5ccc7c6b547/9x16.json",
@@ -286,7 +286,7 @@
       "template": "evac-now",
       "display_level": 4,
       "outcome": "pass",
-      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
         "data/layouts/05210/VXKOii-202610211815-e713da0e3c05/16x9.json",
         "data/layouts/05210/VXKOii-202610211815-e713da0e3c05/9x16.json",
@@ -306,7 +306,7 @@
       "template": "secure-now",
       "display_level": 5,
       "outcome": "pass",
-      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
         "data/layouts/05210/VXKOii-202610211945-a25f8f3aba7d/16x9.json",
         "data/layouts/05210/VXKOii-202610211945-a25f8f3aba7d/9x16.json",
@@ -326,7 +326,7 @@
       "template": "secure-now",
       "display_level": 5,
       "outcome": "pass",
-      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
         "data/layouts/05210/VXKOii-202610212015-979f11623ff9/16x9.json",
         "data/layouts/05210/VXKOii-202610212015-979f11623ff9/9x16.json",
@@ -355,7 +355,7 @@
       "template": "secure-now",
       "display_level": 5,
       "outcome": "pass",
-      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
         "data/layouts/05210/VXKOii-202610212115-34469436adbc/16x9.json",
         "data/layouts/05210/VXKOii-202610212115-34469436adbc/9x16.json",
@@ -438,7 +438,7 @@
       "template": "all-clear",
       "display_level": 1,
       "outcome": "pass",
-      "verified_by": "static+browser(http://127.0.0.1:3152)",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
         "data/layouts/05210/VXKOii-202610220620-74a7831c8a40/16x9.json",
         "data/layouts/05210/VXKOii-202610220620-74a7831c8a40/9x16.json",

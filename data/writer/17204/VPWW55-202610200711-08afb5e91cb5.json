@@ -7,47 +7,59 @@
         "text": {
           "ja": "レベル３大雨警報",
           "ja_easy": "レベル３ おおあめ けいほう",
-          "en": "Heavy Rain Warning Lv3",
+          "en": "Heavy Rain Warning Lv 3",
           "zh_hans": "3级暴雨警报",
           "zh_hant": "3級大雨警報",
-          "ko": "레벨3 호우경보"
+          "ko": "레벨3 호우경보",
+          "th": "คำเตือนฝนตกหนักระดับ3",
+          "vi": "Cảnh báo mưa lớn cấp 3",
+          "fil": "Babala sa Malakas na Ulan Lv 3",
+          "id": "Peringatan Hujan Lebat Lv 3"
         },
-        "basis": "警報 areas[0].kind_name「レベル３大雨警報」（輪島市、status: continued）、level: 3、publishing_office: 金沢地方気象台"
+        "basis": "警報 areas[0].kind_name「レベル３大雨警報」（輪島市, level 3, status continued）, publishing_office 金沢地方気象台"
       },
       {
         "role": "action",
         "text": {
           "ja": "高齢者は避難",
-          "ja_easy": "おとしよりは にげてください",
+          "ja_easy": "おとしより は にげて",
           "en": "Elderly: evacuate",
           "zh_hans": "老年人请避难",
-          "zh_hant": "老年人請避難",
-          "ko": "고령자는 대피하세요"
+          "zh_hant": "長者請避難",
+          "ko": "고령자는 대피",
+          "th": "ผู้สูงอายุอพยพ",
+          "vi": "Người cao tuổi sơ tán",
+          "fil": "Lumikas ang matatanda",
+          "id": "Lansia harap mengungsi"
         },
-        "basis": "警報 level: 3 とテンプレート evac-prepare の図記号 directions_run の意味（レベル3では高齢者等が避難）。字数予算（ja 6字）のため「高齢者等」を「高齢者」と表記。自治体知識ファイルに輪島市の避難行動の記載はなし"
+        "basis": "警報 level 3（areas[0].level 3, 輪島市）と図記号 directions_run の意味（レベル3では高齢者等が避難）。知識ファイルに該当する行動の記載なし"
       },
       {
         "role": "languages",
         "text": {
           "ja": "高齢者は避難",
-          "ja_easy": "おとしよりは にげてください",
+          "ja_easy": "おとしより は にげて",
           "en": "Elderly: evacuate",
           "zh_hans": "老年人请避难",
-          "zh_hant": "老年人請避難",
-          "ko": "고령자는 대피하세요"
+          "zh_hant": "長者請避難",
+          "ko": "고령자는 대피",
+          "th": "ผู้สูงอายุอพยพ",
+          "vi": "Người cao tuổi sơ tán",
+          "fil": "Lumikas ang matatanda",
+          "id": "Lansia harap mengungsi"
         },
-        "basis": "action セルと同じ内容（警報 level: 3、図記号 directions_run の意味）を各言語で表示"
+        "basis": "action セルと同じ内容（警報 level 3 と図記号 directions_run の意味）"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VPWW55-202610200711-08afb5e91cb5",
-      "input": 4937,
-      "output": 1322,
+      "input": 5235,
+      "output": 1656,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.046188
+      "usd": 0.05406
     }
   ],
   "lint": []

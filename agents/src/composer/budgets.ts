@@ -1,32 +1,33 @@
 import type { PanelShape, TemplateId } from "../../../app/layout/types";
 import type { CellBudget } from "../writer/request.js";
 
-// Provisional; the rationale lives in schema/README.md ("Character budgets").
+// Provisional; the rationale lives in schema/README.md ("Character budgets"). th, vi, fil and id start at 1.1x, 1.2x,
+// 1.3x and 1.3x of the English budget until the render seat's overflow results say otherwise.
 const HEADLINE = { role: "headline" as const, max_chars: { ja: 14, ja_easy: 18, en: 24 } };
 export const CHAR_BUDGETS: Record<PanelShape, CellBudget[]> = {
   "16x9": [
     HEADLINE,
-    { role: "action", max_chars: { ja: 12, ja_easy: 18, en: 28 } },
+    { role: "action", max_chars: { ja: 12, ja_easy: 18, en: 28, th: 31, vi: 34, fil: 37, id: 37 } },
     { role: "direction", max_chars: { ja: 10 } },
-    { role: "languages", max_chars: { ja_easy: 24, en: 40, zh_hans: 16, ko: 24 } },
+    { role: "languages", max_chars: { ja_easy: 24, en: 40, zh_hans: 16, ko: 24, th: 44, vi: 48, fil: 52, id: 52 } },
   ],
   "9x16": [
     HEADLINE,
-    { role: "action", max_chars: { ja: 10, ja_easy: 14, en: 22 } },
+    { role: "action", max_chars: { ja: 10, ja_easy: 14, en: 22, th: 25, vi: 27, fil: 29, id: 29 } },
     { role: "direction", max_chars: { ja: 10 } },
-    { role: "languages", max_chars: { ja_easy: 16, en: 26, zh_hans: 10, ko: 16 } },
+    { role: "languages", max_chars: { ja_easy: 16, en: 26, zh_hans: 10, ko: 16, th: 29, vi: 32, fil: 34, id: 34 } },
   ],
   "32x9": [
     HEADLINE,
-    { role: "action", max_chars: { ja: 10, ja_easy: 14, en: 22 } },
+    { role: "action", max_chars: { ja: 10, ja_easy: 14, en: 22, th: 25, vi: 27, fil: 29, id: 29 } },
     { role: "direction", max_chars: { ja: 8 } },
-    { role: "languages", max_chars: { ja_easy: 40, en: 64, zh_hans: 24, ko: 40 } },
+    { role: "languages", max_chars: { ja_easy: 40, en: 64, zh_hans: 24, ko: 40, th: 71, vi: 77, fil: 84, id: 84 } },
   ],
   "1x1": [
     HEADLINE,
-    { role: "action", max_chars: { ja: 6, ja_easy: 24, en: 18 } },
+    { role: "action", max_chars: { ja: 6, ja_easy: 24, en: 18, th: 20, vi: 22, fil: 24, id: 24 } },
     { role: "direction", max_chars: { ja: 8 } },
-    { role: "languages", max_chars: { ja_easy: 14, en: 22, zh_hans: 8, ko: 14 } },
+    { role: "languages", max_chars: { ja_easy: 14, en: 22, zh_hans: 8, ko: 14, th: 25, vi: 27, fil: 29, id: 29 } },
   ],
 };
 
