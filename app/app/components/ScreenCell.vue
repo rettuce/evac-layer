@@ -17,7 +17,7 @@ const props = defineProps<{
 
 const rotationLangs = computed<LangKey[]>(() => LANGUAGE_ROTATION.filter((key) => props.cell.text[key]))
 const headlineStyle = computed(() =>
-  props.headlineScale && props.headlineScale !== 1 ? { fontSize: `calc(var(--fs-guide) * ${props.headlineScale} * var(--px))` } : undefined,
+  props.headlineScale && props.headlineScale !== 1 ? { fontSize: `calc(var(--fs-guide) * ${props.headlineScale} * var(--type-scale, 1) * var(--px))` } : undefined,
 )
 const languageGroups = computed<LangKey[][]>(() => {
   const langs = rotationLangs.value
@@ -158,7 +158,20 @@ p {
 .role-shelter {
   display: flex;
   flex-direction: column;
-  gap: calc(24 * var(--px));
+  gap: calc(16 * var(--px));
+}
+.role-direction {
+  flex-direction: row;
+  align-items: center;
+  gap: calc(16 * var(--px));
+}
+.shape-ribbon .lang-variant {
+  flex-direction: row;
+  gap: calc(96 * var(--px));
+}
+.shape-ribbon .lang-line {
+  flex: 1 1 0;
+  min-width: 0;
 }
 .action-sub,
 .shelter-name {

@@ -87,7 +87,7 @@ body {
   font-weight: 700;
 }
 .t-guide {
-  font-size: calc(var(--fs-guide) * var(--px));
+  font-size: calc(var(--fs-guide) * var(--type-scale, 1) * var(--px));
   line-height: var(--lh-guide);
   font-weight: 700;
 }

@@ -46,3 +46,22 @@ export function gridCss(layout: ShapeLayout) {
     gridTemplateAreas: layout.areas.map((row) => `"${row}"`).join(' '),
   }
 }
+
+// A dropped cell leaves an empty row and the block gap before it; both go, so the space returns to the
+// cells that remain. Names that also sit in other rows (a band or an action spanning rows) count as empty.
+export function collapseAbsent(layout: ShapeLayout, present: ReadonlySet<string>): ShapeLayout {
+  const rows = layout.areas.map((row) => row.split(/\s+/).map((name) => (name === '.' || present.has(name) ? name : '.')))
+  const spans = (name: string, except: Set<number>) => rows.some((names, i) => !except.has(i) && names.includes(name))
+  const removed = new Set<number>()
+  const isEmpty = (i: number) => rows[i]!.every((name) => name === '.' || spans(name, new Set([...removed, i])))
+  layout.areas.forEach((row, i) => {
+    const hadAbsent = row.split(/\s+/).some((name) => name !== '.' && !present.has(name))
+    if (!hadAbsent || !isEmpty(i)) return
+    removed.add(i)
+    if (i > 0 && !removed.has(i - 1) && isEmpty(i - 1)) removed.add(i - 1)
+  })
+  if (!removed.size) return { ...layout, areas: rows.map((names) => names.join(' ')) }
+  const kept = rows.filter((_, i) => !removed.has(i))
+  if ([...present].some((name) => rows.some((names) => names.includes(name)) && !kept.some((names) => names.includes(name)))) return layout
+  return { ...layout, rows: layout.rows.filter((_, i) => !removed.has(i)), areas: kept.map((names) => names.join(' ')) }
+}

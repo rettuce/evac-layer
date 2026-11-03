@@ -3,7 +3,8 @@ import { PILLAR } from './shapes'
 import { SHELTER_PICTOGRAM_PX } from './typography'
 
 const M = 48
-const G = 24
+// Space between information blocks is at least one guide-text height (64), so each block reads as a unit.
+const G = 64
 const BAND = 176
 // The source line is only the bulletin time and the municipality, so it sits close to the foot.
 const SOURCE_GAP = 8
@@ -12,7 +13,7 @@ export const STACKED_BAND_MIN_PX = 200
 
 const LANDSCAPE: ShapeLayout = {
   id: 'split',
-  columns: [M, '5fr', M, '4fr', M],
+  columns: [M, '5fr', G, '4fr', M],
   rows: [BAND, M, '1fr', G, '1fr', G, 'auto', SOURCE_GAP, 'auto', FOOT],
   areas: [
     'headline headline headline headline headline',
@@ -27,7 +28,7 @@ const LANDSCAPE: ShapeLayout = {
     '. . . . .',
   ],
   required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
-  pictogramPx: { headline: 112, action: 192, direction: 192, shelter: SHELTER_PICTOGRAM_PX },
+  pictogramPx: { headline: 112, action: 184, direction: 224, shelter: SHELTER_PICTOGRAM_PX },
 }
 
 const PORTRAIT: ShapeLayout = {
@@ -49,30 +50,42 @@ const PORTRAIT: ShapeLayout = {
     '. . .',
   ],
   required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
-  pictogramPx: { headline: 112, action: 256, direction: 192, shelter: SHELTER_PICTOGRAM_PX },
+  pictogramPx: { headline: 112, action: 300, direction: 224, shelter: SHELTER_PICTOGRAM_PX },
 }
+
+// 32:9 hangs above walkways and is read from 8 to 15 m, so its guide text follows the 8 m distance
+// (8000 / 120 mm at the 55" pitch ≈ 104 px) instead of the 5 m used by panels at eye level.
+const RIBBON_BAND = 1040
+const RIBBON_LANGUAGES = 288
+const RIBBON_TYPE = 1.625
+const RIBBON_HEADLINE_TYPE = 1.75
+const RIBBON_SCALE: Partial<Record<Role, number>> = { headline: RIBBON_HEADLINE_TYPE, direction: RIBBON_TYPE, shelter: RIBBON_TYPE, languages: RIBBON_TYPE }
 
 const RIBBON: ShapeLayout = {
   id: 'columns',
-  columns: [720, M, '4fr', M, '3fr', M, '3fr', M],
-  rows: [M, 'auto', G, '1fr', M, 256],
+  columns: [RIBBON_BAND, M, '5fr', G, '4fr', M],
+  rows: [M, 'auto', G, '1fr', G, 'auto', M, RIBBON_LANGUAGES],
   areas: [
-    'headline . . . . . . .',
-    'headline . source source source source source .',
-    'headline . . . . . . .',
-    'headline . action . direction . shelter .',
-    'headline . . . . . . .',
-    'headline languages languages languages languages languages languages languages',
+    'headline . . . . .',
+    'headline . source source source .',
+    'headline . . . . .',
+    'headline . action . direction .',
+    'headline . action . . .',
+    'headline . action . shelter .',
+    'headline . . . . .',
+    'headline languages languages languages languages languages',
   ],
   required: ['headline', 'action', 'direction', 'languages', 'source'],
-  pictogramPx: { headline: 160, action: 288, direction: 288, shelter: SHELTER_PICTOGRAM_PX },
+  pictogramPx: { headline: 320, action: 352, direction: 208, shelter: 160 },
   darkBand: ['languages'],
+  inline: ['shelter'],
+  typeScale: RIBBON_SCALE,
 }
 
 const RIBBON_WIDE_DIRECTION: ShapeLayout = {
   id: 'wide-direction',
-  columns: [720, M, '4fr', M, '6fr', M],
-  rows: [M, 'auto', G, '1fr', M, 256],
+  columns: [RIBBON_BAND, M, '4fr', G, '6fr', M],
+  rows: [M, 'auto', G, '1fr', M, RIBBON_LANGUAGES],
   areas: [
     'headline . . . . .',
     'headline . source source source .',
@@ -82,9 +95,10 @@ const RIBBON_WIDE_DIRECTION: ShapeLayout = {
     'headline shelter shelter languages languages languages',
   ],
   required: ['headline', 'action', 'direction', 'languages', 'source'],
-  pictogramPx: { headline: 160, action: 288, direction: 320, shelter: SHELTER_PICTOGRAM_PX },
+  pictogramPx: { headline: 320, action: 240, direction: 320, shelter: 160 },
   darkBand: ['shelter', 'languages'],
-  inline: ['direction', 'shelter'],
+  inline: ['shelter'],
+  typeScale: RIBBON_SCALE,
 }
 
 const SQUARE: ShapeLayout = {
@@ -135,8 +149,8 @@ const CLEAR_STACK: ShapeLayout = {
 
 const CLEAR_RIBBON: ShapeLayout = {
   id: 'clear-columns',
-  columns: [720, M, '1fr', M],
-  rows: [M, 'auto', G, '1fr', M, 256],
+  columns: [RIBBON_BAND, M, '1fr', M],
+  rows: [M, 'auto', G, '1fr', M, RIBBON_LANGUAGES],
   areas: [
     'headline . . .',
     'headline . source .',
@@ -146,8 +160,9 @@ const CLEAR_RIBBON: ShapeLayout = {
     'headline languages languages languages',
   ],
   required: ['headline', 'action', 'languages', 'source'],
-  pictogramPx: { headline: 160, action: 288 },
+  pictogramPx: { headline: 320, action: 288 },
   darkBand: ['languages'],
+  typeScale: RIBBON_SCALE,
 }
 
 const CLEAR_SQUARE: ShapeLayout = {
@@ -161,7 +176,7 @@ const CLEAR_SQUARE: ShapeLayout = {
 // screen drops shelter and direction and gives the whole body to the action.
 const SECURE_LANDSCAPE: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 320 } }
 const SECURE_PORTRAIT: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 480 } }
-const SECURE_RIBBON: ShapeLayout = { ...CLEAR_RIBBON, id: 'secure-columns', pictogramPx: { headline: 160, action: 384 } }
+const SECURE_RIBBON: ShapeLayout = { ...CLEAR_RIBBON, id: 'secure-columns', pictogramPx: { headline: 320, action: 384 } }
 const SECURE_SQUARE: ShapeLayout = { ...CLEAR_SQUARE, id: 'secure-square', pictogramPx: { headline: 112, action: 240 } }
 
 // 9:16 and 1:1 put the level label under the headline: the band is at least STACKED_BAND_MIN_PX
@@ -201,7 +216,7 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
 // with the source runs round the foot of the column (0.40–0.75 m), and the top band and one large
 // action pictogram take the upper column. Rows are in design px, so metres are divided by the face scale.
 const PILLAR_EYE_LOW_M = 1.0
-const PILLAR_EYE_HIGH_M = 2.2
+const PILLAR_EYE_HIGH_M = 2.4
 const PILLAR_FOOT_BAND_TOP_M = 0.75
 const PILLAR_HERO_PX = 800
 const PILLAR_BODY_ORDER: Role[] = ['action', 'languages', 'direction', 'shelter']
