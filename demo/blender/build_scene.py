@@ -647,7 +647,8 @@ def main():
     frame_count = max(2, round(seconds * args.fps))
     cut = args.cut or (shot["screens"] if shot else None)
     light_scale = (shot["light_scale"] if shot else 1.0) * ROOM_LIGHT_SCALE * args.room_light
-    frames_dir = CACHE_DIR / "frames"
+    # One frames folder per shot: renders run side by side, and each clears its own folder first.
+    frames_dir = CACHE_DIR / "frames" / (args.shot or "default")
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
     back_wall_clear = [(center.x - SCREENS[shape]["size"][0] / 2 - JOINT_M, center.x + SCREENS[shape]["size"][0] / 2 + JOINT_M)
