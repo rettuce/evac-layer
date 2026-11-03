@@ -100,15 +100,6 @@
       "narration_en": "It reads the documents in calm times, writes when a warning arrives, and sends only checked guidance, as approved."
     },
     {
-      "cut": "4b",
-      "kind": "capture",
-      "seconds": 12,
-      "src": "../capture/out/cut04b.mp4",
-      "slate": "端末 3 連の短縮版（Reader の読み直し → Writer → Verifier の差し戻しと再送・各 4 s）。田中判断待ち",
-      "narration_ja": "生成した案内は検査役が画像で読みます。方向の欄に距離が重なれば差し戻し、直るまで出しません。",
-      "narration_en": "An inspector reads each generated screen as an image. If the distance is duplicated in the direction cell, it is sent back, and nothing goes out until the fix passes."
-    },
-    {
       "cut": "5c",
       "kind": "capture",
       "seconds": 14,

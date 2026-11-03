@@ -196,10 +196,47 @@ SHOTS = {
         "path": [along_axis(-8.6), along_axis(-7.9)],
     },
 }
+
+
+def oblique(target, distance, angle_deg, height, lens):
+    """Camera on a surface facing -Y, swung angle_deg toward +X (the concourse centre for the left column)."""
+    angle = math.radians(angle_deg)
+    location = Vector((target.x + math.sin(angle) * distance, target.y - math.cos(angle) * distance, height))
+    return {"location": location, "target": target, "lens": lens}
+
+
+CLOSEUP_TARGETS = {
+    "col": Vector((COLUMNS[0][0], COLUMNS[0][1], COLUMN_LED_MID_Z)),
+    "rib": RIBBON_FACE,
+    "wall": Vector((0.0, WALL_FACE_Y, BACK_WALL_SCREEN_Z)),
+}
+# (target, angle, height, lens, distance): each keeps the whole screen in frame with some room around it.
+CLOSEUP_OPTIONS = {
+    "col-30-eye-35": ("col", 30, EYE_Z, 35.0, 9.0),
+    "col-45-eye-35": ("col", 45, EYE_Z, 35.0, 9.0),
+    "col-30-low-35": ("col", 30, 0.8, 35.0, 9.0),
+    "col-45-high-35": ("col", 45, 3.0, 35.0, 9.0),
+    "col-35-eye-50": ("col", 35, EYE_Z, 50.0, 11.5),
+    "rib-30-eye-35": ("rib", 30, EYE_Z, 35.0, 11.5),
+    "rib-30-mid-35": ("rib", 30, 3.0, 35.0, 11.5),
+    "rib-15-eye-35": ("rib", 15, EYE_Z, 35.0, 11.5),
+    "rib-m30-mid-35": ("rib", -30, 2.4, 35.0, 11.5),
+    "rib-30-eye-50": ("rib", 30, 2.0, 50.0, 15.0),
+    "wall-30-eye-35": ("wall", 30, EYE_Z, 35.0, 6.5),
+    "wall-45-eye-35": ("wall", 45, EYE_Z, 35.0, 6.5),
+    "wall-30-low-35": ("wall", 30, 0.9, 35.0, 6.5),
+    "wall-30-eye-50": ("wall", 30, EYE_Z, 50.0, 9.0),
+    "wall-20-high-50": ("wall", 20, 2.6, 50.0, 9.0),
+}
+# Mesh objects that make up each close-up's screen (a column's LED band is four strips).
+CLOSEUP_OBJECTS = {"col": [f"led_wrap_0_{face}" for face in range(4)], "rib": ["screen_32x9_0"], "wall": ["screen_9x16_1"]}
+STILL_CAMERAS.update({name: oblique(CLOSEUP_TARGETS[t], d, a, h, lens) for name, (t, a, h, lens, d) in CLOSEUP_OPTIONS.items()})
 CLAY_ALBEDO = 0.85
 # Screens a shade darker than the room, so the silent panels still read in the white world.
 CLAY_SCREEN_ALBEDO = 0.55
 CLAY_WORLD = 1.15
+CLAY_CYCLES_SAMPLES = 48
+CLAY_AO_DISTANCE_M = 4.0
 
 
 def parse_args():
@@ -452,6 +489,31 @@ def canvas_crops():
     return {"canvas": [width, height], "crops": {name: list(box) for name, box in crops.items()}}
 
 
+def framing_report(name):
+    """Share of the close-up's screen surface that is inside the frame and not hidden, sampled per face."""
+    from bpy_extras.object_utils import world_to_camera_view
+    scene = bpy.context.scene
+    camera = scene.camera
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    origin = camera.matrix_world.translation
+    facing_points = inside = 0
+    for obj_name in CLOSEUP_OBJECTS[name.split("-")[0]]:
+        obj = bpy.data.objects[obj_name]
+        for poly in obj.data.polygons:
+            center = obj.matrix_world @ poly.center
+            if (obj.matrix_world.to_3x3() @ poly.normal).dot(origin - center) <= 0:
+                continue
+            corners = [obj.matrix_world @ obj.data.vertices[i].co for i in poly.vertices]
+            for point in [center] + [center + (corner - center) * 0.96 for corner in corners]:
+                facing_points += 1
+                ndc = world_to_camera_view(scene, camera, point)
+                ray = point - origin
+                hit, _, _, _, hit_obj, _ = scene.ray_cast(depsgraph, origin, ray.normalized(), distance=ray.length + 0.01)
+                if 0 <= ndc.x <= 1 and 0 <= ndc.y <= 1 and ndc.z > 0 and hit and hit_obj.name == obj_name:
+                    inside += 1
+    print(f"FRAMING {name} visible={inside}/{facing_points}")
+
+
 def verify_screen_colors(png, frame, sources):
     flat = {shape: SCREENS[shape] for shape in ("9x16", "32x9")}
     report_screen_colors(png, frame, sources, flat, FLUSH_EPS_M, CACHE_DIR)
@@ -460,6 +522,27 @@ def verify_screen_colors(png, frame, sources):
 def shot_frames(frame_count):
     last = len(SHOT_ORDER) - 1
     return [1 + round(i * (frame_count - 1) / last) for i in range(len(SHOT_ORDER))]
+
+
+def use_cycles():
+    """Path-traced occlusion for the clay shot. The room is a closed box, so world light cannot reach inside;
+    Fast GI's ambient occlusion counts any direction clear for CLAY_AO_DISTANCE_M as lit by the white world."""
+    scene = bpy.context.scene
+    scene.cycles.use_fast_gi = True
+    scene.cycles.fast_gi_method = "REPLACE"
+    scene.cycles.ao_bounces_render = 1
+    scene.world.light_settings.ao_factor = 1.0
+    scene.world.light_settings.distance = CLAY_AO_DISTANCE_M
+    scene.render.engine = "CYCLES"
+    prefs = bpy.context.preferences.addons["cycles"].preferences
+    prefs.compute_device_type = "METAL"
+    prefs.get_devices()
+    for device in prefs.devices:
+        device.use = True
+    scene.cycles.device = "GPU"
+    scene.cycles.samples = CLAY_CYCLES_SAMPLES
+    scene.cycles.use_denoising = True
+    scene.render.use_persistent_data = True
 
 
 def configure_render(args, frame_count, frames_dir):
@@ -536,6 +619,8 @@ def main():
         key_frames = build_dolly(frame_count)
         still_names = [f"shot_{shape}" for shape in SHOT_ORDER]
     configure_render(args, frame_count, frames_dir)
+    if shot and shot.get("clay"):
+        use_cycles()
 
     if args.save_blend:
         bpy.ops.wm.save_as_mainfile(filepath=str(CACHE_DIR / f"scene_{args.look}.blend"))
@@ -548,6 +633,8 @@ def main():
         stills_dir = Path(args.stills_dir).resolve()
         for name in args.cams.split(","):
             build_still_camera(name)
+            if name in CLOSEUP_OPTIONS:
+                framing_report(name)
             elapsed = render_still(stills_dir / f"{name}.png", args.frame)
             print(f"RENDER_STATS still look={args.look} cam={name} total_s={elapsed:.1f}")
         return

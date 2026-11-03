@@ -1,8 +1,8 @@
-"""Cuts 3, 4 and 4b: the README's coverage sheets, the system diagram lit stage by stage, and a terminal digest.
+"""Cuts 3 and 4: the README's coverage sheets held still, and the system diagram lit stage by stage.
 
 python3 demo/compose/explainers.py
 
-Outputs in demo/capture/out/: cut03_sheets.mp4 (12 s), cut04_system.mp4 (10 s), cut04b.mp4 (12 s).
+Outputs in demo/capture/out/: cut03_sheets.mp4 (12 s) and cut04_system.mp4 (10 s).
 """
 
 import re
@@ -23,7 +23,6 @@ BRAVE = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
 SHEETS = ["coverage-hazards.png", "coverage-pictograms.png", "coverage-shapes.png"]
 SHEET_SECONDS = 4
-SHEET_ZOOM = 0.03
 SHEET_BACKGROUND = "white"
 STAGE_SECONDS = 2.5
 DIM_OPACITY = 0.6
@@ -34,8 +33,6 @@ STAGES = [
     ("検査", [(3, 4, 2)]),
     ("承認と配信", [(0, 2, 2)]),
 ]
-TERMINALS = ["cut03.mp4", "cut04.mp4", "cut06.mp4"]
-TERMINAL_TAIL_S = 4
 
 
 def encode(args, out):
@@ -52,16 +49,12 @@ def concat(parts, out):
 
 
 def sheets(work):
-    frames = SHEET_SECONDS * FPS
     parts = []
     for i, name in enumerate(SHEETS):
         part = work / f"sheet_{i}.mp4"
-        big_w, big_h = WIDTH * 2, HEIGHT * 2
-        graph = (f"scale={big_w}:{big_h}:force_original_aspect_ratio=decrease,"
-                 f"pad={big_w}:{big_h}:(ow-iw)/2:(oh-ih)/2:color={SHEET_BACKGROUND},"
-                 f"zoompan=z='1+{SHEET_ZOOM}*on/{frames - 1}':d={frames}:x='iw/2-iw/zoom/2':y='ih/2-ih/zoom/2'"
-                 f":s={WIDTH}x{HEIGHT}:fps={FPS}")
-        encode(["-i", str(REPO / "docs" / name), "-vf", graph, "-frames:v", str(frames)], part)
+        fit = (f"scale={WIDTH}:{HEIGHT}:force_original_aspect_ratio=decrease,"
+               f"pad={WIDTH}:{HEIGHT}:(ow-iw)/2:(oh-ih)/2:color={SHEET_BACKGROUND}")
+        encode(["-loop", "1", "-framerate", str(FPS), "-i", str(REPO / "docs" / name), "-t", str(SHEET_SECONDS), "-vf", fit], part)
         parts.append(part)
     concat(parts, OUT_DIR / "cut03_sheets.mp4")
 
@@ -117,25 +110,14 @@ def system(work):
     concat(parts, OUT_DIR / "cut04_system.mp4")
 
 
-def terminal_digest(work):
-    parts = []
-    for i, name in enumerate(TERMINALS):
-        part = work / f"terminal_{i}.mp4"
-        encode(["-sseof", f"-{TERMINAL_TAIL_S}", "-i", str(OUT_DIR / name), "-t", str(TERMINAL_TAIL_S),
-                "-vf", f"scale={WIDTH}:{HEIGHT}:force_original_aspect_ratio=decrease,pad={WIDTH}:{HEIGHT}:(ow-iw)/2:(oh-ih)/2"], part)
-        parts.append(part)
-    concat(parts, OUT_DIR / "cut04b.mp4")
-
-
 def main():
     work = Path(tempfile.mkdtemp(prefix="evac-explainers-"))
     try:
         sheets(work)
         system(work)
-        terminal_digest(work)
     finally:
         shutil.rmtree(work)
-    for name in ("cut03_sheets.mp4", "cut04_system.mp4", "cut04b.mp4"):
+    for name in ("cut03_sheets.mp4", "cut04_system.mp4"):
         print(f"EXPLAINER {OUT_DIR / name}")
 
 
