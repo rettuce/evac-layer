@@ -171,12 +171,12 @@
     },
     {
       "cut": "10",
-      "kind": "title",
+      "kind": "capture",
       "seconds": 8,
-      "title": "スクリーンはもうある。\nThe screens are already there.",
-      "subtitle": "github.com/rettuce/evac-layer",
       "narration_ja": "EVAC LAYER は、オープンソースで公開しています。",
-      "narration_en": "EVAC LAYER is open source."
+      "narration_en": "EVAC LAYER is open source.",
+      "src": "../capture/out/cut10_endcard.png",
+      "slate": "エンドカード: ロゴ（2 段・黒地用）＋リポ URL。文言は田中判断待ち"
     }
   ]
 }

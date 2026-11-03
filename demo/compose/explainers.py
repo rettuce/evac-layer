@@ -1,8 +1,8 @@
-"""Cuts 3 and 4: the README's coverage sheets held still, and the system diagram lit stage by stage.
+"""Cuts 3, 4 and 10: the README's coverage sheets held still, the system diagram lit stage by stage, and the end card.
 
 python3 demo/compose/explainers.py
 
-Outputs in demo/capture/out/: cut03_sheets.mp4 (12 s) and cut04_system.mp4 (10 s).
+Outputs in demo/capture/out/: cut03_sheets.mp4 (12 s), cut04_system.mp4 (10 s) and cut10_endcard.png.
 """
 
 import re
@@ -25,6 +25,9 @@ SHEETS = ["coverage-hazards.png", "coverage-pictograms.png", "coverage-shapes.pn
 SHEET_SECONDS = 4
 SHEET_BACKGROUND = "white"
 STAGE_SECONDS = 2.5
+LOGO = REPO / "docs" / "brand" / "evac-layer-logo-2line-black.svg"
+REPO_URL = "github.com/rettuce/evac-layer"
+LOGO_WIDTH_PX = 760
 DIM_OPACITY = 0.6
 # Zones as drawn by docs/diagrams/system.py: (first column, last column, row) per stage, in reading order.
 STAGES = [
@@ -110,14 +113,29 @@ def system(work):
     concat(parts, OUT_DIR / "cut04_system.mp4")
 
 
+def endcard(work):
+    font = FONT_DIR / "NotoSansJP-Regular.otf"
+    page = work / "endcard.html"
+    page.write_text(f"""<!doctype html><meta charset="utf-8"><style>
+@font-face{{font-family:Noto;src:url("{font.as_uri()}")}}
+html,body{{margin:0;width:{WIDTH}px;height:{HEIGHT}px;background:#000;overflow:hidden}}
+body{{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:56px}}
+img{{width:{LOGO_WIDTH_PX}px}}p{{margin:0;color:#b8b8b8;font:30px Noto,sans-serif;letter-spacing:.02em}}
+</style><img src="{LOGO.as_uri()}"><p>{REPO_URL}</p>""", encoding="utf-8")
+    subprocess.run([BRAVE, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
+                    f"--window-size={WIDTH},{HEIGHT}", "--force-device-scale-factor=1",
+                    f"--screenshot={OUT_DIR / 'cut10_endcard.png'}", page.as_uri()], check=True, capture_output=True)
+
+
 def main():
     work = Path(tempfile.mkdtemp(prefix="evac-explainers-"))
     try:
         sheets(work)
         system(work)
+        endcard(work)
     finally:
         shutil.rmtree(work)
-    for name in ("cut03_sheets.mp4", "cut04_system.mp4"):
+    for name in ("cut03_sheets.mp4", "cut04_system.mp4", "cut10_endcard.png"):
         print(f"EXPLAINER {OUT_DIR / name}")
 
 
