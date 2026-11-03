@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { headlineParts } from '~~/layout/headline'
-import { HEADLINE_STACKED_MAX_LINES, HTML_LANG, LANG_LABEL, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
+import { HEADLINE_STACKED_MAX_LINES, HTML_LANG, LANG_LABEL, LANGUAGES_AT_ONCE, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
 import type { LangKey, LayoutCell } from '~~/layout/types'
 
 const props = defineProps<{
@@ -19,10 +19,11 @@ const rotationLangs = computed<LangKey[]>(() => LANGUAGE_ROTATION.filter((key) =
 const headlineStyle = computed(() =>
   props.headlineScale && props.headlineScale !== 1 ? { fontSize: `calc(var(--fs-guide) * ${props.headlineScale} * var(--px))` } : undefined,
 )
-const currentLang = computed(() => {
+const languageGroups = computed<LangKey[][]>(() => {
   const langs = rotationLangs.value
-  return langs.length ? langs[props.languageIndex % langs.length] : undefined
+  return Array.from({ length: Math.ceil(langs.length / LANGUAGES_AT_ONCE) }, (_, i) => langs.slice(i * LANGUAGES_AT_ONCE, (i + 1) * LANGUAGES_AT_ONCE))
 })
+const currentGroup = computed(() => (languageGroups.value.length ? props.languageIndex % languageGroups.value.length : -1))
 </script>
 
 <template>
@@ -71,16 +72,17 @@ const currentLang = computed(() => {
     <template v-else-if="cell.role === 'languages'">
       <div class="lang-stack">
         <div
-          v-for="key in rotationLangs"
-          :key="key"
+          v-for="(group, g) in languageGroups"
+          :key="group.join('+')"
           class="lang-variant"
-          :class="{ 'is-current': key === currentLang }"
-          :style="key === currentLang ? languageStyle : undefined"
-          :lang="HTML_LANG[key]"
-          :data-lang="key"
+          :class="{ 'is-current': g === currentGroup }"
+          :style="g === currentGroup ? languageStyle : undefined"
+          :data-lang-group="group.join('+')"
         >
-          <span class="t-fine lang-label">{{ LANG_LABEL[key] }}</span>
-          <p class="t-guide">{{ cell.text[key] }}</p>
+          <div v-for="key in group" :key="key" class="lang-line" :lang="HTML_LANG[key]" :data-lang="key">
+            <span class="t-fine lang-label">{{ LANG_LABEL[key] }}</span>
+            <p class="t-guide">{{ cell.text[key] }}</p>
+          </div>
         </div>
       </div>
     </template>
@@ -186,9 +188,14 @@ p {
 .lang-variant {
   grid-area: 1 / 1;
   display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--px));
+  visibility: hidden;
+}
+.lang-line {
+  display: flex;
   align-items: baseline;
   gap: calc(32 * var(--px));
-  visibility: hidden;
 }
 .lang-variant.is-current {
   visibility: visible;

@@ -33,6 +33,8 @@ const SCENES = ['color-planes', 'clock-grid']
 const SWITCH_AT_MS = 12000
 const SWITCH_FRAMES_MS = [11500, 11800, 12100, 12400, 12700, 13000]
 const READY_TIMEOUT_MS = 30000
+// One second into a language pair (2.5 s each), so the band has finished fading in.
+const ALERT_AT_MS = 6000
 
 function scaleFor(shape, width) {
   return shape === 'pillar' ? PILLAR_SCALE : Math.min(1, GALLERY_WIDTH / width)
@@ -137,7 +139,7 @@ async function main() {
     for (const [key, bulletin] of BULLETINS) {
       infos[key] = await layoutInfo(bulletin)
       for (const shape of Object.keys(SHAPES)) {
-        await capture(page, `${base}/screen?shape=${shape}&clock=virtual&t=5000&src=${previewSrc(bulletin, shape)}`, shape, '.evac-screen[data-ready="1"]')
+        await capture(page, `${base}/screen?shape=${shape}&clock=virtual&t=${ALERT_AT_MS}&src=${previewSrc(bulletin, shape)}`, shape, '.evac-screen[data-ready="1"]')
         files.push(await save(page, `${key}-${shape}`))
       }
     }

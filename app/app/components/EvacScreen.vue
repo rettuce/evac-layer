@@ -19,7 +19,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ ready: [] }>()
 
-const FONT_FAMILIES = ['Noto Sans JP', 'Noto Sans', 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans KR']
+const FONT_FAMILIES = ['Noto Sans JP', 'Noto Sans', 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans KR', 'Noto Sans Thai']
 const FONT_WEIGHTS = [400, 700]
 const BAND_RULE_MIN_CONTRAST = 1.5
 const BAND_RULE_PX = 4

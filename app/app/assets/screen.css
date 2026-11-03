@@ -24,6 +24,14 @@ body {
 :lang(ko) {
   font-family: 'Noto Sans KR', 'Noto Sans', sans-serif;
 }
+:lang(th) {
+  font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif;
+}
+:lang(vi),
+:lang(fil),
+:lang(id) {
+  font-family: 'Noto Sans', 'Noto Sans JP', sans-serif;
+}
 
 .evac-screen {
   box-sizing: border-box;
@@ -87,4 +95,10 @@ body {
   font-size: calc(var(--fs-fine) * var(--px));
   line-height: var(--lh-fine);
   font-weight: 400;
+}
+
+/* Thai has no spaces between words; the browser's dictionary finds the breaks. */
+:lang(th) .t-guide,
+.t-guide:lang(th) {
+  word-break: normal;
 }

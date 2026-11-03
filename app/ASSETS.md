@@ -7,6 +7,7 @@
 | Noto Sans SC (400, 700) | `@fontsource/noto-sans-sc` 5.3.1 — https://fontsource.org/fonts/noto-sans-sc | SIL OFL 1.1 |
 | Noto Sans TC (400, 700) | `@fontsource/noto-sans-tc` 5.3.1 — https://fontsource.org/fonts/noto-sans-tc | SIL OFL 1.1 |
 | Noto Sans KR (400, 700) | `@fontsource/noto-sans-kr` 5.3.1 — https://fontsource.org/fonts/noto-sans-kr | SIL OFL 1.1 |
+| Noto Sans Thai (400, 700) | `@fontsource/noto-sans-thai` 5.3.0 — https://fontsource.org/fonts/noto-sans-thai (Thai subset about 9 KB per weight; Vietnamese, Filipino and Indonesian use the Latin and Vietnamese subsets of Noto Sans) | SIL OFL 1.1 |
 | Nuxt 4.6.3 | https://github.com/nuxt/nuxt | MIT |
 | puppeteer-core 25.16.0 (dev, `scripts/shot.mjs`) | https://github.com/puppeteer/puppeteer | Apache-2.0 |
 | Material Symbols Outlined, opsz 48 (`tsunami` `flood` `landslide` `cyclone` `directions_run` `my_location`) | `app/public/picto/*.svg` from https://github.com/google/material-design-icons `symbols/web/<name>/materialsymbolsoutlined/<name>_48px.svg` (commit 10ecc14). Modified: `fill="currentColor"` added, fixed width/height removed. License text: `app/public/picto/LICENSE-material-symbols.txt` | Apache-2.0 |
