@@ -8,7 +8,7 @@
 | 2 | 10 s | 10 s | 駅と街のスクリーンを作ってきました。災害のとき、そのスクリーンは何も言いませんでした。 | 43／50 | 駅と街のスクリーンを作ってきた。 / 災害のとき、このスクリーンは何も言わなかった |
 | 2b | 20 s | 6 s | 黙らないスクリーンを。スクリーンは、もうあります。 | 25／30 | 黙らない画面 / Screens that don't go silent |
 | 3 | 26 s | 25 s | まず、自治体のハザードマップを読みます。文字の壊れた PDF は止めて、ページの画像から読み直します。輪島の最大津波高は 8.3 m。どの数字にも出典のページが付きます。 | 81／125 |  |
-| 4 | 51 s | 20 s | 警報が届くと、やさしい日本語と英語・中国語・韓国語の文を書き、5 つのスクリーンの形に割り付けます。 | 49／100 |  |
+| 4 | 51 s | 20 s | スクリーンは自分の位置を知っています。そこから市町村と、最寄りの避難場所を引きます。警報が届くと、やさしい日本語と英語・中国語・韓国語の文を書き、5 つのスクリーンの形に割り付けます。 | 91／100 |  |
 | 5 | 71 s | 25 s | 由利本荘市、10 月 21 日の実際の電文を 1200 倍で再生します。警戒レベル 3、4、5。すべてのスクリーンが同じ瞬間に切り替わります。 | 65／125 |  |
 | 5b | 96 s | 10 s | 何を出すかは、平時に人が決めます。承認した案内だけが、有事に自動で出ます。 | 37／50 | 平時に決めて、有事は自動 / Decide in calm. Deliver in crisis. |
 | 6 | 106 s | 20 s | 生成した案内は、検査役が画像で読みます。方向の欄に距離が重なっていれば差し戻し、直した版が通るまで出しません。 | 55／100 |  |
@@ -22,7 +22,7 @@
 - 2: We have built screens for stations and streets. When disaster struck, those screens said nothing.
 - 2b: Screens that don't go silent. The screens are already there.
 - 3: First, it reads the city's hazard maps. A PDF with broken text is stopped and read again from the page image. Wajima's maximum tsunami height: 8.3 m. Every figure carries its source page.
-- 4: When a warning arrives, it writes the text in easy Japanese, English, Chinese and Korean, and lays it out for five screen shapes.
+- 4: Each screen knows where it stands. From there it finds its municipality and the nearest evacuation site. When a warning arrives, it writes the text in easy Japanese, English, Chinese and Korean, and lays it out for five screen shapes.
 - 5: Real bulletins for Yurihonjo, October 21, replayed at 1200x. Alert levels 3, 4 and 5. Every screen switches at the same moment.
 - 5b: People decide what to show, in calm times. Only approved guidance goes out, automatically, in a crisis.
 - 6: An inspector reads each generated screen as an image. If the distance is duplicated in the direction cell, it is sent back, and nothing goes out until the fix passes.
