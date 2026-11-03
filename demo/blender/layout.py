@@ -1,14 +1,26 @@
+import os
+
 from mathutils import Vector
 
+# Arrangements compared before the final renders: EVAC_LAYOUT=base|spread|near.
+LAYOUTS = {
+    "base": {"columns_x": 4.5, "back_columns_y": 6.5, "back_wall_y": 9.0},
+    "spread": {"columns_x": 6.5, "back_columns_y": 6.5, "back_wall_y": 9.0},
+    "near": {"columns_x": 4.5, "back_columns_y": 5.3, "back_wall_y": 7.0},
+}
+LAYOUT_NAME = os.environ.get("EVAC_LAYOUT", "base")
+_LAYOUT = LAYOUTS[LAYOUT_NAME]
+
 CEILING_Z = 5.2
-BACK_WALL_Y = 9.0
+BACK_WALL_Y = _LAYOUT["back_wall_y"]
 LEFT_WALL_X = -10.0
 RIGHT_WALL_X = 12.0
 FRONT_Y = -9.0
 EYE_Z = 1.6
 
 COLUMN_SIZE = 0.9
-COLUMNS = [(-4.5, 1.5), (4.5, 1.5), (-4.5, 6.5), (4.5, 6.5)]
+COLUMNS = [(-_LAYOUT["columns_x"], 1.5), (_LAYOUT["columns_x"], 1.5),
+           (-_LAYOUT["columns_x"], _LAYOUT["back_columns_y"]), (_LAYOUT["columns_x"], _LAYOUT["back_columns_y"])]
 COLUMN_CLAD_M = 0.08
 COLUMN_CLAD_TOP_Z = CEILING_Z
 

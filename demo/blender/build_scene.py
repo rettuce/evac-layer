@@ -2,6 +2,8 @@
 
 blender -b -P demo/blender/build_scene.py -- --out demo/renders/test.mp4 --seconds 5 --res 1280x720
 blender -b -P demo/blender/build_scene.py -- --look A --still demo/renders/look_A.png
+blender -b -P demo/blender/build_scene.py -- --look C --cams hero,opt-axis --stills-dir demo/renders/options
+blender -b -P demo/blender/build_scene.py -- --look C --cut switch --seconds 27 --frame 555 --still x.png --verify-colors
 """
 
 import argparse
@@ -18,13 +20,14 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from layout import (
-    BACK_WALL_Y, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
+    LAYOUT_NAME, BACK_WALL_Y, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
     HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIBBON_PANEL_H, RIBBON_PANEL_W,
     RIGHT_WALL_X,
 )
 from led_wrap import build_led_wrap
 from looks import LOOKS, build_look
 from primitives import box, principled, spot_light, vertical_plane
+from verify_colors import report_screen_colors
 
 DEMO_DIR = Path(__file__).resolve().parent.parent
 SCREENS_DIR = DEMO_DIR / "screens"
@@ -36,8 +39,10 @@ CUTS = ("ambient", "switch", "alert", "off", "test")
 INCH = 0.0254
 JOINT_M = 0.003
 FLUSH_EPS_M = 0.001
-SCREEN_EMISSION = 3.0
-SCREEN_GLASS_ROUGHNESS = 0.06
+# With the Standard view transform an unlit emission of 1.0 shows the recording's own sRGB values.
+SCREEN_EMISSION = 1.0
+# Standard has no highlight roll-off, so the room (not the screens) is dimmed to keep the floor from clipping.
+ROOM_LIGHT_SCALE = 0.55
 LENS_MM = 35.0
 F_STOP = 2.8
 # Look B (35 downlights) and C (louvers) overflow the default 512 MB shadow pool.
@@ -68,9 +73,23 @@ COLUMN_LED_PERIMETER = 8 * (COLUMN_SIZE / 2 + COLUMN_CLAD_M - COLUMN_LED_RADIUS)
 RIBBON_SIZE = (RIBBON_PANEL_W, RIBBON_PANEL_H)
 RIBBON_Z = HEADWALL_BOTTOM_Z + RIBBON_PANEL_H / 2
 RIBBON_CENTER_X = 1.0
-WALL_16X9_Z = 2.0
-# x positions on the back wall chosen so the back columns do not hide them from the hero camera.
-WALL_16X9_XS = [1.9, -2.3, -8.0, 7.8]
+BACK_WALL_SCREEN_Z = 2.0
+BACK_WALL_GAP_M = 0.4
+# Four aspect ratios in one row on the back wall (no real wall mixes them; the point is that every shape
+# renders the same bulletin), centred so the row fits between the back columns.
+BACK_WALL_ROW = ["9x16", "1x1", "16x9", "9x16"]
+BACK_WALL_SIZES = {"9x16": panel_from_diagonal(120, 9, 16), "1x1": (1.4, 1.4), "16x9": panel_from_diagonal(100, 16, 9)}
+
+
+def back_wall_mounts(shape):
+    widths = [BACK_WALL_SIZES[s][0] for s in BACK_WALL_ROW]
+    x = -(sum(widths) + BACK_WALL_GAP_M * (len(widths) - 1)) / 2
+    mounts = []
+    for name, width in zip(BACK_WALL_ROW, widths):
+        if name == shape:
+            mounts.append((Vector((x + width / 2, BACK_WALL_Y, BACK_WALL_SCREEN_Z)), 0.0))
+        x += width + BACK_WALL_GAP_M
+    return mounts
 HEADWALL_FRONT_Y = HEADWALL_Y - HEADWALL_DEPTH / 2
 
 
@@ -94,12 +113,13 @@ SCREENS = {
     "pillar": {**screen_spec((COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z), (3308, 2524),
                              [column_front(*COLUMNS[0], COLUMN_LED_MID_Z)]),
                "mounts": [], "wraps": COLUMNS},
-    "16x9": screen_spec(panel_from_diagonal(75, 16, 9), (1920, 1080),
-                        [(Vector((x, BACK_WALL_Y, WALL_16X9_Z)), 0.0) for x in WALL_16X9_XS]),
+    "16x9": screen_spec(BACK_WALL_SIZES["16x9"], (1920, 1080), back_wall_mounts("16x9")),
+    "9x16": screen_spec(BACK_WALL_SIZES["9x16"], (1080, 1920), back_wall_mounts("9x16")),
     "32x9": screen_spec(RIBBON_SIZE, (3840, 1080),
                         [(Vector((x, HEADWALL_FRONT_Y, RIBBON_Z)), 0.0) for x in ribbon_xs()]),
-    "1x1": {**screen_spec((0.9, 0.9), (1080, 1080), [(pillar_face_center(1.6), PILLAR_YAW)]), "mounts": []},
+    "1x1": screen_spec(BACK_WALL_SIZES["1x1"], (1080, 1080), back_wall_mounts("1x1")),
 }
+BACK_WALL_SHAPES = ("9x16", "1x1", "16x9")
 
 SHOT_ORDER = ["pillar", "16x9", "32x9", "1x1"]
 CAMERA_WAYPOINTS = [
@@ -124,6 +144,11 @@ STILL_CAMERAS = {
     "near-wall": {"location": in_front_of("16x9", 2.0, 30, EYE_Z), "focus": "16x9", "lens": 28.0, "aim_shift": -0.3},
     "near-ribbon": {"location": in_front_of("32x9", 3.5, -25, EYE_Z), "focus": "32x9", "lens": 24.0, "aim_shift": 0.0},
     "near-pillar": {"location": in_front_of("1x1", 1.5, 30, EYE_Z), "focus": "1x1", "lens": 28.0, "aim_shift": -0.3},
+    "opt-axis": {"location": Vector((0.0, -8.6, EYE_Z)), "target": Vector((0.0, BACK_WALL_Y, 2.3)), "lens": 28.0},
+    "opt-entrance": {"location": Vector((-9.2, -8.6, 1.7)), "target": Vector((1.0, 5.0, 2.0)), "lens": 24.0},
+    "opt-high": {"location": Vector((-7.5, -7.8, 4.4)), "target": Vector((0.5, 4.5, 1.4)), "lens": 24.0},
+    "opt-low": {"location": Vector((-6.4, -2.0, 0.55)), "target": Vector((1.5, BACK_WALL_Y - 0.5, 2.6)), "lens": 24.0},
+    "opt-wall": {"location": Vector((-0.2, -1.5, 1.8)), "target": Vector((-0.2, BACK_WALL_Y, 2.0)), "lens": 20.0},
 }
 
 
@@ -190,6 +215,9 @@ def parse_args():
     parser.add_argument("--still", help="render one frame from --cam to this PNG")
     parser.add_argument("--cam", choices=sorted(STILL_CAMERAS), default="hero")
     parser.add_argument("--stills-dir", default=str(DEMO_DIR / "renders" / "stills"))
+    parser.add_argument("--cams", help="comma-separated still cameras, each rendered to --stills-dir/<layout>_<cam>.png")
+    parser.add_argument("--verify-colors", action="store_true",
+                        help="after --still, compare flat screen areas in the render with the recording's frame")
     parser.add_argument("--save-blend", action="store_true")
     args = parser.parse_args(argv)
     args.width, args.height = (int(v) for v in args.res.lower().split("x"))
@@ -239,8 +267,11 @@ def make_placeholder(shape):
 
 
 def screen_material(shape, source, frame_count):
+    """Emission only: the screen shows its recording and takes no light or reflection from the room."""
     mat = bpy.data.materials.new(f"screen_{shape}")
+    mat.use_nodes = True
     nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    nodes.clear()
     tex = nodes.new("ShaderNodeTexImage")
     tex.image = bpy.data.images.load(str(source))
     tex.extension = "CLIP"
@@ -252,11 +283,11 @@ def screen_material(shape, source, frame_count):
         user.frame_duration = min(tex.image.frame_duration, frame_count) or frame_count
         user.use_cyclic = True
         user.use_auto_refresh = True
-    bsdf = nodes["Principled BSDF"]
-    bsdf.inputs["Base Color"].default_value = (0.0, 0.0, 0.0, 1.0)
-    bsdf.inputs["Roughness"].default_value = SCREEN_GLASS_ROUGHNESS
-    bsdf.inputs["Emission Strength"].default_value = SCREEN_EMISSION
-    links.new(tex.outputs["Color"], bsdf.inputs["Emission Color"])
+    emission = nodes.new("ShaderNodeEmission")
+    emission.inputs["Strength"].default_value = SCREEN_EMISSION
+    output = nodes.new("ShaderNodeOutputMaterial")
+    links.new(tex.outputs["Color"], emission.inputs["Color"])
+    links.new(emission.outputs["Emission"], output.inputs["Surface"])
     return mat
 
 
@@ -365,12 +396,21 @@ def scale_lights(scale):
 
 def build_still_camera(name):
     spec = STILL_CAMERAS[name]
-    screen = SCREENS[spec["focus"]]
-    focus_point = screen["center"]
-    tangent = Matrix.Rotation(screen["yaw"], 3, "Z") @ Vector((1.0, 0.0, 0.0))
-    target = spec.get("target", focus_point + tangent * spec.get("aim_shift", 0.0))
+    if "focus" in spec:
+        screen = SCREENS[spec["focus"]]
+        focus_point = screen["center"]
+        tangent = Matrix.Rotation(screen["yaw"], 3, "Z") @ Vector((1.0, 0.0, 0.0))
+        target = spec.get("target", focus_point + tangent * spec.get("aim_shift", 0.0))
+    else:
+        focus_point = target = spec["target"]
     camera, _ = add_camera(spec["location"], target, spec["lens"])
     camera.data.dof.focus_distance = (focus_point - spec["location"]).length
+    return camera
+
+
+def verify_screen_colors(png, frame, sources):
+    flat = {shape: SCREENS[shape] for shape in ("16x9", "9x16", "1x1", "32x9")}
+    report_screen_colors(png, frame, sources, flat, FLUSH_EPS_M, CACHE_DIR)
 
 
 def shot_frames(frame_count):
@@ -389,7 +429,10 @@ def configure_render(args, frame_count, frames_dir):
     scene.render.resolution_percentage = 100
     scene.render.fps = args.fps
     scene.frame_start, scene.frame_end = 1, frame_count
-    scene.view_settings.view_transform = "AgX"
+    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.look = "None"
+    scene.view_settings.exposure = 0.0
+    scene.view_settings.gamma = 1.0
     scene.render.image_settings.file_format = "PNG"
     scene.render.filepath = str(frames_dir / "####")
 
@@ -424,13 +467,13 @@ def main():
     seconds = shot["seconds"] if shot else args.seconds
     frame_count = max(2, round(seconds * args.fps))
     cut = args.cut or (shot["screens"] if shot else None)
-    light_scale = shot["light_scale"] if shot else 1.0
+    light_scale = (shot["light_scale"] if shot else 1.0) * ROOM_LIGHT_SCALE
     frames_dir = CACHE_DIR / "frames"
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    wall = SCREENS["16x9"]
-    half = wall["size"][0] / 2 + JOINT_M
-    look = build_look(args.look, [(center.x - half, center.x + half) for center, _ in wall["mounts"]])
+    back_wall_clear = [(center.x - SCREENS[shape]["size"][0] / 2 - JOINT_M, center.x + SCREENS[shape]["size"][0] / 2 + JOINT_M)
+                       for shape in BACK_WALL_SHAPES for center, _ in SCREENS[shape]["mounts"]]
+    look = build_look(args.look, back_wall_clear)
     sources = build_screens(frame_count, cut)
     build_world(look["hdri_strength"] * light_scale)
     scale_lights(light_scale)
@@ -440,7 +483,7 @@ def main():
     if shot:
         key_frames = build_shot_camera(shot, frame_count)
         still_names = [f"{args.shot}_{frame:04d}" for frame in key_frames]
-    elif args.still:
+    elif args.still or args.cams:
         build_still_camera(args.cam)
     else:
         key_frames = build_dolly(frame_count)
@@ -454,10 +497,20 @@ def main():
         width, height = SCREENS[shape]["size"]
         print(f"SCREEN {shape} {width:.3f}m x {height:.3f}m source={source.name}")
 
+    if args.cams:
+        stills_dir = Path(args.stills_dir).resolve()
+        for name in args.cams.split(","):
+            build_still_camera(name)
+            elapsed = render_still(stills_dir / f"{LAYOUT_NAME}_{name}.png", args.frame)
+            print(f"RENDER_STATS still layout={LAYOUT_NAME} look={args.look} cam={name} total_s={elapsed:.1f}")
+        return
+
     if args.still:
         elapsed = render_still(Path(args.still).resolve(), args.frame)
         print(f"RENDER_STATS still look={args.look} shot={args.shot} cam={args.cam} frame={args.frame} res={args.width}x{args.height} "
               f"samples={args.samples} total_s={elapsed:.1f}")
+        if args.verify_colors:
+            verify_screen_colors(Path(args.still).resolve(), args.frame, sources)
         return
 
     if frames_dir.exists():
