@@ -53,7 +53,9 @@ body {
 .cell {
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
+  overflow: clip;
+  /* Text is trimmed to the cap height; kanji rise about 0.15 em above it, which must stay visible. */
+  overflow-clip-margin: calc(24 * var(--px));
 }
 .cell.is-band {
   background: var(--band);
@@ -101,4 +103,14 @@ body {
 :lang(th) .t-guide,
 .t-guide:lang(th) {
   word-break: normal;
+}
+
+/* Lines are trimmed to the cap height and the baseline, so the first line of every body cell starts on
+   the cell's top edge and cells in one row share a top line whatever their type size. */
+.role-action .t-action,
+.role-action .t-guide,
+.role-direction .t-guide,
+.role-shelter .t-guide,
+.role-shelter .t-fine {
+  text-box: trim-both cap alphabetic;
 }
