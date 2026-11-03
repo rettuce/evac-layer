@@ -1,6 +1,6 @@
 import type { Shape } from '../../types'
 import { mulberry32 } from '../rng.ts'
-import type { AmbientScene } from '../types'
+import type { AmbientFrame, AmbientScene } from '../types'
 
 const PLANES_BY_SHAPE: Record<Shape, number> = { '16x9': 4, '9x16': 4, '32x9': 7, '1x1': 3, pillar: 14 }
 const DRIFT_PERIOD_MS = { min: 90_000, max: 150_000 }
@@ -54,11 +54,10 @@ function sceneFor(seed: number, shape: Shape): { ground: string; planes: Plane[]
   return { ground: `hsl(${baseHue.toFixed(1)} ${GROUND.saturation}% ${GROUND.lightness}%)`, planes }
 }
 
-function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: Shape): void {
-  const { width, height } = ctx.canvas
+function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: Shape, frame: AmbientFrame): void {
+  const { width, height } = frame
   const short = Math.min(width, height)
   const { ground, planes } = sceneFor(seed, shape)
-  ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.fillStyle = ground
   ctx.fillRect(0, 0, width, height)
   for (const plane of planes) {
@@ -70,13 +69,14 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
     gradient.addColorStop(0, `hsl(${plane.color} / ${PLANE_ALPHA})`)
     gradient.addColorStop(0.55, `hsl(${plane.color} / ${PLANE_ALPHA * 0.6})`)
     gradient.addColorStop(1, `hsl(${plane.color} / 0)`)
-    ctx.setTransform(1, 0, 0, 1, cx, cy)
+    ctx.save()
+    ctx.translate(cx, cy)
     ctx.rotate(plane.tilt + (Math.sin(angle) * TILT_DRIFT_DEG * Math.PI) / 180)
     ctx.scale(plane.stretch, 1)
     ctx.fillStyle = gradient
     ctx.fillRect(-radius, -radius, radius * 2, radius * 2)
+    ctx.restore()
   }
-  ctx.setTransform(1, 0, 0, 1, 0, 0)
 }
 
 export const colorPlanes: AmbientScene = { id: 'color-planes', name: '色面', ink: 'dark', render }
