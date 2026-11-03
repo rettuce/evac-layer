@@ -41,7 +41,10 @@
         "th": "อพยพจากพื้นที่อันตราย",
         "vi": "Rời khỏi nơi nguy hiểm",
         "fil": "Lumikas mula sa mapanganib na lugar",
-        "id": "Tinggalkan tempat berbahaya"
+        "id": "Tinggalkan tempat berbahaya",
+        "zh_hans": "立即前往高处",
+        "zh_hant": "立即前往高处",
+        "ko": "즉시 높은 곳으로 대피하세요"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
