@@ -37,7 +37,14 @@
       "text": {
         "ja": "すぐ高いところへ",
         "ja_easy": "すぐ たかい ところへ にげて",
-        "en": "Go to high ground now"
+        "en": "Go to high ground now",
+        "th": "ขึ้นที่สูงทันที",
+        "vi": "Lên nơi cao ngay",
+        "fil": "Umakyat agad sa mataas na lugar",
+        "id": "Segera ke tempat tinggi",
+        "zh_hans": "立即前往高处",
+        "zh_hant": "立即前往高處",
+        "ko": "즉시 높은 곳으로 대피하세요"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -74,7 +81,12 @@
         "ja_easy": "すぐ たかい ところへ にげて",
         "en": "Go to high ground now",
         "zh_hans": "立即前往高处",
-        "ko": "지금 바로 높은 곳으로"
+        "ko": "즉시 높은 곳으로 대피하세요",
+        "zh_hant": "立即前往高處",
+        "th": "ขึ้นที่สูงทันที",
+        "vi": "Lên nơi cao ngay",
+        "fil": "Umakyat agad sa mataas na lugar",
+        "id": "Segera ke tempat tinggi"
       },
       "motion": "scale-in"
     },
