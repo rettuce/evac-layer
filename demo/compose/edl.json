@@ -90,8 +90,8 @@
       "seconds": 20,
       "src": "../capture/out/cut04.mp4",
       "slate": "Writer: やさしい日本語 → 4 言語 / Composer: テンプレ番号と必須セル",
-      "narration_ja": "警報が届くと、やさしい日本語と英語・中国語・韓国語の文を書き、5 つのスクリーンの形に割り付けます。",
-      "narration_en": "When a warning arrives, it writes the text in easy Japanese, English, Chinese and Korean, and lays it out for five screen shapes."
+      "narration_ja": "スクリーンは自分の位置を知っています。そこから市町村と、最寄りの避難場所を引きます。警報が届くと、やさしい日本語と英語・中国語・韓国語の文を書き、5 つのスクリーンの形に割り付けます。",
+      "narration_en": "Each screen knows where it stands. From there it finds its municipality and the nearest evacuation site. When a warning arrives, it writes the text in easy Japanese, English, Chinese and Korean, and lays it out for five screen shapes."
     },
     {
       "cut": "5",
