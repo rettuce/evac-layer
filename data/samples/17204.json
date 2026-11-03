@@ -1,0 +1,8 @@
+{
+  "source": "Official JMA sample bulletins (気象庁 技術資料 電文サンプル, 2016-09-01 tsunami series) replayed unmodified from JMA_SAMPLES_DIR; they list 石川県能登 under 津波注意報, which the feed recording of 2026-10/11 never did.",
+  "files": [
+    "32-39_12_02_250206_VTSE41.xml",
+    "32-39_12_07_250206_VTSE41.xml",
+    "32-39_12_13_250206_VTSE41.xml"
+  ]
+}

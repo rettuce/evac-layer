@@ -1,8 +1,8 @@
 {
   "id": "17204-demo",
   "municipality_id": "17204",
-  "lat": 37.396135984268,
-  "lng": 136.9050235542,
+  "lat": 37.388763,
+  "lng": 136.906418,
   "facing_deg": 0,
-  "note": "Illustrative demo screen at the coordinates of a GSI-listed facility near 輪島マリンタウン（ホテル ルートイン輪島）; the viewer is assumed to face north. Not a real installation."
+  "note": "Illustrative demo screen near 道の駅輪島 ふらっと訪夢 (centroid of 河井町20番 from the GSI address search, not a GSI-listed facility); the viewer is assumed to face north. Not a real installation."
 }

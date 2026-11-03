@@ -58,10 +58,10 @@
       "role": "direction",
       "priority": 2,
       "text": {
-        "ja": "北西へ"
+        "ja": "北へ"
       },
       "pictogram": "arrow_forward",
-      "rotation": 225,
+      "rotation": 270,
       "motion": "static"
     },
     {
@@ -73,7 +73,7 @@
       },
       "kind": "emergency_evacuation_site",
       "pictogram": "emergency_evacuation_site",
-      "distance_m": 910,
+      "distance_m": 1710,
       "motion": "static"
     },
     {

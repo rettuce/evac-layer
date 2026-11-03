@@ -36,8 +36,12 @@ export interface Alert {
   raw_title: string;
   headline_text: string;
   publishing_office: string;
+  // Control/Status: 通常 (normal), 試験 (test), 訓練 (drill). A drill screen must say so in every language.
+  status: "normal" | "test" | "drill";
   tsunami?: { highest_category: TsunamiCategory };
 }
+
+const CONTROL_STATUS: Record<string, Alert["status"]> = { "通常": "normal", "試験": "test", "訓練": "drill" };
 
 type Node = Record<string, any>;
 
@@ -237,6 +241,7 @@ export function parseJmaXml(xml: string | Buffer): Alert {
     raw_title: text(head.Title),
     headline_text: text(headline.Text),
     publishing_office: text(control.PublishingOffice),
+    status: CONTROL_STATUS[text(control.Status)] ?? fail(`unknown Control/Status "${text(control.Status)}"`),
     ...(tsunami ? { tsunami } : {}),
   };
 }

@@ -19,7 +19,7 @@ Reader, Writer, Composer, Verifier, the JMA XML parser and the revision loop. Ty
 
 ## 実データ（気象庁 長期フィードの記録, 2026-10-11 〜 11-02）
 
-The long feeds were recorded hourly from 2026-10-11 (20,592 bulletin bodies, 23 days; not redistributed here). `replay` only reads bulletins of the four supported types (VPWW55, VPWW56, VXKOnn, VTSE41); all 703 recorded bulletins of these types parse and validate. No archive of past bulletins exists, so these and the official samples are the only real data the demo can replay. No bulletin is invented or edited.
+The long feeds were recorded hourly from 2026-10-11 (20,592 bulletin bodies, 23 days; not redistributed here). `replay` only reads bulletins of the four supported types (VPWW55, VPWW56, VXKOnn, VTSE41); all 703 recorded bulletins of these types parse and validate. No archive of past bulletins exists, so these and the official samples are the only real data the demo can replay. No bulletin is invented or edited. The recording never carried a tsunami warning for any of the five municipalities, so `data/samples/<id>.json` names official JMA sample bulletins (read from `JMA_SAMPLES_DIR`, unmodified) that `replay` adds to the recording: 輪島市 replays the 2016-09-01 VTSE41 series, in which 石川県能登 is under 津波注意報 and then cleared.
 
 Bulletins that concern the demo municipalities (city code in the body, or the municipality's tsunami forecast region):
 

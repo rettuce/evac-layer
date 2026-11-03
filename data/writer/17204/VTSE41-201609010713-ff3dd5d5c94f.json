@@ -1,0 +1,74 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "津波注意報",
+          "ja_easy": "つなみ ちゅういほう（くんれん）",
+          "en": "Tsunami Advisory (Drill)",
+          "zh_hans": "海啸注意报（演习）",
+          "zh_hant": "海嘯注意報（演習）",
+          "ko": "쓰나미 주의보(훈련)",
+          "th": "การฝึกซ้อมประกาศเฝ้าระวังสึนามิ",
+          "vi": "Chú ý sóng thần (diễn tập)",
+          "fil": "Tsunami Advisory (Pagsasanay)",
+          "id": "Imbauan Tsunami (Latihan)"
+        },
+        "basis": "警報 areas[0].kind_name「津波注意報」（石川県能登, code 360）。訓練であることは headline_text「＊＊＊これは訓練です＊＊＊」による"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "高い所へ上がる",
+          "ja_easy": "たかい ところへ あがって",
+          "en": "Go to high ground",
+          "zh_hans": "前往高处",
+          "zh_hant": "前往高處",
+          "ko": "높은 곳으로 이동",
+          "th": "ขึ้นไปที่สูง",
+          "vi": "Lên chỗ cao",
+          "fil": "Umakyat sa mataas",
+          "id": "Naik ke tempat tinggi"
+        },
+        "basis": "警報 hazard「tsunami」・areas[0].kind_name「津波注意報」と、テンプレート evac-now の図記号 go_higher（いまいる場所から高い所へ上がる）"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "高い所へ上がる",
+          "ja_easy": "たかい ところへ あがって",
+          "en": "Go to high ground",
+          "zh_hans": "前往高处",
+          "zh_hant": "前往高處",
+          "ko": "높은 곳으로 이동",
+          "th": "ขึ้นไปที่สูง",
+          "vi": "Lên chỗ cao",
+          "fil": "Umakyat sa mataas",
+          "id": "Naik ke tempat tinggi"
+        },
+        "basis": "action セルと同じ内容（警報 areas[0].kind_name「津波注意報」と図記号 go_higher）を各言語で表示"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VTSE41-201609010713-ff3dd5d5c94f",
+      "input": 5548,
+      "output": 2126,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.064712
+    },
+    {
+      "stage": "writer VTSE41-201609010713-ff3dd5d5c94f",
+      "input": 5587,
+      "output": 2085,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.064048
+    }
+  ],
+  "lint": []
+}

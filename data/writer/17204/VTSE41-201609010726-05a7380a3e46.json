@@ -1,0 +1,66 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "津波注意報",
+          "ja_easy": "くんれん つなみ ちゅういほう",
+          "en": "DRILL: Tsunami Advisory",
+          "zh_hans": "演习：海啸注意报",
+          "zh_hant": "演習：海嘯注意報",
+          "ko": "훈련: 쓰나미 주의보",
+          "th": "ฝึกซ้อม:ประกาศเฝ้าระวังสึนามิ",
+          "vi": "[diễn tập] Khuyến cáo sóng thần",
+          "fil": "[pagsasanay] Abiso sa Tsunami",
+          "id": "[latihan] Imbauan Tsunami"
+        },
+        "basis": "alert.areas[0].kind_name「津波注意報」(石川県能登, code 360, status continued)。alert.status=drill のため、全言語に訓練の語を入れた。headline_text 冒頭「＊＊＊これは訓練です＊＊＊」とも一致。指摘への対応: 訓練の表記はすべての言語でこの見出しセルに出す。action と languages には訓練の語を入れない取り決めのため、そちらには入れていない。"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "すぐ高い所へ",
+          "ja_easy": "すぐ たかい ところへ",
+          "en": "Go higher now",
+          "zh_hans": "立即前往高处",
+          "zh_hant": "立即前往高處",
+          "ko": "즉시 높은 곳으로",
+          "th": "ไปที่สูงทันที",
+          "vi": "Lên chỗ cao ngay",
+          "fil": "Umakyat agad sa mataas",
+          "id": "Segera ke tempat tinggi"
+        },
+        "basis": "alert.headline_text「ただちに避難してください」と、図記号 go_higher（いまいる場所から高い所へ上がる）を行動として書いた。訓練の語は取り決めにより入れず、headline に示している。"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "すぐ高い所へ",
+          "ja_easy": "すぐ たかい ところへ",
+          "en": "Go higher now",
+          "zh_hans": "立即前往高处",
+          "zh_hant": "立即前往高處",
+          "ko": "즉시 높은 곳으로",
+          "th": "ไปที่สูงทันที",
+          "vi": "Lên chỗ cao ngay",
+          "fil": "Umakyat agad sa mataas",
+          "id": "Segera ke tempat tinggi"
+        },
+        "basis": "action セルと同じ内容を各言語で書いた（根拠: alert.headline_text「ただちに避難してください」と図記号 go_higher）。訓練の表記は取り決めにより languages には入れず、全言語の headline セルに示している。"
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VTSE41-201609010726-05a7380a3e46",
+      "input": 6151,
+      "output": 2061,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.065824
+    }
+  ],
+  "lint": []
+}

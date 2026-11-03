@@ -1,0 +1,124 @@
+{
+  "version": "0.1",
+  "kind": "evac-screen",
+  "municipality": {
+    "id": "17204",
+    "name": "輪島市"
+  },
+  "alert": {
+    "source": "jma",
+    "bulletin_id": "VTSE41-201609010713-ff3dd5d5c94f",
+    "hazard": "tsunami",
+    "level": 2,
+    "issued_at": "2016-09-01T07:13:00+09:00"
+  },
+  "shape": "16x9",
+  "template": "evac-now",
+  "cells": [
+    {
+      "id": "headline",
+      "role": "headline",
+      "priority": 1,
+      "text": {
+        "ja": "【訓練】津波注意報",
+        "ja_easy": "つなみ ちゅういほう（くんれん）",
+        "en": "Tsunami Advisory (Drill)",
+        "zh_hans": "海啸注意报（演习）",
+        "zh_hant": "海嘯注意報（演習）",
+        "ko": "쓰나미 주의보(훈련)",
+        "th": "การฝึกซ้อมประกาศเฝ้าระวังสึนามิ",
+        "vi": "Chú ý sóng thần (diễn tập)",
+        "fil": "Tsunami Advisory (Pagsasanay)",
+        "id": "Imbauan Tsunami (Latihan)"
+      },
+      "pictogram": "tsunami",
+      "motion": "scale-in"
+    },
+    {
+      "id": "action",
+      "role": "action",
+      "priority": 1,
+      "text": {
+        "ja": "高い所へ上がる",
+        "ja_easy": "たかい ところへ あがって",
+        "en": "Go to high ground",
+        "zh_hans": "前往高处",
+        "zh_hant": "前往高處",
+        "ko": "높은 곳으로 이동",
+        "th": "ขึ้นไปที่สูง",
+        "vi": "Lên chỗ cao",
+        "fil": "Umakyat sa mataas",
+        "id": "Naik ke tempat tinggi"
+      },
+      "pictogram": "go_higher",
+      "motion": "pulse"
+    },
+    {
+      "id": "direction",
+      "role": "direction",
+      "priority": 2,
+      "text": {
+        "ja": "北東へ"
+      },
+      "pictogram": "arrow_forward",
+      "rotation": 315,
+      "motion": "static"
+    },
+    {
+      "id": "shelter",
+      "role": "shelter",
+      "priority": 2,
+      "text": {
+        "ja": "輪島市健康ふれあい広場"
+      },
+      "kind": "emergency_evacuation_site",
+      "pictogram": "emergency_evacuation_site",
+      "distance_m": 230,
+      "motion": "static"
+    },
+    {
+      "id": "languages",
+      "role": "languages",
+      "priority": 3,
+      "text": {
+        "ja": "高い所へ上がる",
+        "ja_easy": "たかい ところへ あがって",
+        "en": "Go to high ground",
+        "zh_hans": "前往高处",
+        "zh_hant": "前往高處",
+        "ko": "높은 곳으로 이동",
+        "th": "ขึ้นไปที่สูง",
+        "vi": "Lên chỗ cao",
+        "fil": "Umakyat sa mataas",
+        "id": "Naik ke tempat tinggi"
+      },
+      "motion": "static"
+    },
+    {
+      "id": "source",
+      "role": "source",
+      "priority": 9,
+      "text": {
+        "ja": "気象庁 9/1 07:13 発表・輪島市",
+        "en": "JMA 07:13, Sep 1 · Wajima"
+      },
+      "motion": "static"
+    }
+  ],
+  "palette": "cabinet-office-5",
+  "sources": [
+    {
+      "type": "pdf",
+      "file": "wajima/tsunami_hm_wajima.pdf",
+      "page": 1
+    },
+    {
+      "type": "gsi",
+      "file": "17204_2.csv"
+    },
+    {
+      "type": "jma",
+      "bulletin_id": "VTSE41-201609010713-ff3dd5d5c94f"
+    }
+  ]
+}

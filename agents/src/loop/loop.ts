@@ -4,7 +4,7 @@ import type { Alert } from "../jma/parse.js";
 import { NoRevision, type LoopFinding, type Reviser, type Screen, type Verifier } from "./types.js";
 
 export const MAX_ATTEMPTS = 3;
-const WRITER_FIXABLE = new Set(["over-budget", "font-size", "overflow", "distance-duplicated", "bulletin-mismatch"]);
+const WRITER_FIXABLE = new Set(["over-budget", "font-size", "overflow", "distance-duplicated", "bulletin-mismatch", "drill-marker"]);
 // The Composer writes the shelter and source cells from data, so a rewrite of Writer text cannot fix them.
 const WRITER_CELLS = new Set(["headline", "action", "direction", "languages"]);
 // The action pictogram is fixed by the template and its meaning is given to the Writer, so a mismatch on the
