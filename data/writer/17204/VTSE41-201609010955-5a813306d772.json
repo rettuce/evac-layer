@@ -6,60 +6,68 @@
         "role": "headline",
         "text": {
           "ja": "津波注意報解除",
-          "ja_easy": "くんれん つなみ ちゅうい おわり",
+          "ja_easy": "くんれん つなみちゅういほう おわり",
           "en": "DRILL: Tsunami all clear",
           "zh_hans": "演习：海啸注意报解除",
           "zh_hant": "演習：海嘯注意報解除",
           "ko": "훈련: 쓰나미 주의보 해제",
-          "th": "ฝึกซ้อม:ยกเลิกคำเตือนระวังสึนามิ",
-          "vi": "diễn tập: Dỡ bỏ khuyến cáo sóng thần",
-          "fil": "pagsasanay: Inalis na ang tsunami advisory",
-          "id": "latihan: Imbauan tsunami dicabut"
+          "th": "ฝึกซ้อม: ยกเลิกประกาศเฝ้าระวังสึนามิ",
+          "vi": "Diễn tập: Dỡ bỏ khuyến cáo sóng thần",
+          "fil": "Pagsasanay: Inalis na ang Tsunami Advisory",
+          "id": "Latihan: Imbauan tsunami dicabut"
         },
-        "basis": "alert.areas[0].kind_name「津波注意報解除」(status: cleared, 石川県能登) と alert.status「drill」(headline_text「これは訓練です」)"
+        "basis": "alert.status=drill (training word at the start); alert.areas[0].kind_name=津波注意報解除 (code 60, status=cleared) for 石川県能登. ja keeps the JMA name 津波注意報解除. en avoids an abbreviated official name and states the clearance within the 24-character budget."
       },
       {
         "role": "action",
         "text": {
-          "ja": "避難の必要なし",
-          "ja_easy": "くんれん にげなくて いい",
-          "en": "DRILL: All clear",
-          "zh_hans": "演习：无需避难",
-          "zh_hant": "演習：無需避難",
-          "ko": "훈련: 대피 불필요",
-          "th": "ฝึกซ้อม:ไม่ต้องอพยพ",
-          "vi": "diễn tập: Khỏi sơ tán",
-          "fil": "pagsasanay: Tapos na",
-          "id": "latihan: Selesai"
+          "ja": "もう避難は不要です",
+          "ja_easy": "くんれん もう あんぜんです",
+          "en": "DRILL: Safe now",
+          "zh_hans": "演习：已安全",
+          "zh_hant": "演習：已安全",
+          "ko": "훈련: 이제 안전합니다",
+          "th": "ฝึกซ้อม: ปลอดภัยแล้ว",
+          "vi": "Diễn tập: Đã an toàn",
+          "fil": "Pagsasanay: Ligtas na",
+          "id": "Latihan: Sudah aman"
         },
-        "basis": "alert.areas[0].status「cleared」(津波注意報解除) とテンプレート all-clear の図記号 safe_here（避難の必要がなくなった）。alert.status「drill」のため ja 以外に訓練の語を付記"
+        "basis": "alert.areas[0].status=cleared (津波注意報解除) for the all-clear template, with the safe_here pictogram (no need to evacuate). alert.status=drill, so the training word starts every language except ja."
       },
       {
         "role": "languages",
         "text": {
-          "ja": "避難の必要なし",
-          "ja_easy": "くんれん にげなくて いい",
-          "en": "DRILL: All clear",
-          "zh_hans": "演习：无需避难",
-          "zh_hant": "演習：無需避難",
-          "ko": "훈련: 대피 불필요",
-          "th": "ฝึกซ้อม:ไม่ต้องอพยพ",
-          "vi": "diễn tập: Khỏi sơ tán",
-          "fil": "pagsasanay: Tapos na",
-          "id": "latihan: Selesai"
+          "ja": "もう避難は不要です",
+          "ja_easy": "くんれん もう あんぜんです",
+          "en": "DRILL: Safe now",
+          "zh_hans": "演习：已安全",
+          "zh_hant": "演習：已安全",
+          "ko": "훈련: 이제 안전합니다",
+          "th": "ฝึกซ้อม: ปลอดภัยแล้ว",
+          "vi": "Diễn tập: Đã an toàn",
+          "fil": "Pagsasanay: Ligtas na",
+          "id": "Latihan: Sudah aman"
         },
-        "basis": "action セルと同じ内容（alert.areas[0].status「cleared」、図記号 safe_here）。alert.status「drill」のため全言語に訓練の語を付記"
+        "basis": "Same content as the action cell: alert.areas[0].status=cleared (津波注意報解除) with the safe_here pictogram. alert.status=drill, so the training word starts every language except ja."
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VTSE41-201609010955-5a813306d772",
-      "input": 8771,
-      "output": 3480,
+      "input": 5913,
+      "output": 2789,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.104684
+      "usd": 0.079432
+    },
+    {
+      "stage": "writer VTSE41-201609010955-5a813306d772",
+      "input": 5994,
+      "output": 2718,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.078336
     }
   ],
   "lint": []

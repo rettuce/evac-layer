@@ -11,55 +11,55 @@
           "zh_hans": "演习：海啸注意报",
           "zh_hant": "演習：海嘯注意報",
           "ko": "훈련: 쓰나미 주의보",
-          "th": "ฝึกซ้อม:ประกาศเฝ้าระวังสึนามิ",
-          "vi": "diễn tập: Chú ý sóng thần",
-          "fil": "pagsasanay: Abiso sa tsunami",
-          "id": "latihan: Imbauan waspada tsunami"
+          "th": "ฝึกซ้อม: ประกาศเฝ้าระวังสึนามิ",
+          "vi": "Diễn tập: Chú ý sóng thần",
+          "fil": "Pagsasanay: Tsunami Advisory",
+          "id": "Latihan: Peringatan Dini Tsunami"
         },
-        "basis": "alert.areas[0].kind_name「津波注意報」(石川県能登, code 360) をそのまま使用。alert.status = drill のため【訓練】と各言語の訓練語を付加。"
+        "basis": "alert.status=drill (training prefix); alert.areas[0].kind_name=津波注意報 for 石川県能登 (code 360), the area relevant to 輪島市; JMA official English name 'Tsunami Advisory'"
       },
       {
         "role": "action",
         "text": {
-          "ja": "高い所へ移動",
+          "ja": "高い所へ上がって",
           "ja_easy": "くんれん たかい ところへ",
           "en": "DRILL: Go higher",
-          "zh_hans": "演习：去高处",
-          "zh_hant": "演習：去高處",
+          "zh_hans": "演习：往高处",
+          "zh_hant": "演習：往高處",
           "ko": "훈련: 높은 곳으로",
-          "th": "ฝึกซ้อม:ไปที่สูง",
-          "vi": "diễn tập: Lên chỗ cao",
-          "fil": "pagsasanay: Umakyat",
-          "id": "latihan: Naik ke atas"
+          "th": "ฝึกซ้อม: ขึ้นที่สูง",
+          "vi": "Diễn tập: Lên chỗ cao",
+          "fil": "Pagsasanay: Sa mataas",
+          "id": "Latihan: Naik ke atas"
         },
-        "basis": "alert.hazard = tsunami、alert.areas[0].kind_name「津波注意報」に対し、テンプレート evac-now の図記号 go_higher（高い所へ上がる）と同じ意味の行動。alert.status = drill のため ja 以外に訓練語を付加。"
+        "basis": "Template evac-now action pictogram go_higher (move up to higher ground from where you are); alert.hazard=tsunami, alert.areas[0].kind_name=津波注意報; alert.status=drill (training prefix on all languages except ja)"
       },
       {
         "role": "languages",
         "text": {
-          "ja": "高い所へ移動",
+          "ja": "高い所へ上がって",
           "ja_easy": "くんれん たかい ところへ",
           "en": "DRILL: Go higher",
-          "zh_hans": "演习：去高处",
-          "zh_hant": "演習：去高處",
+          "zh_hans": "演习：往高处",
+          "zh_hant": "演習：往高處",
           "ko": "훈련: 높은 곳으로",
-          "th": "ฝึกซ้อม:ไปที่สูง",
-          "vi": "diễn tập: Lên chỗ cao",
-          "fil": "pagsasanay: Umakyat",
-          "id": "latihan: Naik ke atas"
+          "th": "ฝึกซ้อม: ขึ้นที่สูง",
+          "vi": "Diễn tập: Lên chỗ cao",
+          "fil": "Pagsasanay: Sa mataas",
+          "id": "Latihan: Naik ke atas"
         },
-        "basis": "action セルと同じ内容（図記号 go_higher、alert.hazard = tsunami、alert.areas[0].kind_name「津波注意報」）。alert.status = drill のため ja 以外の全言語に訓練語を付加。"
+        "basis": "Same content as action cell (go_higher pictogram); alert.status=drill (training prefix on all languages except ja)"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VTSE41-201609010713-ff3dd5d5c94f",
-      "input": 8793,
-      "output": 2220,
+      "input": 5935,
+      "output": 2316,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.079572
+      "usd": 0.07006
     }
   ],
   "lint": []

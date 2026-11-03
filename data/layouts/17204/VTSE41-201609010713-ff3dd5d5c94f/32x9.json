@@ -26,10 +26,10 @@
         "zh_hans": "演习：海啸注意报",
         "zh_hant": "演習：海嘯注意報",
         "ko": "훈련: 쓰나미 주의보",
-        "th": "ฝึกซ้อม:ประกาศเฝ้าระวังสึนามิ",
-        "vi": "diễn tập: Chú ý sóng thần",
-        "fil": "pagsasanay: Abiso sa tsunami",
-        "id": "latihan: Imbauan waspada tsunami"
+        "th": "ฝึกซ้อม: ประกาศเฝ้าระวังสึนามิ",
+        "vi": "Diễn tập: Chú ý sóng thần",
+        "fil": "Pagsasanay: Tsunami Advisory",
+        "id": "Latihan: Peringatan Dini Tsunami"
       },
       "pictogram": "tsunami",
       "motion": "scale-in"
@@ -39,16 +39,16 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "高い所へ移動",
+        "ja": "高い所へ上がって",
         "ja_easy": "くんれん たかい ところへ",
         "en": "DRILL: Go higher",
-        "zh_hans": "演习：去高处",
-        "zh_hant": "演習：去高處",
+        "zh_hans": "演习：往高处",
+        "zh_hant": "演習：往高處",
         "ko": "훈련: 높은 곳으로",
-        "th": "ฝึกซ้อม:ไปที่สูง",
-        "vi": "diễn tập: Lên chỗ cao",
-        "fil": "pagsasanay: Umakyat",
-        "id": "latihan: Naik ke atas"
+        "th": "ฝึกซ้อม: ขึ้นที่สูง",
+        "vi": "Diễn tập: Lên chỗ cao",
+        "fil": "Pagsasanay: Sa mataas",
+        "id": "Latihan: Naik ke atas"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -81,16 +81,16 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "高い所へ移動",
+        "ja": "高い所へ上がって",
         "ja_easy": "くんれん たかい ところへ",
         "en": "DRILL: Go higher",
-        "zh_hans": "演习：去高处",
-        "zh_hant": "演習：去高處",
+        "zh_hans": "演习：往高处",
+        "zh_hant": "演習：往高處",
         "ko": "훈련: 높은 곳으로",
-        "th": "ฝึกซ้อม:ไปที่สูง",
-        "vi": "diễn tập: Lên chỗ cao",
-        "fil": "pagsasanay: Umakyat",
-        "id": "latihan: Naik ke atas"
+        "th": "ฝึกซ้อม: ขึ้นที่สูง",
+        "vi": "Diễn tập: Lên chỗ cao",
+        "fil": "Pagsasanay: Sa mataas",
+        "id": "Latihan: Naik ke atas"
       },
       "motion": "static"
     },

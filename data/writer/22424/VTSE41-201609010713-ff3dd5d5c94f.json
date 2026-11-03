@@ -1,0 +1,74 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "大津波警報：発表",
+          "ja_easy": "くんれん おおつなみ けいほう",
+          "en": "DRILL: Major Tsunami",
+          "zh_hans": "演习：大海啸警报",
+          "zh_hant": "演習：大海嘯警報",
+          "ko": "훈련: 대형 쓰나미 경보",
+          "th": "ฝึกซ้อม: คำเตือนสึนามิขนาดใหญ่",
+          "vi": "Diễn tập: Cảnh báo sóng thần lớn",
+          "fil": "Pagsasanay: Babala sa Malaking Tsunami",
+          "id": "Latihan: Peringatan Tsunami Besar"
+        },
+        "basis": "alert.areas[0].kind_name「大津波警報：発表」(静岡県), alert.tsunami.highest_category=major_warning, alert.status=drill. The full official English name (\"DRILL: Major Tsunami Warning\") is 28 characters and cannot fit the 24-character en budget. en is shortened to \"DRILL: Major Tsunami\" so the drill prefix and \"Major\" stay. Downgrading to \"Tsunami Warning\" would weaken the warning."
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "高い所へ避難",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：往高处",
+          "zh_hant": "演習：往高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม: ขึ้นที่สูง",
+          "vi": "Diễn tập: Lên chỗ cao",
+          "fil": "Pagsasanay: Umakyat",
+          "id": "Latihan: Naik ke atas"
+        },
+        "basis": "alert.headline_text「ただちに避難してください」 matches the go_higher pictogram (move up from where you are to higher ground). alert.status=drill, so a drill prefix is added to every language except ja."
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "高い所へ避難",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：往高处",
+          "zh_hant": "演習：往高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม: ขึ้นที่สูง",
+          "vi": "Diễn tập: Lên chỗ cao",
+          "fil": "Pagsasanay: Umakyat",
+          "id": "Latihan: Naik ke atas"
+        },
+        "basis": "Same content as the action cell: alert.headline_text「ただちに避難してください」 + the go_higher pictogram, with the drill prefix from alert.status=drill."
+      }
+    ]
+  },
+  "usage": [
+    {
+      "stage": "writer VTSE41-201609010713-ff3dd5d5c94f",
+      "input": 4325,
+      "output": 3339,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.08408
+    },
+    {
+      "stage": "writer VTSE41-201609010713-ff3dd5d5c94f",
+      "input": 4399,
+      "output": 2619,
+      "cache_write": 0,
+      "cache_read": 0,
+      "usd": 0.069976
+    }
+  ],
+  "lint": []
+}

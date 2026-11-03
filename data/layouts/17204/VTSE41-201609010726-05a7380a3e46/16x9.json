@@ -21,15 +21,15 @@
       "priority": 1,
       "text": {
         "ja": "【訓練】津波注意報",
-        "ja_easy": "くんれん つなみ ちゅういほう",
+        "ja_easy": "くんれん つなみちゅういほう",
         "en": "DRILL: Tsunami Advisory",
         "zh_hans": "演习：海啸注意报",
         "zh_hant": "演習：海嘯注意報",
         "ko": "훈련: 쓰나미 주의보",
         "th": "ฝึกซ้อม: ประกาศเฝ้าระวังสึนามิ",
-        "vi": "Khuyến cáo sóng thần (diễn tập)",
-        "fil": "Abiso sa tsunami (pagsasanay)",
-        "id": "Imbauan waspada tsunami (latihan)"
+        "vi": "Diễn tập: Khuyến cáo sóng thần",
+        "fil": "Pagsasanay: Abiso sa Tsunami",
+        "id": "Latihan: Imbauan Tsunami"
       },
       "pictogram": "tsunami",
       "motion": "scale-in"
@@ -39,16 +39,16 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "高い所へ避難",
+        "ja": "高い所へ上がって",
         "ja_easy": "くんれん たかい ところへ",
         "en": "DRILL: Go higher",
-        "zh_hans": "演习：快到高处",
-        "zh_hant": "演習：快到高處",
+        "zh_hans": "演习：往高处",
+        "zh_hant": "演習：往高處",
         "ko": "훈련: 높은 곳으로",
-        "th": "ฝึกซ้อม:ขึ้นที่สูง",
-        "vi": "Lên chỗ cao (diễn tập)",
-        "fil": "Umakyat (pagsasanay)",
-        "id": "Naik ke atas (latihan)"
+        "th": "ฝึกซ้อม: ขึ้นที่สูง",
+        "vi": "Diễn tập: Lên chỗ cao",
+        "fil": "Pagsasanay: Umakyat",
+        "id": "Latihan: Naik ke atas"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -81,16 +81,16 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "高い所へ避難",
+        "ja": "高い所へ上がって",
         "ja_easy": "くんれん たかい ところへ",
         "en": "DRILL: Go higher",
-        "zh_hans": "演习：快到高处",
-        "zh_hant": "演習：快到高處",
+        "zh_hans": "演习：往高处",
+        "zh_hant": "演習：往高處",
         "ko": "훈련: 높은 곳으로",
-        "th": "ฝึกซ้อม:ขึ้นที่สูง",
-        "vi": "Lên chỗ cao (diễn tập)",
-        "fil": "Umakyat (pagsasanay)",
-        "id": "Naik ke atas (latihan)"
+        "th": "ฝึกซ้อม: ขึ้นที่สูง",
+        "vi": "Diễn tập: Lên chỗ cao",
+        "fil": "Pagsasanay: Umakyat",
+        "id": "Latihan: Naik ke atas"
       },
       "motion": "static"
     },

@@ -114,3 +114,11 @@ test("a drill bulletin gets 【訓練】 in front of the headline", () => {
   const real = compose({ alert: { ...alert, status: "normal" as const }, municipality, site, writer });
   assert.equal(real[0].cells.find((c) => c.id === "headline")!.text.ja, "津波注意報");
 });
+
+test("a newly issued tsunami warning's headline drops the ：発表 suffix of the JMA kind name", () => {
+  const alert = advisory();
+  assert.equal(alert.areas.find((a) => a.code === "380")!.kind_name, "大津波警報：発表");
+  const shizuoka = { ...municipality, id: "22424", name: "吉田町" };
+  const [landscape] = compose({ alert, municipality: shizuoka, site: { ...site, municipality_id: "22424" }, writer });
+  assert.equal(landscape.cells.find((cell) => cell.id === "headline")!.text.ja, "【訓練】大津波警報");
+});

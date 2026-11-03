@@ -54,3 +54,8 @@ test("on a drill, action and languages must carry the marker in every language b
   ];
   assert.deepEqual(judgeDrill(cells, "drill").map((f) => `${f.cell_id}:${f.lang}`), ["action:en"]);
 });
+
+test("a drill word that is not at the start is sent back", () => {
+  const cells = [{ id: "headline", role: "headline", text: { ja: "【訓練】津波注意報", en: "Tsunami Advisory (Drill)", vi: "Diễn tập: Chú ý sóng thần" } }];
+  assert.deepEqual(judgeDrill(cells, "drill").map((f) => f.lang), ["en"]);
+});
