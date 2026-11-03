@@ -1,16 +1,84 @@
 {
   "version": "0.1",
   "kind": "evac-screen",
-  "municipality": { "id": "00000", "name": "[市町村]" },
-  "alert": { "source": "jma", "bulletin_id": "<電文 ID>", "hazard": "flood", "level": 5, "issued_at": "2026-11-02T20:00:00+09:00" },
+  "municipality": {
+    "id": "00000",
+    "name": "[市町村]"
+  },
+  "alert": {
+    "source": "jma",
+    "bulletin_id": "<電文 ID>",
+    "hazard": "flood",
+    "level": 5,
+    "issued_at": "2026-11-02T20:00:00+09:00"
+  },
   "shape": "16x9",
   "template": "secure-now",
   "cells": [
-    { "id": "headline", "role": "headline", "priority": 1, "text": { "ja": "[河川名]レベル５氾濫特別警報", "ja_easy": "かわが あふれて います", "en": "[River] Level 5 flood emergency" }, "pictogram": "flood", "motion": "scale-in" },
-    { "id": "action", "role": "action", "priority": 1, "text": { "ja": "ただちに命を守る行動を", "ja_easy": "いますぐ いのちを まもって ください", "en": "Act now to save your life" }, "pictogram": "go_higher", "motion": "pulse" },
-    { "id": "languages", "role": "languages", "priority": 3, "text": { "ja": "ただちに命を守る行動を", "ja_easy": "いますぐ いのちを まもって ください", "en": "Act now to save your life", "zh_hans": "请立即采取保护生命的行动", "ko": "지금 즉시 목숨을 지키는 행동을 하세요" }, "motion": "static" },
-    { "id": "source", "role": "source", "priority": 9, "text": { "ja": "出典: 気象庁 [hh:mm] 発表" }, "motion": "static" }
+    {
+      "id": "headline",
+      "role": "headline",
+      "priority": 1,
+      "text": {
+        "ja": "[河川名]レベル５氾濫特別警報",
+        "ja_easy": "かわが あふれて います",
+        "en": "[River] Level 5 flood emergency"
+      },
+      "pictogram": "flood",
+      "motion": "scale-in"
+    },
+    {
+      "id": "action",
+      "role": "action",
+      "priority": 1,
+      "text": {
+        "ja": "高い所へ上がって",
+        "ja_easy": "たかい ところへ あがって",
+        "en": "Go up higher",
+        "zh_hans": "请到高处",
+        "zh_hant": "請到高處",
+        "ko": "높은 곳으로 올라가세요",
+        "th": "ขึ้นไปที่สูง",
+        "vi": "Lên chỗ cao hơn",
+        "fil": "Umakyat sa mataas",
+        "id": "Naik ke tempat tinggi"
+      },
+      "pictogram": "go_higher",
+      "motion": "pulse"
+    },
+    {
+      "id": "languages",
+      "role": "languages",
+      "priority": 3,
+      "text": {
+        "ja": "高い所へ上がって",
+        "ja_easy": "たかい ところへ あがって",
+        "en": "Go up higher",
+        "zh_hans": "请到高处",
+        "zh_hant": "請到高處",
+        "ko": "높은 곳으로 올라가세요",
+        "th": "ขึ้นไปที่สูง",
+        "vi": "Lên chỗ cao hơn",
+        "fil": "Umakyat sa mataas",
+        "id": "Naik ke tempat tinggi"
+      },
+      "motion": "static"
+    },
+    {
+      "id": "source",
+      "role": "source",
+      "priority": 9,
+      "text": {
+        "ja": "出典: 気象庁 [hh:mm] 発表"
+      },
+      "motion": "static"
+    }
   ],
   "palette": "cabinet-office-5",
-  "sources": [ { "type": "jma", "bulletin_id": "<電文 ID>" } ]
+  "sources": [
+    {
+      "type": "jma",
+      "bulletin_id": "<電文 ID>"
+    }
+  ]
 }
