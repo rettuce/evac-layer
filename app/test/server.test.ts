@@ -106,3 +106,28 @@ describe('production build with an admin token', { skip: !existsSync(SERVER_ENTR
     assert.equal((await postJson(base, '/api/admin/site', { site_id: SITE, auto_publish: true })).status, 401)
   })
 })
+
+describe('production build serving demo/sites layouts', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first' }, () => {
+  let base = ''
+  let child: ChildProcess | undefined
+
+  before(async () => {
+    const root = await mkdtemp(join(tmpdir(), 'evac-repo-'))
+    await mkdir(join(root, 'demo', 'sites', 'tsurumai-kaikan'), { recursive: true })
+    await cp(join(APP_DIR, 'fixtures', 'wajima-tsunami.json'), join(root, 'demo', 'sites', 'tsurumai-kaikan', '16x9.json'))
+    await writeFile(join(root, 'secret.json'), '{"leak":true}')
+    ;({ base, child } = await startServer({ NUXT_REPO_ROOT: root, NUXT_DATA_DIR: await makeDataDir(), NUXT_ADMIN_TOKEN: '' }))
+  })
+  after(() => child?.kill())
+
+  test('only relative demo/sites/**/*.json paths are served, without the approval gate', async () => {
+    const at = (path: string) => fetch(`${base}/api/demo-site-layout?path=${encodeURIComponent(path)}`)
+    const ok = await at('demo/sites/tsurumai-kaikan/16x9.json')
+    assert.equal(ok.status, 200)
+    assert.equal((await ok.json()).kind, 'evac-screen')
+    for (const path of ['demo/sites/../secret.json', 'demo/sites/tsurumai-kaikan/../../../secret.json', '/secret.json', 'secret.json']) {
+      assert.equal((await at(path)).status, 400, path)
+    }
+    assert.equal((await at('demo/sites/missing/16x9.json')).status, 404)
+  })
+})
