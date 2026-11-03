@@ -30,3 +30,19 @@ def room_center():
 
 def room_size():
     return RIGHT_WALL_X - LEFT_WALL_X, BACK_WALL_Y - FRONT_Y
+
+
+# The room's elevation as one logical canvas (width = room width, height = floor to ceiling, origin top-left),
+# so one picture can be cut into every screen's window.
+ELEVATION_PX_PER_M = 500
+
+
+def elevation_canvas():
+    return round((RIGHT_WALL_X - LEFT_WALL_X) * ELEVATION_PX_PER_M), round(CEILING_Z * ELEVATION_PX_PER_M)
+
+
+def elevation_crop(center_x, center_z, width, height):
+    """x, y, w, h in canvas pixels for a screen centred at (center_x, center_z) metres on the elevation."""
+    px = ELEVATION_PX_PER_M
+    return (round((center_x - width / 2 - LEFT_WALL_X) * px), round((CEILING_Z - center_z - height / 2) * px),
+            round(width * px), round(height * px))

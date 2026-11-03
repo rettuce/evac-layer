@@ -40,7 +40,7 @@
     {
       "cut": "1",
       "kind": "3d",
-      "seconds": 15,
+      "seconds": 10,
       "src": "../renders/cut01.mp4",
       "caption": "2024.1.1 能登半島地震。\nどこへ逃げればよいか判断が難しかった来訪者がいた（上越市の検証）",
       "screens": null,
@@ -52,19 +52,19 @@
     {
       "cut": "2",
       "kind": "3d",
-      "seconds": 13,
+      "seconds": 8,
       "src": "../renders/cut02.mp4",
       "caption": "駅と街のスクリーンを作ってきた。\n災害のとき、このスクリーンは何も言わなかった",
       "screens": "ambient",
       "slate": "平時レイヤーが流れる 4 画面をゆっくりドリー",
-      "narration_ja": "駅と街のスクリーンを作ってきました。災害のとき、そのスクリーンは何も言いませんでした。",
-      "narration_en": "We have built screens for stations and streets. When disaster struck, those screens said nothing.",
+      "narration_ja": "駅と街のスクリーンを作ってきました。災害のとき、それは何も言いませんでした。",
+      "narration_en": "We have built screens for stations and streets. When disaster struck, they said nothing.",
       "caption_en": "We have built screens for stations and streets.\nIn the disaster, those screens said nothing."
     },
     {
       "cut": "2b",
       "kind": "title",
-      "seconds": 5,
+      "seconds": 3,
       "title": "黙らない画面\nScreens that don't go silent",
       "narration_ja": "黙らないスクリーンを。スクリーンは、もうあります。",
       "narration_en": "Screens that don't go silent. The screens are already there."
@@ -72,42 +72,51 @@
     {
       "cut": "2c",
       "kind": "title",
-      "seconds": 5,
+      "seconds": 3,
       "title": "スクリーンはもうある。\nThe screens are already there."
     },
     {
       "cut": "2d",
       "kind": "title",
-      "seconds": 4,
+      "seconds": 3,
       "title": "スクリーンは、自分の場所を知っている。\nEach screen knows where it stands."
     },
     {
       "cut": "3",
       "kind": "capture",
       "seconds": 12,
-      "src": "../capture/out/cut03.mp4",
-      "slate": "管理画面: 自治体 PDF をドロップ → Reader が構造化 → citations 付き JSON が流れる",
-      "narration_ja": "自治体のハザードマップを読みます。文字の壊れた PDF は画像から読み直し、どの数字にも出典のページが付きます。",
-      "narration_en": "It reads the city's hazard maps. A PDF with broken text is read again from the page image, and every figure carries its source page."
+      "src": "../capture/out/cut03_sheets.mp4",
+      "slate": "README のシート 3 枚（災害種別とレベル → 図記号と言語 → 画角）を各 4 s・軽いパン",
+      "narration_ja": "災害の種類とレベル、図記号と言語、そしてどんな形のスクリーンにも、同じ規則で出します。",
+      "narration_en": "Hazard types and levels, pictograms and languages, and screens of any shape, all under the same rules."
     },
     {
       "cut": "4",
       "kind": "capture",
+      "seconds": 10,
+      "src": "../capture/out/cut04_system.mp4",
+      "slate": "システム図を段ごとに点灯（平時 → 有事 → 検査 → 承認と配信・各 2.5 s）",
+      "narration_ja": "平時に資料を読み、警報が届けば文を書き、検査を通った案内だけを、承認どおりに配信します。",
+      "narration_en": "It reads the documents in calm times, writes when a warning arrives, and sends only checked guidance, as approved."
+    },
+    {
+      "cut": "4b",
+      "kind": "capture",
       "seconds": 12,
-      "src": "../capture/out/cut04.mp4",
-      "slate": "Writer: やさしい日本語 → 4 言語 / Composer: テンプレ番号と必須セル",
-      "narration_ja": "位置から市町村と最寄りの避難場所を引き、やさしい日本語と英語・中国語・韓国語で書いて、5 つの形に割り付けます。",
-      "narration_en": "Each screen knows where it stands. From there it finds its municipality and the nearest evacuation site. When a warning arrives, it writes the text in easy Japanese, English, Chinese and Korean, and lays it out for five screen shapes."
+      "src": "../capture/out/cut04b.mp4",
+      "slate": "端末 3 連の短縮版（Reader の読み直し → Writer → Verifier の差し戻しと再送・各 4 s）。田中判断待ち",
+      "narration_ja": "生成した案内は検査役が画像で読みます。方向の欄に距離が重なれば差し戻し、直るまで出しません。",
+      "narration_en": "An inspector reads each generated screen as an image. If the distance is duplicated in the direction cell, it is sent back, and nothing goes out until the fix passes."
     },
     {
       "cut": "5c",
       "kind": "capture",
-      "seconds": 10,
+      "seconds": 14,
       "src": "../capture/out/cut05c.mp4",
-      "slate": "左に由利本荘の地図（地理院タイル）・4 か所のディスプレイと最寄りの避難場所、右にその場所の 16:9 画面。2.5 s ずつ 4 か所",
-      "caption": "同じ警報。場所が違えば、行き先も方向も違う。\nSame warning. Different place, different way out.",
-      "narration_ja": "同じ警報でも、ディスプレイの場所が違えば、行き先も方向も距離も、自動で変わります。",
-      "narration_en": "The same warning, but where the display stands changes the destination, the direction and the distance, automatically."
+      "slate": "左に地図（OpenStreetMap）・4 か所。点が移る → 右の画面が消える → 0.4 s 後に新しい画面。3.5 s × 4",
+      "caption": "同じ警報。場所が違えば、避難先も方向も違う。\nSame warning. Different place, different shelter, different way.",
+      "narration_ja": "同じ警報でも、ディスプレイの場所が違えば、避難先も方向も距離も、自動で変わります。",
+      "narration_en": "The same warning, but where the display stands changes the shelter, the direction and the distance, automatically."
     },
     {
       "cut": "5",
@@ -122,7 +131,7 @@
     {
       "cut": "5b",
       "kind": "capture",
-      "seconds": 10,
+      "seconds": 8,
       "src": "../capture/out/cut05b.mp4",
       "slate": "管理画面: 一式を承認 →「自動配信 ON」・施設の緯度経度ピン",
       "caption": "平時に決めて、有事は自動\nDecide in calm. Deliver in crisis.",
@@ -130,27 +139,18 @@
       "narration_en": "People decide what to show, in calm times. Only approved guidance goes out, automatically, in a crisis."
     },
     {
-      "cut": "6",
-      "kind": "capture",
-      "seconds": 10,
-      "src": "../capture/out/cut06.mp4",
-      "slate": "Verifier がスクリーンショットを読み「文字高さ不足」「点滅頻度超過」を差し戻し → 修正版が通る",
-      "narration_ja": "生成した案内は検査役が画像で読みます。方向の欄に距離が重なれば差し戻し、直るまで出しません。",
-      "narration_en": "An inspector reads each generated screen as an image. If the distance is duplicated in the direction cell, it is sent back, and nothing goes out until the fix passes."
-    },
-    {
       "cut": "7",
       "kind": "capture",
-      "seconds": 15,
+      "seconds": 6,
       "src": "../capture/out/cut07.mp4",
-      "slate": "fan-out: 20 自治体が並列で処理され、ダッシュボードの数字が積み上がる",
-      "narration_ja": "5 つの自治体、198 本の電文。画面を出す 16 本から、80 のレイアウトを作りました。検査が見つけた 41 件の問題は、すべて直しています。",
-      "narration_en": "Five municipalities, 198 bulletins. From the 16 that call for a screen, 80 layouts. All 41 problems the inspection found have been fixed."
+      "slate": "ダッシュボードの最終値（1 秒で確定して 6 s）",
+      "narration_ja": "5 つの自治体、199 本の電文から、80 のレイアウト。",
+      "narration_en": "Five municipalities, 199 bulletins, 80 layouts."
     },
     {
       "cut": "7b",
       "kind": "capture",
-      "seconds": 10,
+      "seconds": 8,
       "src": "../capture/out/cut07b.mp4",
       "slate": "5 自治体それぞれの施設の案内画面を並べる",
       "caption": "5 つの自治体。それぞれの資料から、それぞれの場所へ。\nFive municipalities, each from its own documents.",
@@ -160,23 +160,32 @@
     {
       "cut": "8",
       "kind": "3d",
-      "seconds": 18,
+      "seconds": 15,
       "src": "../renders/cut08.mp4",
       "screens": "alert",
-      "slate": "柱・壁・リボン・案内柱に Lv5 の有事画面（由利本荘・実電文）が同時表示。寄りで出典の小さな文字が読める",
+      "slate": "寄り 3 連: 柱 → 下がり壁 → 壁面 9:16（各 5 s・正対・ゆっくり押し込み）",
       "narration_ja": "柱も、壁も、通路の上のスクリーンも、同じ警報を同時に出します。近づくと、出典が読めます。",
       "narration_en": "Columns, walls and the screen over the passage show the same warning at once. Step closer and the sources are readable."
     },
     {
       "cut": "9",
       "kind": "composite",
-      "seconds": 15,
+      "seconds": 10,
       "src": "../renders/cut09.mp4",
       "slate": "3D ヒーロー画角の 4 画面が Lv5 secure-now（look 確定後に cut09 として作る）\n右下に examples/minimal-cms の収録を小窓で重ねる（webhook ログ 2〜3 行 → PNG 表示）",
       "title": "どの画面にも\nAny screen.",
       "subtitle": "github.com/rettuce/evac-layer",
       "narration_ja": "フィードを受け取れれば、どの CMS でも。どの画面にも。",
       "narration_en": "Any CMS that can read the feed. Any screen."
+    },
+    {
+      "cut": "10",
+      "kind": "title",
+      "seconds": 8,
+      "title": "スクリーンはもうある。\nThe screens are already there.",
+      "subtitle": "github.com/rettuce/evac-layer",
+      "narration_ja": "EVAC LAYER は、オープンソースで公開しています。",
+      "narration_en": "EVAC LAYER is open source."
     }
   ]
 }
