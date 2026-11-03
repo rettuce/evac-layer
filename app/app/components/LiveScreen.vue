@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { formatClockJst } from '~~/layout/ambient'
 import { liveFrame, replayClockEpochMs, type ReplayStatus } from '~~/layout/replay'
+import type { AmbientRect } from '~~/layout/ambient/types'
 import type { EvacScreen, Shape } from '~~/layout/types'
 
 const props = defineProps<{
@@ -15,6 +16,12 @@ const props = defineProps<{
   reset?: boolean
   reducedMotion?: boolean
   scene?: string
+  room?: { width: number; height: number }
+  crop?: AmbientRect
+  ambientSeed?: string
+  bareAmbient?: boolean
+  lat?: number
+  lng?: number
   staleAfterMs?: number
 }>()
 
@@ -196,11 +203,16 @@ onBeforeUnmount(() => {
     <AmbientLayer
       v-show="frame.ambientVisible"
       :active="frame.ambientVisible"
-      :seed="site ?? municipality"
+      :seed="ambientSeed ?? site ?? municipality"
       :clock-epoch-ms="clockEpochMs"
       :site-name="siteName ?? status?.name ?? ''"
       :shape="shape"
       :scene="scene"
+      :room="room"
+      :crop="crop"
+      :bare="bareAmbient"
+      :lat="lat"
+      :lng="lng"
     />
     <div
       v-for="(screen, bulletinId) in layouts"

@@ -10,6 +10,10 @@ What a screen shows while there is no alert: a generative scene on a canvas, wit
 - `/screen?…&scene=<id>` pins a scene (demo recordings). Unknown ids fall back to the hourly pick. The corner still follows `t`, so a recording that must not change picks a fixed `t` range as well.
 - The root element carries `data-scene`, `data-corner` and `data-slot`.
 
+## One room, many screens
+
+`/screen?…&canvas=<W>x<H>&crop=<x>,<y>,<w>,<h>` treats a whole room as one picture: `canvas` is the room's elevation in logical px (all walls side by side; a pillar is its four faces as one strip) and `crop` is this screen's rectangle in it. Every screen of the room draws the same scene with the same seed (`room:<W>x<H>:<canvas_id>`, not the site), so the pieces meet. The room is drawn in fixed 512 px tiles, each with the same transform and bounds whichever screen asks, and copied at whole-pixel offsets; two neighbouring crops match the whole room byte for byte (`test/room.test.ts`, all scenes). The crop is scaled to the screen's width, so give each screen a crop of its own aspect. The clock, site name and coordinates stay per screen, in the screen's own corner. `overlay=none` drops them (used by the test). Without `crop` nothing changes.
+
 ## Overlay (after wgl ss design D21)
 
 Values are in 720-short-side units and scaled by `min(width, height) / 720`, as in ss.
@@ -20,6 +24,7 @@ Values are in 720-short-side units and scaled by `min(width, height) / 720`, as 
 | track / gutter / pitch | 192 / 24 / 216 |
 | block | 2 tracks (408), anchored to one corner on the outer margin |
 | site name | 24 / 32 |
+| coordinates (`lat`, `lng` on `/screen`, from the site's site.json) | 0.8 of the site name, 4 decimals, e.g. 39.3863° N, 140.0563° E |
 | time (HH:MM, JST) | 144 / 144, tabular figures |
 | sweep | a 48-long segment travels the rule under the time once a minute |
 

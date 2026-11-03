@@ -13,6 +13,9 @@ export const CLOCK_SWEEP_PERIOD_MS = 60_000
 export const CLOCK_SWEEP_LENGTH = 48
 export const D21_LABEL_GAP = 8
 export const D21_TRACK_GAP = 24
+const COORDS_TO_LABEL = 0.8
+const COORDS_GAP = 4
+export const COORD_GLYPHS = '0123456789.°NSEW, '
 const RULE_ALPHA = 0.14
 const TRACK_ALPHA = 0.4
 const LABEL_ALPHA = 0.8
@@ -71,12 +74,22 @@ export function timeFont(scale: number): string {
 
 export interface OverlayContent {
   siteName: string
+  coords?: string
   time: string
   sweep: number
   ink: keyof typeof OVERLAY_INK
 }
 
 const BLOCK_HEIGHT = D21_TYPE.label.line + D21_LABEL_GAP + D21_TYPE.time.line + D21_TRACK_GAP
+const COORDS_LINE = D21_TYPE.label.line * COORDS_TO_LABEL + COORDS_GAP
+
+export function formatCoords(lat: number, lng: number): string {
+  return `${Math.abs(lat).toFixed(4)}° ${lat < 0 ? 'S' : 'N'}, ${Math.abs(lng).toFixed(4)}° ${lng < 0 ? 'W' : 'E'}`
+}
+
+export function coordsFont(scale: number): string {
+  return `400 ${D21_TYPE.label.size * COORDS_TO_LABEL * scale}px ${LABEL_FONT_FAMILY}`
+}
 
 export function drawOverlay(ctx: CanvasRenderingContext2D, geometry: OverlayGeometry, content: OverlayContent): void {
   const { scale, block, rules } = geometry
@@ -93,7 +106,8 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, geometry: OverlayGeom
 
   const alignRight = block.left > margin + 0.5
   const textX = alignRight ? block.left + block.width : block.left
-  const top = block.top ?? height - (block.bottom ?? 0) - BLOCK_HEIGHT * scale
+  const coordsHeight = content.coords ? COORDS_LINE * scale : 0
+  const top = block.top ?? height - (block.bottom ?? 0) - BLOCK_HEIGHT * scale - coordsHeight
   ctx.textAlign = alignRight ? 'right' : 'left'
   ctx.textBaseline = 'middle'
 
@@ -101,11 +115,16 @@ export function drawOverlay(ctx: CanvasRenderingContext2D, geometry: OverlayGeom
   ctx.font = labelFont(scale)
   ctx.letterSpacing = `${D21_TYPE.label.size * scale * LABEL_TRACKING_EM}px`
   ctx.fillText(content.siteName, textX, top + (D21_TYPE.label.line * scale) / 2)
+  if (content.coords) {
+    ctx.font = coordsFont(scale)
+    ctx.letterSpacing = '0px'
+    ctx.fillText(content.coords, textX, top + (D21_TYPE.label.line + COORDS_GAP + (D21_TYPE.label.line * COORDS_TO_LABEL) / 2) * scale)
+  }
 
   ctx.globalAlpha = 1
   ctx.font = timeFont(scale)
   ctx.letterSpacing = `${-0.01 * D21_TYPE.time.size * scale}px`
-  const timeTop = top + (D21_TYPE.label.line + D21_LABEL_GAP) * scale
+  const timeTop = top + coordsHeight + (D21_TYPE.label.line + D21_LABEL_GAP) * scale
   ctx.fillText(content.time, textX, timeTop + (D21_TYPE.time.line * scale) / 2)
 
   const trackY = Math.round(timeTop + (D21_TYPE.time.line + D21_TRACK_GAP) * scale)
