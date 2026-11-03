@@ -15,6 +15,7 @@ const props = defineProps<{
   elapsedMs: number
   reducedMotion?: boolean
   box?: { width: number; height: number; scale: number }
+  withSources?: boolean
 }>()
 const emit = defineEmits<{ ready: [] }>()
 
@@ -260,6 +261,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :language-style="languageStyle"
       />
     </section>
+    <EvacSources v-if="withSources !== false" :screen="screen" />
   </main>
 </template>
 

@@ -5,12 +5,15 @@ import { SHELTER_PICTOGRAM_PX } from './typography'
 const M = 48
 const G = 24
 const BAND = 176
+// The source line is only the bulletin time and the municipality, so it sits close to the foot.
+const SOURCE_GAP = 8
+const FOOT = 32
 export const STACKED_BAND_MIN_PX = 200
 
 const LANDSCAPE: ShapeLayout = {
   id: 'split',
   columns: [M, '5fr', M, '4fr', M],
-  rows: [BAND, M, '1fr', G, '1fr', G, 'auto', 16, 'auto', 40],
+  rows: [BAND, M, '1fr', G, '1fr', G, 'auto', SOURCE_GAP, 'auto', FOOT],
   areas: [
     'headline headline headline headline headline',
     '. . . . .',
@@ -30,7 +33,7 @@ const LANDSCAPE: ShapeLayout = {
 const PORTRAIT: ShapeLayout = {
   id: 'stack',
   columns: [M, '1fr', M],
-  rows: [BAND, M, '1fr', G, 'auto', G, 'auto', G, 'auto', 16, 'auto', 40],
+  rows: [BAND, M, '1fr', G, 'auto', G, 'auto', G, 'auto', SOURCE_GAP, 'auto', FOOT],
   areas: [
     'headline headline headline',
     '. . .',
@@ -87,7 +90,7 @@ const RIBBON_WIDE_DIRECTION: ShapeLayout = {
 const SQUARE: ShapeLayout = {
   id: 'pictogram-first',
   columns: [M, '1fr', M],
-  rows: [BAND, M, '1fr', G, 'auto', G, 'auto', G, 'auto', 16, 'auto', 40],
+  rows: [BAND, M, '1fr', G, 'auto', G, 'auto', G, 'auto', SOURCE_GAP, 'auto', FOOT],
   areas: [
     'headline headline headline',
     '. . .',
@@ -115,7 +118,7 @@ function requireShelterInsteadOfDirection(layout: ShapeLayout): ShapeLayout {
 const CLEAR_STACK: ShapeLayout = {
   id: 'clear-stack',
   columns: [M, '1fr', M],
-  rows: [BAND, M, '1fr', G, 'auto', 16, 'auto', 40],
+  rows: [BAND, M, '1fr', G, 'auto', SOURCE_GAP, 'auto', FOOT],
   areas: [
     'headline headline headline',
     '. . .',

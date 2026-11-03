@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { CABINET_OFFICE_5, rgbCss } from '~~/layout/palette'
 import { SHAPES } from '~~/layout/shapes'
-import type { AlertLevel, Shape } from '~~/layout/types'
+import { sourceLines } from '~~/layout/sources'
+import type { AlertLevel, EvacScreen, Shape } from '~~/layout/types'
 
 interface CatalogEntry {
   issued_at: string
@@ -91,6 +92,18 @@ const current = computed(() => {
   const m = catalog.value?.municipalities.find((x) => x.id === selected.value?.municipality)
   return m?.entries.find((e) => e.bulletin_id === selected.value?.bulletin)
 })
+
+const sources = ref<string[]>([])
+watch(
+  selected,
+  async (pick) => {
+    sources.value = []
+    if (!pick) return
+    const layout = await $fetch<EvacScreen>('/api/admin/preview-layout', { headers: adminHeaders(), query: { municipality: pick.municipality, bulletin: pick.bulletin, shape: '16x9' } }).catch(() => undefined)
+    if (layout && selected.value === pick) sources.value = sourceLines(layout)
+  },
+  { immediate: true },
+)
 
 function previewSrc(shape: Shape) {
   if (!selected.value) return ''
@@ -190,6 +203,13 @@ onMounted(() => {
             <span v-for="(ok, shape) in current.report?.screens_ok" :key="shape" class="chip" :class="ok ? 'ok' : 'ng'">{{ shape }} {{ ok ? 'OK' : 'NG' }}</span>
           </dd>
           <dt>指摘</dt><dd>{{ current.report?.findings.length ? `${current.report.findings.length} 件` : 'なし' }}</dd>
+          <dt>出典</dt>
+          <dd>
+            <ul v-if="sources.length" class="sources" data-sources>
+              <li v-for="line in sources" :key="line">{{ line }}</li>
+            </ul>
+            <span v-else class="muted">画面なし</span>
+          </dd>
         </dl>
         <button
           type="button"
@@ -300,6 +320,7 @@ h2 { font-size: 15px; margin: 16px 0 8px; }
 .report dd { margin: 0; }
 .chip { display: inline-block; margin: 0 4px 4px 0; padding: 0 6px; border: 1px solid var(--line); font-size: 12px; }
 .chip.ng { border-color: #c00; color: #c00; }
+.sources { margin: 0; padding-left: 1.2em; font-size: 13px; }
 .approve { width: 100%; padding: 12px; border: 2px solid var(--accent); background: #fff; color: var(--accent); font: 700 15px 'Noto Sans JP', sans-serif; cursor: pointer; }
 .approve:hover:not(:disabled) { background: #f0f0f0; }
 .approve:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }

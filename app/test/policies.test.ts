@@ -3,6 +3,7 @@ import { mkdir, mkdtemp, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
+import { sourceLines } from '../layout/sources.ts'
 import { isDemoSitePath, isTrustedLayoutSrc, resolveLayoutSrc } from '../layout/trust.ts'
 import { adminAccess, clientAddressFor, type AdminRequest } from '../server/utils/adminPolicy.ts'
 import { liveLayoutGate } from '../layout/gate.ts'
@@ -127,4 +128,16 @@ test('webhook targets: only public addresses over http(s)', () => {
 test('webhook retries back off exponentially, five times', () => {
   assert.equal(WEBHOOK_RETRIES, 5)
   assert.deepEqual([0, 1, 2, 3, 4].map(webhookRetryDelayMs), [1000, 2000, 4000, 8000, 16000])
+})
+
+test('every source of a screen stays readable in the document behind the short source line', () => {
+  const lines = sourceLines({
+    alert: { source: 'jma', bulletin_id: 'VXKOii-1', hazard: 'flood', level: 4, issued_at: '2026-10-21T18:15:00+09:00' },
+    sources: [
+      { type: 'pdf', file: 'yurihonjo-map-north.pdf', page: 1 },
+      { type: 'gsi', file: 'mergeFromCity_05210.csv' },
+      { type: 'jma', bulletin_id: 'VXKOii-1' },
+    ],
+  })
+  assert.deepEqual(lines, ['自治体資料 yurihonjo-map-north.pdf p.1', '国土地理院 mergeFromCity_05210.csv', '気象庁 電文 VXKOii-1（2026-10-21T18:15:00+09:00）'])
 })

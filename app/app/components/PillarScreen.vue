@@ -68,9 +68,11 @@ watch(
         :elapsed-ms="elapsedMs"
         :reduced-motion="reducedMotion"
         :box="FACE_BOX"
+        :with-sources="false"
         @ready="onFaceReady(face)"
       />
     </div>
+    <EvacSources :screen="screen" />
   </main>
 </template>
 

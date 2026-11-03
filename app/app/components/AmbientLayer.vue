@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { OUTAGE_NOTICE, clockSweep, drawOverlay, formatClockJst, labelFont, overlayGeometry, pickAmbient, timeFont } from '~~/layout/ambient'
+import { clockSweep, drawOverlay, formatClockJst, labelFont, overlayGeometry, pickAmbient, timeFont } from '~~/layout/ambient'
 import type { AmbientFrame, AmbientRect } from '~~/layout/ambient/types'
 import { PILLAR, pillarYForHeight, shapeForViewport } from '~~/layout/shapes'
 import type { Shape } from '~~/layout/types'
@@ -74,8 +74,8 @@ function draw() {
 // Canvas text does not wait for web fonts; drawing before they load would rasterise a fallback face.
 async function loadFonts() {
   await Promise.all([
-    document.fonts.load(labelFont(1), (props.siteName || '施設') + OUTAGE_NOTICE.ja),
-    document.fonts.load(timeFont(1), TIME_GLYPHS + OUTAGE_NOTICE.en),
+    document.fonts.load(labelFont(1), props.siteName || '施設'),
+    document.fonts.load(timeFont(1), TIME_GLYPHS),
   ])
   fontsReady.value = true
 }
