@@ -3,14 +3,27 @@
   "version": "0.1",
   "municipality": "05210",
   "bulletin_id": "VXKOii-202610212015-979f11623ff9",
-  "verifier": "static+browser(http://127.0.0.1:3152)",
+  "verifier": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
   "reviser": "writer-api(opus)",
   "max_attempts": 3,
   "outcome": "pass",
   "attempts": [
     {
       "n": 1,
-      "writer_source": "writer-cache",
+      "writer_source": "writer-api:opus",
+      "findings": [
+        {
+          "shape": "16x9",
+          "check": "over-budget",
+          "cell_id": "headline",
+          "detail": "16x9 headline.ja_easy has 19 chars, budget 18: \"こよしがわ はんらん とくべつけいほう\""
+        }
+      ],
+      "screens_ok": {}
+    },
+    {
+      "n": 2,
+      "writer_source": "writer-api:opus",
       "findings": [],
       "screens_ok": {
         "16x9": true,
@@ -18,6 +31,13 @@
         "32x9": true,
         "1x1": true,
         "pillar": true
+      },
+      "notes": {
+        "16x9": "分かる。黒い帯に「レベル5」と大きな行動文「すぐ高い所へ上がる」があり、上向き矢印と水位を示す図記号も添えられているので、すぐ上の階や高い所へ逃げればよいと伝わる。",
+        "9x16": "分かる。大きな文字の「すぐ高い所へ上がる」と、上向き矢印と建物の図記号、洪水を示す黒い帯で、洪水のため上の階や高い所へ逃げるべきだと3秒で伝わる。",
+        "32x9": "分かります。大きな文字「すぐ高い所へ上が(る)」と上向き矢印・建物の図記号、やさしい日本語の「すぐ たかい ところへ」で、すぐ高い場所へ逃げる行動が伝わります。ただし文が画面の端で2枚にまたがり「る」が次の画面に分かれるため、一瞬読みにくい点だけ注意です。",
+        "1x1": "黒い帯の浸水の図記号と大きな「すぐ高い所へ上がる」、上向き矢印の図記号で、高い所へ急いで上がればよいと3秒で分かる。やさしい日本語の補足もあり、迷いにくい。",
+        "pillar": "分かる。大きな上向き矢印と浸水する建物の図記号、「すぐ高い所へ上がる」の大きな文字で、水があふれているので高い所へ上がるべきだと3秒以内に伝わる。やさしい日本語も添えられている。"
       }
     }
   ],

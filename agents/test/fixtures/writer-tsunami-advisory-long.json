@@ -8,7 +8,11 @@
         "en": "Tsunami Advisory",
         "zh_hans": "海啸注意报",
         "zh_hant": "海嘯注意報",
-        "ko": "쓰나미 주의보"
+        "ko": "쓰나미 주의보",
+        "th": "อพยพ",
+        "vi": "Tsunami Advisory",
+        "fil": "Tsunami Advisory",
+        "id": "Tsunami Advisory"
       },
       "basis": "alert.areas[石川県能登].kind_name"
     },
@@ -20,14 +24,22 @@
         "en": "Leave the coast",
         "zh_hans": "远离海边",
         "zh_hant": "遠離海邊",
-        "ko": "바다에서 떨어지세요"
+        "ko": "바다에서 떨어지세요",
+        "th": "อพยพ",
+        "vi": "Leave the coast",
+        "fil": "Leave the coast",
+        "id": "Leave the coast"
       },
       "basis": "alert.tsunami.highest_category=advisory"
     },
     {
       "role": "direction",
       "text": {
-        "ja": "出口 B → 左"
+        "ja": "出口 B → 左",
+        "th": "อพยพ",
+        "vi": "出口 B → 左",
+        "fil": "出口 B → 左",
+        "id": "出口 B → 左"
       },
       "basis": "site.direction"
     },
@@ -39,7 +51,11 @@
         "en": "Leave the coast",
         "zh_hans": "远离海边",
         "zh_hant": "遠離海邊",
-        "ko": "바다에서 떨어지세요"
+        "ko": "바다에서 떨어지세요",
+        "th": "อพยพ",
+        "vi": "Leave the coast",
+        "fil": "Leave the coast",
+        "id": "Leave the coast"
       },
       "basis": "action"
     }

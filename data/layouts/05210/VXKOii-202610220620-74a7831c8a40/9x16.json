@@ -21,11 +21,15 @@
       "priority": 1,
       "text": {
         "ja": "レベル２氾濫注意報解除",
-        "ja_easy": "こよしがわ ちゅういほう おわり",
-        "en": "Koyoshi R. flood cleared",
-        "zh_hans": "子吉川(子吉川)2级泛滥注意报解除",
-        "zh_hant": "子吉川(子吉川)2級氾濫注意報解除",
-        "ko": "고요시강(子吉川) 레벨2 범람주의보 해제"
+        "ja_easy": "こよしがわ みずの ちゅうい おわり",
+        "en": "Koyoshi flood alert over",
+        "zh_hans": "子吉川2级泛滥注意报解除",
+        "zh_hant": "子吉川2級氾濫注意報解除",
+        "ko": "고요시강 레벨2 범람주의보 해제",
+        "th": "ยกเลิกประกาศเฝ้าระวังน้ำล้นตลิ่งระดับ2แม่น้ำโคโยชิ",
+        "vi": "Dỡ bỏ cảnh báo lũ cấp 2 sông Koyoshi",
+        "fil": "Tapos na ang abiso sa pagbaha Antas 2 ng Ilog Koyoshi",
+        "id": "Peringatan banjir Level 2 Sungai Koyoshi dicabut"
       },
       "pictogram": "flood",
       "motion": "scale-in"
@@ -35,12 +39,16 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "避難の必要なし",
-        "ja_easy": "にげなくて だいじょうぶ",
+        "ja": "避難は不要です",
+        "ja_easy": "にげなくて だいじょうぶです",
         "en": "No need to leave",
         "zh_hans": "无需避难",
         "zh_hant": "無需避難",
-        "ko": "대피할 필요 없음"
+        "ko": "대피할 필요 없음",
+        "th": "ไม่ต้องอพยพ",
+        "vi": "Không cần sơ tán",
+        "fil": "Hindi kailangang lumikas",
+        "id": "Tidak perlu mengungsi"
       },
       "pictogram": "safe_here",
       "motion": "pulse"
@@ -50,12 +58,16 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "避難の必要なし",
-        "ja_easy": "にげなくて だいじょうぶ",
+        "ja": "避難は不要です",
+        "ja_easy": "にげなくて だいじょうぶです",
         "en": "No need to leave",
         "zh_hans": "无需避难",
         "zh_hant": "無需避難",
-        "ko": "대피할 필요 없음"
+        "ko": "대피할 필요 없음",
+        "th": "ไม่ต้องอพยพ",
+        "vi": "Không cần sơ tán",
+        "fil": "Hindi kailangang lumikas",
+        "id": "Tidak perlu mengungsi"
       },
       "motion": "static"
     },

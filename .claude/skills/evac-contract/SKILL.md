@@ -11,7 +11,7 @@ The layout JSON is the intermediate form: the Composer writes it, the renderer d
 
 - `shape`: `16x9`, `9x16`, `32x9`, `1x1`, `pillar`. `template`: `evac-prepare` (level 3), `evac-now` (level 4), `secure-now` (level 5), `all-clear`, `shelter-direction`.
 - `alert.level` is the display level 1–5. Tsunami bulletins have no Cabinet Office level, so the Composer maps major warning → 4, warning → 3, advisory → 2, forecast / cleared → 1.
-- `cells[].role`: `headline`, `action`, `direction`, `shelter`, `languages`, `source`. `text` keys: `ja` (required), `ja_easy`, `en`, `zh_hans`, `zh_hant`, `ko`.
+- `cells[].role`: `headline`, `action`, `direction`, `shelter`, `languages`, `source`. `text` keys: `ja` (required), `ja_easy`, `en`, `zh_hans`, `zh_hant`, `ko`, `th`, `vi`, `fil`, `id` (that order is the band's order; `action` and `languages` carry all ten).
 - `motion`: `scale-in` once on appearance, `pulse` at 1 Hz or slower, `static`. There is no blinking.
 - Colours are the Cabinet Office 2020 warning-level colours, held by the renderer as tokens; the Composer never writes a colour.
 - Every screen carries its sources (`pdf` with page, `gsi`, `jma` with bulletin id) in `sources[]`; the source cell shows only the issuer, its time and the municipality (気象庁 10/21 19:45 発表・由利本荘市 / JMA 19:45, Oct 21 · Yurihonjo).

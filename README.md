@@ -24,9 +24,9 @@
 
 気象庁の 4 種別の電文（大雨・土砂災害・指定河川の洪水・津波）と、内閣府の警戒レベル 1〜5（原典色・帯の文字はすべてコントラスト 4.5:1 以上）。
 
-![14 の図記号と、言語](docs/sheets/sheet2-pictograms-languages.png)
+![14 の図記号と、10 の言語](docs/sheets/sheet2-pictograms-languages.png)
 
-行動の図記号 14 種（Material Symbols 6・描き直し 1・自作 7）と、日本語・やさしい日本語・英語・中国語（簡体・繁体）・韓国語の行動文。
+行動の図記号 14 種（Material Symbols 6・描き直し 1・自作 7）と、10 の言語の行動文（日本語・やさしい日本語・英語・簡体中文・繁體中文・韓国語・タイ語・ベトナム語・フィリピン語・インドネシア語。JNTO 2025 年の訪日外客数の上位 10 か国・地域から）。
 
 ![どんなスクリーンサイズでも、必要な情報を正確に。](docs/sheets/sheet3-aspect-sweep.png)
 
@@ -48,7 +48,7 @@ EVAC LAYER に画面の座標を渡します。コンコースの柱、商業施
 
 1. **読む** — その自治体のハザードマップ PDF と国土地理院の指定緊急避難場所データを読み、すべての記述に出典ページを残す。
 2. **聞く** — 気象庁の防災情報 XML（2026 年 10 月から記録している実フィード）を受け、警報・内閣府の警戒レベル（1〜5）・対象地域を判定する。
-3. **書く** — その施設・その電文のための案内を書く。行動を日本語・やさしい日本語・英語・中国語・韓国語で、行動の図記号つきで。市町村だけが出せる避難情報の名称は使わない。
+3. **書く** — その施設・その電文のための案内を書く。行動を日本語・やさしい日本語・英語・簡体中文・繁體中文・韓国語・タイ語・ベトナム語・フィリピン語・インドネシア語の 10 言語で、行動の図記号つきで。市町村だけが出せる避難情報の名称は使わない。
 4. **組んで描く** — 同じ案内を 5 つの基準形状（16:9・9:16・32:9・1:1・柱に巻く LED）に組み、Renderer はどんな画角にもいちばん近い基準形状を収めて描く。視距離から導いた文字サイズ、内閣府原典の警戒レベル色、点滅なし。
 5. **検査する** — すべての画面を 3 段で。スキーマと規則、描画した DOM のブラウザ検査（溢れ・欠け・距離の重複）、PNG を電文と照らす Vision 検査。指摘は Writer に戻し、書き直しで直らないものはパイプラインを止める。
 6. **イベントを発火する** — 電文が届いたら、その場所の `alert` / `clear` イベントを、全形状の承認済み画面を添えて出す。フィード、署名つき Webhook、静的ファイル。どのサイネージシステムでも受けられる。
@@ -161,6 +161,6 @@ AGPL-3.0（`LICENSE`）。Copyright (C) 2026 You Tanaka。
 
 **The screens are already there, and each one knows where it stands.** What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it — for any screen in Japan, generated with Claude.
 
-Give EVAC LAYER the coordinates of a screen and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. It reads the municipality's own hazard-map PDFs with citations (Reader, Claude), listens to JMA disaster-prevention XML, writes the guidance in plain Japanese, *yasashii nihongo*, English, Chinese and Korean with action pictograms (Writer, Claude), composes it for five screen shapes, inspects every screen by rules, in a browser and by Vision (Claude), and fires `alert` / `clear` events carrying only operator-approved screens — as a feed, a signed webhook or static files. Any signage system can act on them.
+Give EVAC LAYER the coordinates of a screen and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. It reads the municipality's own hazard-map PDFs with citations (Reader, Claude), listens to JMA disaster-prevention XML, writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five screen shapes, inspects every screen by rules, in a browser and by Vision (Claude), and fires `alert` / `clear` events carrying only operator-approved screens — as a feed, a signed webhook or static files. Any signage system can act on them.
 
 Built from scratch during Built with Claude: Japan 2026 (Nov 2–8). Everything in this repository was written from Nov 2, 12:00 JST, by one commander session and three Claude Code implementation seats on their own git worktrees. Licensed AGPL-3.0; free for municipalities, public-safety organizations, research and personal use; commercial license for embedding into proprietary signage products: you@ie3.jp.

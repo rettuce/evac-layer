@@ -37,7 +37,14 @@
       "text": {
         "ja": "すぐ高いところへ",
         "ja_easy": "すぐ たかい ところへ にげて",
-        "en": "Go to high ground now"
+        "en": "Go to high ground now",
+        "th": "อพยพจากพื้นที่อันตราย",
+        "vi": "Rời khỏi nơi nguy hiểm",
+        "fil": "Lumikas mula sa mapanganib na lugar",
+        "id": "Tinggalkan tempat berbahaya",
+        "zh_hans": "立即前往高处",
+        "zh_hant": "立即前往高处",
+        "ko": "즉시 높은 곳으로 대피하세요"
       },
       "pictogram": "go_higher",
       "motion": "pulse"
@@ -74,7 +81,12 @@
         "ja_easy": "すぐ たかい ところへ にげて",
         "en": "Go to high ground now",
         "zh_hans": "立即前往高处",
-        "ko": "지금 바로 높은 곳으로"
+        "ko": "즉시 높은 곳으로 대피하세요",
+        "zh_hant": "立即前往高处",
+        "th": "อพยพจากพื้นที่อันตราย",
+        "vi": "Rời khỏi nơi nguy hiểm",
+        "fil": "Lumikas mula sa mapanganib na lugar",
+        "id": "Tinggalkan tempat berbahaya"
       },
       "motion": "scale-in"
     },

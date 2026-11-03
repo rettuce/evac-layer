@@ -231,6 +231,26 @@
               ]
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "type": "string",
+                "const": "action"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "properties": {
+              "text": {
+                "$ref": "#/$defs/textAllLanguages"
+              }
+            }
+          }
         }
       ]
     },
@@ -262,6 +282,22 @@
           "minLength": 1
         },
         "ko": {
+          "type": "string",
+          "minLength": 1
+        },
+        "th": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vi": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fil": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
           "type": "string",
           "minLength": 1
         }
@@ -353,7 +389,12 @@
         "ja_easy",
         "en",
         "zh_hans",
-        "ko"
+        "zh_hant",
+        "ko",
+        "th",
+        "vi",
+        "fil",
+        "id"
       ],
       "properties": {
         "ja": {
@@ -373,6 +414,26 @@
           "minLength": 1
         },
         "ko": {
+          "type": "string",
+          "minLength": 1
+        },
+        "zh_hant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "th": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vi": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fil": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
           "type": "string",
           "minLength": 1
         }

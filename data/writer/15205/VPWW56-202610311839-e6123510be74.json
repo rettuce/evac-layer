@@ -6,48 +6,60 @@
         "role": "headline",
         "text": {
           "ja": "レベル４土砂災害危険警報",
-          "ja_easy": "レベル４ どしゃ きけん けいほう",
+          "ja_easy": "レベル4 どしゃさいがい けいほう",
           "en": "Lv4 Landslide Warning",
-          "zh_hans": "4级土砂灾害危险警报",
-          "zh_hant": "4級土砂災害危險警報",
-          "ko": "레벨4 토사재해 위험경보"
+          "zh_hans": "4级土石灾害危险警报",
+          "zh_hant": "4級土石災害危險警報",
+          "ko": "레벨4 토사재해 위험경보",
+          "th": "คำเตือนอันตรายดินถล่มระดับ4",
+          "vi": "Cảnh báo nguy hiểm sạt lở đất cấp 4",
+          "fil": "Babala sa Panganib ng Pagguho ng Lupa, Antas 4",
+          "id": "Peringatan Bahaya Tanah Longsor Level 4"
         },
-        "basis": "警報 areas[0].kind_name「レベル４土砂災害危険警報」(柏崎市, level 4, status continued), publishing_office 新潟地方気象台, issued_at 2026-10-31T18:39+09:00"
+        "basis": "警報 areas[0].kind_name「レベル４土砂災害危険警報」(level 4, 柏崎市) をそのまま使用。publishing_office 新潟地方気象台"
       },
       {
         "role": "action",
         "text": {
           "ja": "危険な場所から避難",
           "ja_easy": "あぶない ばしょから にげて",
-          "en": "Leave danger zones",
-          "zh_hans": "从危险地点撤离",
-          "zh_hant": "從危險地點撤離",
-          "ko": "위험한 곳에서 대피"
+          "en": "Leave danger areas",
+          "zh_hans": "从危险场所撤离",
+          "zh_hant": "從危險場所撤離",
+          "ko": "위험한 곳에서 대피",
+          "th": "ออกจากที่อันตราย",
+          "vi": "Rời khỏi nơi nguy hiểm",
+          "fil": "Lumikas sa mapanganib",
+          "id": "Tinggalkan zona bahaya"
         },
-        "basis": "警報 level 4 とテンプレート evac-now の図記号 directions_run（危険な場所から避難する）。市の避難情報名は使わず行動として記述。知識ファイル kashiwazaki/dosha_hm_2022.pdf p.1 の土砂災害の危険が高まった際の避難の呼びかけとも整合"
+        "basis": "警報 level 4（土砂災害）とテンプレート evac-now の図記号 directions_run（危険な場所から避難する）。知識ファイル kashiwazaki/dosha_hm_2022.pdf p.1 のレベル4でとるべき行動（避難場所に速やかに避難を始める）とも一致。市の避難情報名は使わず行動として記載"
       },
       {
         "role": "languages",
         "text": {
           "ja": "危険な場所から避難",
           "ja_easy": "あぶない ばしょから にげて",
-          "en": "Leave danger zones",
-          "zh_hans": "从危险地点撤离",
-          "zh_hant": "從危險地點撤離",
-          "ko": "위험한 곳에서 대피"
+          "en": "Leave danger areas",
+          "zh_hans": "从危险场所撤离",
+          "zh_hant": "從危險場所撤離",
+          "ko": "위험한 곳에서 대피",
+          "th": "ออกจากที่อันตราย",
+          "vi": "Rời khỏi nơi nguy hiểm",
+          "fil": "Lumikas sa mapanganib",
+          "id": "Tinggalkan zona bahaya"
         },
-        "basis": "action セルと同内容（警報 level 4、図記号 directions_run: 危険な場所から避難する）の各言語表記"
+        "basis": "action セルと同じ内容（警報 level 4・図記号 directions_run、kashiwazaki/dosha_hm_2022.pdf p.1 のとるべき行動）を各言語で表示"
       }
     ]
   },
   "usage": [
     {
       "stage": "writer VPWW56-202610311839-e6123510be74",
-      "input": 35685,
-      "output": 1336,
+      "input": 35983,
+      "output": 2636,
       "cache_write": 0,
       "cache_read": 0,
-      "usd": 0.16946
+      "usd": 0.196652
     }
   ],
   "lint": []

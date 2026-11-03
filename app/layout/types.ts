@@ -11,7 +11,7 @@ export type Role =
   | 'languages'
   | 'source'
   | 'pictogram'
-export type LangKey = 'ja' | 'ja_easy' | 'en' | 'zh_hans' | 'zh_hant' | 'ko'
+export type LangKey = 'ja' | 'ja_easy' | 'en' | 'zh_hans' | 'zh_hant' | 'ko' | 'th' | 'vi' | 'fil' | 'id'
 export type Motion = 'scale-in' | 'pulse' | 'static'
 export type AlertLevel = 1 | 2 | 3 | 4 | 5
 

@@ -50,8 +50,11 @@ export const LINE_HEIGHT: Record<TypeStep, number> = {
   fine: 1.4,
 }
 
-export const LANGUAGE_ROTATION: LangKey[] = ['ja_easy', 'en', 'zh_hans', 'ko']
-export const LANGUAGE_ROTATION_MS = 6000
+// Two languages at a time, so the ten (ja itself is the action text) come round in 12.5 s: one at a
+// time would take over 20 s, and a reader leaves before meeting their own language.
+export const LANGUAGE_ROTATION: LangKey[] = ['ja_easy', 'en', 'zh_hans', 'zh_hant', 'ko', 'th', 'vi', 'fil', 'id']
+export const LANGUAGES_AT_ONCE = 2
+export const LANGUAGE_ROTATION_MS = 2500
 
 export const HTML_LANG: Record<LangKey, string> = {
   ja: 'ja',
@@ -60,15 +63,23 @@ export const HTML_LANG: Record<LangKey, string> = {
   zh_hans: 'zh-Hans',
   zh_hant: 'zh-Hant',
   ko: 'ko',
+  th: 'th',
+  vi: 'vi',
+  fil: 'fil',
+  id: 'id',
 }
 
 export const LANG_LABEL: Record<LangKey, string> = {
   ja: 'JA',
   ja_easy: 'やさしい にほんご',
   en: 'EN',
-  zh_hans: '中文',
-  zh_hant: '中文',
+  zh_hans: '简体中文',
+  zh_hant: '繁體中文',
   ko: '한국어',
+  th: 'ไทย',
+  vi: 'Tiếng Việt',
+  fil: 'Filipino',
+  id: 'Bahasa Indonesia',
 }
 
 // Fixed vocabulary from the Disaster Countermeasures Basic Act categories; the Writer never rewrites it.
