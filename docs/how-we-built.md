@@ -33,5 +33,5 @@ Run over the recorded feed, this loop found 25 defects on its first Vision pass 
 
 - **Skills**: `evac-fanout`, `evac-verify` and `evac-contract` in `.claude/skills/`.
 - **Subagents**: used for parallel research, for example one subagent per municipality when surveying hazard-map PDFs.
-- **Hooks**: a PostToolUse hook that validates layouts against `schema/` and lints Writer records on every write is drafted but not enabled (it changes project settings and waits for approval).
+- **Hooks**: a PostToolUse hook (`.claude/settings.json`, `.claude/hooks/check-data.sh`) runs on every Write and Edit. It validates layouts, municipality files and fixtures against `schema/` and lints Writer records, and a violation goes straight back to the session that wrote the file. Files outside those paths are not touched, so the other seats are unaffected. Changing project settings is not something a session may do by itself, so the author installed the hook after reviewing the draft.
 - **MCP**: the commander fills this in.
