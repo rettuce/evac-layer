@@ -21,7 +21,7 @@ FONT_REGULAR_URL = "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sa
 BRAVE = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
 
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
-SHEETS = ["coverage-hazards.png", "coverage-pictograms.png", "coverage-shapes.png"]
+SHEETS = ["sheets/sheet1-hazards-levels.png", "sheets/sheet2-pictograms-languages.png", "sheets/sheet3-aspect-sweep.png"]
 SHEET_SECONDS = 4
 SHEET_BACKGROUND = "white"
 STAGE_SECONDS = 2.5

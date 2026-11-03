@@ -48,6 +48,8 @@ LENS_MM = 35.0
 F_STOP = 2.8
 # Look B (35 downlights) and C (louvers) overflow the default 512 MB shadow pool.
 SHADOW_POOL_MB = "1536"
+# 4K stills need more shadow pages than the pool above holds (7353 of 6144 at 3840x2160).
+SHADOW_POOL_LARGE_MB = "2048"
 
 
 def facing(yaw):
@@ -587,7 +589,7 @@ def configure_render(args, frame_count, frames_dir):
     scene = bpy.context.scene
     scene.render.engine = "BLENDER_EEVEE"
     scene.eevee.taa_render_samples = args.samples
-    scene.eevee.shadow_pool_size = SHADOW_POOL_MB
+    scene.eevee.shadow_pool_size = SHADOW_POOL_LARGE_MB if args.width > 1920 else SHADOW_POOL_MB
     if hasattr(scene.eevee, "use_raytracing"):
         scene.eevee.use_raytracing = True
     scene.render.resolution_x, scene.render.resolution_y = args.width, args.height
