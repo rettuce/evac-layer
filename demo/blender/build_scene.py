@@ -134,10 +134,6 @@ HERO_LENS_MM = 28.0
 
 
 CLOSE_LENS_MM = 35.0
-# Close-ups frame the lower part of each surface, where the source line sits.
-CLOSE_COLUMN_Z = 1.35
-CLOSE_RIBBON_X = -1.2
-CLOSE_WALL_Z = 1.5
 
 
 def along_axis(y):
@@ -155,54 +151,16 @@ STILL_CAMERAS = {
 
 # Storyboard 3D cuts: camera path as (location, target) keys spread evenly over the cut,
 # which screen recording to show, and a light multiplier (night = everything dimmed).
-COLUMN_FACE_Y = COLUMNS[0][1] - COLUMN_CLAD_HALF
 RIBBON_FACE = Vector((RIBBON_CENTER_X, HEADWALL_FRONT_Y, RIBBON_Z))
 WALL_FACE_Y = BACK_WALL_Y
 
 
-def facing_push(target, start_m, end_m):
-    """A slow push-in square to a surface that faces -Y."""
-    return [(target - Vector((0.0, start_m, 0.0)), target), (target - Vector((0.0, end_m, 0.0)), target)]
-
-
-SHOTS = {
-    "cut01": {
-        "seconds": 10, "screens": "off", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar", "clay": True,
-        "path": [along_axis(-8.6), along_axis(-6.8)],
-    },
-    "cut02": {
-        "seconds": 8, "screens": "ambient", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "32x9",
-        "path": [(Vector((-0.7, -8.6, EYE_Z)), Vector((-0.7, BACK_WALL_Y, 2.3))),
-                 (Vector((0.7, -8.6, EYE_Z)), Vector((0.7, BACK_WALL_Y, 2.3)))],
-    },
-    "cut05": {
-        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
-        "path": [along_axis(-8.6), along_axis(-6.8)],
-    },
-    "cut08a": {
-        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
-        "path": facing_push(Vector((COLUMNS[0][0], COLUMN_FACE_Y, CLOSE_COLUMN_Z)), 3.0, 2.6),
-    },
-    "cut08b": {
-        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
-        "path": facing_push(RIBBON_FACE + Vector((CLOSE_RIBBON_X, 0.0, 0.0)), 3.6, 3.2),
-    },
-    "cut08c": {
-        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
-        "path": facing_push(Vector((0.0, WALL_FACE_Y, CLOSE_WALL_Z)), 3.0, 2.6),
-    },
-    "cut09": {
-        "seconds": 10, "screens": "alert", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
-        "path": [along_axis(-8.6), along_axis(-7.9)],
-    },
-}
-
-
-def oblique(target, distance, angle_deg, height, lens):
-    """Camera on a surface facing -Y, swung angle_deg toward +X (the concourse centre for the left column)."""
+def oblique(target, distance, angle_deg, height, lens, aim_offset=(0.0, 0.0, 0.0)):
+    """Camera on a surface facing -Y, swung angle_deg toward +X (the concourse centre for the left column);
+    aim_offset pans the view without moving the camera."""
     angle = math.radians(angle_deg)
     location = Vector((target.x + math.sin(angle) * distance, target.y - math.cos(angle) * distance, height))
-    return {"location": location, "target": target, "lens": lens}
+    return {"location": location, "target": target + Vector(aim_offset), "lens": lens}
 
 
 CLOSEUP_TARGETS = {
@@ -227,10 +185,59 @@ CLOSEUP_OPTIONS = {
     "wall-30-low-35": ("wall", 30, 0.9, 35.0, 6.5),
     "wall-30-eye-50": ("wall", 30, EYE_Z, 50.0, 9.0),
     "wall-20-high-50": ("wall", 20, 2.6, 50.0, 9.0),
+    # Chosen for cut 8: the low column view panned to between the two left columns, the left-side ribbon view
+    # brought closer, and the 45-degree wall view panned right to trim the empty wall on the left.
+    "col-final": ("col", 30, 0.8, 35.0, 9.0, (0.0, 2.5, 0.0)),
+    "rib-final": ("rib", -30, 2.4, 35.0, 8.5),
+    "wall-final": ("wall", 45, EYE_Z, 35.0, 6.5, (1.2, 0.0, 0.0)),
 }
 # Mesh objects that make up each close-up's screen (a column's LED band is four strips).
 CLOSEUP_OBJECTS = {"col": [f"led_wrap_0_{face}" for face in range(4)], "rib": ["screen_32x9_0"], "wall": ["screen_9x16_1"]}
-STILL_CAMERAS.update({name: oblique(CLOSEUP_TARGETS[t], d, a, h, lens) for name, (t, a, h, lens, d) in CLOSEUP_OPTIONS.items()})
+STILL_CAMERAS.update({name: oblique(CLOSEUP_TARGETS[t], d, a, h, lens, *rest)
+                      for name, (t, a, h, lens, d, *rest) in CLOSEUP_OPTIONS.items()})
+CLOSE_PUSH_M = 0.6
+
+
+def push_from(name):
+    """The chosen still, then CLOSE_PUSH_M closer along the view, for a slow push-in."""
+    spec = STILL_CAMERAS[name]
+    step = (spec["target"] - spec["location"]).normalized() * CLOSE_PUSH_M
+    return [(spec["location"], spec["target"]), (spec["location"] + step, spec["target"] + step)]
+
+
+
+SHOTS = {
+    "cut01": {
+        "seconds": 10, "screens": "off", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar", "clay": True,
+        "path": [along_axis(-8.6), along_axis(-6.8)],
+    },
+    "cut02": {
+        "seconds": 8, "screens": "ambient", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "32x9",
+        "path": [(Vector((-0.7, -8.6, EYE_Z)), Vector((-0.7, BACK_WALL_Y, 2.3))),
+                 (Vector((0.7, -8.6, EYE_Z)), Vector((0.7, BACK_WALL_Y, 2.3)))],
+    },
+    "cut05": {
+        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
+        "path": [along_axis(-8.6), along_axis(-6.8)],
+    },
+    "cut08a": {
+        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
+        "path": push_from("col-final"), "focus_point": CLOSEUP_TARGETS["col"],
+    },
+    "cut08b": {
+        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
+        "path": push_from("rib-final"),
+    },
+    "cut08c": {
+        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
+        "path": push_from("wall-final"),
+    },
+    "cut09": {
+        "seconds": 10, "screens": "alert", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
+        "path": [along_axis(-8.6), along_axis(-7.9)],
+    },
+}
+
 CLAY_ALBEDO = 0.85
 # Screens a shade darker than the room, so the silent panels still read in the white world.
 CLAY_SCREEN_ALBEDO = 0.55
@@ -420,7 +427,8 @@ def build_dolly(frame_count):
 def build_shot_camera(shot, frame_count):
     location, target_location = shot["path"][0]
     camera, target = add_camera(location, target_location, shot["lens"])
-    bpy.ops.object.empty_add(location=SCREENS[shot["focus"]]["center"] if "focus" in shot else shot["path"][0][1])
+    focus = shot.get("focus_point") or (SCREENS[shot["focus"]]["center"] if "focus" in shot else shot["path"][0][1])
+    bpy.ops.object.empty_add(location=focus)
     camera.data.dof.focus_object = bpy.context.active_object
     last = len(shot["path"]) - 1
     for i, (location, target_location) in enumerate(shot["path"]):
