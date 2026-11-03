@@ -159,6 +159,14 @@
       "narration_en": "Columns, walls and the screen over the passage show the same warning at once. Step closer and the sources are readable."
     },
     {
+      "cut": "8d",
+      "kind": "3d",
+      "seconds": 5,
+      "src": "../renders/cut08d.mp4",
+      "screens": "alert",
+      "slate": "柱の寄りから引いて右へパン: 柱・下がり壁・壁面 9:16 が 1 フレームに（wide-a）"
+    },
+    {
       "cut": "9",
       "kind": "composite",
       "seconds": 10,

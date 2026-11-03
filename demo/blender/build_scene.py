@@ -134,6 +134,10 @@ HERO_LENS_MM = 28.0
 
 
 CLOSE_LENS_MM = 35.0
+# The white world looks up a little from the concourse axis.
+CLAY_LENS_MM = 28.0
+CLAY_EYE_Z = 0.95
+CLAY_TARGET = Vector((0.0, BACK_WALL_Y, 2.6))
 
 
 def along_axis(y):
@@ -196,20 +200,35 @@ CLOSEUP_OBJECTS = {"col": [f"led_wrap_0_{face}" for face in range(4)], "rib": ["
 STILL_CAMERAS.update({name: oblique(CLOSEUP_TARGETS[t], d, a, h, lens, *rest)
                       for name, (t, a, h, lens, d, *rest) in CLOSEUP_OPTIONS.items()})
 CLOSE_PUSH_M = 0.6
+# Cut 8d: back from the column view and turned right, so column, ribbon and back wall share one frame.
+WIDE_OPTIONS = {
+    "wide-a": {"location": Vector((-0.5, -7.4, 0.9)), "target": Vector((-2.6, 5.0, 2.4)), "lens": 35.0},
+    "wide-b": {"location": Vector((0.0, -8.4, 1.1)), "target": Vector((-1.6, 5.5, 2.4)), "lens": 35.0},
+    "wide-c": {"location": Vector((0.0, -8.4, 1.2)), "target": Vector((-0.6, 6.0, 2.6)), "lens": 28.0},
+}
+STILL_CAMERAS.update(WIDE_OPTIONS)
 
 
-def push_from(name):
-    """The chosen still, then CLOSE_PUSH_M closer along the view, for a slow push-in."""
+def push_from(name, metres=CLOSE_PUSH_M):
+    """The chosen still, then metres closer along the view, for a slow push-in."""
     spec = STILL_CAMERAS[name]
-    step = (spec["target"] - spec["location"]).normalized() * CLOSE_PUSH_M
+    step = (spec["target"] - spec["location"]).normalized() * metres
     return [(spec["location"], spec["target"]), (spec["location"] + step, spec["target"] + step)]
+
+
+def pan_right_from(name, metres):
+    """The chosen still with the aim sliding metres to the right at the target: a slow pan."""
+    spec = STILL_CAMERAS[name]
+    view = spec["target"] - spec["location"]
+    right = Vector((view.y, -view.x, 0.0)).normalized() * metres
+    return [(spec["location"], spec["target"]), (spec["location"], spec["target"] + right)]
 
 
 
 SHOTS = {
     "cut01": {
-        "seconds": 10, "screens": "off", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar", "clay": True,
-        "path": [along_axis(-8.6), along_axis(-6.8)],
+        "seconds": 10, "screens": "off", "light_scale": 1.0, "lens": CLAY_LENS_MM, "focus": "pillar", "clay": True,
+        "path": [(Vector((0.0, y, CLAY_EYE_Z)), CLAY_TARGET) for y in (-8.4, -6.8)],
     },
     "cut02": {
         "seconds": 8, "screens": "ambient", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "32x9",
@@ -217,8 +236,8 @@ SHOTS = {
                  (Vector((0.7, -8.6, EYE_Z)), Vector((0.7, BACK_WALL_Y, 2.3)))],
     },
     "cut05": {
-        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
-        "path": [along_axis(-8.6), along_axis(-6.8)],
+        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
+        "path": push_from("wide-a", 0.4),
     },
     "cut08a": {
         "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
@@ -231,6 +250,10 @@ SHOTS = {
     "cut08c": {
         "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": CLOSE_LENS_MM,
         "path": push_from("wall-final"),
+    },
+    "cut08d": {
+        "seconds": 5, "screens": "alert", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
+        "path": pan_right_from("wide-a", 1.2),
     },
     "cut09": {
         "seconds": 10, "screens": "alert", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
@@ -504,15 +527,15 @@ def canvas_crops():
     return {"canvas": [width, height], "crops": {name: list(box) for name, box in crops.items()}}
 
 
-def framing_report(name):
-    """Share of the close-up's screen surface that is inside the frame and not hidden, sampled per face."""
+def framing_report(name, key=None):
+    """Share of a screen's surface (key: col, rib or wall) inside the frame and not hidden, sampled per face."""
     from bpy_extras.object_utils import world_to_camera_view
     scene = bpy.context.scene
     camera = scene.camera
     depsgraph = bpy.context.evaluated_depsgraph_get()
     origin = camera.matrix_world.translation
     facing_points = inside = 0
-    for obj_name in CLOSEUP_OBJECTS[name.split("-")[0]]:
+    for obj_name in CLOSEUP_OBJECTS[key or name.split("-")[0]]:
         obj = bpy.data.objects[obj_name]
         for poly in obj.data.polygons:
             center = obj.matrix_world @ poly.center
@@ -526,7 +549,7 @@ def framing_report(name):
                 hit, _, _, _, hit_obj, _ = scene.ray_cast(depsgraph, origin, ray.normalized(), distance=ray.length + 0.01)
                 if 0 <= ndc.x <= 1 and 0 <= ndc.y <= 1 and ndc.z > 0 and hit and hit_obj.name == obj_name:
                     inside += 1
-    print(f"FRAMING {name} visible={inside}/{facing_points}")
+    print(f"FRAMING {name}{' ' + key if key else ''} visible={inside}/{facing_points}")
 
 
 def verify_screen_colors(png, frame, sources):
@@ -650,6 +673,9 @@ def main():
             build_still_camera(name)
             if name in CLOSEUP_OPTIONS:
                 framing_report(name)
+            if name in WIDE_OPTIONS:
+                for key in CLOSEUP_OBJECTS:
+                    framing_report(name, key)
             elapsed = render_still(stills_dir / f"{name}.png", args.frame)
             print(f"RENDER_STATS still look={args.look} cam={name} total_s={elapsed:.1f}")
         return
