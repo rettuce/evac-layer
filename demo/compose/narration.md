@@ -18,7 +18,7 @@
 | `narration/cut05c.wav` | 同じ警報でも、ディスプレイの場所が違えば、避難先も方向も距離も、自動で変わります。 | 14 s（49 s から） | 41／70 |
 | `narration/cut05.wav` | 由利本荘市、10 月 21 日の実際の電文を 1200 倍で再生します。警戒レベル 3、4、5。すべてのスクリーンが同じ瞬間に切り替わります。 | 25 s（63 s から） | 65／125 |
 | `narration/cut05b.wav` | 何を出すかは、平時に人が決めます。承認した案内だけが、有事に自動で出ます。 | 8 s（88 s から） | 37／40 |
-| `narration/cut07.wav` | 5 つの自治体、199 本の電文から、80 のレイアウト。 | 6 s（96 s から） | 26／30 |
+| `narration/cut07.wav` | 5 つの自治体、200 本の電文から、80 のレイアウト。 | 6 s（96 s から） | 26／30 |
 | `narration/cut07b.wav` | それぞれの自治体の資料から、それぞれの場所の案内を。 | 8 s（102 s から） | 26／40 |
 | `narration/cut08.wav` | 柱も、壁も、通路の上のスクリーンも、同じ警報を同時に出します。近づくと、出典が読めます。 | 20 s（110 s から） | 44／100 |
 | `narration/cut09.wav` | フィードを受け取れれば、どの CMS でも。どの画面にも。 | 10 s（130 s から） | 27／50 |
@@ -34,7 +34,7 @@
 - 5c: The same warning, but where the display stands changes the shelter, the direction and the distance, automatically.
 - 5: Real bulletins for Yurihonjo, October 21, replayed at 1200x. Alert levels 3, 4 and 5. Every screen switches at the same moment.
 - 5b: People decide what to show, in calm times. Only approved guidance goes out, automatically, in a crisis.
-- 7: Five municipalities, 199 bulletins, 80 layouts.
+- 7: Five municipalities, 200 bulletins, 80 layouts.
 - 7b: Each from its own municipality's documents, for its own place.
 - 8: Columns, walls and the screen over the passage show the same warning at once. Step closer and the sources are readable.
 - 9: Any CMS that can read the feed. Any screen.
