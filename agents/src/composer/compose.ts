@@ -136,7 +136,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     const add = (cell: LayoutCell) => { if (slots.has(cell.role)) cells.push(cell); };
     const headlineText = text("headline") ?? stop("Writer output has no headline");
     add({ id: "headline", role: "headline", priority: 1, text: { ...headlineText, ja: headline }, pictogram: HAZARD_PICTOGRAM[alert.hazard], motion: "scale-in" });
-    add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: actionPictogram(alert.hazard, situation.template, situation.caution), motion: "pulse" });
+    add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: actionPictogram(alert.hazard, situation.template), motion: "pulse" });
     if (guide && way) {
       add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: way.text_ja }, pictogram: "arrow_forward", rotation: way.rotation, motion: "static" });
       add({ id: "shelter", role: "shelter", priority: 2, text: { ja: guide.shelter.name }, kind: guide.shelter.kind, pictogram: "emergency_evacuation_site", distance_m: guide.distance_m, motion: "static" } as LayoutCell);

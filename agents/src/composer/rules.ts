@@ -40,8 +40,9 @@ export const HAZARD_PICTOGRAM: Record<string, string> = {
 // rising water or a tsunami means going up, levels 3 and 4 mean evacuating (level 3 is 高齢者等避難), and an
 // all-clear asks for nothing. The Writer is told the meaning so the action text cannot contradict the pictogram
 // (both mismatches were found by the Vision Verifier on the 2026-10 replay).
-export function actionPictogram(hazard: string, template: string, caution?: Situation["caution"]): string {
-  if (caution === "sea_level_change") return "tsunami";
+// The action pictogram shows the action only (contract 2026-11-02 17:22): every all-clear, including one that keeps a
+// sea-level caution, uses safe_here; the hazard is the headline's pictogram.
+export function actionPictogram(hazard: string, template: string): string {
   if (template === "all-clear") return "safe_here";
   if (hazard === "tsunami" || template === "secure-now") return "go_higher";
   return "directions_run";
@@ -49,10 +50,14 @@ export function actionPictogram(hazard: string, template: string, caution?: Situ
 
 export const ACTION_PICTOGRAM_MEANING_JA: Record<string, string> = {
   safe_here: "解除。避難の必要がなくなったことを伝える。注意や警戒の呼びかけは書かない",
-  tsunami: "警報・注意報は解除されたが海面変動が続く。海に入らない・海岸に近づかない。『安全』『避難不要』とは書かない",
   go_higher: "いまいる場所から高い所へ上がる",
   directions_run: "危険な場所から避難する（レベル3 では高齢者等が避難し、ほかの人は避難の準備をする）",
 };
+
+export function actionPictogramMeaning(pictogram: string, caution?: Situation["caution"]): string {
+  if (pictogram === "safe_here" && caution === "sea_level_change") return "解除。避難は不要になったが海面変動が続くので、海に入らない・海岸に近づかないことを伝える";
+  return ACTION_PICTOGRAM_MEANING_JA[pictogram];
+}
 
 // heavy_rain warnings drive inundation guidance, so shelters designated for inland flooding or floods qualify.
 export const SHELTER_HAZARDS: Record<string, string[]> = {
