@@ -69,9 +69,9 @@ pnpm -F agents export --site 05210-demo-honjo-station --out dist/
 
 This writes `dist/<site>/<bulletin_id>/<shape>.{json,png,html}` and `dist/<site>/manifest.json` (fixed by [`schema/export-manifest.schema.json`](../schema/export-manifest.schema.json)). PNGs are rendered at the panel's native size. Each HTML file is self-contained: styles, pictograms and only the font subsets the screen uses are embedded, so it opens offline and matches the PNG pixel for pixel (the language rotation is frozen on the language shown at capture). Screens are read through the same approval gate as the live feed; unapproved bulletins are skipped with the reason.
 
-## In a MOJUR installation
+## In the author's own installations
 
-MOJUR includes EVAC LAYER as a standard module. It uses the same generic HTTP surface as any other system: it receives the approved screen URLs and an insert / clear event (the webhook above, or the feed), shows the emergency layer over the ambient content, and removes it on `clear`. Nothing in EVAC LAYER depends on MOJUR, and nothing MOJUR-specific is needed to build your own emergency layer.
+The signage systems the author runs in venues take EVAC LAYER through this same generic HTTP surface: they receive the approved screen URLs and an `alert` / `clear` event (the webhook above, or the feed), show the emergency layer over the ambient content, and remove it on `clear`. Nothing in EVAC LAYER depends on any particular signage system, and nothing system-specific is needed to build your own emergency layer.
 
 ## What every integration must keep
 

@@ -33,7 +33,7 @@ Give EVAC LAYER the coordinates of a screen — a concourse column, a mall wall,
 3. **Writes** the guidance for that venue and that bulletin: the action in plain Japanese, *yasashii nihongo*, English, Chinese and Korean, with action pictograms — never the municipality's own evacuation orders, which only the municipality may issue.
 4. **Composes and renders** the same guidance for five screen shapes — 16:9, 9:16, 32:9, 1:1 and a wrap-around pillar — with viewing-distance-derived type sizes, the official alert-level colors, and no blinking.
 5. **Inspects** every screen three ways: schema and rules, a browser check of the rendered DOM (overflow, dropped cells, duplicated distances), and a Vision pass that reads the PNG against the bulletin. Findings go back to the Writer, or stop the pipeline when rewriting cannot fix them.
-6. **Delivers** only screens an operator approved, to any signage system: a feed, a signed webhook, or static files.
+6. **Fires the event.** When a bulletin arrives, it emits `alert` and `clear` events for that place, each carrying the approved screens for every shape — as a feed, a signed webhook, or static files. Any signage system can act on them.
 
 The output for one venue is a set: hazard × level × shape, each screen carrying its sources line (municipal PDF page, GSI data, JMA bulletin time) and its inspection report.
 
@@ -74,7 +74,7 @@ EVAC LAYER drafts. People decide, ahead of time. For each venue it generates the
 
 ## Any screen. / どの画面にも
 
-EVAC LAYER ships as a standard module of MOJUR, the spatial-media system I run in venues — but most screens in the world are not MOJUR. So the delivery layer speaks plain HTTP, and only ever carries approved screens:
+EVAC LAYER is an event source, not a player. It does not replace a signage system; it tells one — the signage I run in venues, or yours — what to show at this place, now. The delivery layer speaks plain HTTP and only ever carries approved screens:
 
 - **Pull** — `GET /api/feed/<site>`: what the site should show now, with the five layouts and PNG/HTML assets. `ETag` makes polling cheap.
 - **Push** — a webhook per site, signed with HMAC-SHA256 over timestamp, delivery id, event and body; replay-safe.
@@ -148,6 +148,6 @@ External contributions are not accepted during the hackathon (Nov 2–8, 2026). 
 
 **誰の、どんな課題か。** 駅や商業施設のスクリーンは災害のとき、広告を流し続けるか黒く落ちるかのどちらかです。既存の仕組み（CAP 連携サイネージ・L アラート）は「画面を乗っ取る」ところまでで、その先に何を描くかは誰も決めていません。能登半島地震の津波では、上越市が「外国人や市外からの来訪者が、どこに避難すればよいかを判断することが難しかった」と検証しています。警報は届いた。「そこへ、あちらへ、570 m」が届いていない。
 
-**どう解決するか。** 画面は自分の緯度経度を持ち、EVAC LAYER はそこから市町村の電文と最寄りの避難場所（方向・距離）を引きます。自治体のハザードマップ PDF と国土地理院の避難場所データを出典つきで読み、気象庁の電文が来たら、その施設・その画面の形に合わせた避難案内（やさしい日本語・英中韓・図記号）を 5 つの画面形状で生成し、規則・ブラウザ・Vision の 3 段で検査します。平時に運営者が一式を承認しておけば、有事は承認済みの画面だけが自動で上がります。配信はフィード・署名つき Webhook・静的ファイルの 3 通りで、どのサイネージ CMS でも受け取れます。
+**どう解決するか。** 画面は自分の緯度経度を持ち、EVAC LAYER はそこから市町村の電文と最寄りの避難場所（方向・距離）を引きます。自治体のハザードマップ PDF と国土地理院の避難場所データを出典つきで読み、気象庁の電文が来たら、その施設・その画面の形に合わせた避難案内（やさしい日本語・英中韓・図記号）を 5 つの画面形状で生成し、規則・ブラウザ・Vision の 3 段で検査します。平時に運営者が一式を承認しておけば、有事は承認済みの画面だけが自動で上がります。EVAC LAYER はサイネージを置き換えるものではなく、「この場所に、いま、これを出す」というイベントを発火する側です。配信はフィード・署名つき Webhook・静的ファイルの 3 通りで、どのサイネージ CMS でも受け取れます。
 
-**ハッカソン後に誰が使うか。** IE3 の空間演出システム MOJUR の標準モジュールとして、駅・商業施設の導入先に入ります。MOJUR 以外の CMS は `docs/integration.md` と `examples/minimal-cms/` から。自治体・防災機関・研究・個人は無償（AGPL-3.0）です。
+**ハッカソン後に誰が使うか。** 作り手（IE3）が運用する駅・商業施設のサイネージに標準で組み込みます。他のサイネージ CMS は `docs/integration.md` と `examples/minimal-cms/` から繋ぎ込めます。自治体・防災機関・研究・個人は無償（AGPL-3.0）です。導入や連携の相談は you@ie3.jp（IE3 / ie3.jp）へ。
