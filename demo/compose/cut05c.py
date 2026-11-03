@@ -5,7 +5,7 @@ python3 demo/compose/cut05c.py [--zoom 16]
 Inputs: demo/sites/<slug>/site.json and 16x9.json, the GSI emergency evacuation sites in
 data/municipalities/05210.shelters.json, and demo/screens/16x9_site-<slug>.mp4 from
 `node demo/capture/record.mjs --shape 16x9 --cut site-<slug>`.
-Output: demo/capture/out/cut05c.mp4 (1920x1080, 30 fps, 2.5 s per site).
+Output: demo/capture/out/cut05c.mp4 (1920x1080, 30 fps, 3.5 s per site).
 """
 
 import argparse
@@ -33,7 +33,11 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 OUT = DEMO / "capture" / "out" / "cut05c.mp4"
 
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
-SECONDS_PER_SITE = 2.5
+SECONDS_PER_SITE = 3.5
+# Per site: the highlight moves, then the old screen fades to black, a pause, and the new screen scales in.
+MOVE_S, FADE_S, GAP_S = 0.3, 0.3, 0.4
+SCREEN_IN_S = MOVE_S + FADE_S + GAP_S
+SCREEN_SECONDS = SECONDS_PER_SITE - SCREEN_IN_S
 MAP_WIDTH = round(WIDTH * 0.4)
 TILE = 256
 # The burned-in caption covers the bottom of the frame, so markers and the screen stay above it.
@@ -159,24 +163,29 @@ def relative_label(site, reference):
     return f"駅前から {round(meters):,} m {bearing_label(reference['pos'], site['pos'])}"
 
 
-def frame_html(sites, current, zoom, origin, scale):
+def frame_html(sites, current, zoom, origin, scale, marker_at=None):
+    """marker_at: while the highlight travels, its position; the current site is drawn plain until it lands."""
     reference = next(s for s in sites if s["slug"] == REFERENCE)
+    landed = marker_at is None
     svg = []
     for site in sites:
         a = to_screen(site["pos"], origin, scale, zoom)
         b = to_screen(site["shelter_pos"], origin, scale, zoom)
-        active = site["slug"] == current["slug"]
+        active = landed and site["slug"] == current["slug"]
         svg.append(arrow(a, b, LV4 if active else "rgb(40,40,40)", 6 if active else 3, 1 if active else 0.55, 16 if active else 11))
     for site in sites:
         b = to_screen(site["shelter_pos"], origin, scale, zoom)
-        r = 13 if site["slug"] == current["slug"] else 9
+        r = 13 if landed and site["slug"] == current["slug"] else 9
         svg.append(f'<circle cx="{b[0]:.1f}" cy="{b[1]:.1f}" r="{r}" fill="{SHELTER_GREEN}" stroke="white" stroke-width="3"/>')
     for site in sites:
         a = to_screen(site["pos"], origin, scale, zoom)
-        active = site["slug"] == current["slug"]
+        active = landed and site["slug"] == current["slug"]
         half = 14 if active else 8
         svg.append(f'<rect x="{a[0] - half:.1f}" y="{a[1] - half:.1f}" width="{half * 2}" height="{half * 2}" '
                    f'fill="{LV4 if active else "white"}" stroke="{"white" if active else "rgb(40,40,40)"}" stroke-width="3"/>')
+    if not landed:
+        svg.append(f'<rect x="{marker_at[0] - 14:.1f}" y="{marker_at[1] - 14:.1f}" width="28" height="28" '
+                   f'fill="{LV4}" stroke="white" stroke-width="3"/>')
     a = to_screen(current["pos"], origin, scale, zoom)
     b = to_screen(current["shelter_pos"], origin, scale, zoom)
     label = (f'<div class="label" data-at="{a[0]:.1f},{a[1]:.1f},{b[0]:.1f},{b[1]:.1f}">'
@@ -207,48 +216,112 @@ def screenshot(page, png):
                    check=True, capture_output=True)
 
 
-def segment(map_png, screen_mp4, out):
-    screen_w = WIDTH - MAP_WIDTH - 2 * SCREEN_MARGIN
-    screen_h = round(screen_w * 9 / 16)
-    x, y = MAP_WIDTH + SCREEN_MARGIN, SCREEN_TOP
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-loop", "1", "-framerate", str(FPS), "-i", str(map_png),
-                    "-i", str(screen_mp4), "-filter_complex",
-                    f"[1:v]fps={FPS},scale={screen_w}:{screen_h},tpad=stop_mode=clone:stop=-1[s];[0:v][s]overlay={x}:{y}",
-                    "-t", str(SECONDS_PER_SITE), "-r", str(FPS), "-c:v", "libx264", "-preset", "medium", "-crf", "18",
-                    "-pix_fmt", "yuv420p", "-an", str(out)], check=True)
+def screen_box():
+    width = WIDTH - MAP_WIDTH - 2 * SCREEN_MARGIN
+    return width, round(width * 9 / 16)
+
+
+def encode(args, out):
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *args, "-r", str(FPS), "-c:v", "libx264", "-preset", "medium",
+                    "-crf", "18", "-pix_fmt", "yuv420p", "-an", str(out)], check=True)
+
+
+def concat(parts, out):
+    listing = out.with_name(out.stem + "_list.txt")
+    listing.write_text("".join(f"file '{p}'\n" for p in parts))
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(listing), "-c", "copy",
+                    str(out)], check=True)
+
+
+def still(png, seconds, out, extra_vf=None):
+    vf = ["fps=" + str(FPS)] + ([extra_vf] if extra_vf else [])
+    encode(["-loop", "1", "-framerate", str(FPS), "-i", str(png), "-t", f"{seconds:.3f}", "-vf", ",".join(vf)], out)
+
+
+def ease(t):
+    return t * t * (3 - 2 * t)
+
+
+def map_track(sites, zoom, origin, scale, work, keep):
+    parts = []
+    move_frames = round(MOVE_S * FPS)
+    for i, site in enumerate(sites):
+        held = SECONDS_PER_SITE
+        if i > 0:
+            a = to_screen(sites[i - 1]["pos"], origin, scale, zoom)
+            b = to_screen(site["pos"], origin, scale, zoom)
+            for k in range(move_frames):
+                t = ease((k + 1) / move_frames)
+                page = work / f"move_{i}_{k}.html"
+                page.write_text(frame_html(sites, site, zoom, origin, scale, (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)),
+                                encoding="utf-8")
+                png = work / f"move_{i}_{k}.png"
+                screenshot(page, png)
+                parts.append(work / f"move_{i}_{k}.mp4")
+                still(png, 1 / FPS, parts[-1])
+            held -= MOVE_S
+        page = work / f"map_{i}.html"
+        page.write_text(frame_html(sites, site, zoom, origin, scale), encoding="utf-8")
+        png = work / f"map_{i}.png"
+        screenshot(page, png)
+        if keep:
+            Path(keep).mkdir(parents=True, exist_ok=True)
+            shutil.copy(png, Path(keep) / f"cut05c_map_{i}.png")
+        parts.append(work / f"map_{i}.mp4")
+        still(png, held, parts[-1])
+    out = work / "map_track.mp4"
+    concat(parts, out)
+    return out
+
+
+def screen_track(sites, work):
+    width, height = screen_box()
+    fit = f"scale={width}:{height}"
+    parts = []
+    last_frame = round(SCREEN_SECONDS * FPS) - 1
+    for i, site in enumerate(sites):
+        clip = DEMO / "screens" / f"16x9_site-{site['slug']}.mp4"
+        if i == 0:
+            parts.append(work / "black_0.mp4")
+            encode(["-f", "lavfi", "-i", f"color=c=black:s={width}x{height}:r={FPS}", "-t", f"{SCREEN_IN_S:.3f}"], parts[-1])
+        else:
+            previous = DEMO / "screens" / f"16x9_site-{sites[i - 1]['slug']}.mp4"
+            frame = work / f"last_{i}.png"
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(previous), "-vf", f"select=eq(n\\,{last_frame}),{fit}",
+                            "-frames:v", "1", str(frame)], check=True)
+            parts.append(work / f"fade_{i}.mp4")
+            still(frame, MOVE_S + FADE_S, parts[-1], f"fade=t=out:st={MOVE_S}:d={FADE_S}")
+            parts.append(work / f"black_{i}.mp4")
+            encode(["-f", "lavfi", "-i", f"color=c=black:s={width}x{height}:r={FPS}", "-t", f"{GAP_S:.3f}"], parts[-1])
+        parts.append(work / f"screen_{i}.mp4")
+        encode(["-i", str(clip), "-t", f"{SCREEN_SECONDS:.3f}", "-vf", f"fps={FPS},{fit},tpad=stop_mode=clone:stop=-1"], parts[-1])
+    out = work / "screen_track.mp4"
+    concat(parts, out)
+    return out
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--zoom", type=int, default=16)
-    parser.add_argument("--keep-frames", help="directory to keep the four map frames in")
+    parser.add_argument("--keep-frames", help="directory to keep the four landed map frames in")
     args = parser.parse_args()
     sites = load_sites()
     origin, scale = viewport(sites, args.zoom)
     work = Path(tempfile.mkdtemp(prefix="evac-5c-"))
     try:
-        parts = []
-        for i, site in enumerate(sites):
-            page = work / f"map_{i}.html"
-            page.write_text(frame_html(sites, site, args.zoom, origin, scale), encoding="utf-8")
-            png = work / f"map_{i}.png"
-            screenshot(page, png)
-            parts.append(work / f"seg_{i}.mp4")
-            segment(png, DEMO / "screens" / f"16x9_site-{site['slug']}.mp4", parts[-1])
+        left = map_track(sites, args.zoom, origin, scale, work, args.keep_frames)
+        right = screen_track(sites, work)
+        total = len(sites) * SECONDS_PER_SITE
+        OUT.parent.mkdir(parents=True, exist_ok=True)
+        encode(["-i", str(left), "-i", str(right), "-filter_complex",
+                f"[0:v][1:v]overlay={MAP_WIDTH + SCREEN_MARGIN}:{SCREEN_TOP}:shortest=1", "-t", f"{total:.3f}"], OUT)
+        for site in sites:
             computed = distance_m(site["pos"], site["shelter_pos"])
             print(f"SITE {site['slug']:<16} to {site['shelter']} {computed:.0f} m (layout {site['distance_m']} m) "
                   f"{bearing_label(site['pos'], site['shelter_pos'])} (layout {site['direction']})")
-            if args.keep_frames:
-                Path(args.keep_frames).mkdir(parents=True, exist_ok=True)
-                shutil.copy(png, Path(args.keep_frames) / f"cut05c_map_{i}.png")
-        listing = work / "concat.txt"
-        listing.write_text("".join(f"file '{p}'\n" for p in parts))
-        OUT.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(listing), "-c", "copy",
-                        str(OUT)], check=True)
     finally:
         shutil.rmtree(work)
-    print(f"CUT05C {OUT} {len(sites) * SECONDS_PER_SITE}s z={args.zoom} scale={scale:.3f}")
+    print(f"CUT05C {OUT} {total}s z={args.zoom} scale={scale:.3f}")
 
 
 if __name__ == "__main__":

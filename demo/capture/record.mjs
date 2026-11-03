@@ -44,11 +44,11 @@ const LIVE_READY = '[data-mode="live"][data-ready="1"]'
 const LIVE_EVENTS_MS = [13100, 20100, 24600, 26100, 29100, 44350]
 const LIVE_SITE_ID = '05210-demo-honjo-station'
 
-// Cut 5c cuts between four sites showing the same bulletin; they share one virtual clock, 2.5 s each.
+// Cut 5c brings each of four sites' screens in after the map moves, so each starts at its own t = 0 (scale-in).
 const SITE_SLUGS = ['honjo-station', 'tsurumai-kaikan', 'yuri-hs-ground', 'ishiwaki-park']
 const SITE_SECONDS = 2.5
-const SITE_CUTS = Object.fromEntries(SITE_SLUGS.map((slug, i) => [`site-${slug}`, {
-  seconds: SITE_SECONDS, startMs: i * SITE_SECONDS * 1000,
+const SITE_CUTS = Object.fromEntries(SITE_SLUGS.map((slug) => [`site-${slug}`, {
+  seconds: SITE_SECONDS, startMs: 0,
   query: { src: `demo/sites/${slug}/16x9.json` }, ready: READY_SELECTOR, events: [],
 }]))
 
@@ -79,6 +79,8 @@ const CUTS = {
   alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
   // The dashboard counts up in about 4 s of its own clock; a quarter rate stretches that over the cut.
   dashboard: { seconds: 25, startMs: 0, rate: 0.25, page: '/dashboard', query: {}, ready: '.dashboard[data-ready="1"]', events: [] },
+  // Four times the dashboard's own clock settles the numbers within the first second, then they hold.
+  'dashboard-final': { seconds: 6, startMs: 0, rate: 4, page: '/dashboard', query: {}, ready: '.dashboard[data-ready="1"]', events: [] },
   'fixture-alert': { seconds: 27, startMs: 0, query: { layout: 'wajima-tsunami' }, ready: READY_SELECTOR, events: [] },
   'scenario-ambient': { seconds: 12, startMs: 0, query: { ...SCENARIO, scenario: 'ambient' }, ready: READY_SELECTOR, events: [] },
   'scenario-switch': {
