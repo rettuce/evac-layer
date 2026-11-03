@@ -25,7 +25,7 @@ export const MAX_REVERSALS = 1;
 export type TextKind = "primary" | "secondary" | "label";
 export interface TextSample { cell_id: string; role: Role; step_class: TypeStep | null; font_px: number; kind: TextKind; text: string }
 export interface ScreenState { shape: string; template: string; variant: string; level: string; dropped: string; overflow: string | null; missing_required: string | null }
-export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source"; cell_id?: string; lang?: string; detail: string }
+export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker"; cell_id?: string; lang?: string; detail: string }
 export interface CellText { id: string; role: Role; text: string }
 
 // A label (language name, shelter designation) only names what the text beside it is, so it is held to the fine distance.
@@ -73,4 +73,20 @@ export function judgeContent(cells: CellText[]): Finding[] {
   return cells
     .filter((c) => c.role === "direction" && shelterHasDistance && DISTANCE.test(c.text))
     .map((c) => ({ check: "distance-duplicated" as const, cell_id: c.id, detail: `direction text "${c.text}" repeats the distance already shown on the shelter cell` }));
+}
+
+export const DRILL_MARKERS: Record<string, RegExp> = {
+  ja: /訓練/, ja_easy: /くんれん/, en: /drill/i, zh_hans: /演习|演练|训练/, zh_hant: /演習|演練|訓練/, ko: /훈련/,
+  th: /ฝึกซ้อม|ซ้อม/, vi: /diễn tập/i, fil: /pagsasanay|drill/i, id: /latihan|simulasi/i,
+};
+
+// A drill bulletin must be recognisable as one in every language on the headline, or a reader of one language
+// takes a drill for the real thing.
+export function judgeDrill(cells: { id: string; role: string; text: Record<string, string | undefined> }[], status: string): Finding[] {
+  if (status !== "drill") return [];
+  const headline = cells.find((c) => c.role === "headline");
+  if (!headline) return [];
+  return Object.entries(headline.text)
+    .filter(([lang, text]) => text !== undefined && DRILL_MARKERS[lang] && !DRILL_MARKERS[lang].test(text))
+    .map(([lang]) => ({ check: "drill-marker" as const, cell_id: headline.id, lang, detail: `drill bulletin, but the ${lang} headline does not say so` }));
 }

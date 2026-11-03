@@ -105,3 +105,12 @@ test("the source cell names the issuer, its time and the municipality; the detai
   assert.match(source.text.en!, /^JMA \d{2}:\d{2}, [A-Z][a-z]{2} \d{1,2} · Wajima$/);
   assert.ok(landscape.sources.some((s) => s.type === "jma" && s.bulletin_id === landscape.alert.bulletin_id));
 });
+
+test("a drill bulletin gets 【訓練】 in front of the headline", () => {
+  const alert = advisory();
+  assert.equal(alert.status, "drill");
+  const [landscape] = compose({ alert, municipality, site, writer });
+  assert.equal(landscape.cells.find((c) => c.id === "headline")!.text.ja, "【訓練】津波注意報");
+  const real = compose({ alert: { ...alert, status: "normal" as const }, municipality, site, writer });
+  assert.equal(real[0].cells.find((c) => c.id === "headline")!.text.ja, "津波注意報");
+});

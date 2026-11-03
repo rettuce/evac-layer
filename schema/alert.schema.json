@@ -4,41 +4,141 @@
   "title": "EVAC LAYER alert (parsed JMA XML bulletin)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["bulletin_id", "code", "hazard", "level", "info_type", "areas", "issued_at", "raw_title", "headline_text", "publishing_office"],
+  "required": [
+    "bulletin_id",
+    "code",
+    "hazard",
+    "level",
+    "info_type",
+    "areas",
+    "issued_at",
+    "raw_title",
+    "headline_text",
+    "publishing_office"
+  ],
   "properties": {
-    "bulletin_id": { "type": "string", "minLength": 1, "description": "<code>-<ReportDateTime>-<first 12 hex of sha256 of the raw XML bytes>; identical input yields an identical id." },
-    "code": { "type": "string", "pattern": "^(VPWW5[5-9]|VPWW6[01]|VXKO[0-9a-z]{2}|VTSE41)$" },
-    "hazard": { "$ref": "common.schema.json#/$defs/hazard" },
-    "level": { "$ref": "common.schema.json#/$defs/level", "description": "Highest level among areas still in force; null when none apply or the bulletin type defines no level." },
-    "info_type": { "enum": ["issued", "corrected", "cancelled"] },
-    "areas": { "type": "array", "items": { "$ref": "#/$defs/area" } },
-    "issued_at": { "type": "string", "format": "date-time" },
-    "raw_title": { "type": "string", "minLength": 1 },
-    "headline_text": { "type": "string", "description": "Head/Headline/Text verbatim. Not to be edited (Meteorological Service Act art. 23)." },
-    "publishing_office": { "type": "string" },
-    "tsunami": { "$ref": "#/$defs/tsunamiSummary" }
+    "bulletin_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "<code>-<ReportDateTime>-<first 12 hex of sha256 of the raw XML bytes>; identical input yields an identical id."
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^(VPWW5[5-9]|VPWW6[01]|VXKO[0-9a-z]{2}|VTSE41)$"
+    },
+    "hazard": {
+      "$ref": "common.schema.json#/$defs/hazard"
+    },
+    "level": {
+      "$ref": "common.schema.json#/$defs/level",
+      "description": "Highest level among areas still in force; null when none apply or the bulletin type defines no level."
+    },
+    "info_type": {
+      "enum": [
+        "issued",
+        "corrected",
+        "cancelled"
+      ]
+    },
+    "areas": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/area"
+      }
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "raw_title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "headline_text": {
+      "type": "string",
+      "description": "Head/Headline/Text verbatim. Not to be edited (Meteorological Service Act art. 23)."
+    },
+    "publishing_office": {
+      "type": "string"
+    },
+    "tsunami": {
+      "$ref": "#/$defs/tsunamiSummary"
+    },
+    "status": {
+      "enum": [
+        "normal",
+        "test",
+        "drill"
+      ],
+      "description": "Control/Status of the bulletin: 通常, 試験 or 訓練"
+    }
   },
   "$defs": {
     "area": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["code", "name", "code_type", "level", "kind_code", "kind_name", "status"],
+      "required": [
+        "code",
+        "name",
+        "code_type",
+        "level",
+        "kind_code",
+        "kind_name",
+        "status"
+      ],
       "properties": {
-        "code": { "type": "string", "minLength": 1 },
-        "name": { "type": "string", "minLength": 1 },
-        "code_type": { "enum": ["city", "tsunami_forecast_region"] },
-        "level": { "$ref": "common.schema.json#/$defs/level" },
-        "kind_code": { "type": "string" },
-        "kind_name": { "type": "string" },
-        "status": { "enum": ["issued", "continued", "upgraded", "downgraded", "cleared", "none"] }
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code_type": {
+          "enum": [
+            "city",
+            "tsunami_forecast_region"
+          ]
+        },
+        "level": {
+          "$ref": "common.schema.json#/$defs/level"
+        },
+        "kind_code": {
+          "type": "string"
+        },
+        "kind_name": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "issued",
+            "continued",
+            "upgraded",
+            "downgraded",
+            "cleared",
+            "none"
+          ]
+        }
       }
     },
     "tsunamiSummary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["highest_category"],
+      "required": [
+        "highest_category"
+      ],
       "properties": {
-        "highest_category": { "enum": ["major_warning", "warning", "advisory", "forecast", "cleared", "none"] }
+        "highest_category": {
+          "enum": [
+            "major_warning",
+            "warning",
+            "advisory",
+            "forecast",
+            "cleared",
+            "none"
+          ]
+        }
       }
     }
   }

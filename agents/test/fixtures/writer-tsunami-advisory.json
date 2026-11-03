@@ -4,15 +4,15 @@
       "role": "headline",
       "text": {
         "ja": "津波注意報",
-        "ja_easy": "つなみ ちゅういほう",
-        "en": "Tsunami Advisory",
-        "zh_hans": "海啸注意报",
-        "zh_hant": "海嘯注意報",
-        "ko": "쓰나미 주의보",
-        "th": "อพยพ",
-        "vi": "Tsunami Advisory",
-        "fil": "Tsunami Advisory",
-        "id": "Tsunami Advisory"
+        "ja_easy": "くんれん つなみ ちゅういほう",
+        "en": "DRILL: Tsunami Advisory",
+        "zh_hans": "演习：海啸注意报",
+        "zh_hant": "演習：海嘯注意報",
+        "ko": "훈련: 쓰나미 주의보",
+        "th": "ฝึกซ้อม อพยพ",
+        "vi": "Diễn tập: Tsunami Advisory",
+        "fil": "Pagsasanay: Tsunami Advisory",
+        "id": "Latihan: Tsunami Advisory"
       },
       "basis": "alert.areas[石川県能登].kind_name"
     },

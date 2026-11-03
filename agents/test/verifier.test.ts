@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { countReversals, droppedCells, judgeContent, judgeFonts, judgeState, requiredPx, type TextSample } from "../src/verifier/checks.js";
+import { countReversals, droppedCells, judgeContent, judgeFonts, judgeState, requiredPx, type TextSample, judgeDrill } from "../src/verifier/checks.js";
 import { TYPE_PX } from "../../app/layout/typography";
 
 const sample = (over: Partial<TextSample>): TextSample => ({ cell_id: "c", role: "action", step_class: "action", font_px: TYPE_PX.action, kind: "primary", text: "すぐ高いところへ", ...over });
@@ -38,4 +38,10 @@ test("distance shown on both the direction and the shelter cell is flagged", () 
   const shelter = { id: "shelter", role: "shelter" as const, text: "輪島中学校（指定緊急避難場所） 350 m" };
   assert.deepEqual(judgeContent([shelter, { id: "direction", role: "direction", text: "出口 B → 左 350m" }]).map((f) => f.cell_id), ["direction"]);
   assert.deepEqual(judgeContent([shelter, { id: "direction", role: "direction", text: "出口 B → 左" }]), []);
+});
+
+test("a drill bulletin is flagged for every headline language without a drill marker", () => {
+  const cells = [{ id: "headline", role: "headline", text: { ja: "【訓練】津波注意報", ja_easy: "つなみ ちゅういほう", en: "DRILL: Tsunami Advisory", th: "ประกาศเฝ้าระวังสึนามิ" } }];
+  assert.deepEqual(judgeDrill(cells, "drill").map((f) => f.lang), ["ja_easy", "th"]);
+  assert.deepEqual(judgeDrill(cells, "normal"), []);
 });

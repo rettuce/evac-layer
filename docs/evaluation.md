@@ -33,6 +33,7 @@ A finding is one check failing on one shape of one screen, on the first attempt.
 | 11 | 15205 | 3 | 5 | 0 | — | 柏崎 demo site moved off the evacuation site it sat on (nearest was 0 m) |
 | 12 | 05210, 17204, 15205 | 16 | 5 | 0 | — | ten languages (th, vi, fil, id added); every bulletin rewritten by the Writer from scratch, one rewrite for a ja_easy headline over budget |
 | 13 | 17204 | 10 | 5 | 0 | — | the official JMA sample bulletins VTSE41 of 2016-09-01 (a drill series in which 石川県能登 is under 津波注意報, then cleared) added to 輪島's replay via `data/samples/17204.json`, unmodified: three tsunami screens. A first attempt failed 3 times on one of them because Vision was shown every forecast region of the country instead of the municipality's own; fixed in `vision.ts` (about 20 checks, $0.24, not counted in the totals) |
+| 14 | 17204 | 10 | 5 | 0 | — | drill bulletins marked in every language's headline (【訓練】 / DRILL: …) with a new static check `drill-marker`; 輪島 demo site moved off the GSI facility it sat on (nearest site was 0 m, now 230 m). The first pass failed one all-clear screen 3 times because Vision had been told to expect the marker on every cell, while the contract puts it on the headline only; the instruction was corrected and the second pass was 10/10 (both passes counted: 115 checks) |
 
 Every finding in runs 1 and 2 was a real defect: the Composer or the renderer was changed, and the next run no longer reported it (the `fix` field in each findings file). The overflows in runs 3 and 4 were the renderer's header bar; once it was fixed, run 5 passed every screen on the first attempt without calling the Writer.
 
@@ -75,10 +76,10 @@ From `agents/README.md` (Reader runs, 2026-11-02):
 
 | | Value | How |
 |---|---|---|
-| Vision, per check (one shape of one screen) | $0.0111 | $6.999 over 624 checks, runs 1–13 |
+| Vision, per check (one shape of one screen) | $0.0111 | $8.462 over 739 checks, runs 1–14 |
 | Writer, per bulletin, one call, ten languages | $0.05–$0.20 | run 12, 16 bulletins, Opus 5.5 (`data/writer/`, $1.462 in all) |
 | New screen, steady state (Writer once + Vision on 5 shapes) | $0.245 | 柏崎市 in run 12: Writer $0.576 + Vision $0.159 over 3 screens (six languages: $0.222) |
-| Development total so far | about $15.18 | Reader $2.881 + Writer about $5.30 + Vision $6.999 |
-| Development total per screen shown | about $0.80 | over the 19 screens, including every re-run while the defects above were fixed |
+| Development total so far | about $16.86 | Reader $2.881 + Writer about $5.52 + Vision $8.462 |
+| Development total per screen shown | about $0.89 | over the 19 screens, including every re-run while the defects above were fixed |
 
-The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596, $0.506, $1.462 for the ten-language regeneration and $0.577 for the three sample tsunami bulletins) comes from the fan-out output and the agents seat log. Per-call Writer usage is kept only for the latest generation of each bulletin (`data/writer/`, $1.462 now), so the earlier part is not verifiable from the repository alone.
+The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596, $0.506, $1.462 for the ten-language regeneration $0.577 for the three sample tsunami bulletins and $0.219 for their drill-marked headlines) comes from the fan-out output and the agents seat log. Per-call Writer usage is kept only for the latest generation of each bulletin (`data/writer/`, $1.462 now), so the earlier part is not verifiable from the repository alone.

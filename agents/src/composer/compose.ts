@@ -4,7 +4,7 @@ import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { Lang } from "../writer/request.js";
 import { budgetsFor } from "./budgets.js";
 import { shapeContract } from "./template.js";
-import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, MONTH_EN, MUNICIPALITY_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
+import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, DRILL_PREFIX_JA, LANGUAGES_REQUIRED_ON, MONTH_EN, MUNICIPALITY_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
 export interface WriterOutput { cells: WriterCell[] }
@@ -76,10 +76,11 @@ export function headlineFor(alert: Alert, municipalityId: string): string {
   const regions = new Set(tsunamiRegionsFor(municipalityId));
   const mine = alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
   const live = mine.filter((a) => a.status !== "cleared" && a.status !== "none").sort((a, b) => (b.level ?? 0) - (a.level ?? 0));
-  if (live.length) return live[0].kind_name;
+  const prefix = alert.status === "drill" ? DRILL_PREFIX_JA : "";
+  if (live.length) return prefix + live[0].kind_name;
   const cleared = mine.find((a) => a.status === "cleared");
-  if (cleared) return cleared.kind_name.endsWith("解除") ? cleared.kind_name : `${cleared.kind_name}解除`;
-  return alert.raw_title;
+  if (cleared) return prefix + (cleared.kind_name.endsWith("解除") ? cleared.kind_name : `${cleared.kind_name}解除`);
+  return prefix + alert.raw_title;
 }
 
 // The screen names only the issuer, its time and the municipality; the PDF page, the GSI file and the bulletin id stay in

@@ -44,6 +44,7 @@ export function writerSystem(): string {
     ...SIGNAGE_CONVENTIONS_JA.map((c) => `- ${c}`),
     "en・zh_hans・zh_hant・ko・th・vi・fil・id は ja の内容を同じ情報量で訳します。固有名詞（施設名・地名）はその言語の文字で転写し、日本語の文字を混ぜません。",
     "th はタイ文字だけで書き、分かち書きをしません（数字・記号は可）。vi はベトナム語の声調記号・ダイアクリティカルを必ず付けます。fil はフィリピン語（Filipino）の表記で書きます。id は標準インドネシア語（bahasa Indonesia baku）で書きます。",
+    "alert.status が drill（気象庁の訓練電文）のときは、headline の全言語に訓練であることを示す語を入れます: ja_easy「くんれん」、en「DRILL:」、zh_hans「演习」、zh_hant「演習」、ko「훈련」、th「ฝึกซ้อม」、vi「diễn tập」、fil「pagsasanay」、id「latihan」。action と languages には入れません。",
     "basis には、その文の根拠（警報のどの項目か、知識ファイルのどの項目と出典ページか）を書きます。",
   ].join("\n");
 }

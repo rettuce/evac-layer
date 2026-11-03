@@ -20,7 +20,7 @@
       "role": "headline",
       "priority": 1,
       "text": {
-        "ja": "津波注意報",
+        "ja": "【訓練】津波注意報",
         "ja_easy": "つなみ ちゅういほう（くんれん）",
         "en": "Tsunami Advisory (Drill)",
         "zh_hans": "海啸注意报（演习）",
@@ -58,10 +58,10 @@
       "role": "direction",
       "priority": 2,
       "text": {
-        "ja": "北へ"
+        "ja": "北東へ"
       },
       "pictogram": "arrow_forward",
-      "rotation": 270,
+      "rotation": 315,
       "motion": "static"
     },
     {
@@ -69,11 +69,11 @@
       "role": "shelter",
       "priority": 2,
       "text": {
-        "ja": "ホテル　ルートイン輪島"
+        "ja": "輪島市健康ふれあい広場"
       },
       "kind": "emergency_evacuation_site",
       "pictogram": "emergency_evacuation_site",
-      "distance_m": 0,
+      "distance_m": 230,
       "motion": "static"
     },
     {
