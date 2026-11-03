@@ -1,153 +1,153 @@
 # EVAC LAYER
 
-**The screens are already there.**
-Turn the screens a city already has into evacuation guidance anyone can read.
-
 **スクリーンはもうある。**
 街にすでにあるスクリーンを、いちばん伝えなければならない瞬間に、誰にでも読める避難案内へ変える。
 
-![A level-4 flood warning on a 16:9 screen, drawn from a real JMA bulletin for Yurihonjo, Akita](docs/screens/lv4-16x9.png)
+*The screens are already there.* Turn the screens a city already has into evacuation guidance anyone can read. [English summary ↓](#english-summary)
 
-[All screens — every shape and level, the pillar, the ambient layer and the switch →](docs/screens.md)
+![由利本荘市の実際の気象庁電文から描いた、警戒レベル 4 の洪水警報の 16:9 画面](docs/screens/lv4-16x9.png)
 
-Built from scratch during **Built with Claude: Japan 2026** (Nov 2–8, 2026). Status: Day 2 — the pipeline runs end to end on real data; the demo video and the remaining polish are in progress.
+[全画面（形状ごと・レベルごと・柱・平時レイヤー・切替）→](docs/screens.md)
 
-[Demo video — coming Nov 8] · [日本語の概要](#日本語の概要)
+**Built with Claude: Japan 2026**（2026-11-02〜08）の期間中にゼロから作っています。状態: Day 3。パイプラインは実データで端から端まで動き、デモ動画と仕上げが進行中。
 
-## Why
+[デモ動画 — 11/8 公開]
 
-**After the takeover, what do you draw?** / 乗っ取ったあと、何を描くか。
+## 何ができるか（1 枚で）
 
-I build the light that carries information in stations and shopping streets: synchronized LED walls, platform signage, lobby screens. In a disaster those screens do one of two things: keep playing the ads, or go dark. The systems that exist today — CAP-connected signage, L-Alert feeds — decide *that* a screen gets taken over, and stop there. Nobody decides what to draw next, for *this* screen, in *this* building, for the people standing in front of it.
+![EVAC LAYER が対応する災害の種別・警戒レベル・行動の図記号・言語・画面形状](docs/coverage.png)
 
-They are not abstract people. After the Noto Peninsula earthquake tsunami of January 1, 2024, the city of Jōetsu (Niigata) wrote in its official review that "foreign residents and visitors from outside the city found it hard to judge where to evacuate." The warning reached them. The next sentence — *go there, that way, 570 m* — did not.
+気象庁の 4 種別の電文（大雨・土砂災害・指定河川の洪水・津波）、内閣府の警戒レベル 1〜5、行動の図記号 14 種、6 つの言語表現、5 つの画面形状。再生成は `pnpm -F app coverage`。
 
-The screens are already there, and each one knows where it stands. What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it — for any screen in the country, generated with Claude.
+## なぜ作るか
 
-## What it does
+**乗っ取ったあと、何を描くか。**
 
-Give EVAC LAYER the coordinates of a screen — a concourse column, a mall wall, a lobby display — and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance to it from where the viewer stands. The same pipeline runs for any coordinates, so one venue or ten thousand screens across the country are the same job: read once per municipality, composed once per screen. For each screen it then:
+私は駅や商業施設で「情報を伝える光」を作ってきました。同期した LED 壁、ホームのサイネージ、ロビーのスクリーン。災害のとき、それらの画面は 2 つのうちどちらかになります。広告を流し続けるか、黒く落ちるか。既存の仕組み（CAP 連携のサイネージや公的な配信基盤）は「画面を乗っ取る」ことまでを決めて、そこで止まります。その先に、**この**画面で、**この**建物で、目の前の人に何を描くかは、誰も決めていません。
 
-1. **Reads** the municipality's own hazard-map PDFs and the GSI designated evacuation-site data, and keeps every claim with its source page.
-2. **Listens** to JMA disaster-prevention XML bulletins (the real feed, recorded since October 2026) and resolves the warning, the Cabinet Office alert level (1–5) and the areas it concerns.
-3. **Writes** the guidance for that venue and that bulletin: the action in plain Japanese, *yasashii nihongo*, English, Chinese and Korean, with action pictograms — never the municipality's own evacuation orders, which only the municipality may issue.
-4. **Composes and renders** the same guidance for five screen shapes — 16:9, 9:16, 32:9, 1:1 and a wrap-around pillar — with viewing-distance-derived type sizes, the official alert-level colors, and no blinking.
-5. **Inspects** every screen three ways: schema and rules, a browser check of the rendered DOM (overflow, dropped cells, duplicated distances), and a Vision pass that reads the PNG against the bulletin. Findings go back to the Writer, or stop the pipeline when rewriting cannot fix them.
-6. **Fires the event.** When a bulletin arrives, it emits `alert` and `clear` events for that place, each carrying the approved screens for every shape — as a feed, a signed webhook, or static files. Any signage system can act on them.
+目の前の人は抽象的な存在ではありません。2024 年 1 月 1 日の能登半島地震の津波のあと、新潟県上越市は検証で「外国人や市外からの来訪者が、どこに避難すればよいかを判断することが難しかった」と書いています。警報は届いた。その次の一文、**「そこへ、あちらへ、570 m」**が届いていない。
 
-The output for one venue is a set: hazard × level × shape, each screen carrying its sources line (municipal PDF page, GSI data, JMA bulletin time) and its inspection report.
+スクリーンはもうあり、自分の場所を知っている。足りないのは、乗っ取ったあとにその場所のために何を描くかです。EVAC LAYER はそれを、全国のどの画面にも、Claude で作ります。国内のサイネージに 1 枚のレイヤーを足すことで、すでにある全国のスクリーンを防災情報に対応したものにする。それがこのプロジェクトの考えです。
 
-## How it works
+## 何をするか
 
-Two layers. The slow one runs ahead of time; the fast one runs when a bulletin arrives.
+EVAC LAYER に画面の座標を渡します。コンコースの柱、商業施設の壁、ロビーのディスプレイ。あとはその場所のために自分で引きます。どの市町村の電文が当たるか、国土地理院のデータで最寄りの指定緊急避難場所はどこか、見る人の立ち位置からの方向と距離はいくらか。同じパイプラインがどの座標でも走るので、1 施設でも全国 1 万枚でも同じ仕事です。自治体ごとに 1 回読み、画面ごとに 1 回組む。画面ごとに、次を行います。
 
-```
-ahead of time                                   when a bulletin arrives
-─────────────────────────────                   ──────────────────────────────────────────────────
-municipal PDFs ─┐                               JMA XML ──► parser ──► alert JSON
-GSI shelters  ──┼─► Reader ─► municipality.json            │
-site (lat/lng) ─┘   (Claude, cited)              ┌──────────┘
-                                                 ▼
-                                   Writer (Claude) ─► Composer ─► layout JSON ×5 shapes
-                                        ▲                             │
-                                        │ findings                    ▼
-                                        └──────── Verifier ◄──── Renderer (Nuxt, deterministic)
-                                            rules · browser DOM · Vision
-                                                 │ pass
-                                                 ▼
-                              operator approves the set  ──►  feed / webhook / static export
-```
+1. **読む** — その自治体のハザードマップ PDF と国土地理院の指定緊急避難場所データを読み、すべての記述に出典ページを残す。
+2. **聞く** — 気象庁の防災情報 XML（2026 年 10 月から記録している実フィード）を受け、警報・内閣府の警戒レベル（1〜5）・対象地域を判定する。
+3. **書く** — その施設・その電文のための案内を書く。行動を日本語・やさしい日本語・英語・中国語・韓国語で、行動の図記号つきで。市町村だけが出せる避難情報の名称は使わない。
+4. **組んで描く** — 同じ案内を 5 つの画面形状（16:9・9:16・32:9・1:1・柱に巻く LED）に。視距離から導いた文字サイズ、内閣府原典の警戒レベル色、点滅なし。
+5. **検査する** — すべての画面を 3 段で。スキーマと規則、描画した DOM のブラウザ検査（溢れ・欠け・距離の重複）、PNG を電文と照らす Vision 検査。指摘は Writer に戻し、書き直しで直らないものはパイプラインを止める。
+6. **イベントを発火する** — 電文が届いたら、その場所の `alert` / `clear` イベントを、全形状の承認済み画面を添えて出す。フィード、署名つき Webhook、静的ファイル。どのサイネージシステムでも受けられる。
 
-- `agents/` — Reader, JMA parser, Writer, Composer, Verifier, the revise loop, fan-out over recorded bulletins, export. Commands are listed in `agents/README.md`.
-- `app/` — the Renderer and the operator console (`/screen`, `/admin`, `/dashboard`), the approval gate, the feed and webhook delivery. `app/README.md`.
-- `schema/` — the contract between them: layout, alert, municipality, feed, export manifest.
-- `data/` — published municipality knowledge, layouts and inspection reports for the demo municipalities. Raw PDFs and the recorded JMA feed are not redistributed.
-- `demo/` — the Blender concourse, the deterministic screen recorder and the compose pipeline for the video.
+1 施設分の出力は一式です。災害種別 × レベル × 形状。各画面に出典行（自治体 PDF のページ、GSI データ、気象庁電文の時刻）と検査レポートが付きます。
 
-Determinism matters here: the renderer exposes a virtual clock, so the same layout at the same `t` is the same pixels, which is what lets the Verifier, the export and the demo recorder agree.
+## 仕組み
 
-## Human in the loop
+2 層です。遅い層はあらかじめ走り、速い層は電文が届いたときに走ります。
 
-**Decide in calm. Deliver in crisis.** / 平時に決めて、有事は自動。
+![EVAC LAYER の仕組み: 平時に Reader が自治体資料を読み、有事に parser → Writer → Composer → Renderer → Verifier が回り、承認済みの画面だけがイベントとして配信される](docs/diagrams/system.svg)
 
-EVAC LAYER drafts. People decide, ahead of time. For each venue it generates the full set of guidance screens (hazard × alert level × language × screen shape), each carrying its sources (the municipal PDF page and the JMA bulletin ID) and an automated inspection report. An operator reviews and approves the set in calm times. When a bulletin arrives, only approved screens go up, deterministically.
+- `agents/` — Reader・気象庁 XML の parser・Writer・Composer・Verifier・差し戻しループ・記録した電文の一括処理・エクスポート。コマンドは `agents/README.md`。
+- `app/` — Renderer と運営者の画面（`/screen`・`/admin`・`/dashboard`）、承認ゲート、フィードと Webhook の配信。`app/README.md`。
+- `schema/` — 両者の契約: layout・alert・municipality・feed・export manifest。
+- `data/` — デモ自治体の知識ファイル・レイアウト・検査レポート。元の PDF と記録した気象庁フィードは再配布しません。
+- `demo/` — Blender のコンコース、決定論的な画面録画、動画の合成パイプライン。
 
-## Any screen. / どの画面にも
+決定論が要です。Renderer は仮想時計を持ち、同じレイアウトの同じ `t` は同じピクセルになります。だから Verifier・エクスポート・デモの録画が一致します。
 
-EVAC LAYER is an event source, not a player. It does not replace a signage system; it tells one — the signage I run in venues, or yours — what to show at this place, now. The delivery layer speaks plain HTTP and only ever carries approved screens:
+## 人が決める
 
-- **Pull** — `GET /api/feed/<site>`: what the site should show now, with the five layouts and PNG/HTML assets. `ETag` makes polling cheap.
-- **Push** — a webhook per site, signed with HMAC-SHA256 over timestamp, delivery id, event and body; replay-safe.
-- **Files** — `pnpm -F agents export --site <id>`: PNG and self-contained HTML per shape, for CMSs that can only take images.
+**平時に決めて、有事は自動。**
 
-A screen is registered as one JSON file with its coordinates, facing and municipality code (`data/sites/<id>.json`); from then on it gets guidance for its own spot, and `POST /api/admin/site` switches its automatic delivery on. The steps are in `docs/integration.md`.
+EVAC LAYER は下書きを作ります。決めるのは人で、あらかじめ決めます。施設ごとに案内画面の一式（災害 × レベル × 言語 × 形状）を生成し、各画面に出典（自治体 PDF のページと気象庁電文の ID）と自動検査のレポートを付けます。運営者は平時に一式を確認して承認し、その施設の自動配信を入れるか切るかを決めます。電文が届いたら、承認済みの画面だけが、決定論的に上がります。止めるのも運営者で、`/admin` から自動配信を切れば次の電文から出ません。
 
-`docs/integration.md` has the three in detail. `examples/minimal-cms/` is a 30-line signage client that works from the feed alone — it is what the demo's last cut shows.
+## どの画面にも
 
-## What the real data caught
+EVAC LAYER はイベント源であって、プレイヤーではありません。サイネージシステムを置き換えず、サイネージに「この場所に、いま、これを出す」と伝えます。私が運用しているサイネージにも、あなたのサイネージにも。配信層は素の HTTP で、承認済みの画面だけを運びます。
 
-Everything below was found by running the pipeline on real inputs — 703 recorded JMA bulletins and five municipalities' hazard-map PDFs — not on the official samples. The full table with commits is in `agents/FINDINGS.md`.
+- **Pull** — `GET /api/feed/<site>`: その施設がいま出すべきもの。5 形状のレイアウトと PNG/HTML の資産つき。`ETag` でポーリングは軽い。
+- **Push** — 施設ごとの Webhook。timestamp・delivery id・event・body に対する HMAC-SHA256 の署名つき。再送攻撃に耐える。
+- **Files** — `pnpm -F agents export --site <id>`: 形状ごとの PNG と自己完結の HTML。画像しか受けられない CMS 向け。
 
-- **Characters vanish from a PDF's text layer** (「最大津波 16.6m」→「最 津波 16.6m」): CID fonts without ToUnicode, invisible to length and character-class checks. The Reader now flags the layer as suspect and, with `--allow-vision`, reads the page image instead, citing `method: vision`.
-- **A level-5 flood bulletin came out as level null**: inundation districts are listed per breach point, not per gauge. Districts now inherit the forecast-area level; an undecidable level stops the pipeline with a reason instead of being treated as "below threshold".
-- **Nine of 22 screens were "all clear" for warnings that had never been shown.** The replay now tracks what is on screen per hazard and only clears what it showed.
-- **A prefectural rain advisory knocked a level-5 screen back to ambient**: live state was one value for all bulletins; it is now per bulletin series.
-- **Long facility names pushed the distance off the screen** — seen only by looking at the rendered PNG, not in any static check. The shelter cell now carries the name alone and the renderer draws the fixed type label.
-- **The Vision inspector's first pass found 25 pictogram contradictions** (an "evacuate" figure on an all-clear screen). Over five runs the counts went 25 → 8 → 4 → 4 → 0. Action pictograms now express only the action, and the Writer is told what the pictogram means before it writes.
-- **The Writer used the municipality's own order names** ("高齢者等避難") in guidance derived from a JMA warning — which would read as if the city had issued it. A lint now forbids them.
-- **English fields contained kanji** ("子吉川 Lv3 Flood Warning"). A lint now rejects non-Latin characters in `en`.
+画面の登録は、座標・向き・市町村コードを持つ JSON ファイル 1 つ（`data/sites/<id>.json`）。以後その画面は自分の場所のための案内を受け取り、`POST /api/admin/site` で自動配信を入れます。手順は `docs/integration.md`。`examples/minimal-cms/` はフィードだけで動く 30 行のサイネージクライアントで、デモ動画の最後のカットがそれです。
 
-API cost of the whole data pass so far: Reader $2.88 (five municipalities), Writer about $2.75, Vision inspection $5.17 over nine runs.
+停電・回線断について。静的ファイルの経路を使えば、承認済みの一式を端末側に置いておけます。画面は配信元に届かなくなっても直前の状態を保ち、60 秒を超えると「更新が止まっている」印を出します。建物が停電すれば画面は消えます。平時レイヤーはそう書いて、館内放送とラジオを指しています。
 
-## Data sources and licenses
+## 既存の災害対応サイネージとの違い
 
-- **JMA disaster-prevention XML** (気象庁 防災情報 XML) — the official sample bulletins, replayed unmodified, and bulletins recorded from the public long-term feed since 2026-10. The recorded feed itself is not redistributed; the demo municipalities' replay fixtures are.
-- **GSI designated emergency evacuation sites / shelters** (国土地理院 指定緊急避難場所・指定避難所データ) — Public Data License 1.0. Attribution is on every screen's sources line, with the notice that facility details should be confirmed with the municipality.
-- **Municipal hazard-map PDFs** — read from the municipalities' own sites; cited by file and page in `data/municipalities/*.json`; the PDFs are not redistributed.
-- **Alert-level colors** — the Cabinet Office's five-level palette, original values.
-- **Pictograms** — Material Symbols (Apache-2.0) for seven, seven drawn for this project with matching stroke and flat caps. `app/ASSETS.md`.
-- **Fonts** — Noto Sans JP / SC / TC / KR (SIL OFL 1.1), bundled so screens render offline.
-- **3D demo** — Poly Haven HDRI and textures (CC0). `demo/ASSETS.md`.
+公開資料で確認できた範囲では、国内の災害対応サイネージ（2012〜2019 年の大手メーカー・実証）の災害時モードは「公的な配信を受けて割り込み表示し、復帰する」ところまでです。EVAC LAYER が足すのは次の点です。
 
-## What this is not
+- **画面が自分の場所を知っている。** ディスプレイごとの緯度経度から、最寄りの指定緊急避難場所を「ここから何 m・どちらへ」で出す。資料にある粒度は「配信先の選別」まで。
+- **全国のバリエーションを生成で作る。** 総務省の相互運用ガイドライン（2016）は「共通フォーマットが無く、システムごとに制作・個別開発・調整が要る」ことを課題として書いています。自治体ごとの資料を読み、画面ごとの案内を組み、検査する工程を Claude で回すことが、その課題への答えです。
+- **文言の品質を機械で保証する。** やさしい日本語の規則、文字高、点滅なし、距離表記、英語欄の文字種を lint と Verifier で検査します。
+- **平時の価値が設置費を払う。** 災害時だけ動く機械ではなく、環境演出の基盤の上に乗る 1 枚のレイヤーです。
+- **割り込みと復帰、承認と自動配信を構造で持つ。** 施設ごとの承認フローと自動配信の設定は、確認できた資料にはありませんでした。
+- **自治体は無償で、他社のサイネージにも乗せられる。**
 
-- Not a replacement for L-Alert, J-Alert or any official channel. EVAC LAYER sits downstream of the JMA bulletin and draws the screen; it does not issue warnings.
-- Not the issuer of evacuation orders. Those belong to the municipality; the Writer is forbidden by lint from using their names.
-- Not a promise about power. When the building loses power the screens are dark; the ambient layer says so and points to radio.
-- Not a general signage CMS. It produces and gates emergency screens; your CMS shows them.
+「記載なし」は資料に記述が無いことで、機能が無いことではありません。
 
-## Built during the hackathon
+## 実データが見つけたこと
 
-Before Nov 2: research, the concept, the data terms, downloading the source PDFs and recording the JMA feed. No code. Everything in this repository was written from Nov 2, 12:00 JST.
+以下はすべて、公式サンプルではなく実データ（記録した気象庁電文 703 本と 5 自治体のハザードマップ PDF）でパイプラインを回して見つけたものです。コミットつきの全表は `agents/FINDINGS.md`。
 
-How it was built, in one paragraph: one Claude Code session acts as the commander and three implementation seats run as tmux sessions on their own git worktrees (`agents`, `render`, `demo`). The commander writes the specs and the contract between seats (layout JSON, DOM attributes the Verifier reads, the approval gate), integrates `work/*` into `main`, and accepts or returns the work. Seats report with results, what they could not verify, and open questions; the commander rules and sends the fix back. Tests, typecheck and a deterministic screen recorder are the checks the seats run themselves; the Vision inspector and a browser check are what the pipeline runs on its own output. `docs/how-we-built.md` goes into the seats, the contract and the revise loop.
+- **PDF のテキスト層から文字が消える**（「最大津波 16.6m」→「最 津波 16.6m」）。ToUnicode の無い CID フォントで、長さや文字種の検査では見えない。Reader はその層を疑わしいと印し、`--allow-vision` でページ画像を読み直して `method: vision` と出典に書く。
+- **レベル 5 の洪水電文がレベル null になった。** 浸水想定の区域は水位観測所でなく破堤点ごとに書かれている。区域は予報区のレベルを継承し、判定できないレベルは「閾値未満」でなく理由つきで停止する。
+- **22 画面中 9 枚が、出していない警報の「解除」だった。** 再生側は災害種別ごとに表示中の警報を持ち、出したものだけ解除する。
+- **県の大雨注意報がレベル 5 の画面を平時に戻した。** ライブの状態は電文の系列ごとに持つ。
+- **長い施設名が距離を画面の外へ押し出した。** 静的検査では見えず、描画した PNG を見て分かった。避難場所セルは名称だけを持ち、Renderer が固定の種別ラベルを描く。
+- **Vision 検査の初回は図記号の矛盾を 25 件見つけた**（解除画面に「避難」の人型）。5 回の run で 25 → 8 → 4 → 4 → 0。行動の図記号は行動だけを表し、Writer は書く前に図記号の意味を受け取る。
+- **Writer が市町村の避難情報の名称を使った**（「高齢者等避難」）。気象庁の警報から作った画面に書くと、市が発令したように読める。lint で禁止した。
+- **英語欄に漢字が入った**（「子吉川 Lv3 Flood Warning」）。`en` に非ラテン文字を禁じる lint を足した。
 
-## Run it
+API の費用（ここまでのデータ処理）: Reader $2.88（5 自治体）、Writer 約 $2.75、Vision 検査 $5.17（9 run）。評価の数字は `docs/evaluation.md`。
+
+## データと権利
+
+- **気象庁 防災情報 XML** — 公式サンプル電文を無加工で再生したものと、2026 年 10 月から公開の長期フィードを記録した電文。記録したフィードは再配布せず、デモ自治体の再生用フィクスチャだけを含みます。
+- **国土地理院 指定緊急避難場所・指定避難所データ** — Public Data License 1.0。出典表示は全画面の出典行にあり、施設の詳細は市町村で確認する旨の注記つき。
+- **自治体のハザードマップ PDF** — 各自治体のサイトから読み、`data/municipalities/*.json` にファイルとページで引用。PDF は再配布しません。
+- **警戒レベルの色** — 内閣府の 5 段階の原典値。
+- **図記号** — Material Symbols（Apache-2.0）6 種、Material の形をもとに描き直した 1 種、このプロジェクトで描いた 7 種。`app/ASSETS.md`。
+- **フォント** — Noto Sans JP / SC / TC / KR（SIL OFL 1.1）。画面がオフラインで描けるよう同梱。
+- **3D デモ** — Poly Haven の HDRI とテクスチャ（CC0）。地図は OpenStreetMap（© OpenStreetMap contributors）。`demo/ASSETS.md`。
+
+## これではないもの
+
+- 公式の警報経路を置き換えるものではありません。EVAC LAYER は気象庁の電文の下流にあって画面を描くもので、警報を出しません。
+- 避難情報を発令するものではありません。発令は市町村のもので、Writer はその名称を使うことを lint で禁じられています。
+- 電源の約束ではありません。建物が停電すれば画面は消えます。平時レイヤーはそう書いて、ラジオを指しています。
+- 汎用のサイネージ CMS ではありません。緊急画面を作って承認で止めるものです。出すのはあなたの CMS です。
+
+## ハッカソン期間中の作り方
+
+11 月 2 日より前: 調査、コンセプト、データの利用条件、元 PDF のダウンロード、気象庁フィードの記録。コードはありません。このリポジトリのすべては 11 月 2 日 12:00 JST から書きました。
+
+1 段落で言うと: Claude Code のセッション 1 つが司令官になり、実装の 3 席（`agents`・`render`・`demo`）がそれぞれの git worktree で tmux セッションとして走ります。司令官が仕様と席間の契約（layout JSON・Verifier が読む DOM 属性・承認ゲート）を書き、`work/*` を `main` に統合し、検収するか差し戻します。席は結果・確認できなかったこと・未解決点を返し、司令官が裁定して直し方を戻します。テスト・typecheck・決定論的な画面録画は席が自分で回す検査、Vision 検査とブラウザ検査はパイプラインが自分の出力に回す検査です。席・契約・差し戻しループの詳細は `docs/how-we-built.md`。
+
+## 動かす
 
 ```sh
 pnpm install
-pnpm -F app dev                     # renderer + console on http://127.0.0.1:3150
+pnpm -F app dev                     # Renderer と運営者画面 http://127.0.0.1:3150
 open http://127.0.0.1:3150/screen?municipality=05210&mode=live
-pnpm -F agents test                 # agents: unit + sample-based tests
-pnpm -F app test                    # app: build + policy/server tests
+pnpm -F agents test                 # agents: ユニット＋サンプル電文のテスト
+pnpm -F app test                    # app: ビルド＋ポリシー/サーバのテスト
 ```
 
-The repo ships the demo municipalities' knowledge files, layouts and reports, so the console works without an API key. Running the Reader, Writer or Vision inspector yourself needs `ANTHROPIC_API_KEY` in `agents/.env`; `agents/README.md` lists every command with what it costs.
+デモ自治体の知識ファイル・レイアウト・レポートを同梱しているので、運営者画面は API キーなしで動きます。Reader・Writer・Vision 検査を自分で回すには `agents/.env` に `ANTHROPIC_API_KEY` が要ります。各コマンドと費用は `agents/README.md`。
 
-## License
+## ライセンスと連絡先
 
-License: AGPL-3.0 (see `LICENSE`). Copyright (C) 2026 You Tanaka.
-Free for municipalities, public-safety organizations, research and personal use.
-Commercial license for embedding into proprietary signage products: contact IE3 (you@ie3.jp).
+AGPL-3.0（`LICENSE`）。Copyright (C) 2026 You Tanaka。
+自治体・防災機関・研究・個人は無償です。独自のサイネージ製品への組み込みは商用ライセンスで対応します。
 
-External contributions are not accepted during the hackathon (Nov 2–8, 2026). See `CONTRIBUTING.md`.
+導入や連携の相談: you@ie3.jp（IE3 / ie3.jp）。ハッカソン期間中（11/2〜8）は外部からのコントリビューションを受け付けていません（`CONTRIBUTING.md`）。
 
-## 日本語の概要
+## English summary
 
-**スクリーンはもうあり、自分の場所を知っている。** 足りないのは、乗っ取ったあとにその場所のために何を描くかです。EVAC LAYER はそれを、全国のどの画面にも、Claude で作ります。
+**The screens are already there, and each one knows where it stands.** What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it — for any screen in Japan, generated with Claude.
 
-**誰の、どんな課題か。** 駅や商業施設のスクリーンは災害のとき、広告を流し続けるか黒く落ちるかのどちらかです。既存の仕組み（CAP 連携サイネージ・L アラート）は「画面を乗っ取る」ところまでで、その先に何を描くかは誰も決めていません。能登半島地震の津波では、上越市が「外国人や市外からの来訪者が、どこに避難すればよいかを判断することが難しかった」と検証しています。警報は届いた。「そこへ、あちらへ、570 m」が届いていない。
+Give EVAC LAYER the coordinates of a screen and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. It reads the municipality's own hazard-map PDFs with citations (Reader, Claude), listens to JMA disaster-prevention XML, writes the guidance in plain Japanese, *yasashii nihongo*, English, Chinese and Korean with action pictograms (Writer, Claude), composes it for five screen shapes, inspects every screen by rules, in a browser and by Vision (Claude), and fires `alert` / `clear` events carrying only operator-approved screens — as a feed, a signed webhook or static files. Any signage system can act on them.
 
-**どう解決するか。** 画面は自分の緯度経度を持ち、EVAC LAYER はそこから市町村の電文と最寄りの避難場所（方向・距離）を引きます。自治体のハザードマップ PDF と国土地理院の避難場所データを出典つきで読み、気象庁の電文が来たら、その施設・その画面の形に合わせた避難案内（やさしい日本語・英中韓・図記号）を 5 つの画面形状で生成し、規則・ブラウザ・Vision の 3 段で検査します。平時に運営者が一式を承認しておけば、有事は承認済みの画面だけが自動で上がります。EVAC LAYER はサイネージを置き換えるものではなく、「この場所に、いま、これを出す」というイベントを発火する側です。配信はフィード・署名つき Webhook・静的ファイルの 3 通りで、どのサイネージ CMS でも受け取れます。
-
-**ハッカソン後に誰が使うか。** 作り手（IE3）が運用する駅・商業施設のサイネージに標準で組み込みます。他のサイネージ CMS は `docs/integration.md` と `examples/minimal-cms/` から繋ぎ込めます。自治体・防災機関・研究・個人は無償（AGPL-3.0）です。導入や連携の相談は you@ie3.jp（IE3 / ie3.jp）へ。
+Built from scratch during Built with Claude: Japan 2026 (Nov 2–8). Everything in this repository was written from Nov 2, 12:00 JST, by one commander session and three Claude Code implementation seats on their own git worktrees. Licensed AGPL-3.0; free for municipalities, public-safety organizations, research and personal use; commercial license for embedding into proprietary signage products: you@ie3.jp.
