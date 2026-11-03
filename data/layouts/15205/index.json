@@ -693,6 +693,15 @@
       "municipality_level": null,
       "screen": false,
       "reason": "level 0 for 15205: below the evacuation threshold, no screen"
+    },
+    {
+      "issued_at": "2026-11-03T11:49:00+09:00",
+      "bulletin_id": "VPWW56-202611031149-69ba2860495b",
+      "wmo_code": "VPWW56",
+      "raw_title": "新潟県土砂災害警報・注意報",
+      "municipality_level": null,
+      "screen": false,
+      "reason": "level 0 for 15205: below the evacuation threshold, no screen"
     }
   ]
 }
