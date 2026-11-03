@@ -1,0 +1,8 @@
+{
+  "source": "Official JMA sample bulletins (気象庁 技術資料 電文サンプル, 2016-09-01 tsunami drill series) replayed unmodified from JMA_SAMPLES_DIR; they put 静岡県 under 大津波警報 (07:13 issued, 07:26 continued) and downgrade it to 津波予報（若干の海面変動） at 09:55, which the feed recording of 2026-10/11 never did.",
+  "files": [
+    "32-39_12_02_250206_VTSE41.xml",
+    "32-39_12_07_250206_VTSE41.xml",
+    "32-39_12_13_250206_VTSE41.xml"
+  ]
+}

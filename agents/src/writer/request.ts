@@ -44,7 +44,9 @@ export function writerSystem(): string {
     ...SIGNAGE_CONVENTIONS_JA.map((c) => `- ${c}`),
     "en・zh_hans・zh_hant・ko・th・vi・fil・id は ja の内容を同じ情報量で訳します。固有名詞（施設名・地名）はその言語の文字で転写し、日本語の文字を混ぜません。",
     "th はタイ文字だけで書き、分かち書きをしません（数字・記号は可）。vi はベトナム語の声調記号・ダイアクリティカルを必ず付けます。fil はフィリピン語（Filipino）の表記で書きます。id は標準インドネシア語（bahasa Indonesia baku）で書きます。",
-    "alert.status が drill（気象庁の訓練電文）のときは、headline の全言語に訓練であることを示す語を入れます: ja_easy「くんれん」、en「DRILL:」、zh_hans「演习」、zh_hant「演習」、ko「훈련」、th「ฝึกซ้อม」、vi「diễn tập」、fil「pagsasanay」、id「latihan」。action（＝languages）にも ja 以外の全言語で同じ語を入れます（言語帯だけを読む人にも訓練と分かるように）。ja の action には入れません（ja は見出しの【訓練】で示し、字数予算が小さいため）。",
+    "alert.status が drill（気象庁の訓練電文）のときは、headline の全言語と、action（＝languages）の ja 以外の全言語を、訓練語で始めます。訓練語は必ず文の先頭に置き、後ろや括弧には置きません: ja_easy「くんれん 」、en「DRILL: 」、zh_hans「演习：」、zh_hant「演習：」、ko「훈련: 」、th「ฝึกซ้อม: 」、vi「Diễn tập: 」、fil「Pagsasanay: 」、id「Latihan: 」。ja の action には入れません（ja は見出しの【訓練】で示し、字数予算が小さいため）。",
+    "津波の警報名の英語は気象庁の公式表記を使います: 大津波警報 = Major Tsunami Warning、津波警報 = Tsunami Warning、津波注意報 = Tsunami Advisory。",
+    "解除の action は、各言語で『もう避難しなくてよい／安全になった』の意味を残します。『終わった』『完了』だけの語（例: fil Tapos na、id Selesai）にはしません。",
     "basis には、その文の根拠（警報のどの項目か、知識ファイルのどの項目と出典ページか）を書きます。",
   ].join("\n");
 }

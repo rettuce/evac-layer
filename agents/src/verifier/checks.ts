@@ -75,9 +75,11 @@ export function judgeContent(cells: CellText[]): Finding[] {
     .map((c) => ({ check: "distance-duplicated" as const, cell_id: c.id, detail: `direction text "${c.text}" repeats the distance already shown on the shelter cell` }));
 }
 
+// The drill word opens the text in every language, so a reader meets it before the warning; a marker elsewhere
+// (a suffix, brackets) is sent back.
 export const DRILL_MARKERS: Record<string, RegExp> = {
-  ja: /訓練/, ja_easy: /くんれん/, en: /drill/i, zh_hans: /演习|演练|训练/, zh_hant: /演習|演練|訓練/, ko: /훈련/,
-  th: /ฝึกซ้อม|ซ้อม/, vi: /diễn tập/i, fil: /pagsasanay|drill/i, id: /latihan|simulasi/i,
+  ja: /^【訓練】/, ja_easy: /^くんれん/, en: /^drill\b/i, zh_hans: /^(演习|演练|训练)/, zh_hant: /^(演習|演練|訓練)/, ko: /^훈련/,
+  th: /^ฝึกซ้อม/, vi: /^diễn tập/i, fil: /^pagsasanay/i, id: /^latihan/i,
 };
 
 // A drill bulletin must be recognisable as one in every language on the headline, or a reader of one language
@@ -90,5 +92,5 @@ export function judgeDrill(cells: { id: string; role: string; text: Record<strin
     .filter((c) => c.role === "headline" || c.role === "action" || c.role === "languages")
     .flatMap((c) => Object.entries(c.text)
       .filter(([lang, text]) => text !== undefined && DRILL_MARKERS[lang] && !(c.role !== "headline" && lang === "ja") && !DRILL_MARKERS[lang].test(text))
-      .map(([lang]) => ({ check: "drill-marker" as const, cell_id: c.id, lang, detail: `drill bulletin, but the ${lang} ${c.role} does not say so` })));
+      .map(([lang]) => ({ check: "drill-marker" as const, cell_id: c.id, lang, detail: `drill bulletin, but the ${lang} ${c.role} does not open with the drill word` })));
 }

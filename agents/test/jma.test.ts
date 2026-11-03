@@ -108,3 +108,10 @@ test("輪島 replays the three official VTSE41 samples listed in data/samples/17
   assert.deepEqual(samples.map((e) => e.bulletin_id), ["VTSE41-201609010713-ff3dd5d5c94f", "VTSE41-201609010726-05a7380a3e46", "VTSE41-201609010955-5a813306d772"]);
   assert.deepEqual(samples.map((e) => e.municipality_status), [["issued"], ["continued"], ["cleared"]]);
 });
+
+test("吉田町 replays the same three samples; 静岡県 is under 大津波警報, then downgraded", () => {
+  const { entries, errors } = replay("22424");
+  assert.deepEqual(errors, []);
+  const samples = entries.filter((e) => e.file.startsWith("jma-samples/"));
+  assert.deepEqual(samples.map((e) => e.municipality_status), [["issued"], ["continued"], ["downgraded"]]);
+});

@@ -5,11 +5,64 @@
   "writer_note": "",
   "entries": [
     {
+      "issued_at": "2016-09-01T07:13:00+09:00",
+      "bulletin_id": "VTSE41-201609010713-ff3dd5d5c94f",
+      "wmo_code": "VTSE41",
+      "raw_title": "大津波警報・津波警報・津波注意報",
+      "municipality_level": null,
+      "file": "jma-samples/32-39_12_02_250206_VTSE41.xml",
+      "screen": true,
+      "template": "evac-now",
+      "display_level": 4,
+      "outcome": "pass",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/22424/VTSE41-201609010713-ff3dd5d5c94f/16x9.json",
+        "data/layouts/22424/VTSE41-201609010713-ff3dd5d5c94f/9x16.json",
+        "data/layouts/22424/VTSE41-201609010713-ff3dd5d5c94f/32x9.json",
+        "data/layouts/22424/VTSE41-201609010713-ff3dd5d5c94f/1x1.json",
+        "data/layouts/22424/VTSE41-201609010713-ff3dd5d5c94f/pillar.json"
+      ],
+      "report": "data/reports/22424-VTSE41-201609010713-ff3dd5d5c94f/report.json"
+    },
+    {
+      "issued_at": "2016-09-01T07:26:00+09:00",
+      "bulletin_id": "VTSE41-201609010726-05a7380a3e46",
+      "wmo_code": "VTSE41",
+      "raw_title": "大津波警報・津波警報・津波注意報",
+      "municipality_level": null,
+      "file": "jma-samples/32-39_12_07_250206_VTSE41.xml",
+      "screen": true,
+      "template": "evac-now",
+      "display_level": 4,
+      "outcome": "pass",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+      "layouts": [
+        "data/layouts/22424/VTSE41-201609010726-05a7380a3e46/16x9.json",
+        "data/layouts/22424/VTSE41-201609010726-05a7380a3e46/9x16.json",
+        "data/layouts/22424/VTSE41-201609010726-05a7380a3e46/32x9.json",
+        "data/layouts/22424/VTSE41-201609010726-05a7380a3e46/1x1.json",
+        "data/layouts/22424/VTSE41-201609010726-05a7380a3e46/pillar.json"
+      ],
+      "report": "data/reports/22424-VTSE41-201609010726-05a7380a3e46/report.json"
+    },
+    {
+      "issued_at": "2016-09-01T09:55:00+09:00",
+      "bulletin_id": "VTSE41-201609010955-5a813306d772",
+      "wmo_code": "VTSE41",
+      "raw_title": "津波予報",
+      "municipality_level": null,
+      "file": "jma-samples/32-39_12_13_250206_VTSE41.xml",
+      "screen": false,
+      "reason": "tsunami forecast (slight sea-level change) for 22424: no evacuation screen"
+    },
+    {
       "issued_at": "2026-10-20T07:30:00+09:00",
       "bulletin_id": "VPWW55-202610200730-0e4c4fbae242",
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261019/20261019223057_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -19,6 +72,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261019/20261019230509_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -28,6 +82,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261020/20261020000001_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -37,6 +92,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": 2,
+      "file": "bodies/20261020/20261020005555_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 2 for 22424: below the evacuation threshold, no screen"
     },
@@ -46,6 +102,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": 2,
+      "file": "bodies/20261020/20261020011649_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 2 for 22424: below the evacuation threshold, no screen"
     },
@@ -55,6 +112,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261020/20261020055215_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "all-clear for heavy_rain but no heavy_rain screen was shown before; nothing to clear"
     },
@@ -64,6 +122,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025032021_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -73,6 +132,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "静岡県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025032021_0_VPWW56_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -82,6 +142,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025034521_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -91,6 +152,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025040231_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -100,6 +162,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025042626_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -109,6 +172,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025063341_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -118,6 +182,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025071752_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -127,6 +192,7 @@
       "wmo_code": "VPWW55",
       "raw_title": "静岡県大雨警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025090527_0_VPWW55_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -136,6 +202,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "静岡県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025090527_0_VPWW56_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -145,6 +212,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "静岡県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025232040_0_VPWW56_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -154,6 +222,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "静岡県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261026/20261026045551_0_VPWW56_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -163,6 +232,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "静岡県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261026/20261026074627_0_VPWW56_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -172,6 +242,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "静岡県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261026/20261026193434_0_VPWW56_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     },
@@ -181,6 +252,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "静岡県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261026/20261026231129_0_VPWW56_220000.xml",
       "screen": false,
       "reason": "level 0 for 22424: below the evacuation threshold, no screen"
     }

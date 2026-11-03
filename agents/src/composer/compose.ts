@@ -77,7 +77,7 @@ export function headlineFor(alert: Alert, municipalityId: string): string {
   const mine = alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
   const live = mine.filter((a) => a.status !== "cleared" && a.status !== "none").sort((a, b) => (b.level ?? 0) - (a.level ?? 0));
   const prefix = alert.status === "drill" ? DRILL_PREFIX_JA : "";
-  if (live.length) return prefix + live[0].kind_name;
+  if (live.length) return prefix + live[0].kind_name.replace(/：発表$/, "");
   const cleared = mine.find((a) => a.status === "cleared");
   if (cleared) return prefix + (cleared.kind_name.endsWith("解除") ? cleared.kind_name : `${cleared.kind_name}解除`);
   return prefix + alert.raw_title;

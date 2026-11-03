@@ -21,15 +21,15 @@
       "priority": 1,
       "text": {
         "ja": "【訓練】津波注意報解除",
-        "ja_easy": "くんれん つなみ ちゅうい おわり",
+        "ja_easy": "くんれん つなみちゅういほう おわり",
         "en": "DRILL: Tsunami all clear",
         "zh_hans": "演习：海啸注意报解除",
         "zh_hant": "演習：海嘯注意報解除",
         "ko": "훈련: 쓰나미 주의보 해제",
-        "th": "ฝึกซ้อม:ยกเลิกคำเตือนระวังสึนามิ",
-        "vi": "diễn tập: Dỡ bỏ khuyến cáo sóng thần",
-        "fil": "pagsasanay: Inalis na ang tsunami advisory",
-        "id": "latihan: Imbauan tsunami dicabut"
+        "th": "ฝึกซ้อม: ยกเลิกประกาศเฝ้าระวังสึนามิ",
+        "vi": "Diễn tập: Dỡ bỏ khuyến cáo sóng thần",
+        "fil": "Pagsasanay: Inalis na ang Tsunami Advisory",
+        "id": "Latihan: Imbauan tsunami dicabut"
       },
       "pictogram": "tsunami",
       "motion": "scale-in"
@@ -39,16 +39,16 @@
       "role": "action",
       "priority": 1,
       "text": {
-        "ja": "避難の必要なし",
-        "ja_easy": "くんれん にげなくて いい",
-        "en": "DRILL: All clear",
-        "zh_hans": "演习：无需避难",
-        "zh_hant": "演習：無需避難",
-        "ko": "훈련: 대피 불필요",
-        "th": "ฝึกซ้อม:ไม่ต้องอพยพ",
-        "vi": "diễn tập: Khỏi sơ tán",
-        "fil": "pagsasanay: Tapos na",
-        "id": "latihan: Selesai"
+        "ja": "もう避難は不要です",
+        "ja_easy": "くんれん もう あんぜんです",
+        "en": "DRILL: Safe now",
+        "zh_hans": "演习：已安全",
+        "zh_hant": "演習：已安全",
+        "ko": "훈련: 이제 안전합니다",
+        "th": "ฝึกซ้อม: ปลอดภัยแล้ว",
+        "vi": "Diễn tập: Đã an toàn",
+        "fil": "Pagsasanay: Ligtas na",
+        "id": "Latihan: Sudah aman"
       },
       "pictogram": "safe_here",
       "motion": "pulse"
@@ -58,16 +58,16 @@
       "role": "languages",
       "priority": 3,
       "text": {
-        "ja": "避難の必要なし",
-        "ja_easy": "くんれん にげなくて いい",
-        "en": "DRILL: All clear",
-        "zh_hans": "演习：无需避难",
-        "zh_hant": "演習：無需避難",
-        "ko": "훈련: 대피 불필요",
-        "th": "ฝึกซ้อม:ไม่ต้องอพยพ",
-        "vi": "diễn tập: Khỏi sơ tán",
-        "fil": "pagsasanay: Tapos na",
-        "id": "latihan: Selesai"
+        "ja": "もう避難は不要です",
+        "ja_easy": "くんれん もう あんぜんです",
+        "en": "DRILL: Safe now",
+        "zh_hans": "演习：已安全",
+        "zh_hant": "演習：已安全",
+        "ko": "훈련: 이제 안전합니다",
+        "th": "ฝึกซ้อม: ปลอดภัยแล้ว",
+        "vi": "Diễn tập: Đã an toàn",
+        "fil": "Pagsasanay: Ligtas na",
+        "id": "Latihan: Sudah aman"
       },
       "motion": "static"
     },
