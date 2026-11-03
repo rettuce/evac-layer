@@ -1,43 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 796" width="1920" height="796">
-<rect width="1920" height="796" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 972" width="1920" height="972">
+<rect width="1920" height="972" fill="#fff"/>
 <text x="64" y="96" font-family="'Noto Sans JP', sans-serif" font-size="44" font-weight="700" fill="#000">EVAC LAYER が扱う災害情報<tspan dx="19.200000000000003" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="24" font-weight="400" fill="#555">Hazards and warning levels</tspan></text>
-<text x="64" y="168" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="#000">災害の種別<tspan dx="16" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Hazards from JMA bulletins</tspan></text>
-<rect x="64" y="192" width="760" height="68" fill="rgb(255 40 0)"/>
-<svg x="80" y="202" width="48" height="48" color="rgb(0 0 0)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" fill="none" stroke="currentColor" stroke-width="64" stroke-linecap="butt" stroke-linejoin="miter"><path d="M250 520H710A130 130 0 0 0 740 263A230 230 0 0 0 300 290A115 115 0 0 0 250 520Z"/><path d="M330 620L280 830M450 620L400 830M570 620L520 830M690 620L640 830"/></svg>
+<text x="64" y="204" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="#000">災害の種別<tspan dx="16" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Hazards from JMA bulletins</tspan></text>
+<rect x="64" y="240" width="760" height="68" fill="rgb(255 40 0)"/>
+<svg x="80" y="250" width="48" height="48" color="rgb(0 0 0)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" fill="none" stroke="currentColor" stroke-width="64" stroke-linecap="butt" stroke-linejoin="miter"><path d="M250 520H710A130 130 0 0 0 740 263A230 230 0 0 0 300 290A115 115 0 0 0 250 520Z"/><path d="M330 620L280 830M450 620L400 830M570 620L520 830M690 620L640 830"/></svg>
 
-<text x="144" y="238" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="rgb(0 0 0)">レベル３大雨警報</text>
-<text x="856" y="224" font-family="'Noto Sans JP', sans-serif" font-size="26" font-weight="700" fill="#000">大雨</text>
-<text x="856" y="252" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Heavy rain · 気象庁 VPWW55</text>
-<rect x="64" y="276" width="760" height="68" fill="rgb(170 0 170)"/>
-<svg x="80" y="286" width="48" height="48" color="rgb(255 255 255)" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M80-80h800L640-400l-200-80-120-160H80v560Zm60-60v-101l100 32 375-124 145 193H140Zm100-131-100-34v-96l100 32 173-56 122 55-295 99Zm500-129 180-80v-160l-180-40-100 80v120l100 80Zm-500-31-100-34v-115h150l82 105-132 44Zm508-27-58-45v-73l63-50 117 26v87l-122 55ZM480-640l200-80v-200l-200-40-120 80v160l120 80Zm5-56-75-51v-106l81-54 139 28v125l-145 58Z"/></svg>
-<text x="144" y="322" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="rgb(255 255 255)">レベル４土砂災害危険警報</text>
-<text x="856" y="308" font-family="'Noto Sans JP', sans-serif" font-size="26" font-weight="700" fill="#000">土砂災害</text>
-<text x="856" y="336" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Landslide · 気象庁 VPWW56</text>
-<rect x="64" y="360" width="760" height="68" fill="rgb(12 0 12)"/>
-<svg x="80" y="370" width="48" height="48" color="rgb(255 255 255)" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M80-80v-60q34-3 54.5-21.5T208-180q53 0 75.5 20t60.5 20q38 0 60.5-20t75.5-20q53 0 76 20t60 20q38 0 60.5-25t75.5-25q53 0 73.5 23.5T880-140v60q-42 0-68.5-25T752-130q-33 0-58 25t-78 25q-53 0-78-20t-58-20q-33 0-58 20t-78 20q-53 0-78-20t-58-20q-33 0-59.5 20T80-80Zm264-190q-53 0-78-20t-58-20q-33 0-59.5 20T80-270v-60q34-3 54.5-21.5T208-370q11 0 22.5 1.5T251-364l-51-185-62 77-47-38 300-370 445 170-22 56-92-35 86 321q18 10 36.5 24t35.5 13v61q-42 0-68.5-25T752-320q-33 0-58 25t-78 25q-53 0-78-20t-58-20q-33 0-58 20t-78 20Zm0-60q31 0 55.5-17.5T456-369l-37-136 136-36 55 211q38 4 62.5-22t69.5-28l-90-336-241-93-164 202 74 274q7 2 12 2.5t11 .5Zm151-237Z"/></svg>
-<text x="144" y="406" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="rgb(255 255 255)">レベル５氾濫特別警報</text>
-<text x="856" y="392" font-family="'Noto Sans JP', sans-serif" font-size="26" font-weight="700" fill="#000">洪水（指定河川）</text>
-<text x="856" y="420" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">River flood · 気象庁 VXKOnn</text>
-<rect x="64" y="444" width="760" height="68" fill="rgb(255 40 0)"/>
-<svg x="80" y="454" width="48" height="48" color="rgb(0 0 0)" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M80-120v-60q35-2 68-15t65-37q31 24 65.5 37.5T347-181q32 0 68.5-13.5T481-232q33 27 66.5 39t67.5 12q33 0 65-13t69-39q35 26 68.5 38.5T880-180v60q-30-2-66-12t-65-27q-34 20-68 29.5t-66 9.5q-32 0-66-9.5T481-159q-31 20-65.5 29.5T347-120q-33 0-67-9.5T213-159q-29 17-65.5 27T80-120Zm0-190v-70q0-95 38.5-178.5t104-146q65.5-62.5 153-99T560-840q28 0 56.5 2.5T668-830q-19 31-28.5 64.5T630-703q0 59 42 106t101 47h107v60H773q-85 0-144-64t-59-149q0-14 3.5-33t8.5-41q-85 20-138.5 88T390-540q0 38 13.5 74t38.5 70q10-7 19.5-13t18.5-13q31 25 67.5 38t67.5 13q30 0 66.5-13.5T749-422q29 22 63 36t68 16v60q-30-2-66-12t-65-27q-34 20-66.5 29.5T615-310q-35 0-71-11t-63-28q-32 20-66 29t-68 10q-32 0-67.5-10.5T213-349q-29 17-65.5 27T80-310Zm265-61q6 0 16-1t21-2q-25-41-38.5-82.5T330-540q0-78 41-149t109-106v23q-80 17-141.5 54t-104 88q-42.5 51-66 114T140-382q23-13 41-21.5t32-19.5q36 26 66.5 39t65.5 13Zm-62-193Z"/></svg>
-<text x="144" y="490" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="rgb(0 0 0)">津波警報</text>
-<text x="856" y="476" font-family="'Noto Sans JP', sans-serif" font-size="26" font-weight="700" fill="#000">津波</text>
-<text x="856" y="504" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Tsunami · 気象庁 VTSE41</text>
-<text x="64" y="572" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="#000">警戒レベル 1〜5<tspan dx="16" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Cabinet Office warning levels</tspan></text>
-<rect x="64" y="596" width="345.6" height="120" fill="rgb(12 0 12)" stroke="none"/>
-<text x="84" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(255 255 255)">警戒レベル5</text>
-<text x="84" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(255 255 255)">コントラスト比 20.6 : 1</text>
-<rect x="425.6" y="596" width="345.6" height="120" fill="rgb(170 0 170)" stroke="none"/>
-<text x="445.6" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(255 255 255)">警戒レベル4</text>
-<text x="445.6" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(255 255 255)">コントラスト比 6.4 : 1</text>
-<rect x="787.2" y="596" width="345.6" height="120" fill="rgb(255 40 0)" stroke="none"/>
-<text x="807.2" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(0 0 0)">警戒レベル3</text>
-<text x="807.2" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">コントラスト比 5.6 : 1</text>
-<rect x="1148.8000000000002" y="596" width="345.6" height="120" fill="rgb(242 231 0)" stroke="none"/>
-<text x="1168.8000000000002" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(0 0 0)">警戒レベル2</text>
-<text x="1168.8000000000002" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">コントラスト比 16.2 : 1</text>
-<rect x="1510.4" y="596" width="345.6" height="120" fill="rgb(255 255 255)" stroke="#d0d0d0"/>
-<text x="1530.4" y="652" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(0 0 0)">警戒レベル1</text>
-<text x="1530.4" y="696" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">コントラスト比 21.0 : 1</text>
-<text x="64" y="756" font-family="'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">内閣府 2020 年改定の原典色。帯の文字は自動で白／黒を選び、すべて 4.5 : 1 以上（WCAG AA）</text>
+<text x="144" y="286" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="rgb(0 0 0)">レベル３大雨警報</text>
+<text x="856" y="270" font-family="'Noto Sans JP', sans-serif" font-size="26" font-weight="700" fill="#000">大雨</text>
+<text x="856" y="300" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Heavy rain · 気象庁 VPWW55</text>
+<rect x="64" y="332" width="760" height="68" fill="rgb(170 0 170)"/>
+<svg x="80" y="342" width="48" height="48" color="rgb(255 255 255)" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M80-80h800L640-400l-200-80-120-160H80v560Zm60-60v-101l100 32 375-124 145 193H140Zm100-131-100-34v-96l100 32 173-56 122 55-295 99Zm500-129 180-80v-160l-180-40-100 80v120l100 80Zm-500-31-100-34v-115h150l82 105-132 44Zm508-27-58-45v-73l63-50 117 26v87l-122 55ZM480-640l200-80v-200l-200-40-120 80v160l120 80Zm5-56-75-51v-106l81-54 139 28v125l-145 58Z"/></svg>
+<text x="144" y="378" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="rgb(255 255 255)">レベル４土砂災害危険警報</text>
+<text x="856" y="362" font-family="'Noto Sans JP', sans-serif" font-size="26" font-weight="700" fill="#000">土砂災害</text>
+<text x="856" y="392" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Landslide · 気象庁 VPWW56</text>
+<rect x="64" y="424" width="760" height="68" fill="rgb(12 0 12)"/>
+<svg x="80" y="434" width="48" height="48" color="rgb(255 255 255)" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M80-80v-60q34-3 54.5-21.5T208-180q53 0 75.5 20t60.5 20q38 0 60.5-20t75.5-20q53 0 76 20t60 20q38 0 60.5-25t75.5-25q53 0 73.5 23.5T880-140v60q-42 0-68.5-25T752-130q-33 0-58 25t-78 25q-53 0-78-20t-58-20q-33 0-58 20t-78 20q-53 0-78-20t-58-20q-33 0-59.5 20T80-80Zm264-190q-53 0-78-20t-58-20q-33 0-59.5 20T80-270v-60q34-3 54.5-21.5T208-370q11 0 22.5 1.5T251-364l-51-185-62 77-47-38 300-370 445 170-22 56-92-35 86 321q18 10 36.5 24t35.5 13v61q-42 0-68.5-25T752-320q-33 0-58 25t-78 25q-53 0-78-20t-58-20q-33 0-58 20t-78 20Zm0-60q31 0 55.5-17.5T456-369l-37-136 136-36 55 211q38 4 62.5-22t69.5-28l-90-336-241-93-164 202 74 274q7 2 12 2.5t11 .5Zm151-237Z"/></svg>
+<text x="144" y="470" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="rgb(255 255 255)">レベル５氾濫特別警報</text>
+<text x="856" y="454" font-family="'Noto Sans JP', sans-serif" font-size="26" font-weight="700" fill="#000">洪水（指定河川）</text>
+<text x="856" y="484" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">River flood · 気象庁 VXKOnn</text>
+<rect x="64" y="516" width="760" height="68" fill="rgb(255 40 0)"/>
+<svg x="80" y="526" width="48" height="48" color="rgb(0 0 0)" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M80-120v-60q35-2 68-15t65-37q31 24 65.5 37.5T347-181q32 0 68.5-13.5T481-232q33 27 66.5 39t67.5 12q33 0 65-13t69-39q35 26 68.5 38.5T880-180v60q-30-2-66-12t-65-27q-34 20-68 29.5t-66 9.5q-32 0-66-9.5T481-159q-31 20-65.5 29.5T347-120q-33 0-67-9.5T213-159q-29 17-65.5 27T80-120Zm0-190v-70q0-95 38.5-178.5t104-146q65.5-62.5 153-99T560-840q28 0 56.5 2.5T668-830q-19 31-28.5 64.5T630-703q0 59 42 106t101 47h107v60H773q-85 0-144-64t-59-149q0-14 3.5-33t8.5-41q-85 20-138.5 88T390-540q0 38 13.5 74t38.5 70q10-7 19.5-13t18.5-13q31 25 67.5 38t67.5 13q30 0 66.5-13.5T749-422q29 22 63 36t68 16v60q-30-2-66-12t-65-27q-34 20-66.5 29.5T615-310q-35 0-71-11t-63-28q-32 20-66 29t-68 10q-32 0-67.5-10.5T213-349q-29 17-65.5 27T80-310Zm265-61q6 0 16-1t21-2q-25-41-38.5-82.5T330-540q0-78 41-149t109-106v23q-80 17-141.5 54t-104 88q-42.5 51-66 114T140-382q23-13 41-21.5t32-19.5q36 26 66.5 39t65.5 13Zm-62-193Z"/></svg>
+<text x="144" y="562" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="rgb(0 0 0)">津波警報</text>
+<text x="856" y="546" font-family="'Noto Sans JP', sans-serif" font-size="26" font-weight="700" fill="#000">津波</text>
+<text x="856" y="576" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Tsunami · 気象庁 VTSE41</text>
+<text x="64" y="680" font-family="'Noto Sans JP', sans-serif" font-size="30" font-weight="700" fill="#000">警戒レベル 1〜5<tspan dx="16" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">Cabinet Office warning levels</tspan></text>
+<rect x="64" y="716" width="345.6" height="120" fill="rgb(12 0 12)" stroke="none"/>
+<text x="84" y="772" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(255 255 255)">警戒レベル5</text>
+<text x="84" y="816" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(255 255 255)">コントラスト比 20.6 : 1</text>
+<rect x="425.6" y="716" width="345.6" height="120" fill="rgb(170 0 170)" stroke="none"/>
+<text x="445.6" y="772" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(255 255 255)">警戒レベル4</text>
+<text x="445.6" y="816" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(255 255 255)">コントラスト比 6.4 : 1</text>
+<rect x="787.2" y="716" width="345.6" height="120" fill="rgb(255 40 0)" stroke="none"/>
+<text x="807.2" y="772" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(0 0 0)">警戒レベル3</text>
+<text x="807.2" y="816" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">コントラスト比 5.6 : 1</text>
+<rect x="1148.8000000000002" y="716" width="345.6" height="120" fill="rgb(242 231 0)" stroke="none"/>
+<text x="1168.8000000000002" y="772" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(0 0 0)">警戒レベル2</text>
+<text x="1168.8000000000002" y="816" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">コントラスト比 16.2 : 1</text>
+<rect x="1510.4" y="716" width="345.6" height="120" fill="rgb(255 255 255)" stroke="#d0d0d0"/>
+<text x="1530.4" y="772" font-family="'Noto Sans JP', sans-serif" font-size="32" font-weight="700" fill="rgb(0 0 0)">警戒レベル1</text>
+<text x="1530.4" y="816" font-family="'Noto Sans', 'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="rgb(0 0 0)">コントラスト比 21.0 : 1</text>
+<text x="64" y="908" font-family="'Noto Sans JP', sans-serif" font-size="20" font-weight="400" fill="#555">内閣府 2020 年改定の原典色。帯の文字は自動で白／黒を選び、すべて 4.5 : 1 以上（WCAG AA）</text>
 </svg>
