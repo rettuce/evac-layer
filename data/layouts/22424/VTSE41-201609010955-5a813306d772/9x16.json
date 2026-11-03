@@ -1,0 +1,101 @@
+{
+  "version": "0.1",
+  "kind": "evac-screen",
+  "municipality": {
+    "id": "22424",
+    "name": "吉田町"
+  },
+  "alert": {
+    "source": "jma",
+    "bulletin_id": "VTSE41-201609010955-5a813306d772",
+    "hazard": "tsunami",
+    "level": 1,
+    "issued_at": "2016-09-01T09:55:00+09:00"
+  },
+  "shape": "9x16",
+  "template": "all-clear",
+  "cells": [
+    {
+      "id": "headline",
+      "role": "headline",
+      "priority": 1,
+      "text": {
+        "ja": "【訓練】大津波警報解除",
+        "ja_easy": "くんれん つなみけいほう かいじょ",
+        "en": "DRILL: Warnings lifted",
+        "zh_hans": "演习：大海啸警报解除",
+        "zh_hant": "演習：大海嘯警報解除",
+        "ko": "훈련: 대형 쓰나미 경보 해제",
+        "th": "ฝึกซ้อม: ยกเลิกคำเตือนสึนามิใหญ่",
+        "vi": "Diễn tập: Dỡ bỏ cảnh báo sóng thần lớn",
+        "fil": "Pagsasanay: Inalis na ang babala sa malaking tsunami",
+        "id": "Latihan: Peringatan tsunami besar dicabut"
+      },
+      "pictogram": "tsunami",
+      "motion": "scale-in"
+    },
+    {
+      "id": "action",
+      "role": "action",
+      "priority": 1,
+      "text": {
+        "ja": "海と海岸に近づかない",
+        "ja_easy": "くんれん うみに いかないで",
+        "en": "DRILL: Avoid coast",
+        "zh_hans": "演习：远离海边",
+        "zh_hant": "演習：遠離海邊",
+        "ko": "훈련: 바다에 가지 마세요",
+        "th": "ฝึกซ้อม: อย่าลงทะเล",
+        "vi": "Diễn tập: Đừng ra biển",
+        "fil": "Pagsasanay: Wag sa dagat",
+        "id": "Latihan: Jauhi pantai"
+      },
+      "pictogram": "tsunami",
+      "motion": "pulse"
+    },
+    {
+      "id": "languages",
+      "role": "languages",
+      "priority": 3,
+      "text": {
+        "ja": "海と海岸に近づかない",
+        "ja_easy": "くんれん うみに いかないで",
+        "en": "DRILL: Avoid coast",
+        "zh_hans": "演习：远离海边",
+        "zh_hant": "演習：遠離海邊",
+        "ko": "훈련: 바다에 가지 마세요",
+        "th": "ฝึกซ้อม: อย่าลงทะเล",
+        "vi": "Diễn tập: Đừng ra biển",
+        "fil": "Pagsasanay: Wag sa dagat",
+        "id": "Latihan: Jauhi pantai"
+      },
+      "motion": "static"
+    },
+    {
+      "id": "source",
+      "role": "source",
+      "priority": 9,
+      "text": {
+        "ja": "気象庁 9/1 09:55 発表・吉田町",
+        "en": "JMA 09:55, Sep 1 · Yoshida"
+      },
+      "motion": "static"
+    }
+  ],
+  "palette": "cabinet-office-5",
+  "sources": [
+    {
+      "type": "pdf",
+      "file": "yoshida/tsunami_hm_map.pdf",
+      "page": 1
+    },
+    {
+      "type": "gsi",
+      "file": "22424_2.csv"
+    },
+    {
+      "type": "jma",
+      "bulletin_id": "VTSE41-201609010955-5a813306d772"
+    }
+  ]
+}

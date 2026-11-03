@@ -23,6 +23,8 @@ export interface AlertArea {
   kind_code: string;
   kind_name: string;
   status: AreaStatus;
+  // VTSE41 LastKind: the category this region held before this bulletin, so a downgrade can name what ended.
+  last_kind_name?: string;
 }
 
 export interface Alert {
@@ -187,6 +189,7 @@ function parseVtse(body: Node): { areas: AlertArea[]; highest: TsunamiCategory }
       kind_code: kindCode,
       kind_name: text(kind.Name),
       status,
+      ...(lastCode ? { last_kind_name: text(item.Category?.LastKind?.Name) } : {}),
     };
   });
   if (highest === "none" && areas.some((a) => a.status === "cleared")) highest = "cleared";

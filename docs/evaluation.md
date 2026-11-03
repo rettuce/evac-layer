@@ -9,7 +9,7 @@ Numbers from the pipeline runs of 2026-11-02 over the recorded JMA feed (2026-10
 | 由利本荘市 05210 | 62 | 6 | 30 | level 2 or lower, or an all-clear for something never shown (`data/layouts/05210/index.json`) |
 | 輪島市 17204 | 42 (39 recorded + 3 official JMA samples) | 10 (3 tsunami from the samples) | 50 | same (`data/layouts/17204/index.json`) |
 | 柏崎市 15205 | 74 | 3 | 15 | same (`data/layouts/15205/index.json`) |
-| 吉田町 22424 | 23 (20 recorded + 3 official JMA samples) | 2 (both 大津波警報 from the samples) | 10 | highest recorded level was 2; the samples' 09:55 downgrade to 津波予報 shows nothing by rule |
+| 吉田町 22424 | 23 (20 recorded + 3 official JMA samples) | 3 (大津波警報 ×2 and its all-clear, all from the samples) | 15 | highest recorded level was 2 |
 | 横浜市 14100 | 5 | 0 | 0 | no warning in force for the city |
 
 All 16 screens pass the static, browser and Vision checks on all five shapes (16:9, 9:16, 32:9, 1:1, pillar).
@@ -36,6 +36,7 @@ A finding is one check failing on one shape of one screen, on the first attempt.
 | 14 | 17204 | 10 | 5 | 0 | — | drill bulletins marked in every language's headline (【訓練】 / DRILL: …) with a new static check `drill-marker`; 輪島 demo site moved off the GSI facility it sat on (nearest site was 0 m, now 230 m). The first pass failed one all-clear screen 3 times because Vision had been told to expect the marker on every cell, while the contract puts it on the headline only; the instruction was corrected and the second pass was 10/10 (both passes counted: 115 checks) |
 | 15 | 17204 | 10 | 5 | 0 | — | the drill word reaches the language band: `drill-marker` now covers `action` / `languages` in every language but ja. The three cached drill screens were sent back to the Writer once each (18 findings per shape) and passed on the rewrite; the seven recorded-feed screens were unchanged |
 | 16 | 22424, 17204 | 12 | 5 | 0 | — | 吉田町 replays the same drill series (静岡県 under 大津波警報): two display-level-4 screens; the drill word now opens the text in every language and the all-clear keeps "safe now"; 輪島's three drill screens rewritten to the rule; JMA's English warning names given to the Writer. Two passes (the first reused the cached 輪島 text, which already satisfied the position check), 125 checks in all |
+| 17 | 22424 | 3 | 5 | 0 | — | a region downgraded from a warning to 津波予報（若干の海面変動） now gets an all-clear with a sea-level caution instead of leaving the warning screen up (found through the samples, see FINDINGS); 吉田町's 09:55 bulletin became its third screen on the first attempt |
 
 Every finding in runs 1 and 2 was a real defect: the Composer or the renderer was changed, and the next run no longer reported it (the `fix` field in each findings file). The overflows in runs 3 and 4 were the renderer's header bar; once it was fixed, run 5 passed every screen on the first attempt without calling the Writer.
 
@@ -78,10 +79,10 @@ From `agents/README.md` (Reader runs, 2026-11-02):
 
 | | Value | How |
 |---|---|---|
-| Vision, per check (one shape of one screen) | $0.0111 | $10.708 over 929 checks, runs 1–16 |
+| Vision, per check (one shape of one screen) | $0.0111 | $10.898 over 944 checks, runs 1–17 |
 | Writer, per bulletin, one call, ten languages | $0.05–$0.20 | run 12, 16 bulletins, Opus 5.5 (`data/writer/`, $1.462 in all) |
 | New screen, steady state (Writer once + Vision on 5 shapes) | $0.245 | 柏崎市 in run 12: Writer $0.576 + Vision $0.159 over 3 screens (six languages: $0.222) |
-| Development total so far | about $20.22 | Reader $2.881 + Writer about $6.63 + Vision $10.708 |
-| Development total per screen shown | about $0.96 | over the 21 screens, including every re-run while the defects above were fixed |
+| Development total so far | about $20.51 | Reader $2.881 + Writer about $6.73 + Vision $10.898 |
+| Development total per screen shown | about $0.93 | over the 22 screens, including every re-run while the defects above were fixed |
 
-The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596, $0.506, $1.462 for the ten-language regeneration $0.577 for the three sample tsunami bulletins $0.219 for their drill-marked headlines $0.272 for the drill word in their language band and $0.835 for 吉田町's 大津波警報 screens and the prefix rule) comes from the fan-out output and the agents seat log. Per-call Writer usage is kept only for the latest generation of each bulletin (`data/writer/`, $1.462 now), so the earlier part is not verifiable from the repository alone.
+The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596, $0.506, $1.462 for the ten-language regeneration $0.577 for the three sample tsunami bulletins $0.219 for their drill-marked headlines $0.272 for the drill word in their language band $0.835 for 吉田町's 大津波警報 screens and the prefix rule and $0.095 for its all-clear) comes from the fan-out output and the agents seat log. Per-call Writer usage is kept only for the latest generation of each bulletin (`data/writer/`, $1.462 now), so the earlier part is not verifiable from the repository alone.

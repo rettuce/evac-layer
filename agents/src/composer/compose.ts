@@ -4,7 +4,7 @@ import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { Lang } from "../writer/request.js";
 import { budgetsFor } from "./budgets.js";
 import { shapeContract } from "./template.js";
-import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, DRILL_PREFIX_JA, LANGUAGES_REQUIRED_ON, MONTH_EN, MUNICIPALITY_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
+import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, DRILL_PREFIX_JA, LANGUAGES_REQUIRED_ON, MONTH_EN, MUNICIPALITY_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor, tsunamiClearedFrom } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
 export interface WriterOutput { cells: WriterCell[] }
@@ -77,6 +77,8 @@ export function headlineFor(alert: Alert, municipalityId: string): string {
   const mine = alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
   const live = mine.filter((a) => a.status !== "cleared" && a.status !== "none").sort((a, b) => (b.level ?? 0) - (a.level ?? 0));
   const prefix = alert.status === "drill" ? DRILL_PREFIX_JA : "";
+  const ended = tsunamiClearedFrom(alert, municipalityId);
+  if (ended) return `${prefix}${ended}解除`;
   if (live.length) return prefix + live[0].kind_name.replace(/：発表$/, "");
   const cleared = mine.find((a) => a.status === "cleared");
   if (cleared) return prefix + (cleared.kind_name.endsWith("解除") ? cleared.kind_name : `${cleared.kind_name}解除`);
@@ -134,7 +136,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     const add = (cell: LayoutCell) => { if (slots.has(cell.role)) cells.push(cell); };
     const headlineText = text("headline") ?? stop("Writer output has no headline");
     add({ id: "headline", role: "headline", priority: 1, text: { ...headlineText, ja: headline }, pictogram: HAZARD_PICTOGRAM[alert.hazard], motion: "scale-in" });
-    add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: actionPictogram(alert.hazard, situation.template), motion: "pulse" });
+    add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: actionPictogram(alert.hazard, situation.template, situation.caution), motion: "pulse" });
     if (guide && way) {
       add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: way.text_ja }, pictogram: "arrow_forward", rotation: way.rotation, motion: "static" });
       add({ id: "shelter", role: "shelter", priority: 2, text: { ja: guide.shelter.name }, kind: guide.shelter.kind, pictogram: "emergency_evacuation_site", distance_m: guide.distance_m, motion: "static" } as LayoutCell);

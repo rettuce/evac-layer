@@ -122,3 +122,18 @@ test("a newly issued tsunami warning's headline drops the ：発表 suffix of th
   const [landscape] = compose({ alert, municipality: shizuoka, site: { ...site, municipality_id: "22424" }, writer });
   assert.equal(landscape.cells.find((cell) => cell.id === "headline")!.text.ja, "【訓練】大津波警報");
 });
+
+test("a region downgraded to a tsunami forecast gets an all-clear naming the warning that ended", () => {
+  const downgraded = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_12_13_250206_VTSE41.xml")));
+  const shizuoka = { ...municipality, id: "22424", name: "吉田町" };
+  const [landscape] = compose({ alert: downgraded, municipality: shizuoka, site: { ...site, municipality_id: "22424" }, writer });
+  assert.equal(landscape.template, "all-clear");
+  assert.equal(landscape.cells.find((cell) => cell.id === "headline")!.text.ja, "【訓練】大津波警報解除");
+  assert.equal(landscape.cells.find((cell) => cell.id === "action")!.pictogram, "tsunami");
+});
+
+test("a tsunami forecast that arrives on its own still composes nothing", () => {
+  const standalone = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_11_11_250206_VTSE41.xml")));
+  assert.equal(standalone.areas.find((a) => a.code === "360")!.status, "issued");
+  assert.throws(() => compose({ alert: standalone, municipality, site, writer }), ComposerStop);
+});
