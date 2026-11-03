@@ -1,6 +1,6 @@
-"""Cut 5c: the same bulletin at four display sites, a GSI map on the left and that site's 16:9 screen on the right.
+"""Cut 5c: the same bulletin at four display sites, an OpenStreetMap map on the left and that site's 16:9 screen on the right.
 
-python3 demo/compose/cut05c.py [--layer std] [--zoom 16]
+python3 demo/compose/cut05c.py [--zoom 16]
 
 Inputs: demo/sites/<slug>/site.json and 16x9.json, the GSI emergency evacuation sites in
 data/municipalities/05210.shelters.json, and demo/screens/16x9_site-<slug>.mp4 from
@@ -24,8 +24,10 @@ REPO = DEMO.parent
 SITES = ["honjo-station", "tsurumai-kaikan", "yuri-hs-ground", "ishiwaki-park"]
 REFERENCE = "honjo-station"
 SHELTERS = REPO / "data" / "municipalities" / "05210.shelters.json"
-TILE_URL = "https://cyberjapandata.gsi.go.jp/xyz/{layer}/{z}/{x}/{y}.png"
-TILE_CACHE = DEMO / "cache" / "gsi"
+TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+# OSM tile usage policy: identify the application, and fetch each tile once (cached, never bulk).
+USER_AGENT = "evac-layer-demo/1.0 (+https://github.com/rettuce/evac-layer)"
+TILE_CACHE = DEMO / "cache" / "osm"
 FONT = HERE / "fonts" / "NotoSansJP-Bold.otf"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 OUT = DEMO / "capture" / "out" / "cut05c.mp4"
@@ -98,12 +100,12 @@ def load_sites():
     return sites
 
 
-def fetch_tile(layer, z, x, y):
-    path = TILE_CACHE / layer / str(z) / str(x) / f"{y}.png"
+def fetch_tile(z, x, y):
+    path = TILE_CACHE / str(z) / str(x) / f"{y}.png"
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
-        url = TILE_URL.format(layer=layer, z=z, x=x, y=y)
-        request = urllib.request.Request(url, headers={"User-Agent": "evac-layer-demo (hackathon video)"})
+        url = TILE_URL.format(z=z, x=x, y=y)
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(request, timeout=20) as response:
             path.write_bytes(response.read())
     return path
@@ -123,14 +125,14 @@ def to_screen(pos, origin, scale, zoom):
     return (x - origin[0]) * scale, (y - origin[1]) * scale
 
 
-def tiles_html(layer, zoom, origin, scale):
+def tiles_html(zoom, origin, scale):
     x0, y0 = int(origin[0] // TILE), int(origin[1] // TILE)
     x1, y1 = int((origin[0] + MAP_WIDTH / scale) // TILE), int((origin[1] + HEIGHT / scale) // TILE)
     size = TILE * scale
     parts = []
     for tx in range(x0, x1 + 1):
         for ty in range(y0, y1 + 1):
-            path = fetch_tile(layer, zoom, tx, ty)
+            path = fetch_tile(zoom, tx, ty)
             left, top = (tx * TILE - origin[0]) * scale, (ty * TILE - origin[1]) * scale
             parts.append(f'<img src="{path.as_uri()}" style="left:{left:.2f}px;top:{top:.2f}px;width:{size + 0.5:.2f}px;height:{size + 0.5:.2f}px">')
     return "".join(parts)
@@ -157,7 +159,7 @@ def relative_label(site, reference):
     return f"駅前から {round(meters):,} m {bearing_label(reference['pos'], site['pos'])}"
 
 
-def frame_html(sites, current, layer, zoom, origin, scale):
+def frame_html(sites, current, zoom, origin, scale):
     reference = next(s for s in sites if s["slug"] == REFERENCE)
     svg = []
     for site in sites:
@@ -192,10 +194,10 @@ svg{{position:absolute;left:0;top:0}}
 .head{{position:absolute;left:24px;top:22px;background:rgba(255,255,255,0.94);padding:6px 12px;color:#111;font-size:22px}}
 .credit{{position:absolute;left:24px;top:72px;background:rgba(255,255,255,0.9);padding:3px 10px;color:#333;font-size:15px}}
 .legend{{font-size:18px;color:#333;margin-left:10px}}
-</style><div class="map">{tiles_html(layer, zoom, origin, scale)}
+</style><div class="map">{tiles_html(zoom, origin, scale)}
 <svg width="{MAP_WIDTH}" height="{HEIGHT}">{''.join(svg)}</svg>{label}
 <div class="head">由利本荘市<span class="legend">■ ディスプレイ　● 指定緊急避難場所</span></div>
-<div class="credit">地図: 地理院タイル（国土地理院）にディスプレイと避難場所の位置を追記</div></div>
+<div class="credit">地図: © OpenStreetMap contributors にディスプレイと避難場所の位置を追記</div></div>
 <script>{PLACE_LABEL_JS}</script></html>"""
 
 
@@ -218,7 +220,6 @@ def segment(map_png, screen_mp4, out):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--layer", default="std")
     parser.add_argument("--zoom", type=int, default=16)
     parser.add_argument("--keep-frames", help="directory to keep the four map frames in")
     args = parser.parse_args()
@@ -229,7 +230,7 @@ def main():
         parts = []
         for i, site in enumerate(sites):
             page = work / f"map_{i}.html"
-            page.write_text(frame_html(sites, site, args.layer, args.zoom, origin, scale), encoding="utf-8")
+            page.write_text(frame_html(sites, site, args.zoom, origin, scale), encoding="utf-8")
             png = work / f"map_{i}.png"
             screenshot(page, png)
             parts.append(work / f"seg_{i}.mp4")
@@ -247,7 +248,7 @@ def main():
                         str(OUT)], check=True)
     finally:
         shutil.rmtree(work)
-    print(f"CUT05C {OUT} {len(sites) * SECONDS_PER_SITE}s layer={args.layer} z={args.zoom} scale={scale:.3f}")
+    print(f"CUT05C {OUT} {len(sites) * SECONDS_PER_SITE}s z={args.zoom} scale={scale:.3f}")
 
 
 if __name__ == "__main__":
