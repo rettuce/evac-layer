@@ -1,11 +1,11 @@
 import type { Shape } from '../../types'
-import { cellRandom, cellRange, fbm, paper, sceneUnit, wave } from '../field.ts'
+import { cellRandom, cellRange, fbm, paper, sceneUnit, wave, tint } from '../field.ts'
 import type { AmbientFrame, AmbientRect, AmbientScene } from '../types'
 
 const PAPER = 'rgb(239 240 238)'
 const RULE = 'rgb(52 60 72 / 0.2)'
 const DOT = 'rgb(52 60 72 / 0.38)'
-const TINT = 'hsl(206 26% 82% / 0.5)'
+const TINT = tint(206, 26, 82, 0.5)
 const ROOT = 432
 const MAX_DEPTH = 4
 const FIELD_SCALE = 1 / 800

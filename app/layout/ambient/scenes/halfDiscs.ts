@@ -1,10 +1,10 @@
 import type { Shape } from '../../types'
-import { cellRandom, cellRange, paper, sceneUnit } from '../field.ts'
+import { cellRandom, cellRange, paper, sceneUnit, tint } from '../field.ts'
 import type { AmbientFrame, AmbientScene } from '../types'
 
 const PAPER = 'rgb(243 239 232)'
-const TINTS = ['hsl(12 44% 80%)', 'hsl(40 56% 82%)', 'hsl(8 46% 89%)', 'hsl(24 30% 86%)', 'rgb(243 239 232)']
-const FIGURES = ['hsl(12 42% 64%)', 'hsl(42 58% 66%)', 'hsl(220 10% 60%)', 'hsl(6 40% 78%)', 'rgb(250 248 243)']
+const TINTS = [tint(12, 44, 80), tint(40, 56, 82), tint(8, 46, 89), tint(24, 30, 86), 'rgb(243 239 232)']
+const FIGURES = [tint(12, 42, 64), tint(42, 58, 66), tint(220, 10, 60), tint(6, 40, 78), 'rgb(250 248 243)']
 const TILE = 120
 const TURN_MS = { min: 240_000, max: 480_000 }
 

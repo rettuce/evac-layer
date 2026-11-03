@@ -29,7 +29,7 @@ const { values } = parseArgs({
 })
 if (!values.scenes) throw new Error('--scenes is required (comma-separated scene ids)')
 
-const { canvas, crops } = JSON.parse(await readFile(values.crops, 'utf8'))
+const { canvas, crops, seam = {} } = JSON.parse(await readFile(values.crops, 'utf8'))
 const browser = await puppeteer.launch({ executablePath: CHROME_PATH, headless: true })
 try {
   for (const scene of values.scenes.split(',')) {
@@ -40,6 +40,9 @@ try {
         mode: 'scenario', scenario: 'ambient', scene, clock: 'virtual', t: values.t,
         canvas: `${canvas[0]}x${canvas[1]}`, crop: `${x},${y},${w},${h}`, canvas_id: ROOM_ID,
         site_name: SITE.name, lat: SITE.lat, lng: SITE.lng,
+        ...(seam[name] ? { seam: seam[name] } : {}),
+        // A column's window is its four faces side by side; without the shape the page would place the clock as on a panel.
+        ...(name.startsWith('pillar') ? { shape: 'pillar' } : {}),
       })
       const page = await browser.newPage()
       await page.setViewport({ width: w, height: h })

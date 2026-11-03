@@ -61,6 +61,15 @@ export function paper(ctx: CanvasRenderingContext2D, frame: AmbientFrame, color:
   ctx.fillRect(frame.view.x, frame.view.y, frame.view.width, frame.view.height)
 }
 
+// Scene palettes are written as the pale tints of the first round; the gain lifts every tint's saturation
+// (2026-11-04: the whole-room stills read as washed out at gain 1).
+export const SATURATION_GAIN = 1.8
+
+export function tint(hue: number, saturation: number, lightness: number, alpha?: number): string {
+  const s = Math.min(100, Math.round(saturation * SATURATION_GAIN))
+  return alpha === undefined ? `hsl(${hue} ${s}% ${lightness}%)` : `hsl(${hue} ${s}% ${lightness}% / ${alpha})`
+}
+
 export function wave(t: number, periodMs: number, phase = 0): number {
   return Math.sin(2 * Math.PI * (t / periodMs + phase))
 }

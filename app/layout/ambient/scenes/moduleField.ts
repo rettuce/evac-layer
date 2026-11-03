@@ -1,10 +1,10 @@
 import type { Shape } from '../../types'
-import { cellRandom, cellRange, paper, sceneUnit, wave } from '../field.ts'
+import { cellRandom, cellRange, paper, sceneUnit, wave, tint } from '../field.ts'
 import type { AmbientFrame, AmbientScene } from '../types'
 
 const PAPER = 'rgb(243 241 236)'
-const INKS = ['hsl(222 34% 66%)', 'hsl(44 62% 72%)', 'hsl(220 8% 66%)', 'hsl(222 22% 80%)']
-const ACCENT = 'hsl(8 62% 70%)'
+const INKS = [tint(222, 34, 66), tint(44, 62, 72), tint(220, 8, 66), tint(222, 22, 80)]
+const ACCENT = tint(8, 62, 70)
 const CROSS = 'rgb(52 58 68 / 0.35)'
 const CELL = 120
 const GUTTER = 0.12

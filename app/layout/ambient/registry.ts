@@ -1,26 +1,18 @@
 import { OVERLAY_CORNERS, type OverlayCorner } from './overlay.ts'
 import { hashString, mulberry32 } from './rng.ts'
 import { brushFlow } from './scenes/brushFlow.ts'
-import { clockGrid } from './scenes/clockGrid.ts'
-import { colorPlanes } from './scenes/colorPlanes.ts'
 import { etchedStreams } from './scenes/etchedStreams.ts'
-import { glyphHalftone } from './scenes/glyphHalftone.ts'
 import { halfDiscs } from './scenes/halfDiscs.ts'
 import { inkBloom } from './scenes/inkBloom.ts'
 import { moduleField } from './scenes/moduleField.ts'
 import { quadSubdivision } from './scenes/quadSubdivision.ts'
-import { truchetPaths } from './scenes/truchetPaths.ts'
 import type { AmbientScene } from './types'
 
 export const AMBIENT_SCENES: readonly AmbientScene[] = [
-  colorPlanes,
-  clockGrid,
   brushFlow,
   inkBloom,
   etchedStreams,
   halfDiscs,
-  truchetPaths,
-  glyphHalftone,
   quadSubdivision,
   moduleField,
 ]

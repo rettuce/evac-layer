@@ -23,7 +23,7 @@
    SITE_NAME=羽後本荘駅 SHAPES=pillar demo/capture/record_all.sh http://127.0.0.1:3151 # 柱（4 面連続・0.5 倍）
    node demo/capture/record.mjs --shape 16x9 --cut dashboard --verify --out demo/capture/out/cut07.mp4
    ```
-   - 由利本荘市の承認と自動配信は撮影前に自動で POST する。平時は `scene=color-planes` に固定
+   - 由利本荘市の承認と自動配信は撮影前に自動で POST する。平時は `scene=quad-subdivision` に固定
    - `--verify` は先頭・中央・末尾と切り替わりの前後を新しいページで撮り直してバイト比較し、違えば画素数と範囲を出す。判定は緩めない
    - 一部だけ確かめるときは `--from-ms <ms> --seconds <s> --frames-dir <dir> --keep-frames`
 3. **管理画面・最小 CMS・端末を収録する**

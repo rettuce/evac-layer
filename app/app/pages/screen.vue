@@ -86,6 +86,7 @@ const sceneQuery = computed(() => (typeof route.query.scene === 'string' ? route
 const room = computed(() => parseRoom(route.query.canvas))
 const crop = computed(() => parseCrop(route.query.crop, room.value))
 const bareAmbient = computed(() => route.query.overlay === 'none')
+const seam = computed<'left' | 'right'>(() => (route.query.seam === 'right' ? 'right' : 'left'))
 const lat = computed(() => coordinate(route.query.lat, 90))
 const lng = computed(() => coordinate(route.query.lng, 180))
 
@@ -125,6 +126,7 @@ if (scenario.value) start()
     :scene="sceneQuery"
     :room="crop ? room : undefined"
     :crop="crop"
+    :seam="seam"
     :ambient-seed="room && crop ? seed : undefined"
     :bare-ambient="bareAmbient"
     :lat="lat"
@@ -162,6 +164,7 @@ if (scenario.value) start()
       :scene="sceneQuery"
       :room="crop ? room : undefined"
       :crop="crop"
+      :seam="seam"
       :bare="bareAmbient"
       :lat="lat"
       :lng="lng"

@@ -1,6 +1,6 @@
 // Records /screen as a deterministic PNG sequence on a virtual clock, then encodes it with ffmpeg.
 //
-//   node demo/capture/record.mjs --shape 16x9 --cut alert [--seconds 1] [--from-ms <ms>] [--site-name <name>] [--verify]
+//   node demo/capture/record.mjs --shape 16x9 --cut alert [--seconds 1] [--from-ms <ms>] [--site-name <name>] [--scene <id>] [--verify]
 //
 // Output: demo/screens/<shape>_<cut>.mp4 (h264, yuv420p, no audio, native screen resolution).
 import { execFile } from 'node:child_process'
@@ -38,7 +38,7 @@ const SCENARIO = { mode: 'scenario', layout: 'wajima-tsunami' }
 const LIVE = {
   mode: 'live', municipality: '05210', speed: '1200',
   from: '2026-10-21T11:00+09:00', to: '2026-10-22T07:00+09:00',
-  scene: 'color-planes',
+  scene: 'quad-subdivision',
 }
 const LIVE_READY = '[data-mode="live"][data-ready="1"]'
 const LIVE_EVENTS_MS = [13100, 20100, 24600, 26100, 29100, 44350]
@@ -103,6 +103,7 @@ function options() {
       verify: { type: 'boolean', default: false },
       'from-ms': { type: 'string' },
       'frames-dir': { type: 'string' },
+      scene: { type: 'string' },
     },
   })
   if (!SHAPES[values.shape]) throw new Error(`--shape must be one of ${Object.keys(SHAPES).join(', ')}`)
@@ -124,6 +125,7 @@ function frameUrl(opts, tMs) {
     clock: 'virtual',
     t: String(Math.round(tMs)),
     ...CUTS[opts.cut].query,
+    ...(opts.scene ? { scene: opts.scene } : {}),
   })
   if (opts['site-name'] && opts.cut !== 'alert') params.set('site_name', opts['site-name'])
   return `${opts['base-url']}${CUTS[opts.cut].page ?? '/screen'}?${params}`

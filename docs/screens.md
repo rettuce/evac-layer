@@ -97,21 +97,21 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ## Ambient (no alert)
 
-![ambient color-planes (16x9)](screens/ambient-color-planes-16x9.png)
+![ambient quad-subdivision (16x9)](screens/ambient-quad-subdivision-16x9.png)
 
-Ambient scene `color-planes` on 16x9; the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+Ambient scene `quad-subdivision` on 16x9; the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
 
-![ambient color-planes (pillar)](screens/ambient-color-planes-pillar.png)
+![ambient quad-subdivision (pillar)](screens/ambient-quad-subdivision-pillar.png)
 
-Ambient scene `color-planes` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+Ambient scene `quad-subdivision` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
 
-![ambient clock-grid (16x9)](screens/ambient-clock-grid-16x9.png)
+![ambient module-field (16x9)](screens/ambient-module-field-16x9.png)
 
-Ambient scene `clock-grid` on 16x9; the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+Ambient scene `module-field` on 16x9; the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
 
-![ambient clock-grid (pillar)](screens/ambient-clock-grid-pillar.png)
+![ambient module-field (pillar)](screens/ambient-module-field-pillar.png)
 
-Ambient scene `clock-grid` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
+Ambient scene `module-field` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and the power-outage notice sit in one corner (once on the front face of a pillar).
 
 ## Switch (ambient → alert)
 

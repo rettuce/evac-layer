@@ -5,12 +5,18 @@ import { PILLAR, pillarYForHeight, shapeForViewport } from '~~/layout/shapes'
 import type { Shape } from '~~/layout/types'
 
 const props = withDefaults(
-  defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string; active?: boolean; room?: { width: number; height: number }; crop?: AmbientRect; bare?: boolean; lat?: number; lng?: number }>(),
+  defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string; active?: boolean; room?: { width: number; height: number }; crop?: AmbientRect; seam?: 'left' | 'right'; bare?: boolean; lat?: number; lng?: number }>(),
   { active: true },
 )
 
 const TIME_GLYPHS = '0123456789:'
 const PILLAR_CLOCK_TOP_M = 2.0
+const PILLAR_CLOCK_CORNER = 'top-left'
+// On a portrait panel the clock block starts here, so the digits sit a little above mid-height (2026-11-04).
+const PORTRAIT_CLOCK_TOP = 0.36
+// Faces are laid front, right, back, left; a column whose seam must fall on its front-right edge draws
+// the strip's last quarter on the front, so the picture continues round the three faces a viewer sees.
+const SEAM_RIGHT_FRONT_QUARTER = 3
 
 const canvas = ref<HTMLCanvasElement>()
 const viewport = ref({ width: 0, height: 0 })
@@ -19,16 +25,15 @@ const pick = computed(() => pickAmbient(props.seed, props.clockEpochMs, props.sc
 // The ambient pillar is one picture round the column: the field and the D21 rules run across all four
 // faces at the face's scale, and the clock appears once, on the front face at eye height.
 function overlayFor(width: number, height: number) {
-  const geometry = overlayGeometryFor(width, height)
-  return pick.value.scene.drawsGrid ? { ...geometry, rules: [] } : geometry
-}
-
-function overlayGeometryFor(width: number, height: number) {
-  if (props.shape !== 'pillar') return overlayGeometry(width, height, pick.value.corner)
-  const front = overlayGeometry(width / PILLAR.faces, height, pick.value.corner)
-  const rules = overlayGeometry(width, height, pick.value.corner, front.scale).rules
-  const top = pillarYForHeight(PILLAR_CLOCK_TOP_M) * (height / PILLAR.height)
-  return { ...front, rules, block: { ...front.block, top, bottom: undefined } }
+  if (props.shape === 'pillar') {
+    const front = overlayGeometry(width / PILLAR.faces, height, PILLAR_CLOCK_CORNER)
+    const rules = overlayGeometry(width, height, PILLAR_CLOCK_CORNER, front.scale).rules
+    const top = pillarYForHeight(PILLAR_CLOCK_TOP_M) * (height / PILLAR.height)
+    return { ...front, rules, block: { ...front.block, top, bottom: undefined } }
+  }
+  const geometry = overlayGeometry(width, height, pick.value.corner)
+  if (props.shape === '9x16') return { ...geometry, block: { ...geometry.block, top: Math.round(height * PORTRAIT_CLOCK_TOP), bottom: undefined } }
+  return geometry
 }
 
 // A screen cut from a room draws the room's scene in room coordinates; the room is scaled so that the
@@ -44,7 +49,7 @@ function roomFrame(width: number, height: number, room: { width: number; height:
 const ROOM_TILE_PX = 512
 let tileCanvas: HTMLCanvasElement | undefined
 
-function drawRoom(ctx: CanvasRenderingContext2D, frame: AmbientFrame, shape: Shape) {
+function drawRoom(ctx: CanvasRenderingContext2D, frame: AmbientFrame, shape: Shape, destX = 0) {
   tileCanvas ??= Object.assign(document.createElement('canvas'), { width: ROOM_TILE_PX, height: ROOM_TILE_PX })
   const tile = tileCanvas.getContext('2d', { willReadFrequently: true })!
   const { view } = frame
@@ -59,8 +64,17 @@ function drawRoom(ctx: CanvasRenderingContext2D, frame: AmbientFrame, shape: Sha
       tile.setTransform(1, 0, 0, 1, -tx, -ty)
       pick.value.scene.render(tile, props.clockEpochMs, pick.value.seed, shape, { ...frame, view: { x: tx, y: ty, width: ROOM_TILE_PX, height: ROOM_TILE_PX } })
       tile.restore()
-      ctx.drawImage(tileCanvas, x - tx, y - ty, w, h, x - view.x, y - view.y, w, h)
+      ctx.drawImage(tileCanvas, x - tx, y - ty, w, h, destX + x - view.x, y - view.y, w, h)
     }
+  }
+}
+
+function drawPillarFaces(ctx: CanvasRenderingContext2D, frame: AmbientFrame, shape: Shape) {
+  const faceWidth = Math.round(frame.view.width / PILLAR.faces)
+  for (let face = 0; face < PILLAR.faces; face++) {
+    const quarter = (face + SEAM_RIGHT_FRONT_QUARTER) % PILLAR.faces
+    const view = { ...frame.view, x: frame.view.x + quarter * faceWidth, width: faceWidth }
+    drawRoom(ctx, { ...frame, view }, shape, face * faceWidth)
   }
 }
 
@@ -79,7 +93,12 @@ function draw() {
   // CPU-backed canvas: the GPU path rasterised the same gradients slightly differently between runs.
   const ctx = el.getContext('2d', { willReadFrequently: true })!
   ctx.setTransform(1, 0, 0, 1, 0, 0)
-  if (props.room && props.crop) drawRoom(ctx, roomFrame(width, height, props.room, props.crop), shapeForViewport(props.room.width, props.room.height))
+  if (props.room && props.crop) {
+    const frame = roomFrame(width, height, props.room, props.crop)
+    const roomShape = shapeForViewport(props.room.width, props.room.height)
+    if (props.shape === 'pillar' && props.seam === 'right') drawPillarFaces(ctx, frame, roomShape)
+    else drawRoom(ctx, frame, roomShape)
+  }
   else pick.value.scene.render(ctx, props.clockEpochMs, pick.value.seed, props.shape, { width, height, view: { x: 0, y: 0, width, height } })
   const content = {
     siteName: props.siteName,
@@ -110,7 +129,7 @@ onMounted(() => {
   loadFonts()
 })
 onBeforeUnmount(() => window.removeEventListener('resize', onResize))
-watch([() => props.clockEpochMs, () => props.shape, () => props.siteName, () => props.active, () => props.room, () => props.crop, pick, viewport, fontsReady], draw, { flush: 'post' })
+watch([() => props.clockEpochMs, () => props.shape, () => props.siteName, () => props.active, () => props.room, () => props.crop, () => props.seam, pick, viewport, fontsReady], draw, { flush: 'post' })
 watch(() => props.siteName, () => document.fonts.load(labelFont(1), props.siteName).then(draw))
 </script>
 

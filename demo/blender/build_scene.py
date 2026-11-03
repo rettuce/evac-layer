@@ -527,14 +527,20 @@ def build_still_camera(name):
 def canvas_crops():
     """Each screen's window on the elevation canvas; a column's LED band is its four faces laid side by side."""
     crops = {}
+    seam = {}
     for i, (x, _) in enumerate(COLUMNS):
-        crops[f"pillar_{i}"] = elevation_crop(x, COLUMN_LED_MID_Z, COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z)
+        left, top, width, height = elevation_crop(x, COLUMN_LED_MID_Z, COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z)
+        # Whole pixels per face, so a window drawn face by face copies without resampling.
+        crops[f"pillar_{i}"] = (left, top, width - width % 4, height)
+        # The hero camera sees the inner (left) face of the right-hand columns, so their seam goes to the front-right edge.
+        if x > 0:
+            seam[f"pillar_{i}"] = "right"
     for shape in ("32x9", "9x16"):
         width, height = SCREENS[shape]["size"]
         for i, (center, _) in enumerate(SCREENS[shape]["mounts"]):
             crops[f"{shape}_{i}"] = elevation_crop(center.x, center.z, width, height)
     width, height = elevation_canvas()
-    return {"canvas": [width, height], "crops": {name: list(box) for name, box in crops.items()}}
+    return {"canvas": [width, height], "crops": {name: list(box) for name, box in crops.items()}, "seam": seam}
 
 
 def framing_report(name, key=None):

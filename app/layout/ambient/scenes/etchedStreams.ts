@@ -1,10 +1,10 @@
 import type { Shape } from '../../types'
-import { cellRandom, cellRange, fbm, paper, sceneUnit } from '../field.ts'
+import { cellRandom, cellRange, fbm, paper, sceneUnit, tint } from '../field.ts'
 import type { AmbientFrame, AmbientScene } from '../types'
 
-const PAPER = 'rgb(240 239 234)'
-const INK = 'rgb(44 56 74 / 0.26)'
-const RING = 'hsl(8 62% 62% / 0.7)'
+const PAPER = 'rgb(17 19 23)'
+const INK = 'rgb(226 231 240 / 0.42)'
+const RING = tint(8, 62, 62, 0.9)
 const SPACING = 38
 const STEPS = 24
 const STEP = 9
@@ -107,4 +107,4 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
   ctx.stroke()
 }
 
-export const etchedStreams: AmbientScene = { id: 'etched-streams', name: '細線の流れ', ink: 'dark', render }
+export const etchedStreams: AmbientScene = { id: 'etched-streams', name: '細線の流れ', ink: 'light', render }

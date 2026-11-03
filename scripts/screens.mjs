@@ -29,7 +29,7 @@ const SHAPES = {
   '1x1': [1080, 1080],
   pillar: [6616, 5046],
 }
-const SCENES = ['color-planes', 'clock-grid']
+const SCENES = ['quad-subdivision', 'module-field']
 const SWITCH_AT_MS = 12000
 const SWITCH_FRAMES_MS = [11500, 11800, 12100, 12400, 12700, 13000]
 const READY_TIMEOUT_MS = 30000
@@ -77,7 +77,7 @@ async function switchStrip(browser, base, bulletin) {
   for (const t of SWITCH_FRAMES_MS) {
     await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: STRIP_FRAME_WIDTH / 1920 })
     await page.goto(
-      `${base}/screen?shape=16x9&clock=virtual&t=${t}&mode=scenario&scenario=switch&t_switch=${SWITCH_AT_MS}&scene=color-planes&site_name=${encodeURIComponent(SITE_NAME)}&src=${previewSrc(bulletin, '16x9')}`,
+      `${base}/screen?shape=16x9&clock=virtual&t=${t}&mode=scenario&scenario=switch&t_switch=${SWITCH_AT_MS}&scene=quad-subdivision&site_name=${encodeURIComponent(SITE_NAME)}&src=${previewSrc(bulletin, '16x9')}`,
       { waitUntil: 'networkidle0' },
     )
     await page.waitForSelector('[data-scenario] [data-layer="ambient"][data-ready="1"]', { timeout: READY_TIMEOUT_MS })

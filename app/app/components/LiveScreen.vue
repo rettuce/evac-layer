@@ -18,6 +18,7 @@ const props = defineProps<{
   scene?: string
   room?: { width: number; height: number }
   crop?: AmbientRect
+  seam?: 'left' | 'right'
   ambientSeed?: string
   bareAmbient?: boolean
   lat?: number
@@ -210,6 +211,7 @@ onBeforeUnmount(() => {
       :scene="scene"
       :room="room"
       :crop="crop"
+      :seam="seam"
       :bare="bareAmbient"
       :lat="lat"
       :lng="lng"

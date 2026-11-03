@@ -1,10 +1,10 @@
 import type { Shape } from '../../types'
-import { cellRange, fbm, paper, sceneUnit } from '../field.ts'
+import { cellRange, fbm, paper, sceneUnit, tint } from '../field.ts'
 import type { AmbientFrame, AmbientScene } from '../types'
 
 const PAPER = 'rgb(242 239 232)'
-const COOL = 'hsl(220 42% 70% / 0.55)'
-const WARM = 'hsl(10 62% 74% / 0.55)'
+const COOL = tint(220, 42, 70, 0.55)
+const WARM = tint(10, 62, 74, 0.55)
 const CELL = 12
 const FIELD_SCALE = 1 / 520
 const DRIFT_MS = 360_000
