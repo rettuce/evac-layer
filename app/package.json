@@ -10,7 +10,8 @@
     "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare",
     "test": "nuxt build && node --test test/*.test.ts",
-    "screens": "nuxt build && node ../scripts/screens.mjs"
+    "screens": "nuxt build && node ../scripts/screens.mjs",
+    "coverage": "node ../scripts/coverage.mjs"
   },
   "dependencies": {
     "@fontsource/noto-sans": "^5.3.0",
