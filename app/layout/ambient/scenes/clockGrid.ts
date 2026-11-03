@@ -2,7 +2,7 @@ import { PILLAR } from '../../shapes.ts'
 import type { Shape } from '../../types'
 import { D21_BASE_SHORT_SIDE_PX, D21_GUTTER, D21_MARGIN, D21_PITCH, D21_TRACK } from '../overlay.ts'
 import { mulberry32 } from '../rng.ts'
-import type { AmbientScene } from '../types'
+import type { AmbientFrame, AmbientScene } from '../types'
 
 const GROUND = 'rgb(21 24 28)'
 const PAPER = '220 223 216'
@@ -25,8 +25,8 @@ function d21ScaleFor(width: number, height: number, shape: Shape): number {
   return Math.min(faceWidth, height) / D21_BASE_SHORT_SIDE_PX
 }
 
-function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: Shape): void {
-  const { width, height } = ctx.canvas
+function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: Shape, frame: AmbientFrame): void {
+  const { width, height } = frame
   const random = mulberry32(seed)
   const design = DESIGNS[Math.floor(random() * DESIGNS.length)]!
   const scale = d21ScaleFor(width, height, shape)
@@ -37,7 +37,6 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
   const columns = Math.max(1, Math.floor((width - 2 * margin + D21_GUTTER * scale) / pitch))
   const rows = Math.max(1, Math.floor((height - 2 * margin) / rowPitch))
 
-  ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.fillStyle = GROUND
   ctx.fillRect(0, 0, width, height)
 
