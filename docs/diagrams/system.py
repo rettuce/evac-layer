@@ -3,9 +3,15 @@ from pathlib import Path
 
 W, H = 1600, 960
 CW, CH = 250, 116
+BAND = 36
 COLS = [70, 380, 690, 1000, 1310]
 ROWS = [110, 440, 770]
-FILL = {"card": ("#ffffff", "#555555"), "claude": ("#f1e9ff", "#6d3fc4"), "data": ("#f3f3f0", "#8a8a8a"), "human": ("#fff3d6", "#b45309")}
+KINDS = {
+    "claude": ("#f1e9ff", "#6d3fc4", "#d4c2ff", "Claude が読む・書く・見る"),
+    "human": ("#fff3d6", "#b45309", "#ffd38f", "人が決める"),
+    "card": ("#ffffff", "#555555", "#e4e4e4", "コード（決まった処理）"),
+    "data": ("#f6f6f3", "#8a8a8a", "#dddbd4", "データ"),
+}
 out = []
 
 
@@ -22,13 +28,23 @@ def cy(r):
 
 
 def card(c, r, title, subs, kind="card"):
-    fill, stroke = FILL[kind]
+    fill, stroke, band, _ = KINDS[kind]
     x, y = COLS[c], ROWS[r]
     out.append(f'<rect x="{x}" y="{y}" width="{CW}" height="{CH}" rx="8" fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>')
-    ty = y + 40 if len(subs) == 2 else y + 46
-    out.append(f'<text x="{x + CW / 2}" y="{ty}" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1a1a">{esc(title)}</text>')
+    out.append(f'<path d="M {x + 8},{y} H {x + CW - 8} Q {x + CW},{y} {x + CW},{y + 8} V {y + BAND} H {x} V {y + 8} Q {x},{y} {x + 8},{y} Z" fill="{band}"/>')
+    out.append(f'<line x1="{x}" y1="{y + BAND}" x2="{x + CW}" y2="{y + BAND}" stroke="{stroke}" stroke-width="1"/>')
+    out.append(f'<text x="{x + CW / 2}" y="{y + 25}" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">{esc(title)}</text>')
+    first = y + BAND + (CH - BAND) / 2 - (len(subs) - 1) * 10 + 5
     for i, sub in enumerate(subs):
-        out.append(f'<text x="{x + CW / 2}" y="{ty + 26 + i * 20}" text-anchor="middle" font-size="13.5" fill="#444">{esc(sub)}</text>')
+        out.append(f'<text x="{x + CW / 2}" y="{first + i * 20}" text-anchor="middle" font-size="13.5" fill="#333">{esc(sub)}</text>')
+
+
+def legend(x, y):
+    for fill, stroke, band, label in KINDS.values():
+        out.append(f'<rect x="{x}" y="{y - 15}" width="36" height="24" rx="4" fill="{fill}" stroke="{stroke}" stroke-width="1.2"/>')
+        out.append(f'<path d="M {x + 4},{y - 15} H {x + 32} Q {x + 36},{y - 15} {x + 36},{y - 11} V {y - 6} H {x} V {y - 11} Q {x},{y - 15} {x + 4},{y - 15} Z" fill="{band}"/>')
+        out.append(f'<text x="{x + 44}" y="{y + 3}" font-size="13.5" fill="#333">{esc(label)}</text>')
+        x += 44 + len(label) * 13.5 + 28
 
 
 def zone(c0, c1, r, label):
@@ -65,6 +81,8 @@ def right(c0, c1, r, label=None):
 def left(c0, c1, r, label=None):
     arrow(COLS[c0], cy(r), COLS[c1] + CW, cy(r), label)
 
+
+legend(640, 40)
 
 zone(0, 2, 0, "平時（あらかじめ・自治体ごとに 1 回）")
 zone(4, 4, 0, "スクリーンの登録（1 枚 1 回）")
@@ -109,7 +127,6 @@ svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewB
 </defs>
 <rect width="{W}" height="{H}" fill="#ffffff"/>
 <text x="46" y="40" font-size="22" font-weight="700" fill="#1a1a1a">EVAC LAYER の仕組み</text>
-<text x="{W - 46}" y="40" text-anchor="end" font-size="13" fill="#666">紫 = Claude が読む・書く・見る　橙 = 人が決める　灰 = データ</text>
 {chr(10).join(out)}
 </svg>
 """
