@@ -4,7 +4,7 @@ import bpy
 
 from layout import (
     BACK_WALL_Y, CEILING_TRIM_M, CEILING_Z, COLUMN_SIZE, COLUMNS, FRONT_Y, LEFT_WALL_X, LIGHT_XS, LIGHT_YS,
-    PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIGHT_WALL_X, room_center, room_size,
+    RIGHT_WALL_X, room_center, room_size,
 )
 from polyhaven import fetch_texture
 from primitives import area_light, box, emissive, glass, principled, spot_light
@@ -66,7 +66,6 @@ def build_shell(mats):
     box("wall_right", (RIGHT_WALL_X + 0.1, center.y, mid_z), (0.2, depth, CEILING_Z), mats["wall"])
     for i, (x, y) in enumerate(COLUMNS):
         box(f"column_{i}", (x, y, mid_z), (COLUMN_SIZE, COLUMN_SIZE, CEILING_Z), mats["column"])
-    box("guide_pillar", PILLAR_CENTER, PILLAR_SIZE, mats["pillar"], yaw=PILLAR_YAW)
 
 
 def light_grid(color, energy, strip_material=None):
@@ -83,7 +82,6 @@ def look_base(_back_wall_clear):
         "ceiling": principled("ceiling", (0.06, 0.06, 0.07), 0.7),
         "wall": principled("wall", (0.30, 0.30, 0.29), 0.6),
         "column": principled("column", (0.55, 0.55, 0.54), 0.4),
-        "pillar": principled("pillar", (0.08, 0.08, 0.09), 0.35, metallic=0.6),
     })
     light_grid((1.0, 0.97, 0.92), 90.0, emissive("light_strip", (1.0, 0.97, 0.92), 8.0))
     return {"hdri_strength": 0.3}
@@ -96,7 +94,6 @@ def look_a(_back_wall_clear):
         "ceiling": principled("ceiling", (0.70, 0.70, 0.69), 0.6),
         "wall": textured("wall", "long_white_tiles", value=1.05, saturation=0.4, rough_scale=0.6),
         "column": principled("column", (0.86, 0.86, 0.85), 0.22),
-        "pillar": principled("pillar", (0.10, 0.10, 0.11), 0.3, metallic=0.5),
     })
     center = room_center()
     width, depth = room_size()
@@ -120,7 +117,6 @@ def look_b(_back_wall_clear):
         "wall": concrete_wall,
         "wall_left": principled("shop_back", (0.75, 0.70, 0.62), 0.6),
         "column": textured("column", "concrete_wall_008", value=0.85, normal_strength=0.6),
-        "pillar": principled("pillar", (0.06, 0.06, 0.07), 0.3, metallic=0.6),
     })
     disc = emissive("downlight", WARM_3500K, 40.0)
     for i, x in enumerate([-7.5, -4.5, -1.5, 1.5, 4.5, 7.5, 10.5]):
@@ -157,7 +153,6 @@ def look_c(back_wall_clear):
         "ceiling": principled("ceiling", (0.08, 0.07, 0.06), 0.8),
         "wall": white,
         "column": principled("column", (0.88, 0.88, 0.86), 0.35),
-        "pillar": textured("pillar", "ash_veneer", value=0.6, rough_scale=0.7),
     })
     build_louvers(wood, back_wall_clear)
     light_grid(WARM_3000K, 160.0)
