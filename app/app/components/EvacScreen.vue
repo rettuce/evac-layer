@@ -190,7 +190,7 @@ async function fit() {
 }
 
 function updateScale() {
-  scale.value = props.box?.scale ?? designScale(window.innerWidth, window.innerHeight)
+  scale.value = props.box?.scale ?? designScale(window.innerWidth, window.innerHeight, props.shape)
 }
 
 let resizeFrame = 0

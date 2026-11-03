@@ -7,6 +7,7 @@ defineProps<{
   variant?: number
   elapsedMs: number
   reducedMotion?: boolean
+  box?: { width: number; height: number; scale: number }
 }>()
 const emit = defineEmits<{ ready: [] }>()
 </script>
@@ -27,6 +28,7 @@ const emit = defineEmits<{ ready: [] }>()
     :variant="variant"
     :elapsed-ms="elapsedMs"
     :reduced-motion="reducedMotion"
+    :box="box"
     @ready="emit('ready')"
   />
 </template>

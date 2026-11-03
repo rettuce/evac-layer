@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { DEFAULT_REPLAY_SPEED, isMunicipalityId } from '~~/layout/replay'
 import { DEFAULT_SWITCH_AT_MS, scenarioFrame, type ScenarioName } from '~~/layout/scenario'
-import { isShape, shapeForViewport } from '~~/layout/shapes'
+import { designScale, isShape, shapeForViewport, viewportFromQuery } from '~~/layout/shapes'
 import { resolveLayoutSrc } from '~~/layout/trust'
 import type { EvacScreen } from '~~/layout/types'
 import type { ClockMode } from '~/composables/useScreenClock'
@@ -53,10 +53,18 @@ watch(
 
 const screen = computed(() => (src.value ? remote.value : fixtureByName(layoutName.value)))
 const variant = computed(() => numberQuery(route.query.variant, 0))
+const viewport = computed(() => viewportFromQuery(route.query.w, route.query.h, route.query.aspect))
 const shape = computed(() => {
   const requested = route.query.shape
-  return isShape(requested) ? requested : shapeForViewport(window.innerWidth, window.innerHeight)
+  if (isShape(requested)) return requested
+  const { width, height } = viewport.value ?? { width: window.innerWidth, height: window.innerHeight }
+  return shapeForViewport(width, height)
 })
+const box = computed(() =>
+  viewport.value && shape.value !== 'pillar'
+    ? { ...viewport.value, scale: designScale(viewport.value.width, viewport.value.height, shape.value) }
+    : undefined,
+)
 
 const clockMode = computed<ClockMode>(() => (route.query.clock === 'virtual' ? 'virtual' : 'real'))
 const virtualT = computed(() => numberQuery(route.query.t, 0))
@@ -120,6 +128,7 @@ if (scenario.value) start()
     :variant="variant"
     :elapsed-ms="elapsed"
     :reduced-motion="reducedMotion"
+    :box="box"
     :data-clock="clockMode"
     :data-source="layoutSource?.origin === 'demo-sites' ? 'demo-sites' : undefined"
     @ready="start"
@@ -147,6 +156,7 @@ if (scenario.value) start()
         :variant="variant"
         :elapsed-ms="frame.alertElapsedMs"
         :reduced-motion="reducedMotion"
+        :box="box"
         :data-source="layoutSource?.origin === 'demo-sites' ? 'demo-sites' : undefined"
       />
     </div>
