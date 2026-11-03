@@ -12,11 +12,8 @@ const props = withDefaults(
 const TIME_GLYPHS = '0123456789:'
 const PILLAR_CLOCK_TOP_M = 2.0
 const PILLAR_CLOCK_CORNER = 'top-left'
-// On a portrait panel the clock block starts here, so the digits sit a little above mid-height (2026-11-04).
 const PORTRAIT_CLOCK_TOP = 0.36
-// Faces are laid front, right, back, left; a column whose seam must fall on its front-right edge draws
-// the strip's last quarter on the front, so the picture continues round the three faces a viewer sees.
-const SEAM_RIGHT_FRONT_QUARTER = 3
+const FRONT_QUARTER_FOR_RIGHT_SEAM = PILLAR.faces - 1
 
 const canvas = ref<HTMLCanvasElement>()
 const viewport = ref({ width: 0, height: 0 })
@@ -72,7 +69,7 @@ function drawRoom(ctx: CanvasRenderingContext2D, frame: AmbientFrame, shape: Sha
 function drawPillarFaces(ctx: CanvasRenderingContext2D, frame: AmbientFrame, shape: Shape) {
   const faceWidth = Math.round(frame.view.width / PILLAR.faces)
   for (let face = 0; face < PILLAR.faces; face++) {
-    const quarter = (face + SEAM_RIGHT_FRONT_QUARTER) % PILLAR.faces
+    const quarter = (face + FRONT_QUARTER_FOR_RIGHT_SEAM) % PILLAR.faces
     const view = { ...frame.view, x: frame.view.x + quarter * faceWidth, width: faceWidth }
     drawRoom(ctx, { ...frame, view }, shape, face * faceWidth)
   }

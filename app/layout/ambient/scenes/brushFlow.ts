@@ -3,7 +3,6 @@ import { cellRandom, cellRange, fbm, paper, sceneUnit, tint } from '../field.ts'
 import type { AmbientFrame, AmbientScene } from '../types'
 
 const PAPER = 'rgb(236 230 219)'
-// The oil colours of the painterly-flow reference: each stroke is laid as a body colour with a lighter crest.
 const PAINTS = [
   { body: tint(214, 36, 56), crest: tint(214, 30, 68, 0.5) },
   { body: tint(224, 30, 42), crest: tint(224, 24, 56, 0.5) },
