@@ -68,7 +68,7 @@ watch(
         :elapsed-ms="elapsedMs"
         :reduced-motion="reducedMotion"
         :box="FACE_BOX"
-        :with-sources="false"
+        hide-sources
         @ready="onFaceReady(face)"
       />
     </div>

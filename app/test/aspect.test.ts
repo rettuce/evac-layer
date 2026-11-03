@@ -51,12 +51,14 @@ describe('any aspect keeps the guidance', { skip }, () => {
       const src = encodeURIComponent(`/api/admin/preview-layout?municipality=${MUNICIPALITY}&bulletin=${BULLETIN}&shape=${family}`)
       await page.goto(`${base}/screen?aspect=${aspect}&clock=virtual&t=5000&src=${src}`, { waitUntil: 'networkidle0' })
       await page.waitForSelector('.evac-screen[data-ready="1"]', { timeout: READY_MS })
-      return await page.$eval('.evac-screen', (el) => ({
+      const sources = await page.$$eval('footer[data-sources] li', (items) => items.length)
+      const state = await page.$eval('.evac-screen', (el) => ({
         shape: (el as HTMLElement).dataset.shape as Shape,
         overflow: (el as HTMLElement).dataset.overflow ?? '',
         missing: (el as HTMLElement).dataset.missingRequired ?? '',
         dropped: (el as HTMLElement).dataset.dropped ?? '',
       }))
+      return { ...state, sources }
     } finally {
       await page.close()
     }
@@ -68,6 +70,7 @@ describe('any aspect keeps the guidance', { skip }, () => {
       const state = await render(aspect)
       assert.equal(state.shape, shape, aspect)
       assert.deepEqual([state.overflow, state.missing], ['', ''], aspect)
+      assert.ok(state.sources >= 2, `${aspect} keeps every source in the document`)
       nativeDropped.set(shape, new Set(state.dropped.split(',').filter(Boolean)))
     }
     for (const aspect of SWEEP) {
