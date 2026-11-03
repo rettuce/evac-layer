@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { createServer } from 'node:net'
 import { fileURLToPath } from 'node:url'
+import { fitUnder } from './png-budget.mjs'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const require = createRequire(new URL('../app/package.json', import.meta.url))
@@ -74,41 +75,9 @@ async function capture(page, url, shape, ready, scale) {
   return page
 }
 
-// Smooth colour fields compress badly as PNG; posterizing them (fewer levels per channel) keeps the
-// picture and brings the file under the gallery limit without an image library.
-const POSTERIZE_STEPS = [8, 16]
-
-async function posterize(page, png, step) {
-  const data = await page.evaluate(
-    async (base64, step) => {
-      const img = new Image()
-      img.src = `data:image/png;base64,${base64}`
-      await img.decode()
-      const canvas = document.createElement('canvas')
-      canvas.width = img.width
-      canvas.height = img.height
-      const ctx = canvas.getContext('2d')
-      ctx.drawImage(img, 0, 0)
-      const pixels = ctx.getImageData(0, 0, img.width, img.height)
-      for (let i = 0; i < pixels.data.length; i += 4) {
-        for (let c = 0; c < 3; c++) pixels.data[i + c] = Math.min(255, Math.round(pixels.data[i + c] / step) * step)
-      }
-      ctx.putImageData(pixels, 0, 0)
-      return canvas.toDataURL('image/png').split(',')[1]
-    },
-    png.toString('base64'),
-    step,
-  )
-  return Buffer.from(data, 'base64')
-}
-
 async function save(page, name, png) {
   const path = `${OUT_DIR}${name}.png`
-  let bytes = png ?? Buffer.from(await page.screenshot({ type: 'png' }))
-  for (const step of POSTERIZE_STEPS) {
-    if (bytes.length <= MAX_BYTES) break
-    bytes = await posterize(page, bytes, step)
-  }
+  const bytes = await fitUnder(page, png ?? Buffer.from(await page.screenshot({ type: 'png' })), MAX_BYTES)
   await writeFile(path, bytes)
   return { name, size: bytes.length }
 }
