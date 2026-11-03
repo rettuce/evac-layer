@@ -52,8 +52,28 @@ const SITE_CUTS = Object.fromEntries(SITE_SLUGS.map((slug, i) => [`site-${slug}`
   query: { src: `demo/sites/${slug}/16x9.json` }, ready: READY_SELECTOR, events: [],
 }]))
 
+// Cut 7b sets five municipalities side by side: three bulletins from data/layouts through the local-only
+// admin preview, and two municipalities on a quiet day (no bulletin in the window, so the calm layer shows).
+const MUNICIPALITY_SECONDS = 10
+const preview = (municipality, bulletin) => ({
+  seconds: MUNICIPALITY_SECONDS, startMs: 0, ready: READY_SELECTOR, events: [],
+  query: { src: `/api/admin/preview-layout?${new URLSearchParams({ municipality, bulletin, shape: '16x9' })}` },
+})
+const quiet = (municipality) => ({
+  seconds: MUNICIPALITY_SECONDS, startMs: 0, ready: LIVE_READY, events: [], approve: false,
+  query: { ...LIVE, municipality, from: '2026-10-15T00:00+09:00', to: '2026-10-15T06:00+09:00' },
+})
+const MUNICIPALITY_CUTS = {
+  'muni-05210': preview('05210', 'VXKOii-202610211815-e713da0e3c05'),
+  'muni-17204': preview('17204', 'VPWW56-202610211304-1ebf37f5ab8a'),
+  'muni-15205': preview('15205', 'VPWW56-202610311653-b3fa1b3a2ced'),
+  'muni-22424': quiet('22424'),
+  'muni-14100': quiet('14100'),
+}
+
 const CUTS = {
   ...SITE_CUTS,
+  ...MUNICIPALITY_CUTS,
   ambient: { seconds: 12, startMs: 0, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   switch: { seconds: 27, startMs: 5000, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
@@ -153,8 +173,8 @@ async function openPage(browser, opts, tMs) {
 // Live screens only show approved bulletins and read approvals once on mount, so approve every
 // bulletin that becomes a screen (and turn auto-publish on) before the first page opens.
 async function approveLive(browser, opts) {
-  const { query } = CUTS[opts.cut]
-  if (query.mode !== 'live') return null
+  const { query, approve } = CUTS[opts.cut]
+  if (query.mode !== 'live' || approve === false) return null
   const { mode, ...replayQuery } = query
   const replayPath = `/api/replay?${new URLSearchParams(replayQuery)}`
   const page = await browser.newPage()

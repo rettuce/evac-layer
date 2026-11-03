@@ -2,7 +2,7 @@
 
 blender -b -P demo/blender/build_scene.py -- --out demo/renders/test.mp4 --seconds 5 --res 1280x720
 blender -b -P demo/blender/build_scene.py -- --look A --still demo/renders/look_A.png
-blender -b -P demo/blender/build_scene.py -- --look C --cams hero,opt-axis --stills-dir demo/renders/options
+blender -b -P demo/blender/build_scene.py -- --look C --cams hero,near-column --stills-dir demo/renders/stills
 blender -b -P demo/blender/build_scene.py -- --look C --cut switch --seconds 27 --frame 555 --still x.png --verify-colors
 """
 
@@ -20,8 +20,8 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from layout import (
-    LAYOUT_NAME, BACK_WALL_Y, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
-    HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, PILLAR_CENTER, PILLAR_SIZE, PILLAR_YAW, RIBBON_PANEL_H, RIBBON_PANEL_W,
+    BACK_WALL_Y, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
+    HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, RIBBON_PANEL_H, RIBBON_PANEL_W,
     RIGHT_WALL_X,
 )
 from led_wrap import build_led_wrap
@@ -59,11 +59,6 @@ def panel_from_diagonal(diagonal_in, aspect_w, aspect_h):
     return aspect_w * unit, aspect_h * unit
 
 
-def pillar_face_center(height_z):
-    front = Matrix.Rotation(PILLAR_YAW, 3, "Z") @ Vector((0.0, -PILLAR_SIZE[1] / 2, 0.0))
-    return Vector((PILLAR_CENTER.x, PILLAR_CENTER.y, height_z)) + front
-
-
 COLUMN_CLAD_HALF = COLUMN_SIZE / 2 + COLUMN_CLAD_M
 COLUMN_LED_BOTTOM_Z = 0.4
 COLUMN_LED_TOP_Z = 3.6
@@ -72,24 +67,22 @@ COLUMN_LED_MID_Z = (COLUMN_LED_BOTTOM_Z + COLUMN_LED_TOP_Z) / 2
 COLUMN_LED_PERIMETER = 8 * (COLUMN_SIZE / 2 + COLUMN_CLAD_M - COLUMN_LED_RADIUS) + 2 * math.pi * COLUMN_LED_RADIUS
 RIBBON_SIZE = (RIBBON_PANEL_W, RIBBON_PANEL_H)
 RIBBON_Z = HEADWALL_BOTTOM_Z + RIBBON_PANEL_H / 2
-RIBBON_CENTER_X = 1.0
+# The middle ribbon panel sits on the hero camera axis (x = 0), so the three repeats read as centred.
+RIBBON_CENTER_X = 0.0
 BACK_WALL_SCREEN_Z = 2.0
-BACK_WALL_GAP_M = 0.4
-# Four aspect ratios in one row on the back wall (no real wall mixes them; the point is that every shape
-# renders the same bulletin), centred so the row fits between the back columns.
-BACK_WALL_ROW = ["9x16", "1x1", "16x9", "9x16"]
-BACK_WALL_SIZES = {"9x16": panel_from_diagonal(120, 9, 16), "1x1": (1.4, 1.4), "16x9": panel_from_diagonal(100, 16, 9)}
+BACK_WALL_9X16 = panel_from_diagonal(120, 9, 16)
+BACK_WALL_9X16_COUNT = 3
 
 
-def back_wall_mounts(shape):
-    widths = [BACK_WALL_SIZES[s][0] for s in BACK_WALL_ROW]
-    x = -(sum(widths) + BACK_WALL_GAP_M * (len(widths) - 1)) / 2
-    mounts = []
-    for name, width in zip(BACK_WALL_ROW, widths):
-        if name == shape:
-            mounts.append((Vector((x + width / 2, BACK_WALL_Y, BACK_WALL_SCREEN_Z)), 0.0))
-        x += width + BACK_WALL_GAP_M
-    return mounts
+def back_wall_mounts():
+    """Portrait screens with equal gaps (column face to screen included) between the two back columns."""
+    inner = COLUMNS[3][0] - COLUMN_CLAD_HALF
+    width = BACK_WALL_9X16[0]
+    gap = (2 * inner - BACK_WALL_9X16_COUNT * width) / (BACK_WALL_9X16_COUNT + 1)
+    return [(Vector((-inner + gap * (i + 1) + width * (i + 0.5), BACK_WALL_Y, BACK_WALL_SCREEN_Z)), 0.0)
+            for i in range(BACK_WALL_9X16_COUNT)]
+
+
 HEADWALL_FRONT_Y = HEADWALL_Y - HEADWALL_DEPTH / 2
 
 
@@ -113,15 +106,13 @@ SCREENS = {
     "pillar": {**screen_spec((COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z), (3308, 2524),
                              [column_front(*COLUMNS[0], COLUMN_LED_MID_Z)]),
                "mounts": [], "wraps": COLUMNS},
-    "16x9": screen_spec(BACK_WALL_SIZES["16x9"], (1920, 1080), back_wall_mounts("16x9")),
-    "9x16": screen_spec(BACK_WALL_SIZES["9x16"], (1080, 1920), back_wall_mounts("9x16")),
+    "9x16": screen_spec(BACK_WALL_9X16, (1080, 1920), back_wall_mounts()),
     "32x9": screen_spec(RIBBON_SIZE, (3840, 1080),
                         [(Vector((x, HEADWALL_FRONT_Y, RIBBON_Z)), 0.0) for x in ribbon_xs()]),
-    "1x1": screen_spec(BACK_WALL_SIZES["1x1"], (1080, 1080), back_wall_mounts("1x1")),
 }
-BACK_WALL_SHAPES = ("9x16", "1x1", "16x9")
+BACK_WALL_SHAPES = ("9x16",)
 
-SHOT_ORDER = ["pillar", "16x9", "32x9", "1x1"]
+SHOT_ORDER = ["pillar", "9x16", "32x9"]
 CAMERA_WAYPOINTS = [
     Vector((-5.5, -3.5, EYE_Z)),
     Vector((-0.5, 3.5, EYE_Z + 0.1)),
@@ -136,19 +127,22 @@ def in_front_of(shape, distance, angle_deg, height):
     return Vector((spec["center"].x + offset.x, spec["center"].y + offset.y, height))
 
 
+# The wide shot looks straight down the concourse axis: ribbon, four columns and the back wall, symmetric.
+HERO_LOCATION = Vector((0.0, -8.6, EYE_Z))
+HERO_TARGET = Vector((0.0, BACK_WALL_Y, 2.3))
+HERO_LENS_MM = 28.0
+
+
+def along_axis(y):
+    return Vector((HERO_LOCATION.x, y, HERO_LOCATION.z)), HERO_TARGET
+
+
 # Near cameras sit at a horizontal distance from the screen, rotated off its normal so the
 # concourse behind falls out of focus at f/2.8.
 STILL_CAMERAS = {
-    "hero": {"location": Vector((-1.5, -7.5, EYE_Z)), "target": Vector((-2.6, 4.0, 2.4)), "focus": "pillar", "lens": 35.0},
+    "hero": {"location": HERO_LOCATION, "target": HERO_TARGET, "focus": "pillar", "lens": HERO_LENS_MM},
     "near-column": {"location": in_front_of("pillar", 1.5, -35, EYE_Z), "focus": "pillar", "lens": 24.0, "aim_shift": 0.3},
-    "near-wall": {"location": in_front_of("16x9", 2.0, 30, EYE_Z), "focus": "16x9", "lens": 28.0, "aim_shift": -0.3},
     "near-ribbon": {"location": in_front_of("32x9", 3.5, -25, EYE_Z), "focus": "32x9", "lens": 24.0, "aim_shift": 0.0},
-    "near-pillar": {"location": in_front_of("1x1", 1.5, 30, EYE_Z), "focus": "1x1", "lens": 28.0, "aim_shift": -0.3},
-    "opt-axis": {"location": Vector((0.0, -8.6, EYE_Z)), "target": Vector((0.0, BACK_WALL_Y, 2.3)), "lens": 28.0},
-    "opt-entrance": {"location": Vector((-9.2, -8.6, 1.7)), "target": Vector((1.0, 5.0, 2.0)), "lens": 24.0},
-    "opt-high": {"location": Vector((-7.5, -7.8, 4.4)), "target": Vector((0.5, 4.5, 1.4)), "lens": 24.0},
-    "opt-low": {"location": Vector((-6.4, -2.0, 0.55)), "target": Vector((1.5, BACK_WALL_Y - 0.5, 2.6)), "lens": 24.0},
-    "opt-wall": {"location": Vector((-0.2, -1.5, 1.8)), "target": Vector((-0.2, BACK_WALL_Y, 2.0)), "lens": 20.0},
 }
 
 
@@ -156,45 +150,33 @@ STILL_CAMERAS = {
 # which screen recording to show, and a light multiplier (night = everything dimmed).
 SHOTS = {
     "cut01": {
-        "seconds": 10, "screens": "off", "light_scale": 0.03, "lens": 35.0, "focus": "pillar",
+        "seconds": 15, "screens": "off", "light_scale": 0.03, "lens": HERO_LENS_MM, "focus": "pillar",
         "night_lights": [
-            (Vector((-2.8, -2.6, CEILING_Z - 0.2)), Vector((-4.5, 1.0, 1.4)), 600.0),
-            (Vector((1.5, 5.2, CEILING_Z - 0.2)), Vector((1.5, 9.0, 1.2)), 320.0),
+            (Vector((-3.8, -2.6, CEILING_Z - 0.2)), Vector((-5.5, 1.0, 1.4)), 600.0),
+            (Vector((0.0, 5.2, CEILING_Z - 0.2)), Vector((0.0, 9.0, 1.2)), 320.0),
         ],
-        "path": [
-            (Vector((-0.8, -8.2, EYE_Z)), Vector((-3.0, 3.5, 2.6))),
-            (Vector((-2.4, -4.8, EYE_Z)), Vector((-4.0, 1.5, 2.2))),
-        ],
+        "path": [along_axis(-8.6), along_axis(-6.2)],
     },
     "cut02": {
-        "seconds": 10, "screens": "ambient", "light_scale": 1.0, "lens": 35.0, "focus": "32x9",
-        "path": [
-            (Vector((-6.2, -5.5, EYE_Z)), Vector((-4.5, 1.0, 2.0))),
-            (Vector((0.8, -6.2, EYE_Z)), Vector((0.5, 6.0, 2.8))),
-        ],
+        "seconds": 13, "screens": "ambient", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "32x9",
+        "path": [(Vector((-1.4, -8.6, EYE_Z)), Vector((-1.4, BACK_WALL_Y, 2.3))),
+                 (Vector((1.4, -8.6, EYE_Z)), Vector((1.4, BACK_WALL_Y, 2.3)))],
     },
     "cut05": {
-        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": 30.0, "focus": "pillar",
-        "path": [
-            (Vector((-6.0, -7.2, EYE_Z)), Vector((-0.5, 4.5, 2.6))),
-            (Vector((-2.5, -7.8, EYE_Z)), Vector((-1.5, 4.5, 2.5))),
-            (Vector((1.5, -7.0, EYE_Z)), Vector((-2.5, 4.0, 2.4))),
-        ],
+        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
+        "path": [along_axis(-8.6), along_axis(-6.8)],
     },
     "cut08": {
         "seconds": 18, "screens": "alert", "light_scale": 1.0, "lens": 35.0, "focus": "pillar",
         "path": [
-            (Vector((-1.5, -7.5, EYE_Z)), Vector((-2.6, 4.0, 2.4))),
-            (Vector((-2.6, -3.0, 1.5)), Vector((-4.3, 1.0, 1.6))),
-            (Vector((-3.5, -0.5, 1.0)), Vector((-4.5, 0.97, 0.75))),
+            along_axis(-8.6),
+            (Vector((-3.6, -3.0, 1.5)), Vector((-5.3, 1.0, 1.6))),
+            (Vector((-4.5, -0.5, 1.0)), Vector((-5.5, 0.97, 0.75))),
         ],
     },
     "cut09": {
-        "seconds": 10, "screens": "alert", "light_scale": 1.0, "lens": 35.0, "focus": "pillar",
-        "path": [
-            (Vector((-1.5, -7.5, EYE_Z)), Vector((-2.6, 4.0, 2.4))),
-            (Vector((-1.4, -6.7, EYE_Z)), Vector((-2.6, 4.0, 2.4))),
-        ],
+        "seconds": 15, "screens": "alert", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
+        "path": [along_axis(-8.6), along_axis(-7.9)],
     },
 }
 
@@ -409,7 +391,7 @@ def build_still_camera(name):
 
 
 def verify_screen_colors(png, frame, sources):
-    flat = {shape: SCREENS[shape] for shape in ("16x9", "9x16", "1x1", "32x9")}
+    flat = {shape: SCREENS[shape] for shape in ("9x16", "32x9")}
     report_screen_colors(png, frame, sources, flat, FLUSH_EPS_M, CACHE_DIR)
 
 
@@ -501,8 +483,8 @@ def main():
         stills_dir = Path(args.stills_dir).resolve()
         for name in args.cams.split(","):
             build_still_camera(name)
-            elapsed = render_still(stills_dir / f"{LAYOUT_NAME}_{name}.png", args.frame)
-            print(f"RENDER_STATS still layout={LAYOUT_NAME} look={args.look} cam={name} total_s={elapsed:.1f}")
+            elapsed = render_still(stills_dir / f"{name}.png", args.frame)
+            print(f"RENDER_STATS still look={args.look} cam={name} total_s={elapsed:.1f}")
         return
 
     if args.still:
