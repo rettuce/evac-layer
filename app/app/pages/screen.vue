@@ -2,6 +2,7 @@
 import { DEFAULT_REPLAY_SPEED, isMunicipalityId } from '~~/layout/replay'
 import { DEFAULT_SWITCH_AT_MS, scenarioFrame, type ScenarioName } from '~~/layout/scenario'
 import { designScale, isShape, shapeForViewport, viewportFromQuery } from '~~/layout/shapes'
+import { parseCrop, parseRoom, roomSeedKey } from '~~/layout/ambient/room'
 import { resolveLayoutSrc } from '~~/layout/trust'
 import type { EvacScreen } from '~~/layout/types'
 import type { ClockMode } from '~/composables/useScreenClock'
@@ -82,7 +83,17 @@ const frame = computed(() =>
 )
 
 const sceneQuery = computed(() => (typeof route.query.scene === 'string' ? route.query.scene : undefined))
-const seed = computed(() => String(route.query.seed ?? layoutName.value))
+const room = computed(() => parseRoom(route.query.canvas))
+const crop = computed(() => parseCrop(route.query.crop, room.value))
+const bareAmbient = computed(() => route.query.overlay === 'none')
+const lat = computed(() => coordinate(route.query.lat, 90))
+const lng = computed(() => coordinate(route.query.lng, 180))
+
+function coordinate(value: unknown, limit: number): number | undefined {
+  const n = typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN
+  return Number.isFinite(n) && Math.abs(n) <= limit ? n : undefined
+}
+const seed = computed(() => (room.value && crop.value ? roomSeedKey(room.value, route.query.canvas_id) : String(route.query.seed ?? layoutName.value)))
 const siteName = computed(() => String(route.query.site_name ?? screen.value?.municipality.name ?? ''))
 const realStartEpoch = Date.now()
 const clockEpochMs = computed(() => {
@@ -112,6 +123,12 @@ if (scenario.value) start()
     :site-name="typeof route.query.site_name === 'string' ? route.query.site_name : undefined"
     :reset="route.query.reset !== undefined"
     :scene="sceneQuery"
+    :room="crop ? room : undefined"
+    :crop="crop"
+    :ambient-seed="room && crop ? seed : undefined"
+    :bare-ambient="bareAmbient"
+    :lat="lat"
+    :lng="lng"
     :stale-after-ms="route.query.stale_after === undefined ? undefined : numberQuery(route.query.stale_after, 0)"
     :reduced-motion="reducedMotion"
     :data-clock="clockMode"
@@ -143,6 +160,11 @@ if (scenario.value) start()
       :site-name="siteName"
       :shape="shape"
       :scene="sceneQuery"
+      :room="crop ? room : undefined"
+      :crop="crop"
+      :bare="bareAmbient"
+      :lat="lat"
+      :lng="lng"
     />
     <div
       class="alert-layer"
