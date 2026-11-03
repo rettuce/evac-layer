@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '~~/layout/fit'
+import { collapseAbsent, gridCss, initialPlacement, missingRequired, nextOverflowVictim } from '~~/layout/fit'
 import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
 import { CABINET_OFFICE_5, DARK_BAND, LANG_LABEL_OPACITY, PAGE_BACKGROUND, PAGE_INK, SHELTER_KIND_OPACITY, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
@@ -50,7 +50,7 @@ const heroCell = computed(() => (layout.value.hero ? placed.value.find((cell) =>
 const band = computed(() => CABINET_OFFICE_5[props.screen.alert.level])
 
 const rootStyle = computed(() => ({
-  ...gridCss(layout.value),
+  ...gridCss(collapseAbsent(layout.value, new Set([...placed.value.map((cell) => cell.role), ...(layout.value.hero ? ['hero'] : [])]))),
   ...(props.box ? { width: `${props.box.width}px`, height: `${props.box.height}px` } : {}),
   '--px': `${scale.value}px`,
   '--fs-action': TYPE_PX.action,
@@ -77,9 +77,10 @@ const languageStyle = computed(() =>
 )
 
 function cellStyle(cell: LayoutCell) {
-  if (!ready.value) return { gridArea: cell.role }
+  const base = { gridArea: cell.role, '--type-scale': layout.value.typeScale?.[cell.role] ?? 1 }
+  if (!ready.value) return base
   return {
-    gridArea: cell.role,
+    ...base,
     ...frameStyle(motionFrame(cell.motion, props.elapsedMs, props.reducedMotion ?? false)),
   }
 }

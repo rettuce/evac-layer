@@ -69,6 +69,7 @@ export interface ShapeLayout {
   inline?: Role[]
   hero?: { role: Role; px: number }
   bandRoles?: Role[]
+  typeScale?: Partial<Record<Role, number>>
 }
 
 export type TemplateDef = Record<PanelShape, ShapeLayout[]>
