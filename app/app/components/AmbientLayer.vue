@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { clockSweep, drawOverlay, formatClockJst, labelFont, overlayGeometry, pickAmbient, timeFont } from '~~/layout/ambient'
+import { COORD_GLYPHS, clockSweep, formatCoords, drawOverlay, formatClockJst, labelFont, overlayGeometry, pickAmbient, timeFont } from '~~/layout/ambient'
 import type { AmbientFrame, AmbientRect } from '~~/layout/ambient/types'
 import { PILLAR, pillarYForHeight, shapeForViewport } from '~~/layout/shapes'
 import type { Shape } from '~~/layout/types'
 
 const props = withDefaults(
-  defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string; active?: boolean; room?: { width: number; height: number }; crop?: AmbientRect }>(),
+  defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string; active?: boolean; room?: { width: number; height: number }; crop?: AmbientRect; bare?: boolean; lat?: number; lng?: number }>(),
   { active: true },
 )
 
@@ -31,17 +31,37 @@ function overlayGeometryFor(width: number, height: number) {
   return { ...front, rules, block: { ...front.block, top, bottom: undefined } }
 }
 
-// A screen cut from a room draws the room's scene in room coordinates, shifted so that only its own
-// rectangle lands on the canvas; the room is scaled so that the crop fills the screen's width.
-function sceneFrame(width: number, height: number): { frame: AmbientFrame; shape: Shape } {
-  if (!props.room || !props.crop) return { frame: { width, height, view: { x: 0, y: 0, width, height } }, shape: props.shape }
-  const scale = width / props.crop.width
-  const frame = {
-    width: props.room.width * scale,
-    height: props.room.height * scale,
-    view: { x: props.crop.x * scale, y: props.crop.y * scale, width, height },
+// A screen cut from a room draws the room's scene in room coordinates; the room is scaled so that the
+// crop fills the screen's width, and the crop is snapped to whole pixels of that scale.
+function roomFrame(width: number, height: number, room: { width: number; height: number }, crop: AmbientRect): AmbientFrame {
+  const scale = width / crop.width
+  return { width: room.width * scale, height: room.height * scale, view: { x: Math.round(crop.x * scale), y: Math.round(crop.y * scale), width, height } }
+}
+
+// The room is drawn in fixed whole tiles, each with the same transform and bounds whichever screen asks
+// for it, then copied at whole-pixel offsets: shifting by each screen's own offset, or clipping to its
+// edge, rounds curve and line edges differently, and neighbouring screens would not meet exactly.
+const ROOM_TILE_PX = 512
+let tileCanvas: HTMLCanvasElement | undefined
+
+function drawRoom(ctx: CanvasRenderingContext2D, frame: AmbientFrame, shape: Shape) {
+  tileCanvas ??= Object.assign(document.createElement('canvas'), { width: ROOM_TILE_PX, height: ROOM_TILE_PX })
+  const tile = tileCanvas.getContext('2d', { willReadFrequently: true })!
+  const { view } = frame
+  for (let ty = Math.floor(view.y / ROOM_TILE_PX) * ROOM_TILE_PX; ty < view.y + view.height; ty += ROOM_TILE_PX) {
+    for (let tx = Math.floor(view.x / ROOM_TILE_PX) * ROOM_TILE_PX; tx < view.x + view.width; tx += ROOM_TILE_PX) {
+      const x = Math.max(view.x, tx)
+      const y = Math.max(view.y, ty)
+      const w = Math.min(view.x + view.width, tx + ROOM_TILE_PX) - x
+      const h = Math.min(view.y + view.height, ty + ROOM_TILE_PX) - y
+      if (w <= 0 || h <= 0) continue
+      tile.save()
+      tile.setTransform(1, 0, 0, 1, -tx, -ty)
+      pick.value.scene.render(tile, props.clockEpochMs, pick.value.seed, shape, { ...frame, view: { x: tx, y: ty, width: ROOM_TILE_PX, height: ROOM_TILE_PX } })
+      tile.restore()
+      ctx.drawImage(tileCanvas, x - tx, y - ty, w, h, x - view.x, y - view.y, w, h)
+    }
   }
-  return { frame, shape: shapeForViewport(props.room.width, props.room.height) }
 }
 
 // The backing store follows the device pixel ratio: a pillar captured at 0.5 is drawn at a quarter of
@@ -58,23 +78,23 @@ function draw() {
   }
   // CPU-backed canvas: the GPU path rasterised the same gradients slightly differently between runs.
   const ctx = el.getContext('2d', { willReadFrequently: true })!
-  const { frame, shape } = sceneFrame(width, height)
-  ctx.setTransform(1, 0, 0, 1, -frame.view.x, -frame.view.y)
-  pick.value.scene.render(ctx, props.clockEpochMs, pick.value.seed, shape, frame)
   ctx.setTransform(1, 0, 0, 1, 0, 0)
+  if (props.room && props.crop) drawRoom(ctx, roomFrame(width, height, props.room, props.crop), shapeForViewport(props.room.width, props.room.height))
+  else pick.value.scene.render(ctx, props.clockEpochMs, pick.value.seed, props.shape, { width, height, view: { x: 0, y: 0, width, height } })
   const content = {
     siteName: props.siteName,
+    coords: props.lat !== undefined && props.lng !== undefined ? formatCoords(props.lat, props.lng) : undefined,
     time: formatClockJst(props.clockEpochMs),
     sweep: clockSweep(props.clockEpochMs),
     ink: pick.value.scene.ink,
   }
-  drawOverlay(ctx, overlayFor(width, height), content)
+  if (!props.bare) drawOverlay(ctx, overlayFor(width, height), content)
 }
 
 // Canvas text does not wait for web fonts; drawing before they load would rasterise a fallback face.
 async function loadFonts() {
   await Promise.all([
-    document.fonts.load(labelFont(1), props.siteName || '施設'),
+    document.fonts.load(labelFont(1), (props.siteName || '施設') + COORD_GLYPHS),
     document.fonts.load(timeFont(1), TIME_GLYPHS),
   ])
   fontsReady.value = true
