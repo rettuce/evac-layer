@@ -1,0 +1,8 @@
+{
+  "id": "05210-demo-tsurumai-kaikan",
+  "municipality_id": "05210",
+  "lat": 39.38600596,
+  "lng": 140.0457488,
+  "facing_deg": 0,
+  "note": "Illustrative demo screen at the coordinates of a GSI-listed facility (鶴舞会館, GSI id E0521000005111); the viewer is assumed to face north. Not a real installation."
+}

@@ -1,0 +1,8 @@
+{
+  "id": "05210-demo-yuri-hs-ground",
+  "municipality_id": "05210",
+  "lat": 39.40050705,
+  "lng": 140.0566774,
+  "facing_deg": 0,
+  "note": "Illustrative demo screen at the coordinates of a GSI-listed facility (由利高等学校グラウンド, GSI id E0521000076201); the viewer is assumed to face north. Not a real installation."
+}
