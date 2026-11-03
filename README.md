@@ -22,11 +22,11 @@ I build the light that carries information in stations and shopping streets: syn
 
 They are not abstract people. After the Noto Peninsula earthquake tsunami of January 1, 2024, the city of Jōetsu (Niigata) wrote in its official review that "foreign residents and visitors from outside the city found it hard to judge where to evacuate." The warning reached them. The next sentence — *go there, that way, 570 m* — did not.
 
-EVAC LAYER fills that gap: the moment after the takeover.
+The screens are already there, and each one knows where it stands. What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it — for any screen in the country, generated with Claude.
 
 ## What it does
 
-Given a venue (a station concourse, a mall) and the municipality it sits in, EVAC LAYER:
+Give EVAC LAYER the coordinates of a screen — a concourse column, a mall wall, a lobby display — and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance to it from where the viewer stands. The same pipeline runs for any coordinates, so one venue or ten thousand screens across the country are the same job: read once per municipality, composed once per screen. For each screen it then:
 
 1. **Reads** the municipality's own hazard-map PDFs and the GSI designated evacuation-site data, and keeps every claim with its source page.
 2. **Listens** to JMA disaster-prevention XML bulletins (the real feed, recorded since October 2026) and resolves the warning, the Cabinet Office alert level (1–5) and the areas it concerns.
@@ -79,6 +79,8 @@ EVAC LAYER ships as a standard module of MOJUR, the spatial-media system I run i
 - **Pull** — `GET /api/feed/<site>`: what the site should show now, with the five layouts and PNG/HTML assets. `ETag` makes polling cheap.
 - **Push** — a webhook per site, signed with HMAC-SHA256 over timestamp, delivery id, event and body; replay-safe.
 - **Files** — `pnpm -F agents export --site <id>`: PNG and self-contained HTML per shape, for CMSs that can only take images.
+
+A screen is registered as one JSON file with its coordinates, facing and municipality code (`data/sites/<id>.json`); from then on it gets guidance for its own spot, and `POST /api/admin/site` switches its automatic delivery on. The steps are in `docs/integration.md`.
 
 `docs/integration.md` has the three in detail. `examples/minimal-cms/` is a 30-line signage client that works from the feed alone — it is what the demo's last cut shows.
 
@@ -142,8 +144,10 @@ External contributions are not accepted during the hackathon (Nov 2–8, 2026). 
 
 ## 日本語の概要
 
+**スクリーンはもうあり、自分の場所を知っている。** 足りないのは、乗っ取ったあとにその場所のために何を描くかです。EVAC LAYER はそれを、全国のどの画面にも、Claude で作ります。
+
 **誰の、どんな課題か。** 駅や商業施設のスクリーンは災害のとき、広告を流し続けるか黒く落ちるかのどちらかです。既存の仕組み（CAP 連携サイネージ・L アラート）は「画面を乗っ取る」ところまでで、その先に何を描くかは誰も決めていません。能登半島地震の津波では、上越市が「外国人や市外からの来訪者が、どこに避難すればよいかを判断することが難しかった」と検証しています。警報は届いた。「そこへ、あちらへ、570 m」が届いていない。
 
-**どう解決するか。** EVAC LAYER は、自治体のハザードマップ PDF と国土地理院の避難場所データを出典つきで読み、気象庁の電文が来たら、その施設・その画面の形に合わせた避難案内（やさしい日本語・英中韓・図記号）を 5 つの画面形状で生成し、規則・ブラウザ・Vision の 3 段で検査します。平時に運営者が一式を承認しておけば、有事は承認済みの画面だけが自動で上がります。配信はフィード・署名つき Webhook・静的ファイルの 3 通りで、どのサイネージ CMS でも受け取れます。
+**どう解決するか。** 画面は自分の緯度経度を持ち、EVAC LAYER はそこから市町村の電文と最寄りの避難場所（方向・距離）を引きます。自治体のハザードマップ PDF と国土地理院の避難場所データを出典つきで読み、気象庁の電文が来たら、その施設・その画面の形に合わせた避難案内（やさしい日本語・英中韓・図記号）を 5 つの画面形状で生成し、規則・ブラウザ・Vision の 3 段で検査します。平時に運営者が一式を承認しておけば、有事は承認済みの画面だけが自動で上がります。配信はフィード・署名つき Webhook・静的ファイルの 3 通りで、どのサイネージ CMS でも受け取れます。
 
 **ハッカソン後に誰が使うか。** IE3 の空間演出システム MOJUR の標準モジュールとして、駅・商業施設の導入先に入ります。MOJUR 以外の CMS は `docs/integration.md` と `examples/minimal-cms/` から。自治体・防災機関・研究・個人は無償（AGPL-3.0）です。
