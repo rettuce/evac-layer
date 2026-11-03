@@ -13,9 +13,12 @@ export const SHAPES: Record<Shape, { cls: ShapeClass; width: number; height: num
   pillar: { cls: 'pillar', width: 6616, height: 5046 },
 }
 
-const RIBBON_MIN_ASPECT = 2.6
-const LANDSCAPE_MIN_ASPECT = 1.25
-const PORTRAIT_MAX_ASPECT = 0.8
+// Families meet near the geometric mean of their native aspects, so the fitted native canvas never drops
+// below 0.75 of its size (9:16 at 3:4, 16:9 and 32:9 at their lower bounds) and 1:1 never shrinks.
+const RIBBON_MIN_ASPECT = 2.8
+const LANDSCAPE_MIN_ASPECT = 1.4
+const PORTRAIT_MAX_ASPECT = 0.75
+const MAX_VIEWPORT_PX = 16384
 
 export function isShape(value: unknown): value is Shape {
   return typeof value === 'string' && value in SHAPES
@@ -29,8 +32,30 @@ export function shapeForViewport(width: number, height: number): Shape {
   return '1x1'
 }
 
-export function designScale(width: number, height: number): number {
-  return Math.min(width, height) / BASE_SHORT_SIDE_PX
+// The family's native canvas is fitted inside the screen, so every track has at least its native room
+// and a layout that fits at the native size fits at any aspect of the family.
+export function designScale(width: number, height: number, shape: Shape): number {
+  return Math.min(width / SHAPES[shape].width, height / SHAPES[shape].height)
+}
+
+function positiveInt(value: unknown): number | undefined {
+  if (typeof value !== 'string' || !/^\d+$/.test(value)) return undefined
+  const n = Number(value)
+  return n > 0 && n <= MAX_VIEWPORT_PX ? n : undefined
+}
+
+export function viewportFromQuery(w: unknown, h: unknown, aspect: unknown): { width: number; height: number } | undefined {
+  const width = positiveInt(w)
+  const height = positiveInt(h)
+  if (width && height) return { width, height }
+  if (typeof aspect !== 'string') return undefined
+  const parts = aspect.split(':')
+  if (parts.length !== 2) return undefined
+  const [aw, ah] = parts.map((part) => positiveInt(part))
+  if (!aw || !ah) return undefined
+  return aw >= ah
+    ? { width: Math.round((BASE_SHORT_SIDE_PX * aw) / ah), height: BASE_SHORT_SIDE_PX }
+    : { width: BASE_SHORT_SIDE_PX, height: Math.round((BASE_SHORT_SIDE_PX * ah) / aw) }
 }
 
 // A 1.062 m square column wrapped in LED from 0.40 m to 3.60 m above the floor, at the pixel pitch of a
