@@ -96,7 +96,7 @@
       "seconds": 12,
       "src": "../capture/out/cut04.mp4",
       "slate": "Writer: やさしい日本語 → 4 言語 / Composer: テンプレ番号と必須セル",
-      "narration_ja": "スクリーンは自分の位置を知っています。そこから市町村と、最寄りの避難場所を引きます。警報が届くと、やさしい日本語と英語・中国語・韓国語の文を書き、5 つのスクリーンの形に割り付けます。",
+      "narration_ja": "位置から市町村と最寄りの避難場所を引き、やさしい日本語と英語・中国語・韓国語で書いて、5 つの形に割り付けます。",
       "narration_en": "Each screen knows where it stands. From there it finds its municipality and the nearest evacuation site. When a warning arrives, it writes the text in easy Japanese, English, Chinese and Korean, and lays it out for five screen shapes."
     },
     {
@@ -104,10 +104,10 @@
       "kind": "capture",
       "seconds": 10,
       "src": "../capture/out/cut05c.mp4",
-      "slate": "同じ警報の画面を 2 か所で並べる（駅前は南西へ 570 m・もう一つの場所は東へ 160 m）",
+      "slate": "左に由利本荘の地図（地理院タイル）・4 か所のディスプレイと最寄りの避難場所、右にその場所の 16:9 画面。2.5 s ずつ 4 か所",
       "caption": "同じ警報。場所が違えば、行き先も方向も違う。\nSame warning. Different place, different way out.",
-      "narration_ja": "同じ警報でも、場所が違えば行き先も方向も違います。駅前は南西へ 570 m、もう一つの場所は東へ 160 m。",
-      "narration_en": "The same warning, but a different place means a different destination and direction: 570 m southwest from the station, 160 m east from the other site."
+      "narration_ja": "同じ警報でも、ディスプレイの場所が違えば、行き先も方向も距離も、自動で変わります。",
+      "narration_en": "The same warning, but where the display stands changes the destination, the direction and the distance, automatically."
     },
     {
       "cut": "5",
@@ -135,7 +135,7 @@
       "seconds": 10,
       "src": "../capture/out/cut06.mp4",
       "slate": "Verifier がスクリーンショットを読み「文字高さ不足」「点滅頻度超過」を差し戻し → 修正版が通る",
-      "narration_ja": "生成した案内は、検査役が画像で読みます。方向の欄に距離が重なっていれば差し戻し、直した版が通るまで出しません。",
+      "narration_ja": "生成した案内は検査役が画像で読みます。方向の欄に距離が重なれば差し戻し、直るまで出しません。",
       "narration_en": "An inspector reads each generated screen as an image. If the distance is duplicated in the direction cell, it is sent back, and nothing goes out until the fix passes."
     },
     {
@@ -154,8 +154,8 @@
       "src": "../capture/out/cut07b.mp4",
       "slate": "5 自治体それぞれの施設の案内画面を並べる",
       "caption": "5 つの自治体。それぞれの資料から、それぞれの場所へ。\nFive municipalities, each from its own documents.",
-      "narration_ja": "5 つの自治体。それぞれの資料から、それぞれの場所の案内を作りました。",
-      "narration_en": "Five municipalities. From each one's own documents, guidance for each place."
+      "narration_ja": "それぞれの自治体の資料から、それぞれの場所の案内を。",
+      "narration_en": "Each from its own municipality's documents, for its own place."
     },
     {
       "cut": "8",
