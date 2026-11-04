@@ -12,8 +12,11 @@ const LINE = 1.3
 const FIELD_SCALE = 1 / 640
 const VORTEX_RADIUS = 320
 const VORTEX_STRENGTH = 0.9
-const DRIFT_MS = 480_000
-const ORBIT_MS = 900_000
+const DRIFT_MS = 60_000
+const ORBIT_MS = 90_000
+const DASH_ON = 28
+const DASH_OFF = 14
+const DASH_SPEED_PX_S = 90
 
 interface Vortex {
   x: number
@@ -83,6 +86,8 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
   ctx.strokeStyle = INK
   ctx.lineWidth = LINE * unit
   ctx.lineCap = 'round'
+  ctx.setLineDash([DASH_ON * unit, DASH_OFF * unit])
+  ctx.lineDashOffset = -((t / 1000) * DASH_SPEED_PX_S * unit) % ((DASH_ON + DASH_OFF) * unit)
   for (let j = j0; j < j1; j++) {
     for (let i = i0; i < i1; i++) {
       let x = (i + cellRandom(seed, i, j)) * size
@@ -99,6 +104,7 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
       ctx.stroke()
     }
   }
+  ctx.setLineDash([])
   const v = swirls[0]!
   ctx.strokeStyle = RING
   ctx.lineWidth = 3 * unit
