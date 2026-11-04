@@ -1,7 +1,7 @@
 import { PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js'
-import { CameraRig, FILM_GAUGE_MM, presetsFromGltf } from './cameras'
+import { CameraRig, FILM_GAUGE_MM, poseToQuery, presetFromQuery, presetsFromGltf } from './cameras'
 import { Displays } from './displays'
 import { applyRenderMode, loadRoom, type RenderMode } from './room'
 import { loadCrops, type AmbientScene, type Content } from './screenUrl'
@@ -52,11 +52,16 @@ applyRenderMode(room, INITIAL.mode)
 // The four views the demo is judged on (田中 2026-11-05: hero, the wall, the headwall ribbon as in demo cut 8,
 // the column); the glb still carries every still camera.
 const SHOWN_CAMERAS: Record<string, string> = { hero: 'hero', 'wall-final': 'wall-final', 'rib-final': 'rib-final', 'col-final': 'col-final' }
+// hero2: 田中's view of 2026-11-05 (a long lens from the back of the room: the near columns at both edges, the three
+// wall screens centred, the louver ceiling in the top third), fitted by hand; not a Blender camera.
+const HERO2 = presetFromQuery('hero2', '0.80,1.10,11.50,0.20,2.60,-9.00,29')!
 const presets = presetsFromGltf(room.cameras)
   .filter((preset) => preset.name in SHOWN_CAMERAS)
   .map((preset) => ({ ...preset, name: SHOWN_CAMERAS[preset.name]! }))
   .sort((a, b) => Object.values(SHOWN_CAMERAS).indexOf(a.name) - Object.values(SHOWN_CAMERAS).indexOf(b.name))
-const first = presets.find((preset) => preset.name === INITIAL.preset) ?? presets[0]
+presets.splice(1, 0, HERO2)
+const pinned = presetFromQuery('cam', new URLSearchParams(location.search).get('cam'))
+const first = pinned ?? presets.find((preset) => preset.name === INITIAL.preset) ?? presets[0]
 if (first) rig.jumpTo(first)
 
 const displays = new Displays(scene, room.displayMeshes, crops, INITIAL, camera)
@@ -71,6 +76,11 @@ buildUi(document.getElementById('ui')!, presets, INITIAL, {
   onScene: (ambientScene) => displays.setScene(ambientScene),
   onRenderMode: (mode) => applyRenderMode(room, mode),
   onCamera: (preset) => rig.flyTo(preset),
+  onCopyCamera: () => {
+    const query = `?cam=${poseToQuery(camera, controls)}`
+    console.log(query)
+    void navigator.clipboard?.writeText(query)
+  },
 })
 
 // Measurement switches for DevTools (S-4 v2): uncapped draws, WebGL off, and the last loop times.

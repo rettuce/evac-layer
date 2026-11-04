@@ -7,6 +7,7 @@ export interface UiHandlers {
   onScene: (scene: AmbientScene) => void
   onRenderMode: (mode: RenderMode) => void
   onCamera: (preset: CameraPreset) => void
+  onCopyCamera: () => void
 }
 
 const CONTENTS: [Content, string][] = [['calm', '平常時'], ['evac', 'EVAC LAYER']]
@@ -60,6 +61,11 @@ export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { c
     button.addEventListener('click', () => handlers.onCamera(preset))
     cameras.appendChild(button)
   }
+  const copy = document.createElement('button')
+  copy.textContent = 'copy pose'
+  copy.title = 'copies ?cam=… for this view to the clipboard and the console'
+  copy.addEventListener('click', handlers.onCopyCamera)
+  cameras.appendChild(copy)
 }
 
 export function fpsMeter(element: HTMLElement): (nowMs: number) => void {

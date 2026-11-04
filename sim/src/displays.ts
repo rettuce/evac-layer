@@ -130,11 +130,17 @@ export class Displays {
     return this.faces.length * CONTENTS.length
   }
 
+  // Face by face: a page is shown only once it has loaded, so a face keeps its previous content rather
+  // than going blank while the other set is still opening (司令官決定, 2026-11-05).
   setContent(content: Content): void {
     this.content = content
-    for (const face of this.faces) {
-      for (const page of Object.values(face.pages)) showPage(page, page.content === content)
-    }
+    for (const face of this.faces) this.showWanted(face)
+  }
+
+  private showWanted(face: Face): void {
+    const wanted = face.pages[this.content]
+    const shown = wanted?.loaded ? wanted : Object.values(face.pages).find((page) => page.loaded && page.shown) ?? wanted
+    for (const page of Object.values(face.pages)) showPage(page, page === shown)
   }
 
   // The calm pages switch scene in place: /screen listens for this message and changes its route query,
@@ -195,7 +201,7 @@ export class Displays {
     page.iframe.src = screenUrl(face.extras, page.content, page.scene, this.crops)
     await loadedOrTimedOut(page.iframe)
     page.loaded = true
-    showPage(page, page.shown)
+    this.showWanted(face)
     this.loadedPages += 1
     if (this.loadedPages >= this.faces.length) this.concurrency = LOAD_CONCURRENCY_HIDDEN
     this.onProgress(this.loadedPages, this.totalPages)
