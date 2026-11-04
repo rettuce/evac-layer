@@ -74,6 +74,9 @@ export interface ShapeLayout {
   // and the cells follow the rules written on the artboard (see templates.ts PORTRAIT).
   figma?: boolean
   type?: Record<string, number>
+  fixedTracks?: boolean
+  headlineLines?: number
+  distanceBelow?: boolean
 }
 
 export type TemplateDef = Record<PanelShape, ShapeLayout[]>

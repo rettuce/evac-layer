@@ -43,4 +43,8 @@ test("export follows the live gate: auto publish on and the bulletin approved", 
   assert.equal(exportable(a, "S", "05210", "B2"), "unapproved");
   assert.equal(exportable(a, "T", "05210", "B1"), "auto-publish-off");
   assert.equal(exportable(a, "U", "05210", "B1"), "auto-publish-off");
+  const bound: Approvals = { ...a, layouts: { ...a.layouts, "05210/B3": { approved: true, updated_at: "2026-11-05T00:00:00Z", digest: "sha256:aa" } } };
+  assert.equal(exportable(bound, "S", "05210", "B3", "sha256:aa"), "ok");
+  assert.equal(exportable(bound, "S", "05210", "B3", "sha256:bb"), "stale");
+  assert.equal(exportable(a, "S", "05210", "B1", "sha256:aa"), "ok");
 });
