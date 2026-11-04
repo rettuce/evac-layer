@@ -25,6 +25,20 @@ export function presetsFromGltf(cameras: PerspectiveCamera[]): CameraPreset[] {
     .sort((a, b) => a.name.localeCompare(b.name))
 }
 
+// `?cam=x,y,z,tx,ty,tz,lens` (metres, glTF axes: y up) pins a view; the UI's copy button writes the current one.
+export function poseToQuery(camera: PerspectiveCamera, controls: OrbitControls): string {
+  const n = (v: number) => v.toFixed(2)
+  const p = camera.position
+  const t = controls.target
+  return `${n(p.x)},${n(p.y)},${n(p.z)},${n(t.x)},${n(t.y)},${n(t.z)},${camera.getFocalLength().toFixed(0)}`
+}
+
+export function presetFromQuery(name: string, value: string | null): CameraPreset | undefined {
+  const v = (value ?? '').split(',').map(Number)
+  if (v.length !== 7 || v.some((x) => !Number.isFinite(x))) return undefined
+  return { name, position: new Vector3(v[0], v[1], v[2]), target: new Vector3(v[3], v[4], v[5]), lensMm: v[6]! }
+}
+
 export class CameraRig {
   private running: JSAnimation[] = []
 

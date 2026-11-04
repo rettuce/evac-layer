@@ -1,6 +1,6 @@
 export type Content = 'calm' | 'evac'
 export type AmbientScene = (typeof SCENES)[number]
-export const SCENES = ['brush-flow', 'etched-streams', 'half-discs', 'ink-bloom', 'module-field', 'quad-subdivision'] as const
+export const SCENES = ['brush-flow', 'etched-streams', 'ink-bloom', 'module-field', 'painterly-flow', 'quad-subdivision'] as const
 
 export interface DisplayExtras {
   screen: string
@@ -67,5 +67,6 @@ export function screenUrl(extras: DisplayExtras, content: Content, scene: Ambien
     const seam = crops?.seam[extras.screen]
     if (seam) params.set('seam', seam)
   }
-  return `${SCREEN_ORIGIN}/screen?${params}`
+  // Trailing slash: a static host serves the generated screen/index.html without a redirect.
+  return `${SCREEN_ORIGIN}/screen/?${params}`
 }

@@ -6,7 +6,7 @@ The payload is fixed by [`schema/feed.schema.json`](../schema/feed.schema.json):
 
 ## 0. Register the screen
 
-A screen is one JSON file in `data/sites/`, and the only thing it has to know is where it stands:
+A site (one venue; its screens share the coordinates) is one JSON file in `data/sites/`, and the only thing it has to know is where it stands. Today the repository holds one site per municipality; a second site in the same municipality is not wired up yet (the four-location comparison in `demo/sites/` is outside the contract):
 
 ```json
 {
@@ -18,15 +18,15 @@ A screen is one JSON file in `data/sites/`, and the only thing it has to know is
 }
 ```
 
-`facing_deg` is the compass direction the viewer faces when looking at the screen; the arrow to the evacuation site is rotated against it. From these coordinates the Composer picks the nearest GSI designated evacuation site and writes its name, direction and distance into every layout for this screen. The municipality code is written by hand today; it selects which bulletins apply and which hazard-map knowledge file the Reader produced.
+`facing_deg` is the compass direction the viewer faces when looking at the screen; the arrow to the evacuation site is rotated against it. From these coordinates the Composer picks the nearest GSI designated evacuation site and writes its name, direction and distance into every layout for this site. The municipality code is written by hand today; it selects which bulletins apply and which hazard-map knowledge file the Reader produced.
 
 Then generate and approve the set once, in calm times:
 
 ```sh
-pnpm -F agents fanout --municipalities 05210 --verifier vision --writer live   # every recorded bulletin → layouts for every shape
+pnpm -F agents fanout --municipalities 05210 --verifier vision --writer live   # every recorded bulletin → layouts for every shape (the recorded JMA feed is replayed; the live receiver is not in this repository)
 ```
 
-Open `/admin`, review the screens and approve the set, then switch automatic delivery on for the site (`POST /api/admin/site` with `{"site_id": "...", "auto_publish": true}`). From here on the screen receives guidance for its own spot through any of the three ways below.
+Open `/admin`, review the screens and approve the set, then switch automatic delivery on for the site (`POST /api/admin/site` with `{"site_id": "...", "auto_publish": true}`). From here on the site receives guidance for its own spot through any of the three ways below.
 
 ## 1. Pull — poll a feed
 

@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>EVAC LAYER sim</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400&family=Noto+Sans+JP:wght@400&display=swap" />
     <style>
       html, body { margin: 0; height: 100%; background: #000; color: #ddd; font: 12px/1.4 system-ui, sans-serif; overflow: hidden; }
       #stage { position: fixed; inset: 0; }
-      #stage > .css3d { position: absolute; inset: 0; background: #000; pointer-events: none; }
       #stage > canvas { position: absolute; inset: 0; pointer-events: none; }
-      #stage iframe { border: 0; pointer-events: none; background: #000; }
       #ui { position: fixed; top: 12px; left: 12px; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 24px); overflow: auto; }
       #ui .group { background: rgba(0,0,0,.6); border: 1px solid #333; padding: 6px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 280px; }
       #ui .group h2 { flex-basis: 100%; margin: 0 0 2px; font-size: 10px; font-weight: 400; letter-spacing: .08em; color: #888; text-transform: uppercase; }

@@ -13,3 +13,6 @@ demo/cache/
 tmp/
 data/approvals.json
 data/subscriptions.json
+app/dist
+sim/dist-pages/
+sim/public/ambient/

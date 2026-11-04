@@ -23,3 +23,28 @@
 | 公式サンプル（2016-09-01 訓練）で静岡県が大津波警報から津波予報（若干の海面変動）に下がる電文で、画面が「無し」になり、直前の大津波警報の画面が残り続ける（危険側の誤り） | Composer は津波予報を「画面を出さない」と一律に扱い、下がってきた経路を見ていなかった。録音した 2026-10 の feed に津波が無く、サンプルで初めて踏んだ | 警報・注意報から津波予報へ下がった区域は解除画面にする（見出し「〈直前の警報名〉解除」・行動は海面変動の注意「海に入らない・海岸に近づかない」・行動の図記号は解除の safe_here）。LastKind の名前を parser に残した。単独で来る津波予報は従来どおり画面なし | `agents/src/composer/rules.ts` `tsunamiDowngradedFrom`・`data/layouts/22424/VTSE41-201609010955-5a813306d772/` |
 
 **費用（2026-11-02 時点・API 実費）**: Reader $2.88（5 自治体・Sonnet 5.5、Haiku との比較 1 本を含む）／Writer 約 $2.75（Opus 5.5・書き直しと英語欄の作り直し込み）／Vision Verifier $5.17（Sonnet 5.5・9 回。4 形状で 5 回、pillar 込みで 4 回）。最終値（run 19 まで・合計約 $21.30）は docs/evaluation.md の費用表が正。
+
+## 端から端までの再確認（2026-11-05）
+
+主張「信号（気象庁の警報電文）を受け取れる仕組みがあれば、どんな場所のどのスクリーンにも自動で災害情報を表示できる」を、現行 main（c535138、出典セルの 0358717 を含む）で実走して確かめた。入力は 10/21 由利本荘の実電文 1 本（子吉川レベル３氾濫警報・15:55）。登録済みの本荘駅前（A）と、登録していない任意の座標（B・39.3915, 140.04・施設ではない点）の 2 サイトで、読解から画面まで流した。dev `app` は 127.0.0.1:3152、Verifier は Chrome headless + Vision（Sonnet）。
+
+| 段 | コマンド | 所要 | 出力 |
+|---|---|---|---|
+| 読解 | `pnpm -F agents jma $JMA_FEED_DIR/bodies/20261021/20261021065519_0_VXKO55_050000.xml` | 0.4 s | alert JSON（`VXKOii-202610211555-d5ccc7c6b547`・flood・L3・由利本荘市） |
+| 案内生成 → 検査（A） | `pnpm -F agents pipeline --alert <同じ xml> --municipality 05210 --site data/sites/05210-demo.json --writer <data/writer/05210/<id>.json の output> --verifier vision` | 61.6 s | `tmp/pipeline/` に 5 形状 + report.json。attempt 1・findings 0・5/5 pass |
+| 同（B） | 同じ。`--site` は id / municipality_id / lat / lng / facing_deg だけの JSON | 45.9 s | 5 形状。16x9 が fail（下の 4）・他 4 形状 pass |
+| 承認済み一式 | `pnpm -F agents export --site 05210-demo-honjo-station --out <dir>` | 45.0 s | 6 電文 × 5 形状 = 91 ファイル + manifest.json（approved_at 2026-11-02） |
+| 画面 | `/screen?shape=16x9&src=/api/layout?file=<絶対パス .json>` | — | capture 2 枚（private `log/captures/agents-2026-11-05-0619-e2e-16x9-{honjo-station,arbitrary-point}.png`） |
+
+費用: Writer $0（キャッシュ記録の出力を使用）、Vision 10 checks ≈ $0.11（1 check ≈ $0.011）。同じ電文で位置だけ変えた結果: A は 鶴舞小学校 570 m 南西へ、B は 砂子下コミュニティセンター 530 m 南へ。見出し・行動・言語帯・出典は同じ。
+
+主張どおりに動かない箇所（コードは直していない）:
+
+1. **信号の受け口が公開リポに無い。** 気象庁長期フィードの取得は private の `tools/jma-feed-recorder`（launchd・1 時間毎・Python）で、本体は録音（`bodies/`）を `replay` で読む。app の「今の電文」は `sharedReplayOrigin`（サーバ起動時刻からの仮想時計 × speed）で決まり、`/api/feed` は実時間に届いた警報では切り替わらない。「電文が届いたら画面が変わる」経路は未実装。
+2. **1 電文だけを live Writer で流す入口が無い。** `pipeline` は `--writer` の fixture が必須（「the live Writer lands on Day 2」の文言が残る）。live Writer は `fanout` / `replay-pipeline` だけで、どちらも `data/layouts/<自治体>` と reports を消して全電文を作り直す（`runReplay` の rmSync）。
+3. **場所は自治体につき 1 サイト。** `data/layouts/<id>/index.json` の `site` は 1 つで、`/api/live-layout`・`/api/feed`・export は自治体と電文で層を引き、サイト id は承認ゲートの鍵にしか使わない。同じ自治体に 2 台目のスクリーンを置くと 1 台目の避難所と方向が出る。任意座標の compose 自体は動く（B）が、その結果を置く場所が無い（`demo/sites/` は契約外）。
+4. **避難所名が長いと 16:9 で矢印が消える。** B は shelter「砂子下コミュニティセンター」（12 字）が 51.2 px < 64 px で fail（文言で直せない種類）。renderer は `data-shelter-scale="narrow"` に縮めた上で `data-dropped="direction:overflow"` で方向セルを落とし、capture に矢印と「南へ」が無い。Verifier は font-size だけを指摘し、方向の欠落は指摘しない。由利本荘の避難所 220 か所の名前の長さ分布は未確認。
+5. **人手の段。** サイト JSON の `municipality_id` は手書き（docs/integration.md）。Reader（自治体 PDF → 知識ファイル。05210 は 11-02 に $1.165）と `shelters`（GSI CSV）は事前の手動実行。承認と auto_publish は設計上の人手。
+6. **承認は内容を見ない。** `data/approvals.json` は自治体/電文の鍵と updated_at だけで、Writer の書き直しや再 fanout の後も承認が残る（出典セルを変えた今回の再生成でも承認済みのまま）。
+7. **`/screen?lat=&lng=` は平時レイヤーの座標表示だけ。** 避難誘導はサイト JSON を Composer が読んで決める。
+8. 運用上の注意: main を merge した後は `pnpm install` と dev の再起動が要る（three・@fontsource/noto-sans-thai の追加）。再起動前の実走 3 本は `data-ready` 待ちの 30 s timeout で落ちた。

@@ -19,6 +19,21 @@ function numberQuery(value: unknown, fallback: number): number {
 }
 
 const route = useRoute()
+const router = useRouter()
+// An embedding page (the web simulator) switches the ambient scene without a reload by posting
+// { type: 'evac-screen', scene }; the route query stays the single source of what is shown.
+onMounted(() => {
+  window.addEventListener('message', (event: MessageEvent) => {
+    const data = event.data as { type?: unknown; scene?: unknown } | null
+    if (data?.type !== 'evac-screen' || typeof data.scene !== 'string') return
+    router.replace({ query: { ...route.query, scene: data.scene } })
+  })
+})
+// `fps=<n>` caps the ambient canvas redraw for embedded screens (22 of them in the simulator).
+const drawIntervalMs = computed(() => {
+  const fps = numberQuery(route.query.fps, 0)
+  return fps > 0 ? 1000 / fps : undefined
+})
 const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
 const ADMIN_TOKEN_STORAGE_KEY = 'evac-admin-token'
 
@@ -127,6 +142,7 @@ if (scenario.value) start()
     :room="crop ? room : undefined"
     :crop="crop"
     :seam="seam"
+    :draw-interval-ms="drawIntervalMs"
     :ambient-seed="room && crop ? seed : undefined"
     :bare-ambient="bareAmbient"
     :lat="lat"

@@ -5,10 +5,12 @@
 
 # EVAC LAYER
 
-**スクリーンはもうある。**
-街にすでにあるスクリーンを、いちばん伝えなければならない瞬間に、誰にでも読める避難案内へ変える。
+**EVAC LAYER は、いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステムです。**
+スクリーンはもうある。街にすでにあるスクリーンを、いちばん伝えなければならない瞬間に、誰にでも読める避難案内へ変える。
 
-*The screens are already there.* Turn the screens a city already has into evacuation guidance anyone can read. [English summary ↓](#english-summary)
+*EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.* The screens are already there: turn them into evacuation guidance anyone can read. [English summary ↓](#english-summary)
+
+**触れるデモ（Web シミュレーター）: https://rettuce.github.io/evac-layer/** — 駅コンコースの 22 面に平常時 / EVAC LAYER を切り替えて表示（`sim/`）。
 
 ![由利本荘市の実際の気象庁電文から描いた、警戒レベル 4 の洪水警報の 16:9 画面](docs/screens/lv4-16x9.png)
 
@@ -33,7 +35,7 @@ EVAC LAYER は、スクリーンの座標を受け取ると、その場所のた
 
 目の前の人は抽象的な存在ではありません。2024 年 1 月 1 日の能登半島地震の津波のあと、新潟県上越市は検証で「外国人や市外からの来訪者が、どこに避難すればよいかを判断することが難しかった」と書いています。警報は届いた。その次の一文、**「あちらへ、570 m」**が届いていない。
 
-スクリーンはもうあり、自分の場所を知っている。足りないのは、乗っ取ったあとに、その場所のために何を描くかです。EVAC LAYER はそれを、全国のどのスクリーンにも、Claude で作ります。国内のサイネージに 1 枚のレイヤーを足して、すでにある全国のスクリーンを防災情報に対応させる。それがこのプロジェクトの考えです。
+スクリーンはもうあり、自分の場所を知っている。足りないのは、乗っ取ったあとに、その場所のために何を描くかです。EVAC LAYER はそれを、座標を登録したスクリーンのために、Claude で作ります。国内のサイネージに 1 枚のレイヤーを足して、すでにある全国のスクリーンを防災情報に対応させる。それがこのプロジェクトの考えです。
 
 ## 何ができるか（3 枚で）
 
@@ -51,10 +53,10 @@ EVAC LAYER は、スクリーンの座標を受け取ると、その場所のた
 
 ## 何をするか
 
-EVAC LAYER にスクリーンの座標を渡します。コンコースの柱、商業施設の壁、ロビーのディスプレイ。あとは EVAC LAYER が、その場所に要るものを自分で調べます。どの市町村の電文が当たるか。国土地理院のデータで最寄りの指定緊急避難場所はどこか。見る人の立ち位置から、どちらへ何 m か。同じ処理がどの座標でも走るので、1 施設でも全国 1 万枚でも同じ仕事です。自治体ごとに 1 回読み、スクリーンごとに 1 回組みます。
+EVAC LAYER にスクリーンの座標を渡します。コンコースの柱、商業施設の壁、ロビーのディスプレイ。あとは EVAC LAYER が、その場所に要るものを自分で調べます。どの市町村の電文が当たるか。国土地理院のデータで最寄りの指定緊急避難場所はどこか。見る人の立ち位置から、どちらへ何 m か。登録の単位はサイト（1 施設。そのスクリーンは座標を共有する）で、サイトの座標を変えれば、避難先も方向も距離もその場所のものになります。自治体ごとに 1 回読み、サイトごとに 1 回組みます。いまの公開リポは 1 自治体につき 1 サイトで、同じ自治体に 2 つ目のサイトを置く構造はまだありません。
 
 1. **読む** — その自治体のハザードマップ PDF と、国土地理院の指定緊急避難場所データを読み、すべての記述に出典ページを残す。
-2. **聞く** — 気象庁の防災情報 XML（2026 年 10 月から記録している実際のフィード）を受け、警報の種別・内閣府の警戒レベル（1〜5）・対象地域を判定する。
+2. **聞く** — 気象庁の防災情報 XML を読み、警報の種別・内閣府の警戒レベル（1〜5）・対象地域を判定する。公開リポにあるのは、2026 年 10 月から記録した実際のフィードを再生する経路で、気象庁から直接受信する受け口は含めていません。
 3. **書く** — その施設・その電文のための案内を書く。行動文を 10 の言語で、行動の図記号つきで。市町村だけが出せる避難情報の名称は使わない。
 4. **組んで描く** — 同じ案内を 5 つの基準形状（16:9・9:16・32:9・1:1・柱に巻く LED）に組み、描画部（Renderer）がどんな画角にもいちばん近い基準形状を収めて描く。文字サイズは視距離から導き、色は内閣府原典の警戒レベル色、点滅はなし。
 5. **検査する** — すべての画面を 3 段で。スキーマと規則の検査、描画した画面のブラウザ検査（溢れ・欠け・距離の重複）、PNG を電文と照らす Vision 検査。指摘は文章の書き手（Writer）に戻し、書き直しで直らないものはパイプラインを止める。
@@ -91,7 +93,7 @@ EVAC LAYER はイベントの発信元です。画面を再生する機能は持
 - **Push** — 施設ごとの Webhook。timestamp・delivery id・event・body に対する HMAC-SHA256 の署名つきで、再送攻撃に耐える。
 - **Files** — `pnpm -F agents export --site <id>`: 形状ごとの PNG と、単体で開ける HTML。画像しか受けられない CMS 向け。
 
-スクリーンの登録は、座標・向き・市町村コードを持つ JSON ファイル 1 つ（`data/sites/<id>.json`）。以後そのスクリーンは自分の場所のための案内を受け取り、`POST /api/admin/site` で自動配信を入れます。手順は `docs/integration.md`。`examples/minimal-cms/` はフィードだけで動く 39 行のサイネージクライアントで、デモ動画の最後のカットがそれです。
+登録は、座標・向き・市町村コードを持つサイトの JSON ファイル 1 つ（`data/sites/<id>.json`。1 施設分で、そのスクリーンは座標を共有します）。以後そのサイトは自分の場所のための案内を受け取り、`POST /api/admin/site` で自動配信を入れます。現状は 1 自治体につき 1 サイトです。手順は `docs/integration.md`。`examples/minimal-cms/` はフィードだけで動く 39 行のサイネージクライアントで、デモ動画の最後のカットがそれです。
 
 停電・回線断について。静的ファイルの経路を使えば、承認済みの一式を端末側に置いておけます。画面は配信元に届かなくなっても直前の状態を保ち、60 秒を超えると「同期が途絶えている」印を出します。建物が停電すれば画面は消える。EVAC LAYER は電源の約束をしません。
 
@@ -167,8 +169,8 @@ AGPL-3.0（`LICENSE`）。Copyright (C) 2026 You Tanaka。
 
 ## English summary
 
-**The screens are already there, and each one knows where it stands.** What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it, for any screen in Japan, generated with Claude.
+**EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.** The screens are already there, and each one knows where it stands. What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it, for any screen in Japan, generated with Claude.
 
-Give EVAC LAYER the coordinates of a screen and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. It reads the municipality's own hazard-map PDFs with citations (Reader, Claude), listens to JMA disaster-prevention XML, writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five screen shapes, inspects every screen by rules, in a browser and by Vision (Claude), and fires `alert` / `clear` events carrying only operator-approved screens, as a feed, a signed webhook or static files. Any signage system can act on them.
+Give EVAC LAYER the coordinates of a site (one venue; its screens share them) and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. Move the coordinates and the shelter, direction and distance follow; today the repository holds one site per municipality. It reads the municipality's own hazard-map PDFs with citations (Reader, Claude), replays recorded JMA disaster-prevention XML (the live receiver is not part of this repository), writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five screen shapes, inspects every screen by rules, in a browser and by Vision (Claude), and fires `alert` / `clear` events carrying only operator-approved screens, as a feed, a signed webhook or static files. Any signage system can act on them.
 
 Built from scratch during Built with Claude: Japan 2026 (Nov 2–8). Everything in this repository was written from Nov 2, 12:00 JST, by one commander session and several Claude Code implementation sessions (agents, render, demo, layout, sim) on their own git worktrees. Licensed AGPL-3.0; free for municipalities, public-safety organizations, research and personal use; commercial license for embedding into proprietary signage products: you@ie3.jp.

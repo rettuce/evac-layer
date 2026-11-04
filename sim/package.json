@@ -6,7 +6,8 @@
     "dev": "vite --host 127.0.0.1 --port 3160",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1 --port 3160",
-    "export-glb": "blender -b -P blender/export_glb.py"
+    "export-glb": "blender -b -P blender/export_glb.py",
+    "fetch-ambient": "gh release download ambient-loops-v1 --repo rettuce/evac-layer --pattern '*.mp4' -D public/ambient --clobber"
   },
   "dependencies": {
     "animejs": "^4.5.0",
