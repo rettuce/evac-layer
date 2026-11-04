@@ -9,7 +9,8 @@ const CROSS = 'rgb(52 58 68 / 0.35)'
 const CELL = 120
 const GUTTER = 0.12
 const ACCENT_SHARE = 0.03
-const BREATH_MS = { min: 70_000, max: 160_000 }
+const BREATH_MS = { min: 5_000, max: 10_000 }
+const TURN_MS = { min: 8_000, max: 16_000 }
 const KINDS = ['quarter', 'half', 'triangle', 'ring', 'bars', 'diamond', 'disc', 'check'] as const
 type Kind = (typeof KINDS)[number]
 
@@ -52,10 +53,11 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
     for (let i = i0; i < i1; i++) {
       const pick = (k: number) => cellRandom(seed, i, j, k)
       const period = BREATH_MS.min + pick(3) * (BREATH_MS.max - BREATH_MS.min)
-      const scale = 0.78 + 0.22 * wave(t, period, pick(4))
+      const scale = 0.6 + 0.4 * wave(t, period, pick(4))
+      const turn = TURN_MS.min + pick(6) * (TURN_MS.max - TURN_MS.min)
       ctx.save()
       ctx.translate((i + 0.5) * cell, (j + 0.5) * cell)
-      ctx.rotate(Math.floor(pick(1) * 4) * (Math.PI / 2))
+      ctx.rotate(Math.floor(pick(1) * 4) * (Math.PI / 2) + (pick(7) < 0.5 ? -1 : 1) * 2 * Math.PI * ((t / turn) % 1))
       ctx.scale(scale, scale)
       ctx.fillStyle = pick(5) < ACCENT_SHARE ? ACCENT : INKS[Math.floor(pick(2) * INKS.length)]!
       module(ctx, KINDS[Math.floor(pick(0) * KINDS.length)]!, inner)

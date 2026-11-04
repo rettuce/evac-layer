@@ -19,13 +19,24 @@ const CREST_WIDTH = 0.3
 const CREST_LIFT = 0.2
 const FIELD_SCALE = 1 / 520
 const TURNS = 2
-const DRIFT_MS = 300_000
+const DRIFT_MS = 40_000
+const CYCLE_MS = { min: 4_000, max: 8_000 }
+const HOLD = 0.35
 
-function stroke(ctx: CanvasRenderingContext2D, points: number[], lift: number): void {
+function stroke(ctx: CanvasRenderingContext2D, points: number[], lift: number, count: number): void {
   ctx.beginPath()
   ctx.moveTo(points[0]!, points[1]! - lift)
-  for (let k = 2; k < points.length; k += 2) ctx.lineTo(points[k]!, points[k + 1]! - lift)
+  for (let k = 2; k < count * 2; k += 2) ctx.lineTo(points[k]!, points[k + 1]! - lift)
   ctx.stroke()
+}
+
+// 0 → 1 while the stroke draws on, 1 while it holds, then back to 0 as it lifts off.
+function drawnShare(t: number, periodMs: number, phase: number): number {
+  const u = (((t / periodMs + phase) % 1) + 1) % 1
+  const edge = (1 - HOLD) / 2
+  if (u < edge) return u / edge
+  if (u > 1 - edge) return (1 - u) / edge
+  return 1
 }
 
 function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: Shape, frame: AmbientFrame): void {
@@ -51,12 +62,14 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
       }
       const paint = PAINTS[Math.floor(cellRandom(seed, i, j, 2) * PAINTS.length)]!
       const width = (BRUSH.min + cellRandom(seed, i, j, 3) * (BRUSH.max - BRUSH.min)) * unit
+      const period = CYCLE_MS.min + cellRandom(seed, i, j, 4) * (CYCLE_MS.max - CYCLE_MS.min)
+      const count = Math.max(2, Math.round(drawnShare(t, period, cellRandom(seed, i, j, 5)) * (STEPS + 1)))
       ctx.strokeStyle = paint.body
       ctx.lineWidth = width
-      stroke(ctx, points, 0)
+      stroke(ctx, points, 0, count)
       ctx.strokeStyle = paint.crest
       ctx.lineWidth = width * CREST_WIDTH
-      stroke(ctx, points, width * CREST_LIFT)
+      stroke(ctx, points, width * CREST_LIFT, count)
     }
   }
 }
