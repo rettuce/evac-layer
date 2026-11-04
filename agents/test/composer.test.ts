@@ -106,6 +106,13 @@ test("the source cell names the issuer, its time and the municipality; the detai
   assert.ok(landscape.sources.some((s) => s.type === "jma" && s.bulletin_id === landscape.alert.bulletin_id));
 });
 
+test("a designated-river flood forecast (VXKO) names both issuers, JMA and MLIT, in the source cell", () => {
+  const [landscape] = compose({ alert: { ...advisory(), code: "VXKOii" }, municipality, site, writer });
+  const source = landscape.cells.find((c) => c.id === "source")!;
+  assert.match(source.text.ja, /^気象庁・国土交通省 \d{1,2}\/\d{1,2} \d{2}:\d{2} 発表・輪島市$/);
+  assert.match(source.text.en!, /^JMA · MLIT \d{2}:\d{2}, [A-Z][a-z]{2} \d{1,2} · Wajima$/);
+});
+
 test("a drill bulletin gets 【訓練】 in front of the headline", () => {
   const alert = advisory();
   assert.equal(alert.status, "drill");
