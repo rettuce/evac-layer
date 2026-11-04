@@ -13,6 +13,7 @@ interface CatalogEntry {
   display_level?: AlertLevel
   reason?: string
   approved: boolean
+  stale?: boolean
   report?: { outcome: string; verifier: string; attempts: number; findings: unknown[]; screens_ok: Record<string, boolean> }
 }
 interface Catalog {
@@ -117,6 +118,13 @@ function previewStyle(shape: Shape) {
   return { frame: { width: `${width}px`, height: `${height}px`, transform: `scale(${scale})` }, box: { width: `${width * scale}px`, height: `${height * scale}px` } }
 }
 
+function entryState(entry: CatalogEntry) {
+  if (!entry.screen) return '画面なし'
+  if (entry.stale) return '要再承認'
+  if (entry.approved) return '承認済み'
+  return entry.report?.outcome === 'pass' ? '検査 OK' : '要確認'
+}
+
 function hhmm(iso: string) {
   return iso.slice(5, 16).replace('T', ' ')
 }
@@ -179,7 +187,7 @@ onMounted(() => {
                 <span class="swatch" :style="{ background: e.display_level ? rgbCss(CABINET_OFFICE_5[e.display_level]) : 'transparent' }" />
                 <span class="when">{{ hhmm(e.issued_at) }}</span>
                 <span class="title">{{ e.raw_title }}</span>
-                <span class="state">{{ !e.screen ? '画面なし' : e.approved ? '承認済み' : e.report?.outcome === 'pass' ? '検査 OK' : '要確認' }}</span>
+                <span class="state" :class="{ 'is-stale': e.stale }" :data-stale="e.stale ? '1' : undefined">{{ entryState(e) }}</span>
               </button>
             </li>
           </ol>
@@ -203,6 +211,11 @@ onMounted(() => {
             <span v-for="(ok, shape) in current.report?.screens_ok" :key="shape" class="chip" :class="ok ? 'ok' : 'ng'">{{ shape }} {{ ok ? 'OK' : 'NG' }}</span>
           </dd>
           <dt>指摘</dt><dd>{{ current.report?.findings.length ? `${current.report.findings.length} 件` : 'なし' }}</dd>
+          <dt>承認</dt>
+          <dd :data-approval="current.stale ? 'stale' : current.approved ? 'approved' : 'none'">
+            <span v-if="current.stale" class="chip ng">内容が変わりました・再承認が必要</span>
+            <template v-else>{{ current.approved ? '承認済み' : '未承認' }}</template>
+          </dd>
           <dt>出典</dt>
           <dd>
             <ul v-if="sources.length" class="sources" data-sources>
@@ -220,7 +233,7 @@ onMounted(() => {
           data-action="approve"
           @click="setApproved(current, !current.approved)"
         >
-          {{ current.approved ? '承認済み（取り消す）' : 'この一式を承認' }}
+          {{ current.approved ? '承認済み（取り消す）' : current.stale ? '変更後の一式を再承認' : 'この一式を承認' }}
         </button>
       </aside>
 
@@ -310,6 +323,7 @@ h2 { font-size: 15px; margin: 16px 0 8px; }
 .when { font-variant-numeric: tabular-nums; color: var(--muted); }
 .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .state { font-size: 12px; }
+.state.is-stale { color: #c00; }
 .previews { grid-area: previews; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 16px; padding-top: 16px; }
 .previews figure { margin: 0 0 20px; position: relative; }
 .previews iframe { border: 1px solid var(--line); transform-origin: 0 0; display: block; }
@@ -325,6 +339,7 @@ h2 { font-size: 15px; margin: 16px 0 8px; }
 .approve:hover:not(:disabled) { background: #f0f0f0; }
 .approve:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .approve.is-on { background: var(--accent); color: #fff; }
+.approve.is-on:hover:not(:disabled) { background: var(--accent); opacity: 0.85; }
 .approve:disabled { opacity: 0.4; cursor: not-allowed; }
 .sites { grid-area: sites; border-top: 1px solid var(--line); }
 .sites table { width: 100%; border-collapse: collapse; }
