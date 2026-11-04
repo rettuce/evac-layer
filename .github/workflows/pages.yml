@@ -47,6 +47,10 @@ jobs:
           cp -R sim/dist/. site/
           mkdir -p site/app
           cp -R app/.output/public/. site/app/
+      - name: Fetch the ambient loops (GitHub Release ambient-loops-v1, not in git)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download ambient-loops-v1 --repo rettuce/evac-layer --pattern '*.mp4' -D site/ambient
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

@@ -1,10 +1,9 @@
-import { PerspectiveCamera, Scene, WebGLRenderer } from 'three'
+import { PerspectiveCamera, Raycaster, Scene, Vector2, WebGLRenderer } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js'
 import { CameraRig, FILM_GAUGE_MM, poseToQuery, presetFromQuery, presetsFromGltf } from './cameras'
 import { Displays } from './displays'
 import { applyRenderMode, loadRoom, type RenderMode } from './room'
-import { loadCrops, type AmbientScene, type Content } from './screenUrl'
+import { SCENES, loadCrops, screenUrl, type AmbientScene, type Content } from './screenUrl'
 import { buildUi, fpsMeter } from './ui'
 
 const INITIAL: { content: Content; scene: AmbientScene; mode: RenderMode; preset: string } = { content: 'calm', scene: 'brush-flow', mode: 'textured', preset: 'hero' }
@@ -22,10 +21,6 @@ const scene = new Scene()
 const camera = new PerspectiveCamera(50, innerWidth / innerHeight, NEAR_M, FAR_M)
 camera.filmGauge = FILM_GAUGE_MM
 
-const css3d = new CSS3DRenderer()
-css3d.domElement.className = 'css3d'
-stage.appendChild(css3d.domElement)
-
 const webgl = new WebGLRenderer({ antialias: true, alpha: true })
 webgl.setPixelRatio(Math.min(devicePixelRatio, 2))
 webgl.setClearColor(0x000000, 0)
@@ -40,7 +35,6 @@ function resize() {
   camera.aspect = innerWidth / innerHeight
   camera.updateProjectionMatrix()
   webgl.setSize(innerWidth, innerHeight)
-  css3d.setSize(innerWidth, innerHeight)
 }
 addEventListener('resize', resize)
 resize()
@@ -64,16 +58,27 @@ const pinned = presetFromQuery('cam', new URLSearchParams(location.search).get('
 const first = pinned ?? presets.find((preset) => preset.name === INITIAL.preset) ?? presets[0]
 if (first) rig.jumpTo(first)
 
-const displays = new Displays(scene, room.displayMeshes, crops, INITIAL, camera)
+const displays = new Displays(room.displayMeshes, crops, INITIAL)
 const summary = `${room.pieces.length} pieces · ${displays.faces.length} faces · ${presets.length} cameras`
-status.textContent = `${summary} · loading pages 0/${displays.totalPages}`
-displays.onProgress = (loaded, total) => {
-  status.textContent = loaded < total ? `${summary} · loading pages ${loaded}/${total}` : summary
-}
+status.textContent = 'loading video …'
 
-buildUi(document.getElementById('ui')!, presets, INITIAL, {
+const CLICK_SLOP_PX = 4
+const raycaster = new Raycaster()
+const pointer = new Vector2()
+let downAt: { x: number; y: number } | undefined
+stage.style.cursor = 'pointer'
+stage.addEventListener('pointerdown', (event) => { downAt = { x: event.clientX, y: event.clientY } })
+stage.addEventListener('pointerup', (event) => {
+  if (!downAt || Math.hypot(event.clientX - downAt.x, event.clientY - downAt.y) >= CLICK_SLOP_PX) return
+  pointer.set((event.clientX / innerWidth) * 2 - 1, -(event.clientY / innerHeight) * 2 + 1)
+  raycaster.setFromCamera(pointer, camera)
+  const face = displays.faceAt(raycaster)
+  if (face) window.open(screenUrl(face.extras, displays.content, displays.scene, crops), '_blank', 'noopener')
+})
+
+const ui = buildUi(document.getElementById('ui')!, presets, INITIAL, {
   onContent: (content) => displays.setContent(content),
-  onScene: (ambientScene) => displays.setScene(ambientScene),
+  onScene: (ambientScene) => { void displays.setScene(ambientScene) },
   onRenderMode: (mode) => applyRenderMode(room, mode),
   onCamera: (preset) => rig.flyTo(preset),
   onCopyCamera: () => {
@@ -81,6 +86,22 @@ buildUi(document.getElementById('ui')!, presets, INITIAL, {
     console.log(query)
     void navigator.clipboard?.writeText(query)
   },
+})
+
+for (const ambientScene of SCENES) {
+  void displays.hasVideo(ambientScene).then((available) => ui.setSceneAvailable(ambientScene, available))
+}
+void displays.hasVideo(INITIAL.scene).then(async (available) => {
+  if (!available) {
+    status.textContent = `video not found: ${displays.videoUrl(INITIAL.scene)}`
+    return
+  }
+  try {
+    await displays.start()
+    status.textContent = summary
+  } catch (error) {
+    status.textContent = String(error)
+  }
 })
 
 // Measurement switches for DevTools (S-4 v2): uncapped draws, WebGL off, and the last loop times.
@@ -95,9 +116,8 @@ webgl.setAnimationLoop((nowMs) => {
   lastDrawMs = nowMs
   const started = performance.now()
   controls.update()
-  displays.updateZoom(camera, innerHeight)
+  displays.update()
   if (perf.webgl) webgl.render(scene, camera)
-  css3d.render(scene, camera)
   if (perf.loopMs.length < 600) perf.loopMs.push(performance.now() - started)
   fps(nowMs)
 })

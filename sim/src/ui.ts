@@ -42,17 +42,28 @@ function radioButtons<T extends string>(parent: HTMLElement, options: [T, string
   return [...buttons.values()]
 }
 
-export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { content: Content; scene: AmbientScene; mode: RenderMode }, handlers: UiHandlers): void {
+export interface Ui {
+  setSceneAvailable: (scene: AmbientScene, available: boolean) => void
+}
+
+export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { content: Content; scene: AmbientScene; mode: RenderMode }, handlers: UiHandlers): Ui {
   const sceneButtons: HTMLButtonElement[] = []
-  const enableScenes = (content: Content) => {
-    for (const button of sceneButtons) button.disabled = content !== 'calm'
+  const missing = new Set<AmbientScene>()
+  let shownContent = initial.content
+  const enableScenes = () => {
+    sceneButtons.forEach((button, index) => {
+      const scene = SCENES[index]!
+      button.disabled = shownContent !== 'calm' || missing.has(scene)
+      button.title = missing.has(scene) ? '動画未配置' : ''
+    })
   }
   radioButtons(group(root, 'content'), CONTENTS, initial.content, (content) => {
-    enableScenes(content)
+    shownContent = content
+    enableScenes()
     handlers.onContent(content)
   })
   sceneButtons.push(...radioButtons(group(root, 'ambient scene (平常時)'), SCENES.map((id) => [id, id]), initial.scene, handlers.onScene))
-  enableScenes(initial.content)
+  enableScenes()
   radioButtons(group(root, 'render'), RENDER_MODES, initial.mode, handlers.onRenderMode)
   const cameras = group(root, 'camera')
   for (const preset of presets) {
@@ -66,6 +77,13 @@ export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { c
   copy.title = 'copies ?cam=… for this view to the clipboard and the console'
   copy.addEventListener('click', handlers.onCopyCamera)
   cameras.appendChild(copy)
+  return {
+    setSceneAvailable: (scene, available) => {
+      if (available) missing.delete(scene)
+      else missing.add(scene)
+      enableScenes()
+    },
+  }
 }
 
 export function fpsMeter(element: HTMLElement): (nowMs: number) => void {

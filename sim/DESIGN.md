@@ -140,3 +140,11 @@ the same renderer process held the page at 10 fps for 10–15 s) and that every 
   four faces can be offset by the load-time difference; the replay clock itself is shared by the server
   (`sharedReplayOrigin`), so the shown bulletin is the same on every face.
 - `demo/blender/build_scene.py` is not modified. If D-7 changes crops or UVs, re-run the export.
+
+## S-6 (2026-11-05): VideoTexture + PNG swap
+
+- 22 live iframes cost in proportion to the face count, a scene or content switch reloaded or re-rendered every
+  page, and each page's WebGL canvas counts against the browser's limit of 16 contexts.
+- The intended design was always one off-screen canvas cropped per face: 平常時 is now one loop video per scene in a
+  shared `VideoTexture`, each face a plane with fixed UVs into it; EVAC LAYER is 25 PNG stills swapped every 2.5 s.
+- The clock is the app's `drawOverlay` on a transparent canvas plane 1 mm in front of each face, redrawn at 4 Hz.
