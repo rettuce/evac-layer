@@ -1,18 +1,44 @@
+import { createHash } from 'node:crypto'
+
+export interface LayoutApproval {
+  approved: boolean
+  updated_at: string
+  digest?: string
+}
+
 export interface Approvals {
   version: '0.1'
-  layouts: Record<string, { approved: boolean; updated_at: string }>
+  layouts: Record<string, LayoutApproval>
   sites: Record<string, { auto_publish: boolean; updated_at: string }>
+}
+
+// An approval is bound to the bytes that were approved: the shape files of the bulletin. A regenerated layout
+// gets a new digest and falls back to unapproved until an operator looks at it again. Records written before
+// digests existed carry none and stay valid until they are approved again, which binds them.
+export function layoutDigest(files: { shape: string; body: string }[]): string {
+  const hash = createHash('sha256')
+  for (const file of [...files].sort((a, b) => a.shape.localeCompare(b.shape))) hash.update(`${file.shape}\n${file.body}\n`)
+  return `sha256:${hash.digest('hex')}`
+}
+
+export function approvalState(record: LayoutApproval | undefined, digest: string | undefined): { approved: boolean; stale: boolean } {
+  if (!record?.approved) return { approved: false, stale: false }
+  const stale = digest !== undefined && record.digest !== undefined && record.digest !== digest
+  return { approved: !stale, stale }
 }
 
 export function layoutKey(municipality: string, bulletinId: string): string {
   return `${municipality}/${bulletinId}`
 }
 
-export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved'
+export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale'
 
-// Screens only ever show layouts an operator approved, and only at sites with auto publish on.
-export function liveLayoutGate(approvals: Approvals, site: string | undefined, municipality: string, bulletinId: string): LiveLayoutGate {
+// Screens only ever show layouts an operator approved, and only at sites with auto publish on. With the current
+// digest of the layout files, the approval must also be for these very files.
+export function liveLayoutGate(approvals: Approvals, site: string | undefined, municipality: string, bulletinId: string, digest?: string): LiveLayoutGate {
   if (!site || !approvals.sites[site]?.auto_publish) return 'auto-publish-off'
-  if (!approvals.layouts[layoutKey(municipality, bulletinId)]?.approved) return 'unapproved'
+  const state = approvalState(approvals.layouts[layoutKey(municipality, bulletinId)], digest)
+  if (state.stale) return 'stale'
+  if (!state.approved) return 'unapproved'
   return 'ok'
 }

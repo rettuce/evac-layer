@@ -26,7 +26,7 @@ Then generate and approve the set once, in calm times:
 pnpm -F agents fanout --municipalities 05210 --verifier vision --writer live   # every recorded bulletin → layouts for every shape
 ```
 
-Open `/admin`, review the screens and approve the set, then switch automatic delivery on for the site (`POST /api/admin/site` with `{"site_id": "...", "auto_publish": true}`). From here on the screen receives guidance for its own spot through any of the three ways below.
+Open `/admin`, review the screens and approve the set, then switch automatic delivery on for the site (`POST /api/admin/site` with `{"site_id": "...", "auto_publish": true}`). An approval is bound to the layout files it was given for (a digest of the shape JSONs is stored with it), so a bulletin whose screens were regenerated is held back as stale until someone approves it again. From here on the screen receives guidance for its own spot through any of the three ways below.
 
 ## 1. Pull — poll a feed
 

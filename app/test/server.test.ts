@@ -72,6 +72,21 @@ describe('production build', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F 
     const approvals = JSON.parse(await readFile(join(dataDir, 'approvals.json'), 'utf8'))
     assert.equal(approvals.sites[SITE].auto_publish, true)
     assert.equal(approvals.layouts[`${MUNICIPALITY}/${BULLETIN}`].approved, true)
+    assert.match(approvals.layouts[`${MUNICIPALITY}/${BULLETIN}`].digest, /^sha256:[0-9a-f]{64}$/)
+  })
+
+  test('a regenerated layout is stale until it is approved again', async () => {
+    const file = join(dataDir, 'layouts', MUNICIPALITY, BULLETIN, '16x9.json')
+    const screen = JSON.parse(await readFile(file, 'utf8'))
+    screen.cells[0].text.ja = `${screen.cells[0].text.ja}（再生成）`
+    await writeFile(file, JSON.stringify(screen))
+    const stale = await fetch(`${base}${layoutPath}`)
+    assert.equal(stale.status, 403)
+    assert.equal((await stale.json()).data.reason, 'stale')
+    assert.equal((await fetch(`${base}/api/feed/${SITE}`)).status, 200)
+
+    assert.equal((await postJson(base, '/api/admin/approve', { municipality: MUNICIPALITY, bulletin_id: BULLETIN, approved: true })).status, 200)
+    assert.equal((await fetch(`${base}${layoutPath}`)).status, 200)
   })
 
   test('the dev layout bridge does not exist in production', async () => {

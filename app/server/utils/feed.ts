@@ -46,7 +46,8 @@ export async function isDeliverable(site: string, bulletin: string): Promise<boo
   const siteFile = await readSite(site)
   if (!siteFile) return false
   const municipality = siteFile.replay?.municipality ?? siteFile.municipality_id
-  return liveLayoutGate(await readApprovals(), site, municipality, bulletin) === 'ok'
+  const digest = await currentLayoutDigest(municipality, bulletin)
+  return digest !== undefined && liveLayoutGate(await readApprovals(), site, municipality, bulletin, digest) === 'ok'
 }
 
 export async function currentFeed(siteId: string): Promise<Feed | undefined> {
@@ -61,9 +62,13 @@ export async function currentFeed(siteId: string): Promise<Feed | undefined> {
   const speed = site.replay?.speed ?? DEFAULT_REPLAY_SPEED
   const rows = rowsInWindow(replay.rows, window)
   const approvals = await readApprovals()
-  const gated = rows.filter((row) => row.screen && liveLayoutGate(approvals, site.id, municipality, row.bulletin_id) === 'ok')
-  const withLayouts = await Promise.all(gated.map(async (row) => ((await shapesWithLayout(municipality, row.bulletin_id)).length ? row.bulletin_id : undefined)))
-  const available = new Set(withLayouts.filter((id) => id !== undefined))
+  const deliverable = await Promise.all(
+    rows.filter((row) => row.screen).map(async (row) => {
+      const digest = await currentLayoutDigest(municipality, row.bulletin_id)
+      return digest !== undefined && liveLayoutGate(approvals, site.id, municipality, row.bulletin_id, digest) === 'ok' ? row.bulletin_id : undefined
+    }),
+  )
+  const available = new Set(deliverable.filter((id) => id !== undefined))
 
   const elapsedMs = Date.now() - sharedReplayOrigin(municipality, speed, window, false)
   const bulletin = currentBulletinAt(rows, elapsedMs, speed, (id) => available.has(id))
