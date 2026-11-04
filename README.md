@@ -5,10 +5,10 @@
 
 # EVAC LAYER
 
-**スクリーンはもうある。**
-街にすでにあるスクリーンを、いちばん伝えなければならない瞬間に、誰にでも読める避難案内へ変える。
+**EVAC LAYER は、いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステムです。**
+スクリーンはもうある。街にすでにあるスクリーンを、いちばん伝えなければならない瞬間に、誰にでも読める避難案内へ変える。
 
-*The screens are already there.* Turn the screens a city already has into evacuation guidance anyone can read. [English summary ↓](#english-summary)
+*EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.* The screens are already there: turn them into evacuation guidance anyone can read. [English summary ↓](#english-summary)
 
 **触れるデモ（Web シミュレーター）: https://rettuce.github.io/evac-layer/** — 駅コンコースの 22 面に平常時 / EVAC LAYER を切り替えて表示（`sim/`）。
 
@@ -169,7 +169,7 @@ AGPL-3.0（`LICENSE`）。Copyright (C) 2026 You Tanaka。
 
 ## English summary
 
-**The screens are already there, and each one knows where it stands.** What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it, for any screen in Japan, generated with Claude.
+**EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.** The screens are already there, and each one knows where it stands. What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it, for any screen in Japan, generated with Claude.
 
 Give EVAC LAYER the coordinates of a screen and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. It reads the municipality's own hazard-map PDFs with citations (Reader, Claude), listens to JMA disaster-prevention XML, writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five screen shapes, inspects every screen by rules, in a browser and by Vision (Claude), and fires `alert` / `clear` events carrying only operator-approved screens, as a feed, a signed webhook or static files. Any signage system can act on them.
 
