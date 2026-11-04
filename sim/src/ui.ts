@@ -1,9 +1,10 @@
 import type { CameraPreset } from './cameras'
 import type { RenderMode } from './room'
-import type { Content } from './screenUrl'
+import { SCENES, type Content, type AmbientScene } from './screenUrl'
 
 export interface UiHandlers {
   onContent: (content: Content) => void
+  onScene: (scene: AmbientScene) => void
   onRenderMode: (mode: RenderMode) => void
   onCamera: (preset: CameraPreset) => void
 }
@@ -21,7 +22,7 @@ function group(root: HTMLElement, title: string): HTMLElement {
   return element
 }
 
-function radioButtons<T extends string>(parent: HTMLElement, options: [T, string][], initial: T, onPick: (value: T) => void): void {
+function radioButtons<T extends string>(parent: HTMLElement, options: [T, string][], initial: T, onPick: (value: T) => void): HTMLButtonElement[] {
   const buttons = new Map<T, HTMLButtonElement>()
   const select = (value: T) => {
     for (const [key, button] of buttons) button.setAttribute('aria-pressed', String(key === value))
@@ -37,10 +38,20 @@ function radioButtons<T extends string>(parent: HTMLElement, options: [T, string
     parent.appendChild(button)
   }
   select(initial)
+  return [...buttons.values()]
 }
 
-export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { content: Content; mode: RenderMode }, handlers: UiHandlers): void {
-  radioButtons(group(root, 'content'), CONTENTS, initial.content, handlers.onContent)
+export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { content: Content; scene: AmbientScene; mode: RenderMode }, handlers: UiHandlers): void {
+  const sceneButtons: HTMLButtonElement[] = []
+  const enableScenes = (content: Content) => {
+    for (const button of sceneButtons) button.disabled = content !== 'calm'
+  }
+  radioButtons(group(root, 'content'), CONTENTS, initial.content, (content) => {
+    enableScenes(content)
+    handlers.onContent(content)
+  })
+  sceneButtons.push(...radioButtons(group(root, 'ambient scene (平常時)'), SCENES.map((id) => [id, id]), initial.scene, handlers.onScene))
+  enableScenes(initial.content)
   radioButtons(group(root, 'render'), RENDER_MODES, initial.mode, handlers.onRenderMode)
   const cameras = group(root, 'camera')
   for (const preset of presets) {

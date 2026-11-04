@@ -1,4 +1,6 @@
 export type Content = 'calm' | 'evac'
+export type AmbientScene = (typeof SCENES)[number]
+export const SCENES = ['brush-flow', 'etched-streams', 'half-discs', 'ink-bloom', 'module-field', 'quad-subdivision'] as const
 
 export interface DisplayExtras {
   screen: string
@@ -26,7 +28,6 @@ const MUNICIPALITY = '05210'
 const SITE_ID = '05210-demo-honjo-station'
 const ROOM_ID = 'concourse'
 const SITE = { site_name: '羽後本荘駅', lat: '39.38633978', lng: '140.0563304' }
-const SCENE = 'color-planes'
 // A quiet day for the calm screen; the 2026-10-21 flood from just before the level-4 bulletin (18:15 JST)
 // for EVAC LAYER, replayed at real speed so the level-4 screen holds until the level-5 bulletin at 19:45.
 const WINDOWS: Record<Content, { from: string; to: string }> = {
@@ -39,11 +40,11 @@ export async function loadCrops(url: string): Promise<CropsFile | undefined> {
   return response.ok ? ((await response.json()) as CropsFile) : undefined
 }
 
-export function screenUrl(extras: DisplayExtras, content: Content, crops?: CropsFile): string {
+export function screenUrl(extras: DisplayExtras, content: Content, scene: AmbientScene, crops?: CropsFile): string {
   const canvas = crops?.canvas ?? extras.canvas
   const crop = crops?.crops[extras.screen] ?? extras.crop
   const params = new URLSearchParams({
-    mode: 'live', municipality: MUNICIPALITY, site: SITE_ID, speed: '1', ...WINDOWS[content], scene: SCENE,
+    mode: 'live', municipality: MUNICIPALITY, site: SITE_ID, speed: '1', ...WINDOWS[content], scene,
     shape: crops?.shapes[extras.screen] ?? extras.shape, canvas: `${canvas[0]}x${canvas[1]}`, crop: crop.join(','), canvas_id: ROOM_ID,
     ...SITE,
   })

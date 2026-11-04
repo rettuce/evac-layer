@@ -77,6 +77,20 @@ switch between colour×AO, white×AO and wire without a second material set in t
   `demo/capture/record.mjs` does before a recording, through the loopback-only admin API.
 - Camera flights: position and focal length sampled every 100 ms follow the ease-in-out curve over 1.2 s.
 
+## S-2 (2026-11-04, 田中 FB)
+
+- **Column corners showed a dark line.** Numbers: the LED wrap's face arc length is 1.0471 m (1.000 flat +
+  2 × 0.0236 of arc), so the flat CSS3D plane ended 0.5236 m from the column centre while the corner edge is
+  at 0.5310 m: a 7.4 mm notch per corner edge that no page covered, and the hole was the curved wrap itself,
+  so the arc past the plane's end showed the black CSS3D background. Fix: each face is a flat quad 2 × 0.531 =
+  1.062 m wide that meets its neighbours at the corner edge (content 1.4 % larger than on the arc), and the
+  depth-only hole is now built from the same extras as the CSS3D plane (`PlaneGeometry`), so hole and page
+  are the same rectangle on every display; the glb's display meshes are kept for their extras but hidden.
+- The front wall (`wall_front`, behind the hero camera) is removed in the export so the viewer can orbit from
+  outside. No display is mounted on it, so the crops and face list are unchanged.
+- Calm content can switch between six ambient scenes (`scene=<id>` on every iframe); the buttons are
+  disabled while EVAC LAYER is shown because the alert layout covers the scene.
+
 ## Not done / open
 
 - Lights are not baked (no `COMBINED`): the view is unlit albedo × AO, which is what the spec's three
