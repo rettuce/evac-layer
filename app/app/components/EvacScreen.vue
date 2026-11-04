@@ -6,7 +6,8 @@ import { SHAPES, designScale } from '~~/layout/shapes'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
-import { HEADLINE_STEP_DOWN, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
+import { HEADLINE_STEP_DOWN, LINE_HEIGHT, SHELTER_STEP_DOWN, TYPE_PX } from '~~/layout/typography'
+import { pictogramsSettled } from '~/composables/usePictogramInk'
 
 const props = defineProps<{
   screen: EvacScreen
@@ -30,6 +31,9 @@ const overflowDropped = ref<DroppedCell[]>([])
 const overflow = ref('')
 const levelLabel = computed(() => levelLabelFor(props.screen.template, props.screen.alert.level))
 const headlineScale = ref(1)
+const shelterNarrow = ref(false)
+const distanceBelow = ref(false)
+const languagesNarrow = ref(false)
 const stackedHeadline = computed(() => ['portrait', 'square', 'pillar'].includes(SHAPES[props.shape].cls))
 // 32:9 sets the headline in a narrow column, so it gets the same two-line limit as the stacked bands.
 const headlineLimited = computed(() => stackedHeadline.value || SHAPES[props.shape].cls === 'ribbon')
@@ -69,6 +73,10 @@ const rootStyle = computed(() => ({
   '--band-rule': contrastRatio(band.value, PAGE_BACKGROUND) < BAND_RULE_MIN_CONTRAST ? BAND_RULE_PX : 0,
   '--dark-band': rgbCss(DARK_BAND),
   '--dark-band-ink': rgbCss(inkOn(DARK_BAND)),
+  ...Object.fromEntries(Object.entries(layout.value.type ?? {}).map(([key, px]) => [`--type-${key}`, px])),
+  ...(shelterNarrow.value && layout.value.type?.shelterNarrow ? { '--type-shelter': layout.value.type.shelterNarrow } : {}),
+  ...(shelterNarrow.value && !layout.value.figma ? { '--shelter-scale': SHELTER_STEP_DOWN } : {}),
+  ...(languagesNarrow.value && layout.value.type?.languagesNarrow ? { '--type-languages': layout.value.type.languagesNarrow } : {}),
 }))
 
 const language = computed(() => languageStep(props.elapsedMs))
@@ -91,6 +99,7 @@ function cellClass(cell: LayoutCell) {
     'is-band-row': layout.value.bandRoles?.includes(cell.role),
     'is-dark-band': layout.value.darkBand?.includes(cell.role),
     'is-inline': layout.value.inline?.includes(cell.role),
+    'is-figma': layout.value.figma === true,
   }
 }
 
@@ -121,6 +130,7 @@ function overflowingBoxes(cellEl: HTMLElement): HTMLElement[] {
   )
   return boxes.filter((child) => {
     const r = child.getBoundingClientRect()
+    if (r.width === 0 && r.height === 0) return false
     const outside =
       r.bottom > bounds.bottom + OVERFLOW_TOLERANCE_PX ||
       r.right > bounds.right + OVERFLOW_TOLERANCE_PX ||
@@ -161,15 +171,38 @@ function measureOverflow(): { cells: CellOverflow[]; screen: boolean } {
 
 let fitGeneration = 0
 
+// A name that needs more than one line, or runs past its row (a segment that must not break inside).
+function shelterNameWraps(): boolean {
+  const name = root.value?.querySelector<HTMLElement>('.shelter-name-text, .shelter-text > p.t-guide')
+  if (!name) return false
+  const twoLines = name.getBoundingClientRect().height > parseFloat(getComputedStyle(name).lineHeight) + OVERFLOW_TOLERANCE_PX
+  return twoLines || name.scrollWidth > name.clientWidth + OVERFLOW_TOLERANCE_PX
+}
+
 async function fit() {
   const generation = ++fitGeneration
   ready.value = false
   overflowDropped.value = []
   headlineScale.value = 1
+  shelterNarrow.value = false
+  distanceBelow.value = false
+  languagesNarrow.value = false
   await loadFonts()
   for (;;) {
     await nextTick()
+    await pictogramsSettled()
+    await nextTick()
     if (generation !== fitGeneration) return
+    // A facility name that does not fit its line is set one step smaller (the artboard's 90 → 72);
+    // on the artboard the distance then moves under a name that still needs two lines.
+    if (!shelterNarrow.value && shelterNameWraps()) {
+      shelterNarrow.value = true
+      continue
+    }
+    if (layout.value.figma && !distanceBelow.value && shelterNameWraps()) {
+      distanceBelow.value = true
+      continue
+    }
     const over = measureOverflow()
     if (!over.cells.length && !over.screen) {
       overflow.value = ''
@@ -178,6 +211,10 @@ async function fit() {
     const headlineOver = over.cells.some((cell) => placed.value.find((c) => c.id === cell.cellId)?.role === 'headline')
     if (headlineOver && headlineLimited.value && headlineScale.value === 1) {
       headlineScale.value = HEADLINE_STEP_DOWN
+      continue
+    }
+    if (layout.value.figma && !languagesNarrow.value) {
+      languagesNarrow.value = true
       continue
     }
     const victim = nextOverflowVictim(placed.value, layout.value)
@@ -233,6 +270,9 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-missing-required="missing.join(',') || undefined"
     :data-overflow="overflow || undefined"
     :data-headline-scale="headlineScale !== 1 ? headlineScale : undefined"
+    :data-shelter-scale="shelterNarrow ? 'narrow' : undefined"
+    :data-distance="distanceBelow ? 'below' : undefined"
+    :data-languages-scale="languagesNarrow ? 'narrow' : undefined"
     :data-ready="ready ? '1' : '0'"
     :data-bulletin-id="screen.alert.bulletin_id"
   >
@@ -258,6 +298,8 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :easy-in-action="easyInAction"
         :headline-scale="headlineScale"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
+        :figma-rules="layout.figma === true"
+        :distance-below="distanceBelow"
         :language-index="language.index"
         :language-style="languageStyle"
       />

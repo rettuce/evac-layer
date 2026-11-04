@@ -53,8 +53,10 @@ body {
 .cell {
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
+}
+.cell.is-figma {
   overflow: clip;
-  /* Text is trimmed to the cap height; kanji rise about 0.15 em above it, which must stay visible. */
   overflow-clip-margin: calc(24 * var(--px));
 }
 .cell.is-band {
@@ -93,6 +95,9 @@ body {
   line-height: var(--lh-guide);
   font-weight: 700;
 }
+.role-shelter .shelter-text > .t-guide {
+  font-size: calc(var(--fs-guide) * var(--type-scale, 1) * var(--shelter-scale, 1) * var(--px));
+}
 .t-fine {
   font-size: calc(var(--fs-fine) * var(--px));
   line-height: var(--lh-fine);
@@ -105,12 +110,118 @@ body {
   word-break: normal;
 }
 
-/* Lines are trimmed to the cap height and the baseline, so the first line of every body cell starts on
-   the cell's top edge and cells in one row share a top line whatever their type size. */
-.role-action .t-action,
-.role-action .t-guide,
-.role-direction .t-guide,
-.role-shelter .t-guide,
-.role-shelter .t-fine {
-  text-box: trim-both cap alphabetic;
+
+/* 9:16 after 田中's Figma artboard (templates.ts PORTRAIT): type sizes per element, pictograms placed by ink,
+   no cap trimming, labels in #555. Values are the artboard's px at 1080 × 1920. */
+.evac-screen.shape-portrait .is-figma .role-headline.is-stacked {
+  display: block;
+  position: relative;
+  min-height: 0;
+  padding: 0;
+}
+.evac-screen.shape-portrait .is-figma .role-headline > .pictogram {
+  position: absolute;
+  left: calc(34 * var(--px));
+  top: calc(38 * var(--px));
+}
+.evac-screen.shape-portrait .is-figma .role-headline .headline-text {
+  position: absolute;
+  left: calc(184 * var(--px));
+  right: calc(37 * var(--px));
+  top: calc(26 * var(--px));
+  font-size: calc(var(--type-headline) * var(--headline-scale, 1) * var(--px));
+  line-height: 1.1;
+  text-wrap: nowrap;
+}
+.evac-screen.shape-portrait .is-figma .role-headline .level-label {
+  position: absolute;
+  right: calc(37 * var(--px));
+  top: calc(111 * var(--px));
+  font-size: calc(var(--type-level) * var(--px));
+  line-height: 1.1;
+}
+.evac-screen.shape-portrait .is-figma .action-text {
+  font-size: calc(var(--type-action) * var(--px));
+  line-height: 1.1;
+}
+.evac-screen.shape-portrait .is-figma .role-action {
+  gap: calc(54 * var(--px));
+}
+.evac-screen.shape-portrait .is-figma .action-sub {
+  margin-top: 0;
+  align-items: flex-start;
+}
+.evac-screen.shape-portrait .is-figma .role-direction {
+  gap: calc(39 * var(--px));
+  align-items: flex-start;
+}
+.evac-screen.shape-portrait .is-figma .role-direction > .pictogram {
+  margin-top: calc(15 * var(--px));
+}
+.evac-screen.shape-portrait .is-figma .direction-text {
+  font-size: calc(var(--type-direction) * var(--px));
+  line-height: 1.1;
+}
+.evac-screen.shape-portrait .is-figma .shelter-name {
+  align-items: flex-start;
+  gap: calc(38 * var(--px));
+}
+.evac-screen.shape-portrait .is-figma .shelter-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(3 * var(--px));
+  gap: calc(10 * var(--px));
+}
+.evac-screen.shape-portrait .is-figma .action-sub {
+  align-items: flex-start;
+}
+/* The artboard sets the figure's baseline 8 px below the name's, and the Latin language label 8 px above the line's. */
+.evac-screen.shape-portrait .is-figma .name-row:not(.is-stacked) .distance {
+  position: relative;
+  top: calc(8 * var(--px));
+}
+.evac-screen.shape-portrait .is-figma .shelter-kind {
+  font-size: calc(var(--type-label) * var(--px));
+  line-height: 1.1;
+  color: var(--label-ink);
+  opacity: 1;
+}
+.evac-screen.shape-portrait .is-figma .shelter-name-text,
+.evac-screen.shape-portrait .is-figma .distance {
+  font-size: calc(var(--type-shelter) * var(--px));
+  line-height: 1.1;
+}
+/* A facility name breaks at phrase boundaries only; balancing let a name break inside a word. */
+.evac-screen.shape-portrait .is-figma .shelter-name-text {
+  text-wrap: wrap;
+  overflow-wrap: normal;
+}
+.evac-screen.shape-portrait .is-figma .lang-label {
+  width: calc(292 * var(--px));
+  font-size: calc(var(--type-label) * var(--px));
+  line-height: 1.1;
+  color: var(--label-ink);
+  opacity: 1;
+}
+.evac-screen.shape-portrait .is-figma .lang-line {
+  gap: 0;
+}
+.evac-screen.shape-portrait .is-figma .lang-line:not([lang='ja']) .lang-label {
+  position: relative;
+  top: calc(-8 * var(--px));
+}
+.evac-screen.shape-portrait .is-figma .lang-text {
+  font-size: calc(var(--type-languages) * var(--px));
+  line-height: 1.18;
+}
+.evac-screen.shape-portrait .is-figma .lang-variant {
+  gap: calc(35 * var(--px));
+}
+.evac-screen.shape-portrait .is-figma .source-text {
+  font-size: calc(var(--type-source) * var(--px));
+  line-height: 1.1;
+}
+.evac-screen.shape-portrait {
+  --label-ink: #555;
 }
