@@ -1,8 +1,10 @@
-"""Assemble the 3-minute demo from 3D cuts, screen captures and Japanese captions.
+"""Assemble the 3-minute demo from 3D cuts and screen captures.
 
-python3 demo/compose/compose.py [--edl demo/compose/edl.json]
+python3 demo/compose/compose.py [--edl demo/compose/edl.json] [--mode vcon|clean] [--out <mp4>]
 
-Each segment is normalized to the EDL size/fps, captioned with drawtext, and concatenated
+--mode clean leaves out every subtitle, telop and the logo (the final edit lays Figma PNGs over it, timed by
+overlays.py); --mode vcon burns them in, Japanese over English, for checking the timing.
+Each segment is normalized to the EDL size/fps and concatenated
 without audio (sound is mixed in a later pass). A missing 3D cut whose screen recordings exist
 becomes a four-shape preview of those recordings; any other missing source becomes a labeled
 slate, so the full timeline can be previewed before every cut exists.
@@ -16,6 +18,8 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
+from overlays import lines
+
 HERE = Path(__file__).resolve().parent
 SCREENS_DIR = HERE.parent / "screens"
 FONT_DIR = HERE / "fonts"
@@ -23,9 +27,12 @@ FONT_URL = "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/Subse
 FONT_LICENSE_URL = "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/LICENSE"
 FONT_PATH = FONT_DIR / "NotoSansJP-Bold.otf"
 
-CAPTION_SIZE_RATIO = 0.042
+SUBTITLE_SIZE_RATIO = 0.034
+SUBTITLE_EN_SIZE_RATIO = 0.024
+TELOP_SIZE_RATIO = 0.06
+TELOP_EN_SIZE_RATIO = 0.032
+LOGO_WIDTH_RATIO = 0.5
 SLATE_SIZE_RATIO = 0.03
-TITLE_SIZE_RATIO = 0.07
 SLATE_COLOR = "0x1b1b1f"
 ENCODE = ["-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p", "-an"]
 
@@ -60,22 +67,27 @@ def write_text(work, name, text):
     return path
 
 
-def segment_filters(segment, work, width, height):
+def segment_filters(segment, work, width, height, mode):
+    if mode == "clean":
+        return []
     filters = []
-    over_picture = bool(segment.get("src"))
-    if segment.get("caption"):
-        size = round(height * CAPTION_SIZE_RATIO)
-        caption = drawtext(write_text(work, f"cap_{segment['cut']}", segment["caption"]), size, f"h-text_h-{size * 2}")
-        if segment.get("caption_from_s"):
-            caption += f":enable='gte(t\\,{segment['caption_from_s']})'"
-        filters.append(caption)
-    if segment.get("title"):
-        size = round(height * TITLE_SIZE_RATIO)
-        y = "(h-text_h)/2-th" if segment.get("subtitle") else "(h-text_h)/2"
-        filters.append(drawtext(write_text(work, f"title_{segment['cut']}", segment["title"]), size, y, box=over_picture))
-    if segment.get("subtitle"):
-        size = round(height * CAPTION_SIZE_RATIO)
-        filters.append(drawtext(write_text(work, f"sub_{segment['cut']}", segment["subtitle"]), size, f"h/2+{size * 3}", box=over_picture))
+    box = bool(segment.get("src"))
+    cut = segment["cut"]
+    if segment.get("subtitle_ja"):
+        ja = round(height * SUBTITLE_SIZE_RATIO)
+        en = round(height * SUBTITLE_EN_SIZE_RATIO)
+        en_lines = lines(segment.get("subtitle_en", ""))
+        en_height = (en_lines.count("\n") + 1) * en * 4 // 3 if en_lines else 0
+        enable = f":enable='gte(t\\,{segment['subtitle_from_s']})'" if segment.get("subtitle_from_s") else ""
+        filters.append(drawtext(write_text(work, f"sub_ja_{cut}", lines(segment["subtitle_ja"])), ja, f"h-text_h-{ja + en_height + en}", box) + enable)
+        if en_lines:
+            filters.append(drawtext(write_text(work, f"sub_en_{cut}", en_lines), en, f"h-text_h-{ja}", box) + enable)
+    if segment.get("telop_ja"):
+        ja = round(height * TELOP_SIZE_RATIO)
+        en = round(height * TELOP_EN_SIZE_RATIO)
+        filters.append(drawtext(write_text(work, f"telop_ja_{cut}", lines(segment["telop_ja"])), ja, "(h-text_h)/2-th", box))
+        if segment.get("telop_en") and segment["telop_en"] != segment["telop_ja"]:
+            filters.append(drawtext(write_text(work, f"telop_en_{cut}", lines(segment["telop_en"])), en, f"h/2+{ja}", box))
     return filters
 
 
@@ -123,14 +135,14 @@ def slate_text(segment, edl):
     return "\n".join(lines)
 
 
-def render_segment(segment, index, work, edl):
+def render_segment(segment, index, work, edl, mode):
     width, height = edl["size"]
     fps = edl["fps"]
     out = work / f"seg_{index:02d}.mp4"
     seconds = str(segment["seconds"])
     src = segment.get("src")
     source = (HERE / src).resolve() if src else None
-    filters = segment_filters(segment, work, width, height)
+    filters = segment_filters(segment, work, width, height, mode)
     grid = None if source and source.exists() else screen_grid_inputs(segment)
     if grid:
         size = round(height * SLATE_SIZE_RATIO)
@@ -146,19 +158,28 @@ def render_segment(segment, index, work, edl):
         print(f"CUT {segment['cut']:>3} {segment['seconds']:>3}s grid {segment['screens']} x{len(grid)}")
         return out
     if source and source.exists():
-        inputs = ["-i", str(source)]
+        inputs = ["-sseof", "-0.1", "-i", str(source)] if segment.get("freeze") == "last" else ["-i", str(source)]
         fit = f"scale={width}:{height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,fps={fps},tpad=stop_mode=clone:stop=-1"
         filters.insert(0, fit)
-        status = f"ok  {source.name}"
+        status = f"ok  {source.name}" + (" (last frame held)" if segment.get("freeze") == "last" else "")
     else:
         inputs = ["-f", "lavfi", "-i", f"color=c={SLATE_COLOR if src else 'black'}:s={width}x{height}:r={fps}"]
         if src:
             size = round(height * SLATE_SIZE_RATIO)
             filters.insert(0, drawtext(write_text(work, f"slate_{segment['cut']}", slate_text(segment, edl)), size, f"{size * 2}", box=False))
         status = "slate" if src else "card"
-    command = ["ffmpeg", "-y", "-loglevel", "error", *inputs, "-t", seconds]
-    if filters:
-        command += ["-vf", ",".join(filters)]
+    command = ["ffmpeg", "-y", "-loglevel", "error", *inputs]
+    logo = (HERE / segment["logo"]).resolve() if segment.get("logo") and mode == "vcon" else None
+    if logo:
+        command += ["-i", str(logo)]
+        chain = ",".join(filters) if filters else "null"
+        graph = f"[0:v]{chain}[base];[1:v]scale={round(width * LOGO_WIDTH_RATIO)}:-2[logo];[base][logo]overlay=(W-w)/2:(H-h)/2[out]"
+        command += ["-filter_complex", graph, "-map", "[out]", "-t", seconds]
+        status += f" + {logo.name}"
+    else:
+        command += ["-t", seconds]
+        if filters:
+            command += ["-vf", ",".join(filters)]
     subprocess.run([*command, "-r", str(fps), *ENCODE, str(out)], check=True)
     print(f"CUT {segment['cut']:>3} {segment['seconds']:>3}s {status}")
     return out
@@ -176,19 +197,20 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--edl", default=str(HERE / "edl.json"))
     parser.add_argument("--out")
+    parser.add_argument("--mode", choices=("vcon", "clean"), default="vcon")
     args = parser.parse_args()
     edl = json.loads(Path(args.edl).read_text(encoding="utf-8"))
     width, height = edl["size"]
     ensure_font()
     work = Path(tempfile.mkdtemp(prefix="evac-compose-"))
     try:
-        parts = [render_segment(segment, i, work, edl) for i, segment in enumerate(edl["segments"])]
+        parts = [render_segment(segment, i, work, edl, args.mode) for i, segment in enumerate(edl["segments"])]
         out_path = Path(args.out).resolve() if args.out else (HERE / edl["output"]).resolve()
         concat(parts, work, out_path)
     finally:
         shutil.rmtree(work)
     total = sum(segment["seconds"] for segment in edl["segments"])
-    print(f"COMPOSED {out_path} {total}s {width}x{height}@{edl['fps']}")
+    print(f"COMPOSED {out_path} {total}s {width}x{height}@{edl['fps']} mode={args.mode}")
 
 
 if __name__ == "__main__":

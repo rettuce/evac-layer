@@ -37,9 +37,9 @@ SOURCES = {
     "drone": "Drones/Drone Production Element Imaging Bed Deep Bass 01.wav",
 }
 AMBIENCE_CUTS = ["1", "2", "5", "8", "9"]
-# Cut 0 is the cold open: quiet screens switch to the alert at 3.0 s.
+# Cut 0 is the cold open: the calm screen switches to the alert at 5.0 s (15:55:00 on the real-time clock).
 # Cut 5 plays the live switch recording from replay t=5.0 s: Lv3 at 13.1 s, Lv4 at 20.1 s, Lv5 at 24.6 s.
-BEEPS = [("0", 3.0), ("5", 8.1), ("5", 15.1), ("5", 19.6)]
+BEEPS = [("0", 5.0), ("5", 8.1), ("5", 15.1), ("5", 19.6)]
 DRONE_FROM = ("5", 8.1)
 DRONE_UNTIL_END_OF = "8"
 NARRATION = AUDIO_DIR / "narration.wav"
@@ -109,8 +109,9 @@ def narration_track(edl, starts, total, out):
         return NARRATION
     ends = {cut: (starts[narrated[i + 1]][0] if i + 1 < len(narrated) else total) for i, cut in enumerate(narrated)}
     inputs, chains = [], []
+    lead = {s["cut"]: s.get("narration_from_s", 0.0) for s in edl["segments"]}
     for i, (path, cut) in enumerate(takes):
-        start = starts[cut][0]
+        start = starts[cut][0] + lead[cut]
         if start + duration(path) > ends[cut]:
             print(f"NARRATION overrun {path.name}: {duration(path):.1f}s from {start:.0f}s runs past {ends[cut]:.0f}s")
         inputs += ["-i", str(path)]
@@ -193,12 +194,15 @@ def main():
     parser.add_argument("--video", default=str(HERE.parent / "renders" / "evac-layer-demo.mp4"))
     parser.add_argument("--out", default=str(OUT_DIR / "evac-layer-demo-v1.mp4"))
     parser.add_argument("--bgm", help="music bed, looped or trimmed to the video and set to BGM_LUFS")
+    parser.add_argument("--switch-se", help="WAV for the switch sound in place of the default beep (bgm seat's candidates)")
     # Stems stay at their mix gains and skip the limiter, so they sum back to the mix for an editor to rebalance.
     parser.add_argument("--stems", help="also write one 48 kHz WAV per layer, full length from 0 s, into this folder")
     args = parser.parse_args()
     edl = json.loads(Path(args.edl).read_text(encoding="utf-8"))
     starts, total = cut_starts(edl)
     paths = ensure_sources(args.sfx_dir)
+    if args.switch_se:
+        paths["beep"] = Path(args.switch_se)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="evac-mix-"))
     try:

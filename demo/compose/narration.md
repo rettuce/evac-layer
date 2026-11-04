@@ -10,34 +10,30 @@
 
 | ファイル名 | 読み上げ文 | 使える秒数 | 字数／上限 | 読み方 |
 |---|---|---|---|---|
-| `narration/cut00.wav` | 本物の警報が届いた瞬間、スクリーンは、その場所の避難案内に変わります。 | 8 s（0 s から） | 35／40 | ほんものの けいほうが とどいた しゅんかん、スクリーンは、そのばしょの ひなんあんないに かわります |
-| `narration/cut01.wav` | 2024年1月1日、能登半島地震。どこへ逃げればよいか、判断が難しかった来訪者がいました。 | 10 s（8 s から） | 45／50 | にせんにじゅうよねん いちがつ ついたち、のとはんとう じしん。どこへ にげれば よいか、はんだんが むずかしかった らいほうしゃが いました |
-| `narration/cut02.wav` | 駅と街のスクリーンを作ってきました。災害のとき、どれも何も言いませんでした。黙らないスクリーンを。 | 12 s（18 s から） | 49／60 | えきと まちの スクリーンを つくってきました。さいがいの とき、どれも なにも いいませんでした。だまらない スクリーンを |
-| `narration/cut03.wav` | 災害の種類と警戒レベル。図記号と10の言語。そして、どんな形のスクリーンにも、同じ規則で描きます。 | 12 s（30 s から） | 49／60 | さいがいの しゅるいと けいかいレベル。ずきごうと じゅうの げんご。そして、どんな かたちの スクリーンにも、おなじ きそくで えがきます |
-| `narration/cut04.wav` | 平時に資料を読み、案内を書いて検査し、人が承認したものだけを、警報が届いた瞬間に出します。 | 10 s（42 s から） | 45／50 | へいじに しりょうを よみ、あんないを かいて けんさし、ひとが しょうにんした ものだけを、けいほうが とどいた しゅんかんに だします |
-| `narration/cut05c.wav` | 同じ警報でも、ディスプレイの場所が違えば、避難先も方向も距離も、自動で変わります。 | 14 s（52 s から） | 41／70 | おなじ けいほうでも、ディスプレイの ばしょが ちがえば、ひなんさきも ほうこうも きょりも、じどうで かわります |
-| `narration/cut05.wav` | 由利本荘市、10月21日の実際の電文を、1200倍の速さで再生します。警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。 | 25 s（66 s から） | 70／125 | ゆりほんじょうし、じゅうがつ にじゅういちにちの じっさいの でんぶんを、せんにひゃくばいの はやさで さいせいします。けいかいレベル さん、よん、ご。すべての スクリーンが、おなじ しゅんかんに きりかわります |
-| `narration/cut05b.wav` | 何を出すかは、平時に人が決めます。承認した案内だけが、有事に自動で出ます。 | 8 s（91 s から） | 37／40 | なにを だすかは、へいじに ひとが きめます。しょうにんした あんないだけが、ゆうじに じどうで でます |
-| `narration/cut07m.wav` | 5つの自治体、206本の電文から、110のレイアウト。 | 12 s（99 s から） | 27／60 | いつつの じちたい、にひゃくろっぽんの でんぶんから、ひゃくじゅうの レイアウト（数字は凍結時の実数に差し替える） |
-| `narration/cut08.wav` | 柱も、壁も、通路の上のスクリーンも、同じ警報を同時に出します。近づくと、気象庁の発表時刻と自治体名まで読めます。 | 15 s（111 s から） | 56／75 | はしらも、かべも、つうろの うえの スクリーンも、おなじ けいほうを どうじに だします。ちかづくと、きしょうちょうの はっぴょうじこくと じちたいめいまで よめます |
-| `narration/cut09.wav` | フィードを受け取れれば、どのサイネージでも。どのスクリーンにも。 | 10 s（126 s から） | 32／50 | フィードを うけとれれば、どの サイネージでも。どの スクリーンにも |
-| `narration/cut10.wav` | EVAC LAYERは、オープンソースで公開しています。 | 8 s（136 s から） | 27／40 | イーバック レイヤーは、オープンソースで こうかいしています |
-
-## 別案（録音時に両方読んで選ぶ）
-
-- 0: 本物の警報が届いた瞬間、スクリーンは、その場所の避難案内に。（30 字）
+| `narration/cut00.wav` | 警報が届いた瞬間、スクリーンは、その場所に合った避難案内に変わります。 | 8 s（5 s から） | 35／40 | けいほうが とどいた しゅんかん、スクリーンは、そのばしょに あった ひなんあんないに かわります |
+| `narration/cut00b.wav` | EVAC LAYER は、いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステムです。 | 11 s（13 s から） | 53／55 | イーヴァク レイヤーは、いま ある きぞんの サイネージに、さいがいじの きんきゅうあんないの レイヤーを じどうで ついかする システムです |
+| `narration/cut01.wav` | 2024年1月1日、能登半島地震。どこへ逃げればよいか、判断が難しかった来訪者がいました。 | 10 s（24 s から） | 45／50 | にせんにじゅうよねん いちがつ ついたち、のとはんとう じしん。どこへ にげれば よいか、はんだんが むずかしかった らいほうしゃが いました |
+| `narration/cut02.wav` | 私はこれまで駅や街のサイネージシステムを作ってきました。これらは災害のとき、能動的に情報を発信できませんでした。 | 12 s（34 s から） | 56／60 | わたしは これまで えきや まちの サイネージ システムを つくって きました。これらは さいがいの とき、のうどうてきに じょうほうを はっしん できませんでした |
+| `narration/cut03.wav` | 災害の種類と警戒レベル。アイコンと10の言語。そして、どんな形のスクリーンにも、適切なレイアウトで描きます。 | 12 s（46 s から） | 54／60 | さいがいの しゅるいと けいかいレベル。アイコンと じゅうの げんご。そして、どんな かたちの スクリーンにも、てきせつな レイアウトで えがきます |
+| `narration/cut04.wav` | 避難案内は自動作成され、人が事前承認したものだけが、警報が届いた瞬間に表示されます。 | 10 s（58 s から） | 42／50 | ひなん あんないは じどう さくせいされ、ひとが じぜん しょうにんした ものだけが、けいほうが とどいた しゅんかんに ひょうじされます |
+| `narration/cut05c.wav` | 同じ警報でも、スクリーンの位置が違えば、避難先も方向も距離も適切に表示されます。 | 14 s（68 s から） | 40／70 | おなじ けいほうでも、スクリーンの いちが ちがえば、ひなんさきも ほうこうも きょりも てきせつに ひょうじされます |
+| `narration/cut05.wav` | 由利本荘市、10月21日の実際に発表された警報データを使い、1200倍の速さで再生しています。警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。 | 25 s（82 s から） | 82／125 | ゆりほんじょうし、じゅうがつ にじゅういちにちの じっさいに はっぴょうされた けいほうデータを つかい、せんにひゃくばいの はやさで さいせいしています。けいかいレベル さん、よん、ご。すべての スクリーンが、おなじ しゅんかんに きりかわります |
+| `narration/cut05b.wav` | 何を出すかは、事前に人が確認できます。承認しておけば、有事に自動で避難案内に切り替わります。 | 9 s（107 s から） | 46／45（超過） | なにを だすかは、じぜんに ひとが かくにん できます。しょうにん しておけば、ゆうじに じどうで ひなん あんないに きりかわります |
+| `narration/cut07m.wav` | まずは事前収集した5つの自治体の206本の気象庁の電文から、110のレイアウトを作成します。 | 27 s（116 s から） | 46／135 | まずは じぜん しゅうしゅうした いつつの じちたいの にひゃくろっぽんの きしょうちょうの でんぶんから、ひゃくじゅうの レイアウトを さくせいします |
+| `narration/cut09.wav` | 信号を受け取れる仕組みがあれば、どんな場所のどのスクリーンにも、自動で災害情報を表示できます。 | 10 s（143 s から） | 47／50 | しんごうを うけとれる しくみが あれば、どんな ばしょの どの スクリーンにも、じどうで さいがいじょうほうを ひょうじ できます |
+| `narration/cut10.wav` | EVAC LAYERは、オープンソースで公開しています。 | 13 s（153 s から） | 27／65 | イーヴァク レイヤーは、オープンソースで こうかい しています |
 
 ## 英訳（字幕用）
 
-- 0: The moment a real warning arrives, the screen turns into guidance for this spot.
-- 1: January 1, 2024: the Noto Peninsula earthquake. Visitors found it hard to judge where to evacuate from the tsunami (City of Jōetsu review).
-- 2: We have built screens for stations and streets. In the disaster, none of them said a word. Screens that don't go silent.
-- 3: Hazard types and alert levels. Pictograms and ten languages. And screens of any shape, drawn under the same rules.
-- 4: In calm times it reads the documents, writes and checks the guidance; only what a person approved goes out, the moment a warning arrives.
-- 5c: The same warning, but where the display stands changes the shelter, the direction and the distance, automatically.
-- 5: Real bulletins for Yurihonjo, October 21, replayed at 1,200 times speed. Alert levels 3, 4 and 5. Every screen switches at the same moment.
-- 5b: People decide what to show, in calm times. Only approved guidance goes out, automatically, in a crisis.
-- 7m: Five municipalities, 206 bulletins, 110 layouts. (final count at freeze)
-- 8: Columns, walls and the screen over the passage show the same warning at once. Step closer and you can read the JMA issue time and the municipality.
-- 9: Any signage system that can read the feed. Any screen.
+- 0: The moment a warning arrives, the screen turns into evacuation guidance for where it stands.
+- 0b: EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.
+- 1: January 1, 2024. The Noto Peninsula earthquake. Some visitors could not tell where to evacuate.
+- 2: I have built signage systems for stations and streets. When disaster struck, none of them could speak up on its own.
+- 3: Hazard types and alert levels. Icons and ten languages. And for a screen of any shape, a layout that fits.
+- 4: Evacuation guidance is generated automatically. Only what a person has approved in advance is shown, the moment a warning arrives.
+- 5c: Same warning, different place. The shelter, the direction and the distance follow where the screen stands.
+- 5: Yurihonjo City, October 21. Warnings actually issued that day, replayed at 1,200 times speed. Alert levels 3, 4 and 5. Every screen switches at the same moment.
+- 5b: What to show can be checked in advance. Approve it once, and the screens switch to evacuation guidance by themselves.
+- 7m: To begin with, 206 JMA bulletins collected from five municipalities become 110 layouts.
+- 9: Anything that can receive the signal can show the disaster information automatically, in any place, on any screen.
 - 10: EVAC LAYER is open source.
