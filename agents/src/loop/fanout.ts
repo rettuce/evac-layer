@@ -5,7 +5,7 @@ import type { Site } from "../composer/compose.js";
 import { replay } from "../jma/replay.js";
 import { REPO_ROOT } from "../paths.js";
 import { browserVerifier } from "./browser-verifier.js";
-import { runReplay, type ReplaySummary } from "./replay-run.js";
+import { runReplay, type ReplaySummary, promptTokens, type PromptTokens } from "./replay-run.js";
 import { staticVerifier } from "./static-verifier.js";
 import Anthropic from "@anthropic-ai/sdk";
 import { requireApiKey } from "../apikey.js";
@@ -45,7 +45,8 @@ const results = await Promise.all(ids.map(async (id): Promise<ReplaySummary | { 
       municipalityId: id, entries, site, verifier: browser ?? staticVerifier, writer,
       onEvent: (e) => { if (e.outcome !== "no-screen") log(id, `${e.issued_at.slice(5, 16).replace("T", " ")} ${e.template} L${e.level} ${e.outcome}${e.reason ? ` — ${e.reason}` : ""}`); },
     });
-    log(id, `done: ${s.name} bulletins=${s.bulletins} screens=${s.screens} pass=${s.pass} fail=${s.fail} no-screen=${s.no_screen} layouts=${s.layouts} writer=$${s.writer_usd.toFixed(3)} vision=$${visionUsage.reduce((n, u) => n + u.usd, 0).toFixed(3)} (${visionUsage.length} checks) ${s.seconds.toFixed(1)}s`);
+    log(id, `done: ${s.name} bulletins=${s.bulletins} screens=${s.screens} pass=${s.pass} fail=${s.fail} no-screen=${s.no_screen} layouts=${s.layouts} writer=$${s.writer_usd.toFixed(3)} vision=${visionUsage.reduce((n, u) => n + u.usd, 0).toFixed(3)} (${visionUsage.length} checks) ${s.seconds.toFixed(1)}s`);
+    log(id, `prompt tokens: writer ${cacheLine(s.writer_tokens)} / vision ${cacheLine(promptTokens(visionUsage))}`);
     return s;
   } catch (e) {
     return { municipality: id, error: (e as Error).message };
@@ -63,3 +64,8 @@ for (const r of ok) console.log(`${(r.municipality + " " + r.name).padEnd(16)}  
 console.log(`${"total".padEnd(16)}  ${String(sum("bulletins")).padStart(9)}  ${String(sum("screens")).padStart(7)}  ${String(sum("pass")).padStart(4)}  ${String(sum("fail")).padStart(4)}  ${String(sum("layouts")).padStart(7)}  ${((Date.now() - t0) / 1000).toFixed(1).padStart(7)}`);
 for (const f of failed) console.log(`[${f.municipality}] stopped: ${f.error}`);
 process.exitCode = failed.length || sum("fail") ? 1 : 0;
+
+function cacheLine(t: PromptTokens): string {
+  const total = t.input + t.cache_write + t.cache_read;
+  return `${total} tok (cache read ${t.cache_read}, written ${t.cache_write}, uncached ${t.input}; hit ${total ? Math.round((100 * t.cache_read) / total) : 0}%)`;
+}
