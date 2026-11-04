@@ -53,8 +53,10 @@ body {
 .cell {
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
+}
+.cell.is-figma {
   overflow: clip;
-  /* Text is trimmed to the cap height; kanji rise about 0.15 em above it, which must stay visible. */
   overflow-clip-margin: calc(24 * var(--px));
 }
 .cell.is-band {
@@ -93,6 +95,9 @@ body {
   line-height: var(--lh-guide);
   font-weight: 700;
 }
+.role-shelter .shelter-text > .t-guide {
+  font-size: calc(var(--fs-guide) * var(--type-scale, 1) * var(--shelter-scale, 1) * var(--px));
+}
 .t-fine {
   font-size: calc(var(--fs-fine) * var(--px));
   line-height: var(--lh-fine);
@@ -105,21 +110,9 @@ body {
   word-break: normal;
 }
 
-/* Lines are trimmed to the cap height and the baseline, so the first line of every body cell starts on
-   the cell's top edge and cells in one row share a top line whatever their type size. */
-.role-action .t-action,
-.role-action .t-guide,
-.role-direction .t-guide,
-.role-shelter .t-guide,
-.role-shelter .t-fine {
-  text-box: trim-both cap alphabetic;
-}
 
 /* 9:16 after 田中's Figma artboard (templates.ts PORTRAIT): type sizes per element, pictograms placed by ink,
    no cap trimming, labels in #555. Values are the artboard's px at 1080 × 1920. */
-.evac-screen.shape-portrait .cell.is-figma :is(.t-action, .t-guide, .t-fine) {
-  text-box: normal;
-}
 .evac-screen.shape-portrait .is-figma .role-headline.is-stacked {
   display: block;
   position: relative;
@@ -175,8 +168,13 @@ body {
 }
 .evac-screen.shape-portrait .is-figma .shelter-text {
   flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   padding-top: calc(3 * var(--px));
   gap: calc(10 * var(--px));
+}
+.evac-screen.shape-portrait .is-figma .action-sub {
+  align-items: flex-start;
 }
 /* The artboard sets the figure's baseline 8 px below the name's, and the Latin language label 8 px above the line's. */
 .evac-screen.shape-portrait .is-figma .name-row:not(.is-stacked) .distance {

@@ -13,7 +13,7 @@ export const STACKED_BAND_MIN_PX = 200
 
 const LANDSCAPE: ShapeLayout = {
   id: 'split',
-  columns: [M, '1fr', G, '1fr', M],
+  columns: [M, '5fr', G, '4fr', M],
   rows: [BAND, M, '1fr', G, '1fr', G, 'auto', SOURCE_GAP, 'auto', FOOT],
   areas: [
     'headline headline headline headline headline',

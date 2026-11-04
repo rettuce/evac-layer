@@ -6,7 +6,7 @@ import { SHAPES, designScale } from '~~/layout/shapes'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
-import { HEADLINE_STEP_DOWN, LINE_HEIGHT, TYPE_PX } from '~~/layout/typography'
+import { HEADLINE_STEP_DOWN, LINE_HEIGHT, SHELTER_STEP_DOWN, TYPE_PX } from '~~/layout/typography'
 import { pictogramsSettled } from '~/composables/usePictogramInk'
 
 const props = defineProps<{
@@ -75,6 +75,7 @@ const rootStyle = computed(() => ({
   '--dark-band-ink': rgbCss(inkOn(DARK_BAND)),
   ...Object.fromEntries(Object.entries(layout.value.type ?? {}).map(([key, px]) => [`--type-${key}`, px])),
   ...(shelterNarrow.value && layout.value.type?.shelterNarrow ? { '--type-shelter': layout.value.type.shelterNarrow } : {}),
+  ...(shelterNarrow.value && !layout.value.figma ? { '--shelter-scale': SHELTER_STEP_DOWN } : {}),
   ...(languagesNarrow.value && layout.value.type?.languagesNarrow ? { '--type-languages': layout.value.type.languagesNarrow } : {}),
 }))
 
@@ -172,7 +173,7 @@ let fitGeneration = 0
 
 // A name that needs more than one line, or runs past its row (a segment that must not break inside).
 function shelterNameWraps(): boolean {
-  const name = root.value?.querySelector<HTMLElement>('.shelter-name-text')
+  const name = root.value?.querySelector<HTMLElement>('.shelter-name-text, .shelter-text > p.t-guide')
   if (!name) return false
   const twoLines = name.getBoundingClientRect().height > parseFloat(getComputedStyle(name).lineHeight) + OVERFLOW_TOLERANCE_PX
   return twoLines || name.scrollWidth > name.clientWidth + OVERFLOW_TOLERANCE_PX
@@ -192,8 +193,9 @@ async function fit() {
     await pictogramsSettled()
     await nextTick()
     if (generation !== fitGeneration) return
-    // Artboard rules for a long facility name: 90 → 72, then the distance moves under the name.
-    if (layout.value.figma && !shelterNarrow.value && shelterNameWraps()) {
+    // A facility name that does not fit its line is set one step smaller (the artboard's 90 → 72);
+    // on the artboard the distance then moves under a name that still needs two lines.
+    if (!shelterNarrow.value && shelterNameWraps()) {
       shelterNarrow.value = true
       continue
     }

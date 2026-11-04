@@ -40,6 +40,8 @@ export const TYPE_PX: Record<TypeStep, number> = {
 
 export const HEADLINE_STACKED_MAX_LINES = 2
 export const HEADLINE_STEP_DOWN = 0.85
+// A facility name that wraps is set one step smaller first (the 9:16 artboard's 90 → 72).
+export const SHELTER_STEP_DOWN = 0.8
 
 export const SHELTER_PICTOGRAM_RATIO = 1.6
 export const SHELTER_PICTOGRAM_PX = Math.round(TYPE_PX.guide * SHELTER_PICTOGRAM_RATIO)

@@ -49,7 +49,7 @@ const headlineMaxLines = computed(() => (props.headlineLimited ? (props.figmaRul
     <template v-else-if="cell.role === 'action'">
       <p class="t-action action-text">{{ cell.text.ja }}</p>
       <div class="action-sub">
-        <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" :align-bottom="!figmaRules" :fit-ink="figmaRules" />
+        <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" :fit-ink="figmaRules" />
         <p v-if="cell.text.ja_easy && easyInAction" class="t-guide" lang="ja" data-lang="ja_easy">{{ cell.text.ja_easy }}</p>
       </div>
     </template>
@@ -87,7 +87,7 @@ const headlineMaxLines = computed(() => (props.headlineLimited ? (props.figmaRul
           <p v-if="cell.kind" class="t-fine shelter-kind" :data-kind="cell.kind">
             {{ SHELTER_KIND_LABEL[cell.kind].ja }}<span lang="en"> / {{ SHELTER_KIND_LABEL[cell.kind].en }}</span>
           </p>
-          <p class="t-guide" :data-max-lines="SHELTER_NAME_MAX_LINES">{{ cell.text.ja }}</p>
+          <p class="t-guide" :data-max-lines="SHELTER_NAME_MAX_LINES"><template v-for="(segment, i) in shelterNameSegments(cell.text.ja)" :key="i"><wbr v-if="i > 0">{{ segment }}</template></p>
         </div>
       </div>
       <p v-if="cell.distance_m !== undefined" class="t-guide distance">{{ distanceText }}</p>
@@ -203,22 +203,14 @@ p {
   align-items: center;
   gap: calc(24 * var(--px));
 }
-.action-sub {
-  margin-top: auto;
-  align-items: flex-end;
-}
 .shelter-text {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: calc(16 * var(--px));
 }
 .shelter-kind {
   opacity: var(--shelter-kind-opacity);
 }
 .distance {
   flex: none;
-  margin-left: auto;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -234,7 +226,7 @@ p {
   grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
-  gap: calc(16 * var(--px));
+  gap: calc(8 * var(--px));
   visibility: hidden;
 }
 .lang-line {
@@ -247,7 +239,7 @@ p {
 }
 .lang-label {
   flex: none;
-  width: calc(256 * var(--px));
+  min-width: calc(200 * var(--px));
   opacity: var(--lang-label-opacity);
 }
 .is-figma .name-row {
