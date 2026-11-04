@@ -139,18 +139,27 @@ async function recordScene(browser, scene) {
 }
 
 // The last `fold` seconds cross-fade into the first `fold` seconds, so frame `loop` continues into frame 0.
+// The encoder's first keyframes come out 20-30 % smaller than the steady state (rate control warming up), which
+// showed as a brightness step at the loop point, so PREROLL_S of the loop's tail is encoded first and cut off at the
+// keyframe boundary with a stream copy.
+const PREROLL_S = 6
 async function fold(raw, out, encode) {
   const loop = Number(values.loop)
   const f = Number(values.fold)
   const graph = [
-    `[0:v]trim=0:${loop},setpts=PTS-STARTPTS,split[m1][m2]`,
+    `[0:v]trim=0:${loop},setpts=PTS-STARTPTS,split=3[m1][m2][m3]`,
     `[0:v]trim=${loop}:${loop + f},setpts=PTS-STARTPTS[tail]`,
     `[m1]trim=0:${f},setpts=PTS-STARTPTS[head]`,
     `[m2]trim=${f}:${loop},setpts=PTS-STARTPTS[rest]`,
+    `[m3]trim=${loop - PREROLL_S}:${loop},setpts=PTS-STARTPTS[pre]`,
     `[tail][head]blend=all_expr='A*(1-T/${f})+B*(T/${f})'[xf]`,
-    `[xf][rest]concat=n=2:v=1[out]`,
+    `[pre][xf][rest]concat=n=3:v=1[out]`,
   ].join(';')
-  await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', raw, '-filter_complex', graph, '-map', '[out]', ...encode, out])
+  const prerolled = out.replace(/\.mp4$/, '.preroll.mp4')
+  await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', raw, '-filter_complex', graph, '-map', '[out]', ...encode, prerolled])
+  const tag = encode.includes('-tag:v') ? ['-tag:v', encode[encode.indexOf('-tag:v') + 1]] : []
+  await run('ffmpeg', ['-y', '-loglevel', 'error', '-ss', String(PREROLL_S), '-i', prerolled, '-c', 'copy', ...tag, '-movflags', '+faststart', out])
+  await rm(prerolled)
 }
 
 async function recordAlert(browser) {
