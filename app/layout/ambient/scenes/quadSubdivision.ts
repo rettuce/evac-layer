@@ -17,18 +17,20 @@ const FOCUS_R = 3.2
 const FOCUS_STR = 0.11
 const FOCUS2_R_RATIO = 0.8
 const FOCUS2_STR_RATIO = 0.7
+// The gallery video (2026-10-08) predates the 10-10 brush-up that sank deep lines to 0.07 and lifted deep dots to
+// 1.0; the picture is matched to that gallery, so the lines stay 0.26 at every depth and the dots 0.85.
 const LINE_LUMA_ROOT = 0.26
-const LINE_LUMA_DEEP = 0.07
+const LINE_LUMA_DEEP = 0.26
 const BIRTH_LINE_GAIN = 0.33
 const DOT_LUMA_SHALLOW = 0.85
-const DOT_LUMA_DEEP = 1.0
+const DOT_LUMA_DEEP = 0.85
 const DREST = 0.5
 const SPLIT_GAIN = 0.16
 const MIN_CELL_PX = 13
 // The fragment shader lights every pixel within 0.6 px of a border and fades to 1.3 px, on both sides of
 // the shared edge; one stroke this wide carries the same ink.
 const LINE_WIDTH_PX = 1.6
-// The reference's pixel sizes (smallest cell, dot radius, line width) are read at a 540 px short side: twice their size at 1080p, the closest match to the gallery
+// The reference's pixel sizes (smallest cell, dot radius, line width) are read at a 540 px short side (2× at 1080p), the closest match to the gallery's cell sizes and weight
 // capture; on a taller canvas they scale with the short side, so the picture keeps its weight (2026-11-05).
 const REFERENCE_SHORT_SIDE = 540
 const GROUND = 'rgb(8 8 8)'
