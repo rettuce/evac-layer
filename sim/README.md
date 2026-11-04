@@ -1,6 +1,6 @@
 # sim — web simulator of the concourse
 
-The look-C concourse from `demo/blender/build_scene.py`, in the browser: the room is baked once in Blender
+The concourse of `demo/blender/build_scene.py`, in the browser: the room is baked once in Blender
 and drawn unlit; the 22 display faces (4 pillars × 4 faces, 3 ribbon panels, 3 wall panels) are the app's
 `/screen` page in iframes placed in 3D (`DESIGN.md`).
 
