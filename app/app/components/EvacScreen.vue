@@ -54,7 +54,7 @@ const heroCell = computed(() => (layout.value.hero ? placed.value.find((cell) =>
 const band = computed(() => CABINET_OFFICE_5[props.screen.alert.level])
 
 const rootStyle = computed(() => ({
-  ...gridCss(collapseAbsent(layout.value, new Set([...placed.value.map((cell) => cell.role), ...(layout.value.hero ? ['hero'] : [])]))),
+  ...gridCss(layout.value.fixedTracks ? layout.value : collapseAbsent(layout.value, new Set([...placed.value.map((cell) => cell.role), ...(layout.value.hero ? ['hero'] : [])]))),
   ...(props.box ? { width: `${props.box.width}px`, height: `${props.box.height}px` } : {}),
   '--px': `${scale.value}px`,
   '--fs-action': TYPE_PX.action,
@@ -295,6 +295,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :level-label="levelLabel"
         :stacked-headline="stackedHeadline"
         :headline-limited="headlineLimited"
+        :headline-max-lines="layout.headlineLines"
         :easy-in-action="easyInAction"
         :headline-scale="headlineScale"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"

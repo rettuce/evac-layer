@@ -9,6 +9,7 @@ const props = defineProps<{
   levelLabel?: string
   stackedHeadline?: boolean
   headlineLimited?: boolean
+  headlineMaxLines?: number
   easyInAction?: boolean
   headlineScale?: number
   pictogramPx: number
@@ -31,7 +32,7 @@ const languageGroups = computed<LangKey[][]>(() => {
 const currentGroup = computed(() => (languageGroups.value.length ? props.languageIndex % languageGroups.value.length : -1))
 // The Figma artboard writes the distance as one word (570m); the earlier layouts keep the space.
 const distanceText = computed(() => (props.cell.distance_m === undefined ? '' : `${props.cell.distance_m}${props.figmaRules ? '' : ' '}m`))
-const headlineMaxLines = computed(() => (props.headlineLimited ? (props.figmaRules ? 1 : HEADLINE_STACKED_MAX_LINES) : undefined))
+const headlineMaxLines = computed(() => (props.headlineLimited ? (props.headlineMaxLines ?? (props.figmaRules ? 1 : HEADLINE_STACKED_MAX_LINES)) : undefined))
 </script>
 
 <template>

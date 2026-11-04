@@ -11,16 +11,23 @@ const SOURCE_GAP = 8
 const FOOT = 32
 export const STACKED_BAND_MIN_PX = 200
 
+// 16:9 is 田中's Figma artboard (2026-11-05, file H213MoFcJtIZ96s6qdmBZ8 node 3223:4, 1920 × 1080): the band 172,
+// the action in a 720 column from x 52 with the run pictogram's ink under the text, the direction and the shelter
+// right-aligned in a column from x 971 to 1868, the languages across both columns from y 830, the source on the
+// foot. Tracks are the artboard's px: the fr column takes a wider screen, the fr row above the languages a taller one.
+const FIGMA_LANDSCAPE_TYPE = { headline: 64, level: 64, action: 120, direction: 122, shelter: 79, shelterNarrow: 63, kind: 32, distance: 92, label: 24, languages: 54, languagesNarrow: 46, source: 24 }
 const LANDSCAPE: ShapeLayout = {
-  id: 'split',
-  columns: [M, '5fr', G, '4fr', M],
-  rows: [BAND, M, '1fr', G, '1fr', G, 'auto', SOURCE_GAP, 'auto', FOOT],
+  id: 'figma-split',
+  columns: [52, 720, '1fr', 897, 52],
+  rows: [172, 24, 27, 255, 90, 167, 49, '1fr', 170, 20, 29, 31],
   areas: [
     'headline headline headline headline headline',
     '. . . . .',
+    '. action . . .',
+    '. action . direction .',
+    '. action . . .',
     '. action . shelter .',
-    '. action . direction .',
-    '. action . direction .',
+    '. action . . .',
     '. . . . .',
     '. languages languages languages .',
     '. . . . .',
@@ -28,7 +35,19 @@ const LANDSCAPE: ShapeLayout = {
     '. . . . .',
   ],
   required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
-  pictogramPx: { headline: 112, action: 184, direction: 224, shelter: SHELTER_PICTOGRAM_PX },
+  pictogramPx: { headline: 98, action: 225, direction: 129, shelter: 157 },
+  figma: true,
+  fixedTracks: true,
+  type: FIGMA_LANDSCAPE_TYPE,
+}
+
+// The same artboard without the where-blocks (all-clear, secure-now): their rows stay empty.
+const LANDSCAPE_CLEAR: ShapeLayout = {
+  ...LANDSCAPE,
+  id: 'figma-split-clear',
+  areas: LANDSCAPE.areas.map((row) => row.replace(/direction|shelter/, '.')),
+  required: ['headline', 'action', 'languages', 'source'],
+  pictogramPx: { headline: 98, action: 225 },
 }
 
 // 9:16 is 田中's Figma artboard (2026-11-04, file H213MoFcJtIZ96s6qdmBZ8 node 3212:5, 1080 × 1920): one column
@@ -95,52 +114,43 @@ const PILLAR_FACE_BASE: ShapeLayout = {
   pictogramPx: { headline: 112, action: 300, direction: 224, shelter: SHELTER_PICTOGRAM_PX },
 }
 
-// 32:9 hangs above walkways and is read from 8 to 15 m, so its guide text follows the 8 m distance
-// (8000 / 120 mm at the 55" pitch ≈ 104 px) instead of the 5 m used by panels at eye level.
-const RIBBON_BAND = 1040
-const RIBBON_LANGUAGES = 288
-const RIBBON_TYPE = 1.625
-const RIBBON_HEADLINE_TYPE = 1.75
-const RIBBON_SCALE: Partial<Record<Role, number>> = { headline: RIBBON_HEADLINE_TYPE, direction: RIBBON_TYPE, shelter: RIBBON_TYPE, languages: RIBBON_TYPE }
-
+// 32:9 is 田中's Figma artboard (2026-11-05, node 3223:80, 3840 × 1080): the level colour fills a 780 panel on the
+// left with the hazard pictogram, the two-line headline and the level label; the source sits on the top of the white
+// field, the action and the run pictogram's ink in a 1369 column from x 887, the direction from x 2979 and the
+// shelter from x 2256, both ending at x 3748, and the languages side by side in a 294 band at the foot with their labels above the text.
+// The fr column takes a wider screen, the fr row above the band a taller one.
+const FIGMA_RIBBON_TYPE = { headline: 96, level: 96, action: 150, direction: 170, shelter: 140, shelterNarrow: 112, kind: 32, distance: 150, label: 30, languages: 90, languagesNarrow: 76, source: 30 }
 const RIBBON: ShapeLayout = {
-  id: 'columns',
-  columns: [RIBBON_BAND, M, '5fr', G, '4fr', M],
-  rows: [M, 'auto', G, '1fr', G, 'auto', M, RIBBON_LANGUAGES],
+  id: 'figma-ribbon',
+  columns: [780, 107, 1369, '1fr', 769, 92],
+  rows: [40, 83, 185, 53, 24, 30, 275, 39, '1fr', 294],
   areas: [
     'headline . . . . .',
-    'headline . source source source .',
-    'headline . . . . .',
+    'headline . source . direction .',
+    'headline . action . direction .',
     'headline . action . direction .',
     'headline . action . . .',
-    'headline . action . shelter .',
+    'headline . action . . .',
+    'headline . action shelter shelter .',
+    'headline . action . . .',
     'headline . . . . .',
     'headline languages languages languages languages languages',
   ],
-  required: ['headline', 'action', 'direction', 'languages', 'source'],
-  pictogramPx: { headline: 320, action: 352, direction: 208, shelter: 160 },
+  required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
+  pictogramPx: { headline: 310, action: 344, direction: 166, shelter: 253 },
   darkBand: ['languages'],
-  inline: ['shelter'],
-  typeScale: RIBBON_SCALE,
+  figma: true,
+  fixedTracks: true,
+  headlineLines: 2,
+  type: FIGMA_RIBBON_TYPE,
 }
 
-const RIBBON_WIDE_DIRECTION: ShapeLayout = {
-  id: 'wide-direction',
-  columns: [RIBBON_BAND, M, '4fr', G, '6fr', M],
-  rows: [M, 'auto', G, '1fr', M, RIBBON_LANGUAGES],
-  areas: [
-    'headline . . . . .',
-    'headline . source source source .',
-    'headline . . . . .',
-    'headline . action . direction .',
-    'headline . . . . .',
-    'headline shelter shelter languages languages languages',
-  ],
-  required: ['headline', 'action', 'direction', 'languages', 'source'],
-  pictogramPx: { headline: 320, action: 240, direction: 320, shelter: 160 },
-  darkBand: ['shelter', 'languages'],
-  inline: ['shelter'],
-  typeScale: RIBBON_SCALE,
+const RIBBON_CLEAR: ShapeLayout = {
+  ...RIBBON,
+  id: 'figma-ribbon-clear',
+  areas: RIBBON.areas.map((row) => row.replace(/direction|shelter shelter/, (m) => (m === 'direction' ? '.' : '. .'))),
+  required: ['headline', 'action', 'languages', 'source'],
+  pictogramPx: { headline: 310, action: 344 },
 }
 
 const SQUARE: ShapeLayout = {
@@ -189,24 +199,6 @@ const CLEAR_STACK: ShapeLayout = {
   pictogramPx: { headline: 112, action: 192 },
 }
 
-const CLEAR_RIBBON: ShapeLayout = {
-  id: 'clear-columns',
-  columns: [RIBBON_BAND, M, '1fr', M],
-  rows: [M, 'auto', G, '1fr', M, RIBBON_LANGUAGES],
-  areas: [
-    'headline . . .',
-    'headline . source .',
-    'headline . . .',
-    'headline . action .',
-    'headline . . .',
-    'headline languages languages languages',
-  ],
-  required: ['headline', 'action', 'languages', 'source'],
-  pictogramPx: { headline: 320, action: 288 },
-  darkBand: ['languages'],
-  typeScale: RIBBON_SCALE,
-}
-
 const CLEAR_SQUARE: ShapeLayout = {
   ...CLEAR_STACK,
   id: 'clear-square',
@@ -216,8 +208,6 @@ const CLEAR_SQUARE: ShapeLayout = {
 
 // Level 5 (secure safety now) is the stage where leaving may itself be dangerous, so the
 // screen drops shelter and direction and gives the whole body to the action.
-const SECURE_LANDSCAPE: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 320 } }
-const SECURE_RIBBON: ShapeLayout = { ...CLEAR_RIBBON, id: 'secure-columns', pictogramPx: { headline: 320, action: 384 } }
 const SECURE_SQUARE: ShapeLayout = { ...CLEAR_SQUARE, id: 'secure-square', pictogramPx: { headline: 112, action: 240 } }
 
 // 9:16 and 1:1 put the level label under the headline: the band is at least STACKED_BAND_MIN_PX
@@ -230,25 +220,25 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   'evac-now': {
     '16x9': [LANDSCAPE],
     '9x16': [PORTRAIT],
-    '32x9': [RIBBON, RIBBON_WIDE_DIRECTION],
+    '32x9': [RIBBON],
     '1x1': [stackedBand(SQUARE)],
   },
   'evac-prepare': {
     '16x9': [requireShelterInsteadOfDirection(LANDSCAPE)],
     '9x16': [requireShelterInsteadOfDirection(PORTRAIT)],
-    '32x9': [requireShelterInsteadOfDirection(RIBBON), requireShelterInsteadOfDirection(RIBBON_WIDE_DIRECTION)],
+    '32x9': [requireShelterInsteadOfDirection(RIBBON)],
     '1x1': [stackedBand(requireShelterInsteadOfDirection(SQUARE))],
   },
   'secure-now': {
-    '16x9': [SECURE_LANDSCAPE],
+    '16x9': [{ ...LANDSCAPE_CLEAR, id: 'figma-split-secure' }],
     '9x16': [{ ...PORTRAIT_CLEAR, id: 'figma-stack-secure' }],
-    '32x9': [SECURE_RIBBON],
+    '32x9': [{ ...RIBBON_CLEAR, id: 'figma-ribbon-secure' }],
     '1x1': [stackedBand(SECURE_SQUARE)],
   },
   'all-clear': {
-    '16x9': [CLEAR_STACK],
+    '16x9': [LANDSCAPE_CLEAR],
     '9x16': [PORTRAIT_CLEAR],
-    '32x9': [CLEAR_RIBBON],
+    '32x9': [RIBBON_CLEAR],
     '1x1': [stackedBand(CLEAR_SQUARE)],
   },
 }

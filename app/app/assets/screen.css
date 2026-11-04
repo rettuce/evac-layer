@@ -222,6 +222,264 @@ body {
   font-size: calc(var(--type-source) * var(--px));
   line-height: 1.1;
 }
-.evac-screen.shape-portrait {
+.evac-screen.shape-portrait,
+.evac-screen.shape-landscape,
+.evac-screen.shape-ribbon {
   --label-ink: #555;
+}
+
+/* 16:9 after 田中's Figma artboard (templates.ts LANDSCAPE): the band's pictogram, headline and level label at the
+   artboard's px, the direction right-aligned, the shelter's kind label on its own line, the language labels centred
+   on their line. Values are the artboard's px at 1920 × 1080. */
+.evac-screen.shape-landscape .is-figma .role-headline {
+  display: block;
+  position: relative;
+  padding: 0;
+}
+.evac-screen.shape-landscape .is-figma .role-headline > .pictogram {
+  position: absolute;
+  left: calc(48 * var(--px));
+  top: calc(38 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .role-headline .headline-text {
+  position: absolute;
+  left: calc(195 * var(--px));
+  right: calc(52 * var(--px));
+  top: calc(46 * var(--px));
+  font-size: calc(var(--type-headline) * var(--headline-scale, 1) * var(--px));
+  line-height: 1.2;
+  text-wrap: nowrap;
+}
+.evac-screen.shape-landscape .is-figma .role-headline .level-label {
+  position: absolute;
+  right: calc(52 * var(--px));
+  top: calc(46 * var(--px));
+  margin: 0;
+  font-size: calc(var(--type-level) * var(--px));
+  line-height: 1.2;
+}
+.evac-screen.shape-landscape .is-figma .action-text {
+  font-size: calc(var(--type-action) * var(--px));
+  line-height: 1.25;
+}
+.evac-screen.shape-landscape .is-figma .role-action {
+  gap: calc(52 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .action-sub {
+  align-items: flex-start;
+  padding-left: calc(4 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .role-direction {
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: calc(44 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .role-direction > .pictogram {
+  margin-top: calc(59 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .direction-text {
+  flex: none;
+  margin-top: calc(38 * var(--px));
+  font-size: calc(var(--type-direction) * var(--px));
+  line-height: 1.23;
+  text-wrap: nowrap;
+}
+/* The artboard's direction and distance boxes end 2 and 4.7 px past the column's right edge (1868); the cells
+   take that room so the ink lands where it is drawn and nothing leaves its cell. */
+.evac-screen.shape-landscape .cell.is-figma[data-role='direction'] {
+  margin-right: calc(-2 * var(--px));
+}
+.evac-screen.shape-landscape .cell.is-figma[data-role='shelter'] {
+  margin-right: calc(-4 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .shelter-name {
+  align-items: flex-start;
+  gap: calc(37 * var(--px));
+  padding-left: calc(6 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .shelter-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(9 * var(--px));
+  gap: 0;
+}
+.evac-screen.shape-landscape .is-figma .shelter-kind {
+  font-size: calc(var(--type-kind) * var(--px));
+  line-height: 1.1;
+  color: var(--label-ink);
+  opacity: 1;
+}
+.evac-screen.shape-landscape .is-figma .shelter-name-text {
+  font-size: calc(var(--type-shelter) * var(--px));
+  line-height: 1.2;
+  text-wrap: wrap;
+  overflow-wrap: normal;
+}
+.evac-screen.shape-landscape .is-figma .distance {
+  font-size: calc(var(--type-distance) * var(--px));
+  line-height: 1;
+  font-weight: 600;
+}
+.evac-screen.shape-landscape .is-figma .name-row {
+  margin-top: calc(12 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .lang-line {
+  align-items: center;
+  gap: 0;
+}
+.evac-screen.shape-landscape .is-figma .lang-label {
+  width: calc(256 * var(--px));
+  min-width: 0;
+  font-size: calc(var(--type-label) * var(--px));
+  line-height: 1.2;
+  color: var(--label-ink);
+  opacity: 1;
+}
+.evac-screen.shape-landscape .is-figma .lang-text {
+  font-size: calc(var(--type-languages) * var(--px));
+  line-height: 1.2;
+}
+.evac-screen.shape-landscape .is-figma .lang-variant {
+  gap: calc(31 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .lang-line:not([lang='ja']) .lang-label {
+  position: relative;
+  top: calc(5 * var(--px));
+}
+.evac-screen.shape-landscape .is-figma .source-text {
+  font-size: calc(var(--type-source) * var(--px));
+  line-height: 1.2;
+  text-align: right;
+}
+
+
+/* 32:9 after 田中's Figma artboard (templates.ts RIBBON): the panel's pictogram, headline and level label at the
+   artboard's px, the direction left-anchored in its column, the languages side by side with the label above the text
+   (labels #bebebe on the black band). Values are the artboard's px at 3840 × 1080. */
+.evac-screen.shape-ribbon .is-figma .role-headline {
+  display: block;
+  position: relative;
+  padding: 0;
+}
+.evac-screen.shape-ribbon .is-figma .role-headline > .pictogram {
+  position: absolute;
+  left: calc(79 * var(--px));
+  top: calc(91 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .role-headline .headline-text {
+  position: absolute;
+  left: calc(60 * var(--px));
+  right: 0;
+  top: calc(480 * var(--px));
+  font-size: calc(var(--type-headline) * var(--headline-scale, 1) * var(--px));
+  line-height: 1.25;
+  text-wrap: wrap;
+  overflow-wrap: normal;
+}
+.evac-screen.shape-ribbon .is-figma .role-headline .level-label {
+  position: absolute;
+  left: calc(60 * var(--px));
+  top: calc(800 * var(--px));
+  margin: 0;
+  font-size: calc(var(--type-level) * var(--px));
+  line-height: 1.2;
+}
+.evac-screen.shape-ribbon .is-figma .source-text {
+  padding-left: calc(4 * var(--px));
+  font-size: calc(var(--type-source) * var(--px));
+  line-height: 1.2;
+}
+.evac-screen.shape-ribbon .is-figma .action-text {
+  font-size: calc(var(--type-action) * var(--px));
+  line-height: 1.2;
+}
+.evac-screen.shape-ribbon .is-figma .role-action {
+  gap: calc(82 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .action-sub {
+  align-items: flex-start;
+  padding-left: calc(13 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .role-direction {
+  align-items: flex-start;
+  gap: calc(75 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .role-direction > .pictogram {
+  margin-top: calc(98 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .direction-text {
+  flex: none;
+  margin-top: calc(69 * var(--px));
+  font-size: calc(var(--type-direction) * var(--px));
+  line-height: 1.13;
+  text-wrap: nowrap;
+}
+.evac-screen.shape-ribbon .is-figma .shelter-name {
+  align-items: flex-start;
+  gap: calc(58 * var(--px));
+  padding-left: calc(11 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .shelter-name > .pictogram {
+  margin-top: calc(19 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .shelter-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(23 * var(--px));
+  gap: calc(3 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .shelter-kind {
+  font-size: calc(var(--type-kind) * var(--px));
+  line-height: 1.5;
+  color: var(--label-ink);
+  opacity: 1;
+}
+.evac-screen.shape-ribbon .is-figma .shelter-name-text {
+  font-size: calc(var(--type-shelter) * var(--px));
+  line-height: 1.26;
+  text-wrap: wrap;
+  overflow-wrap: normal;
+}
+.evac-screen.shape-ribbon .is-figma .distance {
+  font-size: calc(var(--type-distance) * var(--px));
+  line-height: 1;
+  font-weight: 600;
+}
+.evac-screen.shape-ribbon .cell.is-figma.is-dark-band {
+  padding: 0 0 0 calc(116 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .role-languages {
+  align-items: flex-start;
+}
+.evac-screen.shape-ribbon .is-figma .lang-variant {
+  padding-top: calc(55 * var(--px));
+  gap: 0;
+}
+.evac-screen.shape-ribbon .is-figma .lang-line {
+  flex: none;
+  width: calc(1456 * var(--px));
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(29 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .lang-label {
+  min-width: 0;
+  font-size: calc(var(--type-label) * var(--px));
+  line-height: 1.2;
+  color: #bebebe;
+  opacity: 1;
+}
+.evac-screen.shape-ribbon .is-figma .lang-text {
+  font-size: calc(var(--type-languages) * var(--px));
+  line-height: 1.2;
+}
+/* Noto Sans' line box sits higher than Noto Sans JP's; the artboard aligns the Latin line's ink with the Japanese line's. */
+.evac-screen.shape-ribbon .is-figma .lang-line:not([lang='ja']) .lang-label {
+  position: relative;
+  top: calc(3 * var(--px));
+}
+.evac-screen.shape-ribbon .is-figma .lang-line:not([lang='ja']) .lang-text {
+  margin-top: calc(4 * var(--px));
 }

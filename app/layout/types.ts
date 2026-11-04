@@ -74,6 +74,10 @@ export interface ShapeLayout {
   // and the cells follow the rules written on the artboard (see templates.ts PORTRAIT).
   figma?: boolean
   type?: Record<string, number>
+  // Tracks are the artboard's px and stay put when a role is absent (the artboard has no state without it).
+  fixedTracks?: boolean
+  // Lines the artboard gives the headline (a Figma layout sets one line unless this says otherwise).
+  headlineLines?: number
 }
 
 export type TemplateDef = Record<PanelShape, ShapeLayout[]>
