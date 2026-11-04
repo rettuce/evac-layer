@@ -24,7 +24,7 @@ const EDGE_THRESHOLD_DEG = 20
 const wireMaterial = new LineBasicMaterial({ color: 0xffffff })
 
 async function loadAo(file: string): Promise<Texture> {
-  const texture = await new TextureLoader().loadAsync(`/tex/${file}`)
+  const texture = await new TextureLoader().loadAsync(`${import.meta.env.BASE_URL}tex/${file}`)
   texture.flipY = false
   texture.colorSpace = NoColorSpace
   texture.channel = 0

@@ -35,14 +35,17 @@ FACE_PX = {"9x16": (1080, 1920), "32x9": (3840, 1080), "pillar": (6616, 5046)}
 PILLAR_FACE_PX = 1654
 BAKE_MARGIN_PX = 4
 DIFFUSE_SAMPLES = 8
-JPEG_QUALITY = 88
+# Colour goes into the glb; AO is a grey JPEG. 80 / 70 keep the textures at about a third of the 88-quality
+# files with no visible step on the baked (soft) images (S-4, 2026-11-05).
+JPEG_QUALITY = 80
+AO_JPEG_QUALITY = 70
 
 
 def parse_args():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser()
     parser.add_argument("--size", type=int, default=2048)
-    parser.add_argument("--floor-size", type=int, default=4096)
+    parser.add_argument("--floor-size", type=int, default=2048)
     parser.add_argument("--ao-samples", type=int, default=64)
     parser.add_argument("--ao-distance", type=float, default=2.0)
     parser.add_argument("--out", default=str(PUBLIC_DIR / "room.glb"))
@@ -203,12 +206,12 @@ def bake_image(obj, name, size, bake_type, samples, use_float=False):
     return image
 
 
-def save_image(image, path, file_format):
+def save_image(image, path, file_format, grey=False):
     scene = bpy.context.scene
     settings = scene.render.image_settings
     settings.file_format = file_format
-    settings.color_mode = "RGB"
-    settings.quality = JPEG_QUALITY
+    settings.color_mode = "BW" if grey else "RGB"
+    settings.quality = AO_JPEG_QUALITY if grey else JPEG_QUALITY
     settings.color_depth = "8"
     image.save_render(filepath=str(path), scene=scene)
 
@@ -287,7 +290,7 @@ def main():
         color_path = TEX_DIR / f"{group}_color.jpg"
         ao_path = TEX_DIR / f"{group}_ao.jpg"
         save_image(color, color_path, "JPEG")
-        save_image(ao, ao_path, "JPEG")
+        save_image(ao, ao_path, "JPEG", grey=True)
         bpy.data.images.remove(color)
         bpy.data.images.remove(ao)
         obj.data.materials.clear()

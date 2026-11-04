@@ -5,7 +5,7 @@ import { PILLAR, pillarYForHeight, shapeForViewport } from '~~/layout/shapes'
 import type { Shape } from '~~/layout/types'
 
 const props = withDefaults(
-  defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string; active?: boolean; room?: { width: number; height: number }; crop?: AmbientRect; seam?: 'left' | 'right'; bare?: boolean; lat?: number; lng?: number }>(),
+  defineProps<{ seed: string; clockEpochMs: number; siteName: string; shape: Shape; scene?: string; active?: boolean; room?: { width: number; height: number }; crop?: AmbientRect; seam?: 'left' | 'right'; bare?: boolean; lat?: number; lng?: number; drawIntervalMs?: number }>(),
   { active: true },
 )
 
@@ -77,9 +77,14 @@ function drawPillarFaces(ctx: CanvasRenderingContext2D, frame: AmbientFrame, sha
 
 // The backing store follows the device pixel ratio: a pillar captured at 0.5 is drawn at a quarter of
 // the pixels it would take at full size, and a 1x panel keeps its full resolution.
+let lastDrawAt = -Infinity
+
 function draw() {
   const el = canvas.value
   if (!el || viewport.value.width === 0 || !fontsReady.value || !props.active) return
+  const now = performance.now()
+  if (props.drawIntervalMs && now - lastDrawAt < props.drawIntervalMs) return
+  lastDrawAt = now
   const ratio = window.devicePixelRatio || 1
   const width = Math.round(viewport.value.width * ratio)
   const height = Math.round(viewport.value.height * ratio)

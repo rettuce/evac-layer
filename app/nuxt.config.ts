@@ -11,7 +11,11 @@ export default defineNuxtConfig({
     adminToken: '',
     distDir: '',
     webhookAllowPrivate: '',
+    // NUXT_PUBLIC_STATIC_SCREEN=1 at `nuxt generate` (GitHub Pages): /screen reads public/static/ instead of
+    // /api. Read here because a `ssr: false` generate does not carry runtime env into the client.
+    public: { staticScreen: process.env.NUXT_PUBLIC_STATIC_SCREEN ?? '' },
   },
+  nitro: { prerender: { routes: ['/screen'] } },
   css: [
     '@fontsource/noto-sans-jp/400.css',
     '@fontsource/noto-sans-jp/700.css',

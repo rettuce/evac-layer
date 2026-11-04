@@ -103,6 +103,35 @@ switch between colour×AO, white×AO and wire without a second material set in t
 - The three wall screens moved to louver-gap centres (x −2.85 / 0 / 2.85 m) with D-8, which only needed the
   re-export.
 
+## S-4 v2 (2026-11-05, 田中 FB: too heavy, slow switching, GitHub Pages)
+
+Measured first (hero, 22 faces, calm, 60 fps cap off, 300 draws, Chrome on a 120 Hz Mac):
+
+| condition | frame interval median | p95 | loop (controls + zoom + render) |
+|---|---|---|---|
+| as it was | 8.3 ms | 16.1 ms | 0.2 ms |
+| no iframes (all pages blank) | 8.3 ms | 10.3 ms | 0.2 ms |
+| WebGL render skipped | 8.3 ms | 10.3 ms | 0.1 ms |
+| after the changes below | 8.3 ms | 10.3 ms | 0.2 ms |
+
+The steady state was already one vsync of a 120 Hz display; WebGL is not the cost (0.2 ms), so the DPR /
+render-scale measures were not applied. What felt heavy was page loading (22 Nuxt documents hydrating in
+the same renderer process held the page at 10 fps for 10–15 s) and that every switch reloaded all 22.
+
+- Switching: both contents are loaded per face and swapped by visibility (EVAC shown 300 ms after the
+  click); the ambient scene is changed by `postMessage` to `/screen`, which rewrites its route query in
+  place (22 faces changed 400 ms after the click, no page reloaded).
+- Hidden pages are parked through `CSS3DObject.visible = false` (the renderer's `display: none`), which
+  pauses their animation frames; faces turned away from the camera are parked the same way (8 at hero).
+  A page must load under `visibility: hidden` first: a display-none iframe does not load in Chrome.
+- Loading order: the shown content's 22 pages open at once (a load event waits on the network more than
+  on the CPU: four at a time took 85 s), the other content then opens two at a time (22 more at once froze
+  the main thread for about 50 s). Static site: calm set 3–10 s, all 44 pages 11–19 s.
+- `/screen?fps=30` caps the ambient redraw of an embedded page; the zoom ladder already lowers each
+  page's devicePixelRatio to its on-screen size, so no separate canvas-scale query was needed.
+- Assets: glb 4.46 → 2.8 MB (colour JPEG 80), AO 8.9 → 3.8 MB (grey JPEG 70, floor 2048).
+- UI: the four demo cameras only.
+
 ## Not done / open
 
 - Lights are not baked (no `COMBINED`): the view is unlit albedo × AO, which is what the spec's three
