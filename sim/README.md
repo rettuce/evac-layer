@@ -17,7 +17,7 @@ cp .env.example .env            # VITE_SCREEN_ORIGIN=http://127.0.0.1:3153
 pnpm dev                        # http://127.0.0.1:3160
 pnpm build                      # type-check + sim/dist/
 # VITE_AMBIENT_BASE overrides where the loops are read from (default `${BASE_URL}ambient/`)
-# ?video=4k|8k forces the loop tier (default: 8k where HEVC Main 8K plays, else 4k)
+# ?video=8k selects the 8k HEVC loops where they play (default: 4k, since each 8k scene is ~60 MB over Pages)
 
 # 2. only for opening a face's live /screen by clicking it: the app (any free port; 3150–3152 are used by
 #    other worktrees), then once per app checkout approve the flood bulletins the EVAC LAYER content replays

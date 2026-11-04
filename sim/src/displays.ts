@@ -159,7 +159,7 @@ function waitCanPlay(video: HTMLVideoElement): Promise<void> {
 
 function detectTier(): VideoTier {
   const query = new URLSearchParams(location.search).get('video')
-  if (query === '4k' || query === '8k') return query
+  if (query !== '8k') return '4k'
   const support = document.createElement('video').canPlayType('video/mp4; codecs="hvc1.1.6.L153.B0"')
   return support === 'probably' || support === 'maybe' ? '8k' : '4k'
 }
