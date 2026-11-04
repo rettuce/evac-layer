@@ -135,6 +135,27 @@ interface Field {
   values: Float32Array
 }
 
+function blendedBias(x: number, y: number, time: number, seed: number, prevSeed: number, tt: number): number {
+  const bias = densityBias(x, y, time, seed)
+  if (tt >= 1) return bias
+  const before = densityBias(x, y, time, prevSeed)
+  return before + (bias - before) * tt
+}
+
+// The bias is centred on its mean over the whole grid, not over the nodes one view covers: the room is drawn in
+// tiles, and a per-view mean moved every threshold by a different amount in each tile.
+let meanCache: { key: string; mean: number } | undefined
+function meanBias(cols: number, rows: number, sx: number, sy: number, time: number, seed: number, prevSeed: number, tt: number): number {
+  const key = `${cols}:${rows}:${sx}:${sy}:${time}:${seed}:${prevSeed}:${tt}`
+  if (meanCache?.key === key) return meanCache.mean
+  let sum = 0
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < cols; i++) sum += blendedBias((i / cols) * sx, (j / rows) * sy, time, seed, prevSeed, tt)
+  }
+  meanCache = { key, mean: sum / (cols * rows) }
+  return meanCache.mean
+}
+
 // The field on the coarse grid, only the nodes that cover the view (plus a margin for the red plate).
 function sampleField(frame: AmbientFrame, time: number, seedX: number, seedY: number, marginPx: number): Field {
   const { width, height, view } = frame
@@ -163,22 +184,12 @@ function sampleField(frame: AmbientFrame, time: number, seedX: number, seedY: nu
   const sy = (DENSITY_BIAS_FREQ * height) / S
   const values = new Float32Array(ni * nj)
   const biases = new Float32Array(ni * nj)
-  let sum = 0
   let n = 0
   for (let j = 0; j < nj; j++) {
     const v = (j0 + j) / rows
-    for (let i = 0; i < ni; i++) {
-      const u = (i0 + i) / cols
-      let bias = densityBias(u * sx, v * sy, time, cur.biasSeed)
-      if (tt < 1) {
-        const before = densityBias(u * sx, v * sy, time, prev.biasSeed)
-        bias = before + (bias - before) * tt
-      }
-      biases[n++] = bias
-      sum += bias
-    }
+    for (let i = 0; i < ni; i++) biases[n++] = blendedBias(((i0 + i) / cols) * sx, v * sy, time, cur.biasSeed, prev.biasSeed, tt)
   }
-  const mean = sum / n
+  const mean = meanBias(cols, rows, sx, sy, time, cur.biasSeed, prev.biasSeed, tt)
   n = 0
   for (let j = 0; j < nj; j++) {
     const v = (j0 + j) / rows
@@ -233,16 +244,18 @@ function paintPlates(ctx: CanvasRenderingContext2D, frame: AmbientFrame, field: 
   const { view } = frame
   const S = Math.min(frame.width, frame.height)
   const pitch = (S * HALFTONE_PITCH_FACTOR) / SHADE
-  const w = Math.ceil(view.width / SHADE)
-  const h = Math.ceil(view.height / SHADE)
+  const gx0 = Math.floor(view.x / SHADE) - 1
+  const gy0 = Math.floor(view.y / SHADE) - 1
+  const w = Math.ceil((view.x + view.width) / SHADE) + 1 - gx0
+  const h = Math.ceil((view.y + view.height) / SHADE) + 1 - gy0
   const image = ctx.createImageData(w, h)
   const data = image.data
   const redBandStart = PLATE_T - RED_HALFTONE_BAND
   let o = 0
   for (let py = 0; py < h; py++) {
-    const y = view.y + (py + 0.5) * SHADE
+    const y = (gy0 + py + 0.5) * SHADE
     for (let px = 0; px < w; px++) {
-      const x = view.x + (px + 0.5) * SHADE
+      const x = (gx0 + px + 0.5) * SHADE
       const v = fieldAt(field, x, y)
       const vRed = fieldAt(field, x - shift[0], y - shift[1])
       let r: number
@@ -252,7 +265,7 @@ function paintPlates(ctx: CanvasRenderingContext2D, frame: AmbientFrame, field: 
         ;[r, g, b] = PAPER_COLOR
       } else if (v < HALFTONE_T) {
         const cov = HALFTONE_COVERAGE_MIN + (HALFTONE_COVERAGE_MAX - HALFTONE_COVERAGE_MIN) * ((v - PAPER_T) / (HALFTONE_T - PAPER_T))
-        const dot = halftoneDot(px, py, pitch, cov, BLUE_SCREEN_ANGLE)
+        const dot = halftoneDot(gx0 + px, gy0 + py, pitch, cov, BLUE_SCREEN_ANGLE)
         r = PAPER_COLOR[0] + (BLUE_COLOR[0] - PAPER_COLOR[0]) * dot
         g = PAPER_COLOR[1] + (BLUE_COLOR[1] - PAPER_COLOR[1]) * dot
         b = PAPER_COLOR[2] + (BLUE_COLOR[2] - PAPER_COLOR[2]) * dot
@@ -264,7 +277,7 @@ function paintPlates(ctx: CanvasRenderingContext2D, frame: AmbientFrame, field: 
       if (vRed >= PLATE_T) redInk = 1
       else if (vRed >= redBandStart) {
         const cov = RED_HALFTONE_COVERAGE_MIN + (RED_HALFTONE_COVERAGE_MAX - RED_HALFTONE_COVERAGE_MIN) * ((vRed - redBandStart) / RED_HALFTONE_BAND)
-        redInk = halftoneDot(px, py, pitch, cov, RED_SCREEN_ANGLE)
+        redInk = halftoneDot(gx0 + px, gy0 + py, pitch, cov, RED_SCREEN_ANGLE)
       }
       if (redInk > 0) {
         const red = blueInkHere || vRed >= PURPLE_T ? PURPLE_COLOR : RED_COLOR
@@ -283,7 +296,12 @@ function paintPlates(ctx: CanvasRenderingContext2D, frame: AmbientFrame, field: 
   plate.height = h
   plate.getContext('2d')!.putImageData(image, 0, 0)
   ctx.imageSmoothingEnabled = true
-  ctx.drawImage(plate, view.x, view.y, w * SHADE, h * SHADE)
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(view.x, view.y, view.width, view.height)
+  ctx.clip()
+  ctx.drawImage(plate, gx0 * SHADE, gy0 * SHADE, w * SHADE, h * SHADE)
+  ctx.restore()
 }
 
 function drawContours(ctx: CanvasRenderingContext2D, field: Field, time: number): void {

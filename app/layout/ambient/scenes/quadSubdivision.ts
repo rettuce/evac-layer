@@ -30,6 +30,7 @@ const MIN_CELL_PX = 13
 // The fragment shader lights every pixel within 0.6 px of a border and fades to 1.3 px, on both sides of
 // the shared edge; one stroke this wide carries the same ink.
 const LINE_WIDTH_PX = 1.6
+const AA_MARGIN_PX = 2
 // The reference's pixel sizes (smallest cell, dot radius, line width) are read at a 540 px short side (2× at 1080p), the closest match to the gallery's cell sizes and weight
 // capture; on a taller canvas they scale with the short side, so the picture keeps its weight (2026-11-05).
 const REFERENCE_SHORT_SIDE = 540
@@ -129,20 +130,23 @@ interface Walk {
   S: number
   minCell: number
   view: AmbientRect
+  margin: number
   halfW: number
   halfH: number
   leaves: Leaf[]
 }
 
-function overlaps(x: number, y: number, w: number, h: number, view: AmbientRect): boolean {
-  return x < view.x + view.width && x + w > view.x && y < view.y + view.height && y + h > view.y
+// A cell just outside the view still paints the half of its border stroke (and the anti-aliasing) that falls
+// inside, so cells are kept within `margin` of the view; the room is drawn in tiles and needs both halves.
+function overlaps(x: number, y: number, w: number, h: number, view: AmbientRect, margin: number): boolean {
+  return x < view.x + view.width + margin && x + w > view.x - margin && y < view.y + view.height + margin && y + h > view.y - margin
 }
 
 // Splits the cell at (ox, oy) of size (sw, sh) in grid units exactly as the fragment shader descends.
 function walk(k: Walk, ox: number, oy: number, sw: number, sh: number, depth: number): void {
   const px = k.halfW + ox * k.S
   const py = k.halfH + oy * k.S
-  if (!overlaps(px, py, sw * k.S, sh * k.S, k.view)) return
+  if (!overlaps(px, py, sw * k.S, sh * k.S, k.view, k.margin)) return
   if (depth < MAX_DEPTH && Math.min(sw, sh) * k.S >= k.minCell) {
     const cx = ox + 0.5 * sw
     const cy = oy + 0.5 * sh
@@ -199,6 +203,7 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, _shape: 
     S,
     minCell: MIN_CELL_PX * px,
     view: frame.view,
+    margin: (LINE_WIDTH_PX * px) / 2 + AA_MARGIN_PX,
     halfW,
     halfH,
     leaves: [],

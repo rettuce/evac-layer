@@ -43,11 +43,16 @@ function roomFrame(width: number, height: number, room: { width: number; height:
 // The room is drawn in fixed whole tiles, each with the same transform and bounds whichever screen asks
 // for it, then copied at whole-pixel offsets: shifting by each screen's own offset, or clipping to its
 // edge, rounds curve and line edges differently, and neighbouring screens would not meet exactly.
+// Each tile is drawn with ROOM_TILE_OVERLAP_PX more on every side and only its centre is copied: a shape cut
+// by the canvas edge is rasterized differently from the same shape drawn whole, which left 1-2 px seams
+// along the tile edges wherever a dot or a stroke crossed them.
 const ROOM_TILE_PX = 512
+const ROOM_TILE_OVERLAP_PX = 16
+const ROOM_TILE_CANVAS_PX = ROOM_TILE_PX + 2 * ROOM_TILE_OVERLAP_PX
 let tileCanvas: HTMLCanvasElement | undefined
 
 function drawRoom(ctx: CanvasRenderingContext2D, frame: AmbientFrame, shape: Shape, destX = 0) {
-  tileCanvas ??= Object.assign(document.createElement('canvas'), { width: ROOM_TILE_PX, height: ROOM_TILE_PX })
+  tileCanvas ??= Object.assign(document.createElement('canvas'), { width: ROOM_TILE_CANVAS_PX, height: ROOM_TILE_CANVAS_PX })
   const tile = tileCanvas.getContext('2d', { willReadFrequently: true })!
   const { view } = frame
   for (let ty = Math.floor(view.y / ROOM_TILE_PX) * ROOM_TILE_PX; ty < view.y + view.height; ty += ROOM_TILE_PX) {
@@ -57,11 +62,13 @@ function drawRoom(ctx: CanvasRenderingContext2D, frame: AmbientFrame, shape: Sha
       const w = Math.min(view.x + view.width, tx + ROOM_TILE_PX) - x
       const h = Math.min(view.y + view.height, ty + ROOM_TILE_PX) - y
       if (w <= 0 || h <= 0) continue
+      const ox = tx - ROOM_TILE_OVERLAP_PX
+      const oy = ty - ROOM_TILE_OVERLAP_PX
       tile.save()
-      tile.setTransform(1, 0, 0, 1, -tx, -ty)
-      pick.value.scene.render(tile, props.clockEpochMs, pick.value.seed, shape, { ...frame, view: { x: tx, y: ty, width: ROOM_TILE_PX, height: ROOM_TILE_PX } })
+      tile.setTransform(1, 0, 0, 1, -ox, -oy)
+      pick.value.scene.render(tile, props.clockEpochMs, pick.value.seed, shape, { ...frame, view: { x: ox, y: oy, width: ROOM_TILE_CANVAS_PX, height: ROOM_TILE_CANVAS_PX } })
       tile.restore()
-      ctx.drawImage(tileCanvas, x - tx, y - ty, w, h, destX + x - view.x, y - view.y, w, h)
+      ctx.drawImage(tileCanvas, x - ox, y - oy, w, h, destX + x - view.x, y - view.y, w, h)
     }
   }
 }

@@ -4,6 +4,7 @@ import { brushFlow } from './scenes/brushFlow.ts'
 import { etchedStreams } from './scenes/etchedStreams.ts'
 import { inkBloom } from './scenes/inkBloom.ts'
 import { moduleField } from './scenes/moduleField.ts'
+import { painterlyFlow } from './scenes/painterlyFlow.ts'
 import { quadSubdivision } from './scenes/quadSubdivision.ts'
 import type { AmbientScene } from './types'
 
@@ -13,6 +14,7 @@ export const AMBIENT_SCENES: readonly AmbientScene[] = [
   etchedStreams,
   quadSubdivision,
   moduleField,
+  painterlyFlow,
 ]
 export const AMBIENT_SLOT_MS = 3_600_000
 
