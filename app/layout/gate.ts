@@ -13,8 +13,7 @@ export interface Approvals {
 }
 
 // An approval is bound to the bytes that were approved: the shape files of the bulletin. A regenerated layout
-// gets a new digest and falls back to unapproved until an operator looks at it again. Records written before
-// digests existed carry none and stay valid until they are approved again, which binds them.
+// gets a new digest and falls back to unapproved until an operator looks at it again.
 export function layoutDigest(files: { shape: string; body: string }[]): string {
   const hash = createHash('sha256')
   for (const file of [...files].sort((a, b) => a.shape.localeCompare(b.shape))) hash.update(`${file.shape}\n${file.body}\n`)
@@ -23,7 +22,7 @@ export function layoutDigest(files: { shape: string; body: string }[]): string {
 
 export function approvalState(record: LayoutApproval | undefined, digest: string | undefined): { approved: boolean; stale: boolean } {
   if (!record?.approved) return { approved: false, stale: false }
-  const stale = digest !== undefined && record.digest !== undefined && record.digest !== digest
+  const stale = digest !== undefined && record.digest !== digest
   return { approved: !stale, stale }
 }
 
