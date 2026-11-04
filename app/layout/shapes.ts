@@ -61,7 +61,6 @@ export function viewportFromQuery(w: unknown, h: unknown, aspect: unknown): { wi
 
 // A 1.062 m square column wrapped in LED from 0.40 m to 3.60 m above the floor, at the pixel pitch of a
 // 55" portrait panel (1577 px/m): four faces of 1654 px side by side, the outer 37 px of each on the rounded corner.
-// Faces are read from 2–5 m rather than a panel's 1–2 m, so their design pixels are drawn 1.6x.
 export const PILLAR = {
   faces: 4,
   faceWidth: 1654,
@@ -70,7 +69,6 @@ export const PILLAR = {
   floorMetres: 0.4,
   cornerPx: 37,
   faceShape: '9x16' as PanelShape,
-  faceScale: 1.6,
   outputScale: 0.5,
 } as const
 

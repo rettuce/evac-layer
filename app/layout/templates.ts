@@ -1,38 +1,32 @@
 import type { Role, Shape, ShapeLayout, TemplateDef, TemplateId, Track } from './types'
-import { PILLAR } from './shapes'
-import { SHELTER_PICTOGRAM_PX } from './typography'
 
-const M = 48
-// Space between information blocks is at least one guide-text height (64), so each block reads as a unit.
-const G = 64
-const BAND = 176
-// The source line is only the bulletin time and the municipality, so it sits close to the foot.
-const SOURCE_GAP = 8
-const FOOT = 32
 export const STACKED_BAND_MIN_PX = 200
 
 // 16:9 is 田中's Figma artboard (2026-11-05, file H213MoFcJtIZ96s6qdmBZ8 node 3223:4, 1920 × 1080): the band 172,
 // the action in a 720 column from x 52 with the run pictogram's ink under the text, the direction and the shelter
-// right-aligned in a column from x 971 to 1868, the languages across both columns from y 830, the source on the
+// right-aligned in a column from x 971 to 1868 (the shelter's distance box reaches 1872), the languages across both
+// columns from y 830, the source on the
 // foot. Tracks are the artboard's px: the fr column takes a wider screen, the fr row above the languages a taller one.
+// The shelter also owns the rows under it down to the languages, so a two-line name (司令官 2026-11-05: shrink → two lines → ellipsis,
+// the direction and the distance never move) stays inside its cell.
 const FIGMA_LANDSCAPE_TYPE = { headline: 64, level: 64, action: 120, direction: 122, shelter: 79, shelterNarrow: 63, kind: 32, distance: 92, label: 24, languages: 54, languagesNarrow: 46, source: 24 }
 const LANDSCAPE: ShapeLayout = {
   id: 'figma-split',
-  columns: [52, 720, '1fr', 897, 52],
+  columns: [52, 720, '1fr', 897, 4, 48],
   rows: [172, 24, 27, 255, 90, 167, 49, '1fr', 170, 20, 29, 31],
   areas: [
-    'headline headline headline headline headline',
-    '. . . . .',
-    '. action . . .',
-    '. action . direction .',
-    '. action . . .',
-    '. action . shelter .',
-    '. action . . .',
-    '. . . . .',
-    '. languages languages languages .',
-    '. . . . .',
-    '. source source source .',
-    '. . . . .',
+    'headline headline headline headline headline headline',
+    '. . . . . .',
+    '. action . . . .',
+    '. action . direction . .',
+    '. action . . . .',
+    '. action . shelter shelter .',
+    '. action . shelter shelter .',
+    '. . . shelter shelter .',
+    '. languages languages languages . .',
+    '. . . . . .',
+    '. source source source . .',
+    '. . . . . .',
   ],
   required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
   pictogramPx: { headline: 98, action: 225, direction: 129, shelter: 157 },
@@ -41,18 +35,18 @@ const LANDSCAPE: ShapeLayout = {
   type: FIGMA_LANDSCAPE_TYPE,
 }
 
-// The same artboard without the where-blocks (all-clear, secure-now): their rows stay empty.
 const LANDSCAPE_CLEAR: ShapeLayout = {
   ...LANDSCAPE,
   id: 'figma-split-clear',
-  areas: LANDSCAPE.areas.map((row) => row.replace(/direction|shelter/, '.')),
+  areas: LANDSCAPE.areas.map((row) => row.replace(/direction|shelter shelter/, (m) => (m === 'direction' ? '.' : '. .'))),
   required: ['headline', 'action', 'languages', 'source'],
   pictogramPx: { headline: 98, action: 225 },
 }
 
 // 9:16 is 田中's Figma artboard (2026-11-04, file H213MoFcJtIZ96s6qdmBZ8 node 3212:5, 1080 × 1920): one column
 // from x 48 to 1043, the band 200, and the blocks placed so that every pictogram's ink and every text box start
-// on x 48. Row gaps are the measured distances between the ink of one block and the box of the next; the source
+// on x 48. Row gaps are the measured distances between the ink of one block and the box of the next (the site
+// pictogram's box is its ink, 3 px shorter than wide); the source
 // is anchored to the foot and the languages block takes the room that is left.
 // Two steps written on the artboard's rules: a name that wraps at 90 is set at 72; a stack that still does not
 // fit the frame (five language pairs reserve their tallest) sets the languages at 56.
@@ -60,7 +54,7 @@ const FIGMA_PORTRAIT_TYPE = { headline: 76, level: 66, action: 150, direction: 1
 const PORTRAIT: ShapeLayout = {
   id: 'figma-stack',
   columns: [48, '1fr', 37],
-  rows: [200, 26, 'auto', 62, 'auto', 86, 'auto', 101, 'auto', '1fr', 'auto', 29],
+  rows: [200, 26, 'auto', 62, 'auto', 86, 'auto', 104, 'auto', '1fr', 'auto', 29],
   areas: [
     'headline headline headline',
     '. . .',
@@ -78,6 +72,8 @@ const PORTRAIT: ShapeLayout = {
   required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
   pictogramPx: { headline: 124, action: 333, direction: 109, shelter: 162 },
   figma: true,
+  headlineLines: 1,
+  distanceBelow: true,
   type: FIGMA_PORTRAIT_TYPE,
 }
 
@@ -89,29 +85,6 @@ const PORTRAIT_CLEAR: ShapeLayout = {
   areas: ['headline headline headline', '. . .', '. action .', '. . .', '. languages .', '. . .', '. source .', '. . .'],
   required: ['headline', 'action', 'languages', 'source'],
   pictogramPx: { headline: 124, action: 333 },
-}
-
-// The portrait layout before the Figma redo; pillar faces still build on it (contract 18:13).
-const PILLAR_FACE_BASE: ShapeLayout = {
-  id: 'stack',
-  columns: [M, '1fr', M],
-  rows: [BAND, M, '1fr', G, 'auto', G, 'auto', G, 'auto', SOURCE_GAP, 'auto', FOOT],
-  areas: [
-    'headline headline headline',
-    '. . .',
-    '. action .',
-    '. . .',
-    '. direction .',
-    '. . .',
-    '. shelter .',
-    '. . .',
-    '. languages .',
-    '. . .',
-    '. source .',
-    '. . .',
-  ],
-  required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
-  pictogramPx: { headline: 112, action: 300, direction: 224, shelter: SHELTER_PICTOGRAM_PX },
 }
 
 // 32:9 is 田中's Figma artboard (2026-11-05, node 3223:80, 3840 × 1080): the level colour fills a 780 panel on the
@@ -132,8 +105,8 @@ const RIBBON: ShapeLayout = {
     'headline . action . . .',
     'headline . action . . .',
     'headline . action shelter shelter .',
-    'headline . action . . .',
-    'headline . . . . .',
+    'headline . action shelter shelter .',
+    'headline . . shelter shelter .',
     'headline languages languages languages languages languages',
   ],
   required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
@@ -145,35 +118,59 @@ const RIBBON: ShapeLayout = {
   type: FIGMA_RIBBON_TYPE,
 }
 
+// Without the where-blocks the action may run across the whole field, so a two-line all-clear keeps its pictogram.
 const RIBBON_CLEAR: ShapeLayout = {
   ...RIBBON,
   id: 'figma-ribbon-clear',
-  areas: RIBBON.areas.map((row) => row.replace(/direction|shelter shelter/, (m) => (m === 'direction' ? '.' : '. .'))),
+  areas: [
+    'headline . . . . .',
+    'headline . source . . .',
+    'headline . action action action .',
+    'headline . action action action .',
+    'headline . action action action .',
+    'headline . action action action .',
+    'headline . action action action .',
+    'headline . action action action .',
+    'headline . . . . .',
+    'headline languages languages languages languages languages',
+  ],
   required: ['headline', 'action', 'languages', 'source'],
   pictogramPx: { headline: 310, action: 344 },
 }
 
+// 1:1 is 田中's Figma artboard (2026-11-05, node 3230:4, 1080 × 1080): the band 200, the two-line action from x 48
+// with the run pictogram's ink and the easy-Japanese line (bottom-aligned with the ink) under it, the direction under
+// that, the source on the foot. The artboard has no shelter block and no language band, so those cells get no slot
+// and the easy Japanese reads in the action. The fr row above the source takes a taller screen.
+const FIGMA_SQUARE_TYPE = { headline: 76, level: 66, action: 150, direction: 120, easy: 64, source: 28 }
 const SQUARE: ShapeLayout = {
-  id: 'pictogram-first',
-  columns: [M, '1fr', M],
-  rows: [BAND, M, '1fr', G, 'auto', G, 'auto', G, 'auto', SOURCE_GAP, 'auto', FOOT],
+  id: 'figma-square',
+  columns: [48, '1fr', 7, 41],
+  rows: [200, 27, 580, 33, 130, '1fr', 34, 31],
   areas: [
-    'headline headline headline',
-    '. . .',
-    '. action .',
-    '. . .',
-    '. languages .',
-    '. . .',
-    '. direction .',
-    '. . .',
-    '. shelter .',
-    '. . .',
-    '. source .',
-    '. . .',
+    'headline headline headline headline',
+    '. . . .',
+    '. action . .',
+    '. . . .',
+    '. direction . .',
+    '. . . .',
+    '. source source .',
+    '. . . .',
   ],
   required: ['headline', 'action', 'direction', 'source'],
-  pictogramPx: { headline: 112, action: 136, direction: 128, shelter: SHELTER_PICTOGRAM_PX },
-  inline: ['direction'],
+  pictogramPx: { headline: 112, action: 193, direction: 109 },
+  figma: true,
+  fixedTracks: true,
+  headlineLines: 1,
+  type: FIGMA_SQUARE_TYPE,
+}
+
+const SQUARE_CLEAR: ShapeLayout = {
+  ...SQUARE,
+  id: 'figma-square-clear',
+  areas: SQUARE.areas.map((row) => row.replace('direction', '.')),
+  required: ['headline', 'action', 'source'],
+  pictogramPx: { headline: 112, action: 193 },
 }
 
 function requireShelterInsteadOfDirection(layout: ShapeLayout): ShapeLayout {
@@ -181,107 +178,81 @@ function requireShelterInsteadOfDirection(layout: ShapeLayout): ShapeLayout {
   return { ...layout, required: [...new Set(required)] }
 }
 
-const CLEAR_STACK: ShapeLayout = {
-  id: 'clear-stack',
-  columns: [M, '1fr', M],
-  rows: [BAND, M, '1fr', G, 'auto', SOURCE_GAP, 'auto', FOOT],
-  areas: [
-    'headline headline headline',
-    '. . .',
-    '. action .',
-    '. . .',
-    '. languages .',
-    '. . .',
-    '. source .',
-    '. . .',
-  ],
-  required: ['headline', 'action', 'languages', 'source'],
-  pictogramPx: { headline: 112, action: 192 },
-}
-
-const CLEAR_SQUARE: ShapeLayout = {
-  ...CLEAR_STACK,
-  id: 'clear-square',
-  required: ['headline', 'action', 'source'],
-  pictogramPx: { headline: 112, action: 160 },
-}
-
-// Level 5 (secure safety now) is the stage where leaving may itself be dangerous, so the
-// screen drops shelter and direction and gives the whole body to the action.
-const SECURE_SQUARE: ShapeLayout = { ...CLEAR_SQUARE, id: 'secure-square', pictogramPx: { headline: 112, action: 240 } }
-
-// 9:16 and 1:1 put the level label under the headline: the band is at least STACKED_BAND_MIN_PX
-// (one headline line + label with room above and below) and grows further for a two-line headline.
-function stackedBand(layout: ShapeLayout): ShapeLayout {
-  return { ...layout, rows: ['auto', ...layout.rows.slice(1)] }
-}
-
 export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   'evac-now': {
     '16x9': [LANDSCAPE],
     '9x16': [PORTRAIT],
     '32x9': [RIBBON],
-    '1x1': [stackedBand(SQUARE)],
+    '1x1': [SQUARE],
   },
   'evac-prepare': {
     '16x9': [requireShelterInsteadOfDirection(LANDSCAPE)],
     '9x16': [requireShelterInsteadOfDirection(PORTRAIT)],
     '32x9': [requireShelterInsteadOfDirection(RIBBON)],
-    '1x1': [stackedBand(requireShelterInsteadOfDirection(SQUARE))],
+    '1x1': [SQUARE],
   },
   'secure-now': {
     '16x9': [{ ...LANDSCAPE_CLEAR, id: 'figma-split-secure' }],
     '9x16': [{ ...PORTRAIT_CLEAR, id: 'figma-stack-secure' }],
     '32x9': [{ ...RIBBON_CLEAR, id: 'figma-ribbon-secure' }],
-    '1x1': [stackedBand(SECURE_SQUARE)],
+    '1x1': [{ ...SQUARE_CLEAR, id: 'figma-square-secure' }],
   },
   'all-clear': {
     '16x9': [LANDSCAPE_CLEAR],
     '9x16': [PORTRAIT_CLEAR],
     '32x9': [RIBBON_CLEAR],
-    '1x1': [stackedBand(CLEAR_SQUARE)],
+    '1x1': [SQUARE_CLEAR],
   },
 }
 
-// Pillar faces read best at eye height: the reading rows end 1.0 m above the floor, a level-colour band
-// with the source runs round the foot of the column (0.40–0.75 m), and the top band and one large
-// action pictogram take the upper column. Rows are in design px, so metres are divided by the face scale.
-const PILLAR_EYE_LOW_M = 1.0
-const PILLAR_EYE_HIGH_M = 2.4
-const PILLAR_FOOT_BAND_TOP_M = 0.75
-const PILLAR_HERO_PX = 800
-const PILLAR_BODY_ORDER: Role[] = ['action', 'languages', 'direction', 'shelter']
-
-function pillarDesignPx(fromMetres: number, toMetres: number): number {
-  return ((toMetres - fromMetres) * PILLAR.pxPerMetre) / PILLAR.faceScale
+// The pillar is 田中's Figma artboard (2026-11-05, node 3230:68, 6616 × 5046: four faces of 1654, the colour band 320
+// across the top and the foot band from 4500 with the source in white). A face in strip px: the run pictogram's ink
+// 842 × 1132 from (353, 627) above the two-line action from y 2182, the languages from y 2834 with labels centred on
+// their lines, the shelter group from y 3496 (the 32:9 group), the direction from y 3892, every text from x 80 and
+// the distance ending at x 1572. The fr row above the foot band takes a taller face.
+const FIGMA_PILLAR_TYPE = { headline: 90, level: 90, action: 190, direction: 270, shelter: 140, shelterNarrow: 112, kind: 32, distance: 150, label: 40, languages: 88, languagesNarrow: 74, source: 70 }
+const PILLAR_FACE: ShapeLayout = {
+  id: 'figma-face',
+  columns: [80, 273, 842, 377, 82],
+  rows: [320, 307, 1132, 417, 442, 216, 406, 256, 275, 121, 383, '1fr', 546],
+  areas: [
+    'headline headline headline headline headline',
+    '. . . . .',
+    '. . hero . .',
+    '. . . . .',
+    '. action action action .',
+    '. . . . .',
+    '. languages languages languages .',
+    '. languages languages languages .',
+    '. shelter shelter shelter .',
+    '. shelter shelter shelter .',
+    '. direction direction direction .',
+    '. . . . .',
+    'source source source source source',
+  ],
+  required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
+  pictogramPx: { headline: 186, action: 0, direction: 261, shelter: 253 },
+  hero: { role: 'action', px: 1132 },
+  bandRoles: ['source'],
+  figma: true,
+  fixedTracks: true,
+  headlineLines: 1,
+  type: FIGMA_PILLAR_TYPE,
 }
 
-function pillarFace(layout: ShapeLayout): ShapeLayout {
-  const roles = areaRoles(layout)
-  const topMetres = PILLAR.floorMetres + PILLAR.height / PILLAR.pxPerMetre
-  const heroRow = pillarDesignPx(PILLAR_EYE_HIGH_M, topMetres) - STACKED_BAND_MIN_PX
-  const rows: Track[] = [layout.rows[0]!, heroRow, '1fr']
-  const areas = ['headline headline headline', '. hero .', '. . .']
-  PILLAR_BODY_ORDER.filter((role) => roles.has(role)).forEach((role, i) => {
-    if (i > 0) {
-      rows.push(G)
-      areas.push('. . .')
-    }
-    rows.push('auto')
-    areas.push(`. ${role} .`)
-  })
-  rows.push(pillarDesignPx(PILLAR_FOOT_BAND_TOP_M, PILLAR_EYE_LOW_M), pillarDesignPx(PILLAR.floorMetres, PILLAR_FOOT_BAND_TOP_M))
-  areas.push('. . .', 'source source source')
-  return {
-    ...layout,
-    id: `pillar-${layout.id}`,
-    columns: [M, '1fr', M],
-    rows,
-    areas,
-    pictogramPx: { ...layout.pictogramPx, action: 0 },
-    hero: { role: 'action', px: PILLAR_HERO_PX },
-    bandRoles: ['source'],
-  }
+const PILLAR_FACE_CLEAR: ShapeLayout = {
+  ...PILLAR_FACE,
+  id: 'figma-face-clear',
+  areas: PILLAR_FACE.areas.map((row) => row.replace(/(direction|shelter) \1 \1/, '. . .')),
+  required: ['headline', 'action', 'languages', 'source'],
+  pictogramPx: { headline: 186, action: 0 },
+}
+
+const PILLAR_FACE_LAYOUTS: Partial<Record<TemplateId, ShapeLayout>> = {
+  'evac-now': PILLAR_FACE,
+  'evac-prepare': requireShelterInsteadOfDirection(PILLAR_FACE),
+  'secure-now': { ...PILLAR_FACE_CLEAR, id: 'figma-face-secure' },
+  'all-clear': PILLAR_FACE_CLEAR,
 }
 
 export function areaRoles(layout: ShapeLayout): Set<string> {
@@ -307,18 +278,11 @@ export function definedTemplates(): TemplateId[] {
   return (Object.keys(TEMPLATES) as TemplateId[]).sort()
 }
 
-const PILLAR_FACE_LAYOUTS: Partial<Record<TemplateId, ShapeLayout>> = {
-  'evac-now': stackedBand(PILLAR_FACE_BASE),
-  'evac-prepare': stackedBand(requireShelterInsteadOfDirection(PILLAR_FACE_BASE)),
-  'secure-now': stackedBand({ ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 480 } }),
-  'all-clear': stackedBand(CLEAR_STACK),
-}
-
 export function resolveLayout(templateId: TemplateId, shape: Shape, variant = 0): ShapeLayout {
   if (shape === 'pillar') {
     const face = PILLAR_FACE_LAYOUTS[templateId]
     if (!face) throw new TemplateNotDefinedError(templateId, shape)
-    return pillarFace(face)
+    return face
   }
   const variants = TEMPLATES[templateId]?.[shape]
   if (!variants?.length) throw new TemplateNotDefinedError(templateId, shape)

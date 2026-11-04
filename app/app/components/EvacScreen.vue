@@ -199,7 +199,7 @@ async function fit() {
       shelterNarrow.value = true
       continue
     }
-    if (layout.value.figma && !distanceBelow.value && shelterNameWraps()) {
+    if (layout.value.distanceBelow && !distanceBelow.value && shelterNameWraps()) {
       distanceBelow.value = true
       continue
     }
@@ -276,8 +276,8 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-ready="ready ? '1' : '0'"
     :data-bulletin-id="screen.alert.bulletin_id"
   >
-    <div v-if="layout.hero && heroCell?.pictogram" class="hero-pictogram" :style="{ gridArea: 'hero' }">
-      <PictogramMark :id="heroCell.pictogram" :size-px="layout.hero.px" />
+    <div v-if="layout.hero && heroCell?.pictogram" class="hero-pictogram" :class="{ 'is-figma': layout.figma }" :style="{ gridArea: 'hero' }">
+      <PictogramMark :id="heroCell.pictogram" :size-px="layout.hero.px" :fit-ink="layout.figma" />
     </div>
     <section
       v-for="cell in placed"

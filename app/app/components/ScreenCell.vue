@@ -32,7 +32,7 @@ const languageGroups = computed<LangKey[][]>(() => {
 const currentGroup = computed(() => (languageGroups.value.length ? props.languageIndex % languageGroups.value.length : -1))
 // The Figma artboard writes the distance as one word (570m); the earlier layouts keep the space.
 const distanceText = computed(() => (props.cell.distance_m === undefined ? '' : `${props.cell.distance_m}${props.figmaRules ? '' : ' '}m`))
-const headlineMaxLines = computed(() => (props.headlineLimited ? (props.headlineMaxLines ?? (props.figmaRules ? 1 : HEADLINE_STACKED_MAX_LINES)) : undefined))
+const headlineMaxLines = computed(() => (props.headlineLimited ? (props.headlineMaxLines ?? HEADLINE_STACKED_MAX_LINES) : undefined))
 </script>
 
 <template>
@@ -49,7 +49,7 @@ const headlineMaxLines = computed(() => (props.headlineLimited ? (props.headline
 
     <template v-else-if="cell.role === 'action'">
       <p class="t-action action-text">{{ cell.text.ja }}</p>
-      <div class="action-sub">
+      <div v-if="(cell.pictogram && pictogramPx) || (cell.text.ja_easy && easyInAction)" class="action-sub">
         <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" :fit-ink="figmaRules" />
         <p v-if="cell.text.ja_easy && easyInAction" class="t-guide" lang="ja" data-lang="ja_easy">{{ cell.text.ja_easy }}</p>
       </div>
