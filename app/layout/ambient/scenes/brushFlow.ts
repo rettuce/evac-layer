@@ -19,9 +19,20 @@ const CREST_WIDTH = 0.3
 const CREST_LIFT = 0.2
 const FIELD_SCALE = 1 / 520
 const TURNS = 2
-const DRIFT_MS = 40_000
-const CYCLE_MS = { min: 4_000, max: 8_000 }
-const HOLD = 0.35
+// After wgl painterly-flow: a growth front fills the paper in 12 s (ease 1 − (1 − p)^1.5), holds 2 s, then the
+// next palette paints over the finished picture without wiping it.
+const GROW_MS = 12_000
+const HOLD_MS = 2_000
+const CYCLE_MS = GROW_MS + HOLD_MS
+const GROW_EASE_POW = 1.5
+const STROKE_WINDOW = 0.1
+const CYCLE_SEED_STRIDE = 1013
+
+function cycleProgress(t: number): number {
+  const u = ((t % CYCLE_MS) + CYCLE_MS) % CYCLE_MS
+  const p = Math.min(1, u / GROW_MS)
+  return 1 - (1 - p) ** GROW_EASE_POW
+}
 
 function stroke(ctx: CanvasRenderingContext2D, points: number[], lift: number, count: number): void {
   ctx.beginPath()
@@ -30,40 +41,29 @@ function stroke(ctx: CanvasRenderingContext2D, points: number[], lift: number, c
   ctx.stroke()
 }
 
-// 0 → 1 while the stroke draws on, 1 while it holds, then back to 0 as it lifts off.
-function drawnShare(t: number, periodMs: number, phase: number): number {
-  const u = (((t / periodMs + phase) % 1) + 1) % 1
-  const edge = (1 - HOLD) / 2
-  if (u < edge) return u / edge
-  if (u > 1 - edge) return (1 - u) / edge
-  return 1
-}
-
-function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: Shape, frame: AmbientFrame): void {
-  const unit = sceneUnit(frame, shape)
+function paintCycle(ctx: CanvasRenderingContext2D, cycle: number, progress: number, unit: number, frame: AmbientFrame, baseSeed: number): void {
+  const seed = baseSeed + cycle * CYCLE_SEED_STRIDE
   const size = SPACING * unit
-  const drift = t / DRIFT_MS
   const { i0, i1, j0, j1 } = cellRange(frame.view, size, (STEPS * STEP + BRUSH.max) * unit)
-  paper(ctx, frame, PAPER)
-  ctx.lineCap = 'butt'
-  ctx.lineJoin = 'round'
   const points: number[] = []
   for (let j = j0; j < j1; j++) {
     for (let i = i0; i < i1; i++) {
+      const start = cellRandom(seed, i, j, 6) * (1 - STROKE_WINDOW)
+      const share = Math.min(1, Math.max(0, (progress - start) / STROKE_WINDOW))
+      if (share <= 0) continue
       let x = (i + cellRandom(seed, i, j)) * size
       let y = (j + cellRandom(seed, i, j, 1)) * size
       points.length = 0
       points.push(x, y)
-      for (let s = 0; s < STEPS; s++) {
-        const angle = fbm(seed, (x / unit) * FIELD_SCALE + drift, (y / unit) * FIELD_SCALE - drift * 0.5, 2) * Math.PI * 2 * TURNS
+      for (let k = 0; k < STEPS; k++) {
+        const angle = fbm(seed, (x / unit) * FIELD_SCALE, (y / unit) * FIELD_SCALE, 2) * Math.PI * 2 * TURNS
         x += Math.cos(angle) * STEP * unit
         y += Math.sin(angle) * STEP * unit
         points.push(x, y)
       }
-      const paint = PAINTS[Math.floor(cellRandom(seed, i, j, 2) * PAINTS.length)]!
+      const paint = PAINTS[(Math.floor(cellRandom(seed, i, j, 2) * PAINTS.length) + cycle) % PAINTS.length]!
       const width = (BRUSH.min + cellRandom(seed, i, j, 3) * (BRUSH.max - BRUSH.min)) * unit
-      const period = CYCLE_MS.min + cellRandom(seed, i, j, 4) * (CYCLE_MS.max - CYCLE_MS.min)
-      const count = Math.max(2, Math.round(drawnShare(t, period, cellRandom(seed, i, j, 5)) * (STEPS + 1)))
+      const count = Math.max(2, Math.round(share * (STEPS + 1)))
       ctx.strokeStyle = paint.body
       ctx.lineWidth = width
       stroke(ctx, points, 0, count)
@@ -72,6 +72,16 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
       stroke(ctx, points, width * CREST_LIFT, count)
     }
   }
+}
+
+function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: Shape, frame: AmbientFrame): void {
+  const unit = sceneUnit(frame, shape)
+  const cycle = Math.floor(t / CYCLE_MS)
+  paper(ctx, frame, PAPER)
+  ctx.lineCap = 'butt'
+  ctx.lineJoin = 'round'
+  if (cycle > 0) paintCycle(ctx, cycle - 1, 1, unit, frame, seed)
+  paintCycle(ctx, cycle, cycleProgress(t), unit, frame, seed)
 }
 
 export const brushFlow: AmbientScene = { id: 'brush-flow', name: '筆の流れ', ink: 'dark', render }
