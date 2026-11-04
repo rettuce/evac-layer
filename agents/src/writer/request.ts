@@ -51,13 +51,16 @@ export function writerSystem(): string {
   ].join("\n");
 }
 
+// The municipality block comes first and is the same for every bulletin of a municipality and hazard, so the live
+// Writer puts a cache breakpoint after it; the bulletin and budgets follow.
+export function writerMunicipalityBlock(municipality: unknown): string {
+  return ["## 自治体知識ファイル（municipality.schema.json）", JSON.stringify(municipality, null, 2)].join("\n\n");
+}
+
+export function writerAlertBlock(alert: Alert, budgets: CellBudget[]): string {
+  return ["## 警報（alert.schema.json）", JSON.stringify(alert, null, 2), "## 書くセルと文字数予算", JSON.stringify(budgets, null, 2)].join("\n\n");
+}
+
 export function writerUser(alert: Alert, municipality: unknown, budgets: CellBudget[]): string {
-  return [
-    "## 警報（alert.schema.json）",
-    JSON.stringify(alert, null, 2),
-    "## 自治体知識ファイル（municipality.schema.json）",
-    JSON.stringify(municipality, null, 2),
-    "## 書くセルと文字数予算",
-    JSON.stringify(budgets, null, 2),
-  ].join("\n\n");
+  return [writerMunicipalityBlock(municipality), writerAlertBlock(alert, budgets)].join("\n\n");
 }

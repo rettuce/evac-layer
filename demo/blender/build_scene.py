@@ -21,7 +21,7 @@ from mathutils import Matrix, Vector
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from layout import (
-    BACK_WALL_Y, elevation_canvas, elevation_crop, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
+    BACK_WALL_Y, elevation_canvas, elevation_crop, nearest_louver_gap_x, CEILING_Z, COLUMN_CLAD_M, COLUMN_CLAD_TOP_Z, COLUMN_SIZE, COLUMNS, EYE_Z, HEADWALL_BOTTOM_Z,
     HEADWALL_DEPTH, HEADWALL_Y, LEFT_WALL_X, RIBBON_PANEL_H, RIBBON_PANEL_W,
     RIGHT_WALL_X,
 )
@@ -77,11 +77,11 @@ BACK_WALL_9X16_COUNT = 3
 
 
 def back_wall_mounts():
-    """Portrait screens with equal gaps (column face to screen included) between the two back columns."""
+    """Portrait screens spaced evenly between the two back columns, each centred on the nearest louver gap."""
     inner = COLUMNS[3][0] - COLUMN_CLAD_HALF
     width = BACK_WALL_9X16[0]
     gap = (2 * inner - BACK_WALL_9X16_COUNT * width) / (BACK_WALL_9X16_COUNT + 1)
-    return [(Vector((-inner + gap * (i + 1) + width * (i + 0.5), BACK_WALL_Y, BACK_WALL_SCREEN_Z)), 0.0)
+    return [(Vector((nearest_louver_gap_x(-inner + gap * (i + 1) + width * (i + 0.5)), BACK_WALL_Y, BACK_WALL_SCREEN_Z)), 0.0)
             for i in range(BACK_WALL_9X16_COUNT)]
 
 
@@ -535,23 +535,39 @@ def column_seam_hidden_from_hero(x):
     return "right" if x > 0 else "left"
 
 
+COLUMN_FACE_NAMES = ("front", "right", "back", "left")
+
+
+def column_face_crops(left, top, width, height, seam):
+    """Each face's own window on the strip: the picture advances one face width per face round the column,
+    and a seam on the front-right edge puts the strip's last quarter on the front (AmbientLayer draws the same)."""
+    face_width = width // COLUMN_FACES
+    first_quarter = COLUMN_FACES - 1 if seam == "right" else 0
+    return {name: [left + ((k + first_quarter) % COLUMN_FACES) * face_width, top, face_width, height]
+            for k, name in enumerate(COLUMN_FACE_NAMES)}
+
+
 def canvas_crops():
     """Each screen's window on the elevation canvas; a column's LED band is its four faces laid side by side."""
     crops = {}
     shapes = {}
     seam = {}
+    faces = {}
     for i, (x, _) in enumerate(COLUMNS):
         left, top, width, height = elevation_crop(x, COLUMN_LED_MID_Z, COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z)
-        crops[f"pillar_{i}"] = (left, top, whole_pixels_per_face(width), height)
+        width = whole_pixels_per_face(width)
+        crops[f"pillar_{i}"] = (left, top, width, height)
         shapes[f"pillar_{i}"] = "pillar"
         seam[f"pillar_{i}"] = column_seam_hidden_from_hero(x)
+        faces[f"pillar_{i}"] = column_face_crops(left, top, width, height, seam[f"pillar_{i}"])
     for shape in ("32x9", "9x16"):
         width, height = SCREENS[shape]["size"]
         for i, (center, _) in enumerate(SCREENS[shape]["mounts"]):
             crops[f"{shape}_{i}"] = elevation_crop(center.x, center.z, width, height)
             shapes[f"{shape}_{i}"] = shape
     width, height = elevation_canvas()
-    return {"canvas": [width, height], "crops": {name: list(box) for name, box in crops.items()}, "shapes": shapes, "seam": seam}
+    return {"canvas": [width, height], "crops": {name: list(box) for name, box in crops.items()}, "shapes": shapes, "seam": seam,
+            "faces": faces}
 
 
 def framing_report(name, key=None):

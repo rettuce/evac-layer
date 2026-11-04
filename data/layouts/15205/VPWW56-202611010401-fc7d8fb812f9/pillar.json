@@ -21,15 +21,15 @@
       "priority": 1,
       "text": {
         "ja": "レベル２土砂災害注意報解除",
-        "ja_easy": "どしゃさいがい ちゅういほう おわり",
-        "en": "Landslide advisory ended",
-        "zh_hans": "2级土石灾害注意报解除",
-        "zh_hant": "2級土石災害注意報解除",
+        "ja_easy": "どしゃくずれの ちゅういほう おわり",
+        "en": "Landslide Advisory Ended",
+        "zh_hans": "2级土砂灾害注意报已解除",
+        "zh_hant": "2級土砂災害注意報已解除",
         "ko": "레벨2 토사재해 주의보 해제",
-        "th": "ยกเลิกประกาศเตือนภัยดินถล่มระดับ2",
-        "vi": "Dỡ bỏ thông báo chú ý sạt lở đất cấp 2",
-        "fil": "Inalis na ang abiso sa pagguho ng lupa, Antas 2",
-        "id": "Imbauan waspada tanah longsor level 2 dicabut"
+        "th": "ยกเลิกประกาศเฝ้าระวังภัยดินถล่มระดับ2",
+        "vi": "Đã hủy cảnh báo sạt lở đất cấp 2",
+        "fil": "Inalis na ang Level 2 Landslide Advisory",
+        "id": "Peringatan Tanah Longsor Level 2 Dicabut"
       },
       "pictogram": "landslide",
       "motion": "scale-in"
@@ -41,14 +41,14 @@
       "text": {
         "ja": "避難の必要なし",
         "ja_easy": "もう にげなくて いいです",
-        "en": "No need to leave",
-        "zh_hans": "无需避难",
-        "zh_hant": "無需避難",
-        "ko": "대피할 필요 없음",
+        "en": "No need to flee",
+        "zh_hans": "无需再避难",
+        "zh_hant": "無需再避難",
+        "ko": "이제 대피 안 해도 됩니다",
         "th": "ไม่ต้องอพยพแล้ว",
         "vi": "Không cần sơ tán nữa",
         "fil": "Di na kailangang lumikas",
-        "id": "Tidak perlu mengungsi"
+        "id": "Tak perlu mengungsi lagi"
       },
       "pictogram": "safe_here",
       "motion": "pulse"
@@ -60,14 +60,14 @@
       "text": {
         "ja": "避難の必要なし",
         "ja_easy": "もう にげなくて いいです",
-        "en": "No need to leave",
-        "zh_hans": "无需避难",
-        "zh_hant": "無需避難",
-        "ko": "대피할 필요 없음",
+        "en": "No need to flee",
+        "zh_hans": "无需再避难",
+        "zh_hant": "無需再避難",
+        "ko": "이제 대피 안 해도 됩니다",
         "th": "ไม่ต้องอพยพแล้ว",
         "vi": "Không cần sơ tán nữa",
         "fil": "Di na kailangang lumikas",
-        "id": "Tidak perlu mengungsi"
+        "id": "Tak perlu mengungsi lagi"
       },
       "motion": "static"
     },

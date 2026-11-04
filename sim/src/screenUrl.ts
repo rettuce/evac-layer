@@ -20,6 +20,7 @@ export interface CropsFile {
   crops: Record<string, [number, number, number, number]>
   shapes: Record<string, DisplayExtras['shape']>
   seam: Record<string, string>
+  faces?: Record<string, Record<string, [number, number, number, number]>>
 }
 
 export const SCREEN_ORIGIN = import.meta.env.VITE_SCREEN_ORIGIN ?? 'http://127.0.0.1:3153'
@@ -35,6 +36,16 @@ const WINDOWS: Record<Content, { from: string; to: string }> = {
   evac: { from: '2026-10-21T18:10+09:00', to: '2026-10-21T19:40+09:00' },
 }
 
+// build_scene.py COLUMN_FACE_NAMES, in the order of the glb's face index (0 faces the hero camera, then counter-clockwise).
+const FACE_NAMES = ['front', 'right', 'back', 'left'] as const
+
+// The calm content draws each pillar face as its own page over that face's window of the room canvas
+// (D-8 `faces`); the alert layout stays one pillar page clipped per face, because it is laid out per column.
+export function faceWindow(extras: DisplayExtras, content: Content, crops?: CropsFile): [number, number, number, number] | undefined {
+  if (content !== 'calm' || extras.shape !== 'pillar') return undefined
+  return crops?.faces?.[extras.screen]?.[FACE_NAMES[extras.face]!]
+}
+
 export async function loadCrops(url: string): Promise<CropsFile | undefined> {
   const response = await fetch(url)
   return response.ok ? ((await response.json()) as CropsFile) : undefined
@@ -42,17 +53,19 @@ export async function loadCrops(url: string): Promise<CropsFile | undefined> {
 
 export function screenUrl(extras: DisplayExtras, content: Content, scene: AmbientScene, crops?: CropsFile): string {
   const canvas = crops?.canvas ?? extras.canvas
-  const crop = crops?.crops[extras.screen] ?? extras.crop
+  const face = faceWindow(extras, content, crops)
+  const crop = face ?? crops?.crops[extras.screen] ?? extras.crop
   const params = new URLSearchParams({
     mode: 'live', municipality: MUNICIPALITY, site: SITE_ID, speed: '1', ...WINDOWS[content], scene,
-    shape: crops?.shapes[extras.screen] ?? extras.shape, canvas: `${canvas[0]}x${canvas[1]}`, crop: crop.join(','), canvas_id: ROOM_ID,
-    ...SITE,
+    canvas: `${canvas[0]}x${canvas[1]}`, crop: crop.join(','), canvas_id: ROOM_ID, ...SITE,
   })
-  const seam = crops?.seam[extras.screen]
-  if (seam) params.set('seam', seam)
-  if (extras.shape !== 'pillar') {
+  if (face || extras.shape !== 'pillar') {
     params.set('w', String(extras.face_px[0]))
     params.set('h', String(extras.face_px[1]))
+  } else {
+    params.set('shape', crops?.shapes[extras.screen] ?? extras.shape)
+    const seam = crops?.seam[extras.screen]
+    if (seam) params.set('seam', seam)
   }
   return `${SCREEN_ORIGIN}/screen?${params}`
 }

@@ -6,7 +6,7 @@ const PAPER = 'rgb(243 239 232)'
 const TINTS = [tint(12, 44, 80), tint(40, 56, 82), tint(8, 46, 89), tint(24, 30, 86), 'rgb(243 239 232)']
 const FIGURES = [tint(12, 42, 64), tint(42, 58, 66), tint(220, 10, 60), tint(6, 40, 78), 'rgb(250 248 243)']
 const TILE = 120
-const TURN_MS = { min: 240_000, max: 480_000 }
+const TURN_MS = { min: 4_000, max: 8_000 }
 
 type Figure = 'half' | 'quarter' | 'disc' | 'square'
 const KINDS: Figure[] = ['half', 'half', 'quarter', 'quarter', 'disc', 'square']
@@ -36,7 +36,7 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
       ctx.fillRect(i * size, j * size, size + 0.5, size + 0.5)
       const period = TURN_MS.min + pick(1) * (TURN_MS.max - TURN_MS.min)
       const direction = pick(2) < 0.5 ? -1 : 1
-      const angle = Math.floor(pick(3) * 4) * (Math.PI / 2) + direction * 2 * Math.PI * (t / period)
+      const angle = Math.floor(pick(3) * 4) * (Math.PI / 2) + direction * 2 * Math.PI * ((t / period) % 1)
       ctx.save()
       ctx.beginPath()
       ctx.rect(i * size, j * size, size, size)

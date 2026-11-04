@@ -10,6 +10,24 @@ EYE_Z = 1.6
 COLUMN_SIZE = 0.9
 COLUMNS = [(-5.5, 1.5), (5.5, 1.5), (-5.5, 6.5), (5.5, 6.5)]
 COLUMN_CLAD_M = 0.08
+
+# Back-wall louvers: slats on a fixed pitch with a gap centred on the hero axis (x = 0), so screens can sit in gaps.
+LOUVER_PITCH = 0.15
+LOUVER_SLAT_W = 0.05
+
+
+def louver_gap_x(n):
+    return n * LOUVER_PITCH
+
+
+def nearest_louver_gap_x(x):
+    return louver_gap_x(round(x / LOUVER_PITCH))
+
+
+def louver_slat_xs(x_from, x_to):
+    first = int((x_from - LOUVER_SLAT_W) // LOUVER_PITCH)
+    last = int((x_to + LOUVER_SLAT_W) // LOUVER_PITCH) + 1
+    return [(n + 0.5) * LOUVER_PITCH for n in range(first, last + 1) if x_from < (n + 0.5) * LOUVER_PITCH < x_to]
 COLUMN_CLAD_TOP_Z = CEILING_Z
 
 CEILING_TRIM_M = 0.12
