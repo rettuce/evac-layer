@@ -194,6 +194,9 @@ CLOSEUP_OPTIONS = {
     # Chosen for cut 8: the low column view panned to between the two left columns, the left-side ribbon view
     # brought closer, and the 45-degree wall view panned right to trim the empty wall on the left.
     "col-final": ("col", 30, 0.8, 35.0, 9.0, (0.0, 2.5, 0.0)),
+    # Cut 0: straight on to the column's front face, the whole LED band just inside the frame height; at 50 mm
+    # the shelter line reads at about 25 px in 1080p (the 35 mm framing from 5.6 m did not).
+    "col-front-50": ("col", 0, COLUMN_LED_MID_Z, 50.0, 8.6),
     "rib-final": ("rib", -30, 2.4, 35.0, 8.5),
     "wall-final": ("wall", 45, EYE_Z, 35.0, 6.5, (1.2, 0.0, 0.0)),
 }
@@ -241,6 +244,12 @@ SHOTS = {
         "seconds": 8, "screens": "ambient", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "32x9",
         "path": [(Vector((-0.7, -8.6, EYE_Z)), Vector((-0.7, BACK_WALL_Y, 2.3))),
                  (Vector((0.7, -8.6, EYE_Z)), Vector((0.7, BACK_WALL_Y, 2.3)))],
+    },
+    # Cut 0: the switch seen close on one column face. The recording starts 5.4 s in, so its 0.3 s of black
+    # falls at 2.7 s and the level-3 screen scales in at 3.0 s.
+    "cut00": {
+        "seconds": 8, "screens": "switch", "screens_from_s": 5.4, "light_scale": 1.0, "lens": 50.0,
+        "path": push_from("col-front-50", 0.3), "focus_point": CLOSEUP_TARGETS["col"],
     },
     "cut05": {
         "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
@@ -348,7 +357,7 @@ def make_placeholder(shape):
     return out
 
 
-def screen_material(shape, source, frame_count):
+def screen_material(shape, source, frame_count, offset_frames=0):
     """Emission only: the screen shows its recording and takes no light or reflection from the room."""
     mat = bpy.data.materials.new(f"screen_{shape}")
     mat.use_nodes = True
@@ -361,7 +370,7 @@ def screen_material(shape, source, frame_count):
         tex.image.source = "MOVIE"
         user = tex.image_user
         user.frame_start = 1
-        user.frame_offset = 0
+        user.frame_offset = offset_frames
         user.frame_duration = min(tex.image.frame_duration, frame_count) or frame_count
         user.use_cyclic = True
         user.use_auto_refresh = True
@@ -373,7 +382,7 @@ def screen_material(shape, source, frame_count):
     return mat
 
 
-def build_screens(frame_count, cut, canvas_dir=None):
+def build_screens(frame_count, cut, canvas_dir=None, offset_frames=0):
     """canvas_dir: one still per window (<shape>_<i>.png, pillar_<i>.png) cut from a single room canvas."""
     joint = principled("joint", (0.004, 0.004, 0.004), 0.5)
     sources = {}
@@ -384,7 +393,7 @@ def build_screens(frame_count, cut, canvas_dir=None):
     for shape, spec in SCREENS.items():
         width, height = spec["size"]
         sources[shape] = screen_source(shape, cut)
-        shared = screen_material(shape, sources[shape], frame_count)
+        shared = screen_material(shape, sources[shape], frame_count, offset_frames)
         if canvas_dir and spec["mounts"]:
             sources[shape] = Path(canvas_dir) / f"{shape}_0.png"
         for i, (surface, yaw) in enumerate(spec["mounts"]):
@@ -687,7 +696,7 @@ def main():
     back_wall_clear = [(center.x - SCREENS[shape]["size"][0] / 2 - JOINT_M, center.x + SCREENS[shape]["size"][0] / 2 + JOINT_M)
                        for shape in BACK_WALL_SHAPES for center, _ in SCREENS[shape]["mounts"]]
     look = build_look(args.look, back_wall_clear)
-    sources = build_screens(frame_count, cut, args.canvas_dir)
+    sources = build_screens(frame_count, cut, args.canvas_dir, round((shot.get("screens_from_s", 0.0) if shot else 0.0) * args.fps))
     build_world(look["hdri_strength"] * light_scale)
     scale_lights(light_scale)
     if shot and shot.get("clay"):
