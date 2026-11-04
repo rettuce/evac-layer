@@ -278,7 +278,8 @@ onMounted(() => {
   overflow: auto;
   display: grid;
   grid-template-columns: 380px minmax(0, 1fr) 360px;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto;
+  align-content: start;
   grid-template-areas: 'bar bar bar' 'list previews report' 'sites sites sites';
   gap: 0 24px;
   padding: 0 24px 24px;
