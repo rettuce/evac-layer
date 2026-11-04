@@ -158,3 +158,13 @@ Open point for the commander: the three narrow landscapes and 3:4 fall back to s
 - `app/layout/ambient/README.md` "Overlay (after wgl ss design D21)".
 - Viewing distance rule: `app/layout/typography.ts` (`LETTER_HEIGHT_PER_VIEW_DISTANCE`), kept; measured as cap height from here on.
 - Müller-Brockmann, *Grid Systems in Graphic Design* (1981): modular grid, baseline grid, left-aligned ragged text, numbers as the large element.
+
+## 8. 9:16 as implemented (2026-11-04, 田中's Figma artboard · L-2)
+
+The 9:16 screen is no longer the §4 proposal; it reproduces the artboard (`H213MoFcJtIZ96s6qdmBZ8` node 3212:5, 1080 × 1920) and the four other shapes will follow its hierarchy. Values are px on the 1080 × 1920 canvas (`templates.ts` `PORTRAIT`, `screen.css` `.shape-portrait .is-figma`).
+
+- Column: x 48 to 1043 (right margin 37). Every pictogram is placed by its **ink** (`PictogramMark fitInk`: the box is the drawn ink, measured from the rasterised SVG, rotation included), every text by its box at x 48 / 184 / 196 / 248 / 340 as on the artboard.
+- Band 0–200: hazard ink 124 at (34, 38); headline 76 / 1.1 at (184, 26), one line (a longer name steps to 0.85); level label 66 right-aligned at 1043, top 111.
+- Stack (grid rows, px): band 200 · 26 · action (text 150 / 1.1, then 54, then the action ink 333) · 62 · direction (arrow ink 109 with 15 above, text 120 at x 196) · 86 · shelter (site ink 162; text column 248: designation 30 #555, name 90 / 1.1 and the distance 90 right-aligned on one row, the figure 8 px below the name's baseline) · 101 · languages (label 30 #555 in a 292 column, text 66 / 1.18, pairs 35 apart) · the rest · source 30 · 29.
+- Fit steps, in order: a name that wraps at 90 is set at 72 (`data-shelter-scale="narrow"`); a stack that still overflows sets the languages at 56 (`data-languages-scale="narrow"`); then the contract's headline step and overflow reporting. The five language pairs reserve the tallest pair, so a frame fits at every `t`.
+- Checked: 22 bulletins × (9:16, 10:16, 1:2, 3:4) pass `scripts/grid-audit.mjs --app` (0 NG) with the thresholds recalibrated on the artboard: ja line-height ≥ 1.1 em, ink gap ≥ 8 px, pictogram ink inside its cell, action ink ≥ 288 / hazard ≥ 120 / aux ≥ 100 px, cap ≥ 21 px (action ≥ 100, headline ≥ 47). 由利本荘 Lv4 matches the artboard screenshot within 4 px on all 16 elements (`app/shots/layout-review/diff916.mjs`).
