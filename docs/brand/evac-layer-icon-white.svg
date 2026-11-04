@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<rect width="1024" height="1024" fill="#ffffff"/>
+<path id="layer-3" d="M512.0 424 L862.5 637.5 L512.0 851 L161.5 637.5 Z" fill="#ffffff" stroke="#000000" stroke-width="40" stroke-linejoin="miter"/>
+<path id="layer-2" d="M512.0 298 L862.5 511.5 L512.0 725 L161.5 511.5 Z" fill="#ffffff" stroke="#000000" stroke-width="40" stroke-linejoin="miter"/>
+<path id="layer-1" d="M512.0 172 L862.5 385.5 L512.0 599 L161.5 385.5 Z" fill="#ffffff" stroke="#000000" stroke-width="40" stroke-linejoin="miter"/>
+<path transform="translate(358.5 539.0) scale(0.3198)" fill="#000000" d="M535-40v-239l-108-99-42 188-265-55 11-56 199 40 73-369-100 47v134h-60v-175l164-69q32-14 45.5-17.5T480-714q20 0 35.5 8.5T542-680l42 67q26 42 71 73t105 31v60q-67 0-119.5-31T543-573l-39 158 91 84v291h-60Zm5-714q-30 0-51.5-21.5T467-827q0-30 21.5-51.5T540-900q30 0 51.5 21.5T613-827q0 30-21.5 51.5T540-754Z"/>
+</svg>
