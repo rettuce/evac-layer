@@ -15,16 +15,16 @@ test('the pick is redrawn at each hour boundary', () => {
 })
 
 test('scene= pins a known scene and ignores an unknown one', () => {
-  assert.equal(pickAmbient('x', BASE, 'half-discs').scene.id, 'half-discs')
+  assert.equal(pickAmbient('x', BASE, 'ink-bloom').scene.id, 'ink-bloom')
   assert.equal(pickAmbient('x', BASE, 'unknown').scene.id, pickAmbient('x', BASE).scene.id)
 })
 
-test('the six kept scenes are registered, and etched-streams is the dark one', () => {
+test('the five kept scenes are registered, and the dark-ground ones carry a light clock', () => {
   assert.deepEqual(
     AMBIENT_SCENES.map((scene) => scene.id).sort(),
-    ['brush-flow', 'etched-streams', 'half-discs', 'ink-bloom', 'module-field', 'quad-subdivision'],
+    ['brush-flow', 'etched-streams', 'ink-bloom', 'module-field', 'quad-subdivision'],
   )
-  assert.deepEqual(AMBIENT_SCENES.filter((scene) => scene.ink === 'light').map((scene) => scene.id), ['etched-streams'])
+  assert.deepEqual(AMBIENT_SCENES.filter((scene) => scene.ink === 'light').map((scene) => scene.id).sort(), ['brush-flow', 'etched-streams', 'quad-subdivision'])
 })
 
 test('the D21 block sits on the outer margin in every corner and shape', () => {

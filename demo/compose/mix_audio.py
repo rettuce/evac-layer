@@ -1,6 +1,7 @@
 """Mix the soundtrack for the demo from the EDL timeline, then mux it onto the composed video.
 
 python3 demo/compose/mix_audio.py --sfx-dir <Adobe Audition SFX folder> [--video demo/renders/evac-layer-demo.mp4]
+    [--bgm demo/compose/audio/bgm/<track>.mp3]
 
 Narration is either one 179 s demo/compose/audio/narration.wav, or one take per cut in
 demo/compose/audio/narration/cutNN.wav (names from narration_filename) placed at that cut's start.
@@ -25,6 +26,8 @@ RATE = 48000
 NARRATION_LUFS = -18.0
 AMBIENCE_LUFS = -30.0
 DRONE_LUFS = -26.0
+# A fixed gain for the music bed, no ducking under narration yet, so a candidate can be judged on its own level.
+BGM_LUFS = -24.0
 BEEP_PEAK_DB = -6.0
 FADE_S = 0.5
 
@@ -34,8 +37,9 @@ SOURCES = {
     "drone": "Drones/Drone Production Element Imaging Bed Deep Bass 01.wav",
 }
 AMBIENCE_CUTS = ["1", "2", "5", "8", "9"]
+# Cut 0 is the cold open: quiet screens switch to the alert at 3.0 s.
 # Cut 5 plays the live switch recording from replay t=5.0 s: Lv3 at 13.1 s, Lv4 at 20.1 s, Lv5 at 24.6 s.
-BEEPS = [("5", 8.1), ("5", 15.1), ("5", 19.6)]
+BEEPS = [("0", 3.0), ("5", 8.1), ("5", 15.1), ("5", 19.6)]
 DRONE_FROM = ("5", 8.1)
 DRONE_UNTIL_END_OF = "8"
 NARRATION = AUDIO_DIR / "narration.wav"
@@ -120,19 +124,17 @@ def narration_track(edl, starts, total, out):
     return out
 
 
-def build_mix(paths, narration, starts, total, out):
-    inputs, chains, labels = [], [], []
+def layers(paths, narration, starts, total, bgm=None):
+    items = []
 
-    def add(path, filters, label):
-        inputs.extend(["-i", str(path)])
-        chains.append(f"[{len(inputs) // 2 - 1}:a]{filters}[{label}]")
-        labels.append(f"[{label}]")
+    def add(path, filters, stem):
+        items.append((path, filters, stem))
 
     ambience_gain = AMBIENCE_LUFS - integrated_lufs(paths["ambience"])
     for i, cut in enumerate(AMBIENCE_CUTS):
         start, seconds = starts[cut]
         add(paths["ambience"], f"aloop=loop=-1:size={RATE * 120},atrim=0:{seconds},asetpts=N/SR/TB,volume={ambience_gain:.2f}dB,"
-            f"afade=t=in:d={FADE_S},afade=t=out:st={seconds - FADE_S}:d={FADE_S},adelay={start * 1000:.0f}:all=1", f"amb{i}")
+            f"afade=t=in:d={FADE_S},afade=t=out:st={seconds - FADE_S}:d={FADE_S},adelay={start * 1000:.0f}:all=1", "ambience")
 
     drone_start = starts[DRONE_FROM[0]][0] + DRONE_FROM[1]
     end_start, end_seconds = starts[DRONE_UNTIL_END_OF]
@@ -144,13 +146,34 @@ def build_mix(paths, narration, starts, total, out):
     beep_gain = BEEP_PEAK_DB - peak_db(paths["beep"])
     for i, (cut, offset) in enumerate(BEEPS):
         at = starts[cut][0] + offset
-        add(paths["beep"], f"volume={beep_gain:.2f}dB,adelay={at * 1000:.0f}:all=1", f"beep{i}")
+        add(paths["beep"], f"volume={beep_gain:.2f}dB,adelay={at * 1000:.0f}:all=1", "se")
+
+    if bgm:
+        bgm_gain = BGM_LUFS - integrated_lufs(bgm)
+        add(bgm, f"aloop=loop=-1:size={RATE * 600},atrim=0:{total},asetpts=N/SR/TB,volume={bgm_gain:.2f}dB,"
+            f"afade=t=in:d=1.5,afade=t=out:st={total - 3}:d=3", "bgm")
 
     add(narration, "anull", "narration")
-    graph = ";".join(chains) + f";{''.join(labels)}amix=inputs={len(labels)}:normalize=0:duration=longest," \
-        f"apad=whole_dur={total},atrim=0:{total}[mix]"
+    return items
+
+
+def render(items, total, out):
+    inputs, chains = [], []
+    for i, (path, filters, _) in enumerate(items):
+        inputs += ["-i", str(path)]
+        chains.append(f"[{i}:a]{filters}[l{i}]")
+    graph = ";".join(chains) + f";{''.join(f'[l{i}]' for i in range(len(items)))}amix=inputs={len(items)}:normalize=0:" \
+        f"duration=longest,apad=whole_dur={total},atrim=0:{total}[mix]"
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", graph, "-map", "[mix]",
                     "-ar", str(RATE), "-ac", "2", str(out)], check=True)
+
+
+def write_stems(items, total, stems_dir):
+    stems_dir.mkdir(parents=True, exist_ok=True)
+    for stem in dict.fromkeys(stem for _, _, stem in items):
+        out = stems_dir / f"{stem}.wav"
+        render([item for item in items if item[2] == stem], total, out)
+        print(f"STEM {out}")
 
 
 def limit(raw, out):
@@ -169,6 +192,9 @@ def main():
     parser.add_argument("--sfx-dir")
     parser.add_argument("--video", default=str(HERE.parent / "renders" / "evac-layer-demo.mp4"))
     parser.add_argument("--out", default=str(OUT_DIR / "evac-layer-demo-v1.mp4"))
+    parser.add_argument("--bgm", help="music bed, looped or trimmed to the video and set to BGM_LUFS")
+    # Stems stay at their mix gains and skip the limiter, so they sum back to the mix for an editor to rebalance.
+    parser.add_argument("--stems", help="also write one 48 kHz WAV per layer, full length from 0 s, into this folder")
     args = parser.parse_args()
     edl = json.loads(Path(args.edl).read_text(encoding="utf-8"))
     starts, total = cut_starts(edl)
@@ -177,7 +203,10 @@ def main():
     work = Path(tempfile.mkdtemp(prefix="evac-mix-"))
     try:
         narration = narration_track(edl, starts, total, work / "narration.wav")
-        build_mix(paths, narration, starts, total, work / "raw.wav")
+        items = layers(paths, narration, starts, total, Path(args.bgm) if args.bgm else None)
+        render(items, total, work / "raw.wav")
+        if args.stems:
+            write_stems(items, total, Path(args.stems))
         mix = OUT_DIR / "evac-layer-demo-v1-mix.wav"
         lufs = limit(work / "raw.wav", mix)
     finally:
