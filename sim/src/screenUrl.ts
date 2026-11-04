@@ -69,5 +69,6 @@ export function screenUrl(extras: DisplayExtras, content: Content, scene: Ambien
     const seam = crops?.seam[extras.screen]
     if (seam) params.set('seam', seam)
   }
-  return `${SCREEN_ORIGIN}/screen?${params}`
+  // Trailing slash: a static host serves the generated screen/index.html without a redirect.
+  return `${SCREEN_ORIGIN}/screen/?${params}`
 }

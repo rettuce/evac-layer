@@ -46,6 +46,17 @@ is enough: the viewer reads crops from that file first.
 
 Polyhaven textures (CC0) are fetched by `demo/blender/polyhaven.py` into `demo/assets/textures/` on first run.
 
+## GitHub Pages (https://rettuce.github.io/evac-layer/)
+
+`.github/workflows/pages.yml` builds the simulator with `VITE_BASE=/evac-layer/` and the app with
+`nuxt generate` (`NUXT_APP_BASE_URL=/evac-layer/app/`, `NUXT_PUBLIC_STATIC_SCREEN=1`), puts the app under
+`app/` of the site and deploys with `actions/deploy-pages`. On that site `/screen` has no server: it reads
+`app/public/static/` (one JSON per replay window and per approved layout, written by
+`node sim/scripts/static-screen.mjs` against a dev server and committed), the replay starts at page load,
+and approvals / admin are read-only (the EVAC LAYER content shows the bulletins approved at generation).
+To check the same thing locally: assemble `sim/dist` + `app/.output/public` as `evac-layer/` and `evac-layer/app/`
+under one folder and serve it with `python3 -m http.server`.
+
 ## Dependencies
 
 | package | license |

@@ -10,6 +10,8 @@
 
 *The screens are already there.* Turn the screens a city already has into evacuation guidance anyone can read. [English summary ↓](#english-summary)
 
+**触れるデモ（Web シミュレーター）: https://rettuce.github.io/evac-layer/** — 駅コンコースの 22 面に平常時 / EVAC LAYER を切り替えて表示（`sim/`）。
+
 ![由利本荘市の実際の気象庁電文から描いた、警戒レベル 4 の洪水警報の 16:9 画面](docs/screens/lv4-16x9.png)
 
 [全画面（形状ごと・レベルごと・柱・平時レイヤー・切替）→](docs/screens.md)

@@ -40,6 +40,7 @@ let pollCount = 0
 const loadError = ref<string>()
 const syncError = ref<string>()
 const lastSyncAt = ref<number>()
+const staticScreen = useStaticScreen()
 const wallNow = ref(Date.now())
 let mountedAt = Date.now()
 let syncing = false
@@ -70,12 +71,14 @@ const ready = computed(
 const clockEpochMs = computed(() =>
   rows.value.length || isVirtual.value ? replayClockEpochMs(rows.value, elapsed.value, props.speed) : wallNow.value,
 )
-const stale = computed(() => wallNow.value - (lastSyncAt.value ?? mountedAt) > (props.staleAfterMs ?? STALE_AFTER_MS))
+const stale = computed(() => !staticScreen.enabled && wallNow.value - (lastSyncAt.value ?? mountedAt) > (props.staleAfterMs ?? STALE_AFTER_MS))
 
 function replayUrl(extra: Record<string, string>) {
-  const params = new URLSearchParams({ municipality: props.municipality, speed: String(props.speed), ...extra })
+  const params = new URLSearchParams({ municipality: props.municipality, speed: String(props.speed) })
   if (props.from) params.set('from', props.from)
   if (props.to) params.set('to', props.to)
+  if (staticScreen.enabled) return staticScreen.url('replay', params)
+  for (const [key, value] of Object.entries(extra)) params.set(key, value)
   return `/api/replay?${params}`
 }
 
@@ -109,7 +112,8 @@ async function loadLayouts() {
       const params = new URLSearchParams({ municipality: props.municipality, bulletin: row.bulletin_id, shape: props.shape })
       if (props.site) params.set('site', props.site)
       try {
-        return [row.bulletin_id, await $fetch<EvacScreen>(`/api/live-layout?${params}`, { timeout: FETCH_TIMEOUT_MS, retry: 0 })]
+        const url = staticScreen.enabled ? staticScreen.url('live-layout', params) : `/api/live-layout?${params}`
+        return [row.bulletin_id, await $fetch<EvacScreen>(url, { timeout: FETCH_TIMEOUT_MS, retry: 0 })]
       } catch (error) {
         if ((error as { statusCode?: number }).statusCode === 403) gated.push(row.bulletin_id)
         else absent.push(row.bulletin_id)
@@ -174,7 +178,7 @@ onMounted(async () => {
   frameHandle = requestAnimationFrame(tick)
   pollTimer = setInterval(() => {
     wallNow.value = Date.now()
-    void sync()
+    if (!staticScreen.enabled) void sync()
   }, POLL_MS)
 })
 

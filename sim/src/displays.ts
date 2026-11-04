@@ -11,9 +11,11 @@ const PILLAR_PAGE_WIDTH_PX = 6616
 // are rastered per column.
 const ZOOM_LADDER = [0.125, 0.25, 0.5, 1]
 const MAX_ZOOM: Record<DisplayExtras['shape'], number> = { pillar: 0.5, '9x16': 1, '32x9': 1 }
-// Pages open a few at a time, the faces turned to the camera first: 44 documents at once held the page at
-// 10 fps for 15 s (S-4, 2026-11-05).
-const LOAD_CONCURRENCY = 4
+// The shown content's pages open all at once (their load events wait on the network more than on the
+// CPU: four at a time took 85 s for 44 pages, all 22 take 15 s); the other content then opens two at a
+// time, because 22 more documents at once froze the main thread for about 50 s (S-4 v2, 2026-11-05).
+const LOAD_CONCURRENCY_SHOWN = 22
+const LOAD_CONCURRENCY_HIDDEN = 2
 const LOAD_TIMEOUT_MS = 10000
 
 // A hidden page loads under `visibility: hidden` (a display-none iframe does not load in Chrome) and is then
@@ -27,6 +29,8 @@ function showPage(page: Page, shown: boolean): void {
   page.box.style.visibility = shown ? '' : 'hidden'
 }
 const CONTENTS: Content[] = ['calm', 'evac']
+// On the static site /screen is a path under the simulator's own origin.
+const SCREEN_TARGET_ORIGIN = SCREEN_ORIGIN.startsWith('/') ? location.origin : SCREEN_ORIGIN
 
 // Writes depth and clears colour, so the room in front hides the page and the page shows through from below.
 // The bezel plane sits 0.5 mm behind the face, which z-fights from a few metres away without the offset.
@@ -104,6 +108,7 @@ export class Displays {
   onProgress: (loaded: number, total: number) => void = () => {}
   private queue: (() => Promise<void>)[] = []
   private running = 0
+  private concurrency = LOAD_CONCURRENCY_SHOWN
 
   constructor(private readonly stage: Scene, meshes: Mesh[], private readonly crops: CropsFile | undefined,
     initial: { content: Content; scene: AmbientScene }, camera: PerspectiveCamera) {
@@ -140,7 +145,7 @@ export class Displays {
       const page = face.pages.calm
       if (!page) continue
       page.scene = scene
-      page.iframe.contentWindow?.postMessage({ type: 'evac-screen', scene }, SCREEN_ORIGIN)
+      page.iframe.contentWindow?.postMessage({ type: 'evac-screen', scene }, SCREEN_TARGET_ORIGIN)
     }
   }
 
@@ -192,6 +197,7 @@ export class Displays {
     page.loaded = true
     showPage(page, page.shown)
     this.loadedPages += 1
+    if (this.loadedPages >= this.faces.length) this.concurrency = LOAD_CONCURRENCY_HIDDEN
     this.onProgress(this.loadedPages, this.totalPages)
   }
 
@@ -203,7 +209,7 @@ export class Displays {
   }
 
   private pump(): void {
-    while (this.running < LOAD_CONCURRENCY && this.queue.length) {
+    while (this.running < this.concurrency && this.queue.length) {
       const task = this.queue.shift()!
       this.running += 1
       task().finally(() => {

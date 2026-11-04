@@ -45,7 +45,7 @@ function resize() {
 addEventListener('resize', resize)
 resize()
 
-const [room, crops] = await Promise.all([loadRoom('/room.glb'), loadCrops('/crops.json')])
+const [room, crops] = await Promise.all([loadRoom(`${import.meta.env.BASE_URL}room.glb`), loadCrops(`${import.meta.env.BASE_URL}crops.json`)])
 scene.add(room.scene)
 applyRenderMode(room, INITIAL.mode)
 
