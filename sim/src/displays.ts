@@ -1,6 +1,6 @@
 import { Mesh, MeshBasicMaterial, NoBlending, Object3D, PerspectiveCamera, PlaneGeometry, Vector3 } from 'three'
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js'
-import { screenUrl, type Content, type CropsFile, type DisplayExtras, type AmbientScene } from './screenUrl'
+import { faceWindow, screenUrl, type Content, type CropsFile, type DisplayExtras, type AmbientScene } from './screenUrl'
 
 // The pillar page lays its four faces side by side; a face iframe shows one quarter of it.
 const PILLAR_PAGE_WIDTH_PX = 6616
@@ -45,9 +45,7 @@ export function createDisplay(mesh: Mesh, content: Content, scene: AmbientScene,
   clip.style.cssText = `width:${pageWidth}px;height:${pageHeight}px;overflow:hidden;position:relative;background:#000`
   box.appendChild(clip)
   const iframe = document.createElement('iframe')
-  const iframeWidth = extras.shape === 'pillar' ? PILLAR_PAGE_WIDTH_PX : pageWidth
-  iframe.style.cssText = `position:absolute;top:0;left:${-extras.face * pageWidth}px;width:${iframeWidth}px;height:${pageHeight}px`
-  iframe.src = screenUrl(extras, content, scene, crops)
+  iframe.style.cssText = `position:absolute;top:0;height:${pageHeight}px`
   clip.appendChild(iframe)
 
   const object = new CSS3DObject(box)
@@ -61,7 +59,18 @@ export function createDisplay(mesh: Mesh, content: Content, scene: AmbientScene,
   mesh.parent!.add(hole)
   const display: Display = { hole, extras, object, iframe, box, clip, zoom: 0 }
   applyZoom(display, ZOOM_LADDER[0]!)
+  showPage(display, content, scene, crops)
   return display
+}
+
+// A pillar face shows its quarter of the column's page, except when it has a page of its own (calm faces).
+function showPage(display: Display, content: Content, scene: AmbientScene, crops?: CropsFile): void {
+  const { extras, iframe } = display
+  const [pageWidth] = extras.face_px
+  const ownPage = extras.shape !== 'pillar' || faceWindow(extras, content, crops) !== undefined
+  iframe.style.width = `${ownPage ? pageWidth : PILLAR_PAGE_WIDTH_PX}px`
+  iframe.style.left = `${ownPage ? 0 : -extras.face * pageWidth}px`
+  iframe.src = screenUrl(extras, content, scene, crops)
 }
 
 function applyZoom(display: Display, zoom: number): void {
@@ -89,5 +98,5 @@ export function updateZoom(displays: Display[], camera: PerspectiveCamera, viewp
 }
 
 export function setContent(displays: Display[], content: Content, scene: AmbientScene, crops?: CropsFile): void {
-  for (const display of displays) display.iframe.src = screenUrl(display.extras, content, scene, crops)
+  for (const display of displays) showPage(display, content, scene, crops)
 }

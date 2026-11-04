@@ -91,6 +91,18 @@ switch between colour×AO, white×AO and wire without a second material set in t
 - Calm content can switch between six ambient scenes (`scene=<id>` on every iframe); the buttons are
   disabled while EVAC LAYER is shown because the alert layout covers the scene.
 
+## S-3 (2026-11-05, D-8)
+
+- `crops.json` now carries `faces`: per column, each face's own window on the room canvas (one face width
+  further along the strip per face; a `seam=right` column puts the strip's last quarter on the front). In the
+  calm content every pillar face is its own page (`w=1654&h=5046`, the face window as `crop`, no `shape`), so
+  the four faces draw four different parts of the room picture and each face carries the clock overlay. The
+  picture is the same as the pillar page's own quarter for that face (checked side by side), so the visible
+  difference is the overlay: one clock per face instead of one per column. The alert layout keeps one pillar
+  page per column, clipped per face, because it is laid out per column.
+- The three wall screens moved to louver-gap centres (x −2.85 / 0 / 2.85 m) with D-8, which only needed the
+  re-export.
+
 ## Not done / open
 
 - Lights are not baked (no `COMBINED`): the view is unlit albedo × AO, which is what the spec's three
