@@ -2,13 +2,12 @@ import { PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js'
 import { CameraRig, FILM_GAUGE_MM, presetsFromGltf } from './cameras'
-import { createDisplay, setContent, updateZoom, type Display } from './displays'
+import { Displays } from './displays'
 import { applyRenderMode, loadRoom, type RenderMode } from './room'
-import { loadCrops, type Content, type AmbientScene } from './screenUrl'
+import { loadCrops, type AmbientScene, type Content } from './screenUrl'
 import { buildUi, fpsMeter } from './ui'
 
 const INITIAL: { content: Content; scene: AmbientScene; mode: RenderMode; preset: string } = { content: 'calm', scene: 'brush-flow', mode: 'textured', preset: 'hero' }
-const shown = { content: INITIAL.content, scene: INITIAL.scene }
 const NEAR_M = 0.05
 const FAR_M = 100
 // Frames are skipped so a 120 Hz display still draws 60 per second; the half-millisecond keeps vsync jitter on
@@ -46,41 +45,48 @@ function resize() {
 addEventListener('resize', resize)
 resize()
 
-const [room, crops] = await Promise.all([loadRoom('/room.glb'), loadCrops('/crops.json')])
+const [room, crops] = await Promise.all([loadRoom(`${import.meta.env.BASE_URL}room.glb`), loadCrops(`${import.meta.env.BASE_URL}crops.json`)])
 scene.add(room.scene)
-const displays: Display[] = room.displayMeshes.map((mesh) => createDisplay(mesh, INITIAL.content, INITIAL.scene, crops))
-for (const display of displays) scene.add(display.object)
 applyRenderMode(room, INITIAL.mode)
 
+// The four views the demo is judged on (司令官 S-4 v2); the glb still carries every still camera.
+const SHOWN_CAMERAS: Record<string, string> = { hero: 'hero', 'wall-final': 'wall-final', 'col-final': 'col-final', 'col-45-eye-35': 'col45-corner' }
 const presets = presetsFromGltf(room.cameras)
+  .filter((preset) => preset.name in SHOWN_CAMERAS)
+  .map((preset) => ({ ...preset, name: SHOWN_CAMERAS[preset.name]! }))
+  .sort((a, b) => Object.values(SHOWN_CAMERAS).indexOf(a.name) - Object.values(SHOWN_CAMERAS).indexOf(b.name))
 const first = presets.find((preset) => preset.name === INITIAL.preset) ?? presets[0]
 if (first) rig.jumpTo(first)
-status.textContent = `${room.pieces.length} pieces · ${displays.length} faces · ${presets.length} cameras`
+
+const displays = new Displays(scene, room.displayMeshes, crops, INITIAL, camera)
+const summary = `${room.pieces.length} pieces · ${displays.faces.length} faces · ${presets.length} cameras`
+status.textContent = `${summary} · loading pages 0/${displays.totalPages}`
+displays.onProgress = (loaded, total) => {
+  status.textContent = loaded < total ? `${summary} · loading pages ${loaded}/${total}` : summary
+}
 
 buildUi(document.getElementById('ui')!, presets, INITIAL, {
-  onContent: (content) => {
-    shown.content = content
-    setContent(displays, content, shown.scene, crops)
-  },
-  onScene: (scene) => {
-    shown.scene = scene
-    setContent(displays, shown.content, scene, crops)
-  },
+  onContent: (content) => displays.setContent(content),
+  onScene: (ambientScene) => displays.setScene(ambientScene),
   onRenderMode: (mode) => applyRenderMode(room, mode),
   onCamera: (preset) => rig.flyTo(preset),
 })
 
-// Exposed for browser-side checks (camera flights, fps sampling) from DevTools or a test script.
-Object.assign(window, { sim: { camera, controls, displays, room } })
+// Measurement switches for DevTools (S-4 v2): uncapped draws, WebGL off, and the last loop times.
+const perf = { cap: true, webgl: true, drawMs: [] as number[], loopMs: [] as number[] }
+Object.assign(window, { sim: { camera, controls, displays, room, webgl, perf } })
 
 const fps = fpsMeter(document.getElementById('fps')!)
 let lastDrawMs = -Infinity
 webgl.setAnimationLoop((nowMs) => {
-  if (nowMs - lastDrawMs < MIN_FRAME_MS) return
+  if (perf.cap && nowMs - lastDrawMs < MIN_FRAME_MS) return
+  if (perf.drawMs.length < 600) perf.drawMs.push(nowMs - lastDrawMs)
   lastDrawMs = nowMs
+  const started = performance.now()
   controls.update()
-  updateZoom(displays, camera, innerHeight)
-  webgl.render(scene, camera)
+  displays.updateZoom(camera, innerHeight)
+  if (perf.webgl) webgl.render(scene, camera)
   css3d.render(scene, camera)
+  if (perf.loopMs.length < 600) perf.loopMs.push(performance.now() - started)
   fps(nowMs)
 })

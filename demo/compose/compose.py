@@ -65,7 +65,10 @@ def segment_filters(segment, work, width, height):
     over_picture = bool(segment.get("src"))
     if segment.get("caption"):
         size = round(height * CAPTION_SIZE_RATIO)
-        filters.append(drawtext(write_text(work, f"cap_{segment['cut']}", segment["caption"]), size, f"h-text_h-{size * 2}"))
+        caption = drawtext(write_text(work, f"cap_{segment['cut']}", segment["caption"]), size, f"h-text_h-{size * 2}")
+        if segment.get("caption_from_s"):
+            caption += f":enable='gte(t\\,{segment['caption_from_s']})'"
+        filters.append(caption)
     if segment.get("title"):
         size = round(height * TITLE_SIZE_RATIO)
         y = "(h-text_h)/2-th" if segment.get("subtitle") else "(h-text_h)/2"

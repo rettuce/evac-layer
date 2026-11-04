@@ -99,7 +99,7 @@ right(1, 2, 0)
 
 card(0, 1, "気象庁 防災情報 XML", ["大雨・土砂災害・洪水・津波"], "data")
 card(1, 1, "parser", ["警報・警戒レベル・対象地域"])
-card(2, 1, "Writer", ["Claude", "やさしい日本語・英・中・韓"], "claude")
+card(2, 1, "Writer", ["Claude", "やさしい日本語ほか 10 言語"], "claude")
 card(3, 1, "Composer", ["最寄りの避難場所", "方向・距離・図記号・優先順位"])
 card(4, 1, "layout JSON", ["5 つの基準形状"], "data")
 for c in range(4):

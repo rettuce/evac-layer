@@ -66,7 +66,7 @@
 <line x1="690" y1="446" x2="940" y2="446" stroke="#6d3fc4" stroke-width="1"/>
 <text x="815.0" y="435" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1a1a">Writer</text>
 <text x="815.0" y="481.0" text-anchor="middle" font-size="13.5" fill="#333">Claude</text>
-<text x="815.0" y="501.0" text-anchor="middle" font-size="13.5" fill="#333">やさしい日本語・英・中・韓</text>
+<text x="815.0" y="501.0" text-anchor="middle" font-size="13.5" fill="#333">やさしい日本語ほか 10 言語</text>
 <rect x="1000" y="410" width="250" height="116" rx="8" fill="#ffffff" stroke="#555555" stroke-width="1.5"/>
 <path d="M 1008,410 H 1242 Q 1250,410 1250,418 V 446 H 1000 V 418 Q 1000,410 1008,410 Z" fill="#e4e4e4"/>
 <line x1="1000" y1="446" x2="1250" y2="446" stroke="#555555" stroke-width="1"/>

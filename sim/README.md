@@ -1,6 +1,6 @@
 # sim — web simulator of the concourse
 
-The look-C concourse from `demo/blender/build_scene.py`, in the browser: the room is baked once in Blender
+The concourse of `demo/blender/build_scene.py`, in the browser: the room is baked once in Blender
 and drawn unlit; the 22 display faces (4 pillars × 4 faces, 3 ribbon panels, 3 wall panels) are the app's
 `/screen` page in iframes placed in 3D (`DESIGN.md`).
 
@@ -45,6 +45,17 @@ the canvas crops / seam changed, `blender -b -P demo/blender/build_scene.py -- -
 is enough: the viewer reads crops from that file first.
 
 Polyhaven textures (CC0) are fetched by `demo/blender/polyhaven.py` into `demo/assets/textures/` on first run.
+
+## GitHub Pages (https://rettuce.github.io/evac-layer/)
+
+`.github/workflows/pages.yml` builds the simulator with `VITE_BASE=/evac-layer/` and the app with
+`nuxt generate` (`NUXT_APP_BASE_URL=/evac-layer/app/`, `NUXT_PUBLIC_STATIC_SCREEN=1`), puts the app under
+`app/` of the site and deploys with `actions/deploy-pages`. On that site `/screen` has no server: it reads
+`app/public/static/` (one JSON per replay window and per approved layout, written by
+`node sim/scripts/static-screen.mjs` against a dev server and committed), the replay starts at page load,
+and approvals / admin are read-only (the EVAC LAYER content shows the bulletins approved at generation).
+To check the same thing locally: assemble `sim/dist` + `app/.output/public` as `evac-layer/` and `evac-layer/app/`
+under one folder and serve it with `python3 -m http.server`.
 
 ## Dependencies
 
