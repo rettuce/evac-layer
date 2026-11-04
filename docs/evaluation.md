@@ -1,6 +1,6 @@
 # Evaluation
 
-Numbers from the pipeline runs of 2026-11-02 over the recorded JMA feed (2026-10-11 to 11-02) for five municipalities. Every figure below comes from files in this repository or from the fan-out console output of that run; where a figure was not recorded, the table says **not measured** instead of estimating it.
+Numbers from the pipeline runs of 2026-11-02 to 11-05 over the recorded JMA feed (2026-10-11 to 11-02) for five municipalities. Every figure below comes from files in this repository or from the fan-out console output of that run; where a figure was not recorded, the table says **not measured** instead of estimating it.
 
 ## Screens produced
 
@@ -12,7 +12,7 @@ Numbers from the pipeline runs of 2026-11-02 over the recorded JMA feed (2026-10
 | 吉田町 22424 | 23 (20 recorded + 3 official JMA samples) | 3 (大津波警報 ×2 and its all-clear, all from the samples) | 15 | highest recorded level was 2 |
 | 横浜市 14100 | 5 | 0 | 0 | no warning in force for the city |
 
-All 16 screens pass the static, browser and Vision checks on all five shapes (16:9, 9:16, 32:9, 1:1, pillar).
+All 22 screens pass the static, browser and Vision checks on all five shapes (16:9, 9:16, 32:9, 1:1, pillar).
 
 ## Verifier findings per run
 
