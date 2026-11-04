@@ -24,12 +24,12 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 | ov-2-subtitle-1.png | 2 | subtitle | 私はこれまで駅や街のサイネージシステムを作ってきました。／これらは災害のとき、能動的に情報を発信できませんでした。 | I have built signage systems for stations and streets.／When disaster struck, none of them could speak up on its own. | 3244:17 |
 | ov-2b-telop-1.png | 2b | telop | 街中にスクリーンがあります。／それらは自分の位置関係を知っています。 | Screens are all over the city.／Each one knows where it stands. | 3244:52 |
 | ov-3-subtitle-1.png | 3 | subtitle | 災害の種類と警戒レベル。アイコンと10の言語。／そして、どんな形のスクリーンにも、適切なレイアウトで描きます。 | Hazard types and alert levels. Icons and ten languages.／And for a screen of any shape, a layout that fits. | 3245:4 |
-| ov-4-subtitle-1.png | 4 | subtitle | 避難情報案内は自動作成され、人が事前承認したものだけが、／警報が届いた瞬間に表示されます。 | Evacuation guidance is generated automatically.／Only what a person has approved in advance is shown, the moment a warning arrives. | 3244:21 |
+| ov-4-subtitle-1.png | 4 | subtitle | 避難案内は自動作成され、人が事前承認したものだけが、／警報が届いた瞬間に表示されます。 | Evacuation guidance is generated automatically. Only what a person has approved in advance／is shown, the moment a warning arrives. | 3244:21 |
 | ov-5c-subtitle-1.png | 5c | subtitle | 同じ警報でも、スクリーンの位置が違えば、／避難先も方向も距離も適切に表示されます。 | Same warning, different place.／The shelter, the direction and the distance follow where the screen stands. | 3244:25 |
-| ov-5-subtitle-1.png | 5 | subtitle | 由利本荘市、10月21日の実際に発令された警報データを使い、／1200倍の速さで再生しています。 | Yurihonjo City, October 21.／Real warnings, replayed at 1,200 times speed. | 3244:29 |
+| ov-5-subtitle-1.png | 5 | subtitle | 由利本荘市、10月21日の実際に発表された警報データを使い、／1200倍の速さで再生しています。 | Yurihonjo City, October 21.／Warnings actually issued that day, replayed at 1,200 times speed. | 3244:29 |
 | ov-5-subtitle-2.png | 5 | subtitle | 警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。 | Alert levels 3, 4 and 5. Every screen switches at the same moment. | 3244:33 |
-| ov-5b-subtitle-1.png | 5b | subtitle | 何を出すかは、事前に人が確認できます。／承認しておけば、有事に自動で避難案内に切り替わります。 | What to show can be checked in advance.／Approve it once, and when the time comes the screens switch to evacuation guidance by themselves. | 3244:37 |
-| ov-7m-subtitle-1.png | 7m | subtitle | まずは事前収集した5つの自治体の206本の気象警報から、／110種類のレイアウトを作成します。 | To begin with, 206 weather warnings collected from five municipalities／become 110 layouts. | 3244:41 |
+| ov-5b-subtitle-1.png | 5b | subtitle | 何を出すかは、事前に人が確認できます。／承認しておけば、有事に自動で避難案内に切り替わります。 | What to show can be checked in advance.／Approve it once, and the screens switch to evacuation guidance by themselves. | 3244:37 |
+| ov-7m-subtitle-1.png | 7m | subtitle | まずは事前収集した5つの自治体の206本の気象庁の電文から、／110のレイアウトを作成します。 | To begin with, 206 JMA bulletins collected from five municipalities／become 110 layouts. | 3244:41 |
 | ov-9-telop-1.png | 9 | telop | どのスクリーンにも | Any screen. | 3244:56 |
 | ov-9-subtitle-1.png | 9 | subtitle | 信号を受け取れる仕組みがあれば、どんな場所のどのスクリーンにも、／自動で災害情報を表示できます。 | Anything that can receive the signal can show the disaster information automatically,／in any place, on any screen. | 3244:45 |
 | ov-10-telop-1.png | 10 | telop | github.com/rettuce/evac-layer／you@ie3.jp | （同左） | 3244:60 |
@@ -40,9 +40,8 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 
 ## 文言の差分メモ（demo-v8-text.md に対して）
 
-- cut 5b の英語は短縮版（41 字）に対応する確定訳が表に無いため、表の長文版の英語をそのまま使用。copy 席の短縮版訳が出たら差し替える
-- cut 5 の字幕 ja「発令」は表のまま（copy 席の指摘 1「発表」が正確。田中判断待ち）
-- cut 4「避難情報案内」は表のまま（指摘 3 田中判断待ち）
+- 2026-11-05 田中承認（司令官経由）で cut 4「避難案内」・cut 5「発表」・cut 7m「気象庁の電文／110のレイアウト」に差し替え（copy 席の指摘 1〜3）。英訳は copy 席の確定版
+- cut 5b は短縮版（日本語 46 字・copy 席の英訳）。目安内の 39 字版に変える判断が出たら日英とも差し替える
 - 田中 FB の「you@ie3」は表どおり「you@ie3.jp」で作成
 
 ## 再書き出しの手順
