@@ -4,12 +4,17 @@ import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js'
 import { CameraRig, FILM_GAUGE_MM, presetsFromGltf } from './cameras'
 import { createDisplay, setContent, updateZoom, type Display } from './displays'
 import { applyRenderMode, loadRoom, type RenderMode } from './room'
-import { loadCrops, type Content } from './screenUrl'
+import { loadCrops, type Content, type AmbientScene } from './screenUrl'
 import { buildUi, fpsMeter } from './ui'
 
-const INITIAL: { content: Content; mode: RenderMode; preset: string } = { content: 'calm', mode: 'textured', preset: 'hero' }
+const INITIAL: { content: Content; scene: AmbientScene; mode: RenderMode; preset: string } = { content: 'calm', scene: 'brush-flow', mode: 'textured', preset: 'hero' }
+const shown = { content: INITIAL.content, scene: INITIAL.scene }
 const NEAR_M = 0.05
 const FAR_M = 100
+// Frames are skipped so a 120 Hz display still draws 60 per second; the half-millisecond keeps vsync jitter on
+// a 120 Hz screen from dropping every third frame (田中 S-2 2026-11-04). Camera flights run on real time.
+const MAX_FPS = 60
+const MIN_FRAME_MS = 1000 / MAX_FPS - 0.5
 
 const stage = document.getElementById('stage')!
 const status = document.getElementById('status')!
@@ -43,7 +48,7 @@ resize()
 
 const [room, crops] = await Promise.all([loadRoom('/room.glb'), loadCrops('/crops.json')])
 scene.add(room.scene)
-const displays: Display[] = room.displayMeshes.map((mesh) => createDisplay(mesh, INITIAL.content, crops))
+const displays: Display[] = room.displayMeshes.map((mesh) => createDisplay(mesh, INITIAL.content, INITIAL.scene, crops))
 for (const display of displays) scene.add(display.object)
 applyRenderMode(room, INITIAL.mode)
 
@@ -53,7 +58,14 @@ if (first) rig.jumpTo(first)
 status.textContent = `${room.pieces.length} pieces · ${displays.length} faces · ${presets.length} cameras`
 
 buildUi(document.getElementById('ui')!, presets, INITIAL, {
-  onContent: (content) => setContent(displays, content, crops),
+  onContent: (content) => {
+    shown.content = content
+    setContent(displays, content, shown.scene, crops)
+  },
+  onScene: (scene) => {
+    shown.scene = scene
+    setContent(displays, shown.content, scene, crops)
+  },
   onRenderMode: (mode) => applyRenderMode(room, mode),
   onCamera: (preset) => rig.flyTo(preset),
 })
@@ -62,7 +74,10 @@ buildUi(document.getElementById('ui')!, presets, INITIAL, {
 Object.assign(window, { sim: { camera, controls, displays, room } })
 
 const fps = fpsMeter(document.getElementById('fps')!)
+let lastDrawMs = -Infinity
 webgl.setAnimationLoop((nowMs) => {
+  if (nowMs - lastDrawMs < MIN_FRAME_MS) return
+  lastDrawMs = nowMs
   controls.update()
   updateZoom(displays, camera, innerHeight)
   webgl.render(scene, camera)

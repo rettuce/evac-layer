@@ -1,6 +1,6 @@
-import { Mesh, MeshBasicMaterial, NoBlending, Object3D, PerspectiveCamera, Vector3 } from 'three'
+import { Mesh, MeshBasicMaterial, NoBlending, Object3D, PerspectiveCamera, PlaneGeometry, Vector3 } from 'three'
 import { CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js'
-import { screenUrl, type Content, type CropsFile, type DisplayExtras } from './screenUrl'
+import { screenUrl, type Content, type CropsFile, type DisplayExtras, type AmbientScene } from './screenUrl'
 
 // The pillar page lays its four faces side by side; a face iframe shows one quarter of it.
 const PILLAR_PAGE_WIDTH_PX = 6616
@@ -20,7 +20,9 @@ export const holeMaterial = new MeshBasicMaterial({
 })
 
 export interface Display {
-  mesh: Mesh
+  // The depth-only quad: the same rectangle as the CSS3D plane, so no part of the hole lacks a page behind it
+  // (the glb's curved LED wrap as the hole left the column corners uncovered: S-2, 2026-11-04).
+  hole: Mesh
   extras: DisplayExtras
   object: CSS3DObject
   iframe: HTMLIFrameElement
@@ -33,9 +35,9 @@ export function isDisplayMesh(object: Object3D): object is Mesh {
   return object instanceof Mesh && typeof object.userData.screen === 'string'
 }
 
-export function createDisplay(mesh: Mesh, content: Content, crops?: CropsFile): Display {
+export function createDisplay(mesh: Mesh, content: Content, scene: AmbientScene, crops?: CropsFile): Display {
   const extras = mesh.userData as DisplayExtras
-  mesh.material = holeMaterial
+  mesh.visible = false
   const [pageWidth, pageHeight] = extras.face_px
   const box = document.createElement('div')
   box.style.overflow = 'hidden'
@@ -45,7 +47,7 @@ export function createDisplay(mesh: Mesh, content: Content, crops?: CropsFile): 
   const iframe = document.createElement('iframe')
   const iframeWidth = extras.shape === 'pillar' ? PILLAR_PAGE_WIDTH_PX : pageWidth
   iframe.style.cssText = `position:absolute;top:0;left:${-extras.face * pageWidth}px;width:${iframeWidth}px;height:${pageHeight}px`
-  iframe.src = screenUrl(extras, content, crops)
+  iframe.src = screenUrl(extras, content, scene, crops)
   clip.appendChild(iframe)
 
   const object = new CSS3DObject(box)
@@ -53,7 +55,11 @@ export function createDisplay(mesh: Mesh, content: Content, crops?: CropsFile): 
   const normal = new Vector3(...extras.normal)
   object.position.copy(center)
   object.lookAt(center.clone().add(normal))
-  const display: Display = { mesh, extras, object, iframe, box, clip, zoom: 0 }
+  const hole = new Mesh(new PlaneGeometry(extras.size[0], extras.size[1]), holeMaterial)
+  hole.position.copy(center)
+  hole.lookAt(center.clone().add(normal))
+  mesh.parent!.add(hole)
+  const display: Display = { hole, extras, object, iframe, box, clip, zoom: 0 }
   applyZoom(display, ZOOM_LADDER[0]!)
   return display
 }
@@ -82,6 +88,6 @@ export function updateZoom(displays: Display[], camera: PerspectiveCamera, viewp
   }
 }
 
-export function setContent(displays: Display[], content: Content, crops?: CropsFile): void {
-  for (const display of displays) display.iframe.src = screenUrl(display.extras, content, crops)
+export function setContent(displays: Display[], content: Content, scene: AmbientScene, crops?: CropsFile): void {
+  for (const display of displays) display.iframe.src = screenUrl(display.extras, content, scene, crops)
 }

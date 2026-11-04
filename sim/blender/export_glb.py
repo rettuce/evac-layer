@@ -28,6 +28,8 @@ TEX_DIR = PUBLIC_DIR / "tex"
 SCRATCH_DIR = Path(bpy.app.tempdir or "/tmp") / "evac-sim-export"
 
 LOOK = "C"
+# The wall behind the hero camera: the viewer orbits from outside, and it would hide the room (S-2, 2026-11-04).
+EXCLUDED_OBJECTS = ("wall_front",)
 # The page each shape is drawn at (app/layout/shapes.ts SHAPES); a pillar page is four faces side by side.
 FACE_PX = {"9x16": (1080, 1920), "32x9": (3840, 1080), "pillar": (6616, 5046)}
 PILLAR_FACE_PX = 1654
@@ -87,8 +89,11 @@ def screen_extras(ns, crops):
                 "face_px": list(FACE_PX[shape]), "size": [round(width, 5), round(height, 5)],
                 "center": to_gltf(surface + normal * ns["FLUSH_EPS_M"]), "normal": to_gltf(normal),
             }
-    perimeter = ns["COLUMN_LED_PERIMETER"]
     half = ns["COLUMN_CLAD_HALF"] + ns["FLUSH_EPS_M"]
+    # Each face is drawn as a flat quad that meets its neighbours at the column's corner edge (2 * half wide),
+    # not as the LED wrap's arc length (perimeter / 4 = 1.047 m): flat quads of the arc length end 7 mm short
+    # of the corner, and the uncovered corner showed as a dark line (S-2, 2026-11-04).
+    face_width = 2 * half
     height = ns["COLUMN_LED_TOP_Z"] - ns["COLUMN_LED_BOTTOM_Z"]
     for i, (x, y) in enumerate(ns["COLUMNS"]):
         name = f"pillar_{i}"
@@ -98,7 +103,7 @@ def screen_extras(ns, crops):
             center = Vector((x, y, ns["COLUMN_LED_MID_Z"])) + normal * half
             extras[f"led_wrap_{i}_{face}"] = {
                 "screen": name, "shape": "pillar", "face": face, "canvas": canvas, "crop": crops["crops"][name],
-                "face_px": [PILLAR_FACE_PX, FACE_PX["pillar"][1]], "size": [round(perimeter / 4, 5), round(height, 5)],
+                "face_px": [PILLAR_FACE_PX, FACE_PX["pillar"][1]], "size": [round(face_width, 5), round(height, 5)],
                 "center": to_gltf(center), "normal": to_gltf(normal),
             }
     return extras
@@ -132,7 +137,6 @@ BAKE_GROUPS = {
     "floor": lambda n: n == "floor",
     "ceiling": lambda n: n == "ceiling",
     "wall_back": lambda n: n == "wall_back",
-    "wall_front": lambda n: n == "wall_front",
     "wall_left": lambda n: n == "wall_left",
     "wall_right": lambda n: n == "wall_right",
     "columns": lambda n: n.startswith(("column_", "column_cladding_")),
@@ -256,7 +260,7 @@ def main():
     ns["build_look"](LOOK, back_wall_clear)
     ns["build_screens"](2, "off")
     for obj in list(bpy.data.objects):
-        if obj.type == "LIGHT":
+        if obj.type == "LIGHT" or obj.name in EXCLUDED_OBJECTS:
             bpy.data.objects.remove(obj)
 
     extras = screen_extras(ns, crops)

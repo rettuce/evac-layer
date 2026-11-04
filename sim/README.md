@@ -26,7 +26,7 @@ Measured 2026-11-04 (M-series Mac, Chrome, 1920×1080, DPR 1): `Textured` with E
 at ~10 fps while the 22 pages load. `sim/DESIGN.md` has what made the difference.
 
 UI (top left): content `平常時` / `EVAC LAYER` (由利本荘市, the 2026-10-21 flood replayed at real speed from
-just before the level-4 bulletin); render `Textured` (baked colour × AO) / `AO` (white × AO) / `Wire` (edges
+just before the level-4 bulletin); ambient scene for `平常時` (six of the app's scenes); render `Textured` (baked colour × AO) / `AO` (white × AO) / `Wire` (edges
 on black, displays only); camera presets (every still camera of `build_scene.py`, 1.2 s ease-in-out-cubic
 flight; dragging during a flight cancels it). Bottom right: fps.
 
@@ -37,7 +37,8 @@ blender -b -P sim/blender/export_glb.py            # ~4 min on an M-series GPU (
 blender -b -P sim/blender/export_glb.py -- --size 1024 --floor-size 2048 --ao-samples 32
 ```
 
-Writes `sim/public/room.glb` (baked colour embedded; display faces and cameras carry `extras`),
+Writes `sim/public/room.glb` (baked colour embedded; display faces and cameras carry `extras`; the front wall
+behind the hero camera is left out so the view can orbit from outside),
 `sim/public/tex/<group>_ao.jpg` and `sim/public/crops.json`. The script loads `build_scene.py` without
 modifying it, so a change to the room geometry or the cameras there is picked up by re-running this. If only
 the canvas crops / seam changed, `blender -b -P demo/blender/build_scene.py -- --crops-json sim/public/crops.json`
