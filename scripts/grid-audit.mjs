@@ -38,8 +38,8 @@ export const RULES_APP = {
   pictoUnit: 'dpx',
   textMinCap: 21,
   textUnit: 'dpx',
-  // action 150 px → cap 111; a headline stepped down to 0.85 (64.6 px, contract 17:30) → cap 47.9
-  farCap: (shape, role) => (role === 'headline' ? 47 : 100),
+  // action 150 px → cap 111; a headline stepped down to 0.8 (60.8 px) → cap 45
+  farCap: (shape, role) => (role === 'headline' ? 45 : 100),
 }
 let RULES = RULES_PROPOSAL
 const PICTO_ROLE = {

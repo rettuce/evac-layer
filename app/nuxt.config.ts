@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     '@fontsource/noto-sans-jp/400.css',
     '@fontsource/noto-sans-jp/700.css',
     '@fontsource/noto-sans/400.css',
+    '@fontsource/noto-sans/600.css',
     '@fontsource/noto-sans/700.css',
     '@fontsource/noto-sans-sc/400.css',
     '@fontsource/noto-sans-sc/700.css',
