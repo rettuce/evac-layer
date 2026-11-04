@@ -49,7 +49,8 @@
       "narration_ja_alt": "本物の警報が届いた瞬間、スクリーンは、その場所の避難案内に。",
       "narration_ja": "本物の警報が届いた瞬間、スクリーンは、その場所の避難案内に変わります。",
       "narration_en": "The moment a real warning arrives, the screen turns into guidance for this spot.",
-      "reading_ja": "ほんものの けいほうが とどいた しゅんかん、スクリーンは、そのばしょの ひなんあんないに かわります"
+      "reading_ja": "ほんものの けいほうが とどいた しゅんかん、スクリーンは、そのばしょの ひなんあんないに かわります",
+      "caption_from_s": 3.0
     },
     {
       "cut": "1",
