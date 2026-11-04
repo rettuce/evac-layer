@@ -6,7 +6,7 @@ import { test } from 'node:test'
 import { sourceLines } from '../layout/sources.ts'
 import { isDemoSitePath, isTrustedLayoutSrc, resolveLayoutSrc } from '../layout/trust.ts'
 import { adminAccess, clientAddressFor, type AdminRequest } from '../server/utils/adminPolicy.ts'
-import { liveLayoutGate } from '../layout/gate.ts'
+import { layoutDigest, liveLayoutGate } from '../layout/gate.ts'
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
 import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
 import { WEBHOOK_RETRIES, webhookRetryDelayMs } from '../layout/feed.ts'
@@ -103,6 +103,21 @@ test('live screens get a layout only for an approved bulletin at an auto-publish
   assert.equal(liveLayoutGate(revoked, 's1', '05210', 'B1'), 'unapproved')
   assert.equal(liveLayoutGate(approved, 's1', '05210', 'B2'), 'unapproved')
   assert.equal(liveLayoutGate(approved, 's1', '05210', 'B1'), 'ok')
+})
+
+test('an approval is bound to the layout files it was given for; regenerated files are stale until re-approved', () => {
+  const at = '2026-11-05T00:00:00Z'
+  const files = [{ shape: '16x9', body: '{"a":1}' }, { shape: '9x16', body: '{"b":2}' }]
+  const digest = layoutDigest(files)
+  assert.equal(digest, layoutDigest([...files].reverse()))
+  assert.notEqual(digest, layoutDigest([{ shape: '16x9', body: '{"a":2}' }, { shape: '9x16', body: '{"b":2}' }]))
+  const sites = { s1: { auto_publish: true, updated_at: at } }
+  const bound = { version: '0.1' as const, sites, layouts: { '05210/B1': { approved: true, updated_at: at, digest } } }
+  const unbound = { version: '0.1' as const, sites, layouts: { '05210/B1': { approved: true, updated_at: at } } }
+  assert.equal(liveLayoutGate(bound, 's1', '05210', 'B1', digest), 'ok')
+  assert.equal(liveLayoutGate(bound, 's1', '05210', 'B1', layoutDigest([{ shape: '16x9', body: '{"a":2}' }])), 'stale')
+  assert.equal(liveLayoutGate(unbound, 's1', '05210', 'B1', digest), 'ok')
+  assert.equal(liveLayoutGate(bound, 's1', '05210', 'B1'), 'ok')
 })
 
 test('dev trusts only the forwarded address appended by a local relay', () => {

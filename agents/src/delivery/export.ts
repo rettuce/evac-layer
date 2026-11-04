@@ -8,7 +8,7 @@ import { LAYOUTS_DIR } from "../loop/report.js";
 import { DEFAULT_CHROME } from "../loop/browser-verifier.js";
 import { REPO_ROOT } from "../paths.js";
 import { formatErrors, validateDoc } from "../schemas.js";
-import { exportable, readApprovals } from "./gate.js";
+import { exportable, layoutDigestOf, readApprovals } from "./gate.js";
 import { INLINE_PAGE_SCRIPT } from "./inline-page.js";
 
 // pillar is drawn at its logical size and captured at half scale (6616 × 5046 → 3308 × 2523).
@@ -40,7 +40,7 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
   if (!fs.existsSync(indexFile)) throw new ExportStop(`${indexFile} not found; run replay-pipeline or fanout first`);
   const index = JSON.parse(fs.readFileSync(indexFile, "utf8")) as { entries: IndexEntry[] };
   const shown = index.entries.filter((e) => e.screen);
-  const gated = shown.map((e) => ({ e, gate: exportable(approvals, site.id, m, e.bulletin_id) }));
+  const gated = shown.map((e) => ({ e, gate: exportable(approvals, site.id, m, e.bulletin_id, layoutDigestOf(path.join(LAYOUTS_DIR, m, e.bulletin_id))) }));
   const ready = gated.filter((g) => g.gate === "ok").map((g) => g.e);
   for (const g of gated) if (g.gate !== "ok") log(`skip ${g.e.bulletin_id}: ${g.gate}`);
   if (!ready.length) throw new ExportStop(`nothing to export for ${site.id}: ${shown.length ? gated[0].gate : "no browser-verified screens in index.json"}`);

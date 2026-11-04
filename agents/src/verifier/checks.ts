@@ -25,7 +25,7 @@ export const MAX_REVERSALS = 1;
 export type TextKind = "primary" | "secondary" | "label";
 export interface TextSample { cell_id: string; role: Role; step_class: TypeStep | null; font_px: number; kind: TextKind; text: string }
 export interface ScreenState { shape: string; template: string; variant: string; level: string; dropped: string; overflow: string | null; missing_required: string | null }
-export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker"; cell_id?: string; lang?: string; detail: string }
+export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker" | "direction-dropped"; cell_id?: string; lang?: string; detail: string }
 export interface CellText { id: string; role: Role; text: string }
 
 // A label (language name, shelter designation) only names what the text beside it is, so it is held to the fine distance.
@@ -58,6 +58,14 @@ export function judgeState(state: ScreenState): Finding[] {
 
 export function droppedCells(state: ScreenState): { id: string; reason: string }[] {
   return state.dropped ? state.dropped.split(",").map((d) => { const [id, reason] = d.split(":"); return { id, reason }; }) : [];
+}
+
+// The arrow is the core of the guidance, so a direction cell the Composer placed may never be dropped by the renderer.
+export function judgeDropped(cells: { id: string; role: Role }[], state: ScreenState): Finding[] {
+  const roles = new Map(cells.map((c) => [c.id, c.role]));
+  return droppedCells(state)
+    .filter((d) => roles.get(d.id) === "direction")
+    .map((d) => ({ check: "direction-dropped", cell_id: d.id, detail: `direction cell ${d.id} was dropped by the renderer (${d.reason}); the arrow must stay on the screen` }));
 }
 
 export function countReversals(luminances: number[]): number {

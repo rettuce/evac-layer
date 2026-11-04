@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { layoutKey } from '~~/layout/gate'
+import { approvalState, layoutKey } from '~~/layout/gate'
 import type { ReplayRow } from '~~/layout/replay'
 
 interface LayoutIndexFile {
@@ -41,7 +41,7 @@ export default defineEventHandler(async () => {
         const last = report?.attempts.at(-1)
         return {
           ...entry,
-          approved: approvals.layouts[layoutKey(code, entry.bulletin_id)]?.approved ?? false,
+          ...approvalState(approvals.layouts[layoutKey(code, entry.bulletin_id)], entry.screen ? await currentLayoutDigest(code, entry.bulletin_id) : undefined),
           report: report && {
             outcome: report.outcome,
             verifier: report.verifier,

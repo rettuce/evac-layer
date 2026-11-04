@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { countReversals, droppedCells, judgeContent, judgeFonts, judgeState, requiredPx, type TextSample, judgeDrill } from "../src/verifier/checks.js";
+import { countReversals, droppedCells, judgeContent, judgeDropped, judgeFonts, judgeState, requiredPx, type TextSample, judgeDrill } from "../src/verifier/checks.js";
 import { TYPE_PX } from "../../app/layout/typography";
 
 const sample = (over: Partial<TextSample>): TextSample => ({ cell_id: "c", role: "action", step_class: "action", font_px: TYPE_PX.action, kind: "primary", text: "すぐ高いところへ", ...over });
@@ -25,6 +25,14 @@ test("state attributes turn into findings; drops are reported, not failed", () =
   assert.deepEqual(droppedCells(state), [{ id: "shelter", reason: "overflow" }]);
   const withLang = judgeState({ ...state, missing_required: null, overflow: "headline:ja,action:en" });
   assert.deepEqual(withLang.map((f) => [f.cell_id, f.lang]), [["headline", "ja"], ["action", "en"]]);
+});
+
+test("a direction cell the Composer placed must not be dropped by the renderer", () => {
+  const cells = [{ id: "direction", role: "direction" as const }, { id: "shelter", role: "shelter" as const }];
+  const state = { shape: "16x9", template: "evac-prepare", variant: "split", level: "3", dropped: "direction:overflow", overflow: null, missing_required: null };
+  assert.deepEqual(judgeDropped(cells, state).map((f) => [f.check, f.cell_id]), [["direction-dropped", "direction"]]);
+  assert.deepEqual(judgeDropped(cells, { ...state, dropped: "shelter:overflow" }), []);
+  assert.deepEqual(judgeDropped(cells, { ...state, dropped: "" }), []);
 });
 
 test("flash counting follows WCAG 2.3.1 (10% luminance reversals)", () => {
