@@ -42,7 +42,8 @@
    - look は `A`（白い駅ビル）・`B`（地下コンクリート）・`C`（木質アトリウム）。変えるときはこの 1 行を回して、5 と 6 をやり直す
    - 静止画で確かめる: `blender -b -P demo/blender/build_scene.py -- --look C --cut alert --frame 270 --still out.png --cam hero`
 4b. **カット 5c（地図＋4 か所）**: `node demo/capture/record.mjs --shape 16x9 --cut site-<slug> --base-url http://127.0.0.1:3151`（4 か所）→ `python3 demo/compose/cut05c.py` → `demo/capture/out/cut05c.mp4`。OpenStreetMap のタイルは初回だけ取得して `demo/cache/osm/` に置く
-4c. **説明カット（3・4）と 7**: `python3 demo/compose/explainers.py`（README のシート 3 枚を静止で・システム図の段ごとの点灯）。カット 7 は `node demo/capture/record.mjs --shape 16x9 --cut dashboard-final --base-url http://127.0.0.1:3151 --out demo/capture/out/cut07.mp4`
+4c. **説明カット（3・4）と 7**: `python3 demo/compose/explainers.py`（README のシート 3 枚を静止で・システム図の段ごとの点灯）。カット 7m（警報画面のモザイク・12 s）は `node demo/capture/mosaic_layouts.mjs`（架空の警報画面 180 枚を描画部で撮る・seed 固定）→ `node demo/capture/mosaic.mjs` → `demo/capture/out/cut07m.mp4`。最後に出る数字は撮影時の `/api/dashboard` の集計
+   - カット 7m のタイルは架空の案内で、実際の電文ではありません（自治体・施設・発表時刻はすべて架空）
 5. **合成する**: `python3 demo/compose/compose.py` → `demo/renders/evac-layer-demo.mp4`。素材が無いカットはスレート、3D が無いカットは 4 形状を並べたプレビューになる
 6. **音を載せる**: `python3 demo/compose/mix_audio.py --sfx-dir <Adobe Audition SFX> --out demo/out/evac-layer-demo-v2.mp4`
    - 環境音 -30 LUFS・カット 5 の切替の電子音・ドローン -26 LUFS。-18 LUFS はナレーション用に空けてある

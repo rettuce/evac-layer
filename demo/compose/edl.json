@@ -138,25 +138,14 @@
       "reading_ja": "なにを だすかは、へいじに ひとが きめます。しょうにんした あんないだけが、ゆうじに じどうで でます"
     },
     {
-      "cut": "7",
+      "cut": "7m",
       "kind": "capture",
-      "seconds": 6,
-      "src": "../capture/out/cut07.mp4",
-      "slate": "ダッシュボードの最終値（1 秒で確定して 6 s）",
+      "seconds": 12,
+      "src": "../capture/out/cut07m.mp4",
+      "slate": "架空の警報画面 180 枚（5 形状・4 種別・レベル 2〜5・5 自治体）が中央から加速して増えるモザイク（2 枚/秒 → 終盤 55 枚/秒）。9.5 s で静止 → 背景 40 % に落として数字（5 自治体・206 本・110 レイアウト）が 1 s で確定。タイルは架空の案内で実際の電文ではない（demo/capture/mosaic_layouts.mjs・seed 固定）",
       "narration_ja": "5つの自治体、206本の電文から、110のレイアウト。",
       "narration_en": "Five municipalities, 206 bulletins, 110 layouts. (final count at freeze)",
       "reading_ja": "いつつの じちたい、にひゃくろっぽんの でんぶんから、ひゃくじゅうの レイアウト（数字は凍結時の実数に差し替える）"
-    },
-    {
-      "cut": "7b",
-      "kind": "capture",
-      "seconds": 8,
-      "src": "../capture/out/cut07b.mp4",
-      "slate": "5 自治体それぞれの施設の案内画面を並べる",
-      "caption": "5 つの自治体。それぞれの資料から、それぞれの場所へ。\nFive municipalities, each from its own documents.",
-      "narration_ja": "それぞれの自治体の資料から、それぞれの場所の案内を。",
-      "narration_en": "Each from its own municipality's documents, for its own place.",
-      "reading_ja": "それぞれの じちたいの しりょうから、それぞれの ばしょの あんないを"
     },
     {
       "cut": "8",
