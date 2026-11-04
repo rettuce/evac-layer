@@ -1,5 +1,5 @@
 import type { Shape } from '../../types'
-import { cellRandom, cellRange, fbm, paper, sceneUnit, tint } from '../field.ts'
+import { cellRandom, cellRange, fbm, paper, sceneUnit, tint, wave } from '../field.ts'
 import type { AmbientFrame, AmbientScene } from '../types'
 
 const PAPER = 'rgb(17 19 23)'
@@ -11,28 +11,54 @@ const STEP = 9
 const LINE = 1.3
 const FIELD_SCALE = 1 / 640
 const VORTEX_RADIUS = 320
-const VORTEX_STRENGTH = 0.9
-const DRIFT_MS = 60_000
-const ORBIT_MS = 90_000
-const DASH_ON = 28
-const DASH_OFF = 14
-const DASH_SPEED_PX_S = 90
+// Provisional reference wgl stream-hatch (2026-11-05, to be confirmed): the vortices drift and orbit, their
+// strength pulses over 30 s by ±40 %, and every 20 s a new vortex set blends in over 2.5 s; the field itself
+// flows slowly. Only these numbers describe the motion, so a different reference means changing them here.
+const REFERENCE = {
+  orbitMs: 30_000,
+  orbitRadius: 60,
+  strength: 0.9,
+  pulseDepth: 0.4,
+  pulseMs: 30_000,
+  reseedMs: 20_000,
+  reseedBlendMs: 2_500,
+  driftMs: 60_000,
+} as const
+const RESEED_SEED_STRIDE = 1013
 
 interface Vortex {
   x: number
   y: number
   sign: number
+  strength: number
 }
 
-function vortices(seed: number, frame: AmbientFrame, unit: number, t: number): Vortex[] {
+function smoothstep(x: number): number {
+  const u = Math.min(1, Math.max(0, x))
+  return u * u * (3 - 2 * u)
+}
+
+function vortexSet(seed: number, frame: AmbientFrame, unit: number, t: number): Vortex[] {
   return [0, 1].map((k) => {
-    const orbit = 2 * Math.PI * (t / ORBIT_MS + cellRandom(seed, -1, k, 2))
+    const orbit = 2 * Math.PI * (((t / REFERENCE.orbitMs) % 1) + cellRandom(seed, -1, k, 2))
+    const pulse = 1 + REFERENCE.pulseDepth * wave(t, REFERENCE.pulseMs, cellRandom(seed, -1, k, 3))
     return {
-      x: (0.2 + 0.6 * cellRandom(seed, -1, k)) * frame.width + Math.cos(orbit) * 60 * unit,
-      y: (0.2 + 0.6 * cellRandom(seed, -1, k, 1)) * frame.height + Math.sin(orbit) * 40 * unit,
+      x: (0.2 + 0.6 * cellRandom(seed, -1, k)) * frame.width + Math.cos(orbit) * REFERENCE.orbitRadius * unit,
+      y: (0.2 + 0.6 * cellRandom(seed, -1, k, 1)) * frame.height + Math.sin(orbit) * (REFERENCE.orbitRadius * 0.66) * unit,
       sign: k === 0 ? 1 : -1,
+      strength: REFERENCE.strength * pulse,
     }
   })
+}
+
+// Two vortex sets cross-fade at each reseed, so the lines re-route without a cut.
+function vortices(seed: number, frame: AmbientFrame, unit: number, t: number): Vortex[] {
+  const epoch = Math.floor(t / REFERENCE.reseedMs)
+  const blend = smoothstep((t - epoch * REFERENCE.reseedMs) / REFERENCE.reseedBlendMs)
+  const current = vortexSet(seed + epoch * RESEED_SEED_STRIDE, frame, unit, t)
+  if (blend >= 1) return current
+  const previous = vortexSet(seed + (epoch - 1) * RESEED_SEED_STRIDE, frame, unit, t)
+  return [...previous.map((v) => ({ ...v, strength: v.strength * (1 - blend) })), ...current.map((v) => ({ ...v, strength: v.strength * blend }))]
 }
 
 // A stream function: flow follows its level lines, so streamlines never cross.
@@ -40,11 +66,10 @@ function psi(seed: number, x: number, y: number, unit: number, drift: number, sw
   let value = fbm(seed, (x / unit) * FIELD_SCALE + drift, (y / unit) * FIELD_SCALE, 2)
   for (const v of swirls) {
     const d2 = ((x - v.x) ** 2 + (y - v.y) ** 2) / (VORTEX_RADIUS * unit) ** 2
-    value += v.sign * VORTEX_STRENGTH * Math.exp(-d2)
+    value += v.sign * v.strength * Math.exp(-d2)
   }
   return value
 }
-
 const LATTICE = 16
 
 // The stream function is sampled once per frame on a lattice fixed to canvas coordinates and the flow
@@ -73,7 +98,7 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
   const unit = sceneUnit(frame, shape)
   const size = SPACING * unit
   const reach = STEPS * STEP * unit
-  const drift = t / DRIFT_MS
+  const drift = t / REFERENCE.driftMs
   const swirls = vortices(seed, frame, unit, t)
   const lattice = LATTICE * unit
   const c0 = Math.floor((frame.view.x - reach - size) / lattice)
@@ -86,8 +111,6 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
   ctx.strokeStyle = INK
   ctx.lineWidth = LINE * unit
   ctx.lineCap = 'round'
-  ctx.setLineDash([DASH_ON * unit, DASH_OFF * unit])
-  ctx.lineDashOffset = -((t / 1000) * DASH_SPEED_PX_S * unit) % ((DASH_ON + DASH_OFF) * unit)
   for (let j = j0; j < j1; j++) {
     for (let i = i0; i < i1; i++) {
       let x = (i + cellRandom(seed, i, j)) * size
@@ -104,8 +127,7 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, shape: S
       ctx.stroke()
     }
   }
-  ctx.setLineDash([])
-  const v = swirls[0]!
+  const v = swirls[swirls.length - 2]!
   ctx.strokeStyle = RING
   ctx.lineWidth = 3 * unit
   ctx.beginPath()
