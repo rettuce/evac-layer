@@ -18,6 +18,9 @@
 
 [デモ動画 — 11/8 公開]
 
+ブラウザで触れる 3D シミュレーター: https://rettuce.github.io/evac-layer/（平常時と警報時の切替、4 つのカメラ）
+*Try the 3D simulator in your browser:* https://rettuce.github.io/evac-layer/ (ambient / alert switch, four cameras)
+
 ## 一言で
 
 EVAC LAYER は、スクリーンの座標を受け取ると、その場所のための避難案内を気象庁の電文から自動で作り、承認済みの画面を「いま出す」「もう消す」というイベントとして、どのサイネージにも渡す仕組みです。自治体のハザードマップを読むのも、10 の言語で案内を書くのも、描いた画面を検査するのも Claude が行い、何を出すかを決めるのは人です。
