@@ -1,5 +1,5 @@
 import { areaRoles } from './templates'
-import type { DroppedCell, LayoutCell, ShapeLayout, Track } from './types'
+import type { DroppedCell, LayoutCell, Role, ShapeLayout, Track } from './types'
 
 export function byPriorityThenId(a: LayoutCell, b: LayoutCell): number {
   return a.priority - b.priority || a.id.localeCompare(b.id)
@@ -21,8 +21,10 @@ export function initialPlacement(cells: LayoutCell[], layout: ShapeLayout) {
   return { placed, dropped }
 }
 
+const NEVER_DROPPED: Role[] = ['direction']
+
 export function nextOverflowVictim(placed: LayoutCell[], layout: ShapeLayout): LayoutCell | undefined {
-  const required = new Set(layout.required)
+  const required = new Set([...layout.required, ...NEVER_DROPPED])
   return placed
     .filter((cell) => !required.has(cell.role))
     .sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id))[0]

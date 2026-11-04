@@ -25,9 +25,10 @@ const svg = computed(() => {
 })
 const labelPx = computed(() => Math.max(PLACEHOLDER_LABEL_MIN_PX, Math.round(props.sizePx * PLACEHOLDER_LABEL_RATIO)))
 const glyph = ref<HTMLElement>()
-const ink = ref({ dx: 0, dy: 0, scale: 1 })
+const ink = ref({ dx: 0, dy: 0, scale: 1, w: 1, h: 1 })
 
-// With fitInk the box *is* the ink: sizePx is the ink's longer side and the ink starts at the box's top-left.
+// With fitInk the box *is* the ink: sizePx is the ink's longer side, the box has the ink's proportions and the ink
+// starts at the box's top-left.
 async function measureInk() {
   const svgEl = glyph.value?.querySelector('svg')
   const markup = svg.value
@@ -36,7 +37,8 @@ async function measureInk() {
   const bounds = await pictogramInk(`${props.id}:${props.rotation ?? 0}`, markup)
   if (!bounds) return
   const { left, top, right, bottom } = bounds
-  ink.value = { dx: -(left - vb.x) / vb.width, dy: -(top - vb.y) / vb.height, scale: vb.width / Math.max(right - left, bottom - top) }
+  const longer = Math.max(right - left, bottom - top)
+  ink.value = { dx: -(left - vb.x) / vb.width, dy: -(top - vb.y) / vb.height, scale: vb.width / longer, w: (right - left) / longer, h: (bottom - top) / longer }
 }
 
 onMounted(measureInk)
@@ -49,7 +51,7 @@ watch(() => [props.id, props.rotation, props.fitInk], () => nextTick(measureInk)
     :data-pictogram="id"
     :data-pictogram-missing="svg ? undefined : '1'"
     :class="{ 'is-ink': fitInk }"
-    :style="{ '--size': sizePx, '--label': labelPx, '--rotation': `${rotation ?? 0}deg`, '--ink-dx': ink.dx, '--ink-dy': ink.dy, '--ink-scale': ink.scale }"
+    :style="{ '--size': sizePx, '--label': labelPx, '--rotation': `${rotation ?? 0}deg`, '--ink-dx': ink.dx, '--ink-dy': ink.dy, '--ink-scale': ink.scale, '--ink-w': ink.w, '--ink-h': ink.h }"
   >
     <div v-if="svg" class="ink" aria-hidden="true"><div ref="glyph" class="glyph" v-html="svg" /></div>
     <span v-else class="placeholder">{{ id }}</span>
@@ -70,9 +72,13 @@ watch(() => [props.id, props.rotation, props.fitInk], () => nextTick(measureInk)
   height: 100%;
 }
 .pictogram.is-ink {
+  width: calc(var(--size) * var(--ink-w) * var(--px));
+  height: calc(var(--size) * var(--ink-h) * var(--px));
   overflow: visible;
 }
 .pictogram.is-ink .ink {
+  width: calc(var(--size) * var(--px));
+  height: calc(var(--size) * var(--px));
   transform-origin: 0 0;
   transform: scale(var(--ink-scale)) translate(calc(var(--ink-dx) * 100%), calc(var(--ink-dy) * 100%));
 }

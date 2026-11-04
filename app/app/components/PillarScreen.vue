@@ -11,7 +11,7 @@ const props = defineProps<{
 const emit = defineEmits<{ ready: [] }>()
 
 const FACES = Array.from({ length: PILLAR.faces }, (_, i) => i)
-const FACE_BOX = { width: PILLAR.faceWidth, height: PILLAR.height, scale: PILLAR.faceScale }
+const FACE_BOX = { width: PILLAR.faceWidth, height: PILLAR.height, scale: 1 }
 const COPIED_STATE = ['template', 'variant', 'level', 'dropped', 'missingRequired', 'overflow', 'headlineScale', 'bulletinId'] as const
 
 const firstFace = ref<HTMLElement>()
