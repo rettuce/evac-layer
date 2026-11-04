@@ -68,6 +68,50 @@ export function tint(hue: number, saturation: number, lightness: number, alpha?:
   return alpha === undefined ? `hsl(${hue} ${s}% ${lightness}%)` : `hsl(${hue} ${s}% ${lightness}% / ${alpha})`
 }
 
+// The hash12 value noise of the wgl sketches (Dave Hoskins), so ports keep their character.
+export function hash12(x: number, y: number): number {
+  let a = x * 0.1031 - Math.floor(x * 0.1031)
+  let b = y * 0.1031 - Math.floor(y * 0.1031)
+  let c = a
+  const d = a * (b + 33.33) + b * (c + 33.33) + c * (a + 33.33)
+  a += d
+  b += d
+  c += d
+  const v = (a + b) * c
+  return v - Math.floor(v)
+}
+
+export function vnoise12(x: number, y: number): number {
+  const ix = Math.floor(x)
+  const iy = Math.floor(y)
+  const fx = x - ix
+  const fy = y - iy
+  const ux = fx * fx * (3 - 2 * fx)
+  const uy = fy * fy * (3 - 2 * fy)
+  const a = hash12(ix, iy)
+  const b = hash12(ix + 1, iy)
+  const c = hash12(ix, iy + 1)
+  const d = hash12(ix + 1, iy + 1)
+  return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy
+}
+
+export function cubicBezier(x1: number, y1: number, x2: number, y2: number): (x: number) => number {
+  const b = (t: number, a: number, c: number): number => 3 * a * t * (1 - t) * (1 - t) + 3 * c * t * t * (1 - t) + t * t * t
+  return (x) => {
+    if (x <= 0) return 0
+    if (x >= 1) return 1
+    let lo = 0
+    let hi = 1
+    let t = x
+    for (let i = 0; i < 20; i++) {
+      t = (lo + hi) / 2
+      if (b(t, x1, x2) < x) lo = t
+      else hi = t
+    }
+    return b(t, y1, y2)
+  }
+}
+
 export function wave(t: number, periodMs: number, phase = 0): number {
   return Math.sin(2 * Math.PI * (t / periodMs + phase))
 }
