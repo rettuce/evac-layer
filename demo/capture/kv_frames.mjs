@@ -21,9 +21,9 @@ const SHAPES = {
   '32x9': { width: 3840, height: 1080, windows: ['32x9_0', '32x9_1', '32x9_2'] },
   pillar: { width: 6616, height: 5046, scale: 0.5, windows: ['pillar_0', 'pillar_1', 'pillar_2', 'pillar_3'] },
 }
-// The language band shows two languages per 2.5 s from appearance; stills use t = 13.5 s (easy Japanese
-// and English, one full rotation after the band has settled; the rule of scripts/screens.mjs), t = 6 s is Korean and Thai.
-const T_EASY_EN_MS = 13500
+// The language band shows two languages per 2.5 s from appearance; stills use t = 14.48 s (easy Japanese
+// and English with the action pulse at full opacity; the rule of scripts/screens.mjs), t = 6 s is Korean and Thai.
+const T_EASY_EN_MS = 14480
 const T_KO_TH_MS = 6000
 const preview = (municipality, bulletin) => (shape) =>
   ({ src: `/api/admin/preview-layout?${new URLSearchParams({ municipality, bulletin, shape })}` })

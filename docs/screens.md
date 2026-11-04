@@ -1,7 +1,7 @@
 # Screens
 
-Every screen below is drawn from a bulletin of the Japan Meteorological Agency: the Koyoshi River flood sequence in Yurihonjo, Akita (21–22 Oct 2026, real bulletins), and the official sample tsunami bulletins for Yoshida, Shizuoka (a drill, so every screen says so). The wording is written by the Writer agent from the municipal hazard map and checked by the Verifier (static, browser and vision). Stills are taken 13.5 s in, while the language band shows easy Japanese and English.
-気象庁の電文から作った画面です。秋田県由利本荘市の子吉川の洪水（2026-10-21〜22 の実際の電文）と、静岡県吉田町の津波（気象庁の公式サンプル電文。訓練なので画面にも【訓練】と出ます）。文言は Writer が自治体のハザードマップから書き、Verifier（静的・ブラウザ・画像）が検査しています。言語帯は、やさしい日本語と英語が出ている 13.5 秒の時点で撮っています。
+Every screen below is drawn from a bulletin of the Japan Meteorological Agency: the Koyoshi River flood sequence in Yurihonjo, Akita (21–22 Oct 2026, real bulletins), and the official sample tsunami bulletins for Yoshida, Shizuoka (a drill, so every screen says so). The wording is written by the Writer agent from the municipal hazard map and checked by the Verifier (static, browser and vision). Stills are taken 14.48 s in, while the language band shows easy Japanese and English.
+気象庁の電文から作った画面です。秋田県由利本荘市の子吉川の洪水（2026-10-21〜22 の実際の電文）と、静岡県吉田町の津波（気象庁の公式サンプル電文。訓練なので画面にも【訓練】と出ます）。文言は Writer が自治体のハザードマップから書き、Verifier（静的・ブラウザ・画像）が検査しています。言語帯は、やさしい日本語と英語が出ている 14.48 秒の時点で撮っています。
 
 Regenerate with `pnpm -F app screens` (production build, loopback admin preview).
 
