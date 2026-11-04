@@ -77,6 +77,11 @@ const CUTS = {
   ambient: { seconds: 12, startMs: 0, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   switch: { seconds: 27, startMs: 5000, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
+  // v8 (D-14): the clock runs at real time everywhere except cut 5. The replay clock starts at the window's first
+  // bulletin, so a negative start shows the calm screen before it: 15:54:55, then the 15:55 level 3 at 5 s.
+  'switch-real': { seconds: 13, startMs: -5000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [0] },
+  'ambient-real': { seconds: 12, startMs: -300000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [] },
+  'alert-real': { seconds: 27, startMs: 3000, query: { ...LIVE, speed: '1', from: '2026-10-21T19:45+09:00' }, ready: LIVE_READY, events: [] },
   // The dashboard counts up in about 4 s of its own clock; a quarter rate stretches that over the cut.
   dashboard: { seconds: 25, startMs: 0, rate: 0.25, page: '/dashboard', query: {}, ready: '.dashboard[data-ready="1"]', events: [] },
   // Four times the dashboard's own clock settles the numbers within the first second, then they hold.

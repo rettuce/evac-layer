@@ -633,6 +633,8 @@ function drawHero(ctx: Ctx, L: Layout, seed: number, time: number): void {
   ctx.fill()
 }
 
+// Modules stroke past their cell, so every cell in the loop range (the view plus one cell) is drawn, and the
+// hero is drawn while it is within a cell of the view.
 function overlaps(x: number, y: number, w: number, h: number, view: AmbientRect): boolean {
   return x < view.x + view.width && x + w > view.x && y < view.y + view.height && y + h > view.y
 }
@@ -669,7 +671,6 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, _shape: 
   for (let r = r0; r <= r1; r++) {
     for (let c = c0; c <= c1; c++) {
       if (isHero(L, c, r)) continue
-      if (!overlaps(L.gx0 + c * L.S, L.gy0 + r * L.S, L.S, L.S, view)) continue
       let state: CellState
       if (sweeping) {
         const delay = rng(seed, 8, period, c * 1024 + r)() * SWEEP_DELAY_MAX_SEC
@@ -683,7 +684,7 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, _shape: 
       drawCell(ctx, L, c, r, state)
     }
   }
-  if (overlaps(L.gx0 + L.heroC * L.S, L.gy0 + L.heroR * L.S, 2 * L.S, 2 * L.S, view)) drawHero(ctx, L, seed, time)
+  if (overlaps(L.gx0 + (L.heroC - 1) * L.S, L.gy0 + (L.heroR - 1) * L.S, 4 * L.S, 4 * L.S, view)) drawHero(ctx, L, seed, time)
 }
 
 export const moduleField: AmbientScene = { id: 'module-field', name: 'モジュール場', ink: 'dark', render }

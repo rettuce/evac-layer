@@ -43,12 +43,17 @@ describe('screens cut from one room canvas', { skip }, () => {
     child?.kill()
   })
 
+  const SCENE_QUERY = 'clock=virtual&t=5000&mode=scenario&scenario=ambient&overlay=none'
+
   async function pixels(scene: string, crop: [number, number, number, number]): Promise<Buffer> {
+    return grab(scene, crop[2], crop[3], `canvas=${ROOM.width}x${ROOM.height}&crop=${crop.join(',')}&canvas_id=test`)
+  }
+
+  async function grab(scene: string, width: number, height: number, extra: string): Promise<Buffer> {
     const page = await browser!.newPage()
     try {
-      await page.setViewport({ width: crop[2], height: crop[3], deviceScaleFactor: 1 })
-      const query = `clock=virtual&t=5000&mode=scenario&scenario=ambient&scene=${scene}&canvas=${ROOM.width}x${ROOM.height}&crop=${crop.join(',')}&canvas_id=test&overlay=none`
-      await page.goto(`${base}/screen?shape=16x9&${query}`, { waitUntil: 'networkidle0' })
+      await page.setViewport({ width, height, deviceScaleFactor: 1 })
+      await page.goto(`${base}/screen?shape=16x9&${SCENE_QUERY}&scene=${scene}&${extra}`, { waitUntil: 'networkidle0' })
       await page.waitForSelector('.ambient[data-ready="1"]', { timeout: READY_MS })
       const encoded = await page.$eval('.ambient-canvas', (canvas) => {
         const data = (canvas as HTMLCanvasElement).getContext('2d')!.getImageData(0, 0, (canvas as HTMLCanvasElement).width, (canvas as HTMLCanvasElement).height).data
@@ -78,5 +83,41 @@ describe('screens cut from one room canvas', { skip }, () => {
       }
       assert.ok(worst <= 1, `${scene.id}: crops differ from the whole room by up to ${worst}`)
     }
+  })
+
+  // The tiles are drawn on a CPU canvas and the one-call screen on a GPU one, so curve and stroke edges differ by a
+  // few levels everywhere (and WebGL particles by more); a seam shows instead as those differences crowding the
+  // tile edges. The room's own outer edge is cut by the one-call canvas and not by the tiles, so that band is left out.
+  test('the room drawn in 512 px tiles matches the same view drawn in one call, in every scene', async () => {
+    const seed = encodeURIComponent(roomSeedKey(ROOM, 'test'))
+    const TILE = 512
+    const BAND_PX = 8
+    const CROWDING = 2
+    const SLACK_PX = 5
+    const failures: string[] = []
+    for (const scene of AMBIENT_SCENES) {
+      const tiled = await pixels(scene.id, [0, 0, ROOM.width, ROOM.height])
+      const single = await grab(scene.id, ROOM.width, ROOM.height, `seed=${seed}`)
+      let inBand = 0
+      let outside = 0
+      let bandArea = 0
+      let area = 0
+      for (let y = BAND_PX; y < ROOM.height - BAND_PX; y++) {
+        for (let x = BAND_PX; x < ROOM.width - BAND_PX; x++) {
+          const band = Math.abs(x - TILE) < BAND_PX || Math.abs(y - TILE) < BAND_PX
+          area++
+          if (band) bandArea++
+          const p = (y * ROOM.width + x) * 4
+          let d = 0
+          for (let c = 0; c < 3; c++) d = Math.max(d, Math.abs(tiled[p + c]! - single[p + c]!))
+          if (d <= 1) continue
+          if (band) inBand++
+          else outside++
+        }
+      }
+      const expected = (outside / (area - bandArea)) * bandArea
+      if (inBand > CROWDING * expected + SLACK_PX) failures.push(`${scene.id}: ${inBand} px differ along the tile edges where ${expected.toFixed(1)} would be the scene's own noise`)
+    }
+    assert.deepEqual(failures, [], `tiles show seams — ${failures.join('; ')}`)
   })
 })

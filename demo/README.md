@@ -20,6 +20,7 @@
 2. **画面を録る**（仮想時計で 1/30 秒ずつ撮る。同じ電文・同じ時刻なら同じ絵になる）
    ```sh
    SITE_NAME=羽後本荘駅 demo/capture/record_all.sh http://127.0.0.1:3151              # 4 形状 × ambient / switch / alert
+   SITE_NAME=羽後本荘駅 CUTS="switch-real ambient-real alert-real" demo/capture/record_all.sh http://127.0.0.1:3151  # v8: 実時間の時計（カット 0・2・8・9）
    SITE_NAME=羽後本荘駅 SHAPES=pillar demo/capture/record_all.sh http://127.0.0.1:3151 # 柱（4 面連続・0.5 倍）
    node demo/capture/record.mjs --shape 16x9 --cut dashboard --verify --out demo/capture/out/cut07.mp4
    ```
@@ -30,7 +31,6 @@
    ```sh
    node demo/capture/admin_5b.mjs                    # カット 5b。data/approvals.json を消して未承認から撮る
    pnpm -F agents export --site 05210-demo-honjo-station --base-url http://127.0.0.1:3151
-   node demo/capture/pip_cms.mjs                     # カット 9 の小窓。export の dist/ が前提
    JMA_SAMPLES_DIR=… JMA_FEED_DIR=… VERIFIER_URL=http://127.0.0.1:3153 demo/capture/terminal_cuts.sh
    ```
    - 端末のカット 6 は Verifier がこの worktree の dev（`/api/layout`）を読むので、別ポートで `nuxt dev` を立てる
@@ -44,8 +44,10 @@
 4b. **カット 5c（地図＋4 か所）**: `node demo/capture/record.mjs --shape 16x9 --cut site-<slug> --base-url http://127.0.0.1:3151`（4 か所）→ `python3 demo/compose/cut05c.py` → `demo/capture/out/cut05c.mp4`。OpenStreetMap のタイルは初回だけ取得して `demo/cache/osm/` に置く
 4c. **説明カット（3・4）と 7**: `python3 demo/compose/explainers.py`（README のシート 3 枚を静止で・システム図の段ごとの点灯）。カット 7m（警報画面のモザイク・12 s）は `node demo/capture/mosaic_layouts.mjs`（架空の警報画面 180 枚を描画部で撮る・seed 固定）→ `node demo/capture/mosaic.mjs` → `demo/capture/out/cut07m.mp4`。最後に出る数字は撮影時の `/api/dashboard` の集計
    - カット 7m のタイルは架空の案内で、実際の電文ではありません（自治体・施設・発表時刻はすべて架空）
-5. **合成する**: `python3 demo/compose/compose.py` → `demo/renders/evac-layer-demo.mp4`。素材が無いカットはスレート、3D が無いカットは 4 形状を並べたプレビューになる
-6. **音を載せる**: `python3 demo/compose/mix_audio.py --sfx-dir <Adobe Audition SFX> --out demo/out/evac-layer-demo-v2.mp4`
+5. **合成する**: `python3 demo/compose/compose.py --mode clean --out demo/out/evac-layer-demo-v8-clean.mp4`（字幕・テロップ・ロゴなし）と `--mode vcon --out …-v8-vcon.mp4`（焼き込み・タイミング確認用）。素材が無いカットはスレート、3D が無いカットは 4 形状を並べたプレビューになる
+   - `python3 demo/compose/overlays.py` → `demo/out/overlays-v8.csv`（DaVinci 用。カット・種類・開始/終了秒・日英の文・Figma の PNG 名 `ov-<cut>-<kind>-<n>.png`）
+   - 時計はカット 5 だけ 1200 倍、ほかは実時間（`*-real` の画面素材）。カット 8 は柱 → 下がり壁 → 壁面の 1 本のカメラ移動
+6. **音を載せる**: `python3 demo/compose/mix_audio.py --sfx-dir <Adobe Audition SFX> --out demo/out/evac-layer-demo-v2.mp4`（切替の SE を差し替えるときは `--switch-se <wav>`）
    - 環境音 -30 LUFS・カット 5 の切替の電子音・ドローン -26 LUFS。-18 LUFS はナレーション用に空けてある
    - ナレーションは、カット別の録音を `demo/compose/audio/narration/cutNN.wav`（ファイル名は `compose/narration.md` の録音台本の表）に置けば各カットの開始秒に入る。179 s の `narration.wav` 1 本でもよい。カット別のファイルがあればそちらを使う
 7. **字幕と台本を書き出す**: `python3 demo/compose/subtitles.py [--with-narration]` → `compose/narration.md`（録音台本）と英語字幕 `demo/out/evac-layer-demo-v2.en.srt`（焼き込まない）

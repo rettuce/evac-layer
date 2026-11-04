@@ -13,6 +13,8 @@ import json
 import re
 from pathlib import Path
 
+from overlays import lines
+
 from mix_audio import narration_filename
 
 HERE = Path(__file__).resolve().parent
@@ -34,7 +36,8 @@ def narration_windows(rows, total):
     windows = []
     for i, (start, seg) in enumerate(spoken):
         end = spoken[i + 1][0] if i + 1 < len(spoken) else total
-        windows.append((start, end - start, seg))
+        begin = start + seg.get("narration_from_s", 0.0)
+        windows.append((begin, end - begin, seg))
     return windows
 
 
@@ -55,8 +58,8 @@ RECORDING_GUIDE = [
 ]
 
 
-def caption_of(seg):
-    return seg.get("caption") or seg.get("title") or ""
+def on_screen_en(seg):
+    return "\n".join(lines(seg[key]) for key in ("telop_en", "subtitle_en") if seg.get(key) and seg.get(key) != seg.get("telop_ja"))
 
 
 def write_narration(windows, out):
@@ -95,15 +98,14 @@ def stamp(seconds):
 def write_srt(rows, windows, with_narration, out):
     cues = []
     for start, seg in rows:
-        text = seg.get("caption_en") or english_lines(caption_of(seg))
-        if seg.get("subtitle"):
-            text = f"{text}\n{seg['subtitle']}" if text else seg["subtitle"]
+        text = on_screen_en(seg)
         if text:
-            cues.append((start, start + seg["seconds"], text))
+            cues.append((start + seg.get("subtitle_from_s", 0.0), start + seg["seconds"], text))
     if with_narration:
         for start, window, seg in windows:
             speak = spoken_length(seg["narration_ja"]) / CHARS_PER_SECOND
-            cues.append((start + NARRATION_LEAD_S, start + min(window, NARRATION_LEAD_S + speak), seg["narration_en"]))
+            lead = seg.get("narration_from_s", 0.0) + NARRATION_LEAD_S
+            cues.append((start + lead, start + min(window, lead + speak), seg["narration_en"]))
     cues.sort()
     body = [f"{i}\n{stamp(a)} --> {stamp(b)}\n{text}\n" for i, (a, b, text) in enumerate(cues, 1)]
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -115,7 +117,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--edl", default=str(HERE / "edl.json"))
     parser.add_argument("--with-narration", action="store_true")
-    parser.add_argument("--srt", default=str(HERE.parent / "out" / "evac-layer-demo-v2.en.srt"))
+    parser.add_argument("--srt", default=str(HERE.parent / "out" / "evac-layer-demo-v8.en.srt"))
     args = parser.parse_args()
     edl = json.loads(Path(args.edl).read_text(encoding="utf-8"))
     rows, total = timeline(edl)
