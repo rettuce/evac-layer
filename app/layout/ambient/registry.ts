@@ -2,7 +2,6 @@ import { OVERLAY_CORNERS, type OverlayCorner } from './overlay.ts'
 import { hashString, mulberry32 } from './rng.ts'
 import { brushFlow } from './scenes/brushFlow.ts'
 import { etchedStreams } from './scenes/etchedStreams.ts'
-import { halfDiscs } from './scenes/halfDiscs.ts'
 import { inkBloom } from './scenes/inkBloom.ts'
 import { moduleField } from './scenes/moduleField.ts'
 import { quadSubdivision } from './scenes/quadSubdivision.ts'
@@ -12,7 +11,6 @@ export const AMBIENT_SCENES: readonly AmbientScene[] = [
   brushFlow,
   inkBloom,
   etchedStreams,
-  halfDiscs,
   quadSubdivision,
   moduleField,
 ]
