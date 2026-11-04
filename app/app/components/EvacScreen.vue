@@ -32,6 +32,7 @@ const overflow = ref('')
 const levelLabel = computed(() => levelLabelFor(props.screen.template, props.screen.alert.level))
 const headlineScale = ref(1)
 const shelterNarrow = ref(false)
+const distanceBelow = ref(false)
 const languagesNarrow = ref(false)
 const stackedHeadline = computed(() => ['portrait', 'square', 'pillar'].includes(SHAPES[props.shape].cls))
 // 32:9 sets the headline in a narrow column, so it gets the same two-line limit as the stacked bands.
@@ -128,6 +129,7 @@ function overflowingBoxes(cellEl: HTMLElement): HTMLElement[] {
   )
   return boxes.filter((child) => {
     const r = child.getBoundingClientRect()
+    if (r.width === 0 && r.height === 0) return false
     const outside =
       r.bottom > bounds.bottom + OVERFLOW_TOLERANCE_PX ||
       r.right > bounds.right + OVERFLOW_TOLERANCE_PX ||
@@ -168,10 +170,12 @@ function measureOverflow(): { cells: CellOverflow[]; screen: boolean } {
 
 let fitGeneration = 0
 
+// A name that needs more than one line, or runs past its row (a segment that must not break inside).
 function shelterNameWraps(): boolean {
   const name = root.value?.querySelector<HTMLElement>('.shelter-name-text')
   if (!name) return false
-  return name.getBoundingClientRect().height > parseFloat(getComputedStyle(name).lineHeight) + OVERFLOW_TOLERANCE_PX
+  const twoLines = name.getBoundingClientRect().height > parseFloat(getComputedStyle(name).lineHeight) + OVERFLOW_TOLERANCE_PX
+  return twoLines || name.scrollWidth > name.clientWidth + OVERFLOW_TOLERANCE_PX
 }
 
 async function fit() {
@@ -180,6 +184,7 @@ async function fit() {
   overflowDropped.value = []
   headlineScale.value = 1
   shelterNarrow.value = false
+  distanceBelow.value = false
   languagesNarrow.value = false
   await loadFonts()
   for (;;) {
@@ -187,8 +192,13 @@ async function fit() {
     await pictogramsSettled()
     await nextTick()
     if (generation !== fitGeneration) return
+    // Artboard rules for a long facility name: 90 → 72, then the distance moves under the name.
     if (layout.value.figma && !shelterNarrow.value && shelterNameWraps()) {
       shelterNarrow.value = true
+      continue
+    }
+    if (layout.value.figma && !distanceBelow.value && shelterNameWraps()) {
+      distanceBelow.value = true
       continue
     }
     const over = measureOverflow()
@@ -259,6 +269,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-overflow="overflow || undefined"
     :data-headline-scale="headlineScale !== 1 ? headlineScale : undefined"
     :data-shelter-scale="shelterNarrow ? 'narrow' : undefined"
+    :data-distance="distanceBelow ? 'below' : undefined"
     :data-languages-scale="languagesNarrow ? 'narrow' : undefined"
     :data-ready="ready ? '1' : '0'"
     :data-bulletin-id="screen.alert.bulletin_id"
@@ -286,6 +297,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :headline-scale="headlineScale"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
         :figma-rules="layout.figma === true"
+        :distance-below="distanceBelow"
         :language-index="language.index"
         :language-style="languageStyle"
       />

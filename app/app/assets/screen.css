@@ -179,7 +179,7 @@ body {
   gap: calc(10 * var(--px));
 }
 /* The artboard sets the figure's baseline 8 px below the name's, and the Latin language label 8 px above the line's. */
-.evac-screen.shape-portrait .is-figma .name-row .distance {
+.evac-screen.shape-portrait .is-figma .name-row:not(.is-stacked) .distance {
   position: relative;
   top: calc(8 * var(--px));
 }

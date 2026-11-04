@@ -263,7 +263,7 @@ async function auditApp(base, shapes, aspects, onlyBulletin) {
     for (const t of targets) {
       await page.setViewport({ width: t.size[0], height: t.size[1], deviceScaleFactor: 0.25 })
       const src = encodeURIComponent(`/api/admin/preview-layout?municipality=${m}&bulletin=${b}&shape=${t.shape}`)
-      await page.goto(`${base}/screen?${t.query}&clock=virtual&t=13500&src=${src}`, { waitUntil: 'networkidle0' })
+      await page.goto(`${base}/screen?${t.query}&clock=virtual&t=14480&src=${src}`, { waitUntil: 'networkidle0' })
       await page.waitForSelector('.evac-screen[data-ready="1"]', { timeout: 30000 })
       const unitPx = await page.$eval('.evac-screen', (el) => parseFloat(getComputedStyle(el).getPropertyValue('--px')))
       const mm = await page.evaluate(measureInPage, unitPx, PICTO_ROLE)
@@ -275,11 +275,33 @@ async function auditApp(base, shapes, aspects, onlyBulletin) {
   return results
 }
 
+// Step-4 mocks (proposal-step4.html): 1080-short-side design px, judged by the app thresholds.
+const STEP4 = { '16x9': [1920, 1080, 1], '32x9': [3840, 1080, 1], '1x1': [1080, 1080, 1], pillar: [6616, 5046, 1654 / 1080] }
+async function auditStep4(onlyShape) {
+  const browser = await puppeteer.launch({ executablePath: CHROME_PATH, args: ['--allow-file-access-from-files'] })
+  const page = await browser.newPage()
+  const results = []
+  for (const [shape, [w, h, px]] of Object.entries(STEP4)) {
+    if (onlyShape && onlyShape !== shape) continue
+    await page.setViewport({ width: w, height: h, deviceScaleFactor: 0.25 })
+    await page.goto(`file://${REVIEW_DIR}proposal-step4.html?shape=${shape}&px=${px}`, { waitUntil: 'networkidle0' })
+    await page.waitForFunction(() => document.body.dataset.ready === '1', { timeout: 30000 })
+    const m = await page.evaluate(measureInPage, px, PICTO_ROLE)
+    results.push({ shape, variant: 'step4', rows: applyRules(m, { unitPx: px, shape: shape === 'pillar' ? '9x16' : shape }) })
+  }
+  await browser.close()
+  return results
+}
+
 const args = process.argv.slice(2)
 const arg = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined)
 let results
 let outName
-if (args.includes('--proposal')) {
+if (args.includes('--step4')) {
+  RULES = RULES_APP
+  results = await auditStep4(arg('--shape'))
+  outName = 'audit-step4'
+} else if (args.includes('--proposal')) {
   RULES = RULES_PROPOSAL
   results = await auditProposal(arg('--shape'))
   outName = 'audit'
@@ -291,7 +313,7 @@ if (args.includes('--proposal')) {
   results = await auditApp(base, shapes, aspects, arg('--bulletin'))
   outName = 'audit-app'
 } else {
-  console.error('usage: node scripts/grid-audit.mjs --proposal [--shape <shape>] | --app <baseURL> [--shapes 9x16] [--aspects 10:16,1:2,3:4] [--bulletin <id>]')
+  console.error('usage: node scripts/grid-audit.mjs --proposal [--shape <shape>] | --step4 [--shape <shape>] | --app <baseURL> [--shapes 9x16] [--aspects 10:16,1:2,3:4] [--bulletin <id>]')
   process.exit(2)
 }
 await writeFile(`${REVIEW_DIR}${outName}.html`, tableHtml(results))

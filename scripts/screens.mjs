@@ -41,8 +41,9 @@ const SCENES = ['quad-subdivision', 'module-field']
 const SWITCH_AT_MS = 12000
 const SWITCH_FRAMES_MS = [11500, 11800, 12100, 12400, 12700, 13000]
 const READY_TIMEOUT_MS = 30000
-// One second into the first language pair (easy Japanese + English) of the second round.
-const ALERT_AT_MS = 13500
+// The first language pair (easy Japanese + English) is up and the action's pulse is at full opacity:
+// 480 + 2000 × 7 (pulse period 2000 from the end of the scale-in), 1.98 s into the pair's second round.
+const ALERT_AT_MS = 14480
 
 function scaleFor(shape, width) {
   return shape === 'pillar' ? PILLAR_SCALE : Math.min(1, GALLERY_WIDTH / width)

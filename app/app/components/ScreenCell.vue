@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { headlineParts } from '~~/layout/headline'
+import { shelterNameSegments } from '~~/layout/shelterName'
 import { HEADLINE_STACKED_MAX_LINES, HTML_LANG, LANG_LABEL, LANGUAGES_AT_ONCE, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
 import type { LangKey, LayoutCell } from '~~/layout/types'
 
@@ -12,6 +13,7 @@ const props = defineProps<{
   headlineScale?: number
   pictogramPx: number
   figmaRules?: boolean
+  distanceBelow?: boolean
   languageIndex: number
   languageStyle: Record<string, string | number>
 }>()
@@ -70,8 +72,8 @@ const headlineMaxLines = computed(() => (props.headlineLimited ? (props.figmaRul
           <p v-if="cell.kind" class="t-fine shelter-kind" :data-kind="cell.kind">
             {{ SHELTER_KIND_LABEL[cell.kind].ja }}<span lang="en"> / {{ SHELTER_KIND_LABEL[cell.kind].en }}</span>
           </p>
-          <div class="name-row">
-            <p class="t-guide shelter-name-text" :data-max-lines="SHELTER_NAME_MAX_LINES">{{ cell.text.ja }}</p>
+          <div class="name-row" :class="{ 'is-stacked': distanceBelow }">
+            <p class="t-guide shelter-name-text" :data-max-lines="SHELTER_NAME_MAX_LINES"><template v-for="(segment, i) in shelterNameSegments(cell.text.ja)" :key="i"><wbr v-if="i > 0">{{ segment }}</template></p>
             <p v-if="cell.distance_m !== undefined" class="t-guide distance" lang="en">{{ distanceText }}</p>
           </div>
         </div>
@@ -258,5 +260,12 @@ p {
 }
 .is-figma .name-row .shelter-name-text {
   min-width: 0;
+}
+.is-figma .name-row.is-stacked {
+  display: block;
+}
+.is-figma .name-row.is-stacked .distance {
+  text-align: right;
+  margin-top: calc(11 * var(--px));
 }
 </style>
