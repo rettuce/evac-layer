@@ -89,6 +89,19 @@ describe('production build', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F 
     assert.equal((await fetch(`${base}${layoutPath}`)).status, 200)
   })
 
+  test('an approval written without a digest is stale until it is approved again', async () => {
+    const file = join(dataDir, 'approvals.json')
+    const approvals = JSON.parse(await readFile(file, 'utf8'))
+    delete approvals.layouts[`${MUNICIPALITY}/${BULLETIN}`].digest
+    await writeFile(file, JSON.stringify(approvals))
+    const stale = await fetch(`${base}${layoutPath}`)
+    assert.equal(stale.status, 403)
+    assert.equal((await stale.json()).data.reason, 'stale')
+
+    assert.equal((await postJson(base, '/api/admin/approve', { municipality: MUNICIPALITY, bulletin_id: BULLETIN, approved: true })).status, 200)
+    assert.equal((await fetch(`${base}${layoutPath}`)).status, 200)
+  })
+
   test('the dev layout bridge does not exist in production', async () => {
     const file = join(APP_DIR, 'fixtures', 'wajima-tsunami.json')
     assert.equal((await fetch(`${base}/api/layout?file=${encodeURIComponent(file)}`)).status, 404)

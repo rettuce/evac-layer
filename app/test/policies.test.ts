@@ -116,7 +116,7 @@ test('an approval is bound to the layout files it was given for; regenerated fil
   const unbound = { version: '0.1' as const, sites, layouts: { '05210/B1': { approved: true, updated_at: at } } }
   assert.equal(liveLayoutGate(bound, 's1', '05210', 'B1', digest), 'ok')
   assert.equal(liveLayoutGate(bound, 's1', '05210', 'B1', layoutDigest([{ shape: '16x9', body: '{"a":2}' }])), 'stale')
-  assert.equal(liveLayoutGate(unbound, 's1', '05210', 'B1', digest), 'ok')
+  assert.equal(liveLayoutGate(unbound, 's1', '05210', 'B1', digest), 'stale')
   assert.equal(liveLayoutGate(bound, 's1', '05210', 'B1'), 'ok')
 })
 

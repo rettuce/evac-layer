@@ -21,7 +21,7 @@ export function exportable(a: Approvals, site: string, municipality: string, bul
   if (!a.sites[site]?.auto_publish) return "auto-publish-off";
   const record = a.layouts[`${municipality}/${bulletinId}`];
   if (!record?.approved) return "unapproved";
-  if (digest !== undefined && record.digest !== undefined && record.digest !== digest) return "stale";
+  if (digest !== undefined && record.digest !== digest) return "stale";
   return "ok";
 }
 
