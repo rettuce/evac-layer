@@ -29,6 +29,8 @@ const MUNICIPALITY = '05210'
 const SITE_ID = '05210-demo-honjo-station'
 const ROOM_ID = 'concourse'
 const SITE = { site_name: '羽後本荘駅', lat: '39.38633978', lng: '140.0563304' }
+// The ambient canvas of an embedded screen redraws at most this often (22 of them share one main thread).
+const EMBED_FPS = '30'
 // A quiet day for the calm screen; the 2026-10-21 flood from just before the level-4 bulletin (18:15 JST)
 // for EVAC LAYER, replayed at real speed so the level-4 screen holds until the level-5 bulletin at 19:45.
 const WINDOWS: Record<Content, { from: string; to: string }> = {
@@ -56,7 +58,7 @@ export function screenUrl(extras: DisplayExtras, content: Content, scene: Ambien
   const face = faceWindow(extras, content, crops)
   const crop = face ?? crops?.crops[extras.screen] ?? extras.crop
   const params = new URLSearchParams({
-    mode: 'live', municipality: MUNICIPALITY, site: SITE_ID, speed: '1', ...WINDOWS[content], scene,
+    mode: 'live', municipality: MUNICIPALITY, site: SITE_ID, speed: '1', ...WINDOWS[content], scene, fps: EMBED_FPS,
     canvas: `${canvas[0]}x${canvas[1]}`, crop: crop.join(','), canvas_id: ROOM_ID, ...SITE,
   })
   if (face || extras.shape !== 'pillar') {

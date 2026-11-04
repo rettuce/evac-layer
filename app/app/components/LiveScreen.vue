@@ -19,6 +19,7 @@ const props = defineProps<{
   room?: { width: number; height: number }
   crop?: AmbientRect
   seam?: 'left' | 'right'
+  drawIntervalMs?: number
   ambientSeed?: string
   bareAmbient?: boolean
   lat?: number
@@ -212,6 +213,7 @@ onBeforeUnmount(() => {
       :room="room"
       :crop="crop"
       :seam="seam"
+      :draw-interval-ms="drawIntervalMs"
       :bare="bareAmbient"
       :lat="lat"
       :lng="lng"
