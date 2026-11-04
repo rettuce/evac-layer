@@ -9,7 +9,7 @@ import { tsunamiRegionsFor } from "../jma/regions.js";
 import { REPO_ROOT } from "../paths.js";
 import { MODELS, costOf, type CallUsage } from "../reader/pricing.js";
 import { toStructuredSchema } from "../reader/extraction.js";
-import { WRITER_OUTPUT_SCHEMA, writerSystem, writerUser } from "./request.js";
+import { WRITER_OUTPUT_SCHEMA, writerAlertBlock, writerMunicipalityBlock, writerSystem } from "./request.js";
 import { lintEasyJapanese, lintEnglishScript, lintLatinScript, lintThaiScript, lintTraditionalScript, lintJaEasyScript, lintLevel5, lintMunicipalOrderName, type LintFinding } from "./rules.js";
 
 export const WRITER_DIR = path.join(REPO_ROOT, "data", "writer");
@@ -78,9 +78,15 @@ export async function writeCells(args: {
   const msg = await args.client.messages.stream({
     model: MODELS[args.model].id,
     max_tokens: MAX_TOKENS,
-    system: writerSystem(),
+    system: [{ type: "text", text: writerSystem(), cache_control: { type: "ephemeral" as const } }],
     output_config: { effort: "medium", format: { type: "json_schema", schema: toStructuredSchema(WRITER_OUTPUT_SCHEMA) as Record<string, unknown> } },
-    messages: [{ role: "user", content: `${writerUser(ctx.alert, ctx.municipality, budgets)}\n\n${instructions}` }],
+    messages: [{
+      role: "user",
+      content: [
+        { type: "text", text: writerMunicipalityBlock(ctx.municipality), cache_control: { type: "ephemeral" as const } },
+        { type: "text", text: `${writerAlertBlock(ctx.alert, budgets)}\n\n${instructions}` },
+      ],
+    }],
   }).finalMessage();
   if (msg.stop_reason === "refusal") throw new WriterStop(`Writer refused (${msg.stop_details?.category ?? "no category"})`);
   if (msg.stop_reason === "max_tokens") throw new WriterStop("Writer hit max_tokens");

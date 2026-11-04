@@ -19,7 +19,7 @@ Anything not listed here is internal and may change shape without notice. The si
 | `liveLayoutGate(approvals, site, municipality, bulletinId)`, `layoutKey`, `Approvals`, `LiveLayoutGate` | `gate.ts` | the approval gate used by `/api/live-layout`: `'ok'` only for an approved bulletin at a site with auto publish on, otherwise `'auto-publish-off'` or `'unapproved'` (the 403 `data.reason`). `Approvals` is the shape of `data/approvals.json` |
 | `pickAmbient(siteKey, epochMs, sceneId?)`, `AMBIENT_SCENES`, `AmbientScene`, `overlayGeometry` | `ambient/index.ts` | the ambient layer: hourly deterministic pick of scene, D21 overlay corner and seed; scenes are pure `render(ctx, t, seed, shape)`. See `ambient/README.md` |
 
-The language band shows two languages for 2.5 s each: easy Japanese + English, Simplified + Traditional Chinese, Korean + Thai, Vietnamese + Filipino, Indonesian (12.5 s a round). Stills (gallery, review pages, key visuals, before/after comparisons) are taken with `clock=virtual&t=13500` (or any 1000 + n × 12500 ms), one second into the easy Japanese + English pair, after it has faded in.
+The language band shows two languages for 2.5 s each: easy Japanese + English, Simplified + Traditional Chinese, Korean + Thai, Vietnamese + Filipino, Indonesian (12.5 s a round). Stills (gallery, review pages, key visuals, before/after comparisons) are taken with `clock=virtual&t=14480` (or any 14480 + n × 50000 ms): the easy Japanese + English pair is up (1.98 s after it faded in) and the action's brightness pulse is at full opacity (480 + 2000 × 7; 2026-11-04, replacing 13500 whose pulse phase drew the action at 0.72).
 
 ## What the rendered screen reports
 

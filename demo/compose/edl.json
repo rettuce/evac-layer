@@ -38,6 +38,21 @@
   },
   "segments": [
     {
+      "cut": "0",
+      "kind": "3d",
+      "seconds": 8,
+      "src": "../renders/cut00.mp4",
+      "screens": "switch",
+      "caption": "2026.10.21 15:55 気象庁の電文（実際の発表）・由利本荘市",
+      "caption_en": "JMA bulletin, 21 Oct 2026 15:55 JST (real), Yurihonjo",
+      "slate": "切替の瞬間: 柱の正面を正対・寄り。平時 3 s → 黒 0.3 s → Lv3 がスケールイン → 静止 4.7 s（switch 素材の 5.4〜13.4 s）。代替は ../capture/out/cut00.mp4（16x9_switch.mp4 の同区間・2D）",
+      "narration_ja_alt": "本物の警報が届いた瞬間、スクリーンは、その場所の避難案内に。",
+      "narration_ja": "本物の警報が届いた瞬間、スクリーンは、その場所の避難案内に変わります。",
+      "narration_en": "The moment a real warning arrives, the screen turns into guidance for this spot.",
+      "reading_ja": "ほんものの けいほうが とどいた しゅんかん、スクリーンは、そのばしょの ひなんあんないに かわります",
+      "caption_from_s": 3.0
+    },
+    {
       "cut": "1",
       "kind": "3d",
       "seconds": 10,
@@ -47,39 +62,27 @@
       "slate": "消えたままの駅のサイネージ（4 画面とも黒）。ゆっくり寄る",
       "narration_ja": "2024年1月1日、能登半島地震。どこへ逃げればよいか、判断が難しかった来訪者がいました。",
       "narration_en": "January 1, 2024: the Noto Peninsula earthquake. Visitors found it hard to judge where to evacuate from the tsunami (City of Jōetsu review).",
-      "caption_en": "January 1, 2024: the Noto Peninsula earthquake.\nVisitors found it hard to judge where to evacuate from the tsunami (City of Jōetsu review)."
+      "caption_en": "January 1, 2024: the Noto Peninsula earthquake.\nVisitors found it hard to judge where to evacuate from the tsunami (City of Jōetsu review).",
+      "reading_ja": "にせんにじゅうよねん いちがつ ついたち、のとはんとう じしん。どこへ にげれば よいか、はんだんが むずかしかった らいほうしゃが いました"
     },
     {
       "cut": "2",
       "kind": "3d",
       "seconds": 8,
       "src": "../renders/cut02.mp4",
-      "caption": "駅と街のスクリーンを作ってきた。\n災害のとき、このスクリーンは何も言わなかった",
+      "caption": "駅と街のスクリーンを作ってきた。\n災害のとき、どれも何も言わなかった",
       "screens": "ambient",
       "slate": "平時レイヤーが流れる 4 画面をゆっくりドリー",
-      "narration_ja": "駅と街のスクリーンを作ってきました。災害のとき、それは何も言いませんでした。",
-      "narration_en": "We have built screens for stations and streets. When disaster struck, they said nothing.",
-      "caption_en": "We have built screens for stations and streets.\nIn the disaster, those screens said nothing."
+      "narration_ja": "駅と街のスクリーンを作ってきました。災害のとき、どれも何も言いませんでした。黙らないスクリーンを。",
+      "narration_en": "We have built screens for stations and streets. In the disaster, none of them said a word. Screens that don't go silent.",
+      "caption_en": "We have built screens for stations and streets.\nIn the disaster, none of them said a word.",
+      "reading_ja": "えきと まちの スクリーンを つくってきました。さいがいの とき、どれも なにも いいませんでした。だまらない スクリーンを"
     },
     {
       "cut": "2b",
       "kind": "title",
-      "seconds": 3,
-      "title": "黙らない画面\nScreens that don't go silent",
-      "narration_ja": "黙らないスクリーンを。スクリーンは、もうあります。",
-      "narration_en": "Screens that don't go silent. The screens are already there."
-    },
-    {
-      "cut": "2c",
-      "kind": "title",
-      "seconds": 3,
-      "title": "スクリーンはもうある。\nThe screens are already there."
-    },
-    {
-      "cut": "2d",
-      "kind": "title",
-      "seconds": 3,
-      "title": "スクリーンは、自分の場所を知っている。\nEach screen knows where it stands."
+      "seconds": 4,
+      "title": "スクリーンはもうある。自分の場所を知っている。\nThe screens are already there.\nEach one knows where it stands."
     },
     {
       "cut": "3",
@@ -87,8 +90,9 @@
       "seconds": 12,
       "src": "../capture/out/cut03_sheets.mp4",
       "slate": "README のシート 3 枚（災害種別とレベル → 図記号と言語 → 画角）を各 4 s・軽いパン",
-      "narration_ja": "災害の種類とレベル、図記号と言語、そしてどんな形のスクリーンにも、同じ規則で出します。",
-      "narration_en": "Hazard types and levels, pictograms and languages, and screens of any shape, all under the same rules."
+      "narration_ja": "災害の種類と警戒レベル。図記号と10の言語。そして、どんな形のスクリーンにも、同じ規則で描きます。",
+      "narration_en": "Hazard types and alert levels. Pictograms and ten languages. And screens of any shape, drawn under the same rules.",
+      "reading_ja": "さいがいの しゅるいと けいかいレベル。ずきごうと じゅうの げんご。そして、どんな かたちの スクリーンにも、おなじ きそくで えがきます"
     },
     {
       "cut": "4",
@@ -96,8 +100,9 @@
       "seconds": 10,
       "src": "../capture/out/cut04_system.mp4",
       "slate": "システム図を段ごとに点灯（平時 → 有事 → 検査 → 承認と配信・各 2.5 s）",
-      "narration_ja": "平時に資料を読み、警報が届けば文を書き、検査を通った案内だけを、承認どおりに配信します。",
-      "narration_en": "It reads the documents in calm times, writes when a warning arrives, and sends only checked guidance, as approved."
+      "narration_ja": "平時に資料を読み、案内を書いて検査し、人が承認したものだけを、警報が届いた瞬間に出します。",
+      "narration_en": "In calm times it reads the documents, writes and checks the guidance; only what a person approved goes out, the moment a warning arrives.",
+      "reading_ja": "へいじに しりょうを よみ、あんないを かいて けんさし、ひとが しょうにんした ものだけを、けいほうが とどいた しゅんかんに だします"
     },
     {
       "cut": "5c",
@@ -107,7 +112,8 @@
       "slate": "左に地図（OpenStreetMap）・4 か所。点が移る → 右の画面が消える → 0.4 s 後に新しい画面。3.5 s × 4",
       "caption": "同じ警報。場所が違えば、避難先も方向も違う。\nSame warning. Different place, different shelter, different way.",
       "narration_ja": "同じ警報でも、ディスプレイの場所が違えば、避難先も方向も距離も、自動で変わります。",
-      "narration_en": "The same warning, but where the display stands changes the shelter, the direction and the distance, automatically."
+      "narration_en": "The same warning, but where the display stands changes the shelter, the direction and the distance, automatically.",
+      "reading_ja": "おなじ けいほうでも、ディスプレイの ばしょが ちがえば、ひなんさきも ほうこうも きょりも、じどうで かわります"
     },
     {
       "cut": "5",
@@ -116,8 +122,9 @@
       "src": "../renders/cut05.mp4",
       "screens": "switch",
       "slate": "平時の 4 画面 → 気象庁 XML 再生 → t=12.0 s に 4 画面が同じフレームで有事へ",
-      "narration_ja": "由利本荘市、10 月 21 日の実際の電文を 1200 倍で再生します。警戒レベル 3、4、5。すべてのスクリーンが同じ瞬間に切り替わります。",
-      "narration_en": "Real bulletins for Yurihonjo, October 21, replayed at 1200x. Alert levels 3, 4 and 5. Every screen switches at the same moment."
+      "narration_ja": "由利本荘市、10月21日の実際の電文を、1200倍の速さで再生します。警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。",
+      "narration_en": "Real bulletins for Yurihonjo, October 21, replayed at 1,200 times speed. Alert levels 3, 4 and 5. Every screen switches at the same moment.",
+      "reading_ja": "ゆりほんじょうし、じゅうがつ にじゅういちにちの じっさいの でんぶんを、せんにひゃくばいの はやさで さいせいします。けいかいレベル さん、よん、ご。すべての スクリーンが、おなじ しゅんかんに きりかわります"
     },
     {
       "cut": "5b",
@@ -127,7 +134,8 @@
       "slate": "管理画面: 一式を承認 →「自動配信 ON」・施設の緯度経度ピン",
       "caption": "平時に決めて、有事は自動\nDecide in calm. Deliver in crisis.",
       "narration_ja": "何を出すかは、平時に人が決めます。承認した案内だけが、有事に自動で出ます。",
-      "narration_en": "People decide what to show, in calm times. Only approved guidance goes out, automatically, in a crisis."
+      "narration_en": "People decide what to show, in calm times. Only approved guidance goes out, automatically, in a crisis.",
+      "reading_ja": "なにを だすかは、へいじに ひとが きめます。しょうにんした あんないだけが、ゆうじに じどうで でます"
     },
     {
       "cut": "7",
@@ -135,8 +143,9 @@
       "seconds": 6,
       "src": "../capture/out/cut07.mp4",
       "slate": "ダッシュボードの最終値（1 秒で確定して 6 s）",
-      "narration_ja": "5 つの自治体、200 本の電文から、80 のレイアウト。",
-      "narration_en": "Five municipalities, 200 bulletins, 80 layouts."
+      "narration_ja": "5つの自治体、206本の電文から、110のレイアウト。",
+      "narration_en": "Five municipalities, 206 bulletins, 110 layouts. (final count at freeze)",
+      "reading_ja": "いつつの じちたい、にひゃくろっぽんの でんぶんから、ひゃくじゅうの レイアウト（数字は凍結時の実数に差し替える）"
     },
     {
       "cut": "7b",
@@ -146,7 +155,8 @@
       "slate": "5 自治体それぞれの施設の案内画面を並べる",
       "caption": "5 つの自治体。それぞれの資料から、それぞれの場所へ。\nFive municipalities, each from its own documents.",
       "narration_ja": "それぞれの自治体の資料から、それぞれの場所の案内を。",
-      "narration_en": "Each from its own municipality's documents, for its own place."
+      "narration_en": "Each from its own municipality's documents, for its own place.",
+      "reading_ja": "それぞれの じちたいの しりょうから、それぞれの ばしょの あんないを"
     },
     {
       "cut": "8",
@@ -155,16 +165,9 @@
       "src": "../renders/cut08.mp4",
       "screens": "alert",
       "slate": "寄り 3 連: 柱 → 下がり壁 → 壁面 9:16（各 5 s・正対・ゆっくり押し込み）",
-      "narration_ja": "柱も、壁も、通路の上のスクリーンも、同じ警報を同時に出します。近づくと、出典が読めます。",
-      "narration_en": "Columns, walls and the screen over the passage show the same warning at once. Step closer and the sources are readable."
-    },
-    {
-      "cut": "8d",
-      "kind": "3d",
-      "seconds": 5,
-      "src": "../renders/cut08d.mp4",
-      "screens": "alert",
-      "slate": "柱の寄りから引いて右へパン: 柱・下がり壁・壁面 9:16 が 1 フレームに（wide-a）"
+      "narration_ja": "柱も、壁も、通路の上のスクリーンも、同じ警報を同時に出します。近づくと、気象庁の発表時刻と自治体名まで読めます。",
+      "narration_en": "Columns, walls and the screen over the passage show the same warning at once. Step closer and you can read the JMA issue time and the municipality.",
+      "reading_ja": "はしらも、かべも、つうろの うえの スクリーンも、おなじ けいほうを どうじに だします。ちかづくと、きしょうちょうの はっぴょうじこくと じちたいめいまで よめます"
     },
     {
       "cut": "9",
@@ -172,19 +175,21 @@
       "seconds": 10,
       "src": "../renders/cut09.mp4",
       "slate": "3D ヒーロー画角の 4 画面が Lv5 secure-now（look 確定後に cut09 として作る）\n右下に examples/minimal-cms の収録を小窓で重ねる（webhook ログ 2〜3 行 → PNG 表示）",
-      "title": "どの画面にも\nAny screen.",
+      "title": "どのスクリーンにも\nAny screen.",
       "subtitle": "github.com/rettuce/evac-layer",
-      "narration_ja": "フィードを受け取れれば、どの CMS でも。どの画面にも。",
-      "narration_en": "Any CMS that can read the feed. Any screen."
+      "narration_ja": "フィードを受け取れれば、どのサイネージでも。どのスクリーンにも。",
+      "narration_en": "Any signage system that can read the feed. Any screen.",
+      "reading_ja": "フィードを うけとれれば、どの サイネージでも。どの スクリーンにも"
     },
     {
       "cut": "10",
       "kind": "capture",
       "seconds": 8,
-      "narration_ja": "EVAC LAYER は、オープンソースで公開しています。",
+      "narration_ja": "EVAC LAYERは、オープンソースで公開しています。",
       "narration_en": "EVAC LAYER is open source.",
       "src": "../capture/out/cut10_endcard.png",
-      "slate": "エンドカード: ロゴ（2 段・黒地用）＋リポ URL。文言は田中判断待ち"
+      "slate": "エンドカード: ロゴ（2 段・黒地用）＋ github.com/rettuce/evac-layer ＋ you@ie3.jp",
+      "reading_ja": "イーバック レイヤーは、オープンソースで こうかいしています"
     }
   ]
 }

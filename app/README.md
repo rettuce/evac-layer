@@ -7,7 +7,7 @@ Nuxt 4 SPA. Screens render offline: fonts are bundled, layouts come from `data/`
 ```sh
 pnpm install
 pnpm -F app dev            # http://127.0.0.1:3150
-node scripts/shot.mjs      # four shapes at native size into app/shots/
+node scripts/shot.mjs      # five shapes at native size into app/shots/ (pillar at half scale)
 ```
 
 ## Tests
@@ -29,7 +29,7 @@ HOST=127.0.0.1 PORT=3160 node app/.output/server/index.mjs
 |---|---|
 | `/screen?shape=16x9&mode=live&municipality=05210&speed=1200` | live replay of the municipality's bulletins over the pre-generated layouts (`&clock=virtual&t=<ms>` for frame-exact recording) |
 | `/screen?shape=16x9&layout=<fixture>` | a fixture from `app/fixtures/` |
-| `/admin` | bulletins, four-shape previews, Verifier result, approval and per-site auto publish |
+| `/admin` | bulletins, previews for every shape, Verifier result, approval and per-site auto publish |
 | `/dashboard` | totals over `data/` (`?clock=virtual&t=<ms>` for the count-up) |
 
 `app/layout/README.md` lists every `/screen` parameter and the data attributes a recorder or Verifier can wait on.

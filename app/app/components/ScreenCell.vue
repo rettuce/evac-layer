@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { headlineParts } from '~~/layout/headline'
+import { shelterNameSegments } from '~~/layout/shelterName'
 import { HEADLINE_STACKED_MAX_LINES, HTML_LANG, LANG_LABEL, LANGUAGES_AT_ONCE, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
 import type { LangKey, LayoutCell } from '~~/layout/types'
 
@@ -11,29 +12,36 @@ const props = defineProps<{
   easyInAction?: boolean
   headlineScale?: number
   pictogramPx: number
+  figmaRules?: boolean
+  distanceBelow?: boolean
   languageIndex: number
   languageStyle: Record<string, string | number>
 }>()
 
 const rotationLangs = computed<LangKey[]>(() => LANGUAGE_ROTATION.filter((key) => props.cell.text[key]))
-const headlineStyle = computed(() =>
-  props.headlineScale && props.headlineScale !== 1 ? { fontSize: `calc(var(--fs-guide) * ${props.headlineScale} * var(--type-scale, 1) * var(--px))` } : undefined,
-)
+const headlineStyle = computed(() => {
+  if (!props.headlineScale || props.headlineScale === 1) return undefined
+  if (props.figmaRules) return { '--headline-scale': props.headlineScale }
+  return { fontSize: `calc(var(--fs-guide) * ${props.headlineScale} * var(--type-scale, 1) * var(--px))` }
+})
 const languageGroups = computed<LangKey[][]>(() => {
   const langs = rotationLangs.value
   return Array.from({ length: Math.ceil(langs.length / LANGUAGES_AT_ONCE) }, (_, i) => langs.slice(i * LANGUAGES_AT_ONCE, (i + 1) * LANGUAGES_AT_ONCE))
 })
 const currentGroup = computed(() => (languageGroups.value.length ? props.languageIndex % languageGroups.value.length : -1))
+// The Figma artboard writes the distance as one word (570m); the earlier layouts keep the space.
+const distanceText = computed(() => (props.cell.distance_m === undefined ? '' : `${props.cell.distance_m}${props.figmaRules ? '' : ' '}m`))
+const headlineMaxLines = computed(() => (props.headlineLimited ? (props.figmaRules ? 1 : HEADLINE_STACKED_MAX_LINES) : undefined))
 </script>
 
 <template>
   <div class="cell-body" :class="[`role-${cell.role}`, { 'is-stacked': cell.role === 'headline' && stackedHeadline }]">
     <template v-if="cell.role === 'headline'">
-      <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" />
+      <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" :fit-ink="figmaRules" />
       <p
         class="t-guide headline-text"
         :style="headlineStyle"
-        :data-max-lines="headlineLimited ? HEADLINE_STACKED_MAX_LINES : undefined"
+        :data-max-lines="headlineMaxLines"
       ><template v-if="headlineParts(cell.text.ja).lead"><span class="keep">{{ headlineParts(cell.text.ja).lead }}</span> {{ headlineParts(cell.text.ja).rest }}</template><template v-else>{{ cell.text.ja }}</template></p>
       <p v-if="levelLabel" class="t-guide level-label">{{ levelLabel }}</p>
     </template>
@@ -41,7 +49,7 @@ const currentGroup = computed(() => (languageGroups.value.length ? props.languag
     <template v-else-if="cell.role === 'action'">
       <p class="t-action action-text">{{ cell.text.ja }}</p>
       <div class="action-sub">
-        <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" align-bottom />
+        <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" :fit-ink="figmaRules" />
         <p v-if="cell.text.ja_easy && easyInAction" class="t-guide" lang="ja" data-lang="ja_easy">{{ cell.text.ja_easy }}</p>
       </div>
     </template>
@@ -52,8 +60,24 @@ const currentGroup = computed(() => (languageGroups.value.length ? props.languag
         :id="cell.pictogram"
         :size-px="pictogramPx"
         :rotation="cell.rotation"
+        :fit-ink="figmaRules"
       />
-      <p class="t-guide">{{ cell.text.ja }}</p>
+      <p class="t-guide direction-text">{{ cell.text.ja }}</p>
+    </template>
+
+    <template v-else-if="cell.role === 'shelter' && figmaRules">
+      <div class="shelter-name">
+        <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" fit-ink />
+        <div class="shelter-text">
+          <p v-if="cell.kind" class="t-fine shelter-kind" :data-kind="cell.kind">
+            {{ SHELTER_KIND_LABEL[cell.kind].ja }}<span lang="en"> / {{ SHELTER_KIND_LABEL[cell.kind].en }}</span>
+          </p>
+          <div class="name-row" :class="{ 'is-stacked': distanceBelow }">
+            <p class="t-guide shelter-name-text" :data-max-lines="SHELTER_NAME_MAX_LINES"><template v-for="(segment, i) in shelterNameSegments(cell.text.ja)" :key="i"><wbr v-if="i > 0">{{ segment }}</template></p>
+            <p v-if="cell.distance_m !== undefined" class="t-guide distance" lang="en">{{ distanceText }}</p>
+          </div>
+        </div>
+      </div>
     </template>
 
     <template v-else-if="cell.role === 'shelter'">
@@ -63,10 +87,10 @@ const currentGroup = computed(() => (languageGroups.value.length ? props.languag
           <p v-if="cell.kind" class="t-fine shelter-kind" :data-kind="cell.kind">
             {{ SHELTER_KIND_LABEL[cell.kind].ja }}<span lang="en"> / {{ SHELTER_KIND_LABEL[cell.kind].en }}</span>
           </p>
-          <p class="t-guide" :data-max-lines="SHELTER_NAME_MAX_LINES">{{ cell.text.ja }}</p>
+          <p class="t-guide" :data-max-lines="SHELTER_NAME_MAX_LINES"><template v-for="(segment, i) in shelterNameSegments(cell.text.ja)" :key="i"><wbr v-if="i > 0">{{ segment }}</template></p>
         </div>
       </div>
-      <p v-if="cell.distance_m !== undefined" class="t-guide distance">{{ cell.distance_m }} m</p>
+      <p v-if="cell.distance_m !== undefined" class="t-guide distance">{{ distanceText }}</p>
     </template>
 
     <template v-else-if="cell.role === 'languages'">
@@ -81,14 +105,14 @@ const currentGroup = computed(() => (languageGroups.value.length ? props.languag
         >
           <div v-for="key in group" :key="key" class="lang-line" :lang="HTML_LANG[key]" :data-lang="key">
             <span class="t-fine lang-label">{{ LANG_LABEL[key] }}</span>
-            <p class="t-guide">{{ cell.text[key] }}</p>
+            <p class="t-guide lang-text">{{ cell.text[key] }}</p>
           </div>
         </div>
       </div>
     </template>
 
     <template v-else>
-      <p class="t-fine">{{ cell.text.ja }}</p>
+      <p class="t-fine source-text">{{ cell.text.ja }}</p>
     </template>
   </div>
 </template>
@@ -179,22 +203,14 @@ p {
   align-items: center;
   gap: calc(24 * var(--px));
 }
-.action-sub {
-  margin-top: auto;
-  align-items: flex-end;
-}
 .shelter-text {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: calc(16 * var(--px));
 }
 .shelter-kind {
   opacity: var(--shelter-kind-opacity);
 }
 .distance {
   flex: none;
-  margin-left: auto;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -210,7 +226,7 @@ p {
   grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
-  gap: calc(16 * var(--px));
+  gap: calc(8 * var(--px));
   visibility: hidden;
 }
 .lang-line {
@@ -223,7 +239,25 @@ p {
 }
 .lang-label {
   flex: none;
-  width: calc(256 * var(--px));
+  min-width: calc(200 * var(--px));
   opacity: var(--lang-label-opacity);
+}
+.is-figma .name-row {
+  display: flex;
+  align-items: baseline;
+  gap: calc(24 * var(--px));
+}
+.is-figma .name-row .distance {
+  margin-left: auto;
+}
+.is-figma .name-row .shelter-name-text {
+  min-width: 0;
+}
+.is-figma .name-row.is-stacked {
+  display: block;
+}
+.is-figma .name-row.is-stacked .distance {
+  text-align: right;
+  margin-top: calc(11 * var(--px));
 }
 </style>

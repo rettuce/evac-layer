@@ -70,6 +70,10 @@ export interface ShapeLayout {
   hero?: { role: Role; px: number }
   bandRoles?: Role[]
   typeScale?: Partial<Record<Role, number>>
+  // Figma-derived layouts: pictogram sizes are ink sizes (PictogramMark fitInk), type sizes are set per element
+  // and the cells follow the rules written on the artboard (see templates.ts PORTRAIT).
+  figma?: boolean
+  type?: Record<string, number>
 }
 
 export type TemplateDef = Record<PanelShape, ShapeLayout[]>

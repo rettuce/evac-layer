@@ -19,7 +19,13 @@ const PLACEHOLDER_NOTE = "文言は仮: Writer は API キー未設定のため�
 
 export interface ReplayEvent { municipality: string; issued_at: string; template?: string; level?: number | null; outcome: "pass" | "fail" | "stopped" | "no-screen"; reason?: string }
 
-export interface ReplaySummary { municipality: string; name: string; bulletins: number; screens: number; pass: number; fail: number; no_screen: number; layouts: number; seconds: number; writer_usd: number }
+export interface ReplaySummary { municipality: string; name: string; bulletins: number; screens: number; pass: number; fail: number; no_screen: number; layouts: number; seconds: number; writer_usd: number; writer_tokens: PromptTokens }
+
+// Prompt tokens split by how they were billed, so a run shows whether the cache breakpoints are being hit.
+export interface PromptTokens { input: number; cache_write: number; cache_read: number }
+export function promptTokens(usage: { input: number; cache_write: number; cache_read: number }[]): PromptTokens {
+  return usage.reduce((a, u) => ({ input: a.input + u.input, cache_write: a.cache_write + u.cache_write, cache_read: a.cache_read + u.cache_read }), { input: 0, cache_write: 0, cache_read: 0 });
+}
 
 export async function runReplay(args: { municipalityId: string; entries: ReplayEntry[]; site: Site; verifier: Verifier; onEvent?: (e: ReplayEvent) => void; persist?: boolean; writer?: { client: Anthropic; model: WriterModel } }): Promise<ReplaySummary> {
   const persist = args.persist ?? true;
@@ -115,5 +121,5 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   const indexFile = path.join(LAYOUTS_DIR, municipality.id, "index.json");
   if (persist) fs.mkdirSync(path.dirname(indexFile), { recursive: true });
   if (persist) fs.writeFileSync(indexFile, JSON.stringify({ municipality: municipality.id, name: municipality.name, site: args.site.id, writer_note: notes, entries: index }, null, 2) + "\n");
-  return { municipality: municipality.id, name: municipality.name, bulletins: args.entries.length, screens: pass + fail, pass, fail, no_screen: noScreen, layouts, seconds: (Date.now() - t0) / 1000, writer_usd: writerUsage.reduce((n, u) => n + u.usd, 0) };
+  return { municipality: municipality.id, name: municipality.name, bulletins: args.entries.length, screens: pass + fail, pass, fail, no_screen: noScreen, layouts, seconds: (Date.now() - t0) / 1000, writer_usd: writerUsage.reduce((n, u) => n + u.usd, 0), writer_tokens: promptTokens(writerUsage) };
 }

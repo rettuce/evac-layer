@@ -49,8 +49,9 @@ const [room, crops] = await Promise.all([loadRoom(`${import.meta.env.BASE_URL}ro
 scene.add(room.scene)
 applyRenderMode(room, INITIAL.mode)
 
-// The four views the demo is judged on (司令官 S-4 v2); the glb still carries every still camera.
-const SHOWN_CAMERAS: Record<string, string> = { hero: 'hero', 'wall-final': 'wall-final', 'col-final': 'col-final', 'col-45-eye-35': 'col45-corner' }
+// The four views the demo is judged on (田中 2026-11-05: hero, the wall, the headwall ribbon as in demo cut 8,
+// the column); the glb still carries every still camera.
+const SHOWN_CAMERAS: Record<string, string> = { hero: 'hero', 'wall-final': 'wall-final', 'rib-final': 'rib-final', 'col-final': 'col-final' }
 const presets = presetsFromGltf(room.cameras)
   .filter((preset) => preset.name in SHOWN_CAMERAS)
   .map((preset) => ({ ...preset, name: SHOWN_CAMERAS[preset.name]! }))

@@ -13,7 +13,7 @@ export const STACKED_BAND_MIN_PX = 200
 
 const LANDSCAPE: ShapeLayout = {
   id: 'split',
-  columns: [M, '1fr', G, '1fr', M],
+  columns: [M, '5fr', G, '4fr', M],
   rows: [BAND, M, '1fr', G, '1fr', G, 'auto', SOURCE_GAP, 'auto', FOOT],
   areas: [
     'headline headline headline headline headline',
@@ -31,7 +31,49 @@ const LANDSCAPE: ShapeLayout = {
   pictogramPx: { headline: 112, action: 184, direction: 224, shelter: SHELTER_PICTOGRAM_PX },
 }
 
+// 9:16 is 田中's Figma artboard (2026-11-04, file H213MoFcJtIZ96s6qdmBZ8 node 3212:5, 1080 × 1920): one column
+// from x 48 to 1043, the band 200, and the blocks placed so that every pictogram's ink and every text box start
+// on x 48. Row gaps are the measured distances between the ink of one block and the box of the next; the source
+// is anchored to the foot and the languages block takes the room that is left.
+// Two steps written on the artboard's rules: a name that wraps at 90 is set at 72; a stack that still does not
+// fit the frame (five language pairs reserve their tallest) sets the languages at 56.
+const FIGMA_PORTRAIT_TYPE = { headline: 76, level: 66, action: 150, direction: 120, shelter: 90, shelterNarrow: 72, label: 30, languages: 66, languagesNarrow: 56, source: 30 }
 const PORTRAIT: ShapeLayout = {
+  id: 'figma-stack',
+  columns: [48, '1fr', 37],
+  rows: [200, 26, 'auto', 62, 'auto', 86, 'auto', 101, 'auto', '1fr', 'auto', 29],
+  areas: [
+    'headline headline headline',
+    '. . .',
+    '. action .',
+    '. . .',
+    '. direction .',
+    '. . .',
+    '. shelter .',
+    '. . .',
+    '. languages .',
+    '. . .',
+    '. source .',
+    '. . .',
+  ],
+  required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
+  pictogramPx: { headline: 124, action: 333, direction: 109, shelter: 162 },
+  figma: true,
+  type: FIGMA_PORTRAIT_TYPE,
+}
+
+// The same column without the where-blocks (all-clear, secure-now): the action keeps its pictogram size.
+const PORTRAIT_CLEAR: ShapeLayout = {
+  ...PORTRAIT,
+  id: 'figma-stack-clear',
+  rows: [200, 26, 'auto', 101, 'auto', '1fr', 'auto', 29],
+  areas: ['headline headline headline', '. . .', '. action .', '. . .', '. languages .', '. . .', '. source .', '. . .'],
+  required: ['headline', 'action', 'languages', 'source'],
+  pictogramPx: { headline: 124, action: 333 },
+}
+
+// The portrait layout before the Figma redo; pillar faces still build on it (contract 18:13).
+const PILLAR_FACE_BASE: ShapeLayout = {
   id: 'stack',
   columns: [M, '1fr', M],
   rows: [BAND, M, '1fr', G, 'auto', G, 'auto', G, 'auto', SOURCE_GAP, 'auto', FOOT],
@@ -175,7 +217,6 @@ const CLEAR_SQUARE: ShapeLayout = {
 // Level 5 (secure safety now) is the stage where leaving may itself be dangerous, so the
 // screen drops shelter and direction and gives the whole body to the action.
 const SECURE_LANDSCAPE: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 320 } }
-const SECURE_PORTRAIT: ShapeLayout = { ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 480 } }
 const SECURE_RIBBON: ShapeLayout = { ...CLEAR_RIBBON, id: 'secure-columns', pictogramPx: { headline: 320, action: 384 } }
 const SECURE_SQUARE: ShapeLayout = { ...CLEAR_SQUARE, id: 'secure-square', pictogramPx: { headline: 112, action: 240 } }
 
@@ -188,25 +229,25 @@ function stackedBand(layout: ShapeLayout): ShapeLayout {
 export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   'evac-now': {
     '16x9': [LANDSCAPE],
-    '9x16': [stackedBand(PORTRAIT)],
+    '9x16': [PORTRAIT],
     '32x9': [RIBBON, RIBBON_WIDE_DIRECTION],
     '1x1': [stackedBand(SQUARE)],
   },
   'evac-prepare': {
     '16x9': [requireShelterInsteadOfDirection(LANDSCAPE)],
-    '9x16': [stackedBand(requireShelterInsteadOfDirection(PORTRAIT))],
+    '9x16': [requireShelterInsteadOfDirection(PORTRAIT)],
     '32x9': [requireShelterInsteadOfDirection(RIBBON), requireShelterInsteadOfDirection(RIBBON_WIDE_DIRECTION)],
     '1x1': [stackedBand(requireShelterInsteadOfDirection(SQUARE))],
   },
   'secure-now': {
     '16x9': [SECURE_LANDSCAPE],
-    '9x16': [stackedBand(SECURE_PORTRAIT)],
+    '9x16': [{ ...PORTRAIT_CLEAR, id: 'figma-stack-secure' }],
     '32x9': [SECURE_RIBBON],
     '1x1': [stackedBand(SECURE_SQUARE)],
   },
   'all-clear': {
     '16x9': [CLEAR_STACK],
-    '9x16': [stackedBand(CLEAR_STACK)],
+    '9x16': [PORTRAIT_CLEAR],
     '32x9': [CLEAR_RIBBON],
     '1x1': [stackedBand(CLEAR_SQUARE)],
   },
@@ -276,11 +317,22 @@ export function definedTemplates(): TemplateId[] {
   return (Object.keys(TEMPLATES) as TemplateId[]).sort()
 }
 
+const PILLAR_FACE_LAYOUTS: Partial<Record<TemplateId, ShapeLayout>> = {
+  'evac-now': stackedBand(PILLAR_FACE_BASE),
+  'evac-prepare': stackedBand(requireShelterInsteadOfDirection(PILLAR_FACE_BASE)),
+  'secure-now': stackedBand({ ...CLEAR_STACK, id: 'secure-stack', pictogramPx: { headline: 112, action: 480 } }),
+  'all-clear': stackedBand(CLEAR_STACK),
+}
+
 export function resolveLayout(templateId: TemplateId, shape: Shape, variant = 0): ShapeLayout {
-  const variants = TEMPLATES[templateId]?.[shape === 'pillar' ? PILLAR.faceShape : shape]
+  if (shape === 'pillar') {
+    const face = PILLAR_FACE_LAYOUTS[templateId]
+    if (!face) throw new TemplateNotDefinedError(templateId, shape)
+    return pillarFace(face)
+  }
+  const variants = TEMPLATES[templateId]?.[shape]
   if (!variants?.length) throw new TemplateNotDefinedError(templateId, shape)
-  const layout = variants[variant] ?? variants[0]!
-  return shape === 'pillar' ? pillarFace(layout) : layout
+  return variants[variant] ?? variants[0]!
 }
 
 export function resolveTemplate(templateId: TemplateId, shape: Shape): ResolvedTemplate {

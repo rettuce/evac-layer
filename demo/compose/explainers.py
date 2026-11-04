@@ -27,6 +27,7 @@ SHEET_BACKGROUND = "white"
 STAGE_SECONDS = 2.5
 LOGO = REPO / "docs" / "brand" / "evac-layer-logo-2line-black.svg"
 REPO_URL = "github.com/rettuce/evac-layer"
+CONTACT = "you@ie3.jp"
 LOGO_WIDTH_PX = 760
 DIM_OPACITY = 0.6
 # Zones as drawn by docs/diagrams/system.py: (first column, last column, row) per stage, in reading order.
@@ -120,8 +121,8 @@ def endcard(work):
 @font-face{{font-family:Noto;src:url("{font.as_uri()}")}}
 html,body{{margin:0;width:{WIDTH}px;height:{HEIGHT}px;background:#000;overflow:hidden}}
 body{{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:56px}}
-img{{width:{LOGO_WIDTH_PX}px}}p{{margin:0;color:#b8b8b8;font:30px Noto,sans-serif;letter-spacing:.02em}}
-</style><img src="{LOGO.as_uri()}"><p>{REPO_URL}</p>""", encoding="utf-8")
+img{{width:{LOGO_WIDTH_PX}px}}p{{margin:0;color:#b8b8b8;font:30px/1.6 Noto,sans-serif;letter-spacing:.02em;text-align:center}}
+</style><img src="{LOGO.as_uri()}"><p>{REPO_URL}<br>{CONTACT}</p>""", encoding="utf-8")
     subprocess.run([BRAVE, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
                     f"--window-size={WIDTH},{HEIGHT}", "--force-device-scale-factor=1",
                     f"--screenshot={OUT_DIR / 'cut10_endcard.png'}", page.as_uri()], check=True, capture_output=True)

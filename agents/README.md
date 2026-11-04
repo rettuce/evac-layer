@@ -10,7 +10,7 @@ Reader, Writer, Composer, Verifier, the JMA XML parser and the revision loop. Ty
 | `pnpm -F agents replay --municipality <id> [--summary]` | recorded JMA bulletins that concern a municipality, in issue order, as alert JSON |
 | `pnpm -F agents shelters [id...]` | GSI shelter CSVs → `data/municipalities/<id>.shelters.json` |
 | `pnpm -F agents reader [--dry-run] [--model sonnet\|haiku]` | municipal PDFs → municipality knowledge file (text-layer check, citations, structured outputs) |
-| `pnpm -F agents writer --dry-run --alert <xml>` | the Writer request (live call on Day 2) |
+| `pnpm -F agents writer --dry-run --alert <xml>` | the Writer request, printed without calling the API |
 | `pnpm -F agents compose ...` | alert + municipality + site + Writer output → five layout JSONs (16x9, 9x16, 32x9, 1x1, and pillar, which repeats the 9:16 cells on four faces) |
 | `pnpm -F agents verify --layout <fixture>` | rule-based inspection of the rendered screen |
 | `pnpm -F agents pipeline ...` | compose → verify → revise (≤ 3) → `data/reports/` |
@@ -21,7 +21,7 @@ Reader, Writer, Composer, Verifier, the JMA XML parser and the revision loop. Ty
 
 The long feeds were recorded hourly from 2026-10-11 (20,592 bulletin bodies, 23 days; not redistributed here). `replay` only reads bulletins of the four supported types (VPWW55, VPWW56, VXKOnn, VTSE41); all 703 recorded bulletins of these types parse and validate. No archive of past bulletins exists, so these and the official samples are the only real data the demo can replay. No bulletin is invented or edited. The recording never carried a tsunami warning for any of the five municipalities, so `data/samples/<id>.json` names official JMA sample bulletins (read from `JMA_SAMPLES_DIR`, unmodified) that `replay` adds to the recording: 輪島市 and 吉田町 replay the 2016-09-01 VTSE41 drill series, in which 石川県能登 is under 津波注意報 and then cleared, and 静岡県 is under 大津波警報 and then downgraded to a forecast, which clears the screen with a sea-level caution. A warning screen is taken down only by a bulletin that says the warning ended, as an all-clear or as a downgrade to a forecast; if a later bulletin simply stopped listing the region, the screen would stay up. JMA states clearances explicitly, and no recorded or sample bulletin does otherwise, so this case is documented rather than handled. Drill bulletins (Control/Status 訓練) are shown with the drill word opening the headline in every language and the action in every language but Japanese.
 
-Bulletins that concern the demo municipalities (city code in the body, or the municipality's tsunami forecast region):
+Bulletins that concern the three municipalities surveyed first (city code in the body, or the municipality's tsunami forecast region):
 
 | Code | 輪島市 17204 | 吉田町 22424 | 横浜市 14100 |
 |---|---|---|---|
@@ -33,7 +33,9 @@ Bulletins that concern the demo municipalities (city code in the body, or the mu
 | VPWW58 / VPWW59 / VPWW61 | 22 / 12 / 21 | 19 / 16 / 10 | 25 / 18 / 11 |
 | VPHW50 / VPHW51 | 4 / 4 | 0 / 0 | 0 / 0 |
 
-Highest level for the municipality in the replayable bulletins: 輪島市 level 3 (大雨 2026-10-20 05:00 and 10-21 12:15; 土砂災害 10-21 13:04), 吉田町 level 2 (大雨 10-20 09:55), 横浜市 none (土砂災害 bulletins list the city with no warning in force). Nationally the recording also holds level 4 landslide warnings (18 VPWW56) and level 5 flood special warnings (3 VXKO55), none for these three municipalities.
+由利本荘市 05210 and 柏崎市 15205 were added on Day 2 and 3. Of the four replayable types, 由利本荘市 has VPWW55 20, VPWW56 33 and VXKO55 9 (the 子吉川 flood sequence of 2026-10-21), and 柏崎市 VPWW55 30 and VPWW56 44 (`data/layouts/<id>/index.json`); the transition-format counts were not recorded for them.
+
+Highest level for the municipality in the replayable bulletins: 由利本荘市 level 5 (子吉川 氾濫特別警報 2026-10-21 19:45, 20:15 and 21:15), 柏崎市 level 4 (土砂災害 10-31 16:53 and 18:39), 輪島市 level 3 (大雨 2026-10-20 05:00 and 10-21 12:15; 土砂災害 10-21 13:04), 吉田町 level 2 in the recording (大雨 10-20 09:55) and display level 4 from the official sample 大津波警報, 横浜市 none (土砂災害 bulletins list the city with no warning in force). Nationally the recording also holds level 4 landslide warnings (18 VPWW56) and level 5 flood special warnings (3 VXKO55), none for these three municipalities.
 
 ### Reader runs (2026-11-02, first live run)
 
@@ -58,6 +60,6 @@ Haiku was 30× cheaper on 輪島市 but kept 19 of the ~110 listed facilities an
 
 **An all-clear for something never shown.** The first fan-out over the recorded feed produced nine all-clear screens out of 22 for advisories that had never been displayed (for example a Level 2 heavy-rain advisory lifted on 10-16). The Composer is stateless per bulletin, so the replay keeps, per hazard, whether a screen is showing, and an all-clear appears only after one was.
 
-**A pictogram that said something else than the text.** The Vision Verifier (`--verifier vision`: Sonnet looks at each rendered shape with the bulletin beside it) found 25 action pictograms that contradicted the screen in its first pass over 由利本荘市 and 輪島市 (go_higher on an all-clear, directions_run on a level 3 warning), all Composer defects. After that fix, a second pass found three where the text and pictogram still disagreed (「浸水に警戒」 under a rain cloud, 「川の増水に注意」 under the "safe here" shield): the Composer picked the pictogram while the Writer wrote the text without knowing it. The action pictogram now shows only the action (all-clear → safe_here, tsunami and level 5 → go_higher, otherwise directions_run), the Writer is given its meaning, and an action-cell mismatch goes back to the Writer. The Writer then borrowed 高齢者等避難, the name of an order only a municipality issues, so a lint keeps those names out of the action. Nine passes (five on four shapes, four with the pillar) cost $5.17 in Vision checks; findings are kept in `data/verifier-findings/`.
+**A pictogram that said something else than the text.** The Vision Verifier (`--verifier vision`: Sonnet looks at each rendered shape with the bulletin beside it) found 25 action pictograms that contradicted the screen in its first pass over 由利本荘市 and 輪島市 (go_higher on an all-clear, directions_run on a level 3 warning), all Composer defects. After that fix, a second pass found three where the text and pictogram still disagreed (「浸水に警戒」 under a rain cloud, 「川の増水に注意」 under the "safe here" shield): the Composer picked the pictogram while the Writer wrote the text without knowing it. The action pictogram now shows only the action (all-clear → safe_here, tsunami and level 5 → go_higher, otherwise directions_run), the Writer is given its meaning, and an action-cell mismatch goes back to the Writer. The Writer then borrowed 高齢者等避難, the name of an order only a municipality issues, so a lint keeps those names out of the action. Nineteen runs (2026-11-02 to 11-05) cost $11.34 in Vision checks; findings of the first five are kept in `data/verifier-findings/`, the run-by-run table is in `docs/evaluation.md`.
 
 The recorded feed also held status words absent from the official samples (警報から注意報, 危険警報から注意報); the parser stopped on them, and only the two words that actually occur were added.

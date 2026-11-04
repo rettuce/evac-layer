@@ -16,4 +16,4 @@ PNGs are 2000 px wide with a transparent background. Keep clear space of at leas
 - `evac-layer-icon-black.png` / `evac-layer-icon-white.png` — app icon, 1024×1024: three stacked outline diamonds, a running figure in the top one. Monochrome, stroke 40 px at 1024.
 - `evac-layer-lockup-black.png` / `evac-layer-lockup-white.png` — icon + wordmark (Public Sans Bold, +30% tracking), 2380×448. Used at the top of the project README.
 - SVG masters: `evac-layer-icon-{black,white}.svg`, `evac-layer-lockup-{black,white}.svg` (same geometry; step 126 px between the diamonds at 1024).
-- "black" / "white" name the background. Design by Yo Tanaka; wordmark set in Public Sans (OFL, see `OFL-PublicSans.txt`).
+- "black" / "white" name the background. Design by You Tanaka; wordmark set in Public Sans (OFL, see `OFL-PublicSans.txt`).

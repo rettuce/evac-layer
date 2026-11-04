@@ -69,15 +69,19 @@ def write_narration(windows, out):
         "そのカットの開始から次にナレーションのあるカットの開始までを「使える秒数」とし、上限の字数を示す。"
         "置いたファイルは `mix_audio.py` がそのカットの開始秒に載せる。",
         "",
-        "| ファイル名 | 読み上げ文 | 使える秒数 | 字数／上限 |",
-        "|---|---|---|---|",
+        "| ファイル名 | 読み上げ文 | 使える秒数 | 字数／上限 | 読み方 |",
+        "|---|---|---|---|---|",
     ]
     for start, window, seg in windows:
         text = seg["narration_ja"]
         limit = int(window * CHARS_PER_SECOND)
         mark = "" if spoken_length(text) <= limit else "（超過）"
         lines.append(f"| `narration/{narration_filename(seg['cut'])}` | {text} | {window:.0f} s（{start:.0f} s から） "
-                     f"| {spoken_length(text)}／{limit}{mark} |")
+                     f"| {spoken_length(text)}／{limit}{mark} | {seg.get('reading_ja', '')} |")
+    alternates = [(seg, seg["narration_ja_alt"]) for _, _, seg in windows if seg.get("narration_ja_alt")]
+    if alternates:
+        lines += ["", "## 別案（録音時に両方読んで選ぶ）", ""]
+        lines += [f"- {seg['cut']}: {alt}（{spoken_length(alt)} 字）" for seg, alt in alternates]
     lines += ["", "## 英訳（字幕用）", ""]
     lines += [f"- {seg['cut']}: {seg['narration_en']}" for _, _, seg in windows]
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")

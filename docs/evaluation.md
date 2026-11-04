@@ -1,6 +1,6 @@
 # Evaluation
 
-Numbers from the pipeline runs of 2026-11-02 over the recorded JMA feed (2026-10-11 to 11-02) for five municipalities. Every figure below comes from files in this repository or from the fan-out console output of that run; where a figure was not recorded, the table says **not measured** instead of estimating it.
+Numbers from the pipeline runs of 2026-11-02 to 11-05 over the recorded JMA feed (2026-10-11 to 11-02) for five municipalities. Every figure below comes from files in this repository or from the fan-out console output of that run; where a figure was not recorded, the table says **not measured** instead of estimating it.
 
 ## Screens produced
 
@@ -12,7 +12,7 @@ Numbers from the pipeline runs of 2026-11-02 over the recorded JMA feed (2026-10
 | 吉田町 22424 | 23 (20 recorded + 3 official JMA samples) | 3 (大津波警報 ×2 and its all-clear, all from the samples) | 15 | highest recorded level was 2 |
 | 横浜市 14100 | 5 | 0 | 0 | no warning in force for the city |
 
-All 16 screens pass the static, browser and Vision checks on all five shapes (16:9, 9:16, 32:9, 1:1, pillar).
+All 22 screens pass the static, browser and Vision checks on all five shapes (16:9, 9:16, 32:9, 1:1, pillar).
 
 ## Verifier findings per run
 
@@ -38,6 +38,7 @@ A finding is one check failing on one shape of one screen, on the first attempt.
 | 16 | 22424, 17204 | 12 | 5 | 0 | — | 吉田町 replays the same drill series (静岡県 under 大津波警報): two display-level-4 screens; the drill word now opens the text in every language and the all-clear keeps "safe now"; 輪島's three drill screens rewritten to the rule; JMA's English warning names given to the Writer. Two passes (the first reused the cached 輪島 text, which already satisfied the position check), 125 checks in all |
 | 17 | 22424 | 3 | 5 | 0 | — | a region downgraded from a warning to 津波予報（若干の海面変動） now gets an all-clear with a sea-level caution instead of leaving the warning screen up (found through the samples, see FINDINGS); 吉田町's 09:55 bulletin became its third screen on the first attempt |
 | 18 | 22424 | 3 | 5 | 0 | — | the caution all-clear's action pictogram is safe_here again (the action pictogram shows the action only; the hazard is the headline's); Writer text reused from cache |
+| 19 | 15205 | 3 | 5 | 0 | — | prompt caching: breakpoints after the Writer's system prompt and municipality block and after the Vision Verifier's system prompt; 柏崎 regenerated twice to measure (Writer rewritten once, Vision twice) |
 
 Every finding in runs 1 and 2 was a real defect: the Composer or the renderer was changed, and the next run no longer reported it (the `fix` field in each findings file). The overflows in runs 3 and 4 were the renderer's header bar; once it was fixed, run 5 passed every screen on the first attempt without calling the Writer.
 
@@ -80,10 +81,12 @@ From `agents/README.md` (Reader runs, 2026-11-02):
 
 | | Value | How |
 |---|---|---|
-| Vision, per check (one shape of one screen) | $0.0111 | $11.078 over 959 checks, runs 1–18 |
-| Writer, per bulletin, one call, ten languages | $0.05–$0.20 | run 12, 16 bulletins, Opus 5.5 (`data/writer/`, $1.462 in all) |
+| Vision, per check (one shape of one screen) | $0.0111 | $11.341 over 989 checks, runs 1–19 |
+| Writer, per bulletin, one call, ten languages | $0.05–$0.20 | run 12, 16 bulletins, Opus 5.5 (`data/writer/`, $1.462 in all), before prompt caching |
+| Writer, per bulletin, with the municipality block cached | $0.06 (first call of a municipality and hazard $0.23) | run 19, 柏崎: 35,675 of 36,376 prompt tokens read from cache on the 2nd and 3rd call; three calls $0.353 against $0.576 uncached (−39 %; −68 % per call at steady state) |
+| Vision, per check, with the system prompt cached | $0.0087 | run 19: 1,510 of 5,082 prompt tokens per check read from cache (30 %); the screen images are new every time. 15 checks $0.130 against $0.157–$0.160 before (−17 %) |
 | New screen, steady state (Writer once + Vision on 5 shapes) | $0.245 | 柏崎市 in run 12: Writer $0.576 + Vision $0.159 over 3 screens (six languages: $0.222) |
-| Development total so far | about $20.69 | Reader $2.881 + Writer about $6.73 + Vision $11.078 |
-| Development total per screen shown | about $0.94 | over the 22 screens, including every re-run while the defects above were fixed |
+| Development total so far | about $21.30 | Reader $2.881 + Writer about $7.08 + Vision $11.341 |
+| Development total per screen shown | about $0.97 | over the 22 screens, including every re-run while the defects above were fixed |
 
-The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596, $0.506, $1.462 for the ten-language regeneration $0.577 for the three sample tsunami bulletins $0.219 for their drill-marked headlines $0.272 for the drill word in their language band $0.835 for 吉田町's 大津波警報 screens and the prefix rule and $0.095 for its all-clear) comes from the fan-out output and the agents seat log. Per-call Writer usage is kept only for the latest generation of each bulletin (`data/writer/`, $1.462 now), so the earlier part is not verifiable from the repository alone.
+The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596, $0.506, $1.462 for the ten-language regeneration $0.577 for the three sample tsunami bulletins $0.219 for their drill-marked headlines $0.272 for the drill word in their language band $0.835 for 吉田町's 大津波警報 screens and the prefix rule $0.095 for its all-clear and $0.353 for the caching measurement) comes from the fan-out output and the agents seat log. Per-call Writer usage is kept only for the latest generation of each bulletin (`data/writer/`, $1.462 now), so the earlier part is not verifiable from the repository alone.

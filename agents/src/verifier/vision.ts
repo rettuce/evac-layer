@@ -37,6 +37,9 @@ three_second_note には、前提知識のない人が 3 秒で何をすれば�
 const LANGUAGES = "languages セルの言語と並び順: ja_easy（やさしい日本語）, en, zh_hans, zh_hant, ko, th（タイ文字）, vi（ベトナム語・ダイアクリティカル付き）, fil（フィリピン語）, id（インドネシア語）。これらの文字が見えるのは正常で、判定対象は意味の矛盾だけ";
 const PICTOGRAMS = "図記号 ID: tsunami=津波, flood=洪水・浸水, landslide=土砂災害, heavy_rain=大雨, storm_surge=高潮, earthquake=地震, go_higher=高い所・上の階へ, directions_run=避難する（走る人）, arrow_forward=方向（rotation で向き）, emergency_evacuation_site=指定緊急避難場所, evacuation_shelter=指定避難所, safe_here=ここは安全";
 
+// Everything stable goes in one system block so the cache breakpoint covers it; the bulletin and the images vary.
+export const VISION_VERIFY_SYSTEM = [SYSTEM, PICTOGRAMS, LANGUAGES].join("\n\n");
+
 export interface VisionVerdict { findings: Finding[]; note: string; usage: CallUsage }
 
 export async function visionCheck(args: {
@@ -59,13 +62,13 @@ export async function visionCheck(args: {
   const msg = await args.client.messages.stream({
     model: MODELS[args.model].id,
     max_tokens: 8_000,
-    system: SYSTEM,
+    system: [{ type: "text", text: VISION_VERIFY_SYSTEM, cache_control: { type: "ephemeral" as const } }],
     output_config: { effort: "medium", format: { type: "json_schema", schema: VISION_VERIFY_SCHEMA as unknown as Record<string, unknown> } },
     messages: [{
       role: "user",
       content: [
         ...args.pngs.map((data) => ({ type: "image" as const, source: { type: "base64" as const, media_type: "image/png" as const, data } })),
-        { type: "text" as const, text: [`画面画像は ${args.pngs.length} 枚（横長の画面は左右に分割）。`, PICTOGRAMS, LANGUAGES, `## 電文の要点\n${JSON.stringify(bulletin, null, 1)}`, `## レイアウト JSON（要点）\n${JSON.stringify(layoutBrief, null, 1)}`].join("\n\n") },
+        { type: "text" as const, text: [`画面画像は ${args.pngs.length} 枚（横長の画面は左右に分割）。`, `## 電文の要点\n${JSON.stringify(bulletin, null, 1)}`, `## レイアウト JSON（要点）\n${JSON.stringify(layoutBrief, null, 1)}`].join("\n\n") },
       ],
     }],
   }).finalMessage();
