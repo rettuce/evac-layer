@@ -25,6 +25,12 @@ const DOT_LUMA_DEEP = 1.0
 const DREST = 0.5
 const SPLIT_GAIN = 0.16
 const MIN_CELL_PX = 13
+// The fragment shader lights every pixel within 0.6 px of a border and fades to 1.3 px, on both sides of
+// the shared edge; one stroke this wide carries the same ink.
+const LINE_WIDTH_PX = 1.6
+// The reference's pixel sizes (smallest cell, dot radius, line width) are read at a 540 px short side: twice their size at 1080p, the closest match to the gallery
+// capture; on a taller canvas they scale with the short side, so the picture keeps its weight (2026-11-05).
+const REFERENCE_SHORT_SIDE = 540
 const GROUND = 'rgb(8 8 8)'
 const ACT_REST = 0.5
 const ACT_HI = 0.88
@@ -119,6 +125,7 @@ interface Walk {
   focusB: [number, number]
   act: number[]
   S: number
+  minCell: number
   view: AmbientRect
   halfW: number
   halfH: number
@@ -134,7 +141,7 @@ function walk(k: Walk, ox: number, oy: number, sw: number, sh: number, depth: nu
   const px = k.halfW + ox * k.S
   const py = k.halfH + oy * k.S
   if (!overlaps(px, py, sw * k.S, sh * k.S, k.view)) return
-  if (depth < MAX_DEPTH && Math.min(sw, sh) * k.S >= MIN_CELL_PX) {
+  if (depth < MAX_DEPTH && Math.min(sw, sh) * k.S >= k.minCell) {
     const cx = ox + 0.5 * sw
     const cy = oy + 0.5 * sh
     const n = fbmT(cx * FREQ + k.drift[0], cy * FREQ + k.drift[1], k.t)
@@ -148,8 +155,8 @@ function walk(k: Walk, ox: number, oy: number, sw: number, sh: number, depth: nu
       let dy = 2
       if (pat >= 0.3 && pat < 0.6) dx = 3
       else if (pat >= 0.6) dy = 3
-      if ((sw / dx) * k.S < MIN_CELL_PX) dx = 2
-      if ((sh / dy) * k.S < MIN_CELL_PX) dy = 2
+      if ((sw / dx) * k.S < k.minCell) dx = 2
+      if ((sh / dy) * k.S < k.minCell) dy = 2
       const subW = sw / dx
       const subH = sh / dy
       for (let j = 0; j < dy; j++) for (let i = 0; i < dx; i++) walk(k, ox + i * subW, oy + j * subH, subW, subH, depth + 1)
@@ -162,6 +169,7 @@ function walk(k: Walk, ox: number, oy: number, sw: number, sh: number, depth: nu
 function render(ctx: CanvasRenderingContext2D, t: number, seed: number, _shape: Shape, frame: AmbientFrame): void {
   const time = t / 1000
   const sd = seed % 1000
+  const px = Math.max(1, Math.min(frame.width, frame.height) / REFERENCE_SHORT_SIDE)
   const S = Math.min(frame.width, frame.height) / GRID
   const halfW = frame.width / 2
   const halfH = frame.height / 2
@@ -187,6 +195,7 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, _shape: 
     focusB: placeFocus(time / FOCUS2_PERIOD_RATIO, sd, gridW, gridH, FOCUS2_PHASE, FOCUS2_WOBBLE_OFFSET),
     act,
     S,
+    minCell: MIN_CELL_PX * px,
     view: frame.view,
     halfW,
     halfH,
@@ -198,7 +207,7 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, _shape: 
   const j1 = Math.ceil((frame.view.y + frame.view.height - halfH) / S) + 1
   for (let j = j0; j < j1; j++) for (let i = i0; i < i1; i++) walk(k, i, j, 1, 1, 0)
   paper(ctx, frame, GROUND)
-  const reachable = Math.min(MAX_DEPTH, Math.max(1, Math.floor(Math.log2(S / MIN_CELL_PX)) + 1))
+  const reachable = Math.min(MAX_DEPTH, Math.max(1, Math.floor(Math.log2(S / k.minCell)) + 1))
   const byLuma = new Map<number, Path2D>()
   const dots = new Map<number, Path2D>()
   for (const leaf of k.leaves) {
@@ -206,20 +215,21 @@ function render(ctx: CanvasRenderingContext2D, t: number, seed: number, _shape: 
     const lineLuma = Math.round(255 * (LINE_LUMA_ROOT + (LINE_LUMA_DEEP - LINE_LUMA_ROOT) * depthT) * (1 + BIRTH_LINE_GAIN * pop))
     let rules = byLuma.get(lineLuma)
     if (!rules) byLuma.set(lineLuma, (rules = new Path2D()))
-    rules.rect(leaf.x + 0.3, leaf.y + 0.3, leaf.w - 0.6, leaf.h - 0.6)
+    rules.rect(leaf.x, leaf.y, leaf.w, leaf.h)
     const minDim = Math.min(leaf.w, leaf.h)
     const cx = leaf.x + leaf.w / 2
     const cy = leaf.y + leaf.h / 2
     const pulse = 1 + 0.1 * Math.sin(time * 0.8 + ((cx - halfW) / S) * 1.7 + ((cy - halfH) / S) * 2.1)
-    const small = 1 - clamp01((minDim - 6) / 58)
-    const r = Math.min(7, Math.max(1.45, 1.45 + minDim * 0.016)) * pulse * (1 + pop * (0.22 + 0.55 * small))
+    const minDimRef = minDim / px
+    const small = 1 - clamp01((minDimRef - 6) / 58)
+    const r = Math.min(7, Math.max(1.45, 1.45 + minDimRef * 0.016)) * px * pulse * (1 + pop * (0.22 + 0.55 * small))
     const dotLuma = Math.round(255 * (DOT_LUMA_SHALLOW + (DOT_LUMA_DEEP - DOT_LUMA_SHALLOW) * depthT))
     let path = dots.get(dotLuma)
     if (!path) dots.set(dotLuma, (path = new Path2D()))
     path.moveTo(cx + r, cy)
     path.arc(cx, cy, r, 0, Math.PI * 2)
   }
-  ctx.lineWidth = 0.6
+  ctx.lineWidth = LINE_WIDTH_PX * px
   for (const [luma, path] of byLuma) {
     ctx.strokeStyle = `rgb(${luma} ${luma} ${luma})`
     ctx.stroke(path)
