@@ -39,7 +39,8 @@ export const TYPE_PX: Record<TypeStep, number> = {
 }
 
 export const HEADLINE_STACKED_MAX_LINES = 2
-export const HEADLINE_STEP_DOWN = 0.85
+// Headline and facility name shrink to the same floor (司令官 2026-11-05).
+export const HEADLINE_STEP_DOWN = 0.8
 // A facility name that wraps is set one step smaller first (the 9:16 artboard's 90 → 72).
 export const SHELTER_STEP_DOWN = 0.8
 
