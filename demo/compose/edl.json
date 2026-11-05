@@ -64,7 +64,7 @@
       "telop_en": "EVAC LAYER",
       "narration_ja": "EVAC LAYER は、いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステムです。",
       "narration_en": "EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.",
-      "reading_ja": "イーヴァク レイヤーは、いま ある きぞんの サイネージに、さいがいじの きんきゅうあんないの レイヤーを じどうで ついかする システムです"
+      "reading_ja": "エヴァク レイヤーは、いま ある きぞんの サイネージに、さいがいじの きんきゅうあんないの レイヤーを じどうで ついかする システムです"
     },
     {
       "kind": "3d",
@@ -205,7 +205,7 @@
       "subtitle_en": "EVAC LAYER is open source.",
       "narration_ja": "EVAC LAYERは、オープンソースで公開しています。",
       "narration_en": "EVAC LAYER is open source.",
-      "reading_ja": "イーヴァク レイヤーは、オープンソースで こうかい しています"
+      "reading_ja": "エヴァク レイヤーは、オープンソースで こうかい しています"
     },
     {
       "cut": "end",
