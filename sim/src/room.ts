@@ -21,7 +21,7 @@ export interface Room {
 }
 
 const EDGE_THRESHOLD_DEG = 20
-const wireMaterial = new LineBasicMaterial({ color: 0xffffff })
+const wireMaterial = new LineBasicMaterial({ color: 0xd0d0d0 })
 
 async function loadAo(file: string): Promise<Texture> {
   const texture = await new TextureLoader().loadAsync(`${import.meta.env.BASE_URL}tex/${file}`)
