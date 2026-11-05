@@ -1,6 +1,7 @@
 """A minimal clock-tick bed for the demo, standard library only.
 
 python3 demo/compose/bgm_clock.py --click impulse|noise|lowbit --out <wav>
+python3 demo/compose/bgm_clock.py --voice metal --pattern A|B --out <wav>
 
 A dry click every 0.5 s (a second hand at double speed, 120 BPM), a sub sine pulse every 4 beats and a sparse
 high texture. The bed opens up one step at STEP_AT_S, and goes quiet around every switch SE so the SE stays alone.
@@ -81,6 +82,43 @@ def texture(rng):
             for i in range(n)]
 
 
+def square(freq, ms):
+    n = int(RATE * ms / 1000)
+    return [1.0 if math.sin(2 * math.pi * freq * i / RATE) >= 0 else -1.0 for i in range(n)]
+
+
+LOUD, MID, SOFT = 1.0, 0.55, 0.3
+HIGH, MIDDLE, LOW = GRID_HZ * 288, GRID_HZ * 272, GRID_HZ * 256
+# (eighth-note step in the cycle, pitch, length ms, gain, only after STEP_AT_S). Even steps are the clock's beats.
+METAL_PATTERNS = {
+    "A": (8, [
+        (0, HIGH, 8, LOUD, False), (2, LOW, 5, MID, False), (4, LOW, 5, MID, False), (6, LOW, 5, MID, False),
+        (1, MIDDLE, 3, SOFT, True), (3, MIDDLE, 3, SOFT, True), (5, MIDDLE, 3, SOFT, True), (7, MIDDLE, 3, SOFT, True),
+    ]),
+    "B": (16, [
+        (0, HIGH, 8, LOUD, False), (2, LOW, 5, MID, False), (4, LOW, 3, MID, False), (6, MIDDLE, 5, MID, False),
+        (8, LOW, 5, MID, False), (10, LOW, 3, MID, False), (12, HIGH, 8, LOUD, False), (14, MIDDLE, 5, MID, False),
+        (1, MIDDLE, 3, SOFT, True), (3, MIDDLE, 3, SOFT, True), (5, HIGH, 3, SOFT, True), (7, MIDDLE, 5, MID, True),
+        (9, MIDDLE, 3, SOFT, True), (11, HIGH, 3, SOFT, True), (13, MIDDLE, 3, SOFT, True), (15, MIDDLE, 3, SOFT, True),
+    ]),
+}
+
+
+def render_metal(pattern, se_at, total):
+    buf = array.array("d", bytes(8 * 2 * int(total * RATE)))
+    clear = lambda t: all(abs(t - s) > SE_CLEAR_S for s in se_at)
+    cycle, hits = METAL_PATTERNS[pattern]
+    eighth = BEAT_S / 2
+    sounds = {(freq, ms): square(freq, ms) for _, freq, ms, _, _ in hits}
+    for k in range(int(total / eighth)):
+        t = k * eighth
+        for step, freq, ms, gain, late in hits:
+            if step == k % cycle and clear(t) and (t >= STEP_AT_S or not late):
+                place(buf, t, sounds[(freq, ms)], gain, 0.4 if step % 4 == 0 else 0.6)
+    fade_edges(buf)
+    return buf
+
+
 def place(buf, at_s, sound, gain, pan):
     start = int(round(at_s * RATE))
     left, right = gain * math.cos(pan * math.pi / 2), gain * math.sin(pan * math.pi / 2)
@@ -117,13 +155,17 @@ def render(kind, se_at, total):
             place(buf, t, sub, 0.5 if lifted else 0.35, 0.5)
         if b % 8 == 3 and rng.random() < (0.5 if lifted else 0.25):
             place(buf, t + BEAT_S / 4, texture(rng), 0.12, rng.choice((0.2, 0.8)))
+    fade_edges(buf)
+    return buf
+
+
+def fade_edges(buf):
     fade = int(RATE * 3)
     n = len(buf) // 2
     for i in range(fade):
         g = i / fade
         for k in (2 * i, 2 * i + 1, 2 * (n - 1 - i), 2 * (n - 1 - i) + 1):
             buf[k] *= g
-    return buf
 
 
 def write_wav(buf, out):
@@ -143,12 +185,19 @@ def write_wav(buf, out):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--click", choices=sorted(CLICKS), default="impulse")
+    parser.add_argument("--voice", choices=["layered", "metal"], default="layered",
+                        help="metal: only the 1-bit square click, no sub or texture")
+    parser.add_argument("--pattern", choices=sorted(METAL_PATTERNS), default="A")
     parser.add_argument("--edl", default=str(HERE / "edl.json"))
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
     se_at, total = se_times(args.edl)
-    write_wav(render(args.click, se_at, total), Path(args.out))
-    print(f"BGM {args.click} {total:.0f}s → {args.out} (SE clear at {', '.join(f'{s:.1f}' for s in se_at)} s)")
+    if args.voice == "metal":
+        buf, label = render_metal(args.pattern, se_at, total), f"metal-{args.pattern}"
+    else:
+        buf, label = render(args.click, se_at, total), args.click
+    write_wav(buf, Path(args.out))
+    print(f"BGM {label} {total:.0f}s → {args.out} (SE clear at {', '.join(f'{s:.1f}' for s in se_at)} s)")
 
 
 if __name__ == "__main__":
