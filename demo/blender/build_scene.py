@@ -550,26 +550,51 @@ def column_face_crops(left, top, width, height, seam):
             for k, name in enumerate(COLUMN_FACE_NAMES)}
 
 
+def lower_band_crops(columns, portraits, canvas, band_top):
+    """The columns and the portrait screens side by side under the ribbons, in room order left to right with
+    equal gaps, each centred in the band: two columns share an elevation x (one behind the other), so their
+    windows cannot come from the elevation, and the band has room for all seven only in one row."""
+    width, height = canvas
+    items = sorted(columns + portraits, key=lambda item: (item[1], item[2]))
+    gap = (width - sum(item[3] for item in items)) / (len(items) + 1)
+    if gap < 0:
+        raise SystemExit("CROPS: the columns and portrait screens do not fit side by side on the canvas")
+    boxes = {}
+    x = gap
+    for name, _, _, w, h in items:
+        boxes[name] = (round(x), band_top + (height - band_top - h) // 2, w, h)
+        x += w + gap
+    return boxes
+
+
 def canvas_crops():
-    """Each screen's window on the elevation canvas; a column's LED band is its four faces laid side by side."""
+    """Each screen's window on the elevation canvas; a column's LED band is its four faces laid side by side.
+    The ribbons keep their elevation windows; the columns and portrait screens share the band below them."""
     crops = {}
     shapes = {}
     seam = {}
     faces = {}
-    for i, (x, _) in enumerate(COLUMNS):
-        left, top, width, height = elevation_crop(x, COLUMN_LED_MID_Z, COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z)
-        width = whole_pixels_per_face(width)
-        crops[f"pillar_{i}"] = (left, top, width, height)
+    canvas = elevation_canvas()
+    width, height = SCREENS["32x9"]["size"]
+    ribbon_bottom = 0
+    for i, (center, _) in enumerate(SCREENS["32x9"]["mounts"]):
+        crops[f"32x9_{i}"] = elevation_crop(center.x, center.z, width, height)
+        shapes[f"32x9_{i}"] = "32x9"
+        ribbon_bottom = max(ribbon_bottom, crops[f"32x9_{i}"][1] + crops[f"32x9_{i}"][3])
+    columns = []
+    for i, (x, y) in enumerate(COLUMNS):
+        left, _, strip, band = elevation_crop(x, COLUMN_LED_MID_Z, COLUMN_LED_PERIMETER, COLUMN_LED_TOP_Z - COLUMN_LED_BOTTOM_Z)
+        columns.append((f"pillar_{i}", x, y, whole_pixels_per_face(strip), band))
         shapes[f"pillar_{i}"] = "pillar"
         seam[f"pillar_{i}"] = column_seam_hidden_from_hero(x)
-        faces[f"pillar_{i}"] = column_face_crops(left, top, width, height, seam[f"pillar_{i}"])
-    for shape in ("32x9", "9x16"):
-        width, height = SCREENS[shape]["size"]
-        for i, (center, _) in enumerate(SCREENS[shape]["mounts"]):
-            crops[f"{shape}_{i}"] = elevation_crop(center.x, center.z, width, height)
-            shapes[f"{shape}_{i}"] = shape
-    width, height = elevation_canvas()
-    return {"canvas": [width, height], "crops": {name: list(box) for name, box in crops.items()}, "shapes": shapes, "seam": seam,
+    w9, h9 = SCREENS["9x16"]["size"]
+    portraits = [(f"9x16_{i}", center.x, 0.0, *elevation_crop(center.x, center.z, w9, h9)[2:]) for i, (center, _) in enumerate(SCREENS["9x16"]["mounts"])]
+    for name, *_ in portraits:
+        shapes[name] = "9x16"
+    crops.update(lower_band_crops(columns, portraits, canvas, ribbon_bottom))
+    for name, *_ in columns:
+        faces[name] = column_face_crops(*crops[name], seam[name])
+    return {"canvas": list(canvas), "crops": {name: list(box) for name, box in crops.items()}, "shapes": shapes, "seam": seam,
             "faces": faces}
 
 
