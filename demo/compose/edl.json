@@ -50,7 +50,7 @@
       "narration_en": "The moment a warning arrives, the screen turns into evacuation guidance for where it stands.",
       "narration_from_s": 5.0,
       "reading_ja": "けいほうが とどいた しゅんかん、スクリーンは、そのばしょに あった ひなんあんないに かわります",
-      "ambient_scene": "quad-subdivision"
+      "ambient_scene": "brush-flow"
     },
     {
       "cut": "0b",
@@ -83,7 +83,7 @@
     {
       "kind": "3d",
       "src": "../renders/cut02.mp4",
-      "slate": "平時レイヤーが流れる 4 画面をゆっくりドリー",
+      "slate": "平時レイヤーが流れる 4 画面をゆっくりドリー（v9: もう少し寄った位置から同じ向き・尺）",
       "cut": "2",
       "seconds": 8,
       "screens": "ambient-real",
@@ -141,7 +141,7 @@
       "kind": "3d",
       "src": "../renders/cut05.mp4",
       "screens": "switch",
-      "slate": "平時（etched-streams）4 s → 気象庁 XML を 1200 倍で再生 → 4.0 s に 4 画面が同じフレームで Lv3、11.0 s に Lv4、15.5 s に Lv5",
+      "slate": "平時（ink-bloom）4 s → 気象庁 XML を 1200 倍で再生 → 4.0 s に 4 画面が同じフレームで Lv3、11.0 s に Lv4、15.5 s に Lv5",
       "cut": "5",
       "seconds": 21,
       "narration_ja": "10月21日 由利本荘市で実際に発表された警報データを使い、1200倍の速さでシミュレートしています。警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。",
@@ -157,7 +157,7 @@
           "en": "Alert levels 3, 4 and 5. Every screen switches at the same moment."
         }
       ],
-      "ambient_scene": "etched-streams"
+      "ambient_scene": "ink-bloom"
     },
     {
       "kind": "capture",

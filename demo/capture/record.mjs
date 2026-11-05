@@ -77,11 +77,11 @@ const CUTS = {
   ...MUNICIPALITY_CUTS,
   ambient: { seconds: 12, startMs: 0, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   // Cut 5 opens on 4 s of the calm screen before the 13.1 s level 3 (v9).
-  switch: { seconds: 27, startMs: 9100, query: { ...LIVE, scene: 'etched-streams' }, ready: LIVE_READY, events: LIVE_EVENTS_MS },
+  switch: { seconds: 27, startMs: 9100, query: { ...LIVE, scene: 'ink-bloom' }, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
   // v8 (D-14): the clock runs at real time everywhere except cut 5. The replay clock starts at the window's first
   // bulletin, so a negative start shows the calm screen before it: 15:54:55, then the 15:55 level 3 at 5 s.
-  'switch-real': { seconds: 13, startMs: -5000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [0] },
+  'switch-real': { seconds: 13, startMs: -5000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'brush-flow' }, ready: LIVE_READY, events: [0] },
   'ambient-real': { seconds: 12, startMs: -300000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'brush-flow' }, ready: LIVE_READY, events: [] },
   // Cut 8 (v9) changes bulletin as the camera starts each move: one still alert per bulletin, per shape.
   'alert-lv3': { seconds: 6, startMs: 3000, query: previewOf('05210', 'VXKOii-202610211555-d5ccc7c6b547'), ready: READY_SELECTOR, events: [] },

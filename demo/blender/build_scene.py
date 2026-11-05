@@ -235,6 +235,9 @@ def pan_right_from(name, metres):
 
 
 
+# Cut 2's dolly line: 田中 (v9) wanted it closer than the first -8.6 m, same direction and length.
+CUT02_DOLLY_Y = -6.0
+
 SHOTS = {
     "cut01": {
         "seconds": 10, "screens": "off", "light_scale": 1.0, "lens": CLAY_LENS_MM, "focus": "pillar", "clay": True,
@@ -242,8 +245,8 @@ SHOTS = {
     },
     "cut02": {
         "seconds": 8, "screens": "ambient-real", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "32x9",
-        "path": [(Vector((-0.7, -8.6, EYE_Z)), Vector((-0.7, BACK_WALL_Y, 2.3))),
-                 (Vector((0.7, -8.6, EYE_Z)), Vector((0.7, BACK_WALL_Y, 2.3)))],
+        "path": [(Vector((-0.7, CUT02_DOLLY_Y, EYE_Z)), Vector((-0.7, BACK_WALL_Y, 2.3))),
+                 (Vector((0.7, CUT02_DOLLY_Y, EYE_Z)), Vector((0.7, BACK_WALL_Y, 2.3)))],
     },
     # Cut 0: the switch seen on one column face from a step further back (45 mm, v9), on a real-time clock: 15:54:55 at 0 s, the 0.3 s of black
     # at 5.0 s and the level-3 screen scaling in at 5.3 s.
