@@ -91,3 +91,48 @@ describe('a shelter name is set smaller until it fits on one line', { skip }, ()
     })
   }
 })
+
+// 田中 2026-11-06: 輪島市立港公民館 fits one 16:9 line once the distance beside it takes one step down.
+describe('the distance gives way only to a name that still breaks at its floor', { skip }, () => {
+  let base = ''
+  let child: ChildProcess | undefined
+  let browser: import('puppeteer-core').Browser | undefined
+
+  before(async () => {
+    ;({ base, child } = await startServer({ NUXT_ADMIN_TOKEN: '' }))
+    browser = await puppeteer.launch({ executablePath: CHROME_PATH })
+  })
+  after(async () => {
+    await browser?.close()
+    child?.kill()
+  })
+
+  const CASES: [string, string, Shape, { lines: number; distancePx: number }][] = [
+    ['17204', 'VPWW55-202610200500-e9e69c6c3b73', '16x9', { lines: 1, distancePx: 73 }],
+    [MUNICIPALITY, BULLETIN, '32x9', { lines: 1, distancePx: 150 }],
+  ]
+  for (const [municipality, bulletin, shape, expected] of CASES) {
+    test(`${municipality} ${shape}`, async () => {
+      const [width, height] = SIZES[shape]
+      const page = await browser!.newPage()
+      try {
+        await page.setViewport({ width, height, deviceScaleFactor: 0.25 })
+        const src = encodeURIComponent(`/api/admin/preview-layout?municipality=${municipality}&bulletin=${bulletin}&shape=${shape}`)
+        await page.goto(`${base}/screen?shape=${shape}&clock=virtual&t=14480&src=${src}`, { waitUntil: 'networkidle0' })
+        await page.waitForSelector('.evac-screen[data-ready="1"]', { timeout: READY_MS })
+        const got = await page.evaluate(() => {
+          const el = document.querySelector('.shelter-name-text, .shelter-text > p.t-guide') as HTMLElement
+          const range = document.createRange()
+          range.selectNodeContents(el)
+          return {
+            lines: new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size,
+            distancePx: parseFloat(getComputedStyle(document.querySelector('.distance')!).fontSize),
+          }
+        })
+        assert.deepEqual(got, expected)
+      } finally {
+        await page.close()
+      }
+    })
+  }
+})
