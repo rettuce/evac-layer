@@ -65,10 +65,16 @@ float vnoise3(vec3 p) {
   float n111 = hash3d(i + vec3(1, 1, 1));
   return mix(mix(mix(n000, n100, f.x), mix(n010, n110, f.x), f.y), mix(mix(n001, n101, f.x), mix(n011, n111, f.x), f.y), f.z);
 }
+// One value-noise lattice leaves straight edges and still cells along its lines, where its gradient is zero across
+// them; a second lattice turned 53 degrees fills them in.
+float flowNoise(vec3 p) {
+  vec2 q = mat2(0.6, -0.8, 0.8, 0.6) * p.xy + vec2(17.3, 5.9);
+  return 0.7071 * (vnoise3(p) + vnoise3(vec3(q, p.z + 3.1)));
+}
 vec2 curl(vec3 p) {
   float e = 0.02;
-  float dy = vnoise3(p + vec3(0, e, 0)) - vnoise3(p - vec3(0, e, 0));
-  float dx = vnoise3(p + vec3(e, 0, 0)) - vnoise3(p - vec3(e, 0, 0));
+  float dy = flowNoise(p + vec3(0, e, 0)) - flowNoise(p - vec3(0, e, 0));
+  float dx = flowNoise(p + vec3(e, 0, 0)) - flowNoise(p - vec3(e, 0, 0));
   return vec2(dy, -dx) / (2.0 * e);
 }
 ${RAMP}
@@ -93,8 +99,8 @@ void main() {
   float age = mod(tsec + phase, life);
   float gen = floor((tsec + phase) / life);
   vec2 spawn = vec2(hash1(pid * 3.1 + gen * 17.0 + uSeed), hash1(pid * 5.7 + gen * 23.0 + uSeed * 0.7)) * uCanvas;
-  // |curl| of the value noise reaches 1.5 * sqrt(2), so a particle can travel 2.12 * 60 * 5 s = 636 units from its spawn.
-  float margin = 650.0 * uUnit;
+  // |curl| of flowNoise reaches 0.7071 * 3 * sqrt(2) = 3, so a particle can travel 3 * 60 * 5 s = 900 units from its spawn.
+  float margin = 920.0 * uUnit;
   if (spawn.x < uView.x - margin || spawn.x > uView.x + uView.z + margin || spawn.y < uView.y - margin || spawn.y > uView.y + uView.w + margin) { collapse(); return; }
   float a1 = age - piece * ${TRAIL_PIECE_S};
   float a0 = a1 - ${TRAIL_PIECE_S};
