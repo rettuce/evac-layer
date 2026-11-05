@@ -1,7 +1,7 @@
 # demo v8 オーバーレイ一覧（DaVinci 用・brand 席 B-5・2026-11-05）
 
 Figma: IE3 team「作業」ファイル → ページ「v8 overlays」 https://www.figma.com/design/H213MoFcJtIZ96s6qdmBZ8/?node-id=3244-4
-PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過・1x・Figma MCP の export）。文言の正本は `docs/plan/demo-v8-text.md`（copy 席・2026-11-05）。司令官の指示で cut 0 は置き換え案、cut 5b は 41 字の短縮版、cut 9 は「表示できます」版。
+PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過・1x・Figma MCP の export）。**文言の正本は Figma「v8 overlays」のテキストレイヤー**（2026-11-05 14:3x に田中が直接修正。B-8）。それ以前の正本だった `docs/plan/demo-v8-text.md` との差分は末尾「田中修正の差分」節。
 
 ## 共通の体裁
 
@@ -18,27 +18,27 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 | ファイル | cut | kind | 文言 ja | 文言 en | Figma node |
 |---|---|---|---|---|---|
 | ov-0-subtitle-1.png | 0 | subtitle | 2026.10.21 15:55 子吉川 氾濫警報（警戒レベル3）発表・由利本荘市 | 2026.10.21 15:55 Flood warning issued for the Koyoshi River (Alert Level 3), Yurihonjo | 3244:5 |
-| ov-0b-subtitle-1.png | 0b | subtitle | EVAC LAYER は、いまある既存のサイネージに、／災害時の緊急案内のレイヤーを自動で追加するシステムです。 | EVAC LAYER adds an emergency-guidance layer to the signage a city already has,／automatically, when disaster strikes. | 3244:9 |
+| ov-0b-subtitle-1.png | 0b | subtitle | EVAC LAYER は、いまある既存のサイネージに、／災害時の緊急案内のレイヤーを自動で追加するシステムです。 | EVAC LAYER is a system that automatically adds ／an emergency evacuation guidance layer to existing signage. | 3244:9 |
 | ov-0b-telop-1.png | 0b | telop | EVAC LAYER | EVAC LAYER | 3244:49 |
 | ov-1-subtitle-1.png | 1 | subtitle | 2024.1.1 能登半島地震。／どこへ逃げればよいか判断が難しかった来訪者がいました（上越市の検証） | 1 Jan 2024. The Noto Peninsula earthquake.／Some visitors could not tell where to evacuate (City of Joetsu review) | 3244:13 |
-| ov-2-subtitle-1.png | 2 | subtitle | 私はこれまで駅や街のサイネージシステムを作ってきました。／これらは災害のとき、能動的に情報を発信できませんでした。 | I have built signage systems for stations and streets.／When disaster struck, none of them could speak up on its own. | 3244:17 |
+| ov-2-subtitle-1.png | 2 | subtitle | 私はこれまで駅や街のサイネージシステムを作ってきました。／これらは災害のとき、能動的に情報を発信できませんでした。 | I have previously developed signage systems for stations and city streets.／During disasters, these systems were unable to actively disseminate information. | 3244:17 |
 | ov-2b-telop-1.png | 2b | telop | 街中にスクリーンがあります。／それらは自分の位置関係を知っています。 | Screens are all over the city.／Each one knows where it stands. | 3244:52 |
 | ov-3-subtitle-1.png | 3 | subtitle | 災害の種類と警戒レベル。アイコンと10の言語。／そして、どんな形のスクリーンにも、適切なレイアウトで描きます。 | Hazard types and alert levels. Icons and ten languages.／And for a screen of any shape, a layout that fits. | 3245:4 |
 | ov-4-subtitle-1.png | 4 | subtitle | 避難案内は自動作成され、人が事前承認したものだけが、／警報が届いた瞬間に表示されます。 | Evacuation guidance is generated automatically. Only what a person has approved in advance／is shown, the moment a warning arrives. | 3244:21 |
 | ov-5c-subtitle-1.png | 5c | subtitle | 同じ警報でも、スクリーンの位置が違えば、／避難先も方向も距離も適切に表示されます。 | Same warning, different place.／The shelter, the direction and the distance follow where the screen stands. | 3244:25 |
-| ov-5-subtitle-1.png | 5 | subtitle | 由利本荘市、10月21日の実際に発表された警報データを使い、／1200倍の速さで再生しています。 | Yurihonjo City, October 21.／Warnings actually issued that day, replayed at 1,200 times speed. | 3244:29 |
+| ov-5-subtitle-1.png | 5 | subtitle | 10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシュミレートしています。 | Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed. | 3244:29 |
 | ov-5-subtitle-2.png | 5 | subtitle | 警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。 | Alert levels 3, 4 and 5. Every screen switches at the same moment. | 3244:33 |
 | ov-5b-subtitle-1.png | 5b | subtitle | 何を出すかは、事前に人が確認できます。／承認しておけば、有事に自動で避難案内に切り替わります。 | What to show can be checked in advance.／Approve it once, and the screens switch to evacuation guidance by themselves. | 3244:37 |
-| ov-7m-subtitle-1.png | 7m | subtitle | まずは事前収集した5つの自治体の206本の気象庁の電文から、／110のレイアウトを作成します。 | To begin with, 206 JMA bulletins collected from five municipalities／become 110 layouts. | 3244:41 |
+| ov-7m-subtitle-1.png | 7m | subtitle | まずは半月間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。 | First, we created 110 layouts from 206 Japan Meteorological Agency telegrams ／collected in advance across five municipalities over a half-month period. | 3244:41 |
 | ov-9-telop-1.png | 9 | telop | どのスクリーンにも | Any screen. | 3244:56 |
-| ov-9-subtitle-1.png | 9 | subtitle | 信号を受け取れる仕組みがあれば、どんな場所のどのスクリーンにも、／自動で災害情報を表示できます。 | Anything that can receive the signal can show the disaster information automatically,／in any place, on any screen. | 3244:45 |
+| ov-9-subtitle-1.png | 9 | subtitle | 信号を受け取れる仕組みがあれば、どの場所のどんなスクリーンにも、／自動で災害情報を表示できます。 | If there is a system capable of receiving signals, ／disaster information can be automatically displayed on any screen anywhere. | 3244:45 |
 | ov-10-telop-1.png | 10 | telop | github.com/rettuce/evac-layer／you@ie3.jp | （同左） | 3244:60 |
 | ov-10-subtitle-1.png | 10 | subtitle | EVAC LAYERは、オープンソースで公開しています。 | EVAC LAYER is open source. | 3245:8 |
 | ov-end-logo-1.png | end | logo | （ロゴ lockup run） | — | 3244:64 |
 
 「／」は改行。cut 8 はナレーション・字幕なしのため無し。cut 5 は 25 s のため字幕を 2 枚に分割（切り替え位置は demo 席の overlays-v8.csv に合わせる）。
 
-## 文言の差分メモ（demo-v8-text.md に対して）
+## 文言の差分メモ（B-8 以前の経緯）
 
 - 2026-11-05 田中承認（司令官経由）で cut 4「避難案内」・cut 5「発表」・cut 7m「気象庁の電文／110のレイアウト」に差し替え（copy 席の指摘 1〜3）。英訳は copy 席の確定版
 - cut 5b は短縮版（日本語 46 字・copy 席の英訳）。目安内の 39 字版に変える判断が出たら日英とも差し替える
@@ -46,4 +46,21 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 
 ## 再書き出しの手順
 
-Figma のページ「v8 overlays」で該当フレームの文字を直し、フレームを選択して Export（PNG・1x・設定済み）。ファイル名はフレーム名と同じ。Figma MCP からは `download_assets` で nodeId ごとに取得できる。
+Figma のページ「v8 overlays」が文言の正本。該当フレームの文字を直し、フレームを選択して Export（PNG・1x・設定済み）。ファイル名はフレーム名と同じ。Figma MCP からは `download_assets` で nodeId ごとに取得できる。
+
+## 田中修正の差分（2026-11-05 B-8・旧 = 28ca1ad 時点の本表、新 = Figma）
+
+件数: 8（フレーム 5 枚）。比較は旧表を git から読み、Figma のテキストレイヤーと文字列一致で機械判定。
+
+| フレーム | 言語 | 旧 | 新 |
+|---|---|---|---|
+| ov-0b-subtitle-1 | en | EVAC LAYER adds an emergency-guidance layer to the signage a city already has,／automatically, when disaster strikes. | EVAC LAYER is a system that automatically adds ／an emergency evacuation guidance layer to existing signage. |
+| ov-2-subtitle-1 | en | I have built signage systems for stations and streets.／When disaster struck, none of them could speak up on its own. | I have previously developed signage systems for stations and city streets.／During disasters, these systems were unable to actively disseminate information. |
+| ov-5-subtitle-1 | ja | 由利本荘市、10月21日の実際に発表された警報データを使い、／1200倍の速さで再生しています。 | 10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシュミレートしています。 |
+| ov-5-subtitle-1 | en | Yurihonjo City, October 21.／Warnings actually issued that day, replayed at 1,200 times speed. | Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed. |
+| ov-7m-subtitle-1 | ja | まずは事前収集した5つの自治体の206本の気象庁の電文から、／110のレイアウトを作成します。 | まずは半月間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。 |
+| ov-7m-subtitle-1 | en | To begin with, 206 JMA bulletins collected from five municipalities／become 110 layouts. | First, we created 110 layouts from 206 Japan Meteorological Agency telegrams ／collected in advance across five municipalities over a half-month period. |
+| ov-9-subtitle-1 | ja | 信号を受け取れる仕組みがあれば、どんな場所のどのスクリーンにも、／自動で災害情報を表示できます。 | 信号を受け取れる仕組みがあれば、どの場所のどんなスクリーンにも、／自動で災害情報を表示できます。 |
+| ov-9-subtitle-1 | en | Anything that can receive the signal can show the disaster information automatically,／in any place, on any screen. | If there is a system capable of receiving signals, ／disaster information can be automatically displayed on any screen anywhere. |
+
+英語の 3 行（0b・7m・9）は行末に半角空白が 1 つ入っている（Figma の実テキストのまま。表では見えない）。
