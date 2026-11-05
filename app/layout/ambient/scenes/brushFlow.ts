@@ -8,14 +8,31 @@ import type { AmbientFrame, AmbientScene } from '../types'
 // alive for a few seconds and replaced where it fades. Drawn with WebGL (three, one instanced quad per trail
 // piece); every strand's path is integrated from its spawn point in the vertex shader, so a frame depends
 // on t alone and tiles of one room agree.
-const TRAIL_PIECES = 10
+// The look in one place (D-22 variants are edits of this object).
+const BRUSH = {
+  pieces: 10,
+  steps: 24,
+  particlesPer1080p: 24_000,
+  widthScale: 1,
+  colour: 'two-tone' as 'two-tone' | 'direction' | 'position' | 'direction-position',
+}
+const TRAIL_PIECES = BRUSH.pieces
 const TRAIL_PIECE_S = 0.1
-const PARTICLES_PER_1080P = 24_000
+const PARTICLES_PER_1080P = BRUSH.particlesPer1080p
 const PARTICLES_MAX = 240_000
-const STEPS = 24
+const STEPS = BRUSH.steps
 const GROUND = new THREE.Color(0x0a0a0a)
 const TEAL = [0.16, 0.67, 0.67] as const
 const AMBER = [0.94, 0.59, 0.2] as const
+
+// A continuous ramp teal -> cyan -> violet -> amber for the gradient looks; 'two-tone' is the D-12 mix.
+const RAMP = 'vec3 ramp(float t) { t = fract(t); return mix(mix(vec3(0.10, 0.55, 0.60), vec3(0.30, 0.80, 0.90), smoothstep(0.0, 0.33, t)), mix(vec3(0.62, 0.42, 0.90), vec3(0.96, 0.62, 0.22), smoothstep(0.55, 0.9, t)), smoothstep(0.3, 0.6, t)); }'
+const COLOUR_EXPR = {
+  'two-tone': 'mix(teal, amber, smoothstep(0.1, 0.9, along))',
+  direction: 'ramp(heading * 0.85 + (g.w - 0.5) * 0.1)',
+  position: 'ramp(along * 1.1)',
+  'direction-position': 'ramp(along * 0.7 + heading * 0.45)',
+}[BRUSH.colour]
 
 const VERT = /* glsl */ `
 uniform float uTime;
@@ -54,6 +71,7 @@ vec2 curl(vec3 p) {
   float dx = vnoise3(p + vec3(e, 0, 0)) - vnoise3(p - vec3(e, 0, 0));
   return vec2(dy, -dx) / (2.0 * e);
 }
+${RAMP}
 vec2 advect(vec2 p, float age, float drift, float speed, float scale) {
   float dt = age / float(${STEPS});
   for (int k = 0; k < ${STEPS}; k++) {
@@ -90,7 +108,7 @@ void main() {
   if (len < 0.01) { collapse(); return; }
   vec2 dir = d / len;
   vec2 nrm = vec2(-dir.y, dir.x);
-  float width = mix(1.2, 2.4, g.y) * uUnit;
+  float width = mix(1.2, 2.4, g.y) * ${BRUSH.widthScale.toFixed(3)} * uUnit;
   vec2 world = p0 + d * (position.x + 0.5) + nrm * position.y * width;
   vec2 ndc = ((world - uView.xy) / uView.zw) * 2.0 - 1.0;
   gl_Position = vec4(ndc.x, -ndc.y, 0.0, 1.0);
@@ -101,7 +119,9 @@ void main() {
   vec2 n = world / uCanvas;
   vec3 teal = vec3(${TEAL[0]}, ${TEAL[1]}, ${TEAL[2]});
   vec3 amber = vec3(${AMBER[0]}, ${AMBER[1]}, ${AMBER[2]});
-  vec3 col = mix(teal, amber, smoothstep(0.1, 0.9, n.x * 0.7 + n.y * 0.3 + (g.w - 0.5) * 0.3));
+  float along = n.x * 0.7 + n.y * 0.3 + (g.w - 0.5) * 0.3;
+  float heading = atan(dir.y, dir.x) / 6.2831853 + 0.5;
+  vec3 col = ${COLOUR_EXPR};
   col = mix(col, vec3(0.95, 0.92, 0.85), g.w > 0.95 ? 0.85 : 0.2);
   vColor = col;
 }
