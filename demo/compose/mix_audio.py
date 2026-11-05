@@ -3,7 +3,7 @@
 python3 demo/compose/mix_audio.py --sfx-dir <Adobe Audition SFX folder> [--video demo/renders/evac-layer-demo.mp4]
     [--bgm <wav> | --no-bgm]
 
-Narration is either one 179 s demo/compose/audio/narration.wav, or one take per cut in
+The demo has no narration by default (subtitles and captions carry the words); with --narration it is either one 179 s demo/compose/audio/narration.wav, or one take per cut in
 demo/compose/audio/narration/cutNN.wav (names from narration_filename) placed at that cut's start.
 
 Adobe Audition SFX may be used inside a production but not handed out on their own, so the source WAVs are
@@ -22,12 +22,12 @@ HERE = Path(__file__).resolve().parent
 AUDIO_DIR = HERE / "audio"
 OUT_DIR = HERE.parent / "out"
 RATE = 48000
-# -18 LUFS is kept for the narration; the beds sit well under it so a voice can be laid on top unchanged.
+# -18 LUFS is the narration's level when --narration is given; the ambience, drone and SE beds sit under it.
 NARRATION_LUFS = -18.0
 AMBIENCE_LUFS = -30.0
 DRONE_LUFS = -26.0
-# A fixed gain for the music bed, no ducking under narration yet, so a candidate can be judged on its own level.
-BGM_LUFS = -24.0
+# A fixed gain for the music bed, no ducking: the demo carries no narration by default.
+BGM_LUFS = -20.0
 BGM_DEFAULT = AUDIO_DIR / "bgm" / "grid-cover-1-00254105.wav"
 BGM_SOURCE = "https://suno.com/song/00254105-6ec5-4a63-a178-f82a1451777a"
 BEEP_PEAK_DB = -6.0
@@ -156,7 +156,8 @@ def layers(paths, narration, starts, total, bgm=None):
         add(bgm, f"aloop=loop=-1:size={RATE * 600},atrim=0:{total},asetpts=N/SR/TB,volume={bgm_gain:.2f}dB,"
             f"afade=t=in:d=1.5,afade=t=out:st={total - 3}:d=3", "bgm")
 
-    add(narration, "anull", "narration")
+    if narration:
+        add(narration, "anull", "narration")
     return items
 
 
@@ -209,6 +210,7 @@ def main():
     parser.add_argument("--out", default=str(OUT_DIR / "evac-layer-demo-v1.mp4"))
     parser.add_argument("--bgm", default=str(BGM_DEFAULT), help="music bed, looped or trimmed to the video and set to BGM_LUFS")
     parser.add_argument("--no-bgm", action="store_true", help="mix without the music bed")
+    parser.add_argument("--narration", action="store_true", help="also mix the narration takes from demo/compose/audio/narration")
     parser.add_argument("--switch-se", help="WAV for the switch sound in place of the default Sci-Fi Electronic Beep 04")
     # Stems stay at their mix gains and skip the limiter, so they sum back to the mix for an editor to rebalance.
     parser.add_argument("--stems", help="also write one 48 kHz WAV per layer, full length from 0 s, into this folder")
@@ -221,7 +223,7 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="evac-mix-"))
     try:
-        narration = narration_track(edl, starts, total, work / "narration.wav")
+        narration = narration_track(edl, starts, total, work / "narration.wav") if args.narration else None
         items = layers(paths, narration, starts, total, resolve_bgm(args))
         render(items, total, work / "raw.wav")
         if args.stems:
