@@ -20,7 +20,7 @@
 
 端末収録（`capture/terminal.mjs`）は実行時に次を `cache/terminal/` へ取得する（gitignore・依存には追加しない）: xterm.js 5.5.0（`@xterm/xterm`・MIT・© The xterm.js authors）、JetBrains Mono（`@fontsource/jetbrains-mono` 5.0.20・SIL OFL 1.1・© JetBrains）。和文は `compose/fonts/NotoSansJP-Bold.otf`（SIL OFL 1.1）。
 
-音（`compose/mix_audio.py`）: Adobe Audition SFX（Adobe 無償配布・各カテゴリの LICENSE.pdf。作品内での使用・改変・配布は可、素材単体での配布は不可）から 3 本 — 環境音 `Ambience_1/Ambience Court House Security Checkpoint Interior Opposite Not Busy 02.wav`、電子音 `Science Fiction/Science Fiction Sci-Fi Electronic Alert Beep High 01.wav`、ドローン `Drones/Drone Production Element Imaging Bed Deep Bass 01.wav`。素材の WAV は `compose/audio/`（gitignore）に置き、リポにはミックス後の動画だけを出す。
+音（`compose/mix_audio.py`）: Adobe Audition SFX（Adobe 無償配布・各カテゴリの LICENSE.pdf。作品内での使用・改変・配布は可、素材単体での配布は不可）から 3 本 — 環境音 `Ambience_1/Ambience Court House Security Checkpoint Interior Opposite Not Busy 02.wav`、切替の電子音 `Science Fiction/Science Fiction Sci-Fi Electronic Beep 04.wav`（97 ms・2026-11-05 に Alert Beep High 01 から差し替え）、ドローン `Drones/Drone Production Element Imaging Bed Deep Bass 01.wav`。素材の WAV は `compose/audio/`（gitignore）に置き、リポにはミックス後の動画だけを出す。
 
 ナレーションの自動音声（試作・`demo/out/tts/`・gitignore）:
 - macOS `say` の System Voices（Kyoko）: macOS ソフトウェア使用許諾契約 §2F により、個人的・非商用の制作にのみ使える。「営利・非営利・公開共有の文脈」での録音・公開・再配布は不可。提出映像には使わず、試聴用の比較にとどめる

@@ -33,7 +33,7 @@ FADE_S = 0.5
 
 SOURCES = {
     "ambience": "Ambience_1/Ambience Court House Security Checkpoint Interior Opposite Not Busy 02.wav",
-    "beep": "Science Fiction/Science Fiction Sci-Fi Electronic Alert Beep High 01.wav",
+    "switch": "Science Fiction/Science Fiction Sci-Fi Electronic Beep 04.wav",
     "drone": "Drones/Drone Production Element Imaging Bed Deep Bass 01.wav",
 }
 AMBIENCE_CUTS = ["1", "2", "5", "8", "9"]
@@ -144,10 +144,10 @@ def layers(paths, narration, starts, total, bgm=None):
     add(paths["drone"], f"aloop=loop=-1:size={RATE * 120},atrim=0:{drone_length},asetpts=N/SR/TB,volume={drone_gain:.2f}dB,"
         f"afade=t=in:d=1.5,afade=t=out:st={drone_length - 2}:d=2,adelay={drone_start * 1000:.0f}:all=1", "drone")
 
-    beep_gain = BEEP_PEAK_DB - peak_db(paths["beep"])
+    beep_gain = BEEP_PEAK_DB - peak_db(paths["switch"])
     for i, (cut, offset) in enumerate(BEEPS):
         at = starts[cut][0] + offset
-        add(paths["beep"], f"volume={beep_gain:.2f}dB,adelay={at * 1000:.0f}:all=1", "se")
+        add(paths["switch"], f"volume={beep_gain:.2f}dB,adelay={at * 1000:.0f}:all=1", "se")
 
     if bgm:
         bgm_gain = BGM_LUFS - integrated_lufs(bgm)
@@ -194,7 +194,7 @@ def main():
     parser.add_argument("--video", default=str(HERE.parent / "renders" / "evac-layer-demo.mp4"))
     parser.add_argument("--out", default=str(OUT_DIR / "evac-layer-demo-v1.mp4"))
     parser.add_argument("--bgm", help="music bed, looped or trimmed to the video and set to BGM_LUFS")
-    parser.add_argument("--switch-se", help="WAV for the switch sound in place of the default beep (bgm seat's candidates)")
+    parser.add_argument("--switch-se", help="WAV for the switch sound in place of the default Sci-Fi Electronic Beep 04")
     # Stems stay at their mix gains and skip the limiter, so they sum back to the mix for an editor to rebalance.
     parser.add_argument("--stems", help="also write one 48 kHz WAV per layer, full length from 0 s, into this folder")
     args = parser.parse_args()
@@ -202,7 +202,7 @@ def main():
     starts, total = cut_starts(edl)
     paths = ensure_sources(args.sfx_dir)
     if args.switch_se:
-        paths["beep"] = Path(args.switch_se)
+        paths["switch"] = Path(args.switch_se)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="evac-mix-"))
     try:
