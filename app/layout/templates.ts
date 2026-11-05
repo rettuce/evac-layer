@@ -140,25 +140,25 @@ const RIBBON_CLEAR: ShapeLayout = {
 
 // 1:1 is 田中's Figma artboard (2026-11-05 L-5, node 3230:4 with the 3266:25 parts, 1080 × 1080): the band 200, the
 // two-line action from x 48, the run pictogram's ink 144 × 193 at (51, 590) as the hero beside the shelter group
-// (site ink at (275, 602), texts from x 398, the distance "570 m" anchored at x 833) and the direction under it
+// (site ink at (275, 602), texts from x 398, the distance "570 m" right-aligned at x 1044) and the direction under it
 // from x 766, and a black language band from y 820 with white labels above the text. No source line on the face
 // (the document footer carries the sources). The fr row above the band takes a taller screen.
 const FIGMA_SQUARE_TYPE = { headline: 76, level: 66, action: 150, direction: 70, shelter: 64, shelterNarrow: 51, kind: 30, distance: 72, label: 30, languages: 56, languagesNarrow: 47 }
 const SQUARE: ShapeLayout = {
   id: 'figma-square',
-  columns: [48, 202, 14, 502, 314],
+  columns: [48, 202, 14, 502, 278, 36],
   rows: [200, 27, 335, 26, 2, 122, 71, 17, '1fr', 260],
   areas: [
-    'headline headline headline headline headline',
-    '. . . . .',
-    '. action action action action',
-    '. . . . .',
-    '. . . shelter shelter',
-    '. hero . shelter shelter',
-    '. hero . . direction',
-    '. . . . direction',
-    '. . . . .',
-    'languages languages languages languages languages',
+    'headline headline headline headline headline headline',
+    '. . . . . .',
+    '. action action action action .',
+    '. . . . . .',
+    '. . . shelter shelter .',
+    '. hero . shelter shelter .',
+    '. hero . . direction direction',
+    '. . . . direction direction',
+    '. . . . . .',
+    'languages languages languages languages languages languages',
   ],
   required: ['headline', 'action', 'direction', 'shelter', 'languages'],
   pictogramPx: { headline: 112, action: 0, direction: 56, shelter: 92 },
@@ -174,7 +174,7 @@ const SQUARE: ShapeLayout = {
 const SQUARE_CLEAR: ShapeLayout = {
   ...SQUARE,
   id: 'figma-square-clear',
-  areas: SQUARE.areas.map((row) => row.replace('shelter shelter', '. .').replace('direction', '.')),
+  areas: SQUARE.areas.map((row) => row.replace('shelter shelter', '. .').replace('direction direction', '. .')),
   required: ['headline', 'action', 'languages'],
   pictogramPx: { headline: 112, action: 0 },
 }

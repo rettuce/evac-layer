@@ -540,13 +540,12 @@ body {
 }
 .evac-screen.shape-square .is-figma .name-row {
   display: grid;
-  grid-template-columns: calc(435 * var(--px)) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  gap: 0;
+  gap: calc(24 * var(--px));
 }
 .evac-screen.shape-square .is-figma .shelter-name-text {
   margin-top: calc(2 * var(--px));
-  padding-right: calc(24 * var(--px));
   font-size: calc(var(--type-shelter) * var(--px));
   line-height: 1;
   text-wrap: wrap;
@@ -558,6 +557,7 @@ body {
 }
 .evac-screen.shape-square .is-figma .name-row .distance {
   margin: 0;
+  justify-self: end;
   font-size: calc(var(--type-distance) * var(--px));
   line-height: 1;
 }
