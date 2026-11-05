@@ -18,6 +18,7 @@ const MUNICIPALITY = '22424'
 const BULLETIN = 'VTSE41-201609010726-05a7380a3e46'
 const SIZES: Record<Shape, [number, number]> = { '16x9': [1920, 1080], '9x16': [1080, 1920], '32x9': [3840, 1080], '1x1': [1080, 1080], pillar: [6616, 5046] }
 const READY_MS = 30000
+const FLOOR_PX: Record<Shape, number> = { '16x9': 53, '9x16': 64, '32x9': 64, '1x1': 43, pillar: 64 }
 
 // app/test runs on node's type stripping, which cannot follow the layout modules' extensionless imports; tsx can.
 describe('the shelter floor matches the Verifier', { skip: !existsSync(TSX) && 'agents dependencies are not installed' }, () => {
@@ -30,12 +31,15 @@ describe('the shelter floor matches the Verifier', { skip: !existsSync(TSX) && '
         app: shapes.map((s) => shelterFloorPx(s)),
         verifier: shapes.map((s) => requiredPx('shelter', 1, 'primary', s).px),
         ribbon: shelterSizes(112, 64),
-        under: shelterSizes(63, 64),
+        landscape: shelterSizes(63, shelterFloorPx('16x9')),
+        square: shelterSizes(51, shelterFloorPx('1x1')),
       }))`
     const out = JSON.parse(execFileSync(TSX, ['-e', script], { cwd: AGENTS_DIR, encoding: 'utf8' }))
     assert.deepEqual(out.app, out.verifier)
+    assert.deepEqual(out.app, [53, 64, 64, 43, 64])
     assert.deepEqual(out.ribbon, [112, 103, 94, 86, 79, 72, 66])
-    assert.deepEqual(out.under, [63])
+    assert.deepEqual(out.landscape, [63, 57, 53])
+    assert.deepEqual(out.square, [51, 46, 43])
   })
 })
 
@@ -56,7 +60,7 @@ describe('a shelter name is set smaller until it fits on one line', { skip }, ()
     child?.kill()
   })
 
-  for (const shape of ['32x9', 'pillar', '9x16'] as Shape[]) {
+  for (const shape of Object.keys(SIZES) as Shape[]) {
     test(shape, async () => {
       const [width, height] = SIZES[shape]
       const page = await browser!.newPage()
@@ -80,7 +84,7 @@ describe('a shelter name is set smaller until it fits on one line', { skip }, ()
         assert.match(name.text, /タワー/)
         assert.equal(name.lines, 1, `${shape}: ${name.text} on ${name.lines} lines`)
         assert.equal(name.clipped, false, `${shape}: ${name.text} clipped`)
-        assert.ok(name.px >= 64 - 0.5, `${shape}: ${name.px}px is under the Verifier floor`)
+        assert.ok(name.px >= FLOOR_PX[shape] - 0.5, `${shape}: ${name.px}px is under the Verifier floor`)
       } finally {
         await page.close()
       }

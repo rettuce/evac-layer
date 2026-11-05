@@ -5,9 +5,14 @@ import { TYPE_PX } from './typography'
 export const SHELTER_STEP_RATIO = 0.92
 export const SHELTER_MAX_EXTRA_STEPS = 6
 
-// Mirrors the Verifier (agents/src/verifier: requiredPx('shelter', …, 'primary') at the shape's type scale, the
-// pillar's faces read unscaled); test/shelter-fit.test.ts fails when the two drift apart.
+// The Verifier's ARTBOARD_FLOOR_PX for shelter names (司令官 2026-11-05: 田中's narrow size × 0.92², floored).
+const SHELTER_ARTBOARD_FLOOR_PX: Partial<Record<Shape, number>> = { '16x9': 53, '1x1': 43 }
+
+// Mirrors the Verifier (agents/src/verifier: requiredPx('shelter', …, 'primary', shape) at the shape's type scale,
+// the pillar's faces read unscaled); test/shelter-fit.test.ts fails when the two drift apart.
 export function shelterFloorPx(shape: Shape): number {
+  const artboard = SHELTER_ARTBOARD_FLOOR_PX[shape]
+  if (artboard !== undefined) return artboard
   const scale = shape === 'pillar' ? 1 : Math.min(SHAPES[shape].width, SHAPES[shape].height) / BASE_SHORT_SIDE_PX
   return TYPE_PX.guide * scale
 }
