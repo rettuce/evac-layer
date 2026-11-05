@@ -34,6 +34,7 @@ const levelLabel = computed(() => levelLabelFor(props.screen.template, props.scr
 const headlineScale = ref(1)
 const shelterStep = ref(0)
 const distanceBelow = ref(false)
+const distanceNarrow = ref(false)
 const languagesNarrow = ref(false)
 const sourceNarrow = ref(false)
 const stackedHeadline = computed(() => ['portrait', 'square', 'pillar'].includes(SHAPES[props.shape].cls))
@@ -60,6 +61,11 @@ const shelterNarrowSizes = computed(() => {
   return narrow === undefined ? undefined : shelterSizes(narrow, shelterFloorPx(props.shape))
 })
 const shelterStepCount = computed(() => shelterNarrowSizes.value?.length ?? 1)
+// The distance shares the shelter cell's sample in the Verifier, so its narrow size is held to the same floor.
+const distanceNarrowPx = computed(() => {
+  const narrow = layout.value.type?.distanceNarrow
+  return narrow !== undefined && !layout.value.distanceBelow && narrow >= shelterFloorPx(props.shape) ? narrow : undefined
+})
 
 const rootStyle = computed(() => ({
   ...gridCss(layout.value.fixedTracks ? layout.value : collapseAbsent(layout.value, new Set([...placed.value.map((cell) => cell.role), ...(layout.value.hero ? ['hero'] : [])]))),
@@ -84,6 +90,7 @@ const rootStyle = computed(() => ({
   ...Object.fromEntries(Object.entries(layout.value.type ?? {}).map(([key, px]) => [`--type-${key}`, px])),
   ...(shelterStep.value && shelterNarrowSizes.value ? { '--type-shelter': shelterNarrowSizes.value[shelterStep.value - 1] } : {}),
   ...(shelterStep.value && !layout.value.figma ? { '--shelter-scale': SHELTER_STEP_DOWN } : {}),
+  ...(distanceNarrow.value && distanceNarrowPx.value ? { '--type-distance': distanceNarrowPx.value } : {}),
   ...(languagesNarrow.value && layout.value.type?.languagesNarrow ? { '--type-languages': layout.value.type.languagesNarrow } : {}),
   ...(sourceNarrow.value ? { '--source-scale': SOURCE_STEP_DOWN } : {}),
 }))
@@ -203,6 +210,7 @@ async function fit() {
   headlineScale.value = 1
   shelterStep.value = 0
   distanceBelow.value = false
+  distanceNarrow.value = false
   languagesNarrow.value = false
   sourceNarrow.value = false
   await loadFonts()
@@ -211,11 +219,20 @@ async function fit() {
     await pictogramsSettled()
     await nextTick()
     if (generation !== fitGeneration) return
-    // A facility name that does not fit its line is set smaller, step by step down to the Verifier's floor
-    // (田中 2026-11-05); on the artboard the distance then moves under a name that still needs two lines.
-    if (shelterStep.value < shelterStepCount.value && shelterNameWraps()) {
-      shelterStep.value++
-      continue
+    // A facility name that does not fit its line is set smaller step by step down to the Verifier's floor; one
+    // that still breaks takes room from the distance beside it (one step) and the name steps again from its full
+    // size, so names that fit today keep their screens (田中 2026-11-05/06). On the artboard the distance then
+    // moves under a name that still needs two lines.
+    if (shelterNameWraps()) {
+      if (shelterStep.value < shelterStepCount.value) {
+        shelterStep.value++
+        continue
+      }
+      if (!distanceNarrow.value && distanceNarrowPx.value) {
+        distanceNarrow.value = true
+        shelterStep.value = 0
+        continue
+      }
     }
     if (layout.value.distanceBelow && !distanceBelow.value && shelterNameWraps()) {
       distanceBelow.value = true
@@ -294,6 +311,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-headline-scale="headlineScale !== 1 ? headlineScale : undefined"
     :data-shelter-scale="shelterStep ? 'narrow' : undefined"
     :data-distance="distanceBelow ? 'below' : undefined"
+    :data-distance-scale="distanceNarrow ? 'narrow' : undefined"
     :data-languages-scale="languagesNarrow ? 'narrow' : undefined"
     :data-source-scale="sourceNarrow ? 'narrow' : undefined"
     :data-ready="ready ? '1' : '0'"
