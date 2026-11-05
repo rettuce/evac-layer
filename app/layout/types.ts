@@ -77,6 +77,8 @@ export interface ShapeLayout {
   fixedTracks?: boolean
   headlineLines?: number
   distanceBelow?: boolean
+  // The artboard writes the distance as "570 m" (a space before the unit) instead of "570m".
+  distanceUnitSpace?: boolean
 }
 
 export type TemplateDef = Record<PanelShape, ShapeLayout[]>

@@ -301,6 +301,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
         :figma-rules="layout.figma === true"
         :distance-below="distanceBelow"
+        :distance-unit-space="layout.distanceUnitSpace"
         :language-index="language.index"
         :language-style="languageStyle"
       />
