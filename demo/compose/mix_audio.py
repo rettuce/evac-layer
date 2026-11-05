@@ -24,6 +24,8 @@ OUT_DIR = HERE.parent / "out"
 RATE = 48000
 # -18 LUFS is the narration's level when --narration is given; the ambience, drone and SE beds sit under it.
 NARRATION_LUFS = -18.0
+# ebur128 reports a silent track as -70 LUFS; it gets no gain.
+SILENCE_LUFS = -69.0
 AMBIENCE_LUFS = -30.0
 DRONE_LUFS = -26.0
 # A fixed gain for the music bed, no ducking: the demo carries no narration by default.
@@ -157,7 +159,9 @@ def layers(paths, narration, starts, total, bgm=None):
             f"afade=t=in:d=1.5,afade=t=out:st={total - 3}:d=3", "bgm")
 
     if narration:
-        add(narration, "anull", "narration")
+        level = integrated_lufs(narration)
+        narration_gain = NARRATION_LUFS - level if level > SILENCE_LUFS else 0.0
+        add(narration, f"volume={narration_gain:.2f}dB", "narration")
     return items
 
 
@@ -181,7 +185,7 @@ def write_stems(items, total, stems_dir):
 
 
 def limit(raw, out):
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-af", "alimiter=limit=0.89", str(out)], check=True)
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-af", "alimiter=limit=0.89:level=disabled", str(out)], check=True)
     return integrated_lufs(out)
 
 
