@@ -58,6 +58,14 @@ const displays = new Displays(room.displayMeshes, crops, INITIAL)
 const summary = `${room.pieces.length} pieces · ${displays.faces.length} faces · ${presets.length} cameras`
 status.textContent = 'loading video …'
 
+const debugPanels = [document.getElementById('ui')!, document.getElementById('fps')!]
+let debugShown = true
+addEventListener('keydown', (event) => {
+  if (event.key.toLowerCase() !== 'd' || event.metaKey || event.ctrlKey || event.altKey) return
+  debugShown = !debugShown
+  for (const panel of debugPanels) panel.style.display = debugShown ? '' : 'none'
+})
+
 const ui = buildUi(document.getElementById('ui')!, presets, INITIAL, {
   onContent: (content) => displays.setContent(content),
   onScene: (ambientScene) => { void displays.setScene(ambientScene) },

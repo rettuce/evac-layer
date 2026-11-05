@@ -68,7 +68,7 @@ export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { c
   const cameras = group(root, 'camera')
   for (const preset of presets) {
     const button = document.createElement('button')
-    button.textContent = preset.name
+    button.textContent = preset.name.replace(/-final$/, '')
     button.addEventListener('click', () => handlers.onCamera(preset))
     cameras.appendChild(button)
   }
