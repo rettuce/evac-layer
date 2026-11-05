@@ -2,7 +2,7 @@
 
 ## Seats
 
-EVAC LAYER was built by one commander session and, over the week, seven implementation sessions of Claude Code, each in its own git worktree and branch, while the author watched every tab and stepped in directly when needed. Three ran from Day 1; the others were opened as the work split.
+EVAC LAYER was built by one commander session and, over the week, eight implementation sessions of Claude Code, each in its own git worktree and branch, while the author watched every tab and stepped in directly when needed. Three ran from Day 1; the others were opened as the work split.
 
 - **Commander**: writes the specs, fixes the contract between the seats, reviews each seat's work and is the only one who merges `work/*` into `main`.
 - **agents** (`agents/`, `schema/`, `data/`): JMA parser, Reader, Writer, Composer, Verifier, the revision loop and the export.
@@ -12,6 +12,7 @@ EVAC LAYER was built by one commander session and, over the week, seven implemen
 - **sim** (`sim/`): the browser simulator of the concourse.
 - **brand** (Figma, `docs/brand/`, `docs/sheets/`): the wordmark, the icon and the three sheets.
 - **copy** (`README.md`, `docs/`, the narration): the public wording.
+- **bgm** (`demo/compose/audio/`): the background music through Suno's MCP server and the switch sound effects.
 
 The seats talk through cross-session messages, using one fixed shape: conclusion, files changed, how it was checked, what could not be checked, open points. A seat stops and asks only when a design decision comes up, when the spec and the code disagree, when the same failure happens twice, or before a destructive step.
 
