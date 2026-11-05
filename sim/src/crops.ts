@@ -1,6 +1,6 @@
 export type Content = 'calm' | 'evac'
 export type AmbientScene = (typeof SCENES)[number]
-export const SCENES = ['brush-flow', 'etched-streams', 'ink-bloom', 'module-field', 'painterly-flow', 'quad-subdivision'] as const
+export const SCENES = ['brush-flow', 'etched-streams', 'ink-bloom', 'painterly-flow', 'quad-subdivision'] as const
 
 export interface DisplayExtras {
   screen: string

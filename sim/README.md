@@ -24,7 +24,7 @@ Measured 2026-11-04 (M-series Mac, Chrome, 1920×1080, DPR 1): `Textured` with E
 at ~10 fps while the 22 pages load. `sim/DESIGN.md` has what made the difference.
 
 UI (top left): content `平常時` / `EVAC LAYER` (由利本荘市, the 2026-10-21 flood replayed at real speed from
-just before the level-4 bulletin); ambient scene for `平常時` (six of the app's scenes); render `Textured` (baked colour × AO) / `AO` (white × AO) / `Wire` (edges
+just before the level-4 bulletin); ambient scene for `平常時` (five of the app's scenes: brush-flow / etched-streams / ink-bloom / painterly-flow / quad-subdivision); render `Textured` (baked colour × AO) / `AO` (white × AO) / `Wire` (edges
 on black, displays only); camera presets (every still camera of `build_scene.py`, 1.2 s ease-in-out-cubic
 flight; dragging during a flight cancels it). Bottom right: fps.
 
