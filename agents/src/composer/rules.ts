@@ -15,7 +15,7 @@ const stop = (msg: string): never => { throw new ComposerStop(msg); };
 // 9:16 cells, required roles and budgets; the renderer draws the faces.
 export const CELLS_OF: Record<Shape, PanelShape> = { "16x9": "16x9", "9x16": "9x16", "32x9": "32x9", "1x1": "1x1", pillar: "9x16" };
 export const SHAPE_ORDER: readonly Shape[] = ["16x9", "9x16", "32x9", "1x1", "pillar"];
-export const LANGUAGES_REQUIRED_ON: readonly Shape[] = ["16x9", "9x16", "32x9", "pillar"];
+export const LANGUAGES_REQUIRED_ON: readonly Shape[] = ["16x9", "9x16", "32x9", "1x1", "pillar"];
 
 export const TSUNAMI_DISPLAY_LEVEL: Record<TsunamiCategory, number | null> = {
   major_warning: 4,

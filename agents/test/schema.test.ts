@@ -38,15 +38,13 @@ test("layout requires a numeric display level", () => {
   assert.equal(validateDoc(doc).ok, false);
 });
 
-test("languages cell is required on 16x9, 9x16 and 32x9 but may be dropped on 1x1", () => {
+test("languages cell is required on every shape, 1x1 and the pillar included", () => {
   const doc = fixture();
   doc.cells = doc.cells.filter((c: { role: string }) => c.role !== "languages");
-  for (const shape of ["16x9", "9x16", "32x9"]) {
+  for (const shape of ["16x9", "9x16", "32x9", "1x1", "pillar"]) {
     doc.shape = shape;
     assert.equal(validateDoc(doc).ok, false, shape);
   }
-  doc.shape = "1x1";
-  assert.ok(validateDoc(doc).ok);
 });
 
 test("languages cell must carry ja_easy, en, zh_hans and ko at priority 3", () => {
