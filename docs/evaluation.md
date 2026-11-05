@@ -41,6 +41,8 @@ A finding is one check failing on one shape of one screen, on the first attempt.
 | 19 | 15205 | 3 | 5 | 0 | — | prompt caching: breakpoints after the Writer's system prompt and municipality block and after the Vision Verifier's system prompt; 柏崎 regenerated twice to measure (Writer rewritten once, Vision twice) |
 | 20 | 05210 | 5 | 5 | 5 | missing-source (1:1) | L-4/L-5 renderer (田中's artboards) and the Verifier floor lowered to the artboard sizes (16:9 action 120, languages 54 / label 24, source 24; 1:1 languages 56); level 5 keeps shelter and direction. Every 1:1 failed because the figma-square template has no source line, so the 06:20 all-clear had nothing to clear |
 | 21 | 05210 | 6 | 5 (1:1 static only) | 0 | — | same renderer, `--skip-browser-shapes 1x1` until the 1:1 source line exists; 6/6 pass, Vision $0.26 (24 checks) |
+| 22 | 05210 | 5 | 5 | 5 | font-size (1:1 source) | the 1:1 template gained its source line at the artboard's 24 px (layout 835f36e / 4351a29), below the 28 px fine floor; the 06:20 all-clear again had nothing to clear |
+| 23 | 05210 | 6 | 5 | 0 | — | the 1:1 source floor follows the artboard (24 px); 6/6 pass with Vision on every shape, 213 s, Vision $0.33 (30 checks) |
 
 Every finding in runs 1 and 2 was a real defect: the Composer or the renderer was changed, and the next run no longer reported it (the `fix` field in each findings file). The overflows in runs 3 and 4 were the renderer's header bar; once it was fixed, run 5 passed every screen on the first attempt without calling the Writer.
 
@@ -92,3 +94,21 @@ From `agents/README.md` (Reader runs, 2026-11-02):
 | Development total per screen shown | about $0.97 | over the 22 screens, including every re-run while the defects above were fixed |
 
 The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596, $0.506, $1.462 for the ten-language regeneration $0.577 for the three sample tsunami bulletins $0.219 for their drill-marked headlines $0.272 for the drill word in their language band $0.835 for 吉田町's 大津波警報 screens and the prefix rule $0.095 for its all-clear and $0.353 for the caching measurement) comes from the fan-out output and the agents seat log. Per-call Writer usage is kept only for the latest generation of each bulletin (`data/writer/`, $1.462 now), so the earlier part is not verifiable from the repository alone.
+
+## Why these five municipalities
+
+The five cover different hazards and different settings. One data condition applied to all of them: the GSI list of designated emergency evacuation sites had to be downloadable for the municipality (it was for all seven candidates). 由利本荘市 (05210) is a river flood on the 子吉川, and the only municipality whose recorded feed holds a real escalation through levels 3, 4 and 5 (2026-10-21). 輪島市 (17204) stands for the Noto earthquake, with landslide bulletins and the official JMA tsunami sample series. 柏崎市 (15205) is a landslide case near a station. 吉田町 (22424) is a tsunami case on the Pacific coast, where the official drill bulletins (大津波警報・訓練) reach the top of the scale. 横浜市 (14100) is the urban case: under a memorandum with private operators, the city already shows disaster screens on 142 signage sites around 横浜駅, the closest existing practice to what EVAC LAYER adds.
+
+## What a nationwide roll-out would cost in API calls
+
+A rough extrapolation from the figures above; it assumes the same models and prompts, and it counts API calls only (no screens, lines or staff).
+
+| Item | Basis | Estimate |
+|---|---|---|
+| Reader, once per municipality | $0.26–$1.17 per municipality over the five (page count of the municipal documents) | about 1,740 municipalities × $0.3–1.2 ≈ **$500–2,000, once** |
+| Rendered screens per municipality per year | 200 recorded bulletins for 5 municipalities in 23 days (2026-10-11 to 11-03), 16 of them warning-level and thus rendered (the 6 tsunami screens from the official sample series are left out) → about 51 rendered screens per municipality per year | — |
+| Writer + Vision per rendered screen | $0.245 steady state (Writer once, Vision on 5 shapes) | **about $13 per municipality per year** |
+| All municipalities, one site each | 1,740 × $13 | **about $22,000 per year** |
+| Each additional site in a municipality | the Writer output is cached per municipality and hazard, so an extra site pays for Vision only: $0.053 per screen (5 shapes) × 51 | **about $3 per extra site per year**; 10,000 sites nationwide ≈ $22,000 + 8,260 × $3 ≈ **$47,000 per year** |
+
+Caveats: the recording window sits in typhoon season, so the annualised bulletin count is on the high side; prompt caching and the Batch API (half price) would roughly halve the figures.

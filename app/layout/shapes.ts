@@ -13,9 +13,8 @@ export const SHAPES: Record<Shape, { cls: ShapeClass; width: number; height: num
   pillar: { cls: 'pillar', width: 6616, height: 5046 },
 }
 
-// Base shapes meet near the geometric mean of their native aspects, except that 16:9 reaches down to 5:4: the
-// 1:1 base shape drops the shelter cell, and "how far, which way" must survive on 4:3 monitors. The fitted
-// native canvas never drops below 0.70 of its size (16:9 at 5:4) and 1:1 never shrinks.
+// Base shapes meet near the geometric mean of their native aspects, except that 16:9 reaches down to 5:4. The
+// fitted native canvas never drops below 0.70 of its size (16:9 at 5:4) and 1:1 never shrinks.
 const RIBBON_MIN_ASPECT = 2.8
 const LANDSCAPE_MIN_ASPECT = 1.25
 const PORTRAIT_MAX_ASPECT = 0.75

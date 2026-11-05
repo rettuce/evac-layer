@@ -93,6 +93,16 @@
         "id": "Naik ke tempat tinggi"
       },
       "motion": "static"
+    },
+    {
+      "id": "source",
+      "role": "source",
+      "priority": 9,
+      "text": {
+        "ja": "気象庁・国土交通省 10/21 19:45 発表・由利本荘市",
+        "en": "JMA · MLIT 19:45, Oct 21 · Yurihonjo"
+      },
+      "motion": "static"
     }
   ],
   "palette": "cabinet-office-5",

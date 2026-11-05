@@ -45,6 +45,7 @@ describe('level 5 (secure-now) keeps the shelter and the direction on every shap
           const screen = await response.json()
           screen.template = 'secure-now'
           screen.alert = { ...screen.alert, level: 5 }
+          if (!screen.cells.some((cell: { role: string }) => cell.role === 'source')) screen.cells.push({ id: 'source', role: 'source', priority: 9, text: { ja: '気象庁 10/21 18:15 発表・由利本荘市', en: 'JMA 18:15, Oct 21 · Yurihonjo' }, motion: 'static' })
           return new Response(JSON.stringify(screen), { status: 200, headers: { 'content-type': 'application/json' } })
         }
       })
