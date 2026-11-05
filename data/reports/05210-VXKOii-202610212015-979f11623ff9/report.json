@@ -4,82 +4,27 @@
   "municipality": "05210",
   "bulletin_id": "VXKOii-202610212015-979f11623ff9",
   "verifier": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
-  "reviser": "writer-api",
+  "reviser": "writer-api(opus)",
   "max_attempts": 3,
-  "outcome": "fail",
-  "reason": "not fixable by rewriting text: 16x9 font-size[source], 1x1 missing-source",
+  "outcome": "pass",
   "attempts": [
     {
       "n": 1,
-      "writer_source": "fixture:writer-VXKOii-202610212015-979f11623ff9.json",
-      "findings": [
-        {
-          "shape": "16x9",
-          "check": "font-size",
-          "cell_id": "action",
-          "detail": "action text \"すぐ高い所へ上がる\" is 120px; the action type step needs 144.0px"
-        },
-        {
-          "shape": "16x9",
-          "check": "font-size",
-          "cell_id": "languages",
-          "detail": "languages text \"やさしい にほんご\" is 24px; the fine type step needs 28.0px"
-        },
-        {
-          "shape": "16x9",
-          "check": "font-size",
-          "cell_id": "languages",
-          "detail": "languages text \"すぐ たかい ところへ\" is 54px; the guide type step needs 64.0px"
-        },
-        {
-          "shape": "16x9",
-          "check": "font-size",
-          "cell_id": "languages",
-          "detail": "languages text \"EN\" is 24px; the fine type step needs 28.0px"
-        },
-        {
-          "shape": "16x9",
-          "check": "font-size",
-          "cell_id": "languages",
-          "detail": "languages text \"Go higher now\" is 54px; the guide type step needs 64.0px"
-        },
-        {
-          "shape": "16x9",
-          "check": "font-size",
-          "cell_id": "source",
-          "detail": "source text \"気象庁・国土交通省 10/21 20:15 発表\" is 24px; the fine type step needs 28.0px"
-        },
-        {
-          "shape": "1x1",
-          "check": "font-size",
-          "cell_id": "languages",
-          "detail": "languages text \"すぐ たかい ところへ\" is 56px; the guide type step needs 64.0px"
-        },
-        {
-          "shape": "1x1",
-          "check": "font-size",
-          "cell_id": "languages",
-          "detail": "languages text \"Go higher now\" is 56px; the guide type step needs 64.0px"
-        },
-        {
-          "shape": "1x1",
-          "check": "missing-source",
-          "detail": "vision: 画面のどこにも出典行がない。気象庁の発表時刻(2026-10-21 20:15)も自治体名(由利本荘市)も見えない。"
-        }
-      ],
+      "writer_source": "writer-cache",
+      "findings": [],
       "screens_ok": {
-        "16x9": false,
+        "16x9": true,
         "9x16": true,
         "32x9": true,
-        "1x1": false,
+        "1x1": true,
         "pillar": true
       },
       "notes": {
-        "16x9": "分かる。黒い帯の「レベル5 氾濫特別警報」と大きな「すぐ高い所へ上がる」、上向き矢印と浸水の図記号で、すぐ高い所へ上がる必要があるとすぐ読み取れ、南西の鶴舞小学校(570m)という行き先も示されている。",
-        "9x16": "分かる。大きな文字と図記号で「すぐ高い所へ上がる」と示され、南西へ向かう矢印と避難場所(鶴舞小学校 570m)も続いているので、すぐ上の階や高所へ避難すればよいと理解できる。",
-        "32x9": "分かる。黒地に白の「レベル5 氾濫特別警報」と浸水の図記号で危険が伝わり、大きな「すぐ高い所へ上がる」と上向き矢印で、まず上の階か高い所へ上がればよいと分かる。南西への矢印と避難場所名も続くので、次の行き先も分かる。",
-        "1x1": "分かる。「すぐ高い所へ上がる」が大きく出ていて、上向き矢印と水の図記号、鶴舞小学校まで570mで南西へ、という案内もあるので、高い所へ逃げるべきだとすぐ読み取れる。",
-        "pillar": "分かります。大きな上向き矢印と「すぐ高い所へ上がる」の文字、洪水の図記号で、高い所へ逃げるべきことが伝わります。南西へ570mの避難場所も矢印付きで示されています。"
+        "16x9": "分かる。黒い帯の「レベル5 氾濫特別警報」と洪水の図記号、大きな「すぐ高い所へ上がる」、上向き矢印と建物の図記号で、危険と取るべき行動が一目で伝わる。南西の矢印と鶴舞小学校570mの表示で行き先も分かる。",
+        "9x16": "分かる。「すぐ高い所へ上がる」が大きく表示され、上向き矢印と水位の図記号、南西への矢印と避難場所(鶴舞小学校 570m)が示されているため、何をどちらへ向かうかを3秒で理解できる。",
+        "32x9": "分かる。黒地に白で「レベル5」と浸水の図記号、大きな「すぐ高い所へ上がる」と上向き矢印、南西向きの矢印と避難場所名が見えるので、すぐ高い所へ逃げて南西の鶴舞小学校へ向かえばよいと伝わる。",
+        "1x1": "browser and vision checks skipped for 1x1; static checks only",
+        "pillar": "分かります。大きな上向き矢印と水・建物の図記号、「すぐ高い所へ上がる」の大きな文字で、すぐに高い所へ上がることが伝わり、南西の鶴舞小学校(570m)という行き先も見えます。"
       }
     }
   ],

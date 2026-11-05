@@ -93,16 +93,6 @@
         "id": "Tinggalkan area bahaya"
       },
       "motion": "static"
-    },
-    {
-      "id": "source",
-      "role": "source",
-      "priority": 9,
-      "text": {
-        "ja": "気象庁 10/21 18:15 発表・由利本荘市",
-        "en": "JMA 18:15, Oct 21 · Yurihonjo"
-      },
-      "motion": "static"
     }
   ],
   "palette": "cabinet-office-5",

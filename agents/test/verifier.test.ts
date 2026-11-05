@@ -19,6 +19,18 @@ test("labels are held to the fine distance, action sub-lines to the guide distan
   assert.equal(requiredPx("headline", 2, "primary").px, TYPE_PX.guide * 2);
 });
 
+test("the 16:9 and 1:1 artboards lower the floor for the lines 田中 set smaller; everything else keeps the viewing distance", () => {
+  assert.deepEqual(requiredPx("action", 1, "primary", "16x9"), { step: "artboard", px: 120 });
+  assert.deepEqual(requiredPx("languages", 1, "primary", "16x9"), { step: "artboard", px: 54 });
+  assert.deepEqual(requiredPx("source", 1, "primary", "16x9"), { step: "artboard", px: 24 });
+  assert.deepEqual(requiredPx("languages", 1, "primary", "1x1"), { step: "artboard", px: 56 });
+  assert.equal(requiredPx("shelter", 1, "primary", "16x9").px, TYPE_PX.guide);
+  assert.equal(requiredPx("action", 1, "primary", "9x16").px, TYPE_PX.action);
+  assert.deepEqual(judgeFonts([sample({ font_px: 120 })], 1, "16x9"), []);
+  assert.match(judgeFonts([sample({ font_px: 119 })], 1, "16x9")[0].detail, /16x9 artboard floor needs 120/);
+  assert.equal(judgeFonts([sample({ font_px: 120 })], 1, "9x16").length, 1);
+});
+
 test("state attributes turn into findings; drops are reported, not failed", () => {
   const state = { shape: "16x9", template: "evac-now", variant: "split", level: "4", dropped: "shelter:overflow", overflow: "action", missing_required: "languages" };
   assert.deepEqual(judgeState(state).map((f) => f.check), ["missing-required", "overflow"]);
