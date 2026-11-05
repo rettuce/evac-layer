@@ -4,26 +4,19 @@ The concourse of `demo/blender/build_scene.py`, in the browser: the room is bake
 and drawn unlit; the 22 display faces (4 pillars × 4 faces, 3 ribbon panels, 3 wall panels) are WebGL planes.
 平常時 is one pre-rendered loop per scene (`<video>` → `VideoTexture`) shared by all 22 faces, each face showing its
 fixed UV crop of the room canvas, with the app's clock overlay drawn on a transparent canvas plane in front;
-EVAC LAYER swaps per-face PNG stills of the alert layout every 2.5 s. Clicking a face opens its live `/screen`
-in a new tab (`DESIGN.md`).
+EVAC LAYER swaps per-face PNG stills of the alert layout every 2.5 s (`DESIGN.md`). The simulator needs no
+server besides static files: the loops, the stills, `room.glb` and `crops.json`.
 
 ## Run
 
 ```sh
-# 1. the simulator (standalone package: not in the pnpm workspace)
+# standalone package: not in the pnpm workspace
 cd sim && pnpm install --ignore-workspace
 pnpm fetch-ambient              # the loops into public/ambient/ (GitHub Release ambient-loops-v1; needs `gh auth`)
-cp .env.example .env            # VITE_SCREEN_ORIGIN=http://127.0.0.1:3153
 pnpm dev                        # http://127.0.0.1:3160
 pnpm build                      # type-check + sim/dist/
-# VITE_AMBIENT_BASE overrides where the loops are read from (default `${BASE_URL}ambient/`)
+# VITE_AMBIENT_BASE (.env) overrides where the loops are read from (default `${BASE_URL}ambient/`)
 # ?video=8k selects the 8k HEVC loops where they play (default: 4k, since each 8k scene is ~60 MB over Pages)
-
-# 2. only for opening a face's live /screen by clicking it: the app (any free port; 3150–3152 are used by
-#    other worktrees), then once per app checkout approve the flood bulletins the EVAC LAYER content replays
-#    (live screens only show approved bulletins; data/approvals.json is gitignored)
-cd app && pnpm dev --port 3153
-sim/scripts/approve-live.sh http://127.0.0.1:3153
 ```
 
 Measured 2026-11-04 (M-series Mac, Chrome, 1920×1080, DPR 1): `Textured` with EVAC LAYER on all 22 faces

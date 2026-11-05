@@ -23,19 +23,6 @@ export interface CropsFile {
   faces?: Record<string, Record<string, [number, number, number, number]>>
 }
 
-export const SCREEN_ORIGIN = import.meta.env.VITE_SCREEN_ORIGIN ?? 'http://127.0.0.1:3153'
-
-const MUNICIPALITY = '05210'
-const SITE_ID = '05210-demo-honjo-station'
-const ROOM_ID = 'concourse'
-const SITE = { site_name: '羽後本荘駅', lat: '39.38633978', lng: '140.0563304' }
-// A quiet day for the calm screen; the 2026-10-21 flood from just before the level-4 bulletin (18:15 JST)
-// for EVAC LAYER, replayed at real speed so the level-4 screen holds until the level-5 bulletin at 19:45.
-const WINDOWS: Record<Content, { from: string; to: string }> = {
-  calm: { from: '2026-10-15T00:00+09:00', to: '2026-10-15T06:00+09:00' },
-  evac: { from: '2026-10-21T18:10+09:00', to: '2026-10-21T19:40+09:00' },
-}
-
 // build_scene.py COLUMN_FACE_NAMES, in the order of the glb's face index (0 faces the hero camera, then counter-clockwise).
 const FACE_NAMES = ['front', 'right', 'back', 'left'] as const
 
@@ -49,24 +36,4 @@ export function faceWindow(extras: DisplayExtras, content: Content, crops?: Crop
 export async function loadCrops(url: string): Promise<CropsFile | undefined> {
   const response = await fetch(url)
   return response.ok ? ((await response.json()) as CropsFile) : undefined
-}
-
-export function screenUrl(extras: DisplayExtras, content: Content, scene: AmbientScene, crops?: CropsFile): string {
-  const canvas = crops?.canvas ?? extras.canvas
-  const face = faceWindow(extras, content, crops)
-  const crop = face ?? crops?.crops[extras.screen] ?? extras.crop
-  const params = new URLSearchParams({
-    mode: 'live', municipality: MUNICIPALITY, site: SITE_ID, speed: '1', ...WINDOWS[content], scene,
-    canvas: `${canvas[0]}x${canvas[1]}`, crop: crop.join(','), canvas_id: ROOM_ID, ...SITE,
-  })
-  if (face || extras.shape !== 'pillar') {
-    params.set('w', String(extras.face_px[0]))
-    params.set('h', String(extras.face_px[1]))
-  } else {
-    params.set('shape', crops?.shapes[extras.screen] ?? extras.shape)
-    const seam = crops?.seam[extras.screen]
-    if (seam) params.set('seam', seam)
-  }
-  // Trailing slash: a static host serves the generated screen/index.html without a redirect.
-  return `${SCREEN_ORIGIN}/screen/?${params}`
 }

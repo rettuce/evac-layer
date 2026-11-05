@@ -37,7 +37,6 @@ jobs:
         working-directory: sim
         env:
           VITE_BASE: ${{ env.SITE_BASE }}
-          VITE_SCREEN_ORIGIN: ${{ env.SITE_BASE }}app
         run: |
           pnpm install --frozen-lockfile --ignore-workspace
           pnpm build

@@ -1,5 +1,5 @@
 import {
-  BufferAttribute, CanvasTexture, LinearFilter, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, Raycaster, SRGBColorSpace,
+  BufferAttribute, CanvasTexture, LinearFilter, Mesh, MeshBasicMaterial, Object3D, PlaneGeometry, SRGBColorSpace,
   TextureLoader, Vector3, VideoTexture, type Texture,
 } from 'three'
 import {
@@ -7,7 +7,7 @@ import {
   overlayGeometry, timeFont, type OverlayCorner, type OverlayGeometry,
 } from '../../app/layout/ambient/overlay'
 import { hashString } from '../../app/layout/ambient/rng'
-import { faceWindow, type AmbientScene, type Content, type CropsFile, type DisplayExtras } from './screenUrl'
+import { faceWindow, type AmbientScene, type Content, type CropsFile, type DisplayExtras } from './crops'
 
 export type VideoTier = '4k' | '8k'
 
@@ -186,13 +186,11 @@ export class Displays {
   private sceneRequest = 0
   private lastClockMs = -Infinity
   private fontsReady = false
-  private readonly meshToFace = new Map<Object3D, Face>()
 
   constructor(meshes: Mesh[], private readonly crops: CropsFile | undefined, initial: { content: Content; scene: AmbientScene }) {
     this.content = initial.content
     this.scene = initial.scene
     this.faces = meshes.map((mesh) => faceFromMesh(mesh, crops))
-    for (const face of this.faces) this.meshToFace.set(face.mesh, face)
     this.apply()
   }
 
@@ -260,11 +258,6 @@ export class Displays {
     this.lastClockMs = -Infinity
     this.apply()
     if (previous) releaseVideo(previous.video, previous.texture)
-  }
-
-  faceAt(raycaster: Raycaster): Face | undefined {
-    const hit = raycaster.intersectObjects(this.faces.map((face) => face.mesh), false)[0]
-    return hit ? this.meshToFace.get(hit.object) : undefined
   }
 
   update(): void {

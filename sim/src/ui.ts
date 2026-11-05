@@ -1,6 +1,6 @@
 import type { CameraPreset } from './cameras'
 import type { RenderMode } from './room'
-import { SCENES, type Content, type AmbientScene } from './screenUrl'
+import { SCENES, type Content, type AmbientScene } from './crops'
 
 export interface UiHandlers {
   onContent: (content: Content) => void

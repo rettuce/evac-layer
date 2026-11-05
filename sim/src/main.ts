@@ -1,9 +1,9 @@
-import { PerspectiveCamera, Raycaster, Scene, Vector2, WebGLRenderer } from 'three'
+import { PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { CameraRig, FILM_GAUGE_MM, poseToQuery, presetFromQuery, presetsFromGltf } from './cameras'
 import { Displays } from './displays'
 import { applyRenderMode, loadRoom, type RenderMode } from './room'
-import { SCENES, loadCrops, screenUrl, type AmbientScene, type Content } from './screenUrl'
+import { SCENES, loadCrops, type AmbientScene, type Content } from './crops'
 import { buildUi, fpsMeter } from './ui'
 
 const INITIAL: { content: Content; scene: AmbientScene; mode: RenderMode; preset: string } = { content: 'calm', scene: 'brush-flow', mode: 'textured', preset: 'hero' }
@@ -57,20 +57,6 @@ if (first) rig.jumpTo(first)
 const displays = new Displays(room.displayMeshes, crops, INITIAL)
 const summary = `${room.pieces.length} pieces · ${displays.faces.length} faces · ${presets.length} cameras`
 status.textContent = 'loading video …'
-
-const CLICK_SLOP_PX = 4
-const raycaster = new Raycaster()
-const pointer = new Vector2()
-let downAt: { x: number; y: number } | undefined
-stage.style.cursor = 'pointer'
-stage.addEventListener('pointerdown', (event) => { downAt = { x: event.clientX, y: event.clientY } })
-stage.addEventListener('pointerup', (event) => {
-  if (!downAt || Math.hypot(event.clientX - downAt.x, event.clientY - downAt.y) >= CLICK_SLOP_PX) return
-  pointer.set((event.clientX / innerWidth) * 2 - 1, -(event.clientY / innerHeight) * 2 + 1)
-  raycaster.setFromCamera(pointer, camera)
-  const face = displays.faceAt(raycaster)
-  if (face) window.open(screenUrl(face.extras, displays.content, displays.scene, crops), '_blank', 'noopener')
-})
 
 const ui = buildUi(document.getElementById('ui')!, presets, INITIAL, {
   onContent: (content) => displays.setContent(content),
