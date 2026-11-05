@@ -145,11 +145,11 @@
       "slate": "左に地図（OpenStreetMap）・4 か所。点が移る → 右の画面が消える → 0.4 s 後に新しい画面。3.5 s × 4",
       "cut": "5c",
       "seconds": 14,
-      "subtitle_ja": "同じ警報でも、スクリーンの位置が違えば、／避難先も方向も距離も適切に表示されます。",
+      "subtitle_ja": "同じ警報でも、スクリーンの位置が違えば、／避難先も方向も距離も適切な情報となって表示されます。",
       "subtitle_en": "Same warning, different place.／The shelter, the direction and the distance follow where the screen stands.",
-      "narration_ja": "同じ警報でも、スクリーンの位置が違えば、避難先も方向も距離も適切に表示されます。",
+      "narration_ja": "同じ警報でも、スクリーンの位置が違えば、避難先も方向も距離も適切な情報となって表示されます。",
       "narration_en": "Same warning, different place. The shelter, the direction and the distance follow where the screen stands.",
-      "reading_ja": "おなじ けいほうでも、スクリーンの いちが ちがえば、ひなんさきも ほうこうも きょりも てきせつに ひょうじされます"
+      "reading_ja": "おなじ けいほうでも、スクリーンの いちが ちがえば、ひなんさきも ほうこうも きょりも てきせつな じょうほうと なって ひょうじされます"
     },
     {
       "kind": "3d",
