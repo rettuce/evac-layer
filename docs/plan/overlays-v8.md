@@ -30,7 +30,7 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 | ov-4-subtitle-1.png | 4 | subtitle | 避難案内は自動作成され、人が事前承認したものだけが、／警報が届いた瞬間に表示されます。 | Evacuation guidance is generated automatically. Only what a person has approved in advance／is shown, the moment a warning arrives. | 3244:21 |
 | ov-5c-subtitle-1.png | 5c | subtitle | 同じ警報でも、スクリーンの位置が違えば、／避難先も方向も距離も適切な情報となって表示されます。 | Same warning, different place.／The shelter, the direction and the distance follow where the screen stands. | 3244:25 |
 | ov-5-subtitle-1.png | 5 | subtitle | 10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシミュレートしています。 | Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed. | 3244:29 |
-| ov-5-subtitle-2.png | 5 | subtitle | 警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。 | Alert levels 3, 4 and 5. Every screen switches at the same moment. | 3244:33 |
+| ov-5-subtitle-2.png | 5 | subtitle | 当日、警戒レベル3、4、5と変化していく中で、／すべてのスクリーンが、同じ瞬間に切り替わっていきます。 | That day, as the alert level rose from 3 to 4 to 5,／every screen switched at the same moment. | 3244:33 |
 | ov-5b-subtitle-1.png | 5b | subtitle | 何を出すかは、事前に人が確認できます。／承認しておけば、有事に自動で避難案内に切り替わります。 | What to show can be checked in advance.／Approve it once, and the screens switch to evacuation guidance by themselves. | 3244:37 |
 | ov-7m-subtitle-1.png | 7m | subtitle | まずは3週間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。 | First, we created 110 layouts from 206 Japan Meteorological Agency telegrams ／collected in advance across five municipalities over three weeks. | 3244:41 |
 | ov-9-telop-1.png | 9 | telop | どのスクリーンにも | Any screen. | 3244:56 |
@@ -71,3 +71,5 @@ Figma のページ「v8 overlays」が文言の正本。該当フレームの文
 2026-11-06 C-11（田中確定 02:0x）: cut 2 の字幕を新しいナレーションに合わせて差し替え、尺は 8 → 15 s。Figma の更新は brand 席。字幕は文ごとに 2 枚（各 2 行）: `ov-2-subtitle-1`「私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上設計し、納めてきました。」"For more than ten years, I have designed and installed signage／for public spaces in cities, such as stations and shopping centers."、`ov-2-subtitle-2`「しかし、それらは災害のとき、／自分から情報を出すことができませんでした。」"Yet during disasters,／these systems could not put out information on their own."。テロップ `ov-2-telop-1`（左上・1.0〜7.5 s）「公共空間のサイネージを10年以上」"Public-space signage, 10+ years"。
 
 2026-11-06 B-15（田中変更 03:5x）: cut 5c の ja を「…避難先も方向も距離も適切に表示されます。」→「…適切な情報となって表示されます。」に。en は変更なし。
+
+2026-11-06 B-16（田中が録音時に変更）: cut 5 の 2 文目を差し替え。ja「警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。」→「当日、警戒レベル3、4、5と変化していく中で、／すべてのスクリーンが、同じ瞬間に切り替わっていきます。」、en "Alert levels 3, 4 and 5. Every screen switches at the same moment." → "That day, as the alert level rose from 3 to 4 to 5,／every screen switched at the same moment."。1 行 → 2 行で帯の高さが 150 → 252 px（下端は画面下から 72 px のまま）。
