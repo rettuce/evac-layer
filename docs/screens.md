@@ -17,7 +17,7 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル５氾濫特別警報 (16x9)](screens/lv5-16x9.png)
 
-2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁 10/21 19:45 発表・由利本荘市
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁・国土交通省 10/21 19:45 発表・由利本荘市
 
 ![レベル２氾濫注意報解除 (16x9)](screens/clear-16x9.png)
 
@@ -35,7 +35,7 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル５氾濫特別警報 (9x16)](screens/lv5-9x16.png)
 
-2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁 10/21 19:45 発表・由利本荘市
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁・国土交通省 10/21 19:45 発表・由利本荘市
 
 ![レベル２氾濫注意報解除 (9x16)](screens/clear-9x16.png)
 
@@ -53,7 +53,7 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル５氾濫特別警報 (32x9)](screens/lv5-32x9.png)
 
-2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁 10/21 19:45 発表・由利本荘市
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁・国土交通省 10/21 19:45 発表・由利本荘市
 
 ![レベル２氾濫注意報解除 (32x9)](screens/clear-32x9.png)
 
@@ -71,7 +71,7 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル５氾濫特別警報 (1x1)](screens/lv5-1x1.png)
 
-2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁 10/21 19:45 発表・由利本荘市
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁・国土交通省 10/21 19:45 発表・由利本荘市
 
 ![レベル２氾濫注意報解除 (1x1)](screens/clear-1x1.png)
 
@@ -89,7 +89,7 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル５氾濫特別警報 (pillar)](screens/lv5-pillar.png)
 
-2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁 10/21 19:45 発表・由利本荘市
+2026-10-21 19:45 JST · レベル５氾濫特別警報 · 警戒レベル5 — source line: 気象庁・国土交通省 10/21 19:45 発表・由利本荘市
 
 ![レベル２氾濫注意報解除 (pillar)](screens/clear-pillar.png)
 
