@@ -171,12 +171,15 @@ function measureOverflow(): { cells: CellOverflow[]; screen: boolean } {
 
 let fitGeneration = 0
 
-// A name that needs more than one line, or runs past its row (a segment that must not break inside).
+// A name that needs more than one line, more lines than its clamp, or runs past its row (a segment that must not break inside).
 function shelterNameWraps(): boolean {
   const name = root.value?.querySelector<HTMLElement>('.shelter-name-text, .shelter-text > p.t-guide')
   if (!name) return false
   const twoLines = name.getBoundingClientRect().height > parseFloat(getComputedStyle(name).lineHeight) + OVERFLOW_TOLERANCE_PX
-  return twoLines || name.scrollWidth > name.clientWidth + OVERFLOW_TOLERANCE_PX
+  const range = document.createRange()
+  range.selectNodeContents(name)
+  const lineTops = new Set([...range.getClientRects()].map((rect) => Math.round(rect.top)))
+  return twoLines || lineTops.size > 1 || name.scrollWidth > name.clientWidth + OVERFLOW_TOLERANCE_PX
 }
 
 async function fit() {
@@ -301,6 +304,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
         :figma-rules="layout.figma === true"
         :distance-below="distanceBelow"
+        :distance-unit-space="layout.distanceUnitSpace"
         :language-index="language.index"
         :language-style="languageStyle"
       />
