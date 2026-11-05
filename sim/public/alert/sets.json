@@ -4,7 +4,61 @@
       "id": "yurihonjo-lv4",
       "name": "由利本荘市 警戒レベル4",
       "description": "2026-10-21 18:15 気象庁発表の氾濫危険警報（VXKO）。危険な場所から避難、鶴舞小学校 570 m（南西へ）。demo 席 D-13 の静止画",
-      "pairs": ["ja_easy-en", "zh_hans-zh_hant", "ko-th", "vi-tl", "id"]
+      "pairs": [
+        "ja_easy-en",
+        "zh_hans-zh_hant",
+        "ko-th",
+        "vi-tl",
+        "id"
+      ]
+    },
+    {
+      "id": "yurihonjo-lv3",
+      "name": "由利本荘市 警戒レベル3",
+      "description": "2026-10-21 15:55 気象庁・国土交通省発表の氾濫警報（子吉川）。高齢者は避難、鶴舞小学校 570 m（南西へ）",
+      "pairs": [
+        "ja_easy-en",
+        "zh_hans-zh_hant",
+        "ko-th",
+        "vi-tl",
+        "id"
+      ]
+    },
+    {
+      "id": "yurihonjo-lv5",
+      "name": "由利本荘市 警戒レベル5",
+      "description": "2026-10-21 19:45 気象庁・国土交通省発表の氾濫特別警報（子吉川）。高い所へ上がって、鶴舞小学校 570 m（南西へ）",
+      "pairs": [
+        "ja_easy-en",
+        "zh_hans-zh_hant",
+        "ko-th",
+        "vi-tl",
+        "id"
+      ]
+    },
+    {
+      "id": "yoshida-tsunami-drill",
+      "name": "吉田町 大津波警報（訓練）",
+      "description": "2016-09-01 07:13 気象庁発表の訓練用電文。高い所へ避難、津波避難タワーＭ 910 m（南へ）",
+      "pairs": [
+        "ja_easy-en",
+        "zh_hans-zh_hant",
+        "ko-th",
+        "vi-tl",
+        "id"
+      ]
+    },
+    {
+      "id": "kashiwazaki-lv4",
+      "name": "柏崎市 警戒レベル4",
+      "description": "2026-10-31 16:53 気象庁発表の土砂災害危険警報。危険な場所から避難、産業文化会館 230 m（北へ）",
+      "pairs": [
+        "ja_easy-en",
+        "zh_hans-zh_hant",
+        "ko-th",
+        "vi-tl",
+        "id"
+      ]
     }
   ]
 }
