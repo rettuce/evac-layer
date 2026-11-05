@@ -159,12 +159,12 @@
       "cut": "5",
       "seconds": 21,
       "narration_ja": "10月21日に由利本荘市で実際に発表された警報です。当日、警戒レベル3、4、5と変化していく中で、すべてのスクリーンが、同じ瞬間に切り替わっていきます。",
-      "narration_en": "Using actual warning data issued in Yurihonjo City on October 21, this is simulated at 1200x speed. That day, as the alert level rose from 3 to 4 to 5, every screen switched at the same moment.",
+      "narration_en": "This is a real warning, issued for Yurihonjo City on October 21. That day, as the alert level rose from 3 to 4 to 5, every screen switched at the same moment.",
       "reading_ja": "じゅうがつ にじゅういちにちに ゆりほんじょうしで じっさいに はっぴょうされた けいほうです。とうじつ、けいかいレベル さん、よん、ごと へんかしていく なかで、すべての スクリーンが、おなじ しゅんかんに きりかわって いきます",
       "subtitle_parts": [
         {
           "ja": "10月21日に由利本荘市で実際に発表された警報です。",
-          "en": "Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed."
+          "en": "This is a real warning, issued for Yurihonjo City on October 21."
         },
         {
           "ja": "当日、警戒レベル3、4、5と変化していく中で、／すべてのスクリーンが、同じ瞬間に切り替わっていきます。",

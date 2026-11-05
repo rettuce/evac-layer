@@ -32,7 +32,7 @@
 - 3: Hazard types and alert levels. Icons and ten languages. And for a screen of any shape, a layout that fits.
 - 4: Evacuation guidance is generated automatically. Only what a person has approved in advance is shown, the moment a warning arrives.
 - 5c: Same warning, different place. The shelter, the direction and the distance follow where the screen stands.
-- 5: Using actual warning data issued in Yurihonjo City on October 21, this is simulated at 1200x speed. That day, as the alert level rose from 3 to 4 to 5, every screen switched at the same moment.
+- 5: This is a real warning, issued for Yurihonjo City on October 21. That day, as the alert level rose from 3 to 4 to 5, every screen switched at the same moment.
 - 5b: What to show can be checked in advance. Approve it once, and the screens switch to evacuation guidance by themselves.
 - 7m: First, we created 110 layouts from 206 Japan Meteorological Agency telegrams collected in advance across five municipalities over three weeks.
 - 9: If there is a system capable of receiving signals, disaster information can be automatically displayed on any screen anywhere.
