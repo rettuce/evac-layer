@@ -19,7 +19,7 @@
 | `narration/cut05c.wav` | 同じ警報でも、スクリーンの位置が違えば、避難先も方向も距離も適切に表示されます。 | 14 s（68 s から） | 40／70 | おなじ けいほうでも、スクリーンの いちが ちがえば、ひなんさきも ほうこうも きょりも てきせつに ひょうじされます |
 | `narration/cut05.wav` | 10月21日 由利本荘市で実際に発表された警報データを使い、1200倍の速さでシミュレートしています。警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。 | 25 s（82 s から） | 85／125 | じゅうがつ にじゅういちにち ゆりほんじょうしで じっさいに はっぴょうされた けいほうデータを つかい、せんにひゃくばいの はやさで シミュレート しています。けいかいレベル さん、よん、ご。すべての スクリーンが、おなじ しゅんかんに きりかわります |
 | `narration/cut05b.wav` | 何を出すかは、事前に人が確認できます。承認しておけば、有事に自動で避難案内に切り替わります。 | 9 s（107 s から） | 46／45（超過） | なにを だすかは、じぜんに ひとが かくにん できます。しょうにん しておけば、ゆうじに じどうで ひなん あんないに きりかわります |
-| `narration/cut07m.wav` | まずは半月間で事前収集した、5つの自治体での206本の気象庁の電文から、110のレイアウトを作成しました。 | 27 s（116 s から） | 53／135 | まずは はんつきかんで じぜん しゅうしゅうした、いつつの じちたいでの にひゃくろっぽんの きしょうちょうの でんぶんから、ひゃくじゅうの レイアウトを さくせいしました |
+| `narration/cut07m.wav` | まずは3週間で事前収集した、5つの自治体での206本の気象庁の電文から、110のレイアウトを作成しました。 | 27 s（116 s から） | 53／135 | まずは さんしゅうかんで じぜん しゅうしゅうした、いつつの じちたいでの にひゃくろっぽんの きしょうちょうの でんぶんから、ひゃくじゅうの レイアウトを さくせいしました |
 | `narration/cut09.wav` | 信号を受け取れる仕組みがあれば、どの場所のどんなスクリーンにも、自動で災害情報を表示できます。 | 10 s（143 s から） | 47／50 | しんごうを うけとれる しくみが あれば、どの ばしょの どんな スクリーンにも、じどうで さいがいじょうほうを ひょうじ できます |
 | `narration/cut10.wav` | EVAC LAYERは、オープンソースで公開しています。 | 13 s（153 s から） | 27／65 | エヴァク レイヤーは、オープンソースで こうかい しています |
 
@@ -34,6 +34,6 @@
 - 5c: Same warning, different place. The shelter, the direction and the distance follow where the screen stands.
 - 5: Using actual warning data issued in Yurihonjo City on October 21, this is simulated at 1200x speed. Alert levels 3, 4 and 5. Every screen switches at the same moment.
 - 5b: What to show can be checked in advance. Approve it once, and the screens switch to evacuation guidance by themselves.
-- 7m: First, we created 110 layouts from 206 Japan Meteorological Agency telegrams collected in advance across five municipalities over a half-month period.
+- 7m: First, we created 110 layouts from 206 Japan Meteorological Agency telegrams collected in advance across five municipalities over three weeks.
 - 9: If there is a system capable of receiving signals, disaster information can be automatically displayed on any screen anywhere.
 - 10: EVAC LAYER is open source.

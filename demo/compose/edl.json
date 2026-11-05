@@ -174,11 +174,11 @@
       "slate": "架空の警報画面 180 枚（5 形状・4 種別・レベル 2〜5・5 自治体）が中央から加速して増えるモザイク（2 枚/秒 → 終盤 55 枚/秒）。9.5 s で静止 → 背景 40 % に落として数字（5 自治体・206 本・110 レイアウト）が 1 s で確定。タイルは架空の案内で実際の電文ではない（demo/capture/mosaic_layouts.mjs・seed 固定）",
       "cut": "7m",
       "seconds": 12,
-      "subtitle_ja": "まずは半月間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。",
-      "subtitle_en": "First, we created 110 layouts from 206 Japan Meteorological Agency telegrams／collected in advance across five municipalities over a half-month period.",
-      "narration_ja": "まずは半月間で事前収集した、5つの自治体での206本の気象庁の電文から、110のレイアウトを作成しました。",
-      "narration_en": "First, we created 110 layouts from 206 Japan Meteorological Agency telegrams collected in advance across five municipalities over a half-month period.",
-      "reading_ja": "まずは はんつきかんで じぜん しゅうしゅうした、いつつの じちたいでの にひゃくろっぽんの きしょうちょうの でんぶんから、ひゃくじゅうの レイアウトを さくせいしました"
+      "subtitle_ja": "まずは3週間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。",
+      "subtitle_en": "First, we created 110 layouts from 206 Japan Meteorological Agency telegrams／collected in advance across five municipalities over three weeks.",
+      "narration_ja": "まずは3週間で事前収集した、5つの自治体での206本の気象庁の電文から、110のレイアウトを作成しました。",
+      "narration_en": "First, we created 110 layouts from 206 Japan Meteorological Agency telegrams collected in advance across five municipalities over three weeks.",
+      "reading_ja": "まずは さんしゅうかんで じぜん しゅうしゅうした、いつつの じちたいでの にひゃくろっぽんの きしょうちょうの でんぶんから、ひゃくじゅうの レイアウトを さくせいしました"
     },
     {
       "cut": "8",
