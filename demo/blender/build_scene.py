@@ -551,11 +551,16 @@ def column_face_crops(left, top, width, height, seam):
 
 
 def lower_band_crops(columns, portraits, canvas, band_top):
-    """The columns and the portrait screens side by side under the ribbons, in room order left to right with
-    equal gaps, each centred in the band: two columns share an elevation x (one behind the other), so their
-    windows cannot come from the elevation, and the band has room for all seven only in one row."""
+    """The columns and the portrait screens side by side under the ribbons with equal gaps, each centred in the
+    band: two columns share an elevation x (one behind the other), so their windows cannot come from the
+    elevation, and the band has room for all seven only in one row. The front columns come first and the back
+    ones last, the portrait screens between them, so a column and the one behind it show far-apart parts of
+    the picture."""
     width, height = canvas
-    items = sorted(columns + portraits, key=lambda item: (item[1], item[2]))
+    front_y = min(item[2] for item in columns)
+    front = sorted((item for item in columns if item[2] == front_y), key=lambda item: item[1])
+    back = sorted((item for item in columns if item[2] != front_y), key=lambda item: item[1])
+    items = front + sorted(portraits, key=lambda item: item[1]) + back
     gap = (width - sum(item[3] for item in items)) / (len(items) + 1)
     if gap < 0:
         raise SystemExit("CROPS: the columns and portrait screens do not fit side by side on the canvas")

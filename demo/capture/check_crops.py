@@ -1,5 +1,6 @@
 """Checks a crops.json: every window inside the canvas, no two windows overlapping, the four column windows
-all different, and each column's four faces adjacent round the strip (front -> right -> back -> left).
+all different, each column's four faces adjacent round the strip (front -> right -> back -> left), and each
+column at least FRONT_BACK_MIN_PX from the one behind it.
 
 python3 demo/capture/check_crops.py [demo/renders/canvas-crops.json]
 """
@@ -9,6 +10,9 @@ import sys
 from itertools import combinations
 
 FACE_ORDER = ("front", "right", "back", "left")
+# Columns 0 and 1 stand in front of 2 and 3 (demo/blender/layout.py COLUMNS); nearby windows look alike.
+FRONT_BACK_PAIRS = (("pillar_0", "pillar_2"), ("pillar_1", "pillar_3"))
+FRONT_BACK_MIN_PX = 3000
 
 
 def overlaps(a, b):
@@ -40,6 +44,10 @@ def main():
         quarter = [(faces[face][0] - x) // face_width for face in FACE_ORDER]
         if any((quarter[k + 1] - quarter[k]) % len(FACE_ORDER) != 1 for k in range(len(FACE_ORDER) - 1)):
             problems.append(f"{name}: front -> right -> back -> left is not continuous")
+    for front, back in FRONT_BACK_PAIRS:
+        distance = abs(crops[front][0] - crops[back][0])
+        if distance < FRONT_BACK_MIN_PX:
+            problems.append(f"{front} and {back} are {distance} px apart (< {FRONT_BACK_MIN_PX})")
     for line in problems:
         print(f"CROPS_CHECK {line}")
     print(f"CROPS_CHECK {len(crops)} windows, {len(columns)} columns: {'ok' if not problems else f'{len(problems)} problems'}")
