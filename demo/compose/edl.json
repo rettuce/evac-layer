@@ -101,11 +101,12 @@
           "en": "Yet during disasters,／these systems could not put out information on their own."
         }
       ],
-      "caption_ja": "公共空間のサイネージを10年以上",
-      "caption_en": "Public-space signage, 10+ years",
-      "caption_from_s": 1.0,
-      "caption_to_s": 7.5,
-      "caption_fade_ms": 300
+      "telop_ja": "公共空間のサイネージを10年以上",
+      "telop_en": "Public-space signage, 10+ years",
+      "telop_from_s": 1.0,
+      "telop_to_s": 7.5,
+      "telop_fade_ms": 300,
+      "telop_position": "top-left"
     },
     {
       "cut": "2b",

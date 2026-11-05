@@ -30,7 +30,7 @@ FONT_PATH = FONT_DIR / "NotoSansJP-Bold.otf"
 
 SUBTITLE_SIZE_RATIO = 0.034
 SUBTITLE_EN_SIZE_RATIO = 0.024
-CAPTION_MARGIN_RATIO = 0.045
+TOP_LEFT_MARGIN_RATIO = 0.089
 TELOP_SIZE_RATIO = 0.06
 TELOP_EN_SIZE_RATIO = 0.032
 LOGO_WIDTH_RATIO = 0.5
@@ -88,25 +88,25 @@ def segment_filters(segment, work, width, height, mode):
         filters.append(drawtext(write_text(work, f"sub_ja_{cut}_{n}", lines(text_ja)), ja, f"h-text_h-{ja + en_height + en}", box) + enable)
         if en_lines:
             filters.append(drawtext(write_text(work, f"sub_en_{cut}_{n}", en_lines), en, f"h-text_h-{ja}", box) + enable)
-    if segment.get("telop_ja"):
+    if segment.get("telop_ja") and segment.get("telop_position") == "top-left":
+        a, b = segment.get("telop_from_s", 0.0), segment.get("telop_to_s", segment["seconds"])
+        f = segment.get("telop_fade_ms", 0) / 1000 or 1e-3
+        alpha = (f":alpha='if(lt(t\\,{a})\\,0\\,if(lt(t\\,{a + f:.3f})\\,(t-{a})/{f}\\,if(lt(t\\,{b - f:.3f})\\,1\\,"
+                 f"if(lt(t\\,{b})\\,({b}-t)/{f}\\,0))))'")
+        ja = round(height * SUBTITLE_SIZE_RATIO)
+        en = round(height * SUBTITLE_EN_SIZE_RATIO)
+        margin = round(height * TOP_LEFT_MARGIN_RATIO)
+        filters.append(drawtext(write_text(work, f"telop_ja_{cut}", lines(segment["telop_ja"])), ja, str(margin), box,
+                                x_expr=str(margin), align="L") + alpha)
+        if segment.get("telop_en"):
+            filters.append(drawtext(write_text(work, f"telop_en_{cut}", lines(segment["telop_en"])), en,
+                                    str(margin + ja * 3 // 2), box, x_expr=str(margin), align="L") + alpha)
+    elif segment.get("telop_ja"):
         ja = round(height * TELOP_SIZE_RATIO)
         en = round(height * TELOP_EN_SIZE_RATIO)
         filters.append(drawtext(write_text(work, f"telop_ja_{cut}", lines(segment["telop_ja"])), ja, "(h-text_h)/2-th", box))
         if segment.get("telop_en") and segment["telop_en"] != segment["telop_ja"]:
             filters.append(drawtext(write_text(work, f"telop_en_{cut}", lines(segment["telop_en"])), en, f"h/2+{ja}", box))
-    if segment.get("caption_ja"):
-        a, b = segment["caption_from_s"], segment["caption_to_s"]
-        f = segment.get("caption_fade_ms", 0) / 1000 or 1e-3
-        alpha = (f":alpha='if(lt(t\\,{a})\\,0\\,if(lt(t\\,{a + f:.3f})\\,(t-{a})/{f}\\,if(lt(t\\,{b - f:.3f})\\,1\\,"
-                 f"if(lt(t\\,{b})\\,({b}-t)/{f}\\,0))))'")
-        ja = round(height * SUBTITLE_SIZE_RATIO)
-        en = round(height * SUBTITLE_EN_SIZE_RATIO)
-        margin = round(height * CAPTION_MARGIN_RATIO)
-        filters.append(drawtext(write_text(work, f"caption_ja_{cut}", lines(segment["caption_ja"])), ja, str(margin), box,
-                                x_expr=str(margin), align="L") + alpha)
-        if segment.get("caption_en"):
-            filters.append(drawtext(write_text(work, f"caption_en_{cut}", lines(segment["caption_en"])), en,
-                                    str(margin + ja * 3 // 2), box, x_expr=str(margin), align="L") + alpha)
     return filters
 
 
