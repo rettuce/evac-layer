@@ -25,8 +25,9 @@ const GROUND = new THREE.Color(0x0a0a0a)
 const TEAL = [0.16, 0.67, 0.67] as const
 const AMBER = [0.94, 0.59, 0.2] as const
 
-// A continuous ramp teal -> cyan -> violet -> amber for the gradient looks; 'two-tone' is the D-12 mix.
-const RAMP = 'vec3 ramp(float t) { t = fract(t); return mix(mix(vec3(0.10, 0.55, 0.60), vec3(0.30, 0.80, 0.90), smoothstep(0.0, 0.33, t)), mix(vec3(0.62, 0.42, 0.90), vec3(0.96, 0.62, 0.22), smoothstep(0.55, 0.9, t)), smoothstep(0.3, 0.6, t)); }'
+// A continuous ramp teal -> cyan -> violet -> amber for the gradient looks, mirrored rather than wrapped past 1 so
+// the colour has no edge where its argument crosses an integer; 'two-tone' is the D-12 mix.
+const RAMP = 'vec3 ramp(float t) { t = 1.0 - abs(1.0 - mod(t, 2.0)); return mix(mix(vec3(0.10, 0.55, 0.60), vec3(0.30, 0.80, 0.90), smoothstep(0.0, 0.33, t)), mix(vec3(0.62, 0.42, 0.90), vec3(0.96, 0.62, 0.22), smoothstep(0.55, 0.9, t)), smoothstep(0.3, 0.6, t)); }'
 const COLOUR_EXPR = {
   'two-tone': 'mix(teal, amber, smoothstep(0.1, 0.9, along))',
   direction: 'ramp(heading * 0.85 + (g.w - 0.5) * 0.1)',
@@ -127,7 +128,7 @@ void main() {
   vec3 teal = vec3(${TEAL[0]}, ${TEAL[1]}, ${TEAL[2]});
   vec3 amber = vec3(${AMBER[0]}, ${AMBER[1]}, ${AMBER[2]});
   float along = n.x * 0.7 + n.y * 0.3 + (g.w - 0.5) * 0.3;
-  float heading = atan(dir.y, dir.x) / 6.2831853 + 0.5;
+  float heading = abs(atan(dir.y, dir.x)) / 3.14159265;
   vec3 col = ${COLOUR_EXPR};
   col = mix(col, vec3(0.95, 0.92, 0.85), g.w > 0.95 ? 0.85 : 0.2);
   vColor = col;
