@@ -93,16 +93,6 @@
         "id": "Lansia harap mengungsi"
       },
       "motion": "static"
-    },
-    {
-      "id": "source",
-      "role": "source",
-      "priority": 9,
-      "text": {
-        "ja": "気象庁 10/21 15:55 発表・由利本荘市",
-        "en": "JMA 15:55, Oct 21 · Yurihonjo"
-      },
-      "motion": "static"
     }
   ],
   "palette": "cabinet-office-5",

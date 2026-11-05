@@ -70,16 +70,6 @@
         "id": "Tidak perlu mengungsi"
       },
       "motion": "static"
-    },
-    {
-      "id": "source",
-      "role": "source",
-      "priority": 9,
-      "text": {
-        "ja": "気象庁 10/22 06:20 発表・由利本荘市",
-        "en": "JMA 06:20, Oct 22 · Yurihonjo"
-      },
-      "motion": "static"
     }
   ],
   "palette": "cabinet-office-5",

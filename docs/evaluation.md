@@ -39,6 +39,8 @@ A finding is one check failing on one shape of one screen, on the first attempt.
 | 17 | 22424 | 3 | 5 | 0 | — | a region downgraded from a warning to 津波予報（若干の海面変動） now gets an all-clear with a sea-level caution instead of leaving the warning screen up (found through the samples, see FINDINGS); 吉田町's 09:55 bulletin became its third screen on the first attempt |
 | 18 | 22424 | 3 | 5 | 0 | — | the caution all-clear's action pictogram is safe_here again (the action pictogram shows the action only; the hazard is the headline's); Writer text reused from cache |
 | 19 | 15205 | 3 | 5 | 0 | — | prompt caching: breakpoints after the Writer's system prompt and municipality block and after the Vision Verifier's system prompt; 柏崎 regenerated twice to measure (Writer rewritten once, Vision twice) |
+| 20 | 05210 | 5 | 5 | 5 | missing-source (1:1) | L-4/L-5 renderer (田中's artboards) and the Verifier floor lowered to the artboard sizes (16:9 action 120, languages 54 / label 24, source 24; 1:1 languages 56); level 5 keeps shelter and direction. Every 1:1 failed because the figma-square template has no source line, so the 06:20 all-clear had nothing to clear |
+| 21 | 05210 | 6 | 5 (1:1 static only) | 0 | — | same renderer, `--skip-browser-shapes 1x1` until the 1:1 source line exists; 6/6 pass, Vision $0.26 (24 checks) |
 
 Every finding in runs 1 and 2 was a real defect: the Composer or the renderer was changed, and the next run no longer reported it (the `fix` field in each findings file). The overflows in runs 3 and 4 were the renderer's header bar; once it was fixed, run 5 passed every screen on the first attempt without calling the Writer.
 
