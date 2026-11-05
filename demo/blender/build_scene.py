@@ -244,7 +244,7 @@ SHOTS = {
         "path": [(Vector((0.0, y, CLAY_EYE_Z)), CLAY_TARGET) for y in (-8.4, -6.8)],
     },
     "cut02": {
-        "seconds": 8, "screens": "ambient-real", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "32x9",
+        "seconds": 15, "screens": "ambient-real", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "32x9",
         "path": [(Vector((-0.7, CUT02_DOLLY_Y, EYE_Z)), Vector((-0.7, BACK_WALL_Y, 2.3))),
                  (Vector((0.7, CUT02_DOLLY_Y, EYE_Z)), Vector((0.7, BACK_WALL_Y, 2.3)))],
     },

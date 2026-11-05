@@ -46,8 +46,9 @@ def overlays(edl):
         cut = segment["cut"]
 
         if segment.get("telop_ja"):
-            rows.append({"cut": cut, "kind": "telop", "start_s": start, "end_s": end,
-                         "text_ja": segment["telop_ja"], "text_en": segment.get("telop_en", "")})
+            rows.append({"cut": cut, "kind": "telop", "start_s": start + segment.get("telop_from_s", 0.0),
+                         "end_s": start + segment.get("telop_to_s", segment["seconds"]), "text_ja": segment["telop_ja"],
+                         "text_en": segment.get("telop_en", ""), "fade_ms": segment.get("telop_fade_ms", "")})
         if segment.get("logo"):
             rows.append({"cut": cut, "kind": "logo", "start_s": start, "end_s": end, "text_ja": "", "text_en": "",
                          "file": segment["logo"]})
@@ -112,10 +113,10 @@ def write_csv(rows, path):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["cut", "kind", "start_s", "end_s", "text_ja", "text_en", "png_name"])
+        writer.writerow(["cut", "kind", "start_s", "end_s", "text_ja", "text_en", "png_name", "fade_ms"])
         for row in rows:
             writer.writerow([row["cut"], row["kind"], f"{row['start_s']:.2f}", f"{row['end_s']:.2f}",
-                             row["text_ja"], row["text_en"], row["png_name"]])
+                             row["text_ja"], row["text_en"], row["png_name"], row.get("fade_ms", "")])
 
 
 def main():
