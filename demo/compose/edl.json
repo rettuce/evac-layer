@@ -179,11 +179,11 @@
       "slate": "管理画面: 一式を承認 →「自動配信 ON」・施設の緯度経度ピン",
       "cut": "5b",
       "seconds": 9,
-      "subtitle_ja": "何を出すかは、事前に人が確認できます。／承認しておけば、有事に自動で避難案内に切り替わります。",
+      "subtitle_ja": "何を出すかは、事前に人が確認できます。／承認しておけば、有事の際に自動で避難案内に切り替わります。",
       "subtitle_en": "What to show can be checked in advance.／Approve it once, and the screens switch to evacuation guidance by themselves.",
-      "narration_ja": "何を出すかは、事前に人が確認できます。承認しておけば、有事に自動で避難案内に切り替わります。",
+      "narration_ja": "何を出すかは、事前に人が確認できます。承認しておけば、有事の際に自動で避難案内に切り替わります。",
       "narration_en": "What to show can be checked in advance. Approve it once, and the screens switch to evacuation guidance by themselves.",
-      "reading_ja": "なにを だすかは、じぜんに ひとが かくにん できます。しょうにん しておけば、ゆうじに じどうで ひなん あんないに きりかわります"
+      "reading_ja": "なにを だすかは、じぜんに ひとが かくにん できます。しょうにん しておけば、ゆうじの さいに じどうで ひなん あんないに きりかわります"
     },
     {
       "kind": "capture",

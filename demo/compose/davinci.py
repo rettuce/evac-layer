@@ -151,11 +151,18 @@ def assemble(args, edl):
     shutil.copyfile(args.mix, mix)
     if TEXT_TABLE.exists():
         shutil.copyfile(TEXT_TABLE, out / "docs" / TEXT_TABLE.name)
-    write_readme(out, v, edl, missing, mix)
+    write_readme(out, v, edl, missing, mix, args.note)
     return missing
 
 
-def write_readme(out, version, edl, missing, mix):
+def narration_in_mix(out):
+    takes = sorted((out / "audio" / "narration").glob("*.wav"))
+    if not (out / "audio" / "stems" / "narration.wav").exists():
+        return "no narration"
+    return f"narration: 田中の録音 {len(takes)} 本・cut ごとに頭に配置"
+
+
+def write_readme(out, version, edl, missing, mix, notes=()):
     total = sum(segment["seconds"] for segment in edl["segments"])
     listing = []
     for path in sorted(p for p in out.rglob("*") if p.is_file() and "_prev" not in p.parts and p.name != "README.md"):
@@ -169,7 +176,7 @@ def write_readme(out, version, edl, missing, mix):
         f"version: {version}",
         f"updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
         f"timeline: {total:.0f} s · {edl['size'][0]}x{edl['size'][1]} @ {edl['fps']} fps · every file starts at t = 0",
-        f"mix: {integrated_lufs(mix):.1f} LUFS integrated (BGM set to {BGM_LUFS:.0f} LUFS; no narration)",
+        f"mix: {integrated_lufs(mix):.1f} LUFS integrated (BGM set to {BGM_LUFS:.0f} LUFS; {narration_in_mix(out)})",
         "",
         "## Use",
         "",
@@ -180,6 +187,7 @@ def write_readme(out, version, edl, missing, mix):
         "- `audio/mix/` is the finished mix; `audio/stems/` the layers it was made of, `audio/bgm/` and `audio/se/` the sources, `audio/se.csv` when the switch sound plays.",
         f"- `audio/narration/` and `audio/narration-prev/`: {RECORDINGS_NOTE}. A new version leaves them where they are.",
         "- `docs/demo-v8-text.md` is the text table (Figma is the source of the wording).",
+        *[f"- {note}" for note in notes],
         "",
         "## Rights",
         "",
@@ -205,6 +213,7 @@ def main():
     parser.add_argument("--vcon")
     parser.add_argument("--stems")
     parser.add_argument("--mix", default=str(DEMO / "out" / "evac-layer-demo-v1-mix.wav"))
+    parser.add_argument("--note", action="append", default=[], help="a line for the README's Use section (repeatable)")
     args = parser.parse_args()
     v = args.version
     args.clean = args.clean or str(DEMO / "out" / f"evac-layer-demo-{v}-clean.mp4")
