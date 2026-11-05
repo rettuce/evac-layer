@@ -102,6 +102,7 @@ button.act.primary:not(:disabled) kbd { color: var(--ev-bg); border-color: var(-
 const SAMPLE_RATE = 48000
 const CHARS_PER_SECOND = 5
 const METER_HOT = 0.9
+const FADE_SECONDS = 0.1
 const WORKLET = `
 class Collect extends AudioWorkletProcessor {
   process(inputs) {
@@ -131,10 +132,13 @@ function encodeWav(chunks, sampleRate) {
   view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * bytesPerSample, true)
   view.setUint16(32, bytesPerSample, true); view.setUint16(34, 24, true)
   text(36, 'data'); view.setUint32(40, dataBytes, true)
+  const fade = Math.round(FADE_SECONDS * sampleRate)
   let at = 44
+  let n = 0
   for (const chunk of chunks) {
-    for (let i = 0; i < chunk.length; i++) {
-      const v = Math.round(Math.max(-1, Math.min(1, chunk[i])) * 8388607)
+    for (let i = 0; i < chunk.length; i++, n++) {
+      const gain = Math.min(1, n / fade, (length - 1 - n) / fade)
+      const v = Math.round(Math.max(-1, Math.min(1, chunk[i] * gain)) * 8388607)
       view.setUint8(at, v & 0xff); view.setUint8(at + 1, (v >> 8) & 0xff); view.setUint8(at + 2, (v >> 16) & 0xff)
       at += 3
     }

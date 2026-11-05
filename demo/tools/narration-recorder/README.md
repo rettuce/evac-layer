@@ -30,6 +30,7 @@ Host が `127.0.0.1:<port>` か `localhost:<port>` でない要求と、Origin �
 ## 出力
 
 - 48 kHz・24 bit・mono の WAV（ブラウザ側で変換。エコー除去・ノイズ抑制・自動ゲインは切ってある）
+- 頭と末尾の 0.1 s にはリニアのフェードを掛けて保存する（録音の開始・停止の段差で出るブチッという音を消すため）
 - ファイル名は `mix_audio.py` の `narration_filename` と同じ規則（`cut00.wav`・`cut00b.wav`・`cut05c.wav`・`cut07m.wav`）
 - 同じ cut を保存すると上書きされ、直前の 1 本だけ `narration-prev/` に残る
 - 一覧の「窓」は `mix_audio.py` の `narration_track` と同じ計算（その cut の頭から次にナレーションのある cut の頭まで。cut 0 は頭から 5.0 s 後に置くのでその分短い）。台本は `demo/compose/edl.json` を毎回読み直す
