@@ -1,7 +1,7 @@
 """Mix the soundtrack for the demo from the EDL timeline, then mux it onto the composed video.
 
 python3 demo/compose/mix_audio.py --sfx-dir <Adobe Audition SFX folder> [--video demo/renders/evac-layer-demo.mp4]
-    [--bgm demo/compose/audio/bgm/<track>.mp3]
+    [--bgm <wav> | --no-bgm]
 
 Narration is either one 179 s demo/compose/audio/narration.wav, or one take per cut in
 demo/compose/audio/narration/cutNN.wav (names from narration_filename) placed at that cut's start.
@@ -28,6 +28,8 @@ AMBIENCE_LUFS = -30.0
 DRONE_LUFS = -26.0
 # A fixed gain for the music bed, no ducking under narration yet, so a candidate can be judged on its own level.
 BGM_LUFS = -24.0
+BGM_DEFAULT = AUDIO_DIR / "bgm" / "grid-cover-1-00254105.wav"
+BGM_SOURCE = "https://suno.com/song/00254105-6ec5-4a63-a178-f82a1451777a"
 BEEP_PEAK_DB = -6.0
 FADE_S = 0.5
 
@@ -187,13 +189,26 @@ def mux(video, audio, out):
                     "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest", str(out)], check=True)
 
 
+def resolve_bgm(args):
+    if args.no_bgm:
+        return None
+    bgm = Path(args.bgm)
+    if bgm.exists():
+        return bgm
+    if bgm == BGM_DEFAULT:
+        print(f"BGM skipped: {bgm} is missing (download the WAV from {BGM_SOURCE})")
+        return None
+    raise SystemExit(f"{bgm} is missing")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--edl", default=str(HERE / "edl.json"))
     parser.add_argument("--sfx-dir")
     parser.add_argument("--video", default=str(HERE.parent / "renders" / "evac-layer-demo.mp4"))
     parser.add_argument("--out", default=str(OUT_DIR / "evac-layer-demo-v1.mp4"))
-    parser.add_argument("--bgm", help="music bed, looped or trimmed to the video and set to BGM_LUFS")
+    parser.add_argument("--bgm", default=str(BGM_DEFAULT), help="music bed, looped or trimmed to the video and set to BGM_LUFS")
+    parser.add_argument("--no-bgm", action="store_true", help="mix without the music bed")
     parser.add_argument("--switch-se", help="WAV for the switch sound in place of the default Sci-Fi Electronic Beep 04")
     # Stems stay at their mix gains and skip the limiter, so they sum back to the mix for an editor to rebalance.
     parser.add_argument("--stems", help="also write one 48 kHz WAV per layer, full length from 0 s, into this folder")
@@ -207,7 +222,7 @@ def main():
     work = Path(tempfile.mkdtemp(prefix="evac-mix-"))
     try:
         narration = narration_track(edl, starts, total, work / "narration.wav")
-        items = layers(paths, narration, starts, total, Path(args.bgm) if args.bgm else None)
+        items = layers(paths, narration, starts, total, resolve_bgm(args))
         render(items, total, work / "raw.wav")
         if args.stems:
             write_stems(items, total, Path(args.stems))

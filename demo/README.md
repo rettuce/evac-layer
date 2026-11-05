@@ -50,6 +50,7 @@
 6. **音を載せる**: `python3 demo/compose/mix_audio.py --sfx-dir <Adobe Audition SFX> --out demo/out/evac-layer-demo-v2.mp4`（切替の SE を差し替えるときは `--switch-se <wav>`）
    - 環境音 -30 LUFS・カット 0 と 5 の切替の電子音（ピーク -6 dBFS）・ドローン -26 LUFS。-18 LUFS はナレーション用に空けてある
    - 切替の電子音は Adobe Audition SFX の `Science Fiction/Science Fiction Sci-Fi Electronic Beep 04.wav`（97 ms）。作品内での使用・改変は可、素材単体での配布は不可のため、リポには入れず `--sfx-dir` から `demo/compose/audio/switch.wav` に複製する（`ASSETS.md`）
+   - BGM は Suno（Pro プラン）で作った `compose/audio/bgm/grid-cover-1-00254105.wav` を既定で −24 LUFS で敷く。ファイルが無ければ BGM 無しでミックスし、その旨を表示する。外すときは `--no-bgm`、差し替えは `--bgm <wav>`
    - ナレーションは、カット別の録音を `demo/compose/audio/narration/cutNN.wav`（ファイル名は `compose/narration.md` の録音台本の表）に置けば各カットの開始秒に入る。179 s の `narration.wav` 1 本でもよい。カット別のファイルがあればそちらを使う
 7. **字幕と台本を書き出す**: `python3 demo/compose/subtitles.py [--with-narration]` → `compose/narration.md`（録音台本）と英語字幕 `demo/out/evac-layer-demo-v2.en.srt`（焼き込まない）
 
