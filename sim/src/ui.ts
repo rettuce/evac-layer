@@ -23,46 +23,62 @@ function group(root: HTMLElement, title: string): HTMLElement {
   return element
 }
 
-function radioButtons<T extends string>(parent: HTMLElement, options: [T, string][], initial: T, onPick: (value: T) => void): HTMLButtonElement[] {
+interface Radio<T extends string> {
+  buttons: HTMLButtonElement[]
+  pick: (value: T) => void
+}
+
+function radioButtons<T extends string>(parent: HTMLElement, options: [T, string][], initial: T, onPick: (value: T) => void): Radio<T> {
   const buttons = new Map<T, HTMLButtonElement>()
   const select = (value: T) => {
     for (const [key, button] of buttons) button.setAttribute('aria-pressed', String(key === value))
   }
+  const pick = (value: T) => {
+    select(value)
+    onPick(value)
+  }
   for (const [value, label] of options) {
     const button = document.createElement('button')
     button.textContent = label
-    button.addEventListener('click', () => {
-      select(value)
-      onPick(value)
-    })
+    button.addEventListener('click', () => pick(value))
     buttons.set(value, button)
     parent.appendChild(button)
   }
   select(initial)
-  return [...buttons.values()]
+  return { buttons: [...buttons.values()], pick }
 }
 
 export interface Ui {
+  readonly content: Content
+  readonly scene: AmbientScene
+  // The keyboard goes through the same path as a click, so the pressed button follows.
+  pickContent: (content: Content) => void
+  pickScene: (scene: AmbientScene) => void
+  isSceneAvailable: (scene: AmbientScene) => boolean
   setSceneAvailable: (scene: AmbientScene, available: boolean) => void
 }
 
 export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { content: Content; scene: AmbientScene; mode: RenderMode }, handlers: UiHandlers): Ui {
-  const sceneButtons: HTMLButtonElement[] = []
   const missing = new Set<AmbientScene>()
-  let shownContent = initial.content
+  const current = { content: initial.content, scene: initial.scene }
+  let sceneButtons: HTMLButtonElement[] = []
   const enableScenes = () => {
     sceneButtons.forEach((button, index) => {
       const scene = SCENES[index]!
-      button.disabled = shownContent !== 'calm' || missing.has(scene)
+      button.disabled = current.content !== 'calm' || missing.has(scene)
       button.title = missing.has(scene) ? '動画未配置' : ''
     })
   }
-  radioButtons(group(root, 'content'), CONTENTS, initial.content, (content) => {
-    shownContent = content
+  const contents = radioButtons(group(root, 'content'), CONTENTS, initial.content, (content) => {
+    current.content = content
     enableScenes()
     handlers.onContent(content)
   })
-  sceneButtons.push(...radioButtons(group(root, 'ambient scene (平常時)'), SCENES.map((id) => [id, id]), initial.scene, handlers.onScene))
+  const scenes = radioButtons(group(root, 'ambient scene (平常時)'), SCENES.map((id) => [id, id]), initial.scene, (scene) => {
+    current.scene = scene
+    handlers.onScene(scene)
+  })
+  sceneButtons = scenes.buttons
   enableScenes()
   radioButtons(group(root, 'render'), RENDER_MODES, initial.mode, handlers.onRenderMode)
   const cameras = group(root, 'camera')
@@ -78,6 +94,15 @@ export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { c
   copy.addEventListener('click', handlers.onCopyCamera)
   cameras.appendChild(copy)
   return {
+    get content() {
+      return current.content
+    },
+    get scene() {
+      return current.scene
+    },
+    pickContent: contents.pick,
+    pickScene: scenes.pick,
+    isSceneAvailable: (scene) => !missing.has(scene),
     setSceneAvailable: (scene, available) => {
       if (available) missing.delete(scene)
       else missing.add(scene)
