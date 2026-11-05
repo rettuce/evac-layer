@@ -101,14 +101,14 @@ The five cover different hazards and different settings. One data condition appl
 
 ## What a nationwide roll-out would cost in API calls
 
-A rough extrapolation from the figures above. It assumes the same models and prompts and counts API calls only, not screens, network lines or staff.
+A rough extrapolation from the figures above; it assumes the same models and prompts, and it counts API calls only (no screens, lines or staff).
 
 | Item | Basis | Estimate |
 |---|---|---|
 | Reader, once per municipality | $0.26–$1.17 per municipality over the five (page count of the municipal documents) | about 1,740 municipalities × $0.3–1.2 ≈ **$500–2,000, once** |
-| Screens per municipality per year | 206 bulletins for 5 municipalities in 23 days, 22 of them warning-level and thus rendered → about 70 rendered screens per municipality per year | — |
-| Writer + Vision per rendered screen | $0.245 steady state (Writer once, Vision on 5 shapes) | **about $17 per municipality per year** |
-| All municipalities | 1,740 × $17 | **about $30,000 per year** |
-| Per installed site | Vision runs per site; a municipality with many sites multiplies the Vision part | **about $17 per site per year**, so 10,000 sites ≈ $170,000 per year |
+| Rendered screens per municipality per year | 200 recorded bulletins for 5 municipalities in 23 days (2026-10-11 to 11-03), 16 of them warning-level and thus rendered (the 6 tsunami screens from the official sample series are left out) → about 51 rendered screens per municipality per year | — |
+| Writer + Vision per rendered screen | $0.245 steady state (Writer once, Vision on 5 shapes) | **about $13 per municipality per year** |
+| All municipalities, one site each | 1,740 × $13 | **about $22,000 per year** |
+| Each additional site in a municipality | the Writer output is cached per municipality and hazard, so an extra site pays for Vision only: $0.053 per screen (5 shapes) × 51 | **about $3 per extra site per year**; 10,000 sites nationwide ≈ $22,000 + 8,260 × $3 ≈ **$47,000 per year** |
 
-Caveats. The recording window (2026-10-11 to 11-02) falls in typhoon season, so the annualised bulletin count is on the high side. Prompt caching and the Batch API (half price) would roughly halve the figures. The Writer output is cached per municipality and hazard, so additional sites in the same municipality pay mostly for Vision.
+Caveats: the recording window sits in typhoon season, so the annualised bulletin count is on the high side; prompt caching and the Batch API (half price) would roughly halve the figures.
