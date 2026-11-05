@@ -29,7 +29,7 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 | ov-3-subtitle-1.png | 3 | subtitle | 災害の種類と警戒レベル。アイコンと10の言語。／そして、どんな形のスクリーンにも、適切なレイアウトで描きます。 | Hazard types and alert levels. Icons and ten languages.／And for a screen of any shape, a layout that fits. | 3245:4 |
 | ov-4-subtitle-1.png | 4 | subtitle | 避難案内は自動作成され、人が事前承認したものだけが、／警報が届いた瞬間に表示されます。 | Evacuation guidance is generated automatically. Only what a person has approved in advance／is shown, the moment a warning arrives. | 3244:21 |
 | ov-5c-subtitle-1.png | 5c | subtitle | 同じ警報でも、スクリーンの位置が違えば、／避難先も方向も距離も適切な情報となって表示されます。 | Same warning, different place.／The shelter, the direction and the distance follow where the screen stands. | 3244:25 |
-| ov-5-subtitle-1.png | 5 | subtitle | 10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシミュレートしています。 | Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed. | 3244:29 |
+| ov-5-subtitle-1.png | 5 | subtitle | 10月21日に由利本荘市で実際に発表された警報です。 | This is a real warning, issued for Yurihonjo City on October 21. | 3244:29 |
 | ov-5-subtitle-2.png | 5 | subtitle | 当日、警戒レベル3、4、5と変化していく中で、／すべてのスクリーンが、同じ瞬間に切り替わっていきます。 | That day, as the alert level rose from 3 to 4 to 5,／every screen switched at the same moment. | 3244:33 |
 | ov-5b-subtitle-1.png | 5b | subtitle | 何を出すかは、事前に人が確認できます。／承認しておけば、有事の際に自動で避難案内に切り替わります。 | What to show can be checked in advance.／Approve it once, and the screens switch to evacuation guidance by themselves. | 3244:37 |
 | ov-7m-subtitle-1.png | 7m | subtitle | まずは3週間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。 | First, we created 110 layouts from 206 Japan Meteorological Agency telegrams ／collected in advance across five municipalities over three weeks. | 3244:41 |
@@ -75,3 +75,5 @@ Figma のページ「v8 overlays」が文言の正本。該当フレームの文
 2026-11-06 B-16（田中が録音時に変更）: cut 5 の 2 文目を差し替え。ja「警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。」→「当日、警戒レベル3、4、5と変化していく中で、／すべてのスクリーンが、同じ瞬間に切り替わっていきます。」、en "Alert levels 3, 4 and 5. Every screen switches at the same moment." → "That day, as the alert level rose from 3 to 4 to 5,／every screen switched at the same moment."。1 行 → 2 行で帯の高さが 150 → 252 px（下端は画面下から 72 px のまま）。
 
 2026-11-06 B-17（田中が録音時に変更）: cut 5b の ja 2 行目「有事に」→「有事の際に」。1 行目と en は変更なし。
+
+2026-11-06 B-18（田中確定・1200 倍の再生をやめたため）: cut 5 の 1 文目を差し替え。ja「10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシミュレートしています。」→「10月21日に由利本荘市で実際に発表された警報です。」、en "Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed." → "This is a real warning, issued for Yurihonjo City on October 21."。2 行 → 1 行で帯の高さが 252 → 150 px（下端は画面下から 72 px のまま）。
