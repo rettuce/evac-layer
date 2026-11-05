@@ -63,6 +63,7 @@ const quiet = (municipality) => ({
   seconds: MUNICIPALITY_SECONDS, startMs: 0, ready: LIVE_READY, events: [], approve: false,
   query: { ...LIVE, municipality, from: '2026-10-15T00:00+09:00', to: '2026-10-15T06:00+09:00' },
 })
+const previewOf = (municipality, bulletin) => (shape) => ({ src: `/api/admin/preview-layout?${new URLSearchParams({ municipality, bulletin, shape })}` })
 const MUNICIPALITY_CUTS = {
   'muni-05210': preview('05210', 'VXKOii-202610211815-e713da0e3c05'),
   'muni-17204': preview('17204', 'VPWW56-202610211304-1ebf37f5ab8a'),
@@ -75,12 +76,17 @@ const CUTS = {
   ...SITE_CUTS,
   ...MUNICIPALITY_CUTS,
   ambient: { seconds: 12, startMs: 0, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
-  switch: { seconds: 27, startMs: 5000, query: LIVE, ready: LIVE_READY, events: LIVE_EVENTS_MS },
+  // Cut 5 opens on 4 s of the calm screen before the 13.1 s level 3 (v9).
+  switch: { seconds: 27, startMs: 9100, query: { ...LIVE, scene: 'etched-streams' }, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
   // v8 (D-14): the clock runs at real time everywhere except cut 5. The replay clock starts at the window's first
   // bulletin, so a negative start shows the calm screen before it: 15:54:55, then the 15:55 level 3 at 5 s.
   'switch-real': { seconds: 13, startMs: -5000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [0] },
-  'ambient-real': { seconds: 12, startMs: -300000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [] },
+  'ambient-real': { seconds: 12, startMs: -300000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'brush-flow' }, ready: LIVE_READY, events: [] },
+  // Cut 8 (v9) changes bulletin as the camera starts each move: one still alert per bulletin, per shape.
+  'alert-lv3': { seconds: 6, startMs: 3000, query: previewOf('05210', 'VXKOii-202610211555-d5ccc7c6b547'), ready: READY_SELECTOR, events: [] },
+  'alert-lv4': { seconds: 6, startMs: 3000, query: previewOf('05210', 'VXKOii-202610211815-e713da0e3c05'), ready: READY_SELECTOR, events: [] },
+  'alert-tsunami': { seconds: 6, startMs: 3000, query: previewOf('22424', 'VTSE41-201609010713-ff3dd5d5c94f'), ready: READY_SELECTOR, events: [] },
   'alert-real': { seconds: 27, startMs: 3000, query: { ...LIVE, speed: '1', from: '2026-10-21T19:45+09:00' }, ready: LIVE_READY, events: [] },
   // The dashboard counts up in about 4 s of its own clock; a quarter rate stretches that over the cut.
   dashboard: { seconds: 25, startMs: 0, rate: 0.25, page: '/dashboard', query: {}, ready: '.dashboard[data-ready="1"]', events: [] },
@@ -124,12 +130,17 @@ function options() {
   }
 }
 
+function queryOf(cut, shape) {
+  const { query } = CUTS[cut]
+  return typeof query === 'function' ? query(shape) : query
+}
+
 function frameUrl(opts, tMs) {
   const params = new URLSearchParams({
     shape: opts.shape,
     clock: 'virtual',
     t: String(Math.round(tMs)),
-    ...CUTS[opts.cut].query,
+    ...queryOf(opts.cut, opts.shape),
     ...(opts.scene ? { scene: opts.scene } : {}),
   })
   if (opts['site-name'] && opts.cut !== 'alert') params.set('site_name', opts['site-name'])
@@ -182,7 +193,8 @@ async function openPage(browser, opts, tMs) {
 // Live screens only show approved bulletins and read approvals once on mount, so approve every
 // bulletin that becomes a screen (and turn auto-publish on) before the first page opens.
 async function approveLive(browser, opts) {
-  const { query, approve } = CUTS[opts.cut]
+  const { approve } = CUTS[opts.cut]
+  const query = queryOf(opts.cut, opts.shape)
   if (query.mode !== 'live' || approve === false) return null
   const { mode, ...replayQuery } = query
   const replayPath = `/api/replay?${new URLSearchParams(replayQuery)}`

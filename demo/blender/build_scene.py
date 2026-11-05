@@ -35,7 +35,7 @@ SCREENS_DIR = DEMO_DIR / "screens"
 CACHE_DIR = DEMO_DIR / "cache"
 HDRI_PATH = DEMO_DIR / "assets" / "metro_vijzelgracht_1k.hdr"
 PLACEHOLDER_FONT = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
-CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "off", "test")
+CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "cut08-seq", "off", "test")
 
 INCH = 0.0254
 JOINT_M = 0.003
@@ -245,19 +245,20 @@ SHOTS = {
         "path": [(Vector((-0.7, -8.6, EYE_Z)), Vector((-0.7, BACK_WALL_Y, 2.3))),
                  (Vector((0.7, -8.6, EYE_Z)), Vector((0.7, BACK_WALL_Y, 2.3)))],
     },
-    # Cut 0: the switch seen close on one column face, on a real-time clock: 15:54:55 at 0 s, the 0.3 s of black
+    # Cut 0: the switch seen on one column face from a step further back (45 mm, v9), on a real-time clock: 15:54:55 at 0 s, the 0.3 s of black
     # at 5.0 s and the level-3 screen scaling in at 5.3 s.
     "cut00": {
-        "seconds": 13, "screens": "switch-real", "light_scale": 1.0, "lens": 50.0,
+        "seconds": 13, "screens": "switch-real", "light_scale": 1.0, "lens": 45.0,
         "path": push_from("col-front-50", 0.3), "focus_point": CLOSEUP_TARGETS["col"],
     },
     "cut05": {
-        "seconds": 25, "screens": "switch", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
+        "seconds": 21, "screens": "switch", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
         "path": push_from("wide-a", 0.4),
     },
-    # Cut 8: one camera move column -> ribbon -> back wall, holding on each screen and easing between them.
+    # Cut 8: one camera move column -> ribbon -> back wall, holding on each screen and easing between them; the
+    # screens change bulletin as each move starts (demo/capture/cut08_sequence.sh).
     "cut08": {
-        "seconds": 15, "screens": "alert-real", "light_scale": 1.0, "lens": CLOSE_LENS_MM, "focus_follows": True,
+        "seconds": 15, "screens": "cut08-seq", "light_scale": 1.0, "lens": CLOSE_LENS_MM, "focus_follows": True,
         "path": [held for name in ("col-final", "rib-final", "wall-final") for held in [(STILL_CAMERAS[name]["location"], STILL_CAMERAS[name]["target"])] * 2],
         "path_s": [0.0, 11 / 3, 17 / 3, 28 / 3, 34 / 3, 15.0],
     },
