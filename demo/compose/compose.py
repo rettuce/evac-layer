@@ -18,7 +18,7 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-from overlays import lines
+from overlays import lines, subtitle_spans
 
 HERE = Path(__file__).resolve().parent
 SCREENS_DIR = HERE.parent / "screens"
@@ -73,15 +73,16 @@ def segment_filters(segment, work, width, height, mode):
     filters = []
     box = bool(segment.get("src"))
     cut = segment["cut"]
-    if segment.get("subtitle_ja"):
+    spans = subtitle_spans(segment)
+    for n, (a, b, text_ja, text_en) in enumerate(spans):
         ja = round(height * SUBTITLE_SIZE_RATIO)
         en = round(height * SUBTITLE_EN_SIZE_RATIO)
-        en_lines = lines(segment.get("subtitle_en", ""))
+        en_lines = lines(text_en)
         en_height = (en_lines.count("\n") + 1) * en * 4 // 3 if en_lines else 0
-        enable = f":enable='gte(t\\,{segment['subtitle_from_s']})'" if segment.get("subtitle_from_s") else ""
-        filters.append(drawtext(write_text(work, f"sub_ja_{cut}", lines(segment["subtitle_ja"])), ja, f"h-text_h-{ja + en_height + en}", box) + enable)
+        enable = f":enable='between(t\\,{a:.3f}\\,{b:.3f})'" if len(spans) > 1 or a > 0 else ""
+        filters.append(drawtext(write_text(work, f"sub_ja_{cut}_{n}", lines(text_ja)), ja, f"h-text_h-{ja + en_height + en}", box) + enable)
         if en_lines:
-            filters.append(drawtext(write_text(work, f"sub_en_{cut}", en_lines), en, f"h-text_h-{ja}", box) + enable)
+            filters.append(drawtext(write_text(work, f"sub_en_{cut}_{n}", en_lines), en, f"h-text_h-{ja}", box) + enable)
     if segment.get("telop_ja"):
         ja = round(height * TELOP_SIZE_RATIO)
         en = round(height * TELOP_EN_SIZE_RATIO)

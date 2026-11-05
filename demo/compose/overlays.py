@@ -16,6 +16,27 @@ HERE = Path(__file__).resolve().parent
 LINE_BREAK = "／"
 
 
+def subtitle_spans(segment):
+    """(from_s, to_s, ja, en) within the segment. A subtitle in several parts shares the segment in proportion
+    to each part's spoken length, so every part stays up as long as reading it takes relative to the others."""
+    start = segment.get("subtitle_from_s", 0.0)
+    if segment.get("subtitle_parts"):
+        parts = segment["subtitle_parts"]
+    elif segment.get("subtitle_ja"):
+        parts = [{"ja": segment["subtitle_ja"], "en": segment.get("subtitle_en", "")}]
+    else:
+        return []
+    weights = [len("".join(part["ja"].split()).replace(LINE_BREAK, "")) for part in parts]
+    span = segment["seconds"] - start
+    spans = []
+    t = start
+    for part, weight in zip(parts, weights):
+        end = t + span * weight / sum(weights)
+        spans.append((t, end, part["ja"], part.get("en", "")))
+        t = end
+    return spans
+
+
 def overlays(edl):
     rows = []
     t = 0.0
@@ -23,9 +44,8 @@ def overlays(edl):
         start, end = t, t + segment["seconds"]
         t = end
         cut = segment["cut"]
-        if segment.get("subtitle_ja"):
-            rows.append({"cut": cut, "kind": "subtitle", "start_s": start + segment.get("subtitle_from_s", 0.0), "end_s": end,
-                         "text_ja": segment["subtitle_ja"], "text_en": segment.get("subtitle_en", "")})
+        for a, b, ja, en in subtitle_spans(segment):
+            rows.append({"cut": cut, "kind": "subtitle", "start_s": start + a, "end_s": start + b, "text_ja": ja, "text_en": en})
         if segment.get("telop_ja"):
             rows.append({"cut": cut, "kind": "telop", "start_s": start, "end_s": end,
                          "text_ja": segment["telop_ja"], "text_en": segment.get("telop_en", "")})
