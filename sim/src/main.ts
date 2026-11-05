@@ -50,6 +50,9 @@ const presets = presetsFromGltf(room.cameras)
   .filter((preset) => preset.name in SHOWN_CAMERAS)
   .map((preset) => ({ ...preset, name: SHOWN_CAMERAS[preset.name]! }))
   .sort((a, b) => Object.values(SHOWN_CAMERAS).indexOf(a.name) - Object.values(SHOWN_CAMERAS).indexOf(b.name))
+// hero2: 田中's own pose of 2026-11-05 (copy pose), not a Blender camera.
+const HERO2 = presetFromQuery('hero2', '3.32,1.24,8.33,-0.91,2.81,-8.69,28')!
+presets.splice(1, 0, HERO2)
 const pinned = presetFromQuery('cam', new URLSearchParams(location.search).get('cam'))
 const first = pinned ?? presets.find((preset) => preset.name === INITIAL.preset) ?? presets[0]
 if (first) rig.jumpTo(first)
