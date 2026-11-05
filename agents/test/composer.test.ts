@@ -7,7 +7,9 @@ import { CELLS_OF, ComposerStop } from "../src/composer/rules.js";
 import { shapeContract } from "../src/composer/template.js";
 import { parseJmaXml } from "../src/jma/parse.js";
 import { formatErrors, validateDoc } from "../src/schemas.js";
-import { AGENTS_DIR } from "../src/paths.js";
+import { AGENTS_DIR, REPO_ROOT } from "../src/paths.js";
+import { loadMunicipality } from "../src/loop/municipality.js";
+import type { Alert } from "../src/jma/parse.js";
 
 const SAMPLES_DIR = process.env.JMA_SAMPLES_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/raw/jma-samples/unzipped";
 const fx = <T>(name: string): T => JSON.parse(fs.readFileSync(path.join(AGENTS_DIR, "test/fixtures", name), "utf8"));
@@ -24,6 +26,22 @@ test("tsunami advisory for 石川県能登 composes five valid layouts at displa
     assert.ok(r.ok, `${s.shape}\n${formatErrors(r.errors)}`);
     assert.equal(s.alert.level, 2);
     assert.equal(s.template, "evac-now");
+  }
+});
+
+test("level 5 (secure-now) keeps the nearest site and the direction beside the go-higher action", () => {
+  const koyoshi = fx<{ entries: { alert: Alert; municipality_level: number | null; bulletin_id: string }[] }>("replay-05210-koyoshi-20261021.json");
+  const lv5 = koyoshi.entries.find((e) => e.municipality_level === 5)!;
+  const { municipality: yurihonjo } = loadMunicipality("05210");
+  const honjo = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "data/sites/05210-demo.json"), "utf8")) as Site;
+  const cached = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "data/writer/05210", `${lv5.bulletin_id}.json`), "utf8")).output as WriterOutput;
+  const screens = compose({ alert: lv5.alert, municipality: yurihonjo, site: honjo, writer: cached });
+  for (const s of screens) {
+    assert.equal(s.template, "secure-now");
+    assert.ok(s.sources.some((x) => x.type === "gsi"), `${s.shape}: the guide was not computed`);
+    assert.equal(s.cells.find((c) => c.role === "action")!.pictogram, "go_higher");
+    const { slots } = shapeContract("secure-now", CELLS_OF[s.shape]);
+    if (slots.has("shelter")) assert.ok(s.cells.some((c) => c.role === "shelter") && s.cells.some((c) => c.role === "direction"), `${s.shape}: shelter and direction expected`);
   }
 });
 
