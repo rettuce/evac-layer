@@ -133,6 +133,10 @@ function entryState(entry: CatalogEntry): { label: string; tone: Tone } {
   return entry.report?.outcome === 'pass' ? { label: '検査 OK', tone: 'ok' } : { label: '要確認', tone: 'err' }
 }
 
+function verifierLabel(verifier: string | undefined) {
+  return verifier?.replace(/\s*\((https?:\/\/[^)]*)\)/g, '')
+}
+
 function hhmm(iso: string) {
   return iso.slice(5, 16).replace('T', ' ')
 }
@@ -262,7 +266,7 @@ onUnmounted(() => clearInterval(clockTimer))
               <dt>Verifier</dt>
               <dd :data-outcome="current.report?.outcome">
                 <span class="dot" :class="current.report?.outcome === 'pass' ? 'is-ok' : 'is-err'" />{{ current.report?.outcome ?? 'レポートなし' }}
-                <span class="meta">（{{ current.report?.verifier }}・試行 <span class="mono">{{ current.report?.attempts }}</span>）</span>
+                <span class="meta">（{{ verifierLabel(current.report?.verifier) }}・試行 <span class="mono">{{ current.report?.attempts }}</span>）</span>
               </dd>
               <dt>形状</dt>
               <dd>
