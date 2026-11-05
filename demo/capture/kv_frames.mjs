@@ -29,6 +29,7 @@ const preview = (municipality, bulletin) => (shape) =>
   ({ src: `/api/admin/preview-layout?${new URLSearchParams({ municipality, bulletin, shape })}` })
 const VARIANTS = {
   'lv3-rain': { query: preview('17204', 'VPWW55-202610200500-e9e69c6c3b73'), t: T_EASY_EN_MS },
+  'lv3-flood': { query: preview('05210', 'VXKOii-202610211555-d5ccc7c6b547'), t: T_EASY_EN_MS },
   'lv4-flood': { query: preview('05210', 'VXKOii-202610211815-e713da0e3c05'), t: T_EASY_EN_MS },
   'lv4-flood-ko-th': { query: preview('05210', 'VXKOii-202610211815-e713da0e3c05'), t: T_KO_TH_MS },
   'lv5-flood': { query: preview('05210', 'VXKOii-202610211945-a25f8f3aba7d'), t: T_EASY_EN_MS },
