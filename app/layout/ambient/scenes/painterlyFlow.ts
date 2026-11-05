@@ -87,7 +87,8 @@ const THREAD_AMP = 0.02
 
 const AA_MARGIN_PX = 2
 const MAX_CACHED_CYCLES = 4
-const MAX_CACHED_VIEWS = 160
+const CHUNK_PX = 512
+const MAX_CACHED_CHUNKS = 160
 
 interface Stroke {
   xs: Float32Array
@@ -378,7 +379,7 @@ function paintRange(ctx: CanvasRenderingContext2D, strokes: Stroke[], from: numb
   }
 }
 
-// The paint of one view: an off-screen canvas in canvas coordinates holding everything laid down so far.
+// The paint of one chunk: an off-screen canvas in canvas coordinates holding everything laid down so far.
 interface Buffer {
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
@@ -393,13 +394,12 @@ function bufferFor(key: string, view: AmbientRect): Buffer {
     const canvas = document.createElement('canvas')
     canvas.width = view.width
     canvas.height = view.height
-    // A CPU-backed canvas, like the room's tiles: GPU rasterization of thousands of translucent strokes was not
-    // identical between page loads (up to 24 levels), so neighbouring crops drawn in separate pages differed.
+    // CPU-backed: GPU rasterization of thousands of translucent strokes differed between page loads by up to 24 levels.
     const ctx = canvas.getContext('2d', { willReadFrequently: true })!
     ctx.translate(-view.x, -view.y)
     buffer = { canvas, ctx, cycle: Number.NaN, drawn: 0 }
     buffers.set(key, buffer)
-    if (buffers.size > MAX_CACHED_VIEWS) buffers.delete(buffers.keys().next().value!)
+    if (buffers.size > MAX_CACHED_CHUNKS) buffers.delete(buffers.keys().next().value!)
   }
   return buffer
 }
@@ -409,26 +409,43 @@ function strokesDue(count: number, local: number): number {
   return Math.floor((1 - Math.pow(1 - prog, GROW_EASE_POW)) * count)
 }
 
-function paint(t: number, seed: number, frame: AmbientFrame): HTMLCanvasElement {
-  const { view } = frame
+function paintChunk(t: number, seed: number, frame: AmbientFrame, chunk: AmbientRect): HTMLCanvasElement {
   const cycle = Math.floor(t / CYCLE_MS)
   const local = t - cycle * CYCLE_MS
-  const buffer = bufferFor(`${seed}:${frame.width}x${frame.height}:${view.x},${view.y},${view.width},${view.height}`, view)
+  const buffer = bufferFor(`${seed}:${frame.width}x${frame.height}:${chunk.x},${chunk.y}`, chunk)
   const current = cycleStrokes(seed, cycle, frame.width, frame.height)
   const due = strokesDue(current.length, local)
   if (buffer.cycle !== cycle || due < buffer.drawn) {
     buffer.ctx.fillStyle = GROUND_WHITE
-    buffer.ctx.fillRect(view.x, view.y, view.width, view.height)
+    buffer.ctx.fillRect(chunk.x, chunk.y, chunk.width, chunk.height)
     for (let k = cycle - FINISHED_CYCLES_UNDER; k < cycle; k++) {
       const done = cycleStrokes(seed, k, frame.width, frame.height)
-      paintRange(buffer.ctx, done, 0, done.length, view)
+      paintRange(buffer.ctx, done, 0, done.length, chunk)
     }
     buffer.cycle = cycle
     buffer.drawn = 0
   }
-  paintRange(buffer.ctx, current, buffer.drawn, due, view)
+  paintRange(buffer.ctx, current, buffer.drawn, due, chunk)
   buffer.drawn = due
   return buffer.canvas
+}
+
+// The paint is kept in chunks fixed to the canvas grid, not per view: a stroke rasterized on canvases with
+// different bounds comes out a few levels different, so a room cut into tiles would not match it drawn whole.
+function paint(ctx: CanvasRenderingContext2D, t: number, seed: number, frame: AmbientFrame): void {
+  const { view } = frame
+  const right = view.x + view.width
+  const bottom = view.y + view.height
+  for (let cy = Math.floor(view.y / CHUNK_PX) * CHUNK_PX; cy < bottom; cy += CHUNK_PX) {
+    for (let cx = Math.floor(view.x / CHUNK_PX) * CHUNK_PX; cx < right; cx += CHUNK_PX) {
+      const canvas = paintChunk(t, seed, frame, { x: cx, y: cy, width: CHUNK_PX, height: CHUNK_PX })
+      const x = Math.max(view.x, cx)
+      const y = Math.max(view.y, cy)
+      const w = Math.min(right, cx + CHUNK_PX) - x
+      const h = Math.min(bottom, cy + CHUNK_PX) - y
+      ctx.drawImage(canvas, x - cx, y - cy, w, h, x, y, w, h)
+    }
+  }
 }
 
 // The linen of the display shader: a 3 px sine weave and 2 px thread noise multiplied over the paint, in
@@ -459,9 +476,8 @@ function weave(ctx: CanvasRenderingContext2D, view: AmbientRect): void {
 }
 
 function render(ctx: CanvasRenderingContext2D, t: number, seed: number, _shape: Shape, frame: AmbientFrame): void {
-  const { view } = frame
-  ctx.drawImage(paint(t, seed, frame), view.x, view.y)
-  weave(ctx, view)
+  paint(ctx, t, seed, frame)
+  weave(ctx, frame.view)
 }
 
 export const painterlyFlow: AmbientScene = { id: 'painterly-flow', name: '厚塗りの流れ', ink: 'dark', render }
