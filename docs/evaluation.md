@@ -94,3 +94,21 @@ From `agents/README.md` (Reader runs, 2026-11-02):
 | Development total per screen shown | about $0.97 | over the 22 screens, including every re-run while the defects above were fixed |
 
 The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596, $0.506, $1.462 for the ten-language regeneration $0.577 for the three sample tsunami bulletins $0.219 for their drill-marked headlines $0.272 for the drill word in their language band $0.835 for 吉田町's 大津波警報 screens and the prefix rule $0.095 for its all-clear and $0.353 for the caching measurement) comes from the fan-out output and the agents seat log. Per-call Writer usage is kept only for the latest generation of each bulletin (`data/writer/`, $1.462 now), so the earlier part is not verifiable from the repository alone.
+
+## Why these five municipalities
+
+The five were chosen for different hazards and different contexts, under one data condition: the GSI list of designated emergency evacuation sites had to be downloadable for the municipality (it was, for all seven candidates). 由利本荘市 (05210) is a river-flood case on the 子吉川, and the only one where the recorded feed carries a real escalation to levels 3, 4 and 5 (2026-10-21). 輪島市 (17204) is the Noto earthquake context, with landslide bulletins and the official JMA tsunami sample series. 柏崎市 (15205) is a landslide case around a station front. 吉田町 (22424) is a tsunami case on the Pacific coast, where the official drill bulletins (大津波警報・訓練) exercise the top of the scale. 横浜市 (14100) is the urban case: the city already runs disaster screens on 142 signage sites around 横浜駅 under a public–private memorandum, which is the closest existing practice to what EVAC LAYER adds.
+
+## What a nationwide roll-out would cost in API calls
+
+A rough extrapolation from the figures above; it assumes the same models and prompts, and it counts API calls only (no screens, lines or staff).
+
+| Item | Basis | Estimate |
+|---|---|---|
+| Reader, once per municipality | $0.26–$1.17 per municipality over the five (page count of the municipal documents) | about 1,740 municipalities × $0.3–1.2 ≈ **$500–2,000, once** |
+| Screens per municipality per year | 206 bulletins for 5 municipalities in 23 days, 22 of them warning-level and thus rendered → about 70 rendered screens per municipality per year | — |
+| Writer + Vision per rendered screen | $0.245 steady state (Writer once, Vision on 5 shapes) | **about $17 per municipality per year** |
+| All municipalities | 1,740 × $17 | **about $30,000 per year** |
+| Per installed site | Vision runs per site; a municipality with many sites multiplies the Vision part | **about $17 per site per year**, so 10,000 sites ≈ $170,000 per year |
+
+Caveats: the recording window (2026-10-11 to 11-02) sits in typhoon season, so the annualised bulletin count is on the high side; prompt caching and the Batch API (half price) would roughly halve the figures; the Writer output is cached per municipality and hazard, so additional sites in the same municipality pay mostly for Vision.
