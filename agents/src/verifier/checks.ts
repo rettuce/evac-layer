@@ -32,7 +32,7 @@ export interface CellText { id: string; role: Role; text: string }
 // design, in the shape's own pixels, until a real deployment revisits the distances (agents/FINDINGS.md).
 export const ARTBOARD_FLOOR_PX: Partial<Record<string, Partial<Record<`${Role}:${TextKind}`, number>>>> = {
   "16x9": { "action:primary": 120, "languages:primary": 54, "languages:label": 24, "source:primary": 24 },
-  "1x1": { "languages:primary": 56 },
+  "1x1": { "languages:primary": 56, "source:primary": 24 },
 };
 
 // A label (language name, shelter designation) only names what the text beside it is, so it is held to the fine distance.
