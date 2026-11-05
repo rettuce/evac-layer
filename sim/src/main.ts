@@ -46,14 +46,10 @@ applyRenderMode(room, INITIAL.mode)
 // The four views the demo is judged on (田中 2026-11-05: hero, the wall, the headwall ribbon as in demo cut 8,
 // the column); the glb still carries every still camera.
 const SHOWN_CAMERAS: Record<string, string> = { hero: 'hero', 'wall-final': 'wall-final', 'rib-final': 'rib-final', 'col-final': 'col-final' }
-// hero2: 田中's view of 2026-11-05 (a long lens from the back of the room: the near columns at both edges, the three
-// wall screens centred, the louver ceiling in the top third), fitted by hand; not a Blender camera.
-const HERO2 = presetFromQuery('hero2', '0.80,1.10,11.50,0.20,2.60,-9.00,29')!
 const presets = presetsFromGltf(room.cameras)
   .filter((preset) => preset.name in SHOWN_CAMERAS)
   .map((preset) => ({ ...preset, name: SHOWN_CAMERAS[preset.name]! }))
   .sort((a, b) => Object.values(SHOWN_CAMERAS).indexOf(a.name) - Object.values(SHOWN_CAMERAS).indexOf(b.name))
-presets.splice(1, 0, HERO2)
 const pinned = presetFromQuery('cam', new URLSearchParams(location.search).get('cam'))
 const first = pinned ?? presets.find((preset) => preset.name === INITIAL.preset) ?? presets[0]
 if (first) rig.jumpTo(first)
