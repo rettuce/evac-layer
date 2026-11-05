@@ -152,6 +152,8 @@ STILL_CAMERAS = {
     "hero": {"location": HERO_LOCATION, "target": HERO_TARGET, "focus": "pillar", "lens": HERO_LENS_MM},
     "near-column": {"location": in_front_of("pillar", 1.5, -35, EYE_Z), "focus": "pillar", "lens": 24.0, "aim_shift": 0.3},
     "near-ribbon": {"location": in_front_of("32x9", 3.5, -25, EYE_Z), "focus": "32x9", "lens": 24.0, "aim_shift": 0.0},
+    # The sim's hero2 (sim/src/main.ts), from its Y-up glTF axes back to Blender's: (x, -z, y).
+    "hero2": {"location": Vector((3.32, -8.33, 1.24)), "target": Vector((-0.91, 8.69, 2.81)), "lens": 28.0},
 }
 
 
@@ -376,18 +378,36 @@ def screen_material(shape, source, frame_count, offset_frames=0):
     return mat
 
 
+def window_recording(name, cut):
+    """record.mjs --window <name> --cut <cut>: that window's part of the room-wide screen."""
+    if not cut or cut in ("off", "test"):
+        return None
+    candidate = SCREENS_DIR / f"{name}_{cut}.mp4"
+    return candidate if candidate.exists() else None
+
+
 def build_screens(frame_count, cut, canvas_dir=None, offset_frames=0):
-    """canvas_dir: one still per window (<shape>_<i>.png, pillar_<i>.png) cut from a single room canvas."""
+    """canvas_dir: one still per window (<shape>_<i>.png, pillar_<i>.png) cut from a single room canvas.
+    Window recordings (<shape>_<i>_<cut>.mp4) take the place of the shape's recording on their surface."""
     joint = principled("joint", (0.004, 0.004, 0.004), 0.5)
     sources = {}
 
     def window_material(name, shared):
-        return screen_material(name, Path(canvas_dir) / f"{name}.png", frame_count) if canvas_dir else shared
+        if canvas_dir:
+            return screen_material(name, Path(canvas_dir) / f"{name}.png", frame_count)
+        recording = window_recording(name, cut)
+        return screen_material(name, recording, frame_count, offset_frames) if recording else shared()
 
     for shape, spec in SCREENS.items():
         width, height = spec["size"]
-        sources[shape] = screen_source(shape, cut)
-        shared = screen_material(shape, sources[shape], frame_count, offset_frames)
+        windows = [f"{shape}_{i}" for i in range(len(spec["mounts"]) or len(spec.get("wraps", [])))]
+        if all(window_recording(name, cut) for name in windows):
+            sources[shape] = window_recording(windows[0], cut)
+            shared = None
+        else:
+            sources[shape] = screen_source(shape, cut)
+            built = screen_material(shape, sources[shape], frame_count, offset_frames)
+            shared = lambda built=built: built
         if canvas_dir and spec["mounts"]:
             sources[shape] = Path(canvas_dir) / f"{shape}_0.png"
         for i, (surface, yaw) in enumerate(spec["mounts"]):

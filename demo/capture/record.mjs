@@ -15,6 +15,8 @@ const run = promisify(execFile)
 
 const SCREENS_DIR = fileURLToPath(new URL('../screens/', import.meta.url))
 const FRAMES_ROOT = fileURLToPath(new URL('../cache/capture/', import.meta.url))
+const CROPS_PATH = fileURLToPath(new URL('../renders/canvas-crops.json', import.meta.url))
+const ROOM_ID = 'concourse'
 const CHROME_PATH = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const READY_SELECTOR = '.evac-screen[data-ready="1"]'
 const READY_TIMEOUT_MS = 30000
@@ -100,7 +102,7 @@ const CUTS = {
   },
 }
 
-function options() {
+async function options() {
   const { values } = parseArgs({
     options: {
       shape: { type: 'string' },
@@ -115,6 +117,7 @@ function options() {
       'from-ms': { type: 'string' },
       'frames-dir': { type: 'string' },
       scene: { type: 'string' },
+      window: { type: 'string' },
     },
   })
   if (!SHAPES[values.shape]) throw new Error(`--shape must be one of ${Object.keys(SHAPES).join(', ')}`)
@@ -126,8 +129,18 @@ function options() {
     fps,
     startMs: values['from-ms'] ? Number(values['from-ms']) : CUTS[values.cut].startMs,
     frameCount: Math.round(seconds * fps),
-    out: values.out ?? `${SCREENS_DIR}${values.shape}_${values.cut}.mp4`,
+    out: values.out ?? `${SCREENS_DIR}${values.window ?? values.shape}_${values.cut}.mp4`,
+    room: values.window ? await roomWindow(values.window, values.shape) : undefined,
   }
+}
+
+// One window of the concourse canvas (demo/renders/canvas-crops.json, the same windows as the sim): the screen
+// draws its part of one room-wide ambient, so neighbouring screens continue each other.
+async function roomWindow(name, shape) {
+  const { canvas, crops, shapes, seam } = JSON.parse(await readFile(CROPS_PATH, 'utf8'))
+  if (!crops[name]) throw new Error(`--window must be one of ${Object.keys(crops).join(', ')}`)
+  if (shapes[name] !== shape) throw new Error(`window ${name} is a ${shapes[name]} screen, not ${shape}`)
+  return { canvas: `${canvas[0]}x${canvas[1]}`, crop: crops[name].join(','), canvas_id: ROOM_ID, ...(seam[name] ? { seam: seam[name] } : {}) }
 }
 
 function queryOf(cut, shape) {
@@ -142,6 +155,7 @@ function frameUrl(opts, tMs) {
     t: String(Math.round(tMs)),
     ...queryOf(opts.cut, opts.shape),
     ...(opts.scene ? { scene: opts.scene } : {}),
+    ...(opts.room ?? {}),
   })
   if (opts['site-name'] && opts.cut !== 'alert') params.set('site_name', opts['site-name'])
   return `${opts['base-url']}${CUTS[opts.cut].page ?? '/screen'}?${params}`
@@ -306,8 +320,8 @@ async function encode(opts, framesDir) {
 }
 
 async function main() {
-  const opts = options()
-  const framesDir = opts['frames-dir'] ? `${opts['frames-dir'].replace(/\/$/, '')}/` : `${FRAMES_ROOT}${opts.shape}_${opts.cut}/`
+  const opts = await options()
+  const framesDir = opts['frames-dir'] ? `${opts['frames-dir'].replace(/\/$/, '')}/` : `${FRAMES_ROOT}${opts.window ?? opts.shape}_${opts.cut}/`
   await rm(framesDir, { recursive: true, force: true })
   await mkdir(framesDir, { recursive: true })
   const started = performance.now()
