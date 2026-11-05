@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ナレーション録音</title>
+<style>
+:root {
+  --ev-bg: #0c0d0f;
+  --ev-panel: #111316;
+  --ev-panel-2: #171a1e;
+  --ev-line: #23272d;
+  --ev-fg: #e8e9eb;
+  --ev-fg-2: #a6abb3;
+  --ev-fg-3: #868c95;
+  --ev-orange: #f5821f;
+  --ev-ok: #3ecf8e;
+  --ev-warn: #f2c94c;
+  --ev-err: #ff5d5d;
+  --ev-sans: 'Noto Sans JP', 'Hiragino Sans', system-ui, sans-serif;
+  --ev-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; height: 100vh; display: grid; grid-template-rows: 40px minmax(0, 1fr); background: var(--ev-bg); color: var(--ev-fg); font: 400 13px/20px var(--ev-sans); }
+h1, h2, p, ol { margin: 0; }
+.mono { font-family: var(--ev-mono); font-variant-numeric: tabular-nums; }
+.meta { font-size: 11px; line-height: 16px; font-weight: 500; color: var(--ev-fg-2); }
+.warn { color: var(--ev-warn); }
+.ok { color: var(--ev-ok); }
+.err { color: var(--ev-err); }
+.bar { display: flex; align-items: center; gap: 16px; padding: 0 16px; background: var(--ev-panel); border-bottom: 1px solid var(--ev-line); }
+.bar h1 { font-size: 13px; font-weight: 500; }
+.bar label { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+select { height: 28px; max-width: 360px; padding: 0 8px; border: 1px solid var(--ev-line); border-radius: 4px; background: var(--ev-bg); color: var(--ev-fg); font: inherit; }
+main { display: grid; grid-template-columns: 360px minmax(0, 1fr); min-height: 0; }
+.list { overflow: auto; border-right: 1px solid var(--ev-line); background: var(--ev-panel); }
+.list ol { list-style: none; padding: 0; }
+.cut { width: 100%; display: grid; grid-template-columns: 52px 1fr auto; gap: 8px; align-items: baseline; padding: 10px 16px; border: 0; border-bottom: 1px solid var(--ev-line); background: none; color: var(--ev-fg); font: inherit; text-align: left; cursor: pointer; }
+.cut.is-selected { background: var(--ev-panel-2); box-shadow: inset 2px 0 0 var(--ev-fg); }
+.cut .state { font-size: 11px; line-height: 16px; font-weight: 500; color: var(--ev-fg-2); text-align: right; }
+.stage { overflow: auto; padding: 24px; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-content: start; }
+.script { display: grid; gap: 16px; align-content: start; }
+.timing { font-size: 13px; color: var(--ev-fg-2); }
+.timing b { color: var(--ev-fg); font-weight: 500; }
+.text { font-size: 26px; line-height: 40px; font-weight: 500; white-space: pre-wrap; }
+.still { width: 100%; aspect-ratio: 16 / 9; display: grid; place-items: center; background: var(--ev-panel); border: 1px solid var(--ev-line); border-radius: 6px; overflow: hidden; }
+.still img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.side { display: grid; gap: 16px; align-content: start; }
+.panel { display: grid; gap: 12px; padding: 16px; background: var(--ev-panel); border: 1px solid var(--ev-line); border-radius: 6px; }
+.clock { font-size: 28px; line-height: 36px; }
+.meter { height: 8px; border-radius: 4px; background: var(--ev-line); overflow: hidden; }
+.meter span { display: block; height: 100%; width: 0; background: var(--ev-ok); }
+.meter.is-hot span { background: var(--ev-warn); }
+.buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button.act { height: 40px; border: 1px solid var(--ev-line); border-radius: 4px; background: var(--ev-panel); color: var(--ev-fg); font: 500 13px/20px var(--ev-sans); cursor: pointer; }
+button.act.primary { grid-column: 1 / -1; border-color: var(--ev-orange); background: var(--ev-orange); color: var(--ev-bg); }
+button.act:disabled { border-color: var(--ev-line); background: var(--ev-panel); color: var(--ev-fg-3); cursor: not-allowed; }
+button:focus-visible, select:focus-visible { outline: 2px solid var(--ev-fg); outline-offset: 2px; }
+audio { width: 100%; }
+kbd { font-family: var(--ev-mono); font-size: 11px; padding: 0 4px; border: 1px solid var(--ev-line); border-radius: 4px; color: var(--ev-fg-2); }
+button.act.primary:not(:disabled) kbd { color: var(--ev-bg); border-color: var(--ev-bg); }
+@media (hover: hover) and (pointer: fine) {
+  .cut:hover { background: var(--ev-panel-2); }
+  button.act:not(.primary):not(:disabled):hover { background: var(--ev-panel-2); }
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1>ナレーション録音</h1>
+  <span class="meta" id="summary"></span>
+  <label class="meta">入力 <select id="device" data-control="device"></select></label>
+</header>
+<main>
+  <nav class="list" aria-label="カット"><ol id="cuts"></ol></nav>
+  <section class="stage" id="stage" aria-live="polite">
+    <div class="script">
+      <p class="timing" id="timing"></p>
+      <p class="text" id="text"></p>
+      <p class="meta" id="reading"></p>
+      <p class="meta" id="estimate"></p>
+    </div>
+    <div class="side">
+      <div class="still" id="still"><span class="meta">素材なし</span></div>
+      <div class="panel">
+        <p class="clock mono" id="clock" data-state="idle">0.0 / 0 s</p>
+        <div class="meter" id="meter"><span></span></div>
+        <div class="buttons">
+          <button class="act primary" id="record" data-action="record">録音開始 <kbd>Space</kbd></button>
+          <button class="act" id="play" data-action="play" disabled>再生 <kbd>P</kbd></button>
+          <button class="act" id="retake" data-action="retake" disabled>取り直し <kbd>R</kbd></button>
+          <button class="act primary" id="save" data-action="save" disabled>OK で保存 <kbd>Enter</kbd></button>
+        </div>
+        <audio id="audio" controls></audio>
+        <p class="meta" id="message"></p>
+      </div>
+    </div>
+  </section>
+</main>
+<script type="module">
+const SAMPLE_RATE = 48000
+const CHARS_PER_SECOND = 5
+const METER_HOT = 0.9
+const WORKLET = `
+class Collect extends AudioWorkletProcessor {
+  process(inputs) {
+    const channel = inputs[0][0]
+    if (channel) this.port.postMessage(channel.slice(0))
+    return true
+  }
+}
+registerProcessor('collect', Collect)`
+
+const $ = (id) => document.getElementById(id)
+const state = { cuts: [], selected: null, recording: null, take: null }
+
+function fmt(seconds) {
+  const s = Math.max(0, seconds)
+  return `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, '0')}`
+}
+
+function encodeWav(chunks, sampleRate) {
+  const length = chunks.reduce((n, c) => n + c.length, 0)
+  const bytesPerSample = 3
+  const dataBytes = length * bytesPerSample
+  const view = new DataView(new ArrayBuffer(44 + dataBytes))
+  const text = (at, s) => { for (let i = 0; i < s.length; i++) view.setUint8(at + i, s.charCodeAt(i)) }
+  text(0, 'RIFF'); view.setUint32(4, 36 + dataBytes, true); text(8, 'WAVE')
+  text(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true)
+  view.setUint32(24, sampleRate, true); view.setUint32(28, sampleRate * bytesPerSample, true)
+  view.setUint16(32, bytesPerSample, true); view.setUint16(34, 24, true)
+  text(36, 'data'); view.setUint32(40, dataBytes, true)
+  let at = 44
+  for (const chunk of chunks) {
+    for (let i = 0; i < chunk.length; i++) {
+      const v = Math.round(Math.max(-1, Math.min(1, chunk[i])) * 8388607)
+      view.setUint8(at, v & 0xff); view.setUint8(at + 1, (v >> 8) & 0xff); view.setUint8(at + 2, (v >> 16) & 0xff)
+      at += 3
+    }
+  }
+  return new Blob([view.buffer], { type: 'audio/wav' })
+}
+
+async function loadCuts() {
+  state.cuts = await (await fetch('/api/cuts')).json()
+  const done = state.cuts.filter((c) => c.saved).length
+  $('summary').textContent = `${done} / ${state.cuts.length} 本 録音済み・保存先 demo/compose/audio/narration/`
+  renderList()
+}
+
+function savedLabel(c) {
+  if (!c.saved) return '<span>未録音</span>'
+  const over = c.saved.seconds - c.window
+  return over > 0
+    ? `<span class="warn">録音済み ${fmt(c.saved.seconds)}・窓 +${over.toFixed(1)} s</span>`
+    : `<span class="ok">録音済み ${fmt(c.saved.seconds)}</span>`
+}
+
+function renderList() {
+  $('cuts').innerHTML = state.cuts.map((c) => `
+    <li><button type="button" class="cut${state.selected === c.cut ? ' is-selected' : ''}" data-cut="${c.cut}">
+      <span class="mono">cut ${c.cut}</span>
+      <span><span class="mono">${c.file}</span><br><span class="meta">窓 <span class="mono">${c.window}</span> s</span></span>
+      <span class="state">${savedLabel(c)}</span>
+    </button></li>`).join('')
+}
+
+function current() { return state.cuts.find((c) => c.cut === state.selected) }
+
+function select(cut) {
+  if (state.recording) return
+  state.selected = cut
+  discardTake()
+  const c = current()
+  $('timing').innerHTML = `カットの尺 <b class="mono">${c.seconds}</b> s・使える秒数 <b class="mono">${c.window}</b> s・ナレーションの置く位置 <b class="mono">${c.start}</b> s（頭から）`
+  $('text').textContent = c.narration_ja
+  $('reading').textContent = c.reading_ja
+  const chars = [...c.narration_ja.replace(/\s/g, '')].length
+  $('estimate').textContent = `窓 ${c.window} s・字数 ${chars} ≈ ${(chars / CHARS_PER_SECOND).toFixed(1)} s`
+  $('clock').textContent = `0.0 / ${c.window} s`
+  $('clock').classList.remove('warn')
+  const img = new Image()
+  img.alt = `cut ${c.cut} の場面`
+  img.onload = () => { $('still').replaceChildren(img) }
+  img.onerror = () => { $('still').innerHTML = '<span class="meta">素材なし</span>' }
+  img.src = `/api/still/${encodeURIComponent(c.cut)}`
+  if (c.saved) {
+    $('audio').src = `/api/take/${c.file}?t=${Date.parse(c.saved.mtime)}`
+    $('message').textContent = `保存済み ${fmt(c.saved.seconds)}（${new Date(c.saved.mtime).toLocaleString('ja-JP')}）`
+  }
+  renderList()
+}
+
+async function refreshDevices() {
+  const devices = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === 'audioinput')
+  const chosen = $('device').value
+  $('device').innerHTML = devices.map((d, i) => `<option value="${d.deviceId}">${d.label || `入力 ${i + 1}`}</option>`).join('')
+  if (devices.some((d) => d.deviceId === chosen)) $('device').value = chosen
+}
+
+async function startRecording() {
+  const deviceId = $('device').value
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: { ...(deviceId ? { deviceId: { exact: deviceId } } : {}), channelCount: 1, echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+  })
+  const context = new AudioContext({ sampleRate: SAMPLE_RATE })
+  const url = URL.createObjectURL(new Blob([WORKLET], { type: 'text/javascript' }))
+  await context.audioWorklet.addModule(url)
+  URL.revokeObjectURL(url)
+  const source = context.createMediaStreamSource(stream)
+  const node = new AudioWorkletNode(context, 'collect', { numberOfInputs: 1, numberOfOutputs: 0, channelCount: 1, channelCountMode: 'explicit' })
+  const chunks = []
+  let peak = 0
+  node.port.onmessage = ({ data }) => {
+    chunks.push(data)
+    for (let i = 0; i < data.length; i++) peak = Math.max(peak, Math.abs(data[i]))
+  }
+  source.connect(node)
+  const startedAt = performance.now()
+  const windowSeconds = current().window
+  const tick = () => {
+    if (!state.recording) return
+    const elapsed = (performance.now() - startedAt) / 1000
+    $('clock').textContent = `${elapsed.toFixed(1)} / ${windowSeconds} s`
+    $('clock').classList.toggle('warn', elapsed > windowSeconds)
+    $('meter').firstElementChild.style.width = `${Math.min(100, peak * 100)}%`
+    $('meter').classList.toggle('is-hot', peak > METER_HOT)
+    peak *= 0.6
+    requestAnimationFrame(tick)
+  }
+  state.recording = { stream, context, chunks }
+  $('clock').dataset.state = 'recording'
+  $('record').textContent = '停止'
+  $('record').append(' ', Object.assign(document.createElement('kbd'), { textContent: 'Space' }))
+  setButtons()
+  refreshDevices()
+  requestAnimationFrame(tick)
+}
+
+async function stopRecording() {
+  const { stream, context, chunks } = state.recording
+  state.recording = null
+  stream.getTracks().forEach((t) => t.stop())
+  await context.close()
+  const blob = encodeWav(chunks, SAMPLE_RATE)
+  const seconds = chunks.reduce((n, c) => n + c.length, 0) / SAMPLE_RATE
+  state.take = { blob, seconds }
+  $('audio').src = URL.createObjectURL(blob)
+  $('clock').dataset.state = 'stopped'
+  $('clock').textContent = `${seconds.toFixed(1)} / ${current().window} s`
+  $('meter').firstElementChild.style.width = '0'
+  $('record').innerHTML = '録音開始 <kbd>Space</kbd>'
+  $('message').textContent = seconds > current().window ? `窓を ${(seconds - current().window).toFixed(1)} s 超えています` : '再生して確かめ、OK で保存'
+  setButtons()
+}
+
+function discardTake() {
+  state.take = null
+  $('audio').removeAttribute('src')
+  $('audio').load()
+  $('message').textContent = ''
+  setButtons()
+}
+
+async function saveTake() {
+  const c = current()
+  $('message').textContent = '保存中'
+  const res = await fetch(`/api/take/${c.file}`, { method: 'PUT', body: state.take.blob, headers: { 'content-type': 'audio/wav' } })
+  if (!res.ok) {
+    $('message').innerHTML = `<span class="err">保存に失敗しました: ${(await res.json()).error}</span>`
+    return
+  }
+  const saved = await res.json()
+  state.take = null
+  await loadCuts()
+  $('message').textContent = `${saved.file} を保存（${fmt(saved.seconds)}）。録り終えたら python3 demo/compose/mix_audio.py --narration で mix に入れる`
+  const next = state.cuts.find((x) => !x.saved)
+  const message = $('message').textContent
+  select(next ? next.cut : c.cut)
+  $('message').textContent = message
+}
+
+function setButtons() {
+  const recording = Boolean(state.recording)
+  $('record').disabled = !state.selected
+  $('play').disabled = recording || !$('audio').getAttribute('src')
+  $('retake').disabled = recording || !state.take
+  $('save').disabled = recording || !state.take
+  $('device').disabled = recording
+}
+
+function toggleRecording() {
+  if (!state.selected) return
+  if (state.recording) stopRecording()
+  else { discardTake(); startRecording().catch((error) => { $('message').innerHTML = `<span class="err">録音を開始できません: ${error.message}</span>` }) }
+}
+
+$('cuts').addEventListener('click', (e) => { const b = e.target.closest('[data-cut]'); if (b) select(b.dataset.cut) })
+$('record').addEventListener('click', toggleRecording)
+$('play').addEventListener('click', () => $('audio').play())
+$('retake').addEventListener('click', discardTake)
+$('save').addEventListener('click', () => { if (state.take) saveTake() })
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('select, audio') || e.repeat) return
+  const key = e.key.toLowerCase()
+  if (e.code === 'Space') { e.preventDefault(); toggleRecording() }
+  else if (e.key === 'Enter' && state.take && !state.recording) { e.preventDefault(); saveTake() }
+  else if (key === 'p' && $('audio').getAttribute('src') && !state.recording) $('audio').play()
+  else if (key === 'r' && state.take && !state.recording) discardTake()
+})
+
+await loadCuts()
+await refreshDevices().catch(() => {})
+const first = state.cuts.find((c) => !c.saved) ?? state.cuts[0]
+if (first) select(first.cut)
+</script>
+</body>
+</html>
