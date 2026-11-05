@@ -59,11 +59,11 @@
       "freeze": "last",
       "slate": "定義 1 文。cut 0 の最終フレーム（Lv3 の柱）を静止",
       "subtitle_ja": "EVAC LAYER は、いまある既存のサイネージに、／災害時の緊急案内のレイヤーを自動で追加するシステムです。",
-      "subtitle_en": "EVAC LAYER adds an emergency-guidance layer to the signage a city already has,／automatically, when disaster strikes.",
+      "subtitle_en": "EVAC LAYER is a system that automatically adds／an emergency evacuation guidance layer to existing signage.",
       "telop_ja": "EVAC LAYER",
       "telop_en": "EVAC LAYER",
       "narration_ja": "EVAC LAYER は、いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステムです。",
-      "narration_en": "EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.",
+      "narration_en": "EVAC LAYER is a system that automatically adds an emergency evacuation guidance layer to existing signage.",
       "reading_ja": "エヴァク レイヤーは、いま ある きぞんの サイネージに、さいがいじの きんきゅうあんないの レイヤーを じどうで ついかする システムです"
     },
     {
@@ -87,9 +87,9 @@
       "seconds": 8,
       "screens": "ambient-real",
       "subtitle_ja": "私はこれまで駅や街のサイネージシステムを作ってきました。／これらは災害のとき、能動的に情報を発信できませんでした。",
-      "subtitle_en": "I have built signage systems for stations and streets.／When disaster struck, none of them could speak up on its own.",
+      "subtitle_en": "I have previously developed signage systems for stations and city streets.／During disasters, these systems were unable to actively disseminate information.",
       "narration_ja": "私はこれまで駅や街のサイネージシステムを作ってきました。これらは災害のとき、能動的に情報を発信できませんでした。",
-      "narration_en": "I have built signage systems for stations and streets. When disaster struck, none of them could speak up on its own.",
+      "narration_en": "I have previously developed signage systems for stations and city streets. During disasters, these systems were unable to actively disseminate information.",
       "reading_ja": "わたしは これまで えきや まちの サイネージ システムを つくって きました。これらは さいがいの とき、のうどうてきに じょうほうを はっしん できませんでした"
     },
     {
@@ -142,11 +142,19 @@
       "slate": "平時の 4 画面 → 気象庁 XML 再生 → t=12.0 s に 4 画面が同じフレームで有事へ",
       "cut": "5",
       "seconds": 25,
-      "subtitle_ja": "由利本荘市、10月21日の実際に発表された警報データを使い、1200倍の速さで再生しています。／警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。",
-      "subtitle_en": "Yurihonjo City, October 21. Warnings actually issued that day, replayed at 1,200 times speed.／Alert levels 3, 4 and 5. Every screen switches at the same moment.",
-      "narration_ja": "由利本荘市、10月21日の実際に発表された警報データを使い、1200倍の速さで再生しています。警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。",
-      "narration_en": "Yurihonjo City, October 21. Warnings actually issued that day, replayed at 1,200 times speed. Alert levels 3, 4 and 5. Every screen switches at the same moment.",
-      "reading_ja": "ゆりほんじょうし、じゅうがつ にじゅういちにちの じっさいに はっぴょうされた けいほうデータを つかい、せんにひゃくばいの はやさで さいせいしています。けいかいレベル さん、よん、ご。すべての スクリーンが、おなじ しゅんかんに きりかわります"
+      "narration_ja": "10月21日 由利本荘市で実際に発表された警報データを使い、1200倍の速さでシミュレートしています。警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。",
+      "narration_en": "Using actual warning data issued in Yurihonjo City on October 21, this is simulated at 1200x speed. Alert levels 3, 4 and 5. Every screen switches at the same moment.",
+      "reading_ja": "じゅうがつ にじゅういちにち ゆりほんじょうしで じっさいに はっぴょうされた けいほうデータを つかい、せんにひゃくばいの はやさで シミュレート しています。けいかいレベル さん、よん、ご。すべての スクリーンが、おなじ しゅんかんに きりかわります",
+      "subtitle_parts": [
+        {
+          "ja": "10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシミュレートしています。",
+          "en": "Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed."
+        },
+        {
+          "ja": "警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。",
+          "en": "Alert levels 3, 4 and 5. Every screen switches at the same moment."
+        }
+      ]
     },
     {
       "kind": "capture",
@@ -166,11 +174,11 @@
       "slate": "架空の警報画面 180 枚（5 形状・4 種別・レベル 2〜5・5 自治体）が中央から加速して増えるモザイク（2 枚/秒 → 終盤 55 枚/秒）。9.5 s で静止 → 背景 40 % に落として数字（5 自治体・206 本・110 レイアウト）が 1 s で確定。タイルは架空の案内で実際の電文ではない（demo/capture/mosaic_layouts.mjs・seed 固定）",
       "cut": "7m",
       "seconds": 12,
-      "subtitle_ja": "まずは事前収集した5つの自治体の206本の気象庁の電文から、／110のレイアウトを作成します。",
-      "subtitle_en": "To begin with, 206 JMA bulletins collected from five municipalities／become 110 layouts.",
-      "narration_ja": "まずは事前収集した5つの自治体の206本の気象庁の電文から、110のレイアウトを作成します。",
-      "narration_en": "To begin with, 206 JMA bulletins collected from five municipalities become 110 layouts.",
-      "reading_ja": "まずは じぜん しゅうしゅうした いつつの じちたいの にひゃくろっぽんの きしょうちょうの でんぶんから、ひゃくじゅうの レイアウトを さくせいします"
+      "subtitle_ja": "まずは半月間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。",
+      "subtitle_en": "First, we created 110 layouts from 206 Japan Meteorological Agency telegrams／collected in advance across five municipalities over a half-month period.",
+      "narration_ja": "まずは半月間で事前収集した、5つの自治体での206本の気象庁の電文から、110のレイアウトを作成しました。",
+      "narration_en": "First, we created 110 layouts from 206 Japan Meteorological Agency telegrams collected in advance across five municipalities over a half-month period.",
+      "reading_ja": "まずは はんつきかんで じぜん しゅうしゅうした、いつつの じちたいでの にひゃくろっぽんの きしょうちょうの でんぶんから、ひゃくじゅうの レイアウトを さくせいしました"
     },
     {
       "cut": "8",
@@ -189,11 +197,11 @@
       "slate": "3D ヒーロー画角の 4 画面が Lv5 secure-now。小窓なし",
       "telop_ja": "どのスクリーンにも",
       "telop_en": "Any screen.",
-      "subtitle_ja": "信号を受け取れる仕組みがあれば、どんな場所のどのスクリーンにも、／自動で災害情報を表示できます。",
-      "subtitle_en": "Anything that can receive the signal can show the disaster information automatically,／in any place, on any screen.",
-      "narration_ja": "信号を受け取れる仕組みがあれば、どんな場所のどのスクリーンにも、自動で災害情報を表示できます。",
-      "narration_en": "Anything that can receive the signal can show the disaster information automatically, in any place, on any screen.",
-      "reading_ja": "しんごうを うけとれる しくみが あれば、どんな ばしょの どの スクリーンにも、じどうで さいがいじょうほうを ひょうじ できます"
+      "subtitle_ja": "信号を受け取れる仕組みがあれば、どの場所のどんなスクリーンにも、／自動で災害情報を表示できます。",
+      "subtitle_en": "If there is a system capable of receiving signals,／disaster information can be automatically displayed on any screen anywhere.",
+      "narration_ja": "信号を受け取れる仕組みがあれば、どの場所のどんなスクリーンにも、自動で災害情報を表示できます。",
+      "narration_en": "If there is a system capable of receiving signals, disaster information can be automatically displayed on any screen anywhere.",
+      "reading_ja": "しんごうを うけとれる しくみが あれば、どの ばしょの どんな スクリーンにも、じどうで さいがいじょうほうを ひょうじ できます"
     },
     {
       "cut": "10",

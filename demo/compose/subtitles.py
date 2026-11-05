@@ -13,7 +13,7 @@ import json
 import re
 from pathlib import Path
 
-from overlays import lines
+from overlays import lines, subtitle_spans
 
 from mix_audio import narration_filename
 
@@ -58,8 +58,8 @@ RECORDING_GUIDE = [
 ]
 
 
-def on_screen_en(seg):
-    return "\n".join(lines(seg[key]) for key in ("telop_en", "subtitle_en") if seg.get(key) and seg.get(key) != seg.get("telop_ja"))
+def telop_en(seg):
+    return lines(seg["telop_en"]) if seg.get("telop_en") and seg["telop_en"] != seg.get("telop_ja") else ""
 
 
 def write_narration(windows, out):
@@ -98,9 +98,11 @@ def stamp(seconds):
 def write_srt(rows, windows, with_narration, out):
     cues = []
     for start, seg in rows:
-        text = on_screen_en(seg)
-        if text:
-            cues.append((start + seg.get("subtitle_from_s", 0.0), start + seg["seconds"], text))
+        if telop_en(seg):
+            cues.append((start, start + seg["seconds"], telop_en(seg)))
+        for a, b, _, en in subtitle_spans(seg):
+            if en:
+                cues.append((start + a, start + b, lines(en)))
     if with_narration:
         for start, window, seg in windows:
             speak = spoken_length(seg["narration_ja"]) / CHARS_PER_SECOND
