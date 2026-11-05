@@ -29,7 +29,7 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 | ov-5-subtitle-1.png | 5 | subtitle | 10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシミュレートしています。 | Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed. | 3244:29 |
 | ov-5-subtitle-2.png | 5 | subtitle | 警戒レベル3、4、5。すべてのスクリーンが、同じ瞬間に切り替わります。 | Alert levels 3, 4 and 5. Every screen switches at the same moment. | 3244:33 |
 | ov-5b-subtitle-1.png | 5b | subtitle | 何を出すかは、事前に人が確認できます。／承認しておけば、有事に自動で避難案内に切り替わります。 | What to show can be checked in advance.／Approve it once, and the screens switch to evacuation guidance by themselves. | 3244:37 |
-| ov-7m-subtitle-1.png | 7m | subtitle | まずは半月間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。 | First, we created 110 layouts from 206 Japan Meteorological Agency telegrams ／collected in advance across five municipalities over a half-month period. | 3244:41 |
+| ov-7m-subtitle-1.png | 7m | subtitle | まずは 3 週間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。 | First, we created 110 layouts from 206 Japan Meteorological Agency telegrams ／collected in advance across five municipalities over three weeks. | 3244:41 |
 | ov-9-telop-1.png | 9 | telop | どのスクリーンにも | Any screen. | 3244:56 |
 | ov-9-subtitle-1.png | 9 | subtitle | 信号を受け取れる仕組みがあれば、どの場所のどんなスクリーンにも、／自動で災害情報を表示できます。 | If there is a system capable of receiving signals, ／disaster information can be automatically displayed on any screen anywhere. | 3244:45 |
 | ov-10-telop-1.png | 10 | telop | github.com/rettuce/evac-layer／you@ie3.jp | （同左） | 3244:60 |
@@ -58,9 +58,9 @@ Figma のページ「v8 overlays」が文言の正本。該当フレームの文
 | ov-2-subtitle-1 | en | I have built signage systems for stations and streets.／When disaster struck, none of them could speak up on its own. | I have previously developed signage systems for stations and city streets.／During disasters, these systems were unable to actively disseminate information. |
 | ov-5-subtitle-1 | ja | 由利本荘市、10月21日の実際に発表された警報データを使い、／1200倍の速さで再生しています。 | 10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシミュレートしています。 |
 | ov-5-subtitle-1 | en | Yurihonjo City, October 21.／Warnings actually issued that day, replayed at 1,200 times speed. | Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed. |
-| ov-7m-subtitle-1 | ja | まずは事前収集した5つの自治体の206本の気象庁の電文から、／110のレイアウトを作成します。 | まずは半月間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。 |
-| ov-7m-subtitle-1 | en | To begin with, 206 JMA bulletins collected from five municipalities／become 110 layouts. | First, we created 110 layouts from 206 Japan Meteorological Agency telegrams ／collected in advance across five municipalities over a half-month period. |
+| ov-7m-subtitle-1 | ja | まずは事前収集した5つの自治体の206本の気象庁の電文から、／110のレイアウトを作成します。 | まずは 3 週間で事前収集した、5つの自治体での206本の気象庁の電文から、／110のレイアウトを作成しました。 |
+| ov-7m-subtitle-1 | en | To begin with, 206 JMA bulletins collected from five municipalities／become 110 layouts. | First, we created 110 layouts from 206 Japan Meteorological Agency telegrams ／collected in advance across five municipalities over three weeks. |
 | ov-9-subtitle-1 | ja | 信号を受け取れる仕組みがあれば、どんな場所のどのスクリーンにも、／自動で災害情報を表示できます。 | 信号を受け取れる仕組みがあれば、どの場所のどんなスクリーンにも、／自動で災害情報を表示できます。 |
 | ov-9-subtitle-1 | en | Anything that can receive the signal can show the disaster information automatically,／in any place, on any screen. | If there is a system capable of receiving signals, ／disaster information can be automatically displayed on any screen anywhere. |
 
-2026-11-05 B-9: cut 5 ja「シュミレート」は誤記として Figma 側で「シミュレート」に修正（司令官指示）。英語 3 行（0b・7m・9）の行末空白も Figma 側で除去。
+2026-11-05 B-9: cut 5 ja「シュミレート」は誤記として Figma 側で「シミュレート」に修正（司令官指示）。英語 3 行（0b・7m・9）の行末空白も Figma 側で除去。B-10（田中決定）: cut 7m「半月間で」→「3 週間で」・"over a half-month period" → "over three weeks"。
