@@ -50,6 +50,8 @@ AMBIENCE_CUTS = ["1", "2", "5", "8", "9"]
 BEEPS = [("0", 5.0), ("5", 8.1), ("5", 15.1), ("5", 19.6)]
 DRONE_FROM = ("5", 8.1)
 DRONE_UNTIL_END_OF = "8"
+# Every take opens on a recorder click about 9 ms in; a short fade at both ends keeps it out of the mix.
+NARRATION_FADE_S = 0.1
 NARRATION = AUDIO_DIR / "narration.wav"
 NARRATION_DIR = AUDIO_DIR / "narration"
 
@@ -104,6 +106,11 @@ def duration(path):
     return float(result.stdout)
 
 
+def edge_fades(seconds):
+    f = NARRATION_FADE_S
+    return f"afade=t=in:d={f},afade=t=out:st={max(seconds - f, 0):.3f}:d={f}"
+
+
 def narration_track(edl, starts, total, out):
     narrated = [s["cut"] for s in edl["segments"] if s.get("narration_ja")]
     by_name = {narration_filename(cut): cut for cut in narrated}
@@ -114,7 +121,9 @@ def narration_track(edl, starts, total, out):
     takes = [(path, by_name[path.name]) for path in found if path.name in by_name]
     if not takes:
         ensure_narration(total)
-        return NARRATION, [(starts[cut][0], starts[cut][0] + starts[cut][1]) for cut in narrated]
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(NARRATION), "-af", edge_fades(duration(NARRATION)),
+                        "-ar", str(RATE), "-ac", "2", str(out)], check=True)
+        return out, [(starts[cut][0], starts[cut][0] + starts[cut][1]) for cut in narrated]
     ends = {cut: (starts[narrated[i + 1]][0] if i + 1 < len(narrated) else total) for i, cut in enumerate(narrated)}
     inputs, chains, spans = [], [], []
     lead = {s["cut"]: s.get("narration_from_s", 0.0) for s in edl["segments"]}
@@ -124,7 +133,7 @@ def narration_track(edl, starts, total, out):
         if start + duration(path) > ends[cut]:
             print(f"NARRATION overrun {path.name}: {duration(path):.1f}s from {start:.0f}s runs past {ends[cut]:.0f}s")
         inputs += ["-i", str(path)]
-        chains.append(f"[{i}:a]aresample={RATE},aformat=channel_layouts=mono,pan=stereo|c0=c0|c1=c0,"
+        chains.append(f"[{i}:a]aresample={RATE},aformat=channel_layouts=mono,{edge_fades(duration(path))},pan=stereo|c0=c0|c1=c0,"
                       f"adelay={start * 1000:.0f}:all=1[n{i}]")
     graph = ";".join(chains) + f";{''.join(f'[n{i}]' for i in range(len(takes)))}amix=inputs={len(takes)}:normalize=0:" \
         f"duration=longest,apad=whole_dur={total},atrim=0:{total}[out]"
