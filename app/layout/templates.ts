@@ -77,7 +77,7 @@ const PORTRAIT: ShapeLayout = {
   type: FIGMA_PORTRAIT_TYPE,
 }
 
-// The same column without the where-blocks (all-clear, secure-now): the action keeps its pictogram size.
+// The same column without the where-blocks (all-clear): the action keeps its pictogram size.
 const PORTRAIT_CLEAR: ShapeLayout = {
   ...PORTRAIT,
   id: 'figma-stack-clear',
@@ -197,11 +197,12 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
     '32x9': [requireShelterInsteadOfDirection(RIBBON)],
     '1x1': [SQUARE],
   },
+  // Level 5 keeps the shelter and the direction on screen (田中 2026-11-05): the same slots as evac-now.
   'secure-now': {
-    '16x9': [{ ...LANDSCAPE_CLEAR, id: 'figma-split-secure' }],
-    '9x16': [{ ...PORTRAIT_CLEAR, id: 'figma-stack-secure' }],
-    '32x9': [{ ...RIBBON_CLEAR, id: 'figma-ribbon-secure' }],
-    '1x1': [{ ...SQUARE_CLEAR, id: 'figma-square-secure' }],
+    '16x9': [LANDSCAPE],
+    '9x16': [PORTRAIT],
+    '32x9': [RIBBON],
+    '1x1': [SQUARE],
   },
   'all-clear': {
     '16x9': [LANDSCAPE_CLEAR],
@@ -257,7 +258,7 @@ const PILLAR_FACE_CLEAR: ShapeLayout = {
 const PILLAR_FACE_LAYOUTS: Partial<Record<TemplateId, ShapeLayout>> = {
   'evac-now': PILLAR_FACE,
   'evac-prepare': requireShelterInsteadOfDirection(PILLAR_FACE),
-  'secure-now': { ...PILLAR_FACE_CLEAR, id: 'figma-face-secure' },
+  'secure-now': PILLAR_FACE,
   'all-clear': PILLAR_FACE_CLEAR,
 }
 
