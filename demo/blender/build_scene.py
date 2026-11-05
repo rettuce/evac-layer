@@ -35,7 +35,7 @@ SCREENS_DIR = DEMO_DIR / "screens"
 CACHE_DIR = DEMO_DIR / "cache"
 HDRI_PATH = DEMO_DIR / "assets" / "metro_vijzelgracht_1k.hdr"
 PLACEHOLDER_FONT = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
-CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "cut08-seq", "off", "test")
+CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "alert-real-lv3", "seq", "cut08-seq", "off", "test")
 
 INCH = 0.0254
 JOINT_M = 0.003
@@ -257,7 +257,7 @@ SHOTS = {
         "path": push_from("col-front-50", 0.3), "focus_point": CLOSEUP_TARGETS["col"],
     },
     "cut05": {
-        "seconds": 21, "screens": "switch", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
+        "seconds": 21, "screens": "seq", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
         "path": push_from("wide-a", 0.4),
     },
     # Cut 8: one camera move column -> ribbon -> back wall, holding on each screen and easing between them; the
@@ -268,7 +268,7 @@ SHOTS = {
         "path_s": [0.0, 11 / 3, 17 / 3, 28 / 3, 34 / 3, 15.0],
     },
     "cut09": {
-        "seconds": 10, "screens": "alert-real", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
+        "seconds": 10, "screens": "alert-real-lv3", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
         "path": [along_axis(-8.6), along_axis(-7.9)],
     },
 }

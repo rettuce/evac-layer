@@ -47,8 +47,8 @@ SOURCES = {
 AMBIENCE_CUTS = ["1", "2", "5", "8", "9"]
 # Cut 0 is the cold open: the calm screen switches to the alert at 5.0 s (15:55:00 on the real-time clock).
 # Cut 5 plays the live switch recording from replay t=5.0 s: Lv3 at 13.1 s, Lv4 at 20.1 s, Lv5 at 24.6 s.
-BEEPS = [("0", 5.0), ("5", 8.1), ("5", 15.1), ("5", 19.6)]
-DRONE_FROM = ("5", 8.1)
+BEEPS = [("0", 5.0), ("5", 4.0), ("5", 9.5), ("5", 15.0)]
+DRONE_FROM = ("5", 4.0)
 DRONE_UNTIL_END_OF = "8"
 NARRATION = AUDIO_DIR / "narration.wav"
 NARRATION_DIR = AUDIO_DIR / "narration"

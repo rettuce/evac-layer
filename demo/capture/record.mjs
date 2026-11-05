@@ -90,6 +90,13 @@ const CUTS = {
   'alert-lv4': { seconds: 6, startMs: 3000, query: previewOf('05210', 'VXKOii-202610211815-e713da0e3c05'), ready: READY_SELECTOR, events: [] },
   'alert-tsunami': { seconds: 6, startMs: 3000, query: previewOf('22424', 'VTSE41-201609010713-ff3dd5d5c94f'), ready: READY_SELECTOR, events: [] },
   'alert-real': { seconds: 27, startMs: 3000, query: { ...LIVE, speed: '1', from: '2026-10-21T19:45+09:00' }, ready: LIVE_READY, events: [] },
+  // Cut 5 (D-32): one real-time replay from 15:55, shown in three spans joined at the bulletins. The calm
+  // ink-bloom for 4 s and the 15:55 level 3; from 18:15 the level 4; from 19:45 the level 5 (switches at 4, 9.5, 15 s).
+  'seq-lv3': { seconds: 9.5, startMs: -4000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'ink-bloom' }, ready: LIVE_READY, events: [0] },
+  'seq-lv4': { seconds: 5.5, startMs: 8400000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'ink-bloom' }, ready: LIVE_READY, events: [8400000] },
+  'seq-lv5': { seconds: 6, startMs: 13800000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'ink-bloom' }, ready: LIVE_READY, events: [13800000] },
+  // Cut 9 (D-32): the 15:55 level 3 instead of the level 5.
+  'alert-real-lv3': { seconds: 12, startMs: 3000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [] },
   // The dashboard counts up in about 4 s of its own clock; a quarter rate stretches that over the cut.
   dashboard: { seconds: 25, startMs: 0, rate: 0.25, page: '/dashboard', query: {}, ready: '.dashboard[data-ready="1"]', events: [] },
   // Four times the dashboard's own clock settles the numbers within the first second, then they hold.
