@@ -64,3 +64,5 @@ Figma のページ「v8 overlays」が文言の正本。該当フレームの文
 | ov-9-subtitle-1 | en | Anything that can receive the signal can show the disaster information automatically,／in any place, on any screen. | If there is a system capable of receiving signals, ／disaster information can be automatically displayed on any screen anywhere. |
 
 2026-11-05 B-9: cut 5 ja「シュミレート」は誤記として Figma 側で「シミュレート」に修正（司令官指示）。英語 3 行（0b・7m・9）の行末空白も Figma 側で除去。B-10（田中決定）: cut 7m「半月間で」→「3週間で」（B-11: 同じ文の「5つ」「206本」に合わせ数字の前後に空白なし）・"over a half-month period" → "over three weeks"。
+
+2026-11-06 C-11（田中確定 02:0x）: cut 2 の字幕を新しいナレーションに合わせて差し替え、尺は 8 → 15 s。Figma の更新は brand 席。字幕は文ごとに 2 枚（各 2 行）: `ov-2-subtitle-1`「私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上設計し、納めてきました。」"For more than ten years, I have designed and installed signage／for public spaces in cities, such as stations and shopping centers."、`ov-2-subtitle-2`「しかし、それらは災害のとき、／自分から情報を出すことができませんでした。」"Yet during disasters,／these systems could not put out information on their own."。テロップ `ov-2-telop-1`（左上・1.0〜7.5 s）「公共空間のサイネージを10年以上」"Public-space signage, 10+ years"。
