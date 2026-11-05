@@ -97,11 +97,11 @@ The Writer total ($0.83 before the Vision work, then $1.273, $0.054, $0.596, $0.
 
 ## Why these five municipalities
 
-The five were chosen for different hazards and different contexts, under one data condition: the GSI list of designated emergency evacuation sites had to be downloadable for the municipality (it was, for all seven candidates). 由利本荘市 (05210) is a river-flood case on the 子吉川, and the only one where the recorded feed carries a real escalation to levels 3, 4 and 5 (2026-10-21). 輪島市 (17204) is the Noto earthquake context, with landslide bulletins and the official JMA tsunami sample series. 柏崎市 (15205) is a landslide case around a station front. 吉田町 (22424) is a tsunami case on the Pacific coast, where the official drill bulletins (大津波警報・訓練) exercise the top of the scale. 横浜市 (14100) is the urban case: the city already runs disaster screens on 142 signage sites around 横浜駅 under a public–private memorandum, which is the closest existing practice to what EVAC LAYER adds.
+The five cover different hazards and different settings. One data condition applied to all of them: the GSI list of designated emergency evacuation sites had to be downloadable for the municipality (it was for all seven candidates). 由利本荘市 (05210) is a river flood on the 子吉川, and the only municipality whose recorded feed holds a real escalation through levels 3, 4 and 5 (2026-10-21). 輪島市 (17204) stands for the Noto earthquake, with landslide bulletins and the official JMA tsunami sample series. 柏崎市 (15205) is a landslide case near a station. 吉田町 (22424) is a tsunami case on the Pacific coast, where the official drill bulletins (大津波警報・訓練) reach the top of the scale. 横浜市 (14100) is the urban case: under a memorandum with private operators, the city already shows disaster screens on 142 signage sites around 横浜駅, the closest existing practice to what EVAC LAYER adds.
 
 ## What a nationwide roll-out would cost in API calls
 
-A rough extrapolation from the figures above; it assumes the same models and prompts, and it counts API calls only (no screens, lines or staff).
+A rough extrapolation from the figures above. It assumes the same models and prompts and counts API calls only, not screens, network lines or staff.
 
 | Item | Basis | Estimate |
 |---|---|---|
@@ -111,4 +111,4 @@ A rough extrapolation from the figures above; it assumes the same models and pro
 | All municipalities | 1,740 × $17 | **about $30,000 per year** |
 | Per installed site | Vision runs per site; a municipality with many sites multiplies the Vision part | **about $17 per site per year**, so 10,000 sites ≈ $170,000 per year |
 
-Caveats: the recording window (2026-10-11 to 11-02) sits in typhoon season, so the annualised bulletin count is on the high side; prompt caching and the Batch API (half price) would roughly halve the figures; the Writer output is cached per municipality and hazard, so additional sites in the same municipality pay mostly for Vision.
+Caveats. The recording window (2026-10-11 to 11-02) falls in typhoon season, so the annualised bulletin count is on the high side. Prompt caching and the Batch API (half price) would roughly halve the figures. The Writer output is cached per municipality and hazard, so additional sites in the same municipality pay mostly for Vision.
