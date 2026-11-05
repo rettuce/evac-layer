@@ -1,4 +1,4 @@
-"""Subtitles, telops and the logo of the cut list, as timed overlays.
+"""Subtitles, telops, captions and the logo of the cut list, as timed overlays.
 
 python3 demo/compose/overlays.py [--edl demo/compose/edl.json] [--csv demo/out/overlays-v8.csv]
 
@@ -48,13 +48,17 @@ def overlays(edl):
         if segment.get("telop_ja"):
             rows.append({"cut": cut, "kind": "telop", "start_s": start, "end_s": end,
                          "text_ja": segment["telop_ja"], "text_en": segment.get("telop_en", "")})
+        if segment.get("caption_ja"):
+            rows.append({"cut": cut, "kind": "caption", "start_s": start + segment["caption_from_s"],
+                         "end_s": start + segment["caption_to_s"], "text_ja": segment["caption_ja"],
+                         "text_en": segment.get("caption_en", ""), "fade_ms": segment.get("caption_fade_ms", 0)})
         if segment.get("logo"):
             rows.append({"cut": cut, "kind": "logo", "start_s": start, "end_s": end, "text_ja": "", "text_en": "",
                          "file": segment["logo"]})
     for a, b, cut, _, ja, en in timeline_subtitles(edl):
         rows.append({"cut": cut, "kind": "subtitle", "start_s": a, "end_s": b, "text_ja": ja, "text_en": en})
     order = {segment["cut"]: i for i, segment in enumerate(edl["segments"])}
-    kinds = {"subtitle": 0, "telop": 1, "logo": 2}
+    kinds = {"subtitle": 0, "telop": 1, "caption": 2, "logo": 3}
     rows.sort(key=lambda row: (order[row["cut"]], kinds[row["kind"]], row["start_s"]))
     counts = {}
     for row in rows:
@@ -112,10 +116,10 @@ def write_csv(rows, path):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["cut", "kind", "start_s", "end_s", "text_ja", "text_en", "png_name"])
+        writer.writerow(["cut", "kind", "start_s", "end_s", "text_ja", "text_en", "png_name", "fade_ms"])
         for row in rows:
             writer.writerow([row["cut"], row["kind"], f"{row['start_s']:.2f}", f"{row['end_s']:.2f}",
-                             row["text_ja"], row["text_en"], row["png_name"]])
+                             row["text_ja"], row["text_en"], row["png_name"], row.get("fade_ms", "")])
 
 
 def main():

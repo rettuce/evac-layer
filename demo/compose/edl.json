@@ -83,16 +83,29 @@
     {
       "kind": "3d",
       "src": "../renders/cut02.mp4",
-      "slate": "平時レイヤーが流れる 4 画面をゆっくりドリー（v9: もう少し寄った位置から同じ向き・尺）",
+      "slate": "平時レイヤーが流れる 4 画面をゆっくりドリー（v9.2: 同じ経路を 15 s に伸ばす）",
       "cut": "2",
-      "seconds": 8,
+      "seconds": 15,
       "screens": "ambient-real",
-      "subtitle_ja": "私はこれまで駅や街のサイネージシステムを作ってきました。／これらは災害のとき、能動的に情報を発信できませんでした。",
-      "subtitle_en": "I have previously developed signage systems for stations and city streets.／During disasters, these systems were unable to actively disseminate information.",
-      "narration_ja": "私はこれまで駅や街のサイネージシステムを作ってきました。これらは災害のとき、能動的に情報を発信できませんでした。",
-      "narration_en": "I have previously developed signage systems for stations and city streets. During disasters, these systems were unable to actively disseminate information.",
-      "reading_ja": "わたしは これまで えきや まちの サイネージ システムを つくって きました。これらは さいがいの とき、のうどうてきに じょうほうを はっしん できませんでした",
-      "ambient_scene": "brush-flow"
+      "narration_ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、10年以上設計し、納めてきました。しかし、それらは災害のとき、自分から情報を出すことができませんでした。",
+      "narration_en": "For more than ten years, I have designed and installed signage for public spaces in cities, such as stations and shopping centers. Yet during disasters, these systems could not put out information on their own.",
+      "reading_ja": "わたしは これまで、えきや しょうぎょう しせつなど まちの こうきょう くうかんの サイネージを、じゅうねん いじょう せっけいし、おさめて きました。しかし、それらは さいがいの とき、じぶんから じょうほうを だすことが できませんでした",
+      "ambient_scene": "brush-flow",
+      "subtitle_parts": [
+        {
+          "ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上設計し、納めてきました。",
+          "en": "For more than ten years, I have designed and installed signage／for public spaces in cities, such as stations and shopping centers."
+        },
+        {
+          "ja": "しかし、それらは災害のとき、／自分から情報を出すことができませんでした。",
+          "en": "Yet during disasters,／these systems could not put out information on their own."
+        }
+      ],
+      "caption_ja": "公共空間のサイネージを10年以上",
+      "caption_en": "Public-space signage, 10+ years",
+      "caption_from_s": 1.0,
+      "caption_to_s": 7.5,
+      "caption_fade_ms": 300
     },
     {
       "cut": "2b",

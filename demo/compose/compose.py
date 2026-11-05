@@ -30,6 +30,7 @@ FONT_PATH = FONT_DIR / "NotoSansJP-Bold.otf"
 
 SUBTITLE_SIZE_RATIO = 0.034
 SUBTITLE_EN_SIZE_RATIO = 0.024
+CAPTION_MARGIN_RATIO = 0.045
 TELOP_SIZE_RATIO = 0.06
 TELOP_EN_SIZE_RATIO = 0.032
 LOGO_WIDTH_RATIO = 0.5
@@ -46,16 +47,16 @@ def ensure_font():
     return FONT_PATH
 
 
-def drawtext(text_file, size, y_expr, box=True):
+def drawtext(text_file, size, y_expr, box=True, x_expr="(w-text_w)/2", align="C"):
     options = [
         f"fontfile='{FONT_PATH}'",
         f"textfile='{text_file}'",
         "fontcolor=white",
         f"fontsize={size}",
         f"line_spacing={size // 3}",
-        "x=(w-text_w)/2",
+        f"x={x_expr}",
         f"y={y_expr}",
-        "text_align=C",
+        f"text_align={align}",
     ]
     if box:
         options += ["box=1", "boxcolor=black@0.55", f"boxborderw={size // 2}"]
@@ -93,6 +94,19 @@ def segment_filters(segment, work, width, height, mode):
         filters.append(drawtext(write_text(work, f"telop_ja_{cut}", lines(segment["telop_ja"])), ja, "(h-text_h)/2-th", box))
         if segment.get("telop_en") and segment["telop_en"] != segment["telop_ja"]:
             filters.append(drawtext(write_text(work, f"telop_en_{cut}", lines(segment["telop_en"])), en, f"h/2+{ja}", box))
+    if segment.get("caption_ja"):
+        a, b = segment["caption_from_s"], segment["caption_to_s"]
+        f = segment.get("caption_fade_ms", 0) / 1000 or 1e-3
+        alpha = (f":alpha='if(lt(t\\,{a})\\,0\\,if(lt(t\\,{a + f:.3f})\\,(t-{a})/{f}\\,if(lt(t\\,{b - f:.3f})\\,1\\,"
+                 f"if(lt(t\\,{b})\\,({b}-t)/{f}\\,0))))'")
+        ja = round(height * SUBTITLE_SIZE_RATIO)
+        en = round(height * SUBTITLE_EN_SIZE_RATIO)
+        margin = round(height * CAPTION_MARGIN_RATIO)
+        filters.append(drawtext(write_text(work, f"caption_ja_{cut}", lines(segment["caption_ja"])), ja, str(margin), box,
+                                x_expr=str(margin), align="L") + alpha)
+        if segment.get("caption_en"):
+            filters.append(drawtext(write_text(work, f"caption_en_{cut}", lines(segment["caption_en"])), en,
+                                    str(margin + ja * 3 // 2), box, x_expr=str(margin), align="L") + alpha)
     return filters
 
 

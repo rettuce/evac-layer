@@ -103,9 +103,9 @@ def assemble(args, edl):
         shutil.copyfile(png, out / "overlays" / png.name)
     with (out / "overlays.csv").open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["cut", "kind", "start_s", "end_s", "text_ja", "text_en", "png"])
+        writer.writerow(["cut", "kind", "start_s", "end_s", "text_ja", "text_en", "png", "fade_ms"])
         for row in rows:
-            writer.writerow([row["cut"], row["kind"], f"{row['start_s']:.2f}", f"{row['end_s']:.2f}", row["text_ja"], row["text_en"], row["png_name"]])
+            writer.writerow([row["cut"], row["kind"], f"{row['start_s']:.2f}", f"{row['end_s']:.2f}", row["text_ja"], row["text_en"], row["png_name"], row.get("fade_ms", "")])
     missing = sorted({row["png_name"] for row in rows} - {png.name for png in pngs})
     subtitles = timeline_subtitles(edl)
     write_srt([(a, b, ja.replace(LINE_BREAK, "\n")) for a, b, _, _, ja, _ in subtitles], out / "subtitles" / f"evac-layer-{v}.ja.srt")
