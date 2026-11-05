@@ -9,6 +9,7 @@ node demo/tools/narration-recorder/server.mjs
 ```
 
 表示された `http://127.0.0.1:3190/` を Chrome で開きます。127.0.0.1 にだけ bind するので、LAN からは見えません。
+Host が `127.0.0.1:<port>` か `localhost:<port>` でない要求と、Origin がそのどちらでもない保存（PUT）は 403 で断ります（外のページから書き込まれないように）。
 
 | オプション | 既定 | 内容 |
 |---|---|---|

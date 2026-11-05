@@ -27,6 +27,8 @@ const { values: opts } = parseArgs({
 const OUT_DIR = resolve(opts.out)
 const PREV_DIR = join(dirname(OUT_DIR), `${basename(OUT_DIR)}-prev`)
 const CUTS_DIR = resolve(opts.cuts)
+const LOCAL_HOSTS = new Set([`127.0.0.1:${opts.port}`, `localhost:${opts.port}`])
+const LOCAL_ORIGINS = new Set([...LOCAL_HOSTS].map((host) => `http://${host}`))
 
 export function narrationFilename(cut) {
   const [, number, suffix] = /^(\d+)(\D*)$/.exec(cut)
@@ -148,6 +150,8 @@ function send(res, status, body, type = 'application/json; charset=utf-8') {
 }
 
 async function handle(req, res) {
+  if (!LOCAL_HOSTS.has(req.headers.host)) return send(res, 403, { error: 'host not allowed' })
+  if (req.method !== 'GET' && !LOCAL_ORIGINS.has(req.headers.origin)) return send(res, 403, { error: 'origin not allowed' })
   const { pathname } = new URL(req.url, `http://${HOST}`)
   if (pathname.includes('..')) return send(res, 400, { error: 'bad path' })
   if (req.method === 'GET' && pathname === '/') return send(res, 200, await readFile(INDEX_HTML), 'text/html; charset=utf-8')
