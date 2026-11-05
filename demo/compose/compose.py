@@ -18,6 +18,7 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
+from davinci import assemble, export_cuts
 from overlays import lines, timeline_subtitles
 
 HERE = Path(__file__).resolve().parent
@@ -202,6 +203,9 @@ def main():
     parser.add_argument("--edl", default=str(HERE / "edl.json"))
     parser.add_argument("--out")
     parser.add_argument("--mode", choices=("vcon", "clean"), default="vcon")
+    parser.add_argument("--export-cuts", help="also split the output into one ProRes 422 clip per cut in this folder (+ cuts.csv beside it)")
+    parser.add_argument("--assets", help="place the DaVinci edit kit in this folder (davinci.py; needs --version and the clean, vcon, stems and mix)")
+    parser.add_argument("--version", help="version label for --assets, e.g. v9")
     args = parser.parse_args()
     edl = json.loads(Path(args.edl).read_text(encoding="utf-8"))
     width, height = edl["size"]
@@ -218,6 +222,13 @@ def main():
         concat(parts, work, out_path)
     finally:
         shutil.rmtree(work)
+    if args.export_cuts:
+        export_cuts(out_path, edl, Path(args.export_cuts))
+    if args.assets:
+        assemble(argparse.Namespace(out=args.assets, version=args.version, clean=str(HERE.parent / "out" / f"evac-layer-demo-{args.version}-clean.mp4"),
+                                    vcon=str(HERE.parent / "out" / f"evac-layer-demo-{args.version}-vcon.mp4"),
+                                    stems=str(HERE.parent / "out" / f"stems-{args.version}"),
+                                    mix=str(HERE.parent / "out" / "evac-layer-demo-v1-mix.wav")), edl)
     total = sum(segment["seconds"] for segment in edl["segments"])
     print(f"COMPOSED {out_path} {total}s {width}x{height}@{edl['fps']} mode={args.mode}")
 
