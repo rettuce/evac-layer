@@ -37,7 +37,7 @@ const SHAPES = {
   '1x1': [1080, 1080],
   pillar: [6616, 5046],
 }
-const SCENES = ['quad-subdivision', 'module-field']
+const SCENES = ['quad-subdivision']
 const SWITCH_AT_MS = 12000
 const SWITCH_FRAMES_MS = [11500, 11800, 12100, 12400, 12700, 13000]
 const READY_TIMEOUT_MS = 30000

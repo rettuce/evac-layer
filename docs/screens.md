@@ -119,14 +119,6 @@ Ambient scene `quad-subdivision` on 16x9; the clock, the site name and its coord
 
 Ambient scene `quad-subdivision` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and its coordinates sit in one corner (once on the front face of a pillar).
 
-![ambient module-field (16x9)](screens/ambient-module-field-16x9.png)
-
-Ambient scene `module-field` on 16x9; the clock, the site name and its coordinates sit in one corner (once on the front face of a pillar).
-
-![ambient module-field (pillar)](screens/ambient-module-field-pillar.png)
-
-Ambient scene `module-field` on pillar (the whole column as one picture, shown at 1280 wide); the clock, the site name and its coordinates sit in one corner (once on the front face of a pillar).
-
 ## Switch (ambient → alert)
 
 ![switch](screens/switch-16x9-strip.png)

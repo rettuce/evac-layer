@@ -19,10 +19,10 @@ test('scene= pins a known scene and ignores an unknown one', () => {
   assert.equal(pickAmbient('x', BASE, 'unknown').scene.id, pickAmbient('x', BASE).scene.id)
 })
 
-test('the six kept scenes are registered, and the dark-ground ones carry a light clock', () => {
+test('the five kept scenes are registered, and the dark-ground ones carry a light clock', () => {
   assert.deepEqual(
     AMBIENT_SCENES.map((scene) => scene.id).sort(),
-    ['brush-flow', 'etched-streams', 'ink-bloom', 'module-field', 'painterly-flow', 'quad-subdivision'],
+    ['brush-flow', 'etched-streams', 'ink-bloom', 'painterly-flow', 'quad-subdivision'],
   )
   assert.deepEqual(AMBIENT_SCENES.filter((scene) => scene.ink === 'light').map((scene) => scene.id).sort(), ['brush-flow', 'etched-streams', 'quad-subdivision'])
 })
