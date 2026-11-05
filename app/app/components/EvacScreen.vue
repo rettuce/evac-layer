@@ -3,6 +3,7 @@ import { collapseAbsent, gridCss, initialPlacement, missingRequired, nextOverflo
 import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
 import { CABINET_OFFICE_5, DARK_BAND, LANG_LABEL_OPACITY, PAGE_BACKGROUND, PAGE_INK, SHELTER_KIND_OPACITY, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
+import { shelterFloorPx, shelterSizes } from '~~/layout/shelterFit'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
@@ -31,7 +32,7 @@ const overflowDropped = ref<DroppedCell[]>([])
 const overflow = ref('')
 const levelLabel = computed(() => levelLabelFor(props.screen.template, props.screen.alert.level))
 const headlineScale = ref(1)
-const shelterNarrow = ref(false)
+const shelterStep = ref(0)
 const distanceBelow = ref(false)
 const languagesNarrow = ref(false)
 const sourceNarrow = ref(false)
@@ -54,6 +55,12 @@ const heroCell = computed(() => (layout.value.hero ? placed.value.find((cell) =>
 
 const band = computed(() => CABINET_OFFICE_5[props.screen.alert.level])
 
+const shelterNarrowSizes = computed(() => {
+  const narrow = layout.value.type?.shelterNarrow
+  return narrow === undefined ? undefined : shelterSizes(narrow, shelterFloorPx(props.shape))
+})
+const shelterStepCount = computed(() => shelterNarrowSizes.value?.length ?? 1)
+
 const rootStyle = computed(() => ({
   ...gridCss(layout.value.fixedTracks ? layout.value : collapseAbsent(layout.value, new Set([...placed.value.map((cell) => cell.role), ...(layout.value.hero ? ['hero'] : [])]))),
   ...(props.box ? { width: `${props.box.width}px`, height: `${props.box.height}px` } : {}),
@@ -75,8 +82,8 @@ const rootStyle = computed(() => ({
   '--dark-band': rgbCss(DARK_BAND),
   '--dark-band-ink': rgbCss(inkOn(DARK_BAND)),
   ...Object.fromEntries(Object.entries(layout.value.type ?? {}).map(([key, px]) => [`--type-${key}`, px])),
-  ...(shelterNarrow.value && layout.value.type?.shelterNarrow ? { '--type-shelter': layout.value.type.shelterNarrow } : {}),
-  ...(shelterNarrow.value && !layout.value.figma ? { '--shelter-scale': SHELTER_STEP_DOWN } : {}),
+  ...(shelterStep.value && shelterNarrowSizes.value ? { '--type-shelter': shelterNarrowSizes.value[shelterStep.value - 1] } : {}),
+  ...(shelterStep.value && !layout.value.figma ? { '--shelter-scale': SHELTER_STEP_DOWN } : {}),
   ...(languagesNarrow.value && layout.value.type?.languagesNarrow ? { '--type-languages': layout.value.type.languagesNarrow } : {}),
   ...(sourceNarrow.value ? { '--source-scale': SOURCE_STEP_DOWN } : {}),
 }))
@@ -194,7 +201,7 @@ async function fit() {
   ready.value = false
   overflowDropped.value = []
   headlineScale.value = 1
-  shelterNarrow.value = false
+  shelterStep.value = 0
   distanceBelow.value = false
   languagesNarrow.value = false
   sourceNarrow.value = false
@@ -204,10 +211,10 @@ async function fit() {
     await pictogramsSettled()
     await nextTick()
     if (generation !== fitGeneration) return
-    // A facility name that does not fit its line is set one step smaller (the artboard's 90 → 72);
-    // on the artboard the distance then moves under a name that still needs two lines.
-    if (!shelterNarrow.value && shelterNameWraps()) {
-      shelterNarrow.value = true
+    // A facility name that does not fit its line is set smaller, step by step down to the Verifier's floor
+    // (田中 2026-11-05); on the artboard the distance then moves under a name that still needs two lines.
+    if (shelterStep.value < shelterStepCount.value && shelterNameWraps()) {
+      shelterStep.value++
       continue
     }
     if (layout.value.distanceBelow && !distanceBelow.value && shelterNameWraps()) {
@@ -285,7 +292,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-missing-required="missing.join(',') || undefined"
     :data-overflow="overflow || undefined"
     :data-headline-scale="headlineScale !== 1 ? headlineScale : undefined"
-    :data-shelter-scale="shelterNarrow ? 'narrow' : undefined"
+    :data-shelter-scale="shelterStep ? 'narrow' : undefined"
     :data-distance="distanceBelow ? 'below' : undefined"
     :data-languages-scale="languagesNarrow ? 'narrow' : undefined"
     :data-source-scale="sourceNarrow ? 'narrow' : undefined"
