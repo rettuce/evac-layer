@@ -28,7 +28,7 @@ const RULE_ALPHA = 0.14
 const SITE_NAME = '羽後本荘駅'
 const COORDS = formatCoords(39.38633978, 140.0563304)
 const INK: Record<AmbientScene, keyof typeof OVERLAY_INK> = {
-  'brush-flow': 'light', 'etched-streams': 'light', 'ink-bloom': 'dark', 'module-field': 'dark', 'painterly-flow': 'light',
+  'brush-flow': 'light', 'etched-streams': 'light', 'ink-bloom': 'dark', 'painterly-flow': 'light',
   'quad-subdivision': 'dark',
 }
 

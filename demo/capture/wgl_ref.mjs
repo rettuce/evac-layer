@@ -1,7 +1,7 @@
 // Records a wgl lab sketch in real time as the reference clip for an ambient scene.
 //
 //   node demo/capture/wgl_ref.mjs --sketch stream-hatch [--base-url http://127.0.0.1:3170] [--seconds 5] [--settle 4]
-//   node demo/capture/wgl_ref.mjs --name module-field --url https://wgl.ie3.jp/?set=module-field [--seconds 10]
+//   node demo/capture/wgl_ref.mjs --name painterly-flow --url https://wgl.ie3.jp/?set=painterly-flow [--seconds 10]
 //
 // Output: demo/out/ambient/ref/<sketch>.mp4 (640x360, 30 fps, no audio), via a 1280x720 screencast.
 import { execFile } from 'node:child_process'
