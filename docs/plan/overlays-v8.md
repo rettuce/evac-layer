@@ -9,6 +9,7 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 |---|---|---|
 | subtitle | 日本語 Noto Sans JP Bold 44 px（行送り 60）／英語 Public Sans SemiBold 32 px（行送り 42）。白文字 | 黒 55% の帯（左右 32・上下 20 px・角丸なし）に日本語の下に英語。中央揃え。帯の下端が画面下端から 72 px。最大幅 1600 px |
 | telop | 日本語 Noto Sans JP Bold 72 px／英語 Public Sans Bold 48 px。白文字＋ドロップシャドウ（黒 60%・ぼかし 24・y 4）。帯なし | 画面中央（縦横とも）。2 行（日本語の下に英語） |
+| telop（2） | telop と同じ | 左上・左揃え。テロップのブロックの左上が画面の左上から 96 px（x 96・y 96） |
 | telop（0b） | Public Sans Bold 120 px・字間 -2%（ロゴ規則） | 画面中央 |
 | telop（10） | URL Public Sans Bold 64 px／メール Public Sans SemiBold 48 px | 画面中央 |
 | logo | `docs/brand/evac-layer-lockup-run-black.svg` の背景矩形を外して読み込み。幅 1190 px（原寸 2380 の 1/2） | 画面中央。菱形の内側の黒塗りは残してある（黒地のエンドカード前提。黒以外の背景に置くと菱形の内側が黒く出る） |
@@ -21,7 +22,9 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 | ov-0b-subtitle-1.png | 0b | subtitle | EVAC LAYER は、いまある既存のサイネージに、／災害時の緊急案内のレイヤーを自動で追加するシステムです。 | EVAC LAYER is a system that automatically adds ／an emergency evacuation guidance layer to existing signage. | 3244:9 |
 | ov-0b-telop-1.png | 0b | telop | EVAC LAYER | EVAC LAYER | 3244:49 |
 | ov-1-subtitle-1.png | 1 | subtitle | 2024.1.1 能登半島地震。／どこへ逃げればよいか判断が難しかった来訪者がいました（上越市の検証） | 1 Jan 2024. The Noto Peninsula earthquake.／Some visitors could not tell where to evacuate (City of Joetsu review) | 3244:13 |
-| ov-2-subtitle-1.png | 2 | subtitle | 私はこれまで駅や街のサイネージシステムを作ってきました。／これらは災害のとき、能動的に情報を発信できませんでした。 | I have previously developed signage systems for stations and city streets.／During disasters, these systems were unable to actively disseminate information. | 3244:17 |
+| ov-2-subtitle-1.png | 2 | subtitle | 私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上設計し、納めてきました。 | For more than ten years, I have designed and installed signage／for public spaces in cities, such as stations and shopping centers. | 3244:17 |
+| ov-2-subtitle-2.png | 2 | subtitle | しかし、それらは災害のとき、／自分から情報を出すことができませんでした。 | Yet during disasters,／these systems could not put out information on their own. | 3294:4 |
+| ov-2-telop-1.png | 2 | telop（左上） | 公共空間のサイネージを10年以上 | Public-space signage, 10+ years | 3294:8 |
 | ov-2b-telop-1.png | 2b | telop | 街中にスクリーンがあります。／それらは自分の位置関係を知っています。 | Screens are all over the city.／Each one knows where it stands. | 3244:52 |
 | ov-3-subtitle-1.png | 3 | subtitle | 災害の種類と警戒レベル。アイコンと10の言語。／そして、どんな形のスクリーンにも、適切なレイアウトで描きます。 | Hazard types and alert levels. Icons and ten languages.／And for a screen of any shape, a layout that fits. | 3245:4 |
 | ov-4-subtitle-1.png | 4 | subtitle | 避難案内は自動作成され、人が事前承認したものだけが、／警報が届いた瞬間に表示されます。 | Evacuation guidance is generated automatically. Only what a person has approved in advance／is shown, the moment a warning arrives. | 3244:21 |
@@ -64,3 +67,5 @@ Figma のページ「v8 overlays」が文言の正本。該当フレームの文
 | ov-9-subtitle-1 | en | Anything that can receive the signal can show the disaster information automatically,／in any place, on any screen. | If there is a system capable of receiving signals, ／disaster information can be automatically displayed on any screen anywhere. |
 
 2026-11-05 B-9: cut 5 ja「シュミレート」は誤記として Figma 側で「シミュレート」に修正（司令官指示）。英語 3 行（0b・7m・9）の行末空白も Figma 側で除去。B-10（田中決定）: cut 7m「半月間で」→「3週間で」（B-11: 同じ文の「5つ」「206本」に合わせ数字の前後に空白なし）・"over a half-month period" → "over three weeks"。
+
+2026-11-06 C-11（田中確定 02:0x）: cut 2 の字幕を新しいナレーションに合わせて差し替え、尺は 8 → 15 s。Figma の更新は brand 席。字幕は文ごとに 2 枚（各 2 行）: `ov-2-subtitle-1`「私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上設計し、納めてきました。」"For more than ten years, I have designed and installed signage／for public spaces in cities, such as stations and shopping centers."、`ov-2-subtitle-2`「しかし、それらは災害のとき、／自分から情報を出すことができませんでした。」"Yet during disasters,／these systems could not put out information on their own."。テロップ `ov-2-telop-1`（左上・1.0〜7.5 s）「公共空間のサイネージを10年以上」"Public-space signage, 10+ years"。

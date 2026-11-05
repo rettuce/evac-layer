@@ -230,7 +230,7 @@ function shapesSheet(thumbs) {
     x += width + THUMB_GAP
   }
   y += THUMB_HEIGHT + labelHeight + SPACE.beforeNote
-  parts.push(text(MARGIN, y, '基準形状が 1:1 の画面（1:1・4:5）では、優先度の低い言語の並記を省く（1:1 では避難場所も省く）。4:3・5:4 は 16:9 を基準にするので避難場所まで表示する。必須の項目はどの画角でも表示される', { size: 18, fill: SUB }))
+  parts.push(text(MARGIN, y, '基準形状が 1:1 の画面（1:1・4:5）も、避難場所・方向・言語帯・出典をすべて表示する。4:5 は 1:1 の配置を縦に伸ばし、4:3・5:4 は 16:9 の配置を使う。必須の項目はどの画角でも表示される', { size: 18, fill: SUB }))
   return sheet(y + SPACE.bottom, parts)
 }
 

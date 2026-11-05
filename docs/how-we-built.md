@@ -26,6 +26,18 @@ Compose → verify (static schema, then the rendered page in a browser, then Vis
 
 Run over the recorded feed, this loop found 25 defects on its first Vision pass and 0 by the fifth (`docs/evaluation.md`, `agents/FINDINGS.md`).
 
+## Checkpoints: each seat hands its context back
+
+Every return from a seat ends the same way: what it concluded, which files it changed, how it checked them, what it could not check, and what is still open. The last two lines are the checkpoint. They make the seat state the context the commander cannot see (an assumption it made, a number it took from another file, a check it could not run), and the commander decides on each open point before the next step: accept, send back with the cause and the fix, or ask the author. When the copy seat compared the author's subtitles with the recorded bulletins, "could not check" and "open points" were where the mismatches surfaced, such as a JMA warning written as if a city had issued it, or a recording period of three weeks described as half a month.
+
+各セッションの返却は、いつも同じ形で終わります。結論、変更したファイル、どう確かめたか、確かめられなかったこと、未解決の点。最後の 2 つが同期の確認点です。司令官からは見えない文脈（置いた前提、別のファイルから持ってきた数字、走らせられなかった検査）をセッション自身に書かせ、司令官は次の手に進む前に未解決の点を 1 つずつ裁きます。受け入れるか、原因と直し方を添えて差し戻すか、作者に聞くか。作者の字幕を記録した電文と照らしたときも、気象庁の警報を市が発令したように書いた語や、3 週間の記録期間を半月と書いた語は、この 2 行に出てきました。
+
+## Built for next year's model
+
+The parts that decide what a screen may say are fixed outside the model: the layout, alert, municipality and feed schemas in `schema/`, the renderer's DOM attributes that the Verifier reads, and the approval gate (`/api/live-layout` serves a layout only for an approved bulletin at a site with automatic delivery switched on; approvals live in `data/approvals.json`). The Reader, the Writer and the Vision Verifier sit inside that frame. A newer model can replace any of them, write better text or catch more defects, and the screens still have the same cells, the same checks and the same rule that nothing reaches a screen without a person's approval. The Reader was chosen this way during the week: Haiku and Sonnet were run on the same 輪島市 documents and compared on the same output schema (`agents/README.md`).
+
+画面に何を出してよいかを決める部分は、モデルの外に固定してあります。`schema/` の layout・alert・municipality・feed のスキーマ、検査役が読む描画側の DOM 属性、承認ゲート（`/api/live-layout` は、自動配信を入れたサイトの承認済みの電文にだけレイアウトを返す。承認の記録は `data/approvals.json`）。資料を読む役、文章を書く役、画面を見て検査する役は、その枠の中にいます。新しいモデルに入れ替えて、文章が良くなっても検査で拾える欠陥が増えても、画面のセルも、検査の規則も、人が承認したものしか画面に出ないという決まりも変わりません。今回も資料を読む役のモデルは、同じ輪島市の資料を Haiku と Sonnet で読ませ、同じ出力のスキーマの上で比べて選びました（`agents/README.md`）。
+
 ## Claude in the pipeline
 
 - **Reader**: Sonnet 5.5 turns municipal hazard-map PDFs into knowledge files, with citations and structured outputs. When a PDF's text layer drops characters, it reads the page images instead.

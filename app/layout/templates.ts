@@ -9,7 +9,7 @@ export const STACKED_BAND_MIN_PX = 200
 // foot. Tracks are the artboard's px: the fr column takes a wider screen, the fr row above the languages a taller one.
 // The shelter also owns the rows under it down to the languages, so a two-line name (司令官 2026-11-05: shrink → two lines → ellipsis,
 // the direction and the distance never move) stays inside its cell.
-const FIGMA_LANDSCAPE_TYPE = { headline: 64, level: 64, action: 120, direction: 122, shelter: 79, shelterNarrow: 63, kind: 32, distance: 92, label: 24, languages: 54, languagesNarrow: 46, source: 24 }
+const FIGMA_LANDSCAPE_TYPE = { headline: 64, level: 64, action: 120, direction: 122, shelter: 79, shelterNarrow: 63, kind: 32, distance: 92, distanceNarrow: 73, label: 24, languages: 54, languagesNarrow: 46, source: 24 }
 const LANDSCAPE: ShapeLayout = {
   id: 'figma-split',
   columns: [52, 720, '1fr', 897, 4, 48],
@@ -92,7 +92,7 @@ const PORTRAIT_CLEAR: ShapeLayout = {
 // field, the action and the run pictogram's ink in a 1369 column from x 887, the direction from x 2979 and the
 // shelter from x 2256, both ending at x 3748, and the languages side by side in a 294 band at the foot with their labels above the text.
 // The fr column takes a wider screen, the fr row above the band a taller one.
-const FIGMA_RIBBON_TYPE = { headline: 96, level: 96, action: 150, direction: 170, shelter: 140, shelterNarrow: 112, kind: 32, distance: 150, label: 30, languages: 90, languagesNarrow: 76, source: 30 }
+const FIGMA_RIBBON_TYPE = { headline: 96, level: 96, action: 150, direction: 170, shelter: 140, shelterNarrow: 112, kind: 32, distance: 150, distanceNarrow: 120, label: 30, languages: 90, languagesNarrow: 76, source: 30 }
 const RIBBON: ShapeLayout = {
   id: 'figma-ribbon',
   columns: [780, 107, 1369, '1fr', 769, 92],
@@ -145,7 +145,7 @@ const RIBBON_CLEAR: ShapeLayout = {
 // line; 司令官 2026-11-05 adds one (the sources are a condition of the data providers) on the band's label line,
 // right-aligned at 1032, so no placed element moves: its cell is the fr row above the band and the line hangs
 // from that row's foot into the band (screen.css). The fr row takes a taller screen.
-const FIGMA_SQUARE_TYPE = { headline: 76, level: 66, action: 150, direction: 70, shelter: 64, shelterNarrow: 51, kind: 30, distance: 72, label: 30, languages: 56, languagesNarrow: 47, source: 24 }
+const FIGMA_SQUARE_TYPE = { headline: 76, level: 66, action: 150, direction: 70, shelter: 64, shelterNarrow: 51, kind: 30, distance: 72, distanceNarrow: 57, label: 30, languages: 56, languagesNarrow: 47, source: 24 }
 const SQUARE: ShapeLayout = {
   id: 'figma-square',
   columns: [48, 202, 14, 502, 278, 36],
@@ -219,7 +219,7 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
 // 842 × 1132 from (353, 627) above the two-line action from y 2182, the languages from y 2834 with labels centred on
 // their lines, the shelter group from y 3496 (the 32:9 group), the direction from y 3892, every text from x 80 and
 // the distance ending at x 1572. The fr row above the foot band takes a taller face.
-const FIGMA_PILLAR_TYPE = { headline: 90, level: 90, action: 190, direction: 270, shelter: 140, shelterNarrow: 112, kind: 32, distance: 150, label: 40, languages: 88, languagesNarrow: 74, source: 70 }
+const FIGMA_PILLAR_TYPE = { headline: 90, level: 90, action: 190, direction: 270, shelter: 140, shelterNarrow: 112, kind: 32, distance: 150, distanceNarrow: 120, label: 40, languages: 88, languagesNarrow: 74, source: 70 }
 const PILLAR_FACE: ShapeLayout = {
   id: 'figma-face',
   columns: [80, 273, 842, 377, 82],
