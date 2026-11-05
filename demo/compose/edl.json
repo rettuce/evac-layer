@@ -87,17 +87,17 @@
       "cut": "2",
       "seconds": 16,
       "screens": "ambient-real",
-      "narration_ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、10年以上設計し、納めてきました。しかし、それらは災害のとき、自分から情報を出すことができませんでした。",
+      "narration_ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、10年以上作ってきました。しかし、それらは災害時、自分から情報を能動的に出すことができませんでした。",
       "narration_en": "For more than ten years, I have designed and installed signage for public spaces in cities, such as stations and shopping centers. Yet during disasters, these systems could not put out information on their own.",
-      "reading_ja": "わたしは これまで、えきや しょうぎょう しせつなど まちの こうきょう くうかんの サイネージを、じゅうねん いじょう せっけいし、おさめて きました。しかし、それらは さいがいの とき、じぶんから じょうほうを だすことが できませんでした",
+      "reading_ja": "わたしは これまで、えきや しょうぎょう しせつなど まちの こうきょう くうかんの サイネージを、じゅうねん いじょう つくって きました。しかし、それらは さいがいじ、じぶんから じょうほうを のうどうてきに だすことが できませんでした",
       "ambient_scene": "brush-flow",
       "subtitle_parts": [
         {
-          "ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上設計し、納めてきました。",
+          "ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上作ってきました。",
           "en": "For more than ten years, I have designed and installed signage／for public spaces in cities, such as stations and shopping centers."
         },
         {
-          "ja": "しかし、それらは災害のとき、／自分から情報を出すことができませんでした。",
+          "ja": "しかし、それらは災害時、／自分から情報を能動的に出すことができませんでした。",
           "en": "Yet during disasters,／these systems could not put out information on their own."
         }
       ],
