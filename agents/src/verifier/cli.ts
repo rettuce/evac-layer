@@ -31,7 +31,7 @@ try {
     const { state, samples, cells, scale } = await readScreen(browser, target, shape);
     const luminances = await sampleLuminance(browser, target, shape, values.clock as Clock);
     const reversals = countReversals(luminances);
-    const findings: Finding[] = [...judgeState(state), ...judgeFonts(samples, scale), ...judgeContent(cells)];
+    const findings: Finding[] = [...judgeState(state), ...judgeFonts(samples, scale, shape), ...judgeContent(cells)];
     if (reversals > MAX_REVERSALS) findings.push({ check: "flicker", detail: `${reversals} luminance reversals of ≥10% within 1 s (${luminances.map((l) => l.toFixed(4)).join(", ")})` });
     screens.push({
       shape, template: state.template, variant: state.variant, level: state.level,

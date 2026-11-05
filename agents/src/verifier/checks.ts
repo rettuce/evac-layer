@@ -28,20 +28,29 @@ export interface ScreenState { shape: string; template: string; variant: string;
 export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker" | "direction-dropped"; cell_id?: string; lang?: string; detail: string }
 export interface CellText { id: string; role: Role; text: string }
 
+// 田中's artboards (L-4/L-5, 2026-11-05) set these lines below the viewing-distance floor; the floor follows the
+// design, in the shape's own pixels, until a real deployment revisits the distances (agents/FINDINGS.md).
+export const ARTBOARD_FLOOR_PX: Partial<Record<string, Partial<Record<`${Role}:${TextKind}`, number>>>> = {
+  "16x9": { "action:primary": 120, "languages:primary": 54, "languages:label": 24, "source:primary": 24 },
+  "1x1": { "languages:primary": 56 },
+};
+
 // A label (language name, shelter designation) only names what the text beside it is, so it is held to the fine distance.
-export function requiredPx(role: Role, scale: number, kind: TextKind): { step: TypeStep; px: number } {
+export function requiredPx(role: Role, scale: number, kind: TextKind, shape?: string): { step: TypeStep | "artboard"; px: number } {
+  const artboard = shape === undefined ? undefined : ARTBOARD_FLOOR_PX[shape]?.[`${role}:${kind}`];
+  if (artboard !== undefined) return { step: "artboard", px: artboard };
   const step = kind === "label" ? "fine" : role === "action" && kind === "secondary" ? "guide" : ROLE_MIN_STEP[role];
   return { step, px: TYPE_PX[step] * scale };
 }
 
-export function judgeFonts(samples: TextSample[], scale: number): Finding[] {
+export function judgeFonts(samples: TextSample[], scale: number, shape?: string): Finding[] {
   return samples.flatMap((s) => {
-    const need = requiredPx(s.role, scale, s.kind);
+    const need = requiredPx(s.role, scale, s.kind, shape);
     if (s.font_px + FONT_TOLERANCE_PX >= need.px) return [];
     return [{
       check: "font-size" as const,
       cell_id: s.cell_id,
-      detail: `${s.role} text "${s.text.slice(0, 24)}" is ${s.font_px}px; the ${need.step} type step needs ${need.px.toFixed(1)}px`,
+      detail: `${s.role} text "${s.text.slice(0, 24)}" is ${s.font_px}px; the ${need.step === "artboard" ? `${shape} artboard floor` : `${need.step} type step`} needs ${need.px.toFixed(1)}px`,
     }];
   });
 }
