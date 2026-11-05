@@ -61,14 +61,6 @@ const displays = new Displays(room.displayMeshes, crops, INITIAL)
 const summary = `${room.pieces.length} pieces · ${displays.faces.length} faces · ${presets.length} cameras`
 status.textContent = 'loading video …'
 
-const debugPanels = [document.getElementById('ui')!, document.getElementById('fps')!]
-let debugShown = true
-addEventListener('keydown', (event) => {
-  if (event.key.toLowerCase() !== 'd' || event.metaKey || event.ctrlKey || event.altKey) return
-  debugShown = !debugShown
-  for (const panel of debugPanels) panel.style.display = debugShown ? '' : 'none'
-})
-
 const ui = buildUi(document.getElementById('ui')!, presets, INITIAL, {
   onContent: (content) => displays.setContent(content),
   onScene: (ambientScene) => { void displays.setScene(ambientScene) },
@@ -84,6 +76,40 @@ const ui = buildUi(document.getElementById('ui')!, presets, INITIAL, {
 for (const ambientScene of SCENES) {
   void displays.hasVideo(ambientScene).then((available) => ui.setSceneAvailable(ambientScene, available))
 }
+
+const debugPanels = [document.getElementById('ui')!, document.getElementById('fps')!]
+let debugShown = true
+// Steps over scenes whose loop is missing; the scene also changes under EVAC LAYER, for when it comes back.
+function stepScene(direction: 1 | -1): void {
+  const index = SCENES.indexOf(ui.scene)
+  for (let step = 1; step < SCENES.length; step++) {
+    const candidate = SCENES[(index + direction * step + SCENES.length * step) % SCENES.length]!
+    if (ui.isSceneAvailable(candidate)) {
+      ui.pickScene(candidate)
+      return
+    }
+  }
+}
+addEventListener('keydown', (event) => {
+  if (event.metaKey || event.ctrlKey || event.altKey) return
+  switch (event.key) {
+    case 'd':
+    case 'D':
+      debugShown = !debugShown
+      for (const panel of debugPanels) panel.style.display = debugShown ? '' : 'none'
+      break
+    case 'e':
+    case 'E':
+      ui.pickContent(ui.content === 'calm' ? 'evac' : 'calm')
+      break
+    case 'ArrowRight':
+      stepScene(1)
+      break
+    case 'ArrowLeft':
+      stepScene(-1)
+      break
+  }
+})
 void displays.hasVideo(INITIAL.scene).then(async (available) => {
   if (!available) {
     status.textContent = `video not found: ${displays.videoUrl(INITIAL.scene)}`

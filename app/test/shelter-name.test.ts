@@ -74,7 +74,7 @@ describe('a twenty-character shelter name keeps the direction on every shape', {
         assert.ok(screen.arrows >= 1, `${shape} draws the direction arrow`)
         assert.ok(!screen.dropped.includes('direction'), `${shape} dropped: ${screen.dropped}`)
         assert.deepEqual([screen.overflow, screen.missing], ['', ''], `${shape} overflow/missing`)
-        if (shape !== '1x1') assert.equal(screen.name, LONG_NAME, `${shape} keeps the whole name in the document`)
+        assert.equal(screen.name, LONG_NAME, `${shape} keeps the whole name in the document`)
       }
     })
   }

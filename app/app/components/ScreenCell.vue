@@ -15,6 +15,7 @@ const props = defineProps<{
   pictogramPx: number
   figmaRules?: boolean
   distanceBelow?: boolean
+  distanceUnitSpace?: boolean
   languageIndex: number
   languageStyle: Record<string, string | number>
 }>()
@@ -30,8 +31,8 @@ const languageGroups = computed<LangKey[][]>(() => {
   return Array.from({ length: Math.ceil(langs.length / LANGUAGES_AT_ONCE) }, (_, i) => langs.slice(i * LANGUAGES_AT_ONCE, (i + 1) * LANGUAGES_AT_ONCE))
 })
 const currentGroup = computed(() => (languageGroups.value.length ? props.languageIndex % languageGroups.value.length : -1))
-// The Figma artboard writes the distance as one word (570m); the earlier layouts keep the space.
-const distanceText = computed(() => (props.cell.distance_m === undefined ? '' : `${props.cell.distance_m}${props.figmaRules ? '' : ' '}m`))
+// The 9:16 artboard writes the distance as one word (570m); the 1:1 artboard and the earlier layouts keep the space.
+const distanceText = computed(() => (props.cell.distance_m === undefined ? '' : `${props.cell.distance_m}${props.figmaRules && !props.distanceUnitSpace ? '' : ' '}m`))
 const headlineMaxLines = computed(() => (props.headlineLimited ? (props.headlineMaxLines ?? HEADLINE_STACKED_MAX_LINES) : undefined))
 </script>
 

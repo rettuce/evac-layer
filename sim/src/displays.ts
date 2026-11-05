@@ -13,7 +13,6 @@ export type VideoTier = '4k' | '8k'
 
 const AMBIENT_BASE: string = import.meta.env.VITE_AMBIENT_BASE ?? `${import.meta.env.BASE_URL}ambient/`
 const ALERT_BASE = `${import.meta.env.BASE_URL}alert/`
-const PAIRS = ['ja_easy-en', 'zh_hans-zh_hant', 'ko-th', 'vi-tl', 'id'] as const
 const PAIR_MS = 2500
 const EVAC_BLACKOUT_MS = 300
 // Four redraws a second keep the sweep marker moving smoothly without re-uploading 22 canvases every frame.
@@ -37,6 +36,14 @@ const black = new MeshBasicMaterial({ color: 0x000000 })
 // The bezel plane sits 0.5 mm behind the face, which z-fights from a few metres away without the offset.
 function faceMaterial(map: Texture): MeshBasicMaterial {
   return new MeshBasicMaterial({ map, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 })
+}
+
+// sim/public/alert/sets.json: one entry per alert set, its stills at alert/<id>/<face>/<pair>.png.
+export interface AlertSet {
+  id: string
+  name: string
+  description: string
+  pairs: string[]
 }
 
 export interface Face {
@@ -164,6 +171,12 @@ function detectTier(): VideoTier {
   return support === 'probably' || support === 'maybe' ? '8k' : '4k'
 }
 
+async function loadAlertSets(): Promise<AlertSet[]> {
+  const response = await fetch(`${ALERT_BASE}sets.json`)
+  if (!response.ok) throw new Error(`alert sets not found: ${response.url}`)
+  return ((await response.json()) as { sets: AlertSet[] }).sets
+}
+
 function releaseVideo(video: HTMLVideoElement, texture: VideoTexture): void {
   video.pause()
   video.removeAttribute('src')
@@ -180,6 +193,8 @@ export class Displays {
   private videoTexture?: VideoTexture
   private calmMaterial?: MeshBasicMaterial
   private readonly alertMaterials = new Map<string, MeshBasicMaterial>()
+  private sets: AlertSet[] = []
+  private activeSet = -1
   private pairIndex = -1
   private blackout = false
   private blackoutTimer?: ReturnType<typeof setTimeout>
@@ -212,6 +227,10 @@ export class Displays {
     return this.videoElement
   }
 
+  get alertSet(): AlertSet | undefined {
+    return this.sets[this.activeSet]
+  }
+
   async start(): Promise<void> {
     void Promise.all([
       document.fonts.load(timeFont(1), '0123456789:'),
@@ -219,12 +238,22 @@ export class Displays {
     ]).then(() => {
       this.fontsReady = true
     })
-    const { video, texture } = await this.openVideo(this.scene)
+    const [{ video, texture }, sets] = await Promise.all([this.openVideo(this.scene), loadAlertSets()])
     this.videoElement = video
     this.videoTexture = texture
     this.calmMaterial = faceMaterial(texture)
+    this.sets = sets
+    if (this.activeSet < 0) this.activeSet = 0
     this.apply()
     this.loadAlerts()
+  }
+
+  // Every switch to EVAC LAYER draws a different set than the last one (田中 S-14).
+  private pickAlertSet(): void {
+    if (this.sets.length < 2) return
+    let next = this.activeSet
+    while (next === this.activeSet) next = Math.floor(Math.random() * this.sets.length)
+    this.activeSet = next
   }
 
   setContent(content: Content): void {
@@ -233,6 +262,7 @@ export class Displays {
     clearTimeout(this.blackoutTimer)
     this.blackout = content === 'evac'
     if (this.blackout) {
+      this.pickAlertSet()
       this.blackoutTimer = setTimeout(() => {
         this.blackout = false
         this.apply()
@@ -262,7 +292,7 @@ export class Displays {
 
   update(): void {
     const now = Date.now()
-    const pair = Math.floor(now / PAIR_MS) % PAIRS.length
+    const pair = Math.floor(now / PAIR_MS) % (this.alertSet?.pairs.length ?? 1)
     if (pair !== this.pairIndex) {
       this.pairIndex = pair
       if (this.content === 'evac') this.apply()
@@ -295,14 +325,16 @@ export class Displays {
   private loadAlerts(): void {
     const loader = new TextureLoader()
     const sources = new Set(this.faces.map((face) => face.alertSrc))
-    for (const src of sources) {
-      PAIRS.forEach((pair, index) => {
-        loader.load(`${ALERT_BASE}${src}/${pair}.png`, (texture) => {
-          texture.colorSpace = SRGBColorSpace
-          this.alertMaterials.set(`${src}/${index}`, faceMaterial(texture))
-          if (this.content === 'evac') this.apply()
+    for (const set of this.sets) {
+      for (const src of sources) {
+        set.pairs.forEach((pair, index) => {
+          loader.load(`${ALERT_BASE}${set.id}/${src}/${pair}.png`, (texture) => {
+            texture.colorSpace = SRGBColorSpace
+            this.alertMaterials.set(`${set.id}/${src}/${index}`, faceMaterial(texture))
+            if (this.content === 'evac') this.apply()
+          })
         })
-      })
+      }
     }
   }
 
@@ -315,7 +347,7 @@ export class Displays {
         face.mesh.material = this.calmMaterial ?? black
       } else {
         face.mesh.geometry = face.evacGeometry
-        face.mesh.material = this.blackout ? black : this.alertMaterials.get(`${face.alertSrc}/${this.pairIndex}`) ?? black
+        face.mesh.material = this.blackout ? black : this.alertMaterials.get(`${this.alertSet?.id}/${face.alertSrc}/${this.pairIndex}`) ?? black
       }
     }
   }
