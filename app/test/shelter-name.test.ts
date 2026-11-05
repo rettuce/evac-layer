@@ -46,6 +46,7 @@ describe('a twenty-character shelter name keeps the direction on every shape', {
           if (!url.includes('/api/admin/preview-layout')) return response
           const screen = await response.json()
           for (const cell of screen.cells) if (cell.role === 'shelter') cell.text = { ...cell.text, ja: name }
+          if (!screen.cells.some((cell: { role: string }) => cell.role === 'source')) screen.cells.push({ id: 'source', role: 'source', priority: 9, text: { ja: '気象庁 10/21 18:15 発表・由利本荘市', en: 'JMA 18:15, Oct 21 · Yurihonjo' }, motion: 'static' })
           return new Response(JSON.stringify(screen), { status: 200, headers: { 'content-type': 'application/json' } })
         }
       }, LONG_NAME)

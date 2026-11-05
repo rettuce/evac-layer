@@ -15,6 +15,7 @@ const READY_MS = 30000
 
 const skip = (!existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first') || (!existsSync(CHROME_PATH) && `no Chrome at ${CHROME_PATH}`)
 
+// The layouts in data/ may predate the 1:1 source slot; the tests supply the cell so they check the face, not the data.
 describe('the 1:1 face carries its source line on the language band', { skip }, () => {
   let base = ''
   let child: ChildProcess | undefined
@@ -34,6 +35,17 @@ describe('the 1:1 face carries its source line on the language band', { skip }, 
       const page = await browser!.newPage()
       try {
         await page.setViewport({ width, height, deviceScaleFactor: 0.5 })
+        await page.evaluateOnNewDocument(() => {
+          const original = window.fetch
+          window.fetch = async (input, init) => {
+            const response = await original(input, init)
+            const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+            if (!url.includes('/api/admin/preview-layout')) return response
+            const screen = await response.json()
+  if (!screen.cells.some((cell: { role: string }) => cell.role === 'source')) screen.cells.push({ id: 'source', role: 'source', priority: 9, text: { ja: '気象庁 10/21 18:15 発表・由利本荘市', en: 'JMA 18:15, Oct 21 · Yurihonjo' }, motion: 'static' })
+            return new Response(JSON.stringify(screen), { status: 200, headers: { 'content-type': 'application/json' } })
+          }
+        })
         const src = encodeURIComponent(`/api/admin/preview-layout?municipality=${MUNICIPALITY}&bulletin=${BULLETIN}&shape=1x1`)
         await page.goto(`${base}/screen?aspect=${aspect}&clock=virtual&t=14480&src=${src}`, { waitUntil: 'networkidle0' })
         await page.waitForSelector('.evac-screen[data-ready="1"]', { timeout: READY_MS })
