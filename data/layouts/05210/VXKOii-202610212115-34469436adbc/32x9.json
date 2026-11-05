@@ -54,6 +54,29 @@
       "motion": "pulse"
     },
     {
+      "id": "direction",
+      "role": "direction",
+      "priority": 2,
+      "text": {
+        "ja": "南西へ"
+      },
+      "pictogram": "arrow_forward",
+      "rotation": 135,
+      "motion": "static"
+    },
+    {
+      "id": "shelter",
+      "role": "shelter",
+      "priority": 2,
+      "text": {
+        "ja": "鶴舞小学校"
+      },
+      "kind": "emergency_evacuation_site",
+      "pictogram": "emergency_evacuation_site",
+      "distance_m": 570,
+      "motion": "static"
+    },
+    {
       "id": "languages",
       "role": "languages",
       "priority": 3,
@@ -76,8 +99,8 @@
       "role": "source",
       "priority": 9,
       "text": {
-        "ja": "気象庁 10/21 21:15 発表・由利本荘市",
-        "en": "JMA 21:15, Oct 21 · Yurihonjo"
+        "ja": "気象庁・国土交通省 10/21 21:15 発表・由利本荘市",
+        "en": "JMA · MLIT 21:15, Oct 21 · Yurihonjo"
       },
       "motion": "static"
     }
@@ -88,6 +111,10 @@
       "type": "pdf",
       "file": "yurihonjo/kozui_dosha_hokubu.pdf",
       "page": 1
+    },
+    {
+      "type": "gsi",
+      "file": "05210_2.csv"
     },
     {
       "type": "jma",
