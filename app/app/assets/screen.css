@@ -601,6 +601,21 @@ body {
   font-size: calc(var(--type-languages) * var(--px));
   line-height: 1.2;
 }
+.evac-screen.shape-square {
+  position: relative;
+}
+.evac-screen.shape-square .cell.is-figma[data-role='source'] {
+  position: absolute;
+  right: calc(48 * var(--px));
+  bottom: calc(-52 * var(--px));
+  overflow: visible;
+}
+.evac-screen.shape-square .is-figma .source-text {
+  font-size: calc(var(--type-source) * var(--px));
+  line-height: 1.2;
+  color: var(--dark-band-ink);
+  white-space: nowrap;
+}
 
 .evac-screen.shape-pillar .is-figma .role-headline.is-stacked {
   display: block;
