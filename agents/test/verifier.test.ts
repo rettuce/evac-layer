@@ -24,6 +24,7 @@ test("the 16:9 and 1:1 artboards lower the floor for the lines 田中 set smalle
   assert.deepEqual(requiredPx("languages", 1, "primary", "16x9"), { step: "artboard", px: 54 });
   assert.deepEqual(requiredPx("source", 1, "primary", "16x9"), { step: "artboard", px: 24 });
   assert.deepEqual(requiredPx("languages", 1, "primary", "1x1"), { step: "artboard", px: 56 });
+  assert.deepEqual(requiredPx("source", 1, "primary", "1x1"), { step: "artboard", px: 24 });
   assert.equal(requiredPx("shelter", 1, "primary", "16x9").px, TYPE_PX.guide);
   assert.equal(requiredPx("action", 1, "primary", "9x16").px, TYPE_PX.action);
   assert.deepEqual(judgeFonts([sample({ font_px: 120 })], 1, "16x9"), []);
