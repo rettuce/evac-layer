@@ -159,7 +159,7 @@
       "cut": "5",
       "seconds": 21,
       "narration_ja": "10月21日 由利本荘市で実際に発表された警報データを使い、1200倍の速さでシミュレートしています。当日、警戒レベル3、4、5と変化していく中で、すべてのスクリーンが、同じ瞬間に切り替わっていきます。",
-      "narration_en": "Using actual warning data issued in Yurihonjo City on October 21, this is simulated at 1200x speed. Alert levels 3, 4 and 5. Every screen switches at the same moment.",
+      "narration_en": "Using actual warning data issued in Yurihonjo City on October 21, this is simulated at 1200x speed. That day, as the alert level rose from 3 to 4 to 5, every screen switched at the same moment.",
       "reading_ja": "じゅうがつ にじゅういちにち ゆりほんじょうしで じっさいに はっぴょうされた けいほうデータを つかい、せんにひゃくばいの はやさで シミュレート しています。とうじつ、けいかいレベル さん、よん、ごと へんかしていく なかで、すべての スクリーンが、おなじ しゅんかんに きりかわって いきます",
       "subtitle_parts": [
         {
@@ -168,7 +168,7 @@
         },
         {
           "ja": "当日、警戒レベル3、4、5と変化していく中で、／すべてのスクリーンが、同じ瞬間に切り替わっていきます。",
-          "en": "Alert levels 3, 4 and 5. Every screen switches at the same moment."
+          "en": "That day, as the alert level rose from 3 to 4 to 5,／every screen switched at the same moment."
         }
       ],
       "ambient_scene": "ink-bloom"
