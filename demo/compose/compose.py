@@ -18,7 +18,8 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-from overlays import lines, subtitle_spans
+from davinci import assemble, export_cuts
+from overlays import lines, timeline_subtitles
 
 HERE = Path(__file__).resolve().parent
 SCREENS_DIR = HERE.parent / "screens"
@@ -73,13 +74,16 @@ def segment_filters(segment, work, width, height, mode):
     filters = []
     box = bool(segment.get("src"))
     cut = segment["cut"]
-    spans = subtitle_spans(segment)
-    for n, (a, b, text_ja, text_en) in enumerate(spans):
+    seg_start, seg_end = segment["_start"], segment["_start"] + segment["seconds"]
+    spans = [span for span in segment["_subtitles"] if span[0] < seg_end - 1e-6 and span[1] > seg_start + 1e-6]
+    for n, (a, b, owner, part, text_ja, text_en) in enumerate(spans):
         ja = round(height * SUBTITLE_SIZE_RATIO)
         en = round(height * SUBTITLE_EN_SIZE_RATIO)
         en_lines = lines(text_en)
         en_height = (en_lines.count("\n") + 1) * en * 4 // 3 if en_lines else 0
-        enable = f":enable='between(t\\,{a:.3f}\\,{b:.3f})'" if len(spans) > 1 or a > 0 else ""
+        a, b = max(0.0, a - seg_start), min(segment["seconds"], b - seg_start)
+        whole = a <= 1e-6 and b >= segment["seconds"] - 1e-6
+        enable = "" if whole else f":enable='between(t\\,{a:.3f}\\,{b:.3f})'"
         filters.append(drawtext(write_text(work, f"sub_ja_{cut}_{n}", lines(text_ja)), ja, f"h-text_h-{ja + en_height + en}", box) + enable)
         if en_lines:
             filters.append(drawtext(write_text(work, f"sub_en_{cut}_{n}", en_lines), en, f"h-text_h-{ja}", box) + enable)
@@ -199,17 +203,32 @@ def main():
     parser.add_argument("--edl", default=str(HERE / "edl.json"))
     parser.add_argument("--out")
     parser.add_argument("--mode", choices=("vcon", "clean"), default="vcon")
+    parser.add_argument("--export-cuts", help="also split the output into one ProRes 422 clip per cut in this folder (+ cuts.csv beside it)")
+    parser.add_argument("--assets", help="place the DaVinci edit kit in this folder (davinci.py; needs --version and the clean, vcon, stems and mix)")
+    parser.add_argument("--version", help="version label for --assets, e.g. v9")
     args = parser.parse_args()
     edl = json.loads(Path(args.edl).read_text(encoding="utf-8"))
     width, height = edl["size"]
     ensure_font()
     work = Path(tempfile.mkdtemp(prefix="evac-compose-"))
     try:
+        subtitles = timeline_subtitles(edl)
+        start = 0.0
+        for segment in edl["segments"]:
+            segment["_start"], segment["_subtitles"] = start, subtitles
+            start += segment["seconds"]
         parts = [render_segment(segment, i, work, edl, args.mode) for i, segment in enumerate(edl["segments"])]
         out_path = Path(args.out).resolve() if args.out else (HERE / edl["output"]).resolve()
         concat(parts, work, out_path)
     finally:
         shutil.rmtree(work)
+    if args.export_cuts:
+        export_cuts(out_path, edl, Path(args.export_cuts))
+    if args.assets:
+        assemble(argparse.Namespace(out=args.assets, version=args.version, clean=str(HERE.parent / "out" / f"evac-layer-demo-{args.version}-clean.mp4"),
+                                    vcon=str(HERE.parent / "out" / f"evac-layer-demo-{args.version}-vcon.mp4"),
+                                    stems=str(HERE.parent / "out" / f"stems-{args.version}"),
+                                    mix=str(HERE.parent / "out" / "evac-layer-demo-v1-mix.wav")), edl)
     total = sum(segment["seconds"] for segment in edl["segments"])
     print(f"COMPOSED {out_path} {total}s {width}x{height}@{edl['fps']} mode={args.mode}")
 

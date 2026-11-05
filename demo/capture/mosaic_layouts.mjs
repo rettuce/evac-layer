@@ -127,12 +127,10 @@ function synthesize(count, seed) {
       { id: 'headline', role: 'headline', priority: 1, text: HEADLINES[hazard][level], pictogram: hazard, motion: 'scale-in' },
       { id: 'action', role: 'action', priority: 1, text: action, pictogram: actionPictogram, motion: 'pulse' },
     ]
-    if (template !== 'secure-now') {
-      const rotation = Number(pick(Object.keys(DIRECTIONS)))
-      const facility = pick(hazard === 'tsunami' ? TSUNAMI_FACILITIES : FACILITIES.filter((f) => f !== TSUNAMI_TOWER))
-      cells.push({ id: 'direction', role: 'direction', priority: 2, text: { ja: DIRECTIONS[rotation] }, pictogram: 'arrow_forward', rotation, motion: 'static' })
-      cells.push({ id: 'shelter', role: 'shelter', priority: 2, kind: 'emergency_evacuation_site', text: { ja: facility }, pictogram: 'emergency_evacuation_site', distance_m: 120 + Math.round((rand() * 1680) / 10) * 10, motion: 'static' })
-    }
+    const rotation = Number(pick(Object.keys(DIRECTIONS)))
+    const facility = pick(hazard === 'tsunami' ? TSUNAMI_FACILITIES : FACILITIES.filter((f) => f !== TSUNAMI_TOWER))
+    cells.push({ id: 'direction', role: 'direction', priority: 2, text: { ja: DIRECTIONS[rotation] }, pictogram: 'arrow_forward', rotation, motion: 'static' })
+    cells.push({ id: 'shelter', role: 'shelter', priority: 2, kind: 'emergency_evacuation_site', text: { ja: facility }, pictogram: 'emergency_evacuation_site', distance_m: 120 + Math.round((rand() * 1680) / 10) * 10, motion: 'static' })
     cells.push({ id: 'languages', role: 'languages', priority: 3, text: action, motion: 'static' })
     cells.push({
       id: 'source', role: 'source', priority: 9, motion: 'static',

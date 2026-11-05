@@ -393,7 +393,9 @@ function bufferFor(key: string, view: AmbientRect): Buffer {
     const canvas = document.createElement('canvas')
     canvas.width = view.width
     canvas.height = view.height
-    const ctx = canvas.getContext('2d')!
+    // A CPU-backed canvas, like the room's tiles: GPU rasterization of thousands of translucent strokes was not
+    // identical between page loads (up to 24 levels), so neighbouring crops drawn in separate pages differed.
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
     ctx.translate(-view.x, -view.y)
     buffer = { canvas, ctx, cycle: Number.NaN, drawn: 0 }
     buffers.set(key, buffer)

@@ -27,13 +27,10 @@ const STILL_FROM = 9.5
 const SCALE_IN_S = 0.15
 const SCALE_IN_FROM = 0.92
 const HERO_FILL = 0.6
-const CAMERA_TAU = 0.35
-const SETTLE_S = 0.6
 const DIM_ALPHA = 0.6
 const DIM_S = 0.3
 const COUNT_S = 1
 const ASPECT = { '16x9': 16 / 9, '9x16': 9 / 16, '32x9': 32 / 9, '1x1': 1, pillar: 6616 / 5046 }
-const SKYLINE_STEP = 2
 
 const params = new URLSearchParams(location.search)
 const manifest = await (await fetch(params.get('manifest') ?? 'out/mosaic/manifest.json')).json()
@@ -59,95 +56,79 @@ function spanOf(tile, index) {
   return 1
 }
 
-function pack(slots, h) {
-  const width = W - 2 * MARGIN
-  const sky = new Float64Array(width)
-  const shuffle = mulberry32(manifest.seed + 1)
-  const order = slots.map((slot, i) => i)
-  for (let i = order.length - 1; i > 0; i--) {
-    const j = Math.floor(shuffle() * (i + 1))
-    ;[order[i], order[j]] = [order[j], order[i]]
-  }
-  const placed = new Array(slots.length)
-  let bottom = 0
-  for (const i of order) {
-    const slot = slots[i]
-    const th = slot.span * h + (slot.span - 1) * GAP
-    const tw = Math.round(th * ASPECT[slot.shape])
-    if (tw > width) return undefined
-    let best
-    for (let x = 0; x + tw <= width; x += SKYLINE_STEP) {
-      let y = 0
-      for (let c = x; c < Math.min(width, x + tw + GAP); c++) if (sky[c] > y) y = sky[c]
-      if (!best || y < best.y) best = { x, y }
+const CELL = 4
+
+// Tiles are placed one by one at the free spot nearest the centre (with GAP around each), so the mosaic grows
+// out from the first tile and ends in an organic outline instead of a rectangle.
+function place(sizes, h) {
+  const gw = Math.floor((W - 2 * MARGIN) / CELL)
+  const gh = Math.floor((H - 2 * MARGIN) / CELL)
+  const occupied = new Uint8Array(gw * gh)
+  const sat = new Int32Array((gw + 1) * (gh + 1))
+  const rebuild = () => {
+    for (let y = 0; y < gh; y++) {
+      let row = 0
+      for (let x = 0; x < gw; x++) {
+        row += occupied[y * gw + x]
+        sat[(y + 1) * (gw + 1) + x + 1] = sat[y * (gw + 1) + x + 1] + row
+      }
     }
-    for (let c = best.x; c < Math.min(width, best.x + tw + GAP); c++) sky[c] = best.y + th + GAP
-    placed[i] = { x: best.x, y: best.y, w: tw, h: th }
-    bottom = Math.max(bottom, best.y + th)
   }
-  return { placed, bottom }
+  const busy = (x0, y0, x1, y1) => sat[y1 * (gw + 1) + x1] - sat[y0 * (gw + 1) + x1] - sat[y1 * (gw + 1) + x0] + sat[y0 * (gw + 1) + x0]
+  const candidates = []
+  for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) candidates.push([x, y, Math.hypot(x - gw / 2, (y - gh / 2) * 1.6)])
+  candidates.sort((a, b) => a[2] - b[2])
+  const gap = Math.ceil(GAP / CELL)
+  const rects = []
+  for (const { span, shape } of sizes) {
+    const th = span * h + (span - 1) * GAP
+    const tw = th * ASPECT[shape]
+    const cw = Math.ceil(tw / CELL)
+    const ch = Math.ceil(th / CELL)
+    let spot
+    for (const [cx, cy] of candidates) {
+      const x0 = Math.round(cx - cw / 2)
+      const y0 = Math.round(cy - ch / 2)
+      if (x0 < 0 || y0 < 0 || x0 + cw > gw || y0 + ch > gh) continue
+      if (busy(Math.max(0, x0 - gap), Math.max(0, y0 - gap), Math.min(gw, x0 + cw + gap), Math.min(gh, y0 + ch + gap)) === 0) {
+        spot = [x0, y0]
+        break
+      }
+    }
+    if (!spot) return undefined
+    for (let y = spot[1]; y < spot[1] + ch; y++) occupied.fill(1, y * gw + spot[0], y * gw + spot[0] + cw)
+    rebuild()
+    rects.push({ x: MARGIN + spot[0] * CELL, y: MARGIN + spot[1] * CELL, w: tw, h: th })
+  }
+  return rects
 }
 
+// The first tile goes in the middle; the rest in a seeded shuffle so neighbours differ in place, hazard and level.
 function layout(tiles) {
-  const slots = tiles.map((tile, i) => ({ shape: tile.shape, span: spanOf(tile, i) }))
+  const order = tiles.map((tile, i) => i)
+  for (let i = order.length - 1; i > 1; i--) {
+    const j = 1 + Math.floor(rand() * i)
+    ;[order[i], order[j]] = [order[j], order[i]]
+  }
+  const sizes = order.map((i) => ({ span: spanOf(tiles[i], i), shape: tiles[i].shape }))
   let lo = 10
-  let hi = 400
+  let hi = 200
   let fit
   while (hi - lo > 0.5) {
     const mid = (lo + hi) / 2
-    const result = pack(slots, mid)
-    if (result && result.bottom <= H - 2 * MARGIN) [lo, fit] = [mid, result]
+    const placed = place(sizes, mid)
+    if (placed) [lo, fit] = [mid, placed]
     else hi = mid
   }
-  const { placed, bottom } = fit
-  const right = Math.max(...placed.map((p) => p.x + p.w))
-  const ox = (W - right) / 2
-  const oy = (H - bottom) / 2
-  const rects = placed.map((p) => ({ x: p.x + ox, y: p.y + oy, w: p.w, h: p.h }))
-  return { slots, rects, rowHeight: lo }
+  const rects = new Array(tiles.length)
+  order.forEach((tile, k) => (rects[tile] = fit[k]))
+  return { rects, rowHeight: lo }
 }
 
-// Tiles go into slots of their own shape and span, shuffled so neighbours differ in place, hazard and level;
-// the first tile takes the two-row landscape slot nearest the centre.
-function assign(tiles, slots, rects) {
-  const centre = (r) => [r.x + r.w / 2, r.y + r.h / 2]
-  const dist = (r) => Math.hypot(centre(r)[0] - W / 2, centre(r)[1] - H / 2)
-  const byKey = new Map()
-  slots.forEach((slot, i) => {
-    const key = `${slot.shape}:${slot.span}`
-    if (!byKey.has(key)) byKey.set(key, [])
-    byKey.get(key).push(i)
-  })
-  const heroKey = `${tiles[0].shape}:${slots[0].span}`
-  const heroSlots = byKey.get(heroKey).sort((a, b) => dist(rects[a]) - dist(rects[b]))
-  const heroSlot = heroSlots.shift()
-  for (const list of byKey.values()) {
-    for (let i = list.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1))
-      ;[list[i], list[j]] = [list[j], list[i]]
-    }
-  }
-  const slotOf = new Array(tiles.length)
-  slotOf[0] = heroSlot
-  tiles.forEach((tile, i) => {
-    if (i === 0) return
-    slotOf[i] = byKey.get(`${tile.shape}:${slots[i].span}`).shift()
-  })
-  return slotOf.map((s) => rects[s])
-}
-
-// Tiles appear outward from the first one, ease-in: START_RATE per second at first, the rest by LAST_AT.
+// Tiles appear by distance from the centre, ease-in: START_RATE per second at first, the rest by LAST_AT.
 function schedule(rects) {
-  const hero = rects[0]
-  const hx = hero.x + hero.w / 2
-  const hy = hero.y + hero.h / 2
-  const jitter = rects.map(() => rand() * 140)
-  const order = rects.map((r, i) => i).sort((a, b) => {
-    if (a === 0 || b === 0) return a === 0 ? -1 : 1
-    const da = Math.hypot(rects[a].x + rects[a].w / 2 - hx, rects[a].y + rects[a].h / 2 - hy) + jitter[a]
-    const db = Math.hypot(rects[b].x + rects[b].w / 2 - hx, rects[b].y + rects[b].h / 2 - hy) + jitter[b]
-    return da - db
-  })
+  const dist = (r) => Math.hypot(r.x + r.w / 2 - W / 2, r.y + r.h / 2 - H / 2)
+  const order = rects.map((r, i) => i).sort((a, b) => (a === 0 ? -1 : b === 0 ? 1 : dist(rects[a]) - dist(rects[b])))
   const n = rects.length
   const span = LAST_AT - FIRST_AT
   const a = Math.min(1, (START_RATE * span) / (n - 1))
@@ -164,12 +145,12 @@ function schedule(rects) {
     }
     at[tile] = FIRST_AT + hi * span
   })
+  at[0] = 0
   return { at, endRate: ((n - 1) / span) * (a + 3 * (1 - a)) }
 }
 
 const tiles = manifest.tiles
-const { slots, rects: slotRects, rowHeight } = layout(tiles)
-const rects = assign(tiles, slots, slotRects)
+const { rects, rowHeight } = layout(tiles)
 const { at, endRate } = schedule(rects)
 const images = await Promise.all(tiles.map((tile) => new Promise((resolve, reject) => {
   const img = new Image()
@@ -180,53 +161,14 @@ const images = await Promise.all(tiles.map((tile) => new Promise((resolve, rejec
 await document.fonts.load('700 120px "Noto Sans JP"', '0123456789')
 await document.fonts.load('400 28px "Noto Sans JP"', '自治体気象庁の電文レイアウト')
 
-function cameraTarget(t) {
-  let x0 = Infinity
-  let y0 = Infinity
-  let x1 = -Infinity
-  let y1 = -Infinity
-  let count = 0
-  rects.forEach((r, i) => {
-    if (i !== 0 && at[i] > t) return
-    count++
-    x0 = Math.min(x0, r.x)
-    y0 = Math.min(y0, r.y)
-    x1 = Math.max(x1, r.x + r.w)
-    y1 = Math.max(y1, r.y + r.h)
-  })
-  const fill = HERO_FILL + (1 - HERO_FILL) * ((count - 1) / (rects.length - 1))
-  const scale = Math.min((fill * W) / (x1 - x0), (fill * H) / (y1 - y0))
-  return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, scale }
-}
-
-const FINAL = { cx: W / 2, cy: H / 2, scale: 1 }
-const cameraFrames = []
-{
-  let cam = cameraTarget(0)
-  const k = 1 - Math.exp(-1 / FPS / CAMERA_TAU)
-  for (let f = 0; f <= Math.ceil(STILL_FROM * FPS); f++) {
-    const target = cameraTarget(f / FPS)
-    cam = {
-      cx: cam.cx + (target.cx - cam.cx) * k,
-      cy: cam.cy + (target.cy - cam.cy) * k,
-      scale: Math.exp(Math.log(cam.scale) + (Math.log(target.scale) - Math.log(cam.scale)) * k),
-    }
-    cameraFrames.push(cam)
-  }
-}
-
+// The camera stays on the centre and only zooms out, at one constant rate on a log scale, from the first tile
+// at HERO_FILL of the frame width to the whole mosaic at STILL_FROM.
 const smoothstep = (u) => (u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u))
 const easeOut = (u) => 1 - Math.pow(1 - Math.min(1, Math.max(0, u)), 3)
-
+const ZOOM_FROM = (HERO_FILL * W) / rects[0].w
 function cameraAt(t) {
-  if (t >= STILL_FROM) return FINAL
-  const cam = cameraFrames[Math.min(cameraFrames.length - 1, Math.round(t * FPS))]
-  const w = smoothstep((t - (STILL_FROM - SETTLE_S)) / SETTLE_S)
-  return {
-    cx: cam.cx + (FINAL.cx - cam.cx) * w,
-    cy: cam.cy + (FINAL.cy - cam.cy) * w,
-    scale: Math.exp(Math.log(cam.scale) + (Math.log(FINAL.scale) - Math.log(cam.scale)) * w),
-  }
+  const u = Math.min(1, Math.max(0, t / STILL_FROM))
+  return { cx: W / 2, cy: H / 2, scale: Math.exp(Math.log(ZOOM_FROM) * (1 - u)) }
 }
 
 const NUMBERS = [
@@ -268,7 +210,7 @@ window.mosaicAt = (t) => {
   const cam = cameraAt(t)
   ctx.setTransform(cam.scale, 0, 0, cam.scale, W / 2 - cam.cx * cam.scale, H / 2 - cam.cy * cam.scale)
   rects.forEach((r, i) => {
-    const age = t - (i === 0 ? 0 : at[i])
+    const age = t - at[i]
     if (age < 0) return
     const p = easeOut(age / SCALE_IN_S)
     const s = SCALE_IN_FROM + (1 - SCALE_IN_FROM) * p

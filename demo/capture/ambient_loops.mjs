@@ -5,7 +5,7 @@
 //
 //   node demo/capture/ambient_loops.mjs --scenes brush-flow,ink-bloom [--seconds 26] [--loop 24] [--fold 2] [--base-url http://127.0.0.1:3151]
 //   node demo/capture/ambient_loops.mjs --scenes brush-flow --encode-only   # fold and encode again from the kept raw renders
-//   node demo/capture/ambient_loops.mjs --alert            # still PNGs of the alert faces, one per language pair
+//   node demo/capture/ambient_loops.mjs --alert [--municipality 05210 --bulletin <id>] [--alert-dir <dir>]   # still PNGs of the alert faces, one per language pair
 //
 // Output: demo/out/ambient/loops/<scene>-{4k,8k}.mp4 (30 fps, keyframes every 2 s, faststart, bit rate capped so a
 // loop stays around 20 MB / 50 MB) and demo/out/ambient/loops/alert/<crop>/<pair>.png. The near-lossless renders
@@ -37,7 +37,6 @@ const VERSIONS = {
 // The alert faces: the level-4 bulletin the sim replays, laid out per shape, one still per language pair.
 // t: the pair is up and the action pictogram's pulse is at full opacity (the rule of scripts/screens.mjs:
 // 480 + 2000 n after the scale-in, inside the pair's 2.5 s slot of the second rotation from 12.5 s).
-const ALERT = { municipality: '05210', bulletin: 'VXKOii-202610211815-e713da0e3c05' }
 // The band shows nine languages after the Japanese headline: four pairs and Indonesian alone in the fifth slot.
 const PAIR_T_MS = { 'ja_easy-en': 14480, 'zh_hans-zh_hant': 16480, 'ko-th': 18480, 'vi-tl': 22480, id: 24480 }
 const SHAPE_VIEWPORTS = {
@@ -51,6 +50,9 @@ const { values } = parseArgs({
   options: {
     scenes: { type: 'string' },
     alert: { type: 'boolean', default: false },
+    municipality: { type: 'string', default: '05210' },
+    bulletin: { type: 'string', default: 'VXKOii-202610211815-e713da0e3c05' },
+    'alert-dir': { type: 'string' },
     seconds: { type: 'string', default: '26' },
     loop: { type: 'string', default: '24' },
     fold: { type: 'string', default: '2' },
@@ -163,6 +165,7 @@ async function fold(raw, out, encode) {
 }
 
 async function recordAlert(browser) {
+  const alertRoot = values['alert-dir'] ? `${values['alert-dir'].replace(/\/$/, '')}/` : `${outRoot}alert/`
   const byShape = {}
   for (const name of Object.keys(crops)) (byShape[shapes[name]] ??= []).push(name)
   for (const [shape, names] of Object.entries(byShape)) {
@@ -170,10 +173,10 @@ async function recordAlert(browser) {
     const page = await browser.newPage()
     await page.setViewport({ width: viewport.width, height: viewport.height, deviceScaleFactor: viewport.scale ?? 1 })
     await page.bringToFront()
-    const src = `/api/admin/preview-layout?${new URLSearchParams({ municipality: ALERT.municipality, bulletin: ALERT.bulletin, shape })}`
+    const src = `/api/admin/preview-layout?${new URLSearchParams({ municipality: values.municipality, bulletin: values.bulletin, shape })}`
     const first = names[0]
     const [, , w, h] = crops[first]
-    const dir = `${outRoot}alert/${first}/`
+    const dir = `${alertRoot}${first}/`
     await mkdir(dir, { recursive: true })
     for (const [pair, tMs] of Object.entries(PAIR_T_MS)) {
       const params = new URLSearchParams({ shape, clock: 'virtual', t: String(tMs), src })
@@ -186,7 +189,7 @@ async function recordAlert(browser) {
     }
     await page.close()
     for (const other of names.slice(1)) {
-      const odir = `${outRoot}alert/${other}/`
+      const odir = `${alertRoot}${other}/`
       await mkdir(odir, { recursive: true })
       for (const pair of Object.keys(PAIR_T_MS)) await copyFile(`${dir}${pair}.png`, `${odir}${pair}.png`)
     }
