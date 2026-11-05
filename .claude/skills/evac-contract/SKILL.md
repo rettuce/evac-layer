@@ -27,7 +27,7 @@ The layout JSON is the intermediate form: the Composer writes it, the renderer d
 - The action text never uses a municipal order name (高齢者等避難, 避難指示, 緊急安全確保); the screens come from JMA warnings, not from the city. English text carries no Japanese script.
 - The shelter cell holds the GSI facility name only; `kind` tells the renderer which designation label to draw. Distance appears once, on the shelter cell.
 - `languages` is required on 16x9, 9x16, 32x9 and pillar.
-- Type sizes come from viewing distance (1 inch per 10 ft) on a 55-inch panel: 11 m → 144 px, 5 m → 64 px, 2 m → 28 px at a 1080 px short side.
+- Type sizes come from viewing distance (1 inch per 10 ft) on a 55-inch panel: 11 m → 144 px, 5 m → 64 px, 2 m → 28 px at a 1080 px short side. The Verifier's floor follows 田中's artboards where they are smaller (2026-11-05: 16:9 action 120, languages 54 / label 24, source 24; 1:1 languages 56 — `ARTBOARD_FLOOR_PX` in agents/src/verifier/checks.ts), to be revisited with real viewing distances at deployment.
 
 ## DOM the Verifier reads
 
