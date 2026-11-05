@@ -22,8 +22,8 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 | ov-0b-subtitle-1.png | 0b | subtitle | EVAC LAYER は、いまある既存のサイネージに、／災害時の緊急案内のレイヤーを自動で追加するシステムです。 | EVAC LAYER is a system that automatically adds ／an emergency evacuation guidance layer to existing signage. | 3244:9 |
 | ov-0b-telop-1.png | 0b | telop | EVAC LAYER | EVAC LAYER | 3244:49 |
 | ov-1-subtitle-1.png | 1 | subtitle | 2024.1.1 能登半島地震。／どこへ逃げればよいか判断が難しかった来訪者がいました（上越市の検証） | 1 Jan 2024. The Noto Peninsula earthquake.／Some visitors could not tell where to evacuate (City of Joetsu review) | 3244:13 |
-| ov-2-subtitle-1.png | 2 | subtitle | 私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上設計し、納めてきました。 | For more than ten years, I have designed and installed signage／for public spaces in cities, such as stations and shopping centers. | 3244:17 |
-| ov-2-subtitle-2.png | 2 | subtitle | しかし、それらは災害のとき、／自分から情報を出すことができませんでした。 | Yet during disasters,／these systems could not put out information on their own. | 3294:4 |
+| ov-2-subtitle-1.png | 2 | subtitle | 私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上作ってきました。 | For more than ten years, I have built signage／for public spaces in cities, such as stations and shopping centers. | 3244:17 |
+| ov-2-subtitle-2.png | 2 | subtitle | しかし、それらは災害時、／自分から情報を能動的に出すことができませんでした。 | Yet during disasters,／these systems could not actively put out information on their own. | 3294:4 |
 | ov-2-telop-1.png | 2 | telop（左上） | 公共空間のサイネージを10年以上 | Public-space signage, 10+ years | 3294:8 |
 | ov-2b-telop-1.png | 2b | telop | 街中にスクリーンがあります。／それらは自分の位置関係を知っています。 | Screens are all over the city.／Each one knows where it stands. | 3244:52 |
 | ov-3-subtitle-1.png | 3 | subtitle | 災害の種類と警戒レベル。アイコンと10の言語。／そして、どんな形のスクリーンにも、適切なレイアウトで描きます。 | Hazard types and alert levels. Icons and ten languages.／And for a screen of any shape, a layout that fits. | 3245:4 |
@@ -77,3 +77,5 @@ Figma のページ「v8 overlays」が文言の正本。該当フレームの文
 2026-11-06 B-17（田中が録音時に変更）: cut 5b の ja 2 行目「有事に」→「有事の際に」。1 行目と en は変更なし。
 
 2026-11-06 B-18（田中確定・1200 倍の再生をやめたため）: cut 5 の 1 文目を差し替え。ja「10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシミュレートしています。」→「10月21日に由利本荘市で実際に発表された警報です。」、en "Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed." → "This is a real warning, issued for Yurihonjo City on October 21."。2 行 → 1 行で帯の高さが 252 → 150 px（下端は画面下から 72 px のまま）。
+
+2026-11-06 B-19（田中が録音時に変更）: cut 2 の字幕 2 枚を差し替え。subtitle-1 ja「10年以上設計し、納めてきました。」→「10年以上作ってきました。」・en "I have designed and installed signage" → "I have built signage"。subtitle-2 ja「災害のとき、／自分から情報を出すことが…」→「災害時、／自分から情報を能動的に出すことが…」・en "could not put out" → "could not actively put out"。帯の高さは 2 枚とも 252 px のまま。
