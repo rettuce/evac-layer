@@ -48,3 +48,7 @@
 6. **承認は内容を見ない。** `data/approvals.json` は自治体/電文の鍵と updated_at だけで、Writer の書き直しや再 fanout の後も承認が残る（出典セルを変えた今回の再生成でも承認済みのまま）。
 7. **`/screen?lat=&lng=` は平時レイヤーの座標表示だけ。** 避難誘導はサイト JSON を Composer が読んで決める。
 8. 運用上の注意: main を merge した後は `pnpm install` と dev の再起動が要る（three・@fontsource/noto-sans-thai の追加）。再起動前の実走 3 本は `data-ready` 待ちの 30 s timeout で落ちた。
+
+## Lv5 の避難先表示（2026-11-05・暫定）
+
+田中決定（11-05 15:3x）で、警戒レベル 5（緊急安全確保・secure-now）の画面にも避難先と方向を出す。理由は見た目の密度（主文だけでは画面が空く）で、Composer の `NO_SHELTER_TEMPLATES` を空にした。内閣府の避難情報の考え方では Lv5 は「避難場所への移動がかえって危険な段階」で、主文「高い所へ上がって」と go_higher の図記号はそのまま残す。実導入時にこの趣旨で再検討する（Writer の Lv5 lint「にげる・ひなん を使わない」は変えていない）。
