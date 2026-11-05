@@ -141,9 +141,11 @@ const RIBBON_CLEAR: ShapeLayout = {
 // 1:1 is 田中's Figma artboard (2026-11-05 L-5, node 3230:4 with the 3266:25 parts, 1080 × 1080): the band 200, the
 // two-line action from x 48, the run pictogram's ink 144 × 193 at (51, 590) as the hero beside the shelter group
 // (site ink at (275, 602), texts from x 398, the distance "570 m" right-aligned at x 1044) and the direction under it
-// from x 766, and a black language band from y 820 with white labels above the text. No source line on the face
-// (the document footer carries the sources). The fr row above the band takes a taller screen.
-const FIGMA_SQUARE_TYPE = { headline: 76, level: 66, action: 150, direction: 70, shelter: 64, shelterNarrow: 51, kind: 30, distance: 72, label: 30, languages: 56, languagesNarrow: 47 }
+// from x 766, and a black language band from y 820 with white labels above the text. The artboard has no source
+// line; 司令官 2026-11-05 adds one (the sources are a condition of the data providers) on the band's label line,
+// right-aligned at 1032, so no placed element moves: its cell is the fr row above the band and the line hangs
+// from that row's foot into the band (screen.css). The fr row takes a taller screen.
+const FIGMA_SQUARE_TYPE = { headline: 76, level: 66, action: 150, direction: 70, shelter: 64, shelterNarrow: 51, kind: 30, distance: 72, label: 30, languages: 56, languagesNarrow: 47, source: 24 }
 const SQUARE: ShapeLayout = {
   id: 'figma-square',
   columns: [48, 202, 14, 502, 278, 36],
@@ -157,10 +159,10 @@ const SQUARE: ShapeLayout = {
     '. hero . shelter shelter .',
     '. hero . . direction direction',
     '. . . . direction direction',
-    '. . . . . .',
+    'source source source source source source',
     'languages languages languages languages languages languages',
   ],
-  required: ['headline', 'action', 'direction', 'shelter', 'languages'],
+  required: ['headline', 'action', 'direction', 'shelter', 'languages', 'source'],
   pictogramPx: { headline: 112, action: 0, direction: 56, shelter: 92 },
   hero: { role: 'action', px: 193 },
   darkBand: ['languages'],
@@ -175,7 +177,7 @@ const SQUARE_CLEAR: ShapeLayout = {
   ...SQUARE,
   id: 'figma-square-clear',
   areas: SQUARE.areas.map((row) => row.replace('shelter shelter', '. .').replace('direction direction', '. .')),
-  required: ['headline', 'action', 'languages'],
+  required: ['headline', 'action', 'languages', 'source'],
   pictogramPx: { headline: 112, action: 0 },
 }
 
