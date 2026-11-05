@@ -87,18 +87,18 @@
       "cut": "2",
       "seconds": 16,
       "screens": "ambient-real",
-      "narration_ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、10年以上設計し、納めてきました。しかし、それらは災害のとき、自分から情報を出すことができませんでした。",
-      "narration_en": "For more than ten years, I have designed and installed signage for public spaces in cities, such as stations and shopping centers. Yet during disasters, these systems could not put out information on their own.",
-      "reading_ja": "わたしは これまで、えきや しょうぎょう しせつなど まちの こうきょう くうかんの サイネージを、じゅうねん いじょう せっけいし、おさめて きました。しかし、それらは さいがいの とき、じぶんから じょうほうを だすことが できませんでした",
+      "narration_ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、10年以上作ってきました。しかし、それらは災害時、自分から情報を能動的に出すことができませんでした。",
+      "narration_en": "For more than ten years, I have built signage for public spaces in cities, such as stations and shopping centers. Yet during disasters, these systems could not actively put out information on their own.",
+      "reading_ja": "わたしは これまで、えきや しょうぎょう しせつなど まちの こうきょう くうかんの サイネージを、じゅうねん いじょう つくって きました。しかし、それらは さいがいじ、じぶんから じょうほうを のうどうてきに だすことが できませんでした",
       "ambient_scene": "brush-flow",
       "subtitle_parts": [
         {
-          "ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上設計し、納めてきました。",
-          "en": "For more than ten years, I have designed and installed signage／for public spaces in cities, such as stations and shopping centers."
+          "ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上作ってきました。",
+          "en": "For more than ten years, I have built signage／for public spaces in cities, such as stations and shopping centers."
         },
         {
-          "ja": "しかし、それらは災害のとき、／自分から情報を出すことができませんでした。",
-          "en": "Yet during disasters,／these systems could not put out information on their own."
+          "ja": "しかし、それらは災害時、／自分から情報を能動的に出すことができませんでした。",
+          "en": "Yet during disasters,／these systems could not actively put out information on their own."
         }
       ],
       "telop_ja": "公共空間のサイネージを10年以上",
@@ -154,17 +154,17 @@
     {
       "kind": "3d",
       "src": "../renders/cut05.mp4",
-      "screens": "switch",
-      "slate": "平時（ink-bloom）4 s → 気象庁 XML を 1200 倍で再生 → 4.0 s に 4 画面が同じフレームで Lv3、11.0 s に Lv4、15.5 s に Lv5",
+      "screens": "seq",
+      "slate": "実時間の時計で 平時（ink-bloom）4 s → 4.0 s に Lv3（15:55）→ 9.5 s に Lv4（18:15）→ 15.0 s に Lv5（19:45）。各面は部屋 1 枚のキャンバスの窓",
       "cut": "5",
       "seconds": 21,
-      "narration_ja": "10月21日 由利本荘市で実際に発表された警報データを使い、1200倍の速さでシミュレートしています。当日、警戒レベル3、4、5と変化していく中で、すべてのスクリーンが、同じ瞬間に切り替わっていきます。",
-      "narration_en": "Using actual warning data issued in Yurihonjo City on October 21, this is simulated at 1200x speed. That day, as the alert level rose from 3 to 4 to 5, every screen switched at the same moment.",
-      "reading_ja": "じゅうがつ にじゅういちにち ゆりほんじょうしで じっさいに はっぴょうされた けいほうデータを つかい、せんにひゃくばいの はやさで シミュレート しています。とうじつ、けいかいレベル さん、よん、ごと へんかしていく なかで、すべての スクリーンが、おなじ しゅんかんに きりかわって いきます",
+      "narration_ja": "10月21日に由利本荘市で実際に発表された警報です。当日、警戒レベル3、4、5と変化していく中で、すべてのスクリーンが、同じ瞬間に切り替わっていきます。",
+      "narration_en": "This is a real warning, issued for Yurihonjo City on October 21. That day, as the alert level rose from 3 to 4 to 5, every screen switched at the same moment.",
+      "reading_ja": "じゅうがつ にじゅういちにちに ゆりほんじょうしで じっさいに はっぴょうされた けいほうです。とうじつ、けいかいレベル さん、よん、ごと へんかしていく なかで、すべての スクリーンが、おなじ しゅんかんに きりかわって いきます",
       "subtitle_parts": [
         {
-          "ja": "10月21日 由利本荘市で実際に発表された警報データを使い、／1200倍の速さでシミュレートしています。",
-          "en": "Using actual warning data issued in Yurihonjo City on October 21,／this is simulated at 1200x speed."
+          "ja": "10月21日に由利本荘市で実際に発表された警報です。",
+          "en": "This is a real warning, issued for Yurihonjo City on October 21."
         },
         {
           "ja": "当日、警戒レベル3、4、5と変化していく中で、／すべてのスクリーンが、同じ瞬間に切り替わっていきます。",
@@ -210,8 +210,8 @@
       "kind": "3d",
       "seconds": 10,
       "src": "../renders/cut09.mp4",
-      "screens": "alert-real",
-      "slate": "3D ヒーロー画角の 4 画面が Lv5 secure-now。小窓なし",
+      "screens": "alert-real-lv3",
+      "slate": "3D ヒーロー画角の 4 画面が Lv3（15:55・高齢者は避難・鶴舞小学校 570 m）。小窓なし",
       "telop_ja": "どのスクリーンにも",
       "telop_en": "Any screen.",
       "subtitle_ja": "信号を受け取れる仕組みがあれば、どの場所のどんなスクリーンにも、／自動で災害情報を表示できます。",
