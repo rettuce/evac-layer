@@ -70,6 +70,26 @@ def write_srt(spans, path):
     path.write_text("\n".join(body), encoding="utf-8")
 
 
+# 田中 records narration straight into these folders while editing; a new version never moves or deletes them.
+RECORDINGS = ("narration", "narration-prev")
+RECORDINGS_NOTE = "録音（田中・録音中は davinci.py が触らない）"
+
+
+def is_recording(rel):
+    return len(rel.parts) >= 2 and rel.parts[0] == "audio" and rel.parts[1] in RECORDINGS
+
+
+def recover_recordings(prev, out):
+    """Recordings that an older run moved into _prev go back to their live folder, unless a take of the same
+    name is already there."""
+    for path in sorted(prev.glob("*/audio/*/**/*")):
+        rel = Path(*path.relative_to(prev).parts[1:])
+        target = out / rel
+        if path.is_file() and is_recording(rel) and not target.exists():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(path), str(target))
+
+
 def rotate(out, version):
     readme = out / "README.md"
     if not readme.exists():
@@ -80,12 +100,20 @@ def rotate(out, version):
         return
     prev = out / "_prev"
     if prev.exists():
+        recover_recordings(prev, out)
         shutil.rmtree(prev)
     keep = prev / old
     keep.mkdir(parents=True)
     for item in list(out.iterdir()):
-        if item.name != "_prev":
-            shutil.move(str(item), str(keep / item.name))
+        if item.name == "_prev":
+            continue
+        if item.name == "audio" and item.is_dir():
+            for child in list(item.iterdir()):
+                if child.name not in RECORDINGS:
+                    (keep / "audio").mkdir(exist_ok=True)
+                    shutil.move(str(child), str(keep / "audio" / child.name))
+            continue
+        shutil.move(str(item), str(keep / item.name))
 
 
 def assemble(args, edl):
@@ -133,7 +161,8 @@ def write_readme(out, version, edl, missing, mix):
     for path in sorted(p for p in out.rglob("*") if p.is_file() and "_prev" not in p.parts and p.name != "README.md"):
         rel = path.relative_to(out)
         extra = f" · {duration(path):.2f} s" if path.suffix in (".mp4", ".mov", ".wav") else ""
-        listing.append(f"- `{rel}` ({path.stat().st_size / 1e6:.1f} MB{extra})")
+        note = f" · {RECORDINGS_NOTE}" if is_recording(rel) else ""
+        listing.append(f"- `{rel}` ({path.stat().st_size / 1e6:.1f} MB{extra}{note})")
     lines = [
         "# EVAC LAYER demo — DaVinci edit kit",
         "",
@@ -149,6 +178,7 @@ def write_readme(out, version, edl, missing, mix):
         "- `overlays/` are the Figma exports (1920x1080, transparent) and `overlays.csv` their start and end on the timeline; lay each PNG over the picture for its span.",
         "- `subtitles/` holds the same spans as SRT (Japanese and English).",
         "- `audio/mix/` is the finished mix; `audio/stems/` the layers it was made of, `audio/bgm/` and `audio/se/` the sources, `audio/se.csv` when the switch sound plays.",
+        f"- `audio/narration/` and `audio/narration-prev/`: {RECORDINGS_NOTE}. A new version leaves them where they are.",
         "- `docs/demo-v8-text.md` is the text table (Figma is the source of the wording).",
         "",
         "## Rights",
