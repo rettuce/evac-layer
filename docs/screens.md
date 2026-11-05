@@ -9,11 +9,11 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル３氾濫警報 (16x9)](screens/lv3-16x9.png)
 
-2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁 10/21 15:55 発表・由利本荘市
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁・国土交通省 10/21 15:55 発表・由利本荘市
 
 ![レベル４氾濫危険警報 (16x9)](screens/lv4-16x9.png)
 
-2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁 10/21 18:15 発表・由利本荘市
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁・国土交通省 10/21 18:15 発表・由利本荘市
 
 ![レベル５氾濫特別警報 (16x9)](screens/lv5-16x9.png)
 
@@ -21,17 +21,17 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル２氾濫注意報解除 (16x9)](screens/clear-16x9.png)
 
-2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁 10/22 06:20 発表・由利本荘市
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁・国土交通省 10/22 06:20 発表・由利本荘市
 
 ## 9x16
 
 ![レベル３氾濫警報 (9x16)](screens/lv3-9x16.png)
 
-2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁 10/21 15:55 発表・由利本荘市
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁・国土交通省 10/21 15:55 発表・由利本荘市
 
 ![レベル４氾濫危険警報 (9x16)](screens/lv4-9x16.png)
 
-2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁 10/21 18:15 発表・由利本荘市
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁・国土交通省 10/21 18:15 発表・由利本荘市
 
 ![レベル５氾濫特別警報 (9x16)](screens/lv5-9x16.png)
 
@@ -39,17 +39,17 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル２氾濫注意報解除 (9x16)](screens/clear-9x16.png)
 
-2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁 10/22 06:20 発表・由利本荘市
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁・国土交通省 10/22 06:20 発表・由利本荘市
 
 ## 32x9
 
 ![レベル３氾濫警報 (32x9)](screens/lv3-32x9.png)
 
-2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁 10/21 15:55 発表・由利本荘市
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁・国土交通省 10/21 15:55 発表・由利本荘市
 
 ![レベル４氾濫危険警報 (32x9)](screens/lv4-32x9.png)
 
-2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁 10/21 18:15 発表・由利本荘市
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁・国土交通省 10/21 18:15 発表・由利本荘市
 
 ![レベル５氾濫特別警報 (32x9)](screens/lv5-32x9.png)
 
@@ -57,17 +57,17 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル２氾濫注意報解除 (32x9)](screens/clear-32x9.png)
 
-2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁 10/22 06:20 発表・由利本荘市
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁・国土交通省 10/22 06:20 発表・由利本荘市
 
 ## 1x1
 
 ![レベル３氾濫警報 (1x1)](screens/lv3-1x1.png)
 
-2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁 10/21 15:55 発表・由利本荘市
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁・国土交通省 10/21 15:55 発表・由利本荘市
 
 ![レベル４氾濫危険警報 (1x1)](screens/lv4-1x1.png)
 
-2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁 10/21 18:15 発表・由利本荘市
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁・国土交通省 10/21 18:15 発表・由利本荘市
 
 ![レベル５氾濫特別警報 (1x1)](screens/lv5-1x1.png)
 
@@ -75,17 +75,17 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル２氾濫注意報解除 (1x1)](screens/clear-1x1.png)
 
-2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁 10/22 06:20 発表・由利本荘市
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁・国土交通省 10/22 06:20 発表・由利本荘市
 
 ## pillar (four faces round a column, shown at 0.25)
 
 ![レベル３氾濫警報 (pillar)](screens/lv3-pillar.png)
 
-2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁 10/21 15:55 発表・由利本荘市
+2026-10-21 15:55 JST · レベル３氾濫警報 · 警戒レベル3 — source line: 気象庁・国土交通省 10/21 15:55 発表・由利本荘市
 
 ![レベル４氾濫危険警報 (pillar)](screens/lv4-pillar.png)
 
-2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁 10/21 18:15 発表・由利本荘市
+2026-10-21 18:15 JST · レベル４氾濫危険警報 · 警戒レベル4 — source line: 気象庁・国土交通省 10/21 18:15 発表・由利本荘市
 
 ![レベル５氾濫特別警報 (pillar)](screens/lv5-pillar.png)
 
@@ -93,7 +93,7 @@ Regenerate with `pnpm -F app screens` (production build, loopback admin preview)
 
 ![レベル２氾濫注意報解除 (pillar)](screens/clear-pillar.png)
 
-2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁 10/22 06:20 発表・由利本荘市
+2026-10-22 06:20 JST · レベル２氾濫注意報解除 · 解除 — source line: 気象庁・国土交通省 10/22 06:20 発表・由利本荘市
 
 ## Tsunami (Yoshida, Shizuoka — official sample bulletins, drill)
 
