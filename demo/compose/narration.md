@@ -28,7 +28,7 @@
 - 0: The moment a warning arrives, the screen turns into evacuation guidance for where it stands.
 - 0b: EVAC LAYER is a system that automatically adds an emergency evacuation guidance layer to existing signage.
 - 1: January 1, 2024. The Noto Peninsula earthquake. Some visitors could not tell where to evacuate.
-- 2: For more than ten years, I have designed and installed signage for public spaces in cities, such as stations and shopping centers. Yet during disasters, these systems could not put out information on their own.
+- 2: For more than ten years, I have built signage for public spaces in cities, such as stations and shopping centers. Yet during disasters, these systems could not actively put out information on their own.
 - 3: Hazard types and alert levels. Icons and ten languages. And for a screen of any shape, a layout that fits.
 - 4: Evacuation guidance is generated automatically. Only what a person has approved in advance is shown, the moment a warning arrives.
 - 5c: Same warning, different place. The shelter, the direction and the distance follow where the screen stands.

@@ -88,17 +88,17 @@
       "seconds": 16,
       "screens": "ambient-real",
       "narration_ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、10年以上作ってきました。しかし、それらは災害時、自分から情報を能動的に出すことができませんでした。",
-      "narration_en": "For more than ten years, I have designed and installed signage for public spaces in cities, such as stations and shopping centers. Yet during disasters, these systems could not put out information on their own.",
+      "narration_en": "For more than ten years, I have built signage for public spaces in cities, such as stations and shopping centers. Yet during disasters, these systems could not actively put out information on their own.",
       "reading_ja": "わたしは これまで、えきや しょうぎょう しせつなど まちの こうきょう くうかんの サイネージを、じゅうねん いじょう つくって きました。しかし、それらは さいがいじ、じぶんから じょうほうを のうどうてきに だすことが できませんでした",
       "ambient_scene": "brush-flow",
       "subtitle_parts": [
         {
           "ja": "私はこれまで、駅や商業施設など街の公共空間のサイネージを、／10年以上作ってきました。",
-          "en": "For more than ten years, I have designed and installed signage／for public spaces in cities, such as stations and shopping centers."
+          "en": "For more than ten years, I have built signage／for public spaces in cities, such as stations and shopping centers."
         },
         {
           "ja": "しかし、それらは災害時、／自分から情報を能動的に出すことができませんでした。",
-          "en": "Yet during disasters,／these systems could not put out information on their own."
+          "en": "Yet during disasters,／these systems could not actively put out information on their own."
         }
       ],
       "telop_ja": "公共空間のサイネージを10年以上",
