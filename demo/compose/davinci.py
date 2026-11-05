@@ -17,7 +17,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
-from mix_audio import BEEPS, BGM_DEFAULT, BGM_LUFS, cut_starts, integrated_lufs
+from mix_audio import BEEPS, BGM_DEFAULT, BGM_LUFS, DUCK_DB, NARRATED_BGM_LUFS, NARRATION_LUFS, cut_starts, integrated_lufs
 from overlays import LINE_BREAK, overlays, timeline_subtitles
 
 HERE = Path(__file__).resolve().parent
@@ -155,11 +155,12 @@ def assemble(args, edl):
     return missing
 
 
-def narration_in_mix(out):
+def mix_balance(out):
     takes = sorted((out / "audio" / "narration").glob("*.wav"))
     if not (out / "audio" / "stems" / "narration.wav").exists():
-        return "no narration"
-    return f"narration: 田中の録音 {len(takes)} 本・cut ごとに頭に配置"
+        return f"BGM set to {BGM_LUFS:.0f} LUFS; no narration"
+    return (f"narration {NARRATION_LUFS:.0f} LUFS: 田中の録音 {len(takes)} 本・cut ごとに頭に配置; BGM {NARRATED_BGM_LUFS:.0f} LUFS; "
+            f"ambience and drone {DUCK_DB:.0f} dB under the narration")
 
 
 def write_readme(out, version, edl, missing, mix, notes=()):
@@ -176,7 +177,7 @@ def write_readme(out, version, edl, missing, mix, notes=()):
         f"version: {version}",
         f"updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
         f"timeline: {total:.0f} s · {edl['size'][0]}x{edl['size'][1]} @ {edl['fps']} fps · every file starts at t = 0",
-        f"mix: {integrated_lufs(mix):.1f} LUFS integrated (BGM set to {BGM_LUFS:.0f} LUFS; {narration_in_mix(out)})",
+        f"mix: {integrated_lufs(mix):.1f} LUFS integrated ({mix_balance(out)})",
         "",
         "## Use",
         "",

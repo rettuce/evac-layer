@@ -22,8 +22,12 @@ HERE = Path(__file__).resolve().parent
 AUDIO_DIR = HERE / "audio"
 OUT_DIR = HERE.parent / "out"
 RATE = 48000
-# -18 LUFS is the narration's level when --narration is given; the ambience, drone and SE beds sit under it.
-NARRATION_LUFS = -18.0
+# With --narration the voice leads: -16 LUFS over the music at -26, and the ambience and drone dip 6 dB while it
+# speaks, fading 300 ms either side (田中, D-31). Without narration the music stays at BGM_LUFS.
+NARRATION_LUFS = -16.0
+NARRATED_BGM_LUFS = -26.0
+DUCK_DB = -6.0
+DUCK_FADE_S = 0.3
 # ebur128 reports a silent track as -70 LUFS; it gets no gain.
 SILENCE_LUFS = -69.0
 AMBIENCE_LUFS = -30.0
@@ -110,12 +114,13 @@ def narration_track(edl, starts, total, out):
     takes = [(path, by_name[path.name]) for path in found if path.name in by_name]
     if not takes:
         ensure_narration(total)
-        return NARRATION
+        return NARRATION, [(starts[cut][0], starts[cut][0] + starts[cut][1]) for cut in narrated]
     ends = {cut: (starts[narrated[i + 1]][0] if i + 1 < len(narrated) else total) for i, cut in enumerate(narrated)}
-    inputs, chains = [], []
+    inputs, chains, spans = [], [], []
     lead = {s["cut"]: s.get("narration_from_s", 0.0) for s in edl["segments"]}
     for i, (path, cut) in enumerate(takes):
         start = starts[cut][0] + lead[cut]
+        spans.append((start, start + duration(path)))
         if start + duration(path) > ends[cut]:
             print(f"NARRATION overrun {path.name}: {duration(path):.1f}s from {start:.0f}s runs past {ends[cut]:.0f}s")
         inputs += ["-i", str(path)]
@@ -126,10 +131,20 @@ def narration_track(edl, starts, total, out):
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", graph, "-map", "[out]",
                     "-ar", str(RATE), "-ac", "2", str(out)], check=True)
     print(f"NARRATION {len(takes)}/{len(narrated)} takes from {NARRATION_DIR}")
-    return out
+    return out, spans
 
 
-def layers(paths, narration, starts, total, bgm=None):
+def duck(spans):
+    """A volume filter that dips by DUCK_DB over each span, ramping over DUCK_FADE_S before and after it."""
+    if not spans:
+        return ""
+    floor = 10 ** (DUCK_DB / 20)
+    f = DUCK_FADE_S
+    dips = [f"(1-{1 - floor:.4f}*clip((t-{a - f:.3f})/{f}\\,0\\,1)*clip(({b + f:.3f}-t)/{f}\\,0\\,1))" for a, b in spans]
+    return f",volume='{'*'.join(dips)}':eval=frame"
+
+
+def layers(paths, narration, starts, total, bgm=None, spans=()):
     items = []
 
     def add(path, filters, stem):
@@ -139,14 +154,14 @@ def layers(paths, narration, starts, total, bgm=None):
     for i, cut in enumerate(AMBIENCE_CUTS):
         start, seconds = starts[cut]
         add(paths["ambience"], f"aloop=loop=-1:size={RATE * 120},atrim=0:{seconds},asetpts=N/SR/TB,volume={ambience_gain:.2f}dB,"
-            f"afade=t=in:d={FADE_S},afade=t=out:st={seconds - FADE_S}:d={FADE_S},adelay={start * 1000:.0f}:all=1", "ambience")
+            f"afade=t=in:d={FADE_S},afade=t=out:st={seconds - FADE_S}:d={FADE_S},adelay={start * 1000:.0f}:all=1{duck(spans)}", "ambience")
 
     drone_start = starts[DRONE_FROM[0]][0] + DRONE_FROM[1]
     end_start, end_seconds = starts[DRONE_UNTIL_END_OF]
     drone_length = end_start + end_seconds - drone_start
     drone_gain = DRONE_LUFS - integrated_lufs(paths["drone"])
     add(paths["drone"], f"aloop=loop=-1:size={RATE * 120},atrim=0:{drone_length},asetpts=N/SR/TB,volume={drone_gain:.2f}dB,"
-        f"afade=t=in:d=1.5,afade=t=out:st={drone_length - 2}:d=2,adelay={drone_start * 1000:.0f}:all=1", "drone")
+        f"afade=t=in:d=1.5,afade=t=out:st={drone_length - 2}:d=2,adelay={drone_start * 1000:.0f}:all=1{duck(spans)}", "drone")
 
     beep_gain = BEEP_PEAK_DB - peak_db(paths["switch"])
     for i, (cut, offset) in enumerate(BEEPS):
@@ -154,7 +169,7 @@ def layers(paths, narration, starts, total, bgm=None):
         add(paths["switch"], f"volume={beep_gain:.2f}dB,adelay={at * 1000:.0f}:all=1", "se")
 
     if bgm:
-        bgm_gain = BGM_LUFS - integrated_lufs(bgm)
+        bgm_gain = (NARRATED_BGM_LUFS if narration else BGM_LUFS) - integrated_lufs(bgm)
         add(bgm, f"aloop=loop=-1:size={RATE * 600},atrim=0:{total},asetpts=N/SR/TB,volume={bgm_gain:.2f}dB,"
             f"afade=t=in:d=1.5,afade=t=out:st={total - 3}:d=3", "bgm")
 
@@ -227,8 +242,8 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="evac-mix-"))
     try:
-        narration = narration_track(edl, starts, total, work / "narration.wav") if args.narration else None
-        items = layers(paths, narration, starts, total, resolve_bgm(args))
+        narration, spans = narration_track(edl, starts, total, work / "narration.wav") if args.narration else (None, [])
+        items = layers(paths, narration, starts, total, resolve_bgm(args), spans)
         render(items, total, work / "raw.wav")
         if args.stems:
             write_stems(items, total, Path(args.stems))
