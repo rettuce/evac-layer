@@ -13,7 +13,7 @@ import json
 import re
 from pathlib import Path
 
-from overlays import lines, subtitle_spans
+from overlays import lines, timeline_subtitles
 
 from mix_audio import narration_filename
 
@@ -95,14 +95,12 @@ def stamp(seconds):
     return f"{ms // 3600000:02d}:{ms // 60000 % 60:02d}:{ms // 1000 % 60:02d},{ms % 1000:03d}"
 
 
-def write_srt(rows, windows, with_narration, out):
+def write_srt(edl, rows, windows, with_narration, out):
     cues = []
     for start, seg in rows:
         if telop_en(seg):
             cues.append((start, start + seg["seconds"], telop_en(seg)))
-        for a, b, _, en in subtitle_spans(seg):
-            if en:
-                cues.append((start + a, start + b, lines(en)))
+    cues += [(a, b, lines(en)) for a, b, _, _, _, en in timeline_subtitles(edl) if en]
     if with_narration:
         for start, window, seg in windows:
             speak = spoken_length(seg["narration_ja"]) / CHARS_PER_SECOND
@@ -125,7 +123,7 @@ def main():
     rows, total = timeline(edl)
     windows = narration_windows(rows, total)
     write_narration(windows, HERE / "narration.md")
-    count = write_srt(rows, windows, args.with_narration, Path(args.srt))
+    count = write_srt(edl, rows, windows, args.with_narration, Path(args.srt))
     over = [seg["cut"] for _, w, seg in windows if spoken_length(seg["narration_ja"]) > int(w * CHARS_PER_SECOND)]
     print(f"NARRATION {len(windows)} lines over_limit={over or 'none'} SRT {count} cues → {args.srt}")
 

@@ -18,7 +18,7 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-from overlays import lines, subtitle_spans
+from overlays import lines, timeline_subtitles
 
 HERE = Path(__file__).resolve().parent
 SCREENS_DIR = HERE.parent / "screens"
@@ -73,13 +73,16 @@ def segment_filters(segment, work, width, height, mode):
     filters = []
     box = bool(segment.get("src"))
     cut = segment["cut"]
-    spans = subtitle_spans(segment)
-    for n, (a, b, text_ja, text_en) in enumerate(spans):
+    seg_start, seg_end = segment["_start"], segment["_start"] + segment["seconds"]
+    spans = [span for span in segment["_subtitles"] if span[0] < seg_end - 1e-6 and span[1] > seg_start + 1e-6]
+    for n, (a, b, owner, part, text_ja, text_en) in enumerate(spans):
         ja = round(height * SUBTITLE_SIZE_RATIO)
         en = round(height * SUBTITLE_EN_SIZE_RATIO)
         en_lines = lines(text_en)
         en_height = (en_lines.count("\n") + 1) * en * 4 // 3 if en_lines else 0
-        enable = f":enable='between(t\\,{a:.3f}\\,{b:.3f})'" if len(spans) > 1 or a > 0 else ""
+        a, b = max(0.0, a - seg_start), min(segment["seconds"], b - seg_start)
+        whole = a <= 1e-6 and b >= segment["seconds"] - 1e-6
+        enable = "" if whole else f":enable='between(t\\,{a:.3f}\\,{b:.3f})'"
         filters.append(drawtext(write_text(work, f"sub_ja_{cut}_{n}", lines(text_ja)), ja, f"h-text_h-{ja + en_height + en}", box) + enable)
         if en_lines:
             filters.append(drawtext(write_text(work, f"sub_en_{cut}_{n}", en_lines), en, f"h-text_h-{ja}", box) + enable)
@@ -205,6 +208,11 @@ def main():
     ensure_font()
     work = Path(tempfile.mkdtemp(prefix="evac-compose-"))
     try:
+        subtitles = timeline_subtitles(edl)
+        start = 0.0
+        for segment in edl["segments"]:
+            segment["_start"], segment["_subtitles"] = start, subtitles
+            start += segment["seconds"]
         parts = [render_segment(segment, i, work, edl, args.mode) for i, segment in enumerate(edl["segments"])]
         out_path = Path(args.out).resolve() if args.out else (HERE / edl["output"]).resolve()
         concat(parts, work, out_path)
