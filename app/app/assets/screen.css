@@ -219,7 +219,8 @@ body {
   gap: calc(35 * var(--px));
 }
 .evac-screen.shape-portrait .is-figma .source-text {
-  font-size: calc(var(--type-source) * var(--px));
+  font-size: calc(var(--type-source) * var(--source-scale, 1) * var(--px));
+  white-space: nowrap;
   line-height: 1.1;
 }
 .evac-screen.shape-portrait,
@@ -348,7 +349,8 @@ body {
   top: calc(5 * var(--px));
 }
 .evac-screen.shape-landscape .is-figma .source-text {
-  font-size: calc(var(--type-source) * var(--px));
+  font-size: calc(var(--type-source) * var(--source-scale, 1) * var(--px));
+  white-space: nowrap;
   line-height: 1.2;
   text-align: right;
 }
@@ -383,7 +385,8 @@ body {
 }
 .evac-screen.shape-ribbon .is-figma .source-text {
   padding-left: calc(4 * var(--px));
-  font-size: calc(var(--type-source) * var(--px));
+  font-size: calc(var(--type-source) * var(--source-scale, 1) * var(--px));
+  white-space: nowrap;
   line-height: 1.2;
 }
 .evac-screen.shape-ribbon .is-figma .action-text {
@@ -611,10 +614,10 @@ body {
   overflow: visible;
 }
 .evac-screen.shape-square .is-figma .source-text {
-  font-size: calc(var(--type-source) * var(--px));
+  font-size: calc(var(--type-source) * var(--source-scale, 1) * var(--px));
+  white-space: nowrap;
   line-height: 1.2;
   color: var(--dark-band-ink);
-  white-space: nowrap;
 }
 
 .evac-screen.shape-pillar .is-figma .role-headline.is-stacked {
@@ -733,9 +736,10 @@ body {
 }
 .evac-screen.shape-pillar .cell.is-figma.is-band-row {
   align-items: flex-start;
-  padding: calc(238 * var(--px)) 0 0 calc(80 * var(--px));
+  padding: calc(238 * var(--px)) calc(82 * var(--px)) 0 calc(80 * var(--px));
 }
 .evac-screen.shape-pillar .is-figma .source-text {
-  font-size: calc(var(--type-source) * var(--px));
+  font-size: calc(var(--type-source) * var(--source-scale, 1) * var(--px));
+  white-space: nowrap;
   line-height: 1.2;
 }

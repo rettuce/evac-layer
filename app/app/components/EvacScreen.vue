@@ -6,7 +6,7 @@ import { SHAPES, designScale } from '~~/layout/shapes'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
-import { HEADLINE_STEP_DOWN, LINE_HEIGHT, SHELTER_STEP_DOWN, TYPE_PX } from '~~/layout/typography'
+import { HEADLINE_STEP_DOWN, LINE_HEIGHT, SHELTER_STEP_DOWN, SOURCE_STEP_DOWN, TYPE_PX } from '~~/layout/typography'
 import { pictogramsSettled } from '~/composables/usePictogramInk'
 
 const props = defineProps<{
@@ -34,6 +34,7 @@ const headlineScale = ref(1)
 const shelterNarrow = ref(false)
 const distanceBelow = ref(false)
 const languagesNarrow = ref(false)
+const sourceNarrow = ref(false)
 const stackedHeadline = computed(() => ['portrait', 'square', 'pillar'].includes(SHAPES[props.shape].cls))
 // 32:9 sets the headline in a narrow column, so it gets the same two-line limit as the stacked bands.
 const headlineLimited = computed(() => stackedHeadline.value || SHAPES[props.shape].cls === 'ribbon')
@@ -77,6 +78,7 @@ const rootStyle = computed(() => ({
   ...(shelterNarrow.value && layout.value.type?.shelterNarrow ? { '--type-shelter': layout.value.type.shelterNarrow } : {}),
   ...(shelterNarrow.value && !layout.value.figma ? { '--shelter-scale': SHELTER_STEP_DOWN } : {}),
   ...(languagesNarrow.value && layout.value.type?.languagesNarrow ? { '--type-languages': layout.value.type.languagesNarrow } : {}),
+  ...(sourceNarrow.value ? { '--source-scale': SOURCE_STEP_DOWN } : {}),
 }))
 
 const language = computed(() => languageStep(props.elapsedMs))
@@ -182,6 +184,11 @@ function shelterNameWraps(): boolean {
   return twoLines || lineTops.size > 1 || name.scrollWidth > name.clientWidth + OVERFLOW_TOLERANCE_PX
 }
 
+function sourceTooWide(): boolean {
+  const source = root.value?.querySelector<HTMLElement>('.source-text')
+  return !!source && source.scrollWidth > source.clientWidth + OVERFLOW_TOLERANCE_PX
+}
+
 async function fit() {
   const generation = ++fitGeneration
   ready.value = false
@@ -190,6 +197,7 @@ async function fit() {
   shelterNarrow.value = false
   distanceBelow.value = false
   languagesNarrow.value = false
+  sourceNarrow.value = false
   await loadFonts()
   for (;;) {
     await nextTick()
@@ -204,6 +212,10 @@ async function fit() {
     }
     if (layout.value.distanceBelow && !distanceBelow.value && shelterNameWraps()) {
       distanceBelow.value = true
+      continue
+    }
+    if (layout.value.figma && !sourceNarrow.value && sourceTooWide()) {
+      sourceNarrow.value = true
       continue
     }
     const over = measureOverflow()
@@ -276,6 +288,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-shelter-scale="shelterNarrow ? 'narrow' : undefined"
     :data-distance="distanceBelow ? 'below' : undefined"
     :data-languages-scale="languagesNarrow ? 'narrow' : undefined"
+    :data-source-scale="sourceNarrow ? 'narrow' : undefined"
     :data-ready="ready ? '1' : '0'"
     :data-bulletin-id="screen.alert.bulletin_id"
   >
