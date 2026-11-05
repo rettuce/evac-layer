@@ -17,6 +17,8 @@ pnpm dev                        # http://127.0.0.1:3160
 pnpm build                      # type-check + sim/dist/
 # VITE_AMBIENT_BASE (.env) overrides where the loops are read from (default `${BASE_URL}ambient/`)
 # ?video=8k selects the 8k HEVC loops where they play (default: 4k, since each 8k scene is ~60 MB over Pages)
+# keys: ←/→ step the ambient scene, E toggles EVAC LAYER (each time on, a random alert set from
+# public/alert/sets.json: stills at public/alert/<set>/<face>/<pair>.png), D hides the panel and the fps readout
 ```
 
 Measured 2026-11-04 (M-series Mac, Chrome, 1920×1080, DPR 1): `Textured` with EVAC LAYER on all 22 faces
