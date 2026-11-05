@@ -10,11 +10,11 @@ import type { AmbientFrame, AmbientScene } from '../types'
 // on t alone and tiles of one room agree.
 // The look in one place (D-22 variants are edits of this object).
 const BRUSH = {
-  pieces: 10,
-  steps: 24,
-  particlesPer1080p: 24_000,
-  widthScale: 1,
-  colour: 'two-tone' as 'two-tone' | 'direction' | 'position' | 'direction-position',
+  pieces: 16,
+  steps: 40,
+  particlesPer1080p: 14_400,
+  widthScale: 2.5,
+  colour: 'direction-position' as 'two-tone' | 'direction' | 'position' | 'direction-position',
 }
 const TRAIL_PIECES = BRUSH.pieces
 const TRAIL_PIECE_S = 0.1
@@ -93,7 +93,8 @@ void main() {
   float age = mod(tsec + phase, life);
   float gen = floor((tsec + phase) / life);
   vec2 spawn = vec2(hash1(pid * 3.1 + gen * 17.0 + uSeed), hash1(pid * 5.7 + gen * 23.0 + uSeed * 0.7)) * uCanvas;
-  float margin = 260.0 * uUnit;
+  // |curl| of the value noise reaches 1.5 * sqrt(2), so a particle can travel 2.12 * 60 * 5 s = 636 units from its spawn.
+  float margin = 650.0 * uUnit;
   if (spawn.x < uView.x - margin || spawn.x > uView.x + uView.z + margin || spawn.y < uView.y - margin || spawn.y > uView.y + uView.w + margin) { collapse(); return; }
   float a1 = age - piece * ${TRAIL_PIECE_S};
   float a0 = a1 - ${TRAIL_PIECE_S};
