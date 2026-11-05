@@ -196,8 +196,9 @@ def render(items, total, out):
         chains.append(f"[{i}:a]{filters}[l{i}]")
     graph = ";".join(chains) + f";{''.join(f'[l{i}]' for i in range(len(items)))}amix=inputs={len(items)}:normalize=0:" \
         f"duration=longest,apad=whole_dur={total},atrim=0:{total}[mix]"
+    # Float, so the layers and the pre-limiter mix keep peaks above 0 dBFS instead of clipping them.
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", graph, "-map", "[mix]",
-                    "-ar", str(RATE), "-ac", "2", str(out)], check=True)
+                    "-ar", str(RATE), "-ac", "2", "-c:a", "pcm_f32le", str(out)], check=True)
 
 
 def write_stems(items, total, stems_dir):
@@ -209,7 +210,7 @@ def write_stems(items, total, stems_dir):
 
 
 def limit(raw, out):
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-af", "alimiter=limit=0.89:level=disabled", str(out)], check=True)
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-af", "alimiter=limit=0.89:level=disabled", "-c:a", "pcm_s24le", str(out)], check=True)
     return integrated_lufs(out)
 
 
