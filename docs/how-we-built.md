@@ -1,5 +1,19 @@
 # How we built it
 
+## Before the code / コードを書く前
+
+The hackathon rules required the code to be written during the event, from Nov 2. From Oct 14 to Nov 1 no code was written; the time went to research and to preparing the things that only build up with time.
+
+Five parallel Claude sessions surveyed cases in Japan and abroad, design and technology. 21 hazard-map PDFs from eight municipalities were downloaded, and whether their text could be extracted was measured. The conditions of every data source were checked; ISO 7010 pictograms may not be published online, so the screens use Material Symbols and pictograms drawn for this project instead. A launchd job began recording JMA's feeds, and by the time the hackathon started 20,592 bulletins had built up. Among them was the real sequence for the Koyoshi River in Yurihonjo, Akita, on Oct 21, rising from level 2 to 3, 4 and 5; almost every warning scene in the demo comes from those bulletins.
+
+Alongside the code, decisions were made the same way, on evidence. The Reader's model was chosen by reading the same Wajima documents with both: Haiku cost $0.009, listed 19 facilities and no tsunami heights; Sonnet cost $0.257, listed 113 facilities and recovered the tsunami heights from a PDF that drops characters. Sonnet became the Reader, and reading all five municipalities cost $2.88 in total. Decisions were logged with times: by Nov 6, 181 of the 571 entries in the work log were decisions the author made. The day before submission, six reviews ran at once, five viewpoints (a judge, social media, branding, a developer and a critic) and the session that had been advising on branding, and their findings became the plan. "Following the README does not bring up a warning" led to measuring the approval steps again; "the screens do not say clearly enough that they are a re-creation" led to a SIMULATION mark on the images.
+
+ハッカソンのルールで、コードは期間中（11 月 2 日から）に書くことになっていました。10 月 14 日から 11 月 1 日まではコードを書かず、調べものと、時間がたたないと溜まらないものの準備だけをしています。
+
+国内と海外の事例、デザイン、技術は、Claude の並列のセッション 5 本で調べました。8 自治体の 21 本のハザードマップ PDF を落として、テキストが取れるかを実測し、データの利用条件も確かめています。ISO 7010 の図記号はネットに載せられないため、Material Symbols と自作の図記号に切り替えました。気象庁のフィードは launchd で自前の記録を始め、ハッカソンが始まった時点で 20,592 本の電文が溜まっていました。その中に、10 月 21 日の秋田県由利本荘市・子吉川の氾濫で、レベル 2 から 3、4、5 と上がる実際の電文の列があります。デモの警報の場面は、ほとんどがこの電文です。
+
+コードと並行して、判断も根拠をとって進めました。Reader のモデルは、同じ輪島市の資料を読ませて比べています。Haiku は $0.009 で施設 19 件、津波の高さは取れず、Sonnet は $0.257 で施設 113 件を拾い、文字の欠けた PDF から津波の高さまで読み直しました。Reader は Sonnet にし、5 自治体を読ませた費用は合計 $2.88 です。判断は時刻つきのログに残してあり、11 月 6 日の時点で、作業の記録 571 項目のうち 181 項目が作者の判断でした。提出の前日には、審査員・SNS・ブランディング・開発者・批判役の 5 つの視点と、ブランディングを相談していたセッションの計 6 つに同時にレビューさせ、その指摘から計画を作っています。「README の手順どおりに動かしても警報が出ない」という指摘からは承認の手順を実測し直し、「再現であることの断りが足りない」という指摘からは画像に SIMULATION の印を入れました。
+
 ## Sessions
 
 EVAC LAYER was built by one lead session and, over the week, eight implementation sessions of Claude Code, each in its own git worktree and branch, while the author watched every tab and stepped in directly when needed. Three ran from Day 1; the others were opened as the work split.
