@@ -91,6 +91,15 @@ test("an action text that contradicts its pictogram goes back to the Writer; a h
   assert.match(headline.reason!, /not fixable/);
 });
 
+test("a headline font-size finding stops at once instead of going to the Writer", { skip }, async () => {
+  const small: Verifier = { name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "font-size", cell_id: "headline", detail: "headline text is 60.8px; the guide type step needs 64.0px" }] })) };
+  const clean = fxPath("writer-tsunami-advisory.json");
+  const r = await runLoop({ ...base(), verifier: small, writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean, clean]) });
+  assert.equal(r.attempts.length, 1);
+  assert.match(r.reason!, /not fixable/);
+  assert.match(r.reason!, /font-size\[headline\]/);
+});
+
 test("a Japanese overflow stops at once as render-overflow; other languages go to the Writer at most twice", { skip }, async () => {
   const overflow = (lang: string): Verifier => ({ name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "headline", lang, detail: `cell headline (${lang}) overflows its slot` }] })) });
   const clean = fxPath("writer-tsunami-advisory.json");

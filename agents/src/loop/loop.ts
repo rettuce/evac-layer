@@ -13,8 +13,11 @@ const WRITER_CELLS = new Set(["headline", "action", "direction", "languages"]);
 // does not fit, and screen for the whole page; none of them changes when the Writer rewrites its text.
 const NOT_WRITER_LANGS = new Set(["ja", "pictogram", "screen"]);
 const renderOverflow = (f: LoopFinding) => f.check === "overflow" && f.lang !== undefined && NOT_WRITER_LANGS.has(f.lang);
+// The headline is the JMA warning name the Composer sets; its size is the renderer's, not the Writer's.
+const headlineSize = (f: LoopFinding) => f.check === "font-size" && f.cell_id === "headline";
 const writerCanFix = (f: LoopFinding) =>
   !renderOverflow(f) &&
+  !headlineSize(f) &&
   ((f.check === "pictogram-misuse" && f.cell_id === "action") ||
     (WRITER_FIXABLE.has(f.check) && (f.cell_id === undefined || WRITER_CELLS.has(f.cell_id))));
 const MAX_RESENDS = 2;

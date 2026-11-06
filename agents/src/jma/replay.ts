@@ -23,6 +23,20 @@ export interface ReplayEntry {
   alert: Alert;
 }
 
+export function withinWindow<T extends { issued_at: string }>(entries: T[], window: { from?: string; to?: string }): T[] {
+  const bound = (v: string | undefined, name: string) => {
+    if (v === undefined) return undefined;
+    const t = Date.parse(v);
+    if (Number.isNaN(t)) throw new Error(`--${name} ${v} is not a date (use ISO 8601, e.g. 2026-10-11T00:00+09:00)`);
+    return t;
+  };
+  const [from, to] = [bound(window.from, "from"), bound(window.to, "to")];
+  return entries.filter((e) => {
+    const t = Date.parse(e.issued_at);
+    return (from === undefined || t >= from) && (to === undefined || t <= to);
+  });
+}
+
 export function replay(municipalityId: string, feedDir = FEED_DIR) {
   const entries: ReplayEntry[] = [];
   const errors: { file: string; error: string }[] = [];
