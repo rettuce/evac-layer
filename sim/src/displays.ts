@@ -196,6 +196,7 @@ export class Displays {
   private sets: AlertSet[] = []
   private activeSet = -1
   private pairIndex = -1
+  private pairEpochMs = 0
   private blackout = false
   private blackoutTimer?: ReturnType<typeof setTimeout>
   private sceneRequest = 0
@@ -258,11 +259,29 @@ export class Displays {
 
   setContent(content: Content): void {
     if (content === this.content) return
+    if (content === 'evac') this.pickAlertSet()
+    this.switchTo(content)
+  }
+
+  // A named set (the timeline) or undefined for the calm content; a change between two sets blacks out as a switch from calm does.
+  showSet(id: string | undefined): void {
+    if (id === undefined) {
+      if (this.content !== 'calm') this.switchTo('calm')
+      return
+    }
+    const index = this.sets.findIndex((set) => set.id === id)
+    if (index < 0 || (this.content === 'evac' && index === this.activeSet)) return
+    this.activeSet = index
+    this.switchTo('evac')
+  }
+
+  private switchTo(content: Content): void {
     this.content = content
     clearTimeout(this.blackoutTimer)
     this.blackout = content === 'evac'
     if (this.blackout) {
-      this.pickAlertSet()
+      this.pairEpochMs = Date.now() + EVAC_BLACKOUT_MS
+      this.pairIndex = 0
       this.blackoutTimer = setTimeout(() => {
         this.blackout = false
         this.apply()
@@ -292,7 +311,7 @@ export class Displays {
 
   update(): void {
     const now = Date.now()
-    const pair = Math.floor(now / PAIR_MS) % (this.alertSet?.pairs.length ?? 1)
+    const pair = Math.floor(Math.max(0, now - this.pairEpochMs) / PAIR_MS) % (this.alertSet?.pairs.length ?? 1)
     if (pair !== this.pairIndex) {
       this.pairIndex = pair
       if (this.content === 'evac') this.apply()

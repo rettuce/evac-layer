@@ -22,6 +22,47 @@
       #status, #hint { position: fixed; left: 12px; color: #888; background: rgba(0,0,0,.6); border: 1px solid #333; border-radius: 3px; padding: 4px 6px; }
       #status { bottom: 12px; }
       #hint { bottom: 44px; font-size: 10px; letter-spacing: .08em; }
+      .panel { background: rgba(0,0,0,.6); border: 1px solid #333; border-radius: 3px; }
+      .panel button, .panel select { background: #111; color: #ccc; border: 1px solid #444; padding: 4px 8px; font: inherit; cursor: pointer; }
+      .panel button[aria-pressed="true"] { background: #e8e8e8; color: #000; border-color: #e8e8e8; }
+      .swatch { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border: 1px solid #444; vertical-align: baseline; }
+      .swatch[hidden] { display: none; }
+      #now { position: fixed; top: 12px; right: 12px; padding: 6px 10px; max-width: 360px; text-align: right; }
+      #now .ja { color: #ddd; }
+      #now .en, #now .where, #timeline .caption { color: #888; font-size: 10px; letter-spacing: .04em; }
+      #now .where:empty { display: none; }
+      #timeline { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); width: min(620px, calc(100vw - 24px)); box-sizing: border-box; padding: 6px; display: flex; flex-direction: column; gap: 4px; }
+      #timeline .row { display: flex; gap: 4px; align-items: stretch; }
+      #timeline .play { width: 36px; padding: 4px 0; }
+      #timeline .track { position: relative; flex: 1; display: flex; gap: 2px; }
+      #timeline .track button { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+      #timeline .fill { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: #e8e8e8; pointer-events: none; z-index: 1; }
+      #intro { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.5); }
+      #intro[hidden] { display: none; }
+      #intro .card { width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; box-sizing: border-box; padding: 20px 22px; background: rgba(0,0,0,.85); }
+      #intro h2 { margin: 0 0 12px; font-size: 10px; font-weight: 400; letter-spacing: .08em; color: #888; }
+      #intro .idea { margin: 0; font-size: 15px; line-height: 1.7; color: #e8e8e8; }
+      #intro .en { margin: 4px 0 14px; font-size: 11px; color: #888; }
+      #intro .about { margin: 0; color: #ddd; }
+      #intro ul { margin: 0 0 16px; padding-left: 1.2em; color: #ccc; }
+      #intro li { margin-bottom: 4px; }
+      #intro li .en { display: block; margin: 0; }
+      #intro .start { padding: 6px 16px; }
+      #panel-toggle { display: none; position: fixed; top: 8px; left: 8px; background: #111; color: #ccc; border-color: #444; padding: 8px 12px; font: inherit; }
+      @media (max-width: 700px) {
+        #panel-toggle { display: block; }
+        #ui { display: none; top: 76px; left: 8px; max-height: calc(100vh - 220px); }
+        body.panel-open #ui { display: flex; }
+        #hint, #status, #fps { display: none; }
+        #now { top: 8px; right: 8px; max-width: calc(100vw - 96px); }
+        #timeline { left: 8px; right: 8px; bottom: 8px; transform: none; width: auto; }
+        #timeline .row { flex-wrap: wrap; }
+        #timeline .track { min-width: 0; }
+        #timeline .track button, #timeline .play { min-height: 36px; }
+        #timeline .track button { padding: 4px 2px; }
+        #timeline .track .swatch { margin-right: 3px; }
+        #timeline select { flex-basis: 100%; min-height: 32px; }
+      }
     </style>
   </head>
   <body>
@@ -30,6 +71,31 @@
     <div id="fps">— fps</div>
     <div id="status">loading room.glb…</div>
     <div id="hint">[D] : debug toggle&ensp;&ensp;[←→] : scene&ensp;&ensp;[E] : evac</div>
+    <div id="now" class="panel" aria-live="polite"><div class="ja"><i class="swatch" hidden></i><span class="label"></span></div><div class="en"></div><div class="where"></div></div>
+    <div id="timeline" class="panel">
+      <div class="caption"></div>
+      <div class="row">
+        <button class="play" type="button">▶</button>
+        <div class="track"><div class="fill"></div></div>
+        <select aria-label="警報の場所 / Place"></select>
+      </div>
+    </div>
+    <button id="panel-toggle" class="panel" type="button">panel</button>
+    <div id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title" hidden>
+      <div class="card panel">
+        <h2 id="intro-title">EVAC LAYER — IDEA</h2>
+        <p class="idea">街中にあるスクリーン。<br />それらが自分の位置を知り、災害時に適切な避難情報を出す。<br />そんなハックができないか？</p>
+        <p class="en">Screens are everywhere in the city. What if each knew where it stands and showed the right evacuation guidance in a disaster? Could we hack that?</p>
+        <p class="about">2026 年 10 月 21 日、秋田県由利本荘市で実際に発表された警報で動かします。</p>
+        <p class="en">Driven by the warnings actually issued for Yurihonjo, Akita, on 21 October 2026.</p>
+        <ul>
+          <li>下の帯: ▶ で再生・一時停止、各時点を押すとその警報へ<span class="en">Timeline: play, pause, or jump to a warning</span></li>
+          <li>ドラッグ（スワイプ）で視点を回す、ボタンで移動<span class="en">Drag or swipe to orbit; camera buttons fly to a view</span></li>
+          <li>キー: [E] 別の警報をランダム、[←→] 平常時の映像、[D] パネル<span class="en">Keys: E random warning, ← → ambient video, D panels</span></li>
+        </ul>
+        <button class="start" type="button">はじめる / Start</button>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

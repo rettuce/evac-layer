@@ -26,6 +26,7 @@ function group(root: HTMLElement, title: string): HTMLElement {
 interface Radio<T extends string> {
   buttons: HTMLButtonElement[]
   pick: (value: T) => void
+  select: (value: T) => void
 }
 
 function radioButtons<T extends string>(parent: HTMLElement, options: [T, string][], initial: T, onPick: (value: T) => void): Radio<T> {
@@ -45,14 +46,15 @@ function radioButtons<T extends string>(parent: HTMLElement, options: [T, string
     parent.appendChild(button)
   }
   select(initial)
-  return { buttons: [...buttons.values()], pick }
+  return { buttons: [...buttons.values()], pick, select }
 }
 
 export interface Ui {
   readonly content: Content
   readonly scene: AmbientScene
+  // The timeline and [E] change the faces themselves; this only moves the pressed button and the scene lock.
+  showContent: (content: Content) => void
   // The keyboard goes through the same path as a click, so the pressed button follows.
-  pickContent: (content: Content) => void
   pickScene: (scene: AmbientScene) => void
   isSceneAvailable: (scene: AmbientScene) => boolean
   setSceneAvailable: (scene: AmbientScene, available: boolean) => void
@@ -100,7 +102,11 @@ export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { c
     get scene() {
       return current.scene
     },
-    pickContent: contents.pick,
+    showContent: (content) => {
+      current.content = content
+      contents.select(content)
+      enableScenes()
+    },
     pickScene: scenes.pick,
     isSceneAvailable: (scene) => !missing.has(scene),
     setSceneAvailable: (scene, available) => {
