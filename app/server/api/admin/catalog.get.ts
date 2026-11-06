@@ -9,11 +9,8 @@ interface ReportFile {
   attempts: { n: number; findings: unknown[]; screens_ok: Record<string, boolean> }[]
 }
 
-async function readReport(root: string, site: string, municipality: string, bulletin: string): Promise<ReportFile | undefined> {
-  return (
-    (await readJsonIfExists<ReportFile>(join(root, 'reports', `${site}-${bulletin}`, 'report.json'))) ??
-    readJsonIfExists<ReportFile>(join(root, 'reports', `${municipality}-${bulletin}`, 'report.json'))
-  )
+function readReport(root: string, site: string, bulletin: string): Promise<ReportFile | undefined> {
+  return readJsonIfExists<ReportFile>(join(root, 'reports', site, bulletin, 'report.json'))
 }
 
 export default defineEventHandler(async () => {
@@ -26,7 +23,7 @@ export default defineEventHandler(async () => {
     if (!index) continue
     const entries = await Promise.all(
       index.entries.map(async (entry: ReplayRow) => {
-        const report = entry.screen ? await readReport(root, site, index.municipality, entry.bulletin_id) : undefined
+        const report = entry.screen ? await readReport(root, site, entry.bulletin_id) : undefined
         const last = report?.attempts.at(-1)
         return {
           ...entry,

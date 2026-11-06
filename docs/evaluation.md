@@ -52,7 +52,7 @@ Every finding in runs 1 and 2 was a real defect: the Composer or the renderer wa
 |---|---|---|
 | Vision findings (runs 1–10) | 35 | 25 + 8 + 1 + 1; the overflows in runs 3 and 4 came from the browser check, not Vision |
 | Confirmed defects | 33 | runs 1 and 2 (`fix` filled in `data/verifier-findings/2026-11-02-vision-run{1,2}.json`) |
-| Clear false positive | 1 | run 9, 輪島市 10-21 19:42 all-clear: the finding's own text says the headline "matches" and "does not contradict" the bulletin, yet it is filed as bulletin-mismatch (`data/reports/17204-VPWW55-202610211942-7720a18f5cfa/report.json`) |
+| Clear false positive | 1 | run 9, 輪島市 10-21 19:42 all-clear: the finding's own text says the headline "matches" and "does not contradict" the bulletin, yet it is filed as bulletin-mismatch (`data/reports/17204-demo/VPWW55-202610211942-7720a18f5cfa/report.json`) |
 | Disputed | 1 | run 8, same screen: "避難は不要です" was called an assertion the bulletin does not make, while the bulletin's own text still warns of rising rivers. A reasonable reading, but the next run did not repeat it |
 
 False-positive rate: 1 of 35 findings (2.9 %), or 2 of 35 (5.7 %) when the disputed one is counted; 1 to 2 of 479 Vision checks. In both cases the loop sent the screen back to the Writer once and passed it on the second attempt, and the same finding is sent at most twice, so a false positive costs one rewrite and cannot loop.
