@@ -1,6 +1,6 @@
 <img alt="EVAC LAYER" src="docs/brand/evac-layer-lockup-black.png" width="100%">
 
-<img alt="駅のコンコースの柱と壁のスクリーンが、警戒レベル 4 の避難案内に一斉に切り替わった様子（Blender で描いた 3D シミュレーション）" src="docs/images/hero-lv4.jpg" width="100%">
+https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 
 # EVAC LAYER
 
@@ -181,7 +181,7 @@ pnpm -F app test
 - **図記号** — Material Symbols（Apache-2.0）6 種、Material の形をもとに描き直した 1 種、このプロジェクトで描いた 7 種（[`app/ASSETS.md`](app/ASSETS.md)）。JIS Z 8210 / Z 9098 の図記号ではありません。
 - **フォント** — Noto Sans JP / SC / TC / KR / Thai と Noto Sans（SIL OFL 1.1）。オフラインでも描けるよう同梱しています。
 - **3D のデモ** — Poly Haven の HDRI とテクスチャ（CC0）。地図は OpenStreetMap（© OpenStreetMap contributors）（[`demo/ASSETS.md`](demo/ASSETS.md)）。
-- **動画の音と README の画像** — BGM は Suno で作成（作成者所有）、効果音は Adobe Audition SFX と合成音。README の画像はこのリポジトリで描いたもので、出所は [`demo/ASSETS.md`](demo/ASSETS.md)。
+- **動画の音と README の画像** — BGM は Suno で作成（作成者所有）、効果音は Adobe Audition SFX。README の画像はこのリポジトリで描いたもので、出所は [`demo/ASSETS.md`](demo/ASSETS.md)。
 
 ## EVAC LAYER がしないこと
 
