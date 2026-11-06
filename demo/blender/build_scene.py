@@ -35,7 +35,7 @@ SCREENS_DIR = DEMO_DIR / "screens"
 CACHE_DIR = DEMO_DIR / "cache"
 HDRI_PATH = DEMO_DIR / "assets" / "metro_vijzelgracht_1k.hdr"
 PLACEHOLDER_FONT = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
-CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "alert-real-lv3", "seq", "cut08-seq", "off", "test")
+CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "alert-real-lv3", "seq", "ambient-30", "cut08-seq", "off", "test")
 
 INCH = 0.0254
 JOINT_M = 0.003
@@ -258,6 +258,11 @@ SHOTS = {
     },
     "cut05": {
         "seconds": 21, "screens": "seq", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
+        "path": push_from("wide-a", 0.4),
+    },
+    # Edit material (D-33): cut 5's camera over 30 s of one calm scene.
+    "ambient30": {
+        "seconds": 30, "screens": "ambient-30", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
         "path": push_from("wide-a", 0.4),
     },
     # Cut 8: one camera move column -> ribbon -> back wall, holding on each screen and easing between them; the
