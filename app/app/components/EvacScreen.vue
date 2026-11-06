@@ -7,7 +7,7 @@ import { shelterFloorPx, shelterSizes } from '~~/layout/shelterFit'
 import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
-import { HEADLINE_STEP_DOWN, LINE_HEIGHT, SHELTER_STEP_DOWN, SOURCE_STEP_DOWN, TYPE_PX } from '~~/layout/typography'
+import { LINE_HEIGHT, headlineStepScale, SHELTER_STEP_DOWN, SOURCE_STEP_DOWN, TYPE_PX } from '~~/layout/typography'
 import { pictogramsSettled } from '~/composables/usePictogramInk'
 
 const props = defineProps<{
@@ -32,6 +32,7 @@ const overflowDropped = ref<DroppedCell[]>([])
 const overflow = ref('')
 const levelLabel = computed(() => levelLabelFor(props.screen.template, props.screen.alert.level))
 const headlineScale = ref(1)
+const headlineWrapShift = ref(0)
 const shelterStep = ref(0)
 const distanceBelow = ref(false)
 const distanceNarrow = ref(false)
@@ -43,6 +44,16 @@ const headlineLimited = computed(() => stackedHeadline.value || SHAPES[props.sha
 const ready = ref(false)
 
 const layout = computed(() => resolveLayout(props.screen.template, props.shape, props.variant))
+const headlineFloorScale = computed(() =>
+  headlineStepScale(layout.value.figma ? (layout.value.type?.headline ?? TYPE_PX.guide) : TYPE_PX.guide * (layout.value.typeScale?.headline ?? 1)),
+)
+// A headline that takes another line takes it from the band's own row, and the level label moves down with it.
+const gridLayout = computed(() => {
+  const headlineRow = layout.value.areas.findIndex((row) => row.split(/\s+/).includes('headline'))
+  const height = layout.value.rows[headlineRow]
+  if (!headlineWrapShift.value || !stackedHeadline.value || typeof height !== 'number') return layout.value
+  return { ...layout.value, rows: layout.value.rows.map((row, i) => (i === headlineRow ? height + headlineWrapShift.value : row)) }
+})
 
 const initial = computed(() => initialPlacement(props.screen.cells, layout.value))
 const placed = computed(() => {
@@ -68,7 +79,7 @@ const distanceNarrowPx = computed(() => {
 })
 
 const rootStyle = computed(() => ({
-  ...gridCss(layout.value.fixedTracks ? layout.value : collapseAbsent(layout.value, new Set([...placed.value.map((cell) => cell.role), ...(layout.value.hero ? ['hero'] : [])]))),
+  ...gridCss(gridLayout.value.fixedTracks ? gridLayout.value : collapseAbsent(gridLayout.value, new Set([...placed.value.map((cell) => cell.role), ...(layout.value.hero ? ['hero'] : [])]))),
   ...(props.box ? { width: `${props.box.width}px`, height: `${props.box.height}px` } : {}),
   '--px': `${scale.value}px`,
   '--fs-action': TYPE_PX.action,
@@ -93,6 +104,7 @@ const rootStyle = computed(() => ({
   ...(distanceNarrow.value && distanceNarrowPx.value ? { '--type-distance': distanceNarrowPx.value } : {}),
   ...(languagesNarrow.value && layout.value.type?.languagesNarrow ? { '--type-languages': layout.value.type.languagesNarrow } : {}),
   ...(sourceNarrow.value ? { '--source-scale': SOURCE_STEP_DOWN } : {}),
+  ...(headlineWrapShift.value ? { '--headline-wrap-shift': headlineWrapShift.value } : {}),
 }))
 
 const language = computed(() => languageStep(props.elapsedMs))
@@ -198,6 +210,11 @@ function shelterNameWraps(): boolean {
   return twoLines || lineTops.size > 1 || name.scrollWidth > name.clientWidth + OVERFLOW_TOLERANCE_PX
 }
 
+function headlineLineDesignPx(): number {
+  const text = root.value?.querySelector<HTMLElement>('.headline-text')
+  return text ? Math.ceil(parseFloat(getComputedStyle(text).lineHeight) / scale.value) : 0
+}
+
 function sourceTooWide(): boolean {
   const source = root.value?.querySelector<HTMLElement>('.source-text')
   return !!source && source.scrollWidth > source.clientWidth + OVERFLOW_TOLERANCE_PX
@@ -208,6 +225,7 @@ async function fit() {
   ready.value = false
   overflowDropped.value = []
   headlineScale.value = 1
+  headlineWrapShift.value = 0
   shelterStep.value = 0
   distanceBelow.value = false
   distanceNarrow.value = false
@@ -248,9 +266,16 @@ async function fit() {
       break
     }
     const headlineOver = over.cells.some((cell) => placed.value.find((c) => c.id === cell.cellId)?.role === 'headline')
-    if (headlineOver && headlineLimited.value && headlineScale.value === 1) {
-      headlineScale.value = HEADLINE_STEP_DOWN
-      continue
+    if (headlineOver && headlineLimited.value) {
+      if (headlineScale.value === 1 && headlineFloorScale.value < 1) {
+        headlineScale.value = headlineFloorScale.value
+        continue
+      }
+      const lineDesignPx = headlineWrapShift.value ? 0 : headlineLineDesignPx()
+      if (lineDesignPx) {
+        headlineWrapShift.value = lineDesignPx
+        continue
+      }
     }
     if (layout.value.figma && !languagesNarrow.value) {
       languagesNarrow.value = true
@@ -339,6 +364,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :headline-max-lines="layout.headlineLines"
         :easy-in-action="easyInAction"
         :headline-scale="headlineScale"
+        :headline-wrapped="headlineWrapShift > 0"
         :pictogram-px="layout.pictogramPx[cell.role] ?? 0"
         :figma-rules="layout.figma === true"
         :distance-below="distanceBelow"
