@@ -137,6 +137,8 @@ API の費用（11 月 5 日までのデータ処理）は、Reader $2.88（5 �
 
 ## Claude とどう作ったか
 
+作者は、ほぼ一人で物を作っています。防災の案内には、一人では到底できない物量があります。自治体ごとのハザードマップや気象庁の電文といった膨大な資料、都道府県をまたぐ情報の食い違い（市町村や場所ごとに、避難先も方向も言葉も違う）、千差万別のスクリーンのレイアウト。人がやれば時間も労力もコストも膨大にかかるこの作業を、システムとアルゴリズムの力と、AI を使った並列処理で一気に解こうと考えました。
+
 11 月 2 日より前にあったのは、調査・コンセプト・データの利用条件の確認・元の PDF のダウンロード・気象庁のフィードの記録だけで、コードはありません。このリポジトリは、すべて 11 月 2 日 12:00 から書きました。
 
 作者は 1 人です。11 月 6 日の時点で、commit は 446（ほかに統合が 219）、コードは約 2 万行、テストは 159 件になりました。作業の記録 571 項目のうち 181 項目は、作者が決めたことです。手を動かす量は Claude が担い、何を作るか・どう見せるかは作者が決めました。
@@ -204,6 +206,8 @@ pnpm -F app test
 AGPL-3.0（[`LICENSE`](LICENSE)）。Copyright (C) 2026 You Tanaka。
 AGPL-3.0 の条件で、誰でも使えます。AGPL の条件で公開できない製品への組み込みには、別のライセンスも用意します。
 
+ハッカソンという報酬の出ない場で作るものは、オープンソースにすると決めていました。作者たちは、自分たちが作っている環境演出のシステムに、EVAC LAYER をオプションのモジュールとして 1 枚のレイヤーで組み込み、自分たちの製品を育てていきます。そのレイヤーの部分は、オープンソースで誰でも使えます。
+
 導入や連携の相談: you@ie3.jp（IE3 / ie3.jp）。ハッカソンの期間中（11 月 2〜8 日）は、外部からのコントリビューションを受け付けていません（[`CONTRIBUTING.md`](CONTRIBUTING.md)）。
 
 **Built with Claude: Japan 2026**（2026 年 11 月 2〜8 日）の期間中に、ゼロから作りました。
@@ -218,4 +222,4 @@ Give EVAC LAYER the latitude, longitude and facing of a site (one venue; its scr
 
 To add your own screens: register a site file, generate and approve its screens once, then take the feed, the webhook or the files. Your JMA receiver switches a site by posting a bulletin id (or `null`) to `POST /api/admin/live`; receiving bulletins and composing screens for new ones are outside this repository. The switches in the demo video and the simulator are replays of recorded bulletins. The steps are in [`docs/integration.md`](docs/integration.md). In steady state a screen costs about $0.245 in API calls, roughly $13 per municipality per year.
 
-EVAC LAYER does not issue warnings or evacuation orders and has not yet been run in operation or checked by a municipality; evacuation sites are chosen from GSI data by rule (Claude writes and checks the text), and direction and distance are straight-line. JMA data is edited and translated under EVAC LAYER's responsibility with no forecast of its own, and the GSI data should be confirmed with each municipality. The only thing deployed publicly is the static simulator on GitHub Pages, and nothing there calls the Claude API. Built from scratch during Built with Claude: Japan 2026 (Nov 2–8) by one lead Claude Code session and eight implementation sessions on their own git worktrees. Licensed AGPL-3.0 for anyone; a separate license is available for products that cannot be published under the AGPL: you@ie3.jp.
+EVAC LAYER does not issue warnings or evacuation orders and has not yet been run in operation or checked by a municipality; evacuation sites are chosen from GSI data by rule (Claude writes and checks the text), and direction and distance are straight-line. JMA data is edited and translated under EVAC LAYER's responsibility with no forecast of its own, and the GSI data should be confirmed with each municipality. The only thing deployed publicly is the static simulator on GitHub Pages, and nothing there calls the Claude API. Built from scratch during Built with Claude: Japan 2026 (Nov 2–8) by one lead Claude Code session and eight implementation sessions on their own git worktrees. The author works almost alone, and the volume here (hazard maps and bulletins, guidance that differs for every place, layouts for every kind of screen) is more than one person could do, so it is solved with systems, algorithms and Claude working in parallel. What is built at an unpaid hackathon is open source: the author's team will build it into their own ambient-signage system as one optional layer, and that layer stays open for anyone. Licensed AGPL-3.0 for anyone; a separate license is available for products that cannot be published under the AGPL: you@ie3.jp.
