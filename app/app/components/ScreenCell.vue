@@ -12,6 +12,7 @@ const props = defineProps<{
   headlineMaxLines?: number
   easyInAction?: boolean
   headlineScale?: number
+  headlineWrapped?: boolean
   pictogramPx: number
   figmaRules?: boolean
   distanceBelow?: boolean
@@ -33,7 +34,9 @@ const languageGroups = computed<LangKey[][]>(() => {
 const currentGroup = computed(() => (languageGroups.value.length ? props.languageIndex % languageGroups.value.length : -1))
 // The 9:16 artboard writes the distance as one word (570m); the 1:1 artboard and the earlier layouts keep the space.
 const distanceText = computed(() => (props.cell.distance_m === undefined ? '' : `${props.cell.distance_m}${props.figmaRules && !props.distanceUnitSpace ? '' : ' '}m`))
-const headlineMaxLines = computed(() => (props.headlineLimited ? (props.headlineMaxLines ?? HEADLINE_STACKED_MAX_LINES) : undefined))
+const headlineMaxLines = computed(() =>
+  props.headlineLimited ? (props.headlineMaxLines ?? HEADLINE_STACKED_MAX_LINES) + (props.headlineWrapped ? 1 : 0) : undefined,
+)
 </script>
 
 <template>
@@ -42,6 +45,7 @@ const headlineMaxLines = computed(() => (props.headlineLimited ? (props.headline
       <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" :fit-ink="figmaRules" />
       <p
         class="t-guide headline-text"
+        :class="{ 'is-wrapped': headlineWrapped }"
         :style="headlineStyle"
         :data-max-lines="headlineMaxLines"
       ><template v-if="headlineParts(cell.text.ja).lead"><span class="keep">{{ headlineParts(cell.text.ja).lead }}</span> {{ headlineParts(cell.text.ja).rest }}</template><template v-else>{{ cell.text.ja }}</template></p>

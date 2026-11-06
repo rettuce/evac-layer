@@ -136,7 +136,7 @@ body {
 .evac-screen.shape-portrait .is-figma .role-headline .level-label {
   position: absolute;
   right: calc(37 * var(--px));
-  top: calc(111 * var(--px));
+  top: calc((111 + var(--headline-wrap-shift, 0)) * var(--px));
   font-size: calc(var(--type-level) * var(--px));
   line-height: 1.1;
 }
@@ -507,7 +507,7 @@ body {
 .evac-screen.shape-square .is-figma .role-headline .level-label {
   position: absolute;
   right: calc(48 * var(--px));
-  top: calc(108 * var(--px));
+  top: calc((108 + var(--headline-wrap-shift, 0)) * var(--px));
   margin: 0;
   font-size: calc(var(--type-level) * var(--px));
   line-height: 1.2;
@@ -643,7 +643,7 @@ body {
 .evac-screen.shape-pillar .is-figma .role-headline .level-label {
   position: absolute;
   right: calc(72 * var(--px));
-  top: calc(167 * var(--px));
+  top: calc((167 + var(--headline-wrap-shift, 0)) * var(--px));
   margin: 0;
   font-size: calc(var(--type-level) * var(--px));
   line-height: 1.2;
@@ -742,4 +742,8 @@ body {
   font-size: calc(var(--type-source) * var(--source-scale, 1) * var(--px));
   white-space: nowrap;
   line-height: 1.2;
+}
+
+.evac-screen .is-figma .role-headline .headline-text.is-wrapped {
+  text-wrap: wrap;
 }
