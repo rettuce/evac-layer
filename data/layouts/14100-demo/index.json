@@ -10,6 +10,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "神奈川県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025032200_0_VPWW56_140000.xml",
       "screen": false,
       "reason": "level 0 for 14100: below the evacuation threshold, no screen"
     },
@@ -19,6 +20,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "神奈川県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025035050_0_VPWW56_140000.xml",
       "screen": false,
       "reason": "level 0 for 14100: below the evacuation threshold, no screen"
     },
@@ -28,6 +30,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "神奈川県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261025/20261025090515_0_VPWW56_140000.xml",
       "screen": false,
       "reason": "level 0 for 14100: below the evacuation threshold, no screen"
     },
@@ -37,6 +40,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "神奈川県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261026/20261026010651_0_VPWW56_140000.xml",
       "screen": false,
       "reason": "level 0 for 14100: below the evacuation threshold, no screen"
     },
@@ -46,6 +50,7 @@
       "wmo_code": "VPWW56",
       "raw_title": "神奈川県土砂災害警報・注意報",
       "municipality_level": null,
+      "file": "bodies/20261026/20261026205801_0_VPWW56_140000.xml",
       "screen": false,
       "reason": "level 0 for 14100: below the evacuation threshold, no screen"
     }
