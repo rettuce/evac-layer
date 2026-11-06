@@ -20,7 +20,8 @@
     "replay": "tsx src/jma/replay.ts",
     "replay-pipeline": "tsx src/loop/replay-cli.ts",
     "fanout": "tsx src/loop/fanout.ts",
-    "export": "tsx src/delivery/cli.ts"
+    "export": "tsx src/delivery/cli.ts",
+    "live": "tsx src/delivery/live-cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

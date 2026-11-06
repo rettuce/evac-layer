@@ -9,7 +9,7 @@ const { values, positionals } = parseArgs({
 });
 
 if (positionals.length === 0) {
-  console.error("usage: pnpm -F agents validate [--schema layout|alert|municipality] <file.json>...");
+  console.error("usage: pnpm -F agents validate [--schema layout|alert|municipality|site|municipality-preset|...] <file.json>...");
   process.exit(2);
 }
 

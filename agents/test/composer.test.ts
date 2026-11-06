@@ -1,3 +1,4 @@
+import { SAMPLES_DIR, FEED_DIR } from "../src/paths.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -11,7 +12,6 @@ import { AGENTS_DIR, REPO_ROOT } from "../src/paths.js";
 import { loadMunicipality } from "../src/loop/municipality.js";
 import type { Alert } from "../src/jma/parse.js";
 
-const SAMPLES_DIR = process.env.JMA_SAMPLES_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/raw/jma-samples/unzipped";
 const fx = <T>(name: string): T => JSON.parse(fs.readFileSync(path.join(AGENTS_DIR, "test/fixtures", name), "utf8"));
 const municipality = fx<Municipality>("municipality-17204-min.json");
 const site = fx<Site>("site-wajima-test.json");
@@ -33,7 +33,7 @@ test("level 5 (secure-now) keeps the nearest site and the direction beside the g
   const koyoshi = fx<{ entries: { alert: Alert; municipality_level: number | null; bulletin_id: string }[] }>("replay-05210-koyoshi-20261021.json");
   const lv5 = koyoshi.entries.find((e) => e.municipality_level === 5)!;
   const { municipality: yurihonjo } = loadMunicipality("05210");
-  const honjo = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "data/sites/05210-demo.json"), "utf8")) as Site;
+  const honjo = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "data/sites/05210-demo-honjo-station.json"), "utf8")) as Site;
   const cached = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "data/writer/05210", `${lv5.bulletin_id}.json`), "utf8")).output as WriterOutput;
   const screens = compose({ alert: lv5.alert, municipality: yurihonjo, site: honjo, writer: cached });
   for (const s of screens) {
@@ -99,8 +99,7 @@ test("action pictogram follows the template, and a cleared VPWW headline says �
   assert.equal(actionPictogram("flood", "secure-now"), "go_higher");
   assert.equal(actionPictogram("tsunami", "evac-now"), "go_higher");
   const { headlineFor } = await import("../src/composer/compose.js");
-  const FEED = process.env.JMA_FEED_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/jma-feed";
-  const file = path.join(FEED, "bodies/20261021/20261021150027_0_VPWW56_170000.xml");
+    const file = path.join(FEED_DIR, "bodies/20261021/20261021150027_0_VPWW56_170000.xml");
   if (!fs.existsSync(file)) throw new Error(`recorded bulletin ${file} not found. Set JMA_FEED_DIR.`);
   assert.equal(headlineFor(parseJmaXml(fs.readFileSync(file)), "17204"), "レベル２土砂災害注意報解除");
 });

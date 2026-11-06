@@ -1,3 +1,4 @@
+import { SAMPLES_DIR } from "../src/paths.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -10,7 +11,6 @@ import { staticVerifier } from "../src/loop/static-verifier.js";
 import type { Verifier } from "../src/loop/types.js";
 import { AGENTS_DIR } from "../src/paths.js";
 
-const SAMPLES_DIR = process.env.JMA_SAMPLES_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/raw/jma-samples/unzipped";
 const fxPath = (n: string) => path.join(AGENTS_DIR, "test/fixtures", n);
 const fx = <T>(n: string): T => JSON.parse(fs.readFileSync(fxPath(n), "utf8"));
 const base = () => ({

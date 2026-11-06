@@ -1,3 +1,4 @@
+import { SAMPLES_DIR, FEED_DIR } from "../src/paths.js";
 import { test } from "node:test";
 import { replay } from "../src/jma/replay.js";
 import assert from "node:assert/strict";
@@ -9,8 +10,6 @@ import { tsunamiRegionsFor } from "../src/jma/regions.js";
 
 // The official JMA sample bulletins are not redistributed in this repository; point JMA_SAMPLES_DIR at the unzipped
 // jmaxml_20260917_Samples.zip (https://xml.kishou.go.jp/).
-const SAMPLES_DIR =
-  process.env.JMA_SAMPLES_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/raw/jma-samples/unzipped";
 
 function load(name: string): Alert {
   const file = path.join(SAMPLES_DIR, name);
@@ -90,10 +89,9 @@ test("demo municipalities map to tsunami forecast regions", () => {
   assert.deepEqual(tsunamiRegionsFor("14100"), ["312"]);
 });
 
-const FEED = process.env.JMA_FEED_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/jma-feed";
 
 test("recorded feed: a warning-to-advisory step for 輪島市 parses as a downgrade", () => {
-  const file = path.join(FEED, "bodies/20261021/20261021061124_0_VPWW55_170000.xml");
+  const file = path.join(FEED_DIR, "bodies/20261021/20261021061124_0_VPWW55_170000.xml");
   if (!fs.existsSync(file)) throw new Error(`recorded bulletin ${file} not found. Set JMA_FEED_DIR.`);
   const a = parseJmaXml(fs.readFileSync(file));
   assert.ok(validateDoc(a, "alert").ok);

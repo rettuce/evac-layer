@@ -116,7 +116,6 @@ function categoryOfKind(code: string): TsunamiCategory {
 }
 
 // English for the source line only; the Writer never sees the municipality name, so romanisation lives here.
-export const MUNICIPALITY_EN: Record<string, string> = { "05210": "Yurihonjo", "17204": "Wajima", "15205": "Kashiwazaki", "22424": "Yoshida", "14100": "Yokohama" };
 export const MONTH_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
 
 // A JMA drill bulletin (Control/Status 訓練) is shown with the marker in every language's headline; ja is the

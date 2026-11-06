@@ -27,14 +27,16 @@ export function promptTokens(usage: { input: number; cache_write: number; cache_
   return usage.reduce((a, u) => ({ input: a.input + u.input, cache_write: a.cache_write + u.cache_write, cache_read: a.cache_read + u.cache_read }), { input: 0, cache_write: 0, cache_read: 0 });
 }
 
-export async function runReplay(args: { municipalityId: string; entries: ReplayEntry[]; site: Site; verifier: Verifier; onEvent?: (e: ReplayEvent) => void; persist?: boolean; writer?: { client: Anthropic; model: WriterModel } }): Promise<ReplaySummary> {
+export async function runReplay(args: { municipalityId: string; entries: ReplayEntry[]; site: Site; verifier: Verifier; onEvent?: (e: ReplayEvent) => void; persist?: boolean; writer?: { client: Anthropic; model: WriterModel }; roots?: { reports: string; layouts: string } }): Promise<ReplaySummary> {
   const persist = args.persist ?? true;
   const t0 = Date.now();
   const { municipality, readerRan } = loadMunicipality(args.municipalityId);
-  // A replay regenerates the municipality's whole output, so screens from an earlier run cannot linger.
+  const layoutsRoot = args.roots?.layouts ?? LAYOUTS_DIR;
+  const reportsRoot = args.roots?.reports ?? REPORTS_DIR;
+  // A replay regenerates the site's whole output, so screens from an earlier run cannot linger.
   if (persist) {
-    fs.rmSync(path.join(LAYOUTS_DIR, municipality.id), { recursive: true, force: true });
-    if (fs.existsSync(REPORTS_DIR)) for (const d of fs.readdirSync(REPORTS_DIR)) if (d.startsWith(`${municipality.id}-`)) fs.rmSync(path.join(REPORTS_DIR, d), { recursive: true, force: true });
+    fs.rmSync(path.join(layoutsRoot, args.site.id), { recursive: true, force: true });
+    fs.rmSync(path.join(reportsRoot, args.site.id), { recursive: true, force: true });
   }
   const live = args.writer;
   const writerUsage: CallUsage[] = [];
@@ -101,7 +103,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       saveWriter(municipality.id, e.bulletin_id, { model: live.model, output: result.writer, usage: writerUsage.slice(usageStart), lint: [] });
     }
     const { dir, report } = persist
-      ? writeReport({ municipalityId: municipality.id, bulletinId: e.bulletin_id, verifier: args.verifier.name, reviser: reviser.name, maxAttempts: 3, result, writerNote: notes || undefined })
+      ? writeReport({ siteId: args.site.id, municipalityId: municipality.id, roots: args.roots, bulletinId: e.bulletin_id, verifier: args.verifier.name, reviser: reviser.name, maxAttempts: 3, result, writerNote: notes || undefined })
       : { dir: "", report: { outcome: result.outcome, reason: result.reason, layouts: result.screens.map((x) => `${x.shape}.json`) } };
     const screen = report.outcome === "pass" && browserChecked;
     if (report.outcome === "pass") pass++; else fail++;
@@ -118,7 +120,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
     });
     args.onEvent?.({ municipality: municipality.id, issued_at: e.issued_at, template: situation.template, level: situation.level, outcome: report.outcome, reason: report.reason });
   }
-  const indexFile = path.join(LAYOUTS_DIR, municipality.id, "index.json");
+  const indexFile = path.join(layoutsRoot, args.site.id, "index.json");
   if (persist) fs.mkdirSync(path.dirname(indexFile), { recursive: true });
   if (persist) fs.writeFileSync(indexFile, JSON.stringify({ municipality: municipality.id, name: municipality.name, site: args.site.id, writer_note: notes, entries: index }, null, 2) + "\n");
   return { municipality: municipality.id, name: municipality.name, bulletins: args.entries.length, screens: pass + fail, pass, fail, no_screen: noScreen, layouts, seconds: (Date.now() - t0) / 1000, writer_usd: writerUsage.reduce((n, u) => n + u.usd, 0), writer_tokens: promptTokens(writerUsage) };
