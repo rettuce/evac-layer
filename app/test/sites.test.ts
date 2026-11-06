@@ -162,6 +162,13 @@ describe('sites in one municipality', { skip }, () => {
     assert.equal((await getJson(base, `/api/replay?municipality=00007`)).speed, 600)
   })
 
+  test('the bare origin leads to the approvals', async () => {
+    const root = await fetch(`${base}/`, { redirect: 'manual' })
+    assert.equal(root.status, 302)
+    assert.equal(root.headers.get('location'), '/admin')
+    assert.equal((await fetch(`${base}/screen`, { redirect: 'manual' })).status, 200)
+  })
+
   test('demo site layouts are not served without EVAC_DEMO=1', async () => {
     assert.equal((await fetch(`${base}/api/demo-site-layout?path=${encodeURIComponent('demo/sites/x/16x9.json')}`)).status, 404)
   })
