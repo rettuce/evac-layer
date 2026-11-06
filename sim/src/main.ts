@@ -4,6 +4,8 @@ import { CameraRig, FILM_GAUGE_MM, poseToQuery, presetFromQuery, presetsFromGltf
 import { Displays } from './displays'
 import { applyRenderMode, loadRoom, type RenderMode } from './room'
 import { SCENES, loadCrops, type AmbientScene, type Content } from './crops'
+import { intro } from './intro'
+import { Timeline, renderNow } from './timeline'
 import { buildUi, fpsMeter } from './ui'
 
 const INITIAL: { content: Content; scene: AmbientScene; mode: RenderMode; preset: string } = { content: 'calm', scene: 'brush-flow', mode: 'textured', preset: 'hero' }
@@ -16,6 +18,8 @@ const MIN_FRAME_MS = 1000 / MAX_FPS - 0.5
 
 const stage = document.getElementById('stage')!
 const status = document.getElementById('status')!
+const nowBadge = document.getElementById('now')!
+const introCard = document.getElementById('intro')!
 
 const scene = new Scene()
 const camera = new PerspectiveCamera(50, innerWidth / innerHeight, NEAR_M, FAR_M)
@@ -61,8 +65,25 @@ const displays = new Displays(room.displayMeshes, crops, INITIAL)
 const summary = `${room.pieces.length} pieces · ${displays.faces.length} faces · ${presets.length} cameras`
 status.textContent = 'loading video …'
 
+const timeline = new Timeline(document.getElementById('timeline')!, {
+  onShow: (setId) => {
+    displays.showSet(setId)
+    ui.showContent(setId ? 'evac' : 'calm')
+    renderNow(nowBadge, setId)
+  },
+})
+renderNow(nowBadge, undefined)
+
 const ui = buildUi(document.getElementById('ui')!, presets, INITIAL, {
-  onContent: (content) => displays.setContent(content),
+  onContent: (content) => {
+    if (content === 'calm') {
+      timeline.pause()
+      timeline.jump(0)
+      return
+    }
+    timeline.jump(timeline.firstAlertStep)
+    timeline.play()
+  },
   onScene: (ambientScene) => { void displays.setScene(ambientScene) },
   onRenderMode: (mode) => applyRenderMode(room, mode),
   onCamera: (preset) => rig.flyTo(preset),
@@ -90,8 +111,17 @@ function stepScene(direction: 1 | -1): void {
     }
   }
 }
+// [E] keeps the random set of S-14 beside the timeline: the timeline stops and lets go of the faces.
+function toggleRandomAlert(): void {
+  timeline.release()
+  if (ui.content === 'calm') displays.setContent('evac')
+  else displays.showSet(undefined)
+  ui.showContent(displays.content)
+  renderNow(nowBadge, displays.content === 'evac' ? displays.alertSet?.id : undefined)
+}
+document.getElementById('panel-toggle')!.addEventListener('click', () => document.body.classList.toggle('panel-open'))
 addEventListener('keydown', (event) => {
-  if (event.metaKey || event.ctrlKey || event.altKey) return
+  if (event.metaKey || event.ctrlKey || event.altKey || !introCard.hidden) return
   switch (event.key) {
     case 'd':
     case 'D':
@@ -100,7 +130,7 @@ addEventListener('keydown', (event) => {
       break
     case 'e':
     case 'E':
-      ui.pickContent(ui.content === 'calm' ? 'evac' : 'calm')
+      toggleRandomAlert()
       break
     case 'ArrowRight':
       stepScene(1)
@@ -110,22 +140,27 @@ addEventListener('keydown', (event) => {
       break
   }
 })
-void displays.hasVideo(INITIAL.scene).then(async (available) => {
+const ready = displays.hasVideo(INITIAL.scene).then(async (available) => {
   if (!available) {
     status.textContent = `video not found: ${displays.videoUrl(INITIAL.scene)}`
-    return
+    return false
   }
   try {
     await displays.start()
     status.textContent = summary
+    return true
   } catch (error) {
     status.textContent = String(error)
+    return false
   }
+})
+void Promise.all([ready, intro(introCard)]).then(([started]) => {
+  if (started) timeline.play()
 })
 
 // Measurement switches for DevTools (S-4 v2): uncapped draws, WebGL off, and the last loop times.
 const perf = { cap: true, webgl: true, drawMs: [] as number[], loopMs: [] as number[] }
-Object.assign(window, { sim: { camera, controls, displays, room, webgl, perf } })
+Object.assign(window, { sim: { camera, controls, displays, room, webgl, perf, timeline } })
 
 const fps = fpsMeter(document.getElementById('fps')!)
 let lastDrawMs = -Infinity
@@ -135,6 +170,7 @@ webgl.setAnimationLoop((nowMs) => {
   lastDrawMs = nowMs
   const started = performance.now()
   controls.update()
+  timeline.tick(nowMs)
   displays.update()
   if (perf.webgl) webgl.render(scene, camera)
   if (perf.loopMs.length < 600) perf.loopMs.push(performance.now() - started)
