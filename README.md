@@ -49,10 +49,10 @@ EVAC LAYER は、スクリーンの座標を受け取ると、その場所のた
 
 ## 何をするか
 
-EVAC LAYER にスクリーンの座標を渡します。コンコースの柱、商業施設の壁、ロビーのディスプレイ。あとは EVAC LAYER が、その場所に要るものを自分で調べます。どの市町村の電文が当たるか。国土地理院のデータで最寄りの指定緊急避難場所はどこか。見る人の立ち位置から、どちらへ何 m か。登録の単位はサイト（1 施設。そのスクリーンは座標を共有する）で、サイトの座標を変えれば、避難先も方向も距離もその場所のものになります。自治体ごとに 1 回読み、サイトごとに 1 回組みます。いまの公開リポは 1 自治体につき 1 サイトで、同じ自治体に 2 つ目のサイトを置く構造はまだありません。
+EVAC LAYER にスクリーンの座標を渡します。コンコースの柱、商業施設の壁、ロビーのディスプレイ。あわせて、その場所の市町村コードを手で書きます（座標からは割り出しません）。どの市町村の電文を当てるかは、このコードで決まります。あとは EVAC LAYER が、その場所に要るものを自分で調べます。国土地理院のデータで最寄りの指定緊急避難場所はどこか。見る人の立ち位置から、どちらへ何 m か。登録の単位はサイト（1 施設。そのスクリーンは座標を共有する）で、サイトの座標を変えれば、避難先も方向も距離もその場所のものになります。自治体ごとに 1 回読み、サイトごとに 1 回組みます。同じ自治体にサイトをいくつ置いても、それぞれが自分の画面と承認を持ちます。
 
 1. **読む** — その自治体のハザードマップ PDF と、国土地理院の指定緊急避難場所データを読み、すべての記述に出典ページを残す。
-2. **聞く** — 気象庁の防災情報 XML を読み、警報の種別・内閣府の警戒レベル（1〜5）・対象地域を判定する。公開リポにあるのは、2026 年 10 月から記録した実際のフィードを再生する経路で、気象庁から直接受信する受け口は含めていません。
+2. **聞く** — 気象庁の防災情報 XML を読み、警報の種別・内閣府の警戒レベル（1〜5）・対象地域を判定する。気象庁から電文を受信する部分は、このリポジトリに含めていません。デモは 2026 年 10 月から記録した実際のフィードを再生します。実際の導入では、自前の受信系がサイトの状態を切り替えます（下の「あなたのサイネージに導入する」）。
 3. **書く** — その施設・その電文のための案内を書く。行動文を 10 の言語で、行動の図記号つきで。市町村だけが出せる避難情報の名称は使わない。
 4. **組んで描く** — 同じ案内を 5 つの基準形状（16:9・9:16・32:9・1:1・柱に巻く LED）に組み、描画部（Renderer）がどんな画角にもいちばん近い基準形状を収めて描く。文字サイズは視距離から導き、色は内閣府原典の警戒レベル色、点滅はなし。
 5. **検査する** — すべての画面を 3 段で。スキーマと規則の検査、描画した画面のブラウザ検査（溢れ・欠け・距離の重複）、PNG を電文と照らす Vision 検査。指摘は文章の書き手（Writer）に戻し、書き直しで直らないものはパイプラインを止める。
@@ -81,15 +81,18 @@ EVAC LAYER にスクリーンの座標を渡します。コンコースの柱、
 
 EVAC LAYER が作るのは下書きです。決めるのは人で、あらかじめ決める。施設ごとに案内画面の一式（災害 × 警戒レベル × 言語 × 形状）を生成し、各画面には出典（自治体 PDF のページと気象庁電文の ID）と自動検査のレポートが添えられます。運営者は平時に一式を確認して承認し、その施設の自動配信を入れるか切るかを決めます。電文が届いたら、承認済みの画面だけが自動で上がる。生成も判断も、そこには挟まらない。止めるのも運営者で、`/admin` から自動配信を切れば次の電文から出ません。
 
-## どのスクリーンにも
+## あなたのサイネージに導入する
 
-EVAC LAYER はイベントの発信元です。画面を再生する機能は持たず、サイネージシステムを置き換えません。サイネージに「この場所に、いま、これを出す」と伝えるだけです。自分が運用しているサイネージにも、あなたのサイネージにも。配信はふつうの HTTP で、承認済みの画面だけを運びます。
+EVAC LAYER はイベントの発信元です。画面を再生する機能は持たず、サイネージシステムを置き換えません。サイネージに「この場所に、いま、これを出す」と伝えるだけです。配信はふつうの HTTP で、承認済みの画面だけを運びます。作者が運用するサイネージも、同じ口で受けています。
 
-- **Pull** — `GET /api/feed/<site>`: その施設がいま出すべきもの。5 形状のレイアウトと PNG/HTML の資産つき。`ETag` でポーリングは軽い。
-- **Push** — 施設ごとの Webhook。timestamp・delivery id・event・body に対する HMAC-SHA256 の署名つきで、再送攻撃に耐える。
-- **Files** — `pnpm -F agents export --site <id>`: 形状ごとの PNG と、単体で開ける HTML。画像しか受けられない CMS 向け。
+1. **サイトを登録する** — `data/sites/<id>.json` に、座標・画面の向き・市町村コードを書きます（`schema/site.schema.json`）。1 サイトは 1 施設で、その施設のスクリーンは座標を共有します。同じ自治体にいくつ置いてもかまいません。
+2. **生成して承認する** — `pnpm -F agents fanout --sites <id>` でそのサイトの画面一式を作ります。`/admin` で電文ごとに画面を確かめて承認し、そのサイトの自動配信を入れます。
+3. **受ける** — 次の 3 つのどれかで受けます。
+   - **Pull** — `GET /api/feed/<site>`: そのサイトがいま出すべきもの。5 形状のレイアウトと PNG/HTML の資産つき。`ETag` でポーリングは軽い。
+   - **Push** — サイトごとの Webhook。timestamp・delivery id・event・body に対する HMAC-SHA256 の署名つきで、再送攻撃に耐える。
+   - **Files** — `pnpm -F agents export --site <id>`: 形状ごとの PNG と、単体で開ける HTML。画像しか受けられない CMS 向け。
 
-登録は、座標・向き・市町村コードを持つサイトの JSON ファイル 1 つ（`data/sites/<id>.json`。1 施設分で、そのスクリーンは座標を共有します）。以後そのサイトは自分の場所のための案内を受け取り、`POST /api/admin/site` で自動配信を入れます。現状は 1 自治体につき 1 サイトです。手順は `docs/integration.md`。`examples/minimal-cms/` はフィードだけで動く 39 行のサイネージクライアントで、デモ動画の最後のカットがそれです。
+画面を切り替えるのは `POST /api/admin/live`（または `pnpm -F agents live`）です。自前の気象庁の受信系から、そのサイトに当たる電文の ID を渡すと、承認済みの画面が上がり、`null` を渡すと平常に戻ります。手順の全体と環境変数は [`docs/integration.md`](docs/integration.md)。`examples/minimal-cms/` はフィードだけで動く 40 行のサイネージクライアントで、デモ動画の最後のカットがそれです。
 
 停電・回線断について。静的ファイルの経路を使えば、承認済みの一式を端末側に置いておけます。画面は配信元に届かなくなっても直前の状態を保ち、60 秒を超えると「同期が途絶えている」印を出します。建物が停電すれば画面は消える。EVAC LAYER は電源の約束をしません。
 
@@ -133,11 +136,13 @@ Claude Code のセッション 1 つが司令官になり、8 つの実装のセ
 pnpm install
 pnpm -F app dev                     # Renderer と運営者画面 http://127.0.0.1:3150
 open http://127.0.0.1:3150/screen?municipality=05210&mode=live
-pnpm -F agents test                 # agents: ユニット＋サンプル電文のテスト
+pnpm -F agents test                 # agents: ユニットテスト（元データがあればサンプル電文のテストも）
 pnpm -F app test                    # app: ビルド＋ポリシー/サーバのテスト
 ```
 
-デモ自治体の知識ファイル・レイアウト・レポートを同梱しているので、運営者画面は API キーなしで動きます。Reader・Writer・Vision 検査を自分で回すには `agents/.env` に `ANTHROPIC_API_KEY` が要ります。各コマンドと費用は `agents/README.md`。
+デモ自治体の知識ファイル・レイアウト・レポートを同梱しているので、運営者画面は API キーなしで動きます。設定は環境変数か、リポジトリ直下の `.env` で渡します（項目は `.env.example`）。Reader・Writer・Vision 検査を自分で回すには `ANTHROPIC_API_KEY` が要ります。各コマンドと費用は `agents/README.md`。
+
+再配布していない元データ（自治体の PDF・国土地理院の CSV・記録した気象庁電文）は `EVAC_RAW_DIR`（既定は `data/raw`）に置きます。これが要るのは Reader・`shelters`・`fanout`・`replay` と、電文を読むテストです。元データが無いと `pnpm -F agents test` は 36 件を飛ばし、置き場所と入手先を表示します。元データがあれば 85 件すべてが通ります。
 
 公開しているのは、ブラウザで動く静的なシミュレーター（GitHub Pages）だけです。そこから Claude API を呼ぶ経路はありません。Reader・Writer と運営者画面（`/admin`）は、手元で自分の API キーを使って動かします。
 
@@ -158,6 +163,13 @@ pnpm -F app test                    # app: ビルド＋ポリシー/サーバの
 - 電源の約束ではありません。建物が停電すれば画面は消えます。
 - 汎用のサイネージ CMS ではありません。緊急画面を作って承認で止めるものです。出すのはあなたの CMS です。
 
+## 今後
+
+- **言語セットの選択。** いまは 10 言語すべてが必須で、導入先ごとに言語を絞ったり入れ替えたりできません。
+- **津波予報区の全国化。** 気象庁の津波予報区と市町村の対応表は、いまはデモの 5 自治体の分だけです。気象庁のコード表から全国分を作ります。
+- **電文の受信と、新しい電文からの画面生成。** いまは記録した電文から作った画面のうち、どれを出すかを外から指定する形です。
+- **座標からの自治体の自動判定。** いまは市町村コードを手で書きます。
+
 ## ライセンスと連絡先
 
 AGPL-3.0（`LICENSE`）。Copyright (C) 2026 You Tanaka。
@@ -169,7 +181,7 @@ AGPL-3.0（`LICENSE`）。Copyright (C) 2026 You Tanaka。
 
 **EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.** The screens are already there, and each one knows where it stands. What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it, for any screen in Japan, generated with Claude.
 
-Give EVAC LAYER the coordinates of a site (one venue; its screens share them) and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. Move the coordinates and the shelter, direction and distance follow; today the repository holds one site per municipality. It reads the municipality's own hazard-map PDFs with citations (Reader, Claude), replays recorded JMA disaster-prevention XML (the live receiver is not part of this repository), writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five screen shapes, inspects every screen by rules, in a browser and by Vision (Claude), and fires `alert` / `clear` events carrying only operator-approved screens, as a feed, a signed webhook or static files. Any signage system can act on them. In steady state a screen costs about $0.245 in API calls, roughly $13 per municipality per year. A nationwide estimate, on rough assumptions, is at the end of `docs/evaluation.md`.
+Give EVAC LAYER the coordinates of a site (one venue; its screens share them) and its municipality code, written by hand, and it works out the rest for that spot: the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. Move the coordinates and the shelter, direction and distance follow; a municipality can hold any number of sites. It reads the municipality's own hazard-map PDFs with citations (Reader, Claude), replays recorded JMA disaster-prevention XML (the live receiver is not part of this repository), writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five screen shapes, inspects every screen by rules, in a browser and by Vision (Claude), and fires `alert` / `clear` events carrying only operator-approved screens, as a feed, a signed webhook or static files. Any signage system can act on them. To add your own screens, register a site file, generate and approve its screens once in calm times, then take the feed, the webhook or the files; your JMA receiver switches a site by posting a bulletin id (or `null`) to `POST /api/admin/live`. Receiving bulletins and composing screens for new ones are outside this repository; the steps are in `docs/integration.md`. In steady state a screen costs about $0.245 in API calls, roughly $13 per municipality per year. A nationwide estimate, on rough assumptions, is at the end of `docs/evaluation.md`.
 
 The only thing deployed publicly is the static browser simulator on GitHub Pages, and nothing there calls the Claude API; the Reader, the Writer and the operator screen (`/admin`) run locally with your own API key.
 

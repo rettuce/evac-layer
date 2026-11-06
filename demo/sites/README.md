@@ -16,4 +16,4 @@ node -e 'const w=require("./data/writer/05210/VXKOii-202610211815-e713da0e3c05.j
 pnpm -F agents compose --site "$PWD/demo/sites/<slug>/site.json" --alert "$JMA_FEED_DIR/bodies/20261021/20261021091533_0_VXKO55_050000.xml" --municipality 05210 --writer /tmp/writer.json --out-dir /tmp/out/
 ```
 
-`honjo-station/16x9.json` is a copy of `data/layouts/05210/VXKOii-202610211815-e713da0e3c05/16x9.json`. These files are outside the contract: `data/` keeps one site per municipality (`data/sites/`) and the fan-out does not read this directory.
+`honjo-station/16x9.json` is a copy of `data/layouts/05210-demo-honjo-station/VXKOii-202610211815-e713da0e3c05/16x9.json`. These files are outside the contract: the fan-out reads only `data/sites/`, not this directory.

@@ -6,6 +6,8 @@
 | `alert.schema.json` | JMA XML parser (`agents/src/jma/`) | Writer, Composer |
 | `municipality.schema.json` | Reader (`agents/src/reader/`) | Writer, Composer |
 | `common.schema.json` | shared `$defs` (hazard, level, municipality id) | all of the above |
+| `site.schema.json` | the integrator (`data/sites/<id>.json`, one per venue) | Composer, fan-out, app |
+| `municipality-preset.schema.json` | the integrator (`data/municipalities/<id>.preset.json`) | Reader, shelters CLI |
 | `feed.schema.json` | feed API / webhook (render seat) | other signage systems |
 | `export-manifest.schema.json` | `pnpm -F agents export` | systems that take files only |
 
@@ -13,13 +15,13 @@ Validate any document: `pnpm -F agents validate <file.json>` (schema inferred; `
 
 - Colors are never written into layout JSON. `palette: "cabinet-office-5"` tells the Renderer to use the Cabinet Office five-level tokens.
 - Tsunami bulletins carry no five-level value (`level: null`). The Composer maps `tsunami.highest_category` to a level token: `major_warning` → Lv4 token, `warning` → Lv3, `advisory` → Lv2, `forecast` / `cleared` → Lv1 (same ordering as JMA tsunami warning colors).
-- Tsunami areas are forecast regions, not municipalities; `agents/src/jma/regions.ts` maps the regions of the demo municipalities only.
+- Tsunami areas are forecast regions, not municipalities; `data/jma/tsunami-regions.json` maps the regions of the demo municipalities only; a municipality missing from it gets a warning when a tsunami bulletin is processed.
 - `ja_easy` follows 出入国在留管理庁・文化庁「在留支援のためのやさしい日本語ガイドライン」(2020-08, https://www.moj.go.jp/isa/content/930006072.pdf, step 2 on printed pp.7-9); rules are quoted in `agents/src/writer/rules.ts`, signage conventions (kana with spaces, JMA warning names verbatim) are listed separately there.
 
 ## Composer (agents/src/composer/)
 
 - Slots and required cells come from the render seat's public `resolveTemplate(templateId, shape)` (`app/layout/README.md`), read through `agents/src/composer/template.ts#shapeContract`. The Composer also adds the `languages` cell the contract requires on 16x9 / 9x16 / 32x9 and stops if a required role is missing.
-- `pillar` (a column wrapped by LED on four faces, each face repeating a 9:16 screen): the Composer emits it with the 9:16 slots, required roles (languages included) and budgets (`CELLS_OF` in `agents/src/composer/rules.ts`) as a fifth `pillar.json`; the renderer draws the faces at 6616 × 5834 and exports are captured at half scale (3308 × 2917). Until the renderer has the shape, `--skip-browser-shapes pillar` (fanout / replay-pipeline / pipeline) checks it statically only and marks the index row `browser_skipped`, and `export --skip-shapes pillar` leaves it out.
+- `pillar` (a column wrapped by LED on four faces, each face repeating a 9:16 screen): the Composer emits it with the 9:16 slots, required roles (languages included) and budgets (`CELLS_OF` in `agents/src/composer/rules.ts`) as a fifth `pillar.json`; the renderer draws the faces at 6616 × 5046 and exports are captured at half scale (3308 × 2523). Until the renderer has the shape, `--skip-browser-shapes pillar` (fanout / replay-pipeline / pipeline) checks it statically only and marks the index row `browser_skipped`, and `export --skip-shapes pillar` leaves it out.
 - Action pictogram shows the action, never the hazard (the headline pictogram carries that): `all-clear` → safe_here, tsunami and `secure-now` → go_higher, otherwise directions_run. The Writer is given the pictogram's meaning and writes the action to match; the action text never uses a municipal order name (高齢者等避難・避難指示・緊急安全確保), because the screen comes from a JMA warning (both found by the Vision Verifier on the real replay).
 - Template choice: level 5 → `secure-now` (Cabinet Office 緊急安全確保: no shelter or direction cell, action is immediate safety where people are, no evacuation wording); tsunami major warning / warning / advisory and level 4 → `evac-now`; level 3 → `evac-prepare`; all areas cleared → `all-clear`; tsunami forecast or level ≤ 2 → no screen. All four (`secure-now`, `evac-now`, `evac-prepare`, `all-clear`) are defined in templates.ts.
 - Shelter: nearest GSI designated emergency evacuation site (text = facility name, `kind` = designation) whose designated hazards match the alert (heavy_rain → inland_flood or flood), excluding any name listed in `conflicts[]`; distance rounded to 10 m and shown once, on the shelter cell.
@@ -35,5 +37,5 @@ Validate any document: `pnpm -F agents validate <file.json>` (schema inferred; `
 
 - Compose → verify → send findings back to the Writer → recompose, up to 3 attempts. Findings a rewrite can fix: `over-budget`, `font-size`, `overflow`, `distance-duplicated`. Anything else (a missing required cell, flicker) stops the loop at once, because rewriting text cannot fix it.
 - The `static` Verifier checks what needs no rendering (layout schema, duplicated distance). Font size, overflow and flicker need the browser Verifier, which joins the loop once `/screen` accepts an arbitrary layout via `?src=`.
-- Report: `data/reports/<municipality>-<bulletin_id>/report.json` (every attempt with its Writer source and findings, outcome and reason) plus `layouts/<shape>.json` from the last attempt.
+- Report: `data/reports/<site_id>/<bulletin_id>/report.json` with `--publish` (otherwise under `tmp/pipeline/`) (every attempt with its Writer source and findings, outcome and reason) plus `layouts/<shape>.json` from the last attempt.
 - Until the API key is in place, Writer revisions come from fixture files (`--revisions`); without them the live reviser declines rather than inventing text.

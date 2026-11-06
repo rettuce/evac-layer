@@ -31,7 +31,7 @@
 | 段 | コマンド | 所要 | 出力 |
 |---|---|---|---|
 | 読解 | `pnpm -F agents jma $JMA_FEED_DIR/bodies/20261021/20261021065519_0_VXKO55_050000.xml` | 0.4 s | alert JSON（`VXKOii-202610211555-d5ccc7c6b547`・flood・L3・由利本荘市） |
-| 案内生成 → 検査（A） | `pnpm -F agents pipeline --alert <同じ xml> --municipality 05210 --site data/sites/05210-demo.json --writer <data/writer/05210/<id>.json の output> --verifier vision` | 61.6 s | `tmp/pipeline/` に 5 形状 + report.json。attempt 1・findings 0・5/5 pass |
+| 案内生成 → 検査（A） | `pnpm -F agents pipeline --alert <同じ xml> --municipality 05210 --site data/sites/05210-demo-honjo-station.json --writer <data/writer/05210/<id>.json の output> --verifier vision` | 61.6 s | `tmp/pipeline/` に 5 形状 + report.json。attempt 1・findings 0・5/5 pass |
 | 同（B） | 同じ。`--site` は id / municipality_id / lat / lng / facing_deg だけの JSON | 45.9 s | 5 形状。16x9 が fail（下の 4）・他 4 形状 pass |
 | 承認済み一式 | `pnpm -F agents export --site 05210-demo-honjo-station --out <dir>` | 45.0 s | 6 電文 × 5 形状 = 91 ファイル + manifest.json（approved_at 2026-11-02） |
 | 画面 | `/screen?shape=16x9&src=/api/layout?file=<絶対パス .json>` | — | capture 2 枚（private `log/captures/agents-2026-11-05-0619-e2e-16x9-{honjo-station,arbitrary-point}.png`） |

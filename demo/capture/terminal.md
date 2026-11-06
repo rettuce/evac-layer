@@ -31,9 +31,9 @@ agents 席の CLI（`pnpm -F agents …`）の実走を、端末画面として�
 
 | 秒 | 見せるもの | コマンド・出力 |
 |---|---|---|
-| 0〜2 | コマンド入力 | `pnpm -F agents replay-pipeline --replay <由利本荘 10-21 の replay.json> --site data/sites/05210-demo.json --writer live --writer-model opus` |
+| 0〜2 | コマンド入力 | `pnpm -F agents replay-pipeline --replay <由利本荘 10-21 の replay.json> --site data/sites/05210-demo-honjo-station.json --writer live --writer-model opus` |
 | 2〜10 | 18:15 の Lv4（子吉川 氾濫危険警報）の Writer 出力: `ja` → `ja_easy` → `en` / `zh_hans` / `zh_hant` / `ko` が順に出る | `data/writer/05210/VXKOii-202610211815-e713da0e3c05.json` の `output`（`model`・`usage`・`lint` も持つ）。言語キーごとに 1 行ずつ見えるよう `jq` で整形する |
-| 10〜12 | コマンド入力 | `pnpm -F agents compose --alert $JMA_FEED_DIR/bodies/20261021/20261021091533_0_VXKO55_050000.xml --municipality 05210 --site data/sites/05210-demo.json --writer <writer>.json --out-dir tmp/cut4` |
+| 10〜12 | コマンド入力 | `pnpm -F agents compose --alert $JMA_FEED_DIR/bodies/20261021/20261021091533_0_VXKO55_050000.xml --municipality 05210 --site data/sites/05210-demo-honjo-station.json --writer <writer>.json --out-dir tmp/cut4` |
 | 12〜20 | 4 形状の検証結果と、各形状の `template` と必須セル | stderr の `OK  <file>` ×4（agents 席が 4 形状とも OK を確認済み）。続けて 4 ファイルの `shape`・`template`・`cells[].role` を 1 行ずつ |
 
 ライブ Writer は単体の `writer` CLI（今は `--dry-run` だけ）ではなく、replay と fan-out の `--writer live` から呼ばれる。出力は電文ごとに `data/writer/<自治体>/<電文>.json` に保存されて再利用されるので、同じ電文はいつも同じ画面になる。0〜10 秒は、収録の時点で agents 席の CLI の最終形に合わせる。電文はカット 5 の live と同じ由利本荘の列。
@@ -58,7 +58,7 @@ agents 席の CLI（`pnpm -F agents …`）の実走を、端末画面として�
 ## agents 席の回答（2026-11-02・work/agents で実走して確認）
 
 1. **電文 XML の実ファイル**
-   - カット 4（由利本荘 10-21 18:15 子吉川 レベル４氾濫危険警報）: `$JMA_FEED_DIR/bodies/20261021/20261021091533_0_VXKO55_050000.xml`（`JMA_FEED_DIR` 既定は private の `data/jma-feed`）。`pnpm -F agents compose --alert <このファイル> --municipality 05210 --site data/sites/05210-demo.json --writer <writer>.json --out-dir tmp/cut4` で 4 形状とも `OK` を確認済み。`--municipality` は自治体コードでも渡せる（Reader 未実行の間は `data/municipalities/<id>.shelters.json` から組む）
+   - カット 4（由利本荘 10-21 18:15 子吉川 レベル４氾濫危険警報）: `$JMA_FEED_DIR/bodies/20261021/20261021091533_0_VXKO55_050000.xml`（`JMA_FEED_DIR` 既定は private の `data/jma-feed`）。`pnpm -F agents compose --alert <このファイル> --municipality 05210 --site data/sites/05210-demo-honjo-station.json --writer <writer>.json --out-dir tmp/cut4` で 4 形状とも `OK` を確認済み。`--municipality` は自治体コードでも渡せる（Reader 未実行の間は `data/municipalities/<id>.shelters.json` から組む）
    - カット 6（輪島・石川県能登の津波注意報。公式サンプル）: `$JMA_SAMPLES_DIR/32-39_12_02_250206_VTSE41.xml`
 2. **attempt 1 の差し戻し**: 出る。ただし `long → advisory` の attempt 1 は `16x9 over-budget[action]` で、Composer が描画の前に文字数予算で止めたもの（画面は描かれない）。実走結果（`--verifier browser`）:
    ```

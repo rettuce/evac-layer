@@ -11,7 +11,8 @@ let screen = { state: 'ambient' }
 async function poll() {
   try {
     const res = await fetch(FEED, { headers: etag ? { 'If-None-Match': etag } : {} })
-    if (res.status !== 200) return
+    if (res.status === 304) return
+    if (res.status !== 200) return console.error(`feed ${res.status}: ${FEED}`)
     etag = res.headers.get('etag') ?? ''
     const feed = await res.json()
     const png = feed.assets[SHAPE]?.png

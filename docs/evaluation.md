@@ -6,9 +6,9 @@ Numbers from the pipeline runs of 2026-11-02 to 11-05 over the recorded JMA feed
 
 | Municipality | Recorded bulletins | Screens | Layouts (× 5 shapes) | Why no more screens |
 |---|---|---|---|---|
-| 由利本荘市 05210 | 62 | 6 | 30 | level 2 or lower, or an all-clear for something never shown (`data/layouts/05210/index.json`) |
-| 輪島市 17204 | 42 (39 recorded + 3 official JMA samples) | 10 (3 tsunami from the samples) | 50 | same (`data/layouts/17204/index.json`) |
-| 柏崎市 15205 | 74 | 3 | 15 | same (`data/layouts/15205/index.json`) |
+| 由利本荘市 05210 | 62 | 6 | 30 | level 2 or lower, or an all-clear for something never shown (`data/layouts/05210-demo-honjo-station/index.json`) |
+| 輪島市 17204 | 42 (39 recorded + 3 official JMA samples) | 10 (3 tsunami from the samples) | 50 | same (`data/layouts/17204-demo/index.json`) |
+| 柏崎市 15205 | 74 | 3 | 15 | same (`data/layouts/15205-demo/index.json`) |
 | 吉田町 22424 | 23 (20 recorded + 3 official JMA samples) | 3 (大津波警報 ×2 and its all-clear, all from the samples) | 15 | highest recorded level was 2 |
 | 横浜市 14100 | 5 | 0 | 0 | no warning in force for the city |
 
