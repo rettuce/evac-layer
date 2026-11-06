@@ -17,18 +17,29 @@ pnpm dev                        # http://127.0.0.1:3160
 pnpm build                      # type-check + sim/dist/
 # VITE_AMBIENT_BASE (.env) overrides where the loops are read from (default `${BASE_URL}ambient/`)
 # ?video=8k selects the 8k HEVC loops where they play (default: 4k, since each 8k scene is ~60 MB over Pages)
-# keys: ←/→ step the ambient scene, E toggles EVAC LAYER (each time on, a random alert set from
-# public/alert/sets.json: stills at public/alert/<set>/<face>/<pair>.png), D hides the panel and the fps readout
+# keys: ←/→ step the ambient scene, E toggles a random alert set (public/alert/sets.json, stills at
+# public/alert/<set>/<face>/<pair>.png; the place variants are left out), D hides every overlay
+# ?dev shows the render modes (Textured / AO / Wire) and `copy pose`, which visitors do not need
 ```
 
-Measured 2026-11-04 (M-series Mac, Chrome, 1920×1080, DPR 1): `Textured` with EVAC LAYER on all 22 faces
-60–65 fps at `hero`, 100–120 fps at `wide-a` / `wall-final`; the first 10–15 s after a content switch run
-at ~10 fps while the 22 pages load. `sim/DESIGN.md` has what made the difference.
+Measured 2026-11-06 (M-series Mac, Chrome, 1848×1388, DPR 1, drawing capped at 60 fps on a 121 Hz screen):
+`hero` with EVAC LAYER on all 22 faces runs at 53–57 fps whether the timeline plays or not, frame interval
+median 16.7 ms, 0.2 ms of script per frame. The first 4k loop is ready about 6.5 s after the page opens on
+localhost; a switch blacks the faces for 300 ms and shows the stills, and a place set that has not been shown
+yet is fetched then (about 0.3 s on localhost). `sim/DESIGN.md` has the history, from the iframe faces this replaced.
 
-UI (top left): content `平常時` / `EVAC LAYER` (由利本荘市, the 2026-10-21 flood replayed at real speed from
-just before the level-4 bulletin); ambient scene for `平常時` (five of the app's scenes: brush-flow / etched-streams / ink-bloom / painterly-flow / quad-subdivision); render `Textured` (baked colour × AO) / `AO` (white × AO) / `Wire` (edges
-on black, displays only); camera presets (every still camera of `build_scene.py`, 1.2 s ease-in-out-cubic
-flight; dragging during a flight cancels it). Bottom right: fps.
+A card explains the idea on the first visit (remembered in localStorage). Top left: content `平常時` /
+`EVAC LAYER` (plays the timeline from level 3); ambient scene for `平常時` (brush-flow / etched-streams /
+ink-bloom / painterly-flow / quad-subdivision); camera presets (`hero`, `hero2`, `wall`, `rib`, `col`; a 1.2 s
+ease-in-out-cubic flight that dragging cancels). Top right: what the faces show now, with the level colour,
+the warning in Japanese and English, the place, the issue time and the shelter, direction and distance.
+Bottom right: the place panel and the timeline. The timeline replays 由利本荘市 on 2026-10-21 in 30 s
+(平常時 6 s, then level 3 at 15:55, level 4 at 18:15, level 5 at 19:45, 8 s each, looping); the segments jump,
+and a selector switches to 柏崎市 (level 4) or the 吉田町 tsunami drill. The place panel switches the level-4
+bulletin between four display sites in 由利本荘市 on a small map (© OpenStreetMap contributors): all 22 faces
+change together, and so do the shelter, its direction and its distance. `sim/scripts/site-alerts.mjs` writes
+those stills, the map and `public/sites/sites.json`. Bottom left: fps, the key hint and a link to the repository.
+On a phone the panels fold behind a `panel` button and the timeline takes the bottom.
 
 ## Regenerate the model
 

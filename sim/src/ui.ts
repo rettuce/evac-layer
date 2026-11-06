@@ -82,7 +82,9 @@ export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { c
   })
   sceneButtons = scenes.buttons
   enableScenes()
-  radioButtons(group(root, 'render'), RENDER_MODES, initial.mode, handlers.onRenderMode)
+  const render = group(root, 'render')
+  render.classList.add('dev')
+  radioButtons(render, RENDER_MODES, initial.mode, handlers.onRenderMode)
   const cameras = group(root, 'camera')
   for (const preset of presets) {
     const button = document.createElement('button')
@@ -93,6 +95,7 @@ export function buildUi(root: HTMLElement, presets: CameraPreset[], initial: { c
   const copy = document.createElement('button')
   copy.textContent = 'copy pose'
   copy.title = 'copies ?cam=… for this view to the clipboard and the console'
+  copy.classList.add('dev')
   copy.addEventListener('click', handlers.onCopyCamera)
   cameras.appendChild(copy)
   return {
