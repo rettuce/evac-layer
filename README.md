@@ -1,7 +1,6 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/evac-layer-lockup-black.png">
-  <img alt="EVAC LAYER" src="docs/brand/evac-layer-lockup-white.png" width="560">
-</picture>
+<img alt="EVAC LAYER" src="docs/brand/evac-layer-lockup-black.png" width="100%">
+
+<img alt="駅のコンコースの柱と壁のスクリーンが、警戒レベル 4 の避難案内に一斉に切り替わった様子（Blender で描いた 3D シミュレーション）" src="docs/images/hero-lv4.jpg" width="100%">
 
 # EVAC LAYER
 
