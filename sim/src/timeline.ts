@@ -18,11 +18,11 @@ export interface Scenario {
 
 // Issued times and names from sim/public/alert/sets.json; the bulletins themselves are the stills.
 export const ALERTS: Record<string, Alert> = {
-  'yurihonjo-lv3': { level: 3, issuedAt: '15:55', ja: '氾濫警報（子吉川）', en: 'Flood warning' },
-  'yurihonjo-lv4': { level: 4, issuedAt: '18:15', ja: '氾濫危険警報（子吉川）', en: 'Flood danger warning' },
-  'yurihonjo-lv5': { level: 5, issuedAt: '19:45', ja: '氾濫特別警報（子吉川）', en: 'Flood emergency warning' },
-  'kashiwazaki-lv4': { level: 4, issuedAt: '16:53', ja: '土砂災害危険警報', en: 'Landslide danger warning' },
-  'yoshida-tsunami-drill': { issuedAt: '07:13', ja: '大津波警報（訓練）', en: 'Major tsunami warning (drill)' },
+  'yurihonjo-lv3': { level: 3, issuedAt: '15:55', ja: '氾濫警報（子吉川）', en: 'Warning (Flood)' },
+  'yurihonjo-lv4': { level: 4, issuedAt: '18:15', ja: '氾濫危険警報（子吉川）', en: 'Urgent Warning (Flood)' },
+  'yurihonjo-lv5': { level: 5, issuedAt: '19:45', ja: '氾濫特別警報（子吉川）', en: 'Emergency Warning (Flood)' },
+  'kashiwazaki-lv4': { level: 4, issuedAt: '16:53', ja: '土砂災害危険警報', en: 'Urgent Warning (Landslide)' },
+  'yoshida-tsunami-drill': { issuedAt: '07:13', ja: '大津波警報（訓練）', en: 'Major Tsunami Warning (drill)' },
 }
 
 export const SCENARIOS: Scenario[] = [
