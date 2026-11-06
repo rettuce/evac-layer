@@ -9,18 +9,15 @@
 
 *EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.* The screens are already there: turn them into evacuation guidance anyone can read. [English summary ↓](#english-summary)
 
-**触れるデモ（Web シミュレーター）: https://rettuce.github.io/evac-layer/** — 駅コンコースの 22 面に平常時 / EVAC LAYER を切り替えて表示（`sim/`）。
+**触れるデモ（3D の Web シミュレーター）: [rettuce.github.io/evac-layer](https://rettuce.github.io/evac-layer/)** — 駅コンコースの 22 面を、平常時と警報時で切り替え、4 つのカメラで見られます（`sim/`）。*Try the 3D simulator in your browser (ambient / alert switch, four cameras).*
 
 ![由利本荘市の実際の気象庁電文から描いた、警戒レベル 4 の洪水警報の 16:9 画面](docs/screens/lv4-16x9.png)
 
 [全画面（形状ごと・レベルごと・柱・平時レイヤー・切替）→](docs/screens.md)
 
-**Built with Claude: Japan 2026**（2026-11-02〜08）の期間中にゼロから作っています。状態: Day 4。パイプラインは実データで端から端まで動いています。いまは画面レイアウトの組み直しと、コンコースのシミュレーター、デモ動画の仕上げを進めています。
+**Built with Claude: Japan 2026**（2026-11-02〜08）の期間中にゼロから作りました。パイプラインは実際の気象庁電文と 5 自治体のハザードマップで、端から端まで動きます。
 
 [デモ動画 — 11/8 公開]
-
-ブラウザで触れる 3D シミュレーター: https://rettuce.github.io/evac-layer/（平常時と警報時の切替、4 つのカメラ）
-*Try the 3D simulator in your browser:* https://rettuce.github.io/evac-layer/ (ambient / alert switch, four cameras)
 
 ## 一言で
 
