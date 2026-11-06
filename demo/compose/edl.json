@@ -115,7 +115,8 @@
       "telop_ja": "街中にスクリーンがあります。／それらは自分の位置関係を知っています。",
       "telop_en": "Screens are all over the city.／Each one knows where it stands.",
       "narration_ja": "街中にあるスクリーン。それらが自分の位置を知り、災害時に適切な避難情報を出す。そんなハックができないか？",
-      "reading_ja": "まちなかに ある スクリーン。それらが じぶんの いちを しり、さいがいじに てきせつな ひなんじょうほうを だす。そんな ハックが できないか？"
+      "reading_ja": "まちなかに ある スクリーン。それらが じぶんの いちを しり、さいがいじに てきせつな ひなんじょうほうを だす。そんな ハックが できないか？",
+      "narration_en": "Screens all over the city. What if each one knew where it stands and showed the right evacuation information in a disaster? Could we hack that?"
     },
     {
       "kind": "capture",
