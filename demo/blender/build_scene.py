@@ -270,9 +270,10 @@ SHOTS = {
         "seconds": 3, "screens": "ambient-3", "light_scale": 1.0, "lens": CLOSE_LENS_MM, "focus_follows": True,
         "path": [(STILL_CAMERAS["col-final"]["location"], STILL_CAMERAS["col-final"]["target"])] * 2,
     },
+    # D-35: cut 9's own 10 s move, rendered for its first 3 s only (render_s), so the motion matches the cut.
     "cut09head": {
-        "seconds": 3, "screens": "ambient-3", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
-        "path": [along_axis(-8.6)] * 2,
+        "seconds": 10, "render_s": 3, "screens": "ambient-3", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
+        "path": [along_axis(-8.6), along_axis(-7.9)],
     },
     # Cut 8: one camera move column -> ribbon -> back wall, holding on each screen and easing between them; the
     # screens change bulletin as each move starts (demo/capture/cut08_sequence.sh).
@@ -771,7 +772,7 @@ def main():
     else:
         key_frames = build_dolly(frame_count)
         still_names = [f"shot_{shape}" for shape in SHOT_ORDER]
-    configure_render(args, frame_count, frames_dir)
+    configure_render(args, round(shot["render_s"] * args.fps) if shot and "render_s" in shot else frame_count, frames_dir)
     if shot and shot.get("clay"):
         use_cycles()
 
@@ -810,7 +811,9 @@ def main():
     bpy.ops.render.render(animation=True)
     elapsed = time.perf_counter() - started
     encode_mp4(frames_dir, args.fps, Path(args.out).resolve())
-    export_stills(frames_dir, key_frames, Path(args.stills_dir).resolve(), still_names)
+    rendered = bpy.context.scene.frame_end
+    kept = [(frame, name) for frame, name in zip(key_frames, still_names) if frame <= rendered]
+    export_stills(frames_dir, [frame for frame, _ in kept], Path(args.stills_dir).resolve(), [name for _, name in kept])
     print(f"RENDER_STATS look={args.look} shot={args.shot} frames={frame_count} res={args.width}x{args.height} "
           f"samples={args.samples} total_s={elapsed:.1f} per_frame_s={elapsed / frame_count:.2f}")
 
