@@ -17,8 +17,8 @@ interface CatalogEntry {
   report?: { outcome: string; verifier: string; attempts: number; findings: unknown[]; screens_ok: Record<string, boolean> }
 }
 interface Catalog {
-  municipalities: { id: string; name: string; writer_note?: string; entries: CatalogEntry[] }[]
-  sites: { id: string; municipality_id: string; lat: number; lng: number; note?: string; auto_publish: boolean }[]
+  layouts: { site_id: string; municipality_id: string; name: string; writer_note?: string; entries: CatalogEntry[] }[]
+  sites: { id: string; municipality_id: string; lat?: number; lng?: number; note?: string; auto_publish: boolean }[]
   approvals_file: string
 }
 
@@ -62,22 +62,38 @@ function submitToken() {
 
 const catalog = shallowRef<Catalog>()
 const loadError = ref<string>()
-const selected = ref<{ municipality: string; bulletin: string }>()
+const selected = ref<{ site: string; bulletin: string }>()
 const municipalityId = ref<string>()
+const siteId = ref<string>()
 
-const visibleMunicipalities = computed(() =>
-  (catalog.value?.municipalities ?? []).filter((m) => m.id === municipalityId.value),
-)
+const siteLayouts = computed(() => catalog.value?.layouts ?? [])
+const municipalities = computed(() => {
+  const byCode = new Map<string, { id: string; name: string; screens: number }>()
+  for (const l of siteLayouts.value) {
+    const m = byCode.get(l.municipality_id) ?? { id: l.municipality_id, name: l.name, screens: 0 }
+    m.screens += l.entries.filter((e) => e.screen).length
+    byCode.set(l.municipality_id, m)
+  }
+  return [...byCode.values()]
+})
+const sitesOfMunicipality = computed(() => siteLayouts.value.filter((l) => l.municipality_id === municipalityId.value))
+const visibleMunicipalities = computed(() => siteLayouts.value.filter((l) => l.site_id === siteId.value))
 const currentMunicipality = computed(() => visibleMunicipalities.value[0])
 
-const screenEntries = computed(() => (catalog.value?.municipalities ?? []).flatMap((m) => m.entries.filter((e) => e.screen)))
+const screenEntries = computed(() => siteLayouts.value.flatMap((m) => m.entries.filter((e) => e.screen)))
 const approvedCount = computed(() => screenEntries.value.filter((e) => e.approved).length)
 const autoPublishCount = computed(() => (catalog.value?.sites ?? []).filter((s) => s.auto_publish).length)
 
 function selectMunicipality(id: string) {
   municipalityId.value = id
-  const first = catalog.value?.municipalities.find((m) => m.id === id)?.entries.find((e) => e.screen)
-  selected.value = first ? { municipality: id, bulletin: first.bulletin_id } : undefined
+  const site = siteLayouts.value.find((l) => l.municipality_id === id)
+  if (site) selectSite(site.site_id)
+}
+
+function selectSite(id: string) {
+  siteId.value = id
+  const first = siteLayouts.value.find((l) => l.site_id === id)?.entries.find((e) => e.screen)
+  selected.value = first ? { site: id, bulletin: first.bulletin_id } : undefined
 }
 const saving = ref<string>()
 
@@ -86,7 +102,7 @@ async function load() {
     catalog.value = await $fetch<Catalog>('/api/admin/catalog', { headers: adminHeaders() })
     needsToken.value = false
     loadError.value = undefined
-    const firstMunicipality = catalog.value.municipalities[0]
+    const firstMunicipality = municipalities.value[0]
     if (!municipalityId.value && firstMunicipality) selectMunicipality(firstMunicipality.id)
   } catch (error) {
     const status = (error as { statusCode?: number }).statusCode
@@ -96,7 +112,7 @@ async function load() {
 }
 
 const current = computed(() => {
-  const m = catalog.value?.municipalities.find((x) => x.id === selected.value?.municipality)
+  const m = siteLayouts.value.find((x) => x.site_id === selected.value?.site)
   return m?.entries.find((e) => e.bulletin_id === selected.value?.bulletin)
 })
 
@@ -106,7 +122,7 @@ watch(
   async (pick) => {
     sources.value = []
     if (!pick) return
-    const layout = await $fetch<EvacScreen>('/api/admin/preview-layout', { headers: adminHeaders(), query: { municipality: pick.municipality, bulletin: pick.bulletin, shape: '16x9' } }).catch(() => undefined)
+    const layout = await $fetch<EvacScreen>('/api/admin/preview-layout', { headers: adminHeaders(), query: { site: pick.site, bulletin: pick.bulletin, shape: '16x9' } }).catch(() => undefined)
     if (layout && selected.value === pick) sources.value = sourceLines(layout)
   },
   { immediate: true },
@@ -114,7 +130,7 @@ watch(
 
 function previewSrc(shape: Shape) {
   if (!selected.value) return ''
-  const layout = `/api/admin/preview-layout?municipality=${selected.value.municipality}&bulletin=${selected.value.bulletin}&shape=${shape}`
+  const layout = `/api/admin/preview-layout?${new URLSearchParams({ site: selected.value.site, bulletin: selected.value.bulletin, shape })}`
   return `/screen?shape=${shape}&src=${encodeURIComponent(layout)}&clock=virtual&t=${PREVIEW_AT_MS}`
 }
 
@@ -151,7 +167,7 @@ const approveBlockedReason = computed(() => {
 async function setApproved(entry: CatalogEntry, approved: boolean) {
   if (!selected.value) return
   saving.value = entry.bulletin_id
-  await $fetch('/api/admin/approve', { method: 'POST', headers: adminHeaders(), body: { municipality: selected.value.municipality, bulletin_id: entry.bulletin_id, approved } })
+  await $fetch('/api/admin/approve', { method: 'POST', headers: adminHeaders(), body: { site_id: selected.value.site, bulletin_id: entry.bulletin_id, approved } })
   await load()
   saving.value = undefined
 }
@@ -215,20 +231,26 @@ onUnmounted(() => clearInterval(clockTimer))
           <div>
             <h2 class="page-title">承認</h2>
             <p v-if="currentMunicipality" class="meta">
-              {{ currentMunicipality.name }} <span class="mono">{{ currentMunicipality.id }}</span>・画面 {{ currentMunicipality.entries.filter((e) => e.screen).length }} / 電文 {{ currentMunicipality.entries.length }}
+              {{ currentMunicipality.name }} <span class="mono">{{ currentMunicipality.municipality_id }}</span>・画面 {{ currentMunicipality.entries.filter((e) => e.screen).length }} / 電文 {{ currentMunicipality.entries.length }}
             </p>
           </div>
           <label class="picker">
             <span class="meta">自治体</span>
             <select :value="municipalityId" data-control="municipality" @change="selectMunicipality(($event.target as HTMLSelectElement).value)">
-              <option v-for="m in catalog.municipalities" :key="m.id" :value="m.id">{{ m.name }}（{{ m.id }}・{{ m.entries.filter((e) => e.screen).length }} 画面）</option>
+              <option v-for="m in municipalities" :key="m.id" :value="m.id">{{ m.name }}（{{ m.id }}・{{ m.screens }} 画面）</option>
+            </select>
+          </label>
+          <label v-if="sitesOfMunicipality.length > 1" class="picker">
+            <span class="meta">施設</span>
+            <select :value="siteId" data-control="site" @change="selectSite(($event.target as HTMLSelectElement).value)">
+              <option v-for="l in sitesOfMunicipality" :key="l.site_id" :value="l.site_id">{{ l.site_id }}（{{ l.entries.filter((e) => e.screen).length }} 画面）</option>
             </select>
           </label>
         </div>
 
         <div class="cards">
           <nav class="list card" aria-label="電文">
-            <section v-for="m in visibleMunicipalities" :key="m.id">
+            <section v-for="m in visibleMunicipalities" :key="m.site_id">
               <p v-if="m.writer_note" class="note meta">{{ m.writer_note }}</p>
               <ol>
                 <li v-for="e in m.entries" :key="e.bulletin_id">
@@ -238,7 +260,7 @@ onUnmounted(() => clearInterval(clockTimer))
                     :class="{ 'is-selected': selected?.bulletin === e.bulletin_id }"
                     :disabled="!e.screen"
                     :data-bulletin="e.bulletin_id"
-                    @click="selected = { municipality: m.id, bulletin: e.bulletin_id }"
+                    @click="selected = { site: m.site_id, bulletin: e.bulletin_id }"
                   >
                     <span class="swatch" :style="{ background: e.display_level ? rgbCss(CABINET_OFFICE_5[e.display_level]) : 'transparent' }" />
                     <span class="when mono">{{ hhmm(e.issued_at) }}</span>
@@ -310,8 +332,8 @@ onUnmounted(() => clearInterval(clockTimer))
               <tr v-for="s in catalog.sites" :key="s.id">
                 <td><span class="mono">{{ s.id }}</span><br><span class="meta fg-2">{{ s.note }}</span></td>
                 <td class="mono">{{ s.municipality_id }}</td>
-                <td class="mono">{{ s.lat.toFixed(5) }}</td>
-                <td class="mono">{{ s.lng.toFixed(5) }}</td>
+                <td class="mono">{{ s.lat?.toFixed(5) }}</td>
+                <td class="mono">{{ s.lng?.toFixed(5) }}</td>
                 <td>
                   <label class="toggle">
                     <span class="switch" :class="{ 'is-on': s.auto_publish }">

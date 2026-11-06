@@ -23,7 +23,7 @@ async function makeDelivery(): Promise<{ dataDir: string; distDir: string }> {
   const root = await mkdtemp(join(tmpdir(), 'evac-feed-'))
   const dataDir = join(root, 'data')
   const distDir = join(root, 'dist')
-  const layoutDir = join(dataDir, 'layouts', MUNICIPALITY, BULLETIN)
+  const layoutDir = join(dataDir, 'layouts', SITE, BULLETIN)
   const assetDir = join(distDir, SITE, BULLETIN)
   await mkdir(layoutDir, { recursive: true })
   await mkdir(assetDir, { recursive: true })
@@ -36,7 +36,7 @@ async function makeDelivery(): Promise<{ dataDir: string; distDir: string }> {
   await writeFile(join(assetDir, '16x9.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]))
   await writeFile(join(assetDir, '16x9.html'), '<!doctype html><title>16x9</title>')
   await writeFile(
-    join(dataDir, 'layouts', MUNICIPALITY, 'index.json'),
+    join(dataDir, 'layouts', SITE, 'index.json'),
     JSON.stringify({
       municipality: MUNICIPALITY,
       name: 'フィード市',

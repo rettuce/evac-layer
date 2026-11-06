@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 import { alertFeed, ambientFeed, type Feed, type FeedAsset, type FeedSite } from '~~/layout/feed'
-import { layoutKey, liveLayoutGate } from '~~/layout/gate'
+import { type Approvals, layoutKey, liveLayoutGate } from '~~/layout/gate'
 import { DEFAULT_REPLAY_SPEED, currentBulletinAt, rowsInWindow, type ReplayWindow } from '~~/layout/replay'
 import { SHAPES, isShape } from '~~/layout/shapes'
 import type { EvacScreen, Shape } from '~~/layout/types'
@@ -17,15 +17,15 @@ export function deliveryAssetUrl(site: string, bulletin: string, file: string): 
   return `/delivery/${encodeURIComponent(site)}/${encodeURIComponent(bulletin)}/${file}`
 }
 
-async function shapesWithLayout(municipality: string, bulletin: string): Promise<Shape[]> {
-  const files = await listDir(join(dataDir(), 'layouts', municipality, bulletin))
+async function shapesWithLayout(site: string, bulletin: string): Promise<Shape[]> {
+  const files = await listDir(siteLayoutsDir(site, bulletin))
   return ALL_SHAPES.filter((shape) => files.includes(`${shape}.json`))
 }
 
-async function readScreens(municipality: string, bulletin: string): Promise<Partial<Record<Shape, EvacScreen>>> {
+async function readScreens(site: string, bulletin: string): Promise<Partial<Record<Shape, EvacScreen>>> {
   const layouts: Partial<Record<Shape, EvacScreen>> = {}
-  for (const shape of await shapesWithLayout(municipality, bulletin)) {
-    const screen = await readJsonIfExists<EvacScreen>(join(dataDir(), 'layouts', municipality, bulletin, `${shape}.json`))
+  for (const shape of await shapesWithLayout(site, bulletin)) {
+    const screen = await readJsonIfExists<EvacScreen>(siteLayoutsDir(site, bulletin, `${shape}.json`))
     if (screen) layouts[shape] = screen
   }
   return layouts
@@ -42,39 +42,48 @@ async function readAssets(site: string, bulletin: string): Promise<Partial<Recor
   return assets
 }
 
-export async function isDeliverable(site: string, bulletin: string): Promise<boolean> {
-  const siteFile = await readSite(site)
-  if (!siteFile) return false
-  const municipality = siteFile.replay?.municipality ?? siteFile.municipality_id
-  const digest = await currentLayoutDigest(municipality, bulletin)
-  return digest !== undefined && liveLayoutGate(await readApprovals(), site, municipality, bulletin, digest) === 'ok'
+async function deliverableWith(approvals: Approvals, site: string, bulletin: string): Promise<boolean> {
+  const digest = await currentLayoutDigest(site, bulletin)
+  return digest !== undefined && liveLayoutGate(approvals, site, bulletin, digest) === 'ok'
 }
 
+export async function isDeliverable(site: string, bulletin: string): Promise<boolean> {
+  return (await readSite(site)) !== undefined && deliverableWith(await readApprovals(), site, bulletin)
+}
+
+export function replayWindowOf(site: SiteFile): { window: ReplayWindow; speed: number } {
+  return { window: { from: site.replay?.from, to: site.replay?.to }, speed: site.replay?.speed ?? DEFAULT_REPLAY_SPEED }
+}
+
+async function replayedBulletin(site: SiteFile, approvals: Approvals): Promise<string | undefined> {
+  const replay = await loadReplayIndex(site)
+  if (!replay) return undefined
+  const { window, speed } = replayWindowOf(site)
+  const rows = rowsInWindow(replay.rows, window)
+  const deliverable = await Promise.all(
+    rows.filter((row) => row.screen).map(async (row) => ((await deliverableWith(approvals, site.id, row.bulletin_id)) ? row.bulletin_id : undefined)),
+  )
+  const available = new Set(deliverable.filter((id) => id !== undefined))
+  const elapsedMs = Date.now() - sharedReplayOrigin(site.id, speed, window, false)
+  return currentBulletinAt(rows, elapsedMs, speed, (id) => available.has(id))
+}
+
+async function liveBulletin(site: SiteFile, approvals: Approvals): Promise<string | undefined> {
+  const bulletin = (await readLiveState(site.id))?.bulletin_id
+  return bulletin && (await deliverableWith(approvals, site.id, bulletin)) ? bulletin : undefined
+}
+
+// A site with `replay` plays a recorded record back (the demo); any other site shows the bulletin the
+// receiver last posted to /api/admin/live.
 export async function currentFeed(siteId: string): Promise<Feed | undefined> {
   const site = await readSite(siteId)
   if (!site) return undefined
   const feedSite: FeedSite = { id: site.id, municipality_id: site.municipality_id, ...(site.name ? { name: site.name } : {}) }
-  const municipality = site.replay?.municipality ?? site.municipality_id
-  const replay = await loadReplayIndex(municipality)
-  if (!replay) return ambientFeed(feedSite)
-
-  const window: ReplayWindow = { from: site.replay?.from, to: site.replay?.to }
-  const speed = site.replay?.speed ?? DEFAULT_REPLAY_SPEED
-  const rows = rowsInWindow(replay.rows, window)
   const approvals = await readApprovals()
-  const deliverable = await Promise.all(
-    rows.filter((row) => row.screen).map(async (row) => {
-      const digest = await currentLayoutDigest(municipality, row.bulletin_id)
-      return digest !== undefined && liveLayoutGate(approvals, site.id, municipality, row.bulletin_id, digest) === 'ok' ? row.bulletin_id : undefined
-    }),
-  )
-  const available = new Set(deliverable.filter((id) => id !== undefined))
-
-  const elapsedMs = Date.now() - sharedReplayOrigin(municipality, speed, window, false)
-  const bulletin = currentBulletinAt(rows, elapsedMs, speed, (id) => available.has(id))
+  const bulletin = site.replay ? await replayedBulletin(site, approvals) : await liveBulletin(site, approvals)
   if (!bulletin) return ambientFeed(feedSite)
-  const approvedAt = approvals.layouts[layoutKey(municipality, bulletin)]!.updated_at
-  return alertFeed(feedSite, await readScreens(municipality, bulletin), await readAssets(site.id, bulletin), approvedAt)
+  const approvedAt = approvals.layouts[layoutKey(site.id, bulletin)]!.updated_at
+  return alertFeed(feedSite, await readScreens(site.id, bulletin), await readAssets(site.id, bulletin), approvedAt)
 }
 
 export function feedEtag(body: string): string {

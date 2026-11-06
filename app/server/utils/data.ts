@@ -3,7 +3,7 @@ import { join } from 'node:path'
 
 export function dataDir(): string {
   const config = useRuntimeConfig()
-  return config.dataDir || join(config.repoRoot, 'data')
+  return process.env.EVAC_DATA_DIR || config.dataDir || join(config.repoRoot, 'data')
 }
 
 export async function readJsonIfExists<T>(file: string): Promise<T | undefined> {

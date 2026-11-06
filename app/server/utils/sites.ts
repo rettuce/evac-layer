@@ -1,4 +1,7 @@
 import { join } from 'node:path'
+import { isMunicipalityId } from '~~/layout/replay'
+
+const SITE_ID = /^[A-Za-z0-9_-]{1,80}$/
 
 export interface SiteReplay {
   municipality?: string
@@ -11,16 +14,68 @@ export interface SiteFile {
   id: string
   municipality_id: string
   name?: string
+  note?: string
+  lat?: number
+  lng?: number
+  facing_deg?: number
   replay?: SiteReplay
+}
+
+const misnamed = new Set<string>()
+
+export function isSiteId(value: unknown): value is string {
+  return typeof value === 'string' && SITE_ID.test(value)
 }
 
 export async function readSites(): Promise<SiteFile[]> {
   const dir = join(dataDir(), 'sites')
   const files = (await listDir(dir)).filter((f) => f.endsWith('.json'))
-  const sites = await Promise.all(files.map((f) => readJsonIfExists<SiteFile>(join(dir, f))))
+  const sites = await Promise.all(
+    files.map(async (file) => {
+      const site = await readJsonIfExists<SiteFile>(join(dir, file))
+      if (site && `${site.id}.json` === file) return site
+      if (site && !misnamed.has(file)) {
+        misnamed.add(file)
+        console.warn(`[sites] ${file} is ignored: a site file must be named <id>.json (id ${site.id})`)
+      }
+      return undefined
+    }),
+  )
   return sites.filter((site): site is SiteFile => site !== undefined)
 }
 
 export async function readSite(id: string): Promise<SiteFile | undefined> {
-  return (await readSites()).find((site) => site.id === id)
+  if (!isSiteId(id)) return undefined
+  const site = await readJsonIfExists<SiteFile>(join(dataDir(), 'sites', `${id}.json`))
+  return site?.id === id ? site : undefined
+}
+
+export async function sitesOf(municipality: string): Promise<SiteFile[]> {
+  return (await readSites()).filter((site) => site.municipality_id === municipality)
+}
+
+function badRequest(message: string): never {
+  throw createError({ status: 400, statusText: 'Bad Request', message })
+}
+
+// `site` names the screen. `municipality` alone is the pre-site alias: it stands for the municipality's
+// only site, because with two sites it cannot tell whose arrows and shelters to serve.
+export async function resolveSite({ site, municipality }: { site?: unknown; municipality?: unknown }): Promise<SiteFile> {
+  if (site !== undefined) {
+    if (!isSiteId(site)) badRequest('site id is invalid')
+    const found = await readSite(site)
+    if (!found) throw createError({ status: 404, statusText: 'Not Found', message: `no site ${site}` })
+    if (municipality !== undefined && municipality !== found.municipality_id && municipality !== found.replay?.municipality) {
+      badRequest(`site ${site} is in municipality ${found.municipality_id}, not ${String(municipality)}`)
+    }
+    return found
+  }
+  if (!isMunicipalityId(municipality)) badRequest('site is required (or municipality, when it has exactly one site)')
+  const sites = await sitesOf(municipality)
+  if (sites.length === 1) return sites[0]!
+  badRequest(
+    sites.length
+      ? `municipality ${municipality} has ${sites.length} sites (${sites.map((s) => s.id).join(', ')}); specify site=<site id>`
+      : `municipality ${municipality} has no site; specify site=<site id>`,
+  )
 }

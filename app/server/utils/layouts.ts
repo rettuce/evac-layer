@@ -1,34 +1,29 @@
 import { join } from 'node:path'
 import { isShape } from '~~/layout/shapes'
-import { isBulletinId, isMunicipalityId } from '~~/layout/replay'
-
-const SITE_ID = /^[A-Za-z0-9_-]{1,80}$/
+import { isBulletinId } from '~~/layout/replay'
+import type { Shape } from '~~/layout/types'
 
 export interface LayoutQuery {
-  municipality: string
+  site: string
   bulletin: string
-  shape: string
+  shape: Shape
 }
 
-export function parseLayoutQuery(query: Record<string, unknown>): LayoutQuery {
-  const { municipality, bulletin, shape } = query
-  if (!isMunicipalityId(municipality) || !isBulletinId(bulletin) || !isShape(shape)) {
-    throw createError({ status: 400, statusText: 'Bad Request', message: 'municipality, bulletin and shape are required' })
+export function siteLayoutsDir(site: string, ...rest: string[]): string {
+  return join(dataDir(), 'layouts', site, ...rest)
+}
+
+export async function parseLayoutQuery(query: Record<string, unknown>): Promise<LayoutQuery> {
+  const { bulletin, shape } = query
+  if (!isBulletinId(bulletin) || !isShape(shape)) {
+    throw createError({ status: 400, statusText: 'Bad Request', message: 'site (or municipality), bulletin and shape are required' })
   }
-  return { municipality, bulletin, shape }
+  const site = await resolveSite(query)
+  return { site: site.id, bulletin, shape }
 }
 
-export async function readLayout({ municipality, bulletin, shape }: LayoutQuery) {
-  const layout = await readJsonIfExists(join(dataDir(), 'layouts', municipality, bulletin, `${shape}.json`))
-  if (!layout) throw createError({ status: 404, statusText: 'Not Found', message: `no layout for ${bulletin} ${shape}` })
+export async function readLayout({ site, bulletin, shape }: LayoutQuery) {
+  const layout = await readJsonIfExists(siteLayoutsDir(site, bulletin, `${shape}.json`))
+  if (!layout) throw createError({ status: 404, statusText: 'Not Found', message: `no layout for ${site} ${bulletin} ${shape}` })
   return layout
-}
-
-export async function defaultSiteFor(municipality: string): Promise<string | undefined> {
-  const index = await readJsonIfExists<{ site?: string }>(join(dataDir(), 'layouts', municipality, 'index.json'))
-  return index?.site
-}
-
-export function isSiteId(value: unknown): value is string {
-  return typeof value === 'string' && SITE_ID.test(value)
 }

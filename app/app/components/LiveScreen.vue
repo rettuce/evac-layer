@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { formatClockJst } from '~~/layout/ambient'
-import { liveFrame, replayClockEpochMs, type ReplayStatus } from '~~/layout/replay'
+import { DEFAULT_REPLAY_SPEED, liveFrame, replayClockEpochMs, type ReplayStatus } from '~~/layout/replay'
 import type { AmbientRect } from '~~/layout/ambient/types'
 import type { EvacScreen, Shape } from '~~/layout/types'
 
 const props = defineProps<{
-  municipality: string
+  municipality?: string
   shape: Shape
-  speed: number
+  speed?: number
   from?: string
   to?: string
   virtualElapsedMs?: number
@@ -56,7 +56,8 @@ let pollTimer: ReturnType<typeof setInterval> | undefined
 const isVirtual = computed(() => props.virtualElapsedMs !== undefined)
 const rows = computed(() => status.value?.rows ?? [])
 const elapsed = computed(() => props.virtualElapsedMs ?? realElapsed.value)
-const frame = computed(() => liveFrame(rows.value, elapsed.value, props.speed, (id) => id in layouts.value))
+const speed = computed(() => props.speed ?? status.value?.speed ?? DEFAULT_REPLAY_SPEED)
+const frame = computed(() => liveFrame(rows.value, elapsed.value, speed.value, (id) => id in layouts.value))
 const currentRow = computed(() => (frame.value.index >= 0 ? rows.value[frame.value.index] : undefined))
 const unavailableCurrent = computed(() =>
   currentRow.value?.screen && !(currentRow.value.bulletin_id in layouts.value) ? currentRow.value.bulletin_id : undefined,
@@ -69,12 +70,20 @@ const ready = computed(
   () => layoutsLoaded.value && Object.keys(layouts.value).every((id) => readyBulletins.value.has(id)),
 )
 const clockEpochMs = computed(() =>
-  rows.value.length || isVirtual.value ? replayClockEpochMs(rows.value, elapsed.value, props.speed) : wallNow.value,
+  rows.value.length || isVirtual.value ? replayClockEpochMs(rows.value, elapsed.value, speed.value) : wallNow.value,
 )
 const stale = computed(() => !staticScreen.enabled && wallNow.value - (lastSyncAt.value ?? mountedAt) > (props.staleAfterMs ?? STALE_AFTER_MS))
 
+// The `municipality=` form keeps its exact parameter order: the static simulator files are named after it.
+function replayParams(): URLSearchParams {
+  if (props.municipality) return new URLSearchParams({ municipality: props.municipality, speed: String(props.speed ?? DEFAULT_REPLAY_SPEED) })
+  const params = new URLSearchParams({ site: props.site ?? '' })
+  if (props.speed !== undefined) params.set('speed', String(props.speed))
+  return params
+}
+
 function replayUrl(extra: Record<string, string>) {
-  const params = new URLSearchParams({ municipality: props.municipality, speed: String(props.speed) })
+  const params = replayParams()
   if (props.from) params.set('from', props.from)
   if (props.to) params.set('to', props.to)
   if (staticScreen.enabled) return staticScreen.url('replay', params)
@@ -109,7 +118,9 @@ async function loadLayouts() {
   const gated: string[] = []
   const fetched = await Promise.all(
     wanted.map(async (row): Promise<[string, EvacScreen | undefined]> => {
-      const params = new URLSearchParams({ municipality: props.municipality, bulletin: row.bulletin_id, shape: props.shape })
+      const params = new URLSearchParams(props.municipality ? { municipality: props.municipality } : {})
+      params.set('bulletin', row.bulletin_id)
+      params.set('shape', props.shape)
       if (props.site) params.set('site', props.site)
       try {
         const url = staticScreen.enabled ? staticScreen.url('live-layout', params) : `/api/live-layout?${params}`
@@ -135,7 +146,10 @@ async function loadLayouts() {
 async function pollAndRecheck() {
   await poll()
   pollCount += 1
-  if (unapproved.value.length && pollCount % APPROVAL_RECHECK_POLLS === 0) await loadLayouts()
+  const unseen = rows.value.some(
+    (row) => row.screen && !(row.bulletin_id in layouts.value) && !missing.value.includes(row.bulletin_id) && !unapproved.value.includes(row.bulletin_id),
+  )
+  if (unseen || (unapproved.value.length && pollCount % APPROVAL_RECHECK_POLLS === 0)) await loadLayouts()
 }
 
 function markReady(bulletinId: string) {
@@ -209,7 +223,7 @@ onBeforeUnmount(() => {
     <AmbientLayer
       v-show="frame.ambientVisible"
       :active="frame.ambientVisible"
-      :seed="ambientSeed ?? site ?? municipality"
+      :seed="ambientSeed ?? site ?? municipality ?? ''"
       :clock-epoch-ms="clockEpochMs"
       :site-name="siteName ?? status?.name ?? ''"
       :shape="shape"

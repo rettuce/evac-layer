@@ -14,12 +14,16 @@ export default defineNitroPlugin((nitroApp) => {
     let lastError = ''
     for (let retry = 0; retry <= WEBHOOK_RETRIES; retry++) {
       if (generation.get(subscription.id) !== deliveryGeneration) return
+      let status = 0
       try {
-        const status = await postWebhook(subscription.url, subscription.secret, feedEvent(feed), body)
-        if (status >= 200 && status < 300) return
+        status = await postWebhook(subscription.url, subscription.secret, feedEvent(feed), body)
         lastError = `HTTP ${status}`
       } catch (error) {
         lastError = (error as Error).message
+      }
+      if (status >= 200 && status < 300) {
+        await recordDelivered(subscription.id, feed.bulletin_id).catch((error: Error) => console.warn(`[webhook] ${subscription.id} delivered but not recorded: ${error.message}`))
+        return
       }
       if (retry < WEBHOOK_RETRIES) await sleep(webhookRetryDelayMs(retry))
     }
@@ -35,10 +39,10 @@ export default defineNitroPlugin((nitroApp) => {
         if (!feeds.has(subscription.site_id)) feeds.set(subscription.site_id, await currentFeed(subscription.site_id))
         const feed = feeds.get(subscription.site_id)
         if (!feed) continue
-        const seen = lastBulletin.has(subscription.id)
-        if (seen && lastBulletin.get(subscription.id) === feed.bulletin_id) continue
+        const told = lastBulletin.has(subscription.id) ? lastBulletin.get(subscription.id) : subscription.last_bulletin_id
+        if (told !== undefined && told === feed.bulletin_id) continue
         lastBulletin.set(subscription.id, feed.bulletin_id)
-        if (!seen && feed.state === 'ambient') continue
+        if (told === undefined && feed.state === 'ambient') continue
         const next = (generation.get(subscription.id) ?? 0) + 1
         generation.set(subscription.id, next)
         void deliver(subscription, feed, next)
