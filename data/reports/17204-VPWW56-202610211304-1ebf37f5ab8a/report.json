@@ -29,10 +29,10 @@
     }
   ],
   "layouts": [
-    "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/16x9.json",
-    "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/9x16.json",
-    "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/32x9.json",
-    "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/1x1.json",
-    "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/pillar.json"
+    "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/16x9.json",
+    "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/9x16.json",
+    "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/32x9.json",
+    "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/1x1.json",
+    "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/pillar.json"
   ]
 }

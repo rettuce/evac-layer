@@ -29,10 +29,10 @@
     }
   ],
   "layouts": [
-    "data/layouts/05210/VXKOii-202610212115-34469436adbc/16x9.json",
-    "data/layouts/05210/VXKOii-202610212115-34469436adbc/9x16.json",
-    "data/layouts/05210/VXKOii-202610212115-34469436adbc/32x9.json",
-    "data/layouts/05210/VXKOii-202610212115-34469436adbc/1x1.json",
-    "data/layouts/05210/VXKOii-202610212115-34469436adbc/pillar.json"
+    "data/layouts/05210-demo-honjo-station/VXKOii-202610212115-34469436adbc/16x9.json",
+    "data/layouts/05210-demo-honjo-station/VXKOii-202610212115-34469436adbc/9x16.json",
+    "data/layouts/05210-demo-honjo-station/VXKOii-202610212115-34469436adbc/32x9.json",
+    "data/layouts/05210-demo-honjo-station/VXKOii-202610212115-34469436adbc/1x1.json",
+    "data/layouts/05210-demo-honjo-station/VXKOii-202610212115-34469436adbc/pillar.json"
   ]
 }
