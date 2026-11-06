@@ -9,8 +9,6 @@ import {
 import { hashString } from '../../app/layout/ambient/rng'
 import { faceWindow, type AmbientScene, type Content, type CropsFile, type DisplayExtras } from './crops'
 
-export type VideoTier = '4k' | '8k'
-
 const AMBIENT_BASE: string = import.meta.env.VITE_AMBIENT_BASE ?? `${import.meta.env.BASE_URL}ambient/`
 const ALERT_BASE = `${import.meta.env.BASE_URL}alert/`
 const PAIR_MS = 2500
@@ -165,13 +163,6 @@ function waitCanPlay(video: HTMLVideoElement): Promise<void> {
   })
 }
 
-function detectTier(): VideoTier {
-  const query = new URLSearchParams(location.search).get('video')
-  if (query !== '8k') return '4k'
-  const support = document.createElement('video').canPlayType('video/mp4; codecs="hvc1.1.6.L153.B0"')
-  return support === 'probably' || support === 'maybe' ? '8k' : '4k'
-}
-
 async function loadAlertSets(): Promise<AlertSet[]> {
   const response = await fetch(`${ALERT_BASE}sets.json`)
   if (!response.ok) throw new Error(`alert sets not found: ${response.url}`)
@@ -187,7 +178,6 @@ function releaseVideo(video: HTMLVideoElement, texture: VideoTexture): void {
 
 export class Displays {
   readonly faces: Face[]
-  readonly tier = detectTier()
   content: Content
   scene: AmbientScene
   private videoElement?: HTMLVideoElement
@@ -213,7 +203,7 @@ export class Displays {
   }
 
   videoUrl(scene: AmbientScene): string {
-    return `${AMBIENT_BASE}${scene}-${this.tier}.mp4`
+    return `${AMBIENT_BASE}${scene}-4k.mp4`
   }
 
   // The vite dev server answers a missing file with index.html and 200, so the type is checked as well as the status.

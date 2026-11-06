@@ -49,7 +49,7 @@ jobs:
       - name: Fetch the ambient loops (GitHub Release ambient-loops-v1, not in git)
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release download ambient-loops-v1 --repo rettuce/evac-layer --pattern '*.mp4' -D site/ambient
+        run: gh release download ambient-loops-v1 --repo rettuce/evac-layer --pattern '*-4k.mp4' -D site/ambient
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

@@ -16,7 +16,6 @@ pnpm fetch-ambient              # the loops into public/ambient/ (GitHub Release
 pnpm dev                        # http://127.0.0.1:3160
 pnpm build                      # type-check + sim/dist/
 # VITE_AMBIENT_BASE (.env) overrides where the loops are read from (default `${BASE_URL}ambient/`)
-# ?video=8k selects the 8k HEVC loops where they play (default: 4k, since each 8k scene is ~60 MB over Pages)
 # keys: ←/→ step the ambient scene, E toggles a random alert set (public/alert/sets.json, stills at
 # public/alert/<set>/<face>/<pair>.png; the place variants are left out), D hides every overlay
 # ?dev shows the render modes (Textured / AO / Wire) and `copy pose`, which visitors do not need
