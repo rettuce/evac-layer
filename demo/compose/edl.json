@@ -113,7 +113,9 @@
       "kind": "title",
       "seconds": 4,
       "telop_ja": "街中にスクリーンがあります。／それらは自分の位置関係を知っています。",
-      "telop_en": "Screens are all over the city.／Each one knows where it stands."
+      "telop_en": "Screens are all over the city.／Each one knows where it stands.",
+      "narration_ja": "街中にあるスクリーン。それらが自分の位置を知り、災害時に適切な避難情報を出す。そんなハックができないか？",
+      "reading_ja": "まちなかに ある スクリーン。それらが じぶんの いちを しり、さいがいじに てきせつな ひなんじょうほうを だす。そんな ハックが できないか？"
     },
     {
       "kind": "capture",
