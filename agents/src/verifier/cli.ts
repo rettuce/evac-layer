@@ -24,7 +24,7 @@ if (values.clock !== "realtime" && values.clock !== "virtual") {
 }
 
 const target = { baseUrl: values.url!, layout: values.layout!, variant: Number(values.variant) };
-const browser = await puppeteer.launch({ executablePath: values.chrome, headless: true });
+const browser = await puppeteer.launch({ executablePath: values.chrome, headless: true, args: ["--disable-gpu-rasterization"] });
 try {
   const screens = [];
   for (const shape of SHAPES) {

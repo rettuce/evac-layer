@@ -259,7 +259,7 @@ const ids = await pictogramIds()
 const layout = JSON.parse(await readFile(`${ROOT}${EXAMPLE_LAYOUT}`, 'utf8'))
 const action = layout.cells.find((c) => c.role === 'action').text
 const { base, child } = await startServer()
-const browser = await puppeteer.launch({ executablePath: CHROME_PATH, args: ['--allow-file-access-from-files'] })
+const browser = await puppeteer.launch({ executablePath: CHROME_PATH, args: ['--allow-file-access-from-files', '--disable-gpu-rasterization'] })
 try {
   const page = await browser.newPage()
   const thumbs = []

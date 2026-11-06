@@ -148,7 +148,7 @@ function markdown(infos, files) {
 async function main() {
   await mkdir(OUT_DIR, { recursive: true })
   const { base, child } = await startServer()
-  const browser = await puppeteer.launch({ executablePath: CHROME_PATH })
+  const browser = await puppeteer.launch({ executablePath: CHROME_PATH, args: ['--disable-gpu-rasterization'] })
   try {
     const page = await browser.newPage()
     const files = []
