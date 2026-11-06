@@ -35,7 +35,7 @@ SCREENS_DIR = DEMO_DIR / "screens"
 CACHE_DIR = DEMO_DIR / "cache"
 HDRI_PATH = DEMO_DIR / "assets" / "metro_vijzelgracht_1k.hdr"
 PLACEHOLDER_FONT = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
-CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "alert-real-lv3", "seq", "ambient-3", "ambient-30", "cut08-seq", "off", "test")
+CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "alert-real-lv3", "seq", "hsw", "ambient-3", "ambient-30", "cut08-seq", "off", "test")
 
 INCH = 0.0254
 JOINT_M = 0.003
@@ -264,6 +264,16 @@ SHOTS = {
     "ambient30": {
         "seconds": 30, "screens": "ambient-30", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
         "path": push_from("wide-a", 0.4),
+    },
+    # README switch (D-36): calm brush-flow -> level 3 -> 4 -> 5 on the KV's fixed hero and hero2 cameras.
+    "herosw": {
+        "seconds": 8.6, "screens": "hsw", "light_scale": 1.0, "lens": STILL_CAMERAS["hero"]["lens"], "focus": "pillar",
+        "path": [(STILL_CAMERAS["hero"]["location"], STILL_CAMERAS["hero"]["target"])] * 2,
+    },
+    "hero2sw": {
+        "seconds": 8.6, "screens": "hsw", "light_scale": 1.0, "lens": STILL_CAMERAS["hero2"]["lens"],
+        "focus_point": STILL_CAMERAS["hero2"]["target"],
+        "path": [(STILL_CAMERAS["hero2"]["location"], STILL_CAMERAS["hero2"]["target"])] * 2,
     },
     # Edit material (D-34): 3 s of a calm scene, held on the first camera of cut 8 and of cut 9.
     "cut08head": {
