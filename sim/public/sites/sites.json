@@ -1,0 +1,91 @@
+{
+  "bulletin": "VXKOii-202610211815-e713da0e3c05",
+  "map": {
+    "src": "map.jpg",
+    "width": 360,
+    "height": 555,
+    "credit": "© OpenStreetMap contributors"
+  },
+  "sites": [
+    {
+      "slug": "honjo-station",
+      "setId": "yurihonjo-lv4",
+      "ja": "羽後本荘駅",
+      "en": "Ugo-Honjo Sta.",
+      "direction": "南西へ",
+      "directionEn": "SW",
+      "distanceM": 570,
+      "at": [
+        275.9,
+        457.5
+      ],
+      "shelter": {
+        "name": "鶴舞小学校",
+        "at": [
+          135.5,
+          526.9
+        ]
+      }
+    },
+    {
+      "slug": "tsurumai-kaikan",
+      "setId": "yurihonjo-lv4-tsurumai-kaikan",
+      "ja": "鶴舞会館",
+      "en": "Tsurumai Kaikan",
+      "direction": "東へ",
+      "directionEn": "E",
+      "distanceM": 160,
+      "at": [
+        28,
+        467.6
+      ],
+      "shelter": {
+        "name": "本荘公園前広場",
+        "at": [
+          71.4,
+          466
+        ]
+      }
+    },
+    {
+      "slug": "yuri-hs-ground",
+      "setId": "yurihonjo-lv4-yuri-hs-ground",
+      "ja": "由利高校",
+      "en": "Yuri High School",
+      "direction": "南東へ",
+      "directionEn": "SE",
+      "distanceM": 210,
+      "at": [
+        284,
+        28
+      ],
+      "shelter": {
+        "name": "南内越公民館・体育館",
+        "at": [
+          332,
+          57.3
+        ]
+      }
+    },
+    {
+      "slug": "ishiwaki-park",
+      "setId": "yurihonjo-lv4-ishiwaki-park",
+      "ja": "石脇公園",
+      "en": "Ishiwaki Park",
+      "direction": "北へ",
+      "directionEn": "N",
+      "distanceM": 80,
+      "at": [
+        79.5,
+        108.8
+      ],
+      "shelter": {
+        "name": "石脇体育館",
+        "at": [
+          72.1,
+          87.1
+        ]
+      }
+    }
+  ]
+}

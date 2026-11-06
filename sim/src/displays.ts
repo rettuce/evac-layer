@@ -44,6 +44,7 @@ export interface AlertSet {
   name: string
   description: string
   pairs: string[]
+  random?: boolean
 }
 
 export interface Face {
@@ -193,6 +194,7 @@ export class Displays {
   private videoTexture?: VideoTexture
   private calmMaterial?: MeshBasicMaterial
   private readonly alertMaterials = new Map<string, MeshBasicMaterial>()
+  private readonly requestedSets = new Set<string>()
   private sets: AlertSet[] = []
   private activeSet = -1
   private pairIndex = -1
@@ -246,15 +248,13 @@ export class Displays {
     this.sets = sets
     if (this.activeSet < 0) this.activeSet = 0
     this.apply()
-    this.loadAlerts()
+    for (const set of sets) if (set.random !== false) this.loadAlertSet(set)
   }
 
-  // Every switch to EVAC LAYER draws a different set than the last one (田中 S-14).
+  // Every switch to EVAC LAYER draws a different set than the last one (田中 S-14); the place variants of S-R2 sit out.
   private pickAlertSet(): void {
-    if (this.sets.length < 2) return
-    let next = this.activeSet
-    while (next === this.activeSet) next = Math.floor(Math.random() * this.sets.length)
-    this.activeSet = next
+    const drawable = this.sets.flatMap((set, index) => (set.random === false || index === this.activeSet ? [] : [index]))
+    if (drawable.length) this.activeSet = drawable[Math.floor(Math.random() * drawable.length)]!
   }
 
   setContent(content: Content): void {
@@ -271,6 +271,7 @@ export class Displays {
     }
     const index = this.sets.findIndex((set) => set.id === id)
     if (index < 0 || (this.content === 'evac' && index === this.activeSet)) return
+    this.loadAlertSet(this.sets[index]!)
     this.activeSet = index
     this.switchTo('evac')
   }
@@ -341,19 +342,19 @@ export class Displays {
     return { video, texture }
   }
 
-  private loadAlerts(): void {
+  // The place variants are only fetched when shown: each set is about 25 stills of up to 2092×1600 on the GPU.
+  private loadAlertSet(set: AlertSet): void {
+    if (this.requestedSets.has(set.id)) return
+    this.requestedSets.add(set.id)
     const loader = new TextureLoader()
-    const sources = new Set(this.faces.map((face) => face.alertSrc))
-    for (const set of this.sets) {
-      for (const src of sources) {
-        set.pairs.forEach((pair, index) => {
-          loader.load(`${ALERT_BASE}${set.id}/${src}/${pair}.png`, (texture) => {
-            texture.colorSpace = SRGBColorSpace
-            this.alertMaterials.set(`${set.id}/${src}/${index}`, faceMaterial(texture))
-            if (this.content === 'evac') this.apply()
-          })
+    for (const src of new Set(this.faces.map((face) => face.alertSrc))) {
+      set.pairs.forEach((pair, index) => {
+        loader.load(`${ALERT_BASE}${set.id}/${src}/${pair}.png`, (texture) => {
+          texture.colorSpace = SRGBColorSpace
+          this.alertMaterials.set(`${set.id}/${src}/${index}`, faceMaterial(texture))
+          if (this.content === 'evac') this.apply()
         })
-      }
+      })
     }
   }
 

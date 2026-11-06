@@ -1,11 +1,22 @@
 import { CABINET_OFFICE_5, rgbCss } from '../../app/layout/palette'
 import type { AlertLevel } from '../../app/layout/types'
 
+export interface Shelter {
+  name: string
+  direction: string
+  directionEn: string
+  distanceM: number
+}
+
 export interface Alert {
   level?: AlertLevel
   issuedAt: string
   ja: string
   en: string
+  site?: string
+  shelter?: Shelter
+  // A place variant stands in for this set of the scenario (S-R2: the same Lv4 bulletin at another display).
+  base?: string
 }
 
 export interface Scenario {
@@ -16,13 +27,25 @@ export interface Scenario {
   steps: { setId?: string; seconds: number }[]
 }
 
-// Issued times and names from sim/public/alert/sets.json; the bulletins themselves are the stills.
+const HONJO_STATION = { site: '羽後本荘駅', shelter: { name: '鶴舞小学校', direction: '南西へ', directionEn: 'SW', distanceM: 570 } }
+
+// Issued times, names and shelters from sim/public/alert/sets.json; the bulletins themselves are the stills.
 export const ALERTS: Record<string, Alert> = {
-  'yurihonjo-lv3': { level: 3, issuedAt: '15:55', ja: '氾濫警報（子吉川）', en: 'Warning (Flood)' },
-  'yurihonjo-lv4': { level: 4, issuedAt: '18:15', ja: '氾濫危険警報（子吉川）', en: 'Urgent Warning (Flood)' },
-  'yurihonjo-lv5': { level: 5, issuedAt: '19:45', ja: '氾濫特別警報（子吉川）', en: 'Emergency Warning (Flood)' },
-  'kashiwazaki-lv4': { level: 4, issuedAt: '16:53', ja: '土砂災害危険警報', en: 'Urgent Warning (Landslide)' },
-  'yoshida-tsunami-drill': { issuedAt: '07:13', ja: '大津波警報（訓練）', en: 'Major Tsunami Warning (drill)' },
+  'yurihonjo-lv3': { level: 3, issuedAt: '15:55', ja: '氾濫警報（子吉川）', en: 'Warning (Flood)', ...HONJO_STATION },
+  'yurihonjo-lv4': { level: 4, issuedAt: '18:15', ja: '氾濫危険警報（子吉川）', en: 'Urgent Warning (Flood)', ...HONJO_STATION },
+  'yurihonjo-lv5': { level: 5, issuedAt: '19:45', ja: '氾濫特別警報（子吉川）', en: 'Emergency Warning (Flood)', ...HONJO_STATION },
+  'kashiwazaki-lv4': {
+    level: 4, issuedAt: '16:53', ja: '土砂災害危険警報', en: 'Urgent Warning (Landslide)',
+    shelter: { name: '産業文化会館', direction: '北へ', directionEn: 'N', distanceM: 230 },
+  },
+  'yoshida-tsunami-drill': {
+    issuedAt: '07:13', ja: '大津波警報（訓練）', en: 'Major Tsunami Warning (drill)',
+    shelter: { name: '津波避難タワーＭ', direction: '南へ', directionEn: 'S', distanceM: 910 },
+  },
+}
+
+export function addPlaceVariant(setId: string, base: string, site: string, shelter: Shelter): void {
+  ALERTS[setId] = { ...ALERTS[base]!, base, site, shelter }
 }
 
 export const SCENARIOS: Scenario[] = [
@@ -59,7 +82,8 @@ function setSwatch(element: HTMLElement, alert: Alert | undefined): void {
 }
 
 export function scenarioOf(setId: string): Scenario | undefined {
-  return SCENARIOS.find((scenario) => scenario.steps.some((step) => step.setId === setId))
+  const stepId = ALERTS[setId]?.base ?? setId
+  return SCENARIOS.find((scenario) => scenario.steps.some((step) => step.setId === stepId))
 }
 
 // The corner badge reads what the faces show, so the random set of [E] is named as well as the timeline's.
@@ -71,8 +95,11 @@ export function renderNow(root: HTMLElement, setId: string | undefined): void {
   root.querySelector('.ja .label')!.textContent = alert ? `${level!.ja} ${alert.ja}`.trim() : '平常時'
   root.querySelector('.en')!.textContent = alert ? `${level!.en} ${alert.en}`.trim() : 'Normal'
   root.querySelector('.where')!.textContent = alert && scenario
-    ? `${scenario.placeJa} ${scenario.placeEn} · ${scenario.date} ${alert.issuedAt} JST`
+    ? `${scenario.placeJa}${alert.site ? ` ${alert.site}` : ''} · ${scenario.date} ${alert.issuedAt} JST`
     : ''
+  const shelter = alert?.shelter
+  root.querySelector('.shelter')!.textContent = shelter ? `避難先 ${shelter.name} ${shelter.direction} ${shelter.distanceM} m` : ''
+  root.querySelector('.shelter-en')!.textContent = shelter ? `Shelter ${shelter.distanceM} m ${shelter.directionEn}` : ''
 }
 
 export interface TimelineHandlers {
@@ -91,6 +118,8 @@ export class Timeline {
   private readonly playButton: HTMLButtonElement
   private readonly caption: HTMLElement
   private segments: HTMLButtonElement[] = []
+  private readonly select: HTMLSelectElement
+  private readonly variants = new Map<string, string>()
 
   constructor(root: HTMLElement, private readonly handlers: TimelineHandlers) {
     this.caption = root.querySelector('.caption')!
@@ -98,6 +127,7 @@ export class Timeline {
     this.track = root.querySelector('.track')!
     this.fill = root.querySelector('.fill')!
     const select = root.querySelector<HTMLSelectElement>('select')!
+    this.select = select
     for (const scenario of SCENARIOS) select.add(new Option(`${scenario.placeJa} ${scenario.date.slice(5).replace('-', '/')}`, scenario.id))
     select.addEventListener('change', () => this.selectScenario(select.value))
     this.playButton.addEventListener('click', () => (this.playing ? this.pause() : this.play()))
@@ -132,6 +162,24 @@ export class Timeline {
     this.renderControls()
   }
 
+  // The faces show the chosen variant at its step and stay there, paused, so the change of place can be read.
+  showVariant(setId: string): void {
+    const base = ALERTS[setId]?.base ?? setId
+    const scenario = scenarioOf(setId)
+    if (!scenario) return
+    this.variants.set(base, setId)
+    if (scenario !== this.scenario) {
+      this.select.value = scenario.id
+      this.selectScenario(scenario.id)
+    }
+    this.pause()
+    this.jump(scenario.steps.findIndex((step) => step.setId === base))
+  }
+
+  variantOf(base: string): string {
+    return this.variants.get(base) ?? base
+  }
+
   jump(index: number): void {
     const steps = this.scenario.steps
     this.elapsedMs = steps.slice(0, index).reduce((sum, step) => sum + step.seconds * 1000, 0)
@@ -158,7 +206,8 @@ export class Timeline {
 
   private enter(index: number): void {
     this.stepIndex = index
-    this.handlers.onShow(this.scenario.steps[index]!.setId)
+    const setId = this.scenario.steps[index]!.setId
+    this.handlers.onShow(setId && this.variantOf(setId))
     this.renderControls()
   }
 
