@@ -3,7 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>EVAC LAYER sim</title>
+    <title>EVAC LAYER — 3D simulator</title>
+    <meta name="description" content="いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステム EVAC LAYER の 3D シミュレーター。2026 年 10 月 21 日に由利本荘市で発表された警報を再現します。 / A 3D simulator of EVAC LAYER, replaying real warnings on 22 screens of a station concourse." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rettuce.github.io/evac-layer/" />
+    <meta property="og:title" content="EVAC LAYER — 3D simulator" />
+    <meta property="og:description" content="いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステム。過去の警報を再現した 3D のシミュレーションです。 / Adds an emergency guidance layer to the signage that is already there. A 3D replay of past warnings." />
+    <meta property="og:image" content="https://rettuce.github.io/evac-layer/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EVAC LAYER — 3D simulator" />
+    <meta name="twitter:image" content="https://rettuce.github.io/evac-layer/og.jpg" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,7 +24,7 @@
       #stage { position: fixed; inset: 0; }
       #stage > canvas { position: absolute; inset: 0; pointer-events: none; }
       #ui { position: fixed; top: 12px; left: 12px; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 24px); overflow: auto; }
-      #ui .group { background: rgba(0,0,0,.6); border: 1px solid #333; padding: 6px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 280px; }
+      #ui .group { background: rgba(0,0,0,.6); border: 1px solid #333; padding: 6px; display: flex; flex-wrap: wrap; gap: 4px; max-width: 230px; }
       #ui .group h2 { flex-basis: 100%; margin: 0 0 2px; font-size: 10px; font-weight: 400; letter-spacing: .08em; color: #888; text-transform: uppercase; }
       #ui button { background: #111; color: #ccc; border: 1px solid #444; padding: 4px 8px; font: inherit; cursor: pointer; }
       #ui button[aria-pressed="true"] { background: #e8e8e8; color: #000; border-color: #e8e8e8; }
@@ -23,6 +34,9 @@
       #status, #hint { color: #888; background: rgba(0,0,0,.6); border: 1px solid #333; border-radius: 3px; padding: 4px 6px; }
       #hint { font-size: 10px; letter-spacing: .08em; }
       #status:empty { display: none; }
+      #repo { font-size: 10px; letter-spacing: .04em; color: #888; text-decoration: none; background: rgba(0,0,0,.6); border: 1px solid #333; border-radius: 3px; padding: 4px 6px; }
+      #repo:hover { color: #ddd; }
+      body:not(.dev) #ui .dev { display: none; }
       .panel { background: rgba(0,0,0,.6); border: 1px solid #333; border-radius: 3px; }
       .panel button, .panel select { background: #111; color: #ccc; border: 1px solid #444; padding: 4px 8px; font: inherit; cursor: pointer; }
       .panel button[aria-pressed="true"] { background: #e8e8e8; color: #000; border-color: #e8e8e8; }
@@ -65,6 +79,10 @@
       #intro ul { margin: 0 0 16px; padding-left: 1.2em; color: #ccc; }
       #intro li { margin-bottom: 4px; }
       #intro li .en { display: block; margin: 0; }
+      #intro .note { margin: 0; color: #ccc; }
+      #intro .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+      #intro .links { margin: 0; font-size: 11px; color: #888; }
+      #intro .links a { color: #ccc; }
       #intro .start { padding: 6px 16px; }
       #panel-toggle { display: none; position: fixed; top: 8px; left: 8px; background: #111; color: #ccc; border-color: #444; padding: 8px 12px; font: inherit; }
       @media (max-width: 700px) {
@@ -91,6 +109,7 @@
       <div id="fps">— fps</div>
       <div id="hint">[D] : debug toggle&ensp;&ensp;[←→] : scene&ensp;&ensp;[E] : evac</div>
       <div id="status">loading room.glb…</div>
+      <a id="repo" href="https://github.com/rettuce/evac-layer" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
     <div id="now" class="panel" aria-live="polite"><div class="ja"><i class="swatch" hidden></i><span class="label"></span></div><div class="en"></div><div class="where"></div><div class="shelter"></div><div class="shelter-en"></div></div>
     <div id="dock">
@@ -114,14 +133,22 @@
         <h2 id="intro-title">EVAC LAYER — IDEA</h2>
         <p class="idea">街中にあるスクリーン。<br />それらが自分の位置を知り、災害時に適切な避難情報を出す。<br />そんなハックができないか？</p>
         <p class="en">Screens are everywhere in the city. What if each knew where it stands and showed the right evacuation guidance in a disaster? Could we hack that?</p>
+        <p class="about">EVAC LAYER は、いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステムです。</p>
+        <p class="en">EVAC LAYER automatically adds a layer of emergency guidance to the signage that is already there.</p>
         <p class="about">2026 年 10 月 21 日、秋田県由利本荘市で実際に発表された警報で動かします。</p>
         <p class="en">Driven by the warnings actually issued for Yurihonjo, Akita, on 21 October 2026.</p>
+        <p class="note">過去の警報を再現した 3D のシミュレーションです。実在の駅への設置ではありません。避難は自治体と気象庁の発表に従ってください。</p>
+        <p class="en">A 3D simulation that replays past warnings, not an installation at a real station. In an emergency, follow your municipality and the Japan Meteorological Agency.</p>
         <ul>
-          <li>下の帯: ▶ で再生・一時停止、各時点を押すとその警報へ<span class="en">Timeline: play, pause, or jump to a warning</span></li>
+          <li>右下の帯: ▶ で再生・一時停止、各時点を押すとその警報へ<span class="en">Timeline (bottom right): play, pause, or jump to a warning</span></li>
+          <li>表示する場所を選ぶと、同じ警報でも避難先・方向・距離が変わる<span class="en">Pick a display site: the same warning sends people to a different shelter</span></li>
           <li>ドラッグ（スワイプ）で視点を回す、ボタンで移動<span class="en">Drag or swipe to orbit; camera buttons fly to a view</span></li>
-          <li>キー: [E] 別の警報をランダム、[←→] 平常時の映像、[D] パネル<span class="en">Keys: E random warning, ← → ambient video, D panels</span></li>
+          <li>キー: [E] 別の警報をランダム、[←→] 平常時の映像、[D] 表示を消す<span class="en">Keys: E random warning, ← → ambient video, D hide the overlays</span></li>
         </ul>
-        <button class="start" type="button">はじめる / Start</button>
+        <div class="foot">
+          <button class="start" type="button">はじめる / Start</button>
+          <p class="links"><a href="https://github.com/rettuce/evac-layer" target="_blank" rel="noopener">GitHub</a> · <a href="https://youtu.be/9XRmnF2DCsM" target="_blank" rel="noopener">動画 / Video</a></p>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
