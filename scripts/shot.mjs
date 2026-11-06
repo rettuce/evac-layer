@@ -118,7 +118,7 @@ function galleryHtml(results) {
 
 async function main() {
   await mkdir(OUT_DIR, { recursive: true })
-  const browser = await puppeteer.launch({ executablePath: CHROME_PATH, headless: true })
+  const browser = await puppeteer.launch({ executablePath: CHROME_PATH, headless: true, args: ['--disable-gpu-rasterization'] })
   try {
     const results = []
     for (const shape of Object.keys(SHAPES)) {
@@ -166,7 +166,7 @@ async function recordFrames() {
   const extra = args.query ? `&${args.query}` : ''
   const url = `${screenUrl(shape)}&clock=virtual&t=${startMs}${extra}`
 
-  const browser = await puppeteer.launch({ executablePath: CHROME_PATH, headless: true })
+  const browser = await puppeteer.launch({ executablePath: CHROME_PATH, headless: true, args: ['--disable-gpu-rasterization'] })
   const began = performance.now()
   try {
     const page = await browser.newPage()

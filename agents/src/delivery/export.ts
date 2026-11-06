@@ -47,7 +47,7 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
 
   const siteDir = path.join(opts.out, site.id);
   fs.rmSync(siteDir, { recursive: true, force: true });
-  const browser = await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true });
+  const browser = await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
   const entries = [];
   try {
     for (const e of ready) {

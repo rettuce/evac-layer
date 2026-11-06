@@ -23,7 +23,7 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
     skippedShapes: opts.skipShapes ?? [],
     async verify(screens: Screen[], ctx?: VerifyContext) {
       const base = await staticVerifier.verify(screens);
-      browser ??= await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true });
+      browser ??= await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
       fs.mkdirSync(stageDir, { recursive: true });
       const out: ScreenVerdict[] = [];
       for (const [i, s] of screens.entries()) {

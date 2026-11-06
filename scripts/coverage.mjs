@@ -258,7 +258,7 @@ const ids = await pictogramIds()
 const { base, child } = await startServer()
 const layout = await (await fetch(`${base}/api/admin/preview-layout?municipality=${MUNICIPALITY}&bulletin=${BULLETIN}&shape=16x9`)).json()
 const action = layout.cells.find((c) => c.role === 'action').text
-const browser = await puppeteer.launch({ executablePath: CHROME_PATH, args: ['--allow-file-access-from-files'] })
+const browser = await puppeteer.launch({ executablePath: CHROME_PATH, args: ['--allow-file-access-from-files', '--disable-gpu-rasterization'] })
 try {
   const page = await browser.newPage()
   const thumbs = []
