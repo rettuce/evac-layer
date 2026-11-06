@@ -14,9 +14,9 @@
 | GSI と市の PDF で施設名が食い違う（輪島 20 件。2012 年地図の旧施設名、「旧輪島市立鳳至小学校」、GSI 側の誤記「ＷＡＪＩＭＡ ＭＥＭＯＲＩＡＬ GIM」） | 出典ごとの更新時期の差と誤記 | Reader が `conflicts[]` に記録する。食い違う施設は画面に出さない | `data/municipalities/17204.json`（8569675） |
 | Vision 1 回目: 行動の図記号が画面の内容と矛盾する 25 件（解除画面に「上へ逃げる」、Lv3「警戒」に go_higher、解除の見出しが発令中に見える） | Composer が災害種別だけで図記号と見出しを決めていた | 図記号をテンプレートで決め、解除の見出しは「〈警報名〉解除」にする | `data/verifier-findings/2026-11-02-vision-run1.json`（6c757d6） |
 | Vision 2 回目: 行動の文と図記号の意味がずれる 3 件（「浸水に警戒」に雨雲、「川の増水に注意」に「ここは安全」の盾）。指摘件数（形状ごと）は 5 回で 25→8→4→4→0 | 図記号は Composer が決めるのに、Writer はそれを知らずに行動文を書いていた | 行動の図記号は行動だけを表す（解除→safe_here、津波・Lv5→go_higher、他→directions_run）。図記号の意味を Writer に渡し、行動セルの食い違いは Writer に差し戻す | `data/verifier-findings/2026-11-02-vision-run2.json`（50d5843） |
-| Lv3 の行動文に「高齢者等避難」が入る（市町村の避難情報の正式名称） | 上の修正で Writer に渡した図記号の意味文に「高齢者等が避難し」とあった。画面は気象庁の警報から作るので、市が発令したように読める | 規約と lint で、行動文に避難情報の名称（高齢者等避難・避難指示・緊急安全確保）を使わせない。修正後は「高齢者は避難」 | `agents/src/writer/rules.ts`（8dedf81） |
+| Lv3 の行動文に「高齢者等避難」が入る（市町村の避難情報の正式名称） | 上の修正で Writer に渡した図記号の意味文に「高齢者等が避難し」とあった。画面は気象庁の警報から作るので、市が発令したように読める | 規約と検査規則で、行動文に避難情報の名称（高齢者等避難・避難指示・緊急安全確保）を使わせない。修正後は「高齢者は避難」 | `agents/src/writer/rules.ts`（8dedf81） |
 | 解除画面の見出し「レベル２土砂災害注意報解除」(13 字) が、9:16 と 1:1 で 3 行に折れて見出し帯から溢れる（輪島 2 画面） | 見出し帯の右の「警戒レベル1」ラベルに幅を取られる。見出しは警報名からコードが決めるので、Writer の書き直しでは直らない | render は解除画面でレベルラベルを出さず、9:16・1:1 ではラベルを見出しの下に置き、見出しは 2 行まで・超えたら 0.85 倍にする（f292654）。agents は `data-overflow="<cellId>:<lang>"` で差し戻し先を分け、ja・pictogram・screen は停止、他言語は Writer へ（7ae76d8・3397bb9）。再実行で輪島 7 画面すべて pass・Writer 呼び出し 0 回 | `data/verifier-findings/2026-11-02-vision-run{3,4,5}.json`・captures 1710 |
-| Writer の英語欄に日本語の文字が入る（由利本荘の見出し 5 件「子吉川 Lv3 Flood Warning」「Koyoshi(子吉川) flood L4」、輪島の解除「Wajima(輪島市) lifted」） | 固有名詞を漢字のまま英語に混ぜていた。やさしい日本語と Lv5 の lint はあったが、英語欄の文字種は検査していなかった | 英語欄に漢字・かなを禁じる lint を足し、違反は Writer に差し戻す。6 電文を作り直して「Lv4 Flood: Koyoshi River」の形に | `agents/src/writer/rules.ts`（0cacb31） |
+| Writer の英語欄に日本語の文字が入る（由利本荘の見出し 5 件「子吉川 Lv3 Flood Warning」「Koyoshi(子吉川) flood L4」、輪島の解除「Wajima(輪島市) lifted」） | 固有名詞を漢字のまま英語に混ぜていた。やさしい日本語と Lv5 の検査規則はあったが、英語欄の文字種は検査していなかった | 英語欄に漢字・かなを禁じる検査規則を足し、違反は Writer に差し戻す。6 電文を作り直して「Lv4 Flood: Koyoshi River」の形に | `agents/src/writer/rules.ts`（0cacb31） |
 | Vision の誤検知: 輪島 10-21 19:42（大雨注意報の解除）で、指摘文の中で「内容は一致している」「電文と矛盾しない」と書きながら bulletin-mismatch を出す。別の回では同じ画面に「避難は不要です は言い切り」と指摘し、回ごとに判定が揺れる | Vision（Sonnet 5.5）の判定の揺れ | 直さない。ループが Writer に 1 回書き直させ、2 回目で pass する。同じ finding の Writer への再送は 2 回までで止まる | `data/reports/17204-demo/VPWW55-202610211942-7720a18f5cfa/report.json`（ec7e1fb） |
 | 記録期間（10-11〜11-02）に、吉田町は最高 Lv2（20 電文）、横浜は警報なし（5 電文）で、画面が 1 枚も出ない。柏崎は 73 電文のうち土砂災害 Lv4 が 2 本（10-31 16:53・18:39）と、その解除（11-01 04:01）で 3 画面 | 実際の気象。Lv3 未満では画面を出さない（表示済みの警報の解除だけが解除画面になる） | 画面を作らず、電文ごとに理由を index.json に残す（例:「level 2 for 22424: below the evacuation threshold, no screen」）。柏崎は 3 画面 × 5 形状とも pass | `data/layouts/{22424,14100,15205}/index.json` |
 | 公式サンプルの津波電文（2016-09-01 訓練・全国 66 予報区）で、輪島の「津波注意報・レベル 2」画面を Vision が 3 回続けて「電文より過小」と判定し fail | Vision に渡す電文要点が、津波電文では全国の予報区（大津波警報を含む）を全部載せていた。Composer は自治体の予報区だけを見るので、画面と判定の根拠がずれていた | Vision の要点も自治体の予報区だけに絞り、津波の表示レベルが警報種別から規則で決まる（大津波警報=4・津波警報=3・津波注意報=2）ことを指示文に書く。直後の再実行で 10/10 pass | `agents/src/verifier/vision.ts`・`data/reports/17204-demo/VTSE41-201609010726-05a7380a3e46/` |
@@ -38,23 +38,25 @@
 
 費用: Writer $0（キャッシュ記録の出力を使用）、Vision 10 checks ≈ $0.11（1 check ≈ $0.011）。同じ電文で位置だけ変えた結果: A は 鶴舞小学校 570 m 南西へ、B は 砂子下コミュニティセンター 530 m 南へ。見出し・行動・言語帯・出典は同じ。
 
-主張どおりに動かない箇所（コードは直していない）:
+主張どおりに動かない箇所（11-05 時点。各項目の末尾にその後の対応）:
 
-1. **信号の受け口が公開リポに無い。** 気象庁長期フィードの取得は private の `tools/jma-feed-recorder`（launchd・1 時間毎・Python）で、本体は録音（`bodies/`）を `replay` で読む。app の「今の電文」は `sharedReplayOrigin`（サーバ起動時刻からの仮想時計 × speed）で決まり、`/api/feed` は実時間に届いた警報では切り替わらない。「電文が届いたら画面が変わる」経路は未実装。
-2. **1 電文だけを live Writer で流す入口が無い。** `pipeline` は `--writer` の fixture が必須（「the live Writer lands on Day 2」の文言が残る）。live Writer は `fanout` / `replay-pipeline` だけで、どちらも `data/layouts/<自治体>` と reports を消して全電文を作り直す（`runReplay` の rmSync）。
-3. **場所は自治体につき 1 サイト。** `data/layouts/<id>/index.json` の `site` は 1 つで、`/api/live-layout`・`/api/feed`・export は自治体と電文で層を引き、サイト id は承認ゲートの鍵にしか使わない。同じ自治体に 2 台目のスクリーンを置くと 1 台目の避難所と方向が出る。任意座標の compose 自体は動く（B）が、その結果を置く場所が無い（`demo/sites/` は契約外）。
-4. **避難所名が長いと 16:9 で矢印が消える。** B は shelter「砂子下コミュニティセンター」（12 字）が 51.2 px < 64 px で fail（文言で直せない種類）。renderer は `data-shelter-scale="narrow"` に縮めた上で `data-dropped="direction:overflow"` で方向セルを落とし、capture に矢印と「南へ」が無い。Verifier は font-size だけを指摘し、方向の欠落は指摘しない。由利本荘の避難所 220 か所の名前の長さ分布は未確認。
-5. **人手の段。** サイト JSON の `municipality_id` は手書き（docs/integration.md）。Reader（自治体 PDF → 知識ファイル。05210 は 11-02 に $1.165）と `shelters`（GSI CSV）は事前の手動実行。承認と auto_publish は設計上の人手。
-6. **承認は内容を見ない。** `data/approvals.json` は自治体/電文の鍵と updated_at だけで、Writer の書き直しや再 fanout の後も承認が残る（出典セルを変えた今回の再生成でも承認済みのまま）。
-7. **`/screen?lat=&lng=` は平時レイヤーの座標表示だけ。** 避難誘導はサイト JSON を Composer が読んで決める。
-8. 運用上の注意: main を merge した後は `pnpm install` と dev の再起動が要る（three・@fontsource/noto-sans-thai の追加）。再起動前の実走 3 本は `data-ready` 待ちの 30 s timeout で落ちた。
+1. **信号の受け口が公開リポに無い。** 気象庁長期フィードの取得は private の `tools/jma-feed-recorder`（launchd・1 時間毎・Python）で、本体は録音（`bodies/`）を `replay` で読む。app の「今の電文」は `sharedReplayOrigin`（サーバ起動時刻からの仮想時計 × speed）で決まり、`/api/feed` は実時間に届いた警報では切り替わらない。「電文が届いたら画面が変わる」経路は未実装。→ **未対応**（電文の受信の口）。外から施設の表示を切り替える口（`POST /api/admin/live`・`pnpm -F agents live`）は 11-06 に追加した（116963a）。
+2. **1 電文だけを live Writer で流す入口が無い。** `pipeline` は `--writer` の fixture が必須（「the live Writer lands on Day 2」の文言が残る）。live Writer は `fanout` / `replay-pipeline` だけで、どちらも `data/layouts/<自治体>` と reports を消して全電文を作り直す（`runReplay` の rmSync）。→ **未対応**（新しい電文からの画面の生成）。
+3. **場所は自治体につき 1 サイト。** `data/layouts/<id>/index.json` の `site` は 1 つで、`/api/live-layout`・`/api/feed`・export は自治体と電文で層を引き、サイト id は承認ゲートの鍵にしか使わない。同じ自治体に 2 台目のスクリーンを置くと 1 台目の避難所と方向が出る。任意座標の compose 自体は動く（B）が、その結果を置く場所が無い（`demo/sites/` は契約外）。→ 11-06 に修正（830594e・116963a）。画面一式・承認・フィードを施設ごとに持ち、同じ自治体に何施設でも置ける。
+4. **避難所名が長いと 16:9 で矢印が消える。** B は shelter「砂子下コミュニティセンター」（12 字）が 51.2 px < 64 px で fail（文言で直せない種類）。renderer は `data-shelter-scale="narrow"` に縮めた上で `data-dropped="direction:overflow"` で方向セルを落とし、capture に矢印と「南へ」が無い。Verifier は font-size だけを指摘し、方向の欠落は指摘しない。由利本荘の避難所 220 か所の名前の長さ分布は未確認。→ 11-05 に修正（3129b5a）。方向セルが落ちた画面は Verifier が fail にする。
+5. **人手の段。** サイト JSON の `municipality_id` は手書き（docs/integration.md）。Reader（自治体 PDF → 知識ファイル。05210 は 11-02 に $1.165）と `shelters`（GSI CSV）は事前の手動実行。承認と auto_publish は設計上の人手。→ **未対応**（市町村コードの自動判定は README の「今後」。承認は人が行う設計のまま）。
+6. **承認は内容を見ない。** `data/approvals.json` は自治体/電文の鍵と updated_at だけで、Writer の書き直しや再 fanout の後も承認が残る（出典セルを変えた今回の再生成でも承認済みのまま）。→ 11-05 に修正（7fd5b78・2bb6ca9・acc252d）。承認はその時点の layout のダイジェストに束縛され、作り直した画面は「要再承認」になる。
+7. **`/screen?lat=&lng=` は平時レイヤーの座標表示だけ。** 避難誘導はサイト JSON を Composer が読んで決める。→ **未対応**（仕様のまま）。
+8. 運用上の注意: main を merge した後は `pnpm install` と dev の再起動が要る（three・@fontsource/noto-sans-thai の追加）。再起動前の実走 3 本は `data-ready` 待ちの 30 s timeout で落ちた。→ 運用上の注意（修正の対象ではない）。
 
-## 文字サイズの下限を田中の設計に合わせた（2026-11-05）
+## 文字サイズの下限: 視距離の前提を設置場所ごとに決める設計にした（2026-11-05）
 
-Verifier の文字サイズ下限は視距離から導いていた（1 inch / 10 ft・55 型 1080 px: 行動 11 m → 144 px、案内 5 m → 64 px、細字 2 m → 28 px。`app/layout/typography.ts` の `TYPE_PX`。renderer の既定サイズも同じ値）。11-05 の L-4/L-5 で田中が Figma で 4 形状を手で組み、16:9 の行動 120 px・言語帯 54 px（ラベル 24 px）・出典 24 px、1:1 の言語帯 56 px と出典 24 px（出典行は 11-05 に追加）が下限を割った（05210 の 6 画面すべてで同じ finding。Lv5 の再生成で発覚、Lv4 でも同じ）。司令官裁定（11-05）で Verifier の下限を設計の実サイズに合わせ、`agents/src/verifier/checks.ts` の `ARTBOARD_FLOOR_PX` に形状ごとに置いた。他の行は視距離の下限のまま（実測はすべて下限以上）。実導入時に視距離（設置場所の見る距離）で再検討する。
+Verifier の文字サイズの下限は、視距離から導いていた（1 inch / 10 ft・55 型 1080 px: 行動 11 m → 144 px、案内 5 m → 64 px、細字 2 m → 28 px。`app/layout/typography.ts` の `TYPE_PX`。renderer の既定サイズも同じ値）。11-05 に作者が Figma で 4 形状のレイアウトを手で組むと、16:9 の行動 120 px・言語帯 54 px（ラベル 24 px）・出典 24 px、1:1 の言語帯 56 px と出典 24 px（出典行は 11-05 に追加）がこの下限を割った（05210 の 6 画面すべてで同じ finding。Lv5 の再生成で発覚し、Lv4 でも同じ）。
 
-避難先名（shelter）も、田中の Figma 値の 2 段下まで下限を下げた（11-05 19:0x 田中「避難先名は文字を小さくして 1 行に収める」・司令官裁定）。16:9 は shelterNarrow 63 px × 0.92² → 53 px、1:1 は 51 px × 0.92² → 43 px（切り捨て）。9:16・32:9・柱は 64 px のまま。暫定で、実導入時に視距離で再検討する。
+ここから、下限は 1 つの視距離から決め打ちせず、設置場所の視距離の前提に合わせて決める設計にした。いまは Figma のレイアウトが前提とする距離に合わせ、`agents/src/verifier/checks.ts` の `ARTBOARD_FLOOR_PX` に形状ごとの下限を置いている。他の行は視距離の下限のまま（実測はすべて下限以上）。実際に導入するときは、その場所で見る距離から下限を決め直す。
+
+避難先名（shelter）も、Figma の値の 2 段下まで下限を下げた（避難先名は文字を小さくして 1 行に収める方針）。16:9 は shelterNarrow 63 px × 0.92² → 53 px、1:1 は 51 px × 0.92² → 43 px（切り捨て）。9:16・32:9・柱は 64 px のまま。これも設置場所の視距離で決め直す前提の暫定値。
 
 ## Lv5 の避難先表示（2026-11-05・暫定）
 
-田中決定（11-05 15:3x）で、警戒レベル 5（緊急安全確保・secure-now）の画面にも避難先と方向を出す。理由は見た目の密度（主文だけでは画面が空く）で、Composer の `NO_SHELTER_TEMPLATES` を空にした。内閣府の避難情報の考え方では Lv5 は「避難場所への移動がかえって危険な段階」で、主文「高い所へ上がって」と go_higher の図記号はそのまま残す。実導入時にこの趣旨で再検討する（Writer の Lv5 lint「にげる・ひなん を使わない」は変えていない）。
+警戒レベル 5（緊急安全確保・secure-now）の画面にも、いまは避難先と方向を出している（Composer の `NO_SHELTER_TEMPLATES` は空）。ただし内閣府の避難情報の考え方では、レベル 5 は「指定緊急避難場所等への立退き避難がかえって危険な段階」で、取るべき行動はその場での安全確保になる。画面では主文「高い所へ上がって」と go_higher の図記号が優先し、避難先と方向はその下に添える情報として置いている。Writer の Lv5 の検査規則（「にげる・ひなん」を使わない）も変えていない。実際に運用する前に、レベル 5 では避難先を出さないという判断もありうる。

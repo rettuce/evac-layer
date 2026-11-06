@@ -1,6 +1,6 @@
 <img alt="EVAC LAYER" src="docs/brand/evac-layer-lockup-black.png" width="100%">
 
-<img alt="駅のコンコースの柱と壁のスクリーンが、警戒レベル 4 の避難案内に一斉に切り替わった様子（Blender で描いた 3D シミュレーション）" src="docs/images/hero-lv4.jpg" width="100%">
+https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 
 # EVAC LAYER
 
@@ -19,6 +19,8 @@
 
 ## できること
 
+デモ動画とシミュレーターの切り替えは、記録した実際の電文を再生したものです。実際の運用では、自前の気象庁の受信系が `POST /api/admin/live` を呼んで画面を切り替えます。
+
 ### 警報が届いた瞬間、すべてのスクリーンが切り替わる
 
 ![平常時の環境映像を流していたコンコースが、警戒レベル 3・4・5 の避難案内へ順に切り替わる 4 コマ](docs/images/levels-same-moment.jpg)
@@ -35,7 +37,7 @@
 
 ![4 つの災害と、5 つの警戒レベル](docs/sheets/sheet1-hazards-levels.png)
 
-気象庁の 4 種類の電文（大雨・土砂災害・指定河川の洪水・津波）を、内閣府の警戒レベル 1〜5 の画面にします。色は内閣府の原典の値で、色の帯の上の文字はすべてコントラスト 4.5:1 以上です。
+気象庁の 4 種類の電文（大雨・土砂災害・指定河川の洪水・津波）から、警戒レベル 3 以上と解除の画面を作ります。色は内閣府の警戒レベル 1〜5 の原典の値で、色の帯の上の文字はすべてコントラスト 4.5:1 以上です。
 
 ![14 の図記号と、10 の言語](docs/sheets/sheet2-pictograms-languages.png)
 
@@ -55,13 +57,13 @@ EVAC LAYER が作るのは下書きです。施設ごとに、災害 × 警戒�
 
 ![5 自治体・気象庁の電文 206 本・レイアウト 110。背景のタイルは画面の見た目を示すための架空の例](docs/images/screens-from-real-bulletins.jpg)
 
-3 週間かけて記録した、5 つの自治体に関わる気象庁の電文 206 本から、110 のレイアウト（画面を出す 22 本 × 5 形状）を作りました。背景のタイルは、画面の並びを見せるための架空の例です。実際の電文から作った画面は [`docs/screens.md`](docs/screens.md) にあります。すべての画面を、規則の検査・ブラウザでの描画の検査・Claude の画像認識（Vision）による検査の 3 段で確かめています。実データで見つかった問題は[下に](#実データで見つかったこと)まとめています。
+3 週間かけて記録した、5 つの自治体に関わる気象庁の電文 206 本（うち 6 本は気象庁の公式のサンプル電文で、訓練の電文）から、110 のレイアウト（画面を出す 22 本 × 5 形状）を作りました。背景のタイルは、画面の並びを見せるための架空の例です。実際の電文から作った画面は [`docs/screens.md`](docs/screens.md) にあります。すべての画面を、規則の検査・ブラウザでの描画の検査・Claude の画像認識（Vision）による検査の 3 段で確かめています。実データで見つかった問題は[下に](#実データで見つかったこと)まとめています。
 
 ## なぜ作るか
 
 私はこれまで、駅や商業施設など街の公共空間のサイネージを、10 年以上作ってきました。同期した LED の壁、駅のホームのサイネージ、ロビーのスクリーン。しかし、それらは災害のとき、自分から情報を出すことができません。広告を流し続けるか、黒く消えるかのどちらかです。既存の仕組み（CAP 連携のサイネージや公的な配信基盤）が決めているのは「画面を切り替える」ところまでで、切り替えたあとに、**この**場所で、目の前の人に何を出すかは決まっていません。
 
-2024 年 1 月 1 日の能登半島地震の津波のあと、新潟県上越市は検証で「外国人や市外からの来訪者が、どこに避難すればよいかを判断することが難しかった」と書いています。警報は届いた。けれど、その次の一言、**「南西へ、570 m」**は届いていませんでした。
+2024 年 1 月 1 日の能登半島地震の津波のあと、新潟県上越市は検証で「防災行政無線による避難の呼びかけを受けた外国人や市外からの来訪者が、自身の避難の必要性や、どこに避難すればよいかを判断することが難しかった。」と書いています。呼びかけは届いた。けれど、その次の一言、たとえば**「南西へ、570 m」**は届いていませんでした。
 
 スクリーンはもう街にあり、自分がどこにあるかも分かります。足りないのは、その場所のための避難案内です。EVAC LAYER はそれを Claude で作り、既存のサイネージに 1 枚のレイヤーとして重ねます。
 
@@ -135,38 +137,51 @@ API の費用（11 月 5 日までのデータ処理）は、Reader $2.88（5 �
 
 ## Claude とどう作ったか
 
+作者は、ほぼ一人で物を作っています。防災の案内には、一人では到底できない物量があります。自治体ごとのハザードマップや気象庁の電文といった膨大な資料、都道府県をまたぐ情報の食い違い（市町村や場所ごとに、避難先も方向も言葉も違う）、千差万別のスクリーンのレイアウト。人がやれば時間も労力もコストも膨大にかかるこの作業を、システムとアルゴリズムの力と、AI を使った並列処理で一気に解こうと考えました。
+
 11 月 2 日より前にあったのは、調査・コンセプト・データの利用条件の確認・元の PDF のダウンロード・気象庁のフィードの記録だけで、コードはありません。このリポジトリは、すべて 11 月 2 日 12:00 から書きました。
 
 作者は 1 人です。11 月 6 日の時点で、commit は 446（ほかに統合が 219）、コードは約 2 万行、テストは 159 件になりました。作業の記録 571 項目のうち 181 項目は、作者が決めたことです。手を動かす量は Claude が担い、何を作るか・どう見せるかは作者が決めました。
 
-Claude Code のセッションの 1 つが全体のまとめ役になり、8 つの実装のセッション（`agents`・`render`・`demo`・`layout`・`sim`、Figma の `brand`、文章の `copy`、音の `bgm`）が、それぞれの git worktree で並行して作業しました。まとめ役は仕様とセッションの間の取り決め（layout の JSON・Verifier が読む DOM の属性・承認の仕組み）を書き、各セッションの成果を `main` に取り込み、確かめて、足りなければ直し方を添えて戻します。作者はすべてのセッションを見ていて、必要なときは直接指示します。詳しくは [`docs/how-we-built.md`](docs/how-we-built.md)。
+Claude Code のセッションの 1 つが全体のまとめ役になり、8 つの実装のセッション（`agents`・`render`・`demo`・`layout`・`sim`、Figma の `brand`、文章の `copy`、音の `bgm`）が、それぞれの git worktree で並行して作業しました。まとめ役は仕様とセッションの間の取り決め（layout の JSON・Verifier が読む DOM の属性・承認の仕組み）を書き、各セッションの成果を `main` に取り込み、確かめて、足りなければ直し方を添えて戻します。作者はすべてのセッションを見ていて、必要なときは直接指示します。
+
+- **3 段の検査と書き直しのループ。** 規則・ブラウザ・Vision の検査が先にあり、指摘は書いた本人に戻ります。Writer の文は書き直させ、コードが書く部分（気象庁の見出し・避難先・出典）の問題は理由を添えてループを止めます。
+- **返却の最後に「確かめられなかったこと」と「未解決の点」。** 各セッションは、まとめ役から見えない前提や走らせられなかった検査を自分で書き、まとめ役は次に進む前にそれを 1 つずつ決めます。
+- **承認はモデルの外に置いた。** スキーマ、Verifier が読む DOM の属性、承認の仕組みは固定してあり、モデルを入れ替えても、人が承認した画面しか出ないという決まりは変わりません。
+
+詳しくは [`docs/how-we-built.md`](docs/how-we-built.md)。
 
 ## 動かす
 
 ```sh
 pnpm install
-pnpm -F app dev                     # Renderer と運営者の画面 http://127.0.0.1:3150
-open "http://127.0.0.1:3150/screen?site=05210-demo-honjo-station&mode=live"
-pnpm -F agents test                 # agents のテスト（元データがあれば、電文を読むテストも）
-pnpm -F app test                    # app のビルドとテスト
+pnpm -F app dev                     # Renderer と運営者の画面 http://127.0.0.1:3150（/ は /admin へ）
+pnpm -F app demo:approve            # デモの 6 電文を承認し、施設の自動配信を ON（初回だけ。data/approvals.json）
+open "http://127.0.0.1:3150/screen?site=05210-demo-honjo-station&mode=live&reset"   # 約 15 秒でレベル 3、約 21 秒でレベル 4
+pnpm -F agents test
+pnpm -F app test
 ```
+
+承認していない画面は出ない作りなので、デモでは `demo:approve` で 6 件を承認します（`/admin` で 1 件ずつ承認しても同じです。API で承認する手順は [`docs/integration.md`](docs/integration.md) の §2）。`&reset` を付けないと再生の途中から始まり、1 分を過ぎると解除の画面のままになります。
 
 デモの 5 自治体の知識ファイル・レイアウト・検査レポートを同梱しているので、運営者の画面は API キーなしで動きます。設定は環境変数か、リポジトリ直下の `.env` で渡します（項目は `.env.example`）。Reader・Writer・Vision の検査を自分で回すには `ANTHROPIC_API_KEY` が要ります。コマンドと費用は [`agents/README.md`](agents/README.md)。
 
-再配布していない元データ（自治体の PDF・国土地理院の CSV・記録した気象庁の電文）は `EVAC_RAW_DIR`（既定は `data/raw`）に置きます。元データが無いと、`pnpm -F agents test` は電文を読む 36 件を飛ばし、置き場所と入手先を表示します。元データがあれば 85 件すべてが通ります。
+再配布していない元データ（自治体の PDF・国土地理院の CSV・記録した気象庁の電文）は `EVAC_RAW_DIR`（既定は `data/raw`）に置きます。`pnpm -F agents test` は 87 件で、元データが無いと電文を読む 37 件を飛ばし、置き場所と入手先を表示します。`pnpm -F app test` は 78 件です。
+
+ポート 3150 が使用中なら、`pnpm -F app exec nuxt dev --port <n>` で別のポートに立て、agents と `demo:approve` からは `EVAC_URL=http://127.0.0.1:<n>` で同じポートを指します。
 
 公開しているのは、ブラウザで動く静的なシミュレーター（GitHub Pages）だけで、そこから Claude の API を呼ぶ経路はありません。Reader・Writer と運営者の画面は、手元で自分の API キーを使って動かします。
 
 ## データと権利
 
-- **気象庁 防災情報 XML** — 公式のサンプル電文と、2026 年 10 月から公開されている長期フィードを記録した電文。記録したフィードは再配布せず、デモの自治体の再生に使う電文だけを含みます。
-- **国土地理院 指定緊急避難場所・指定避難所データ** — 公共データ利用規約（PDL 1.0）。出典は各画面の配信データ（`sources`）と単体の HTML に入れ、施設の詳細は市町村に確認するよう注記しています。
+- **気象庁 防災情報 XML** — 気象警報・注意報などは、気象庁防災情報 XML（出典: 気象庁ホームページ https://xml.kishou.go.jp/ ）を利用しています。EVAC LAYER はこれを独自に編集し、やさしい日本語と多言語に言い換えて表示しており、編集の責任は EVAC LAYER にあります。警報の名称・警戒レベル・対象の地域は気象庁の発表のまま表示し、独自の予報はしません。使ったのは公式のサンプル電文と、2026 年 10 月から記録した長期フィードの電文です。記録したフィードは再配布せず、デモの自治体の再生に使う電文だけを含みます。
+- **国土地理院 指定緊急避難場所・指定避難所データ** — 指定緊急避難場所は「指定緊急避難場所・指定避難所データ」（国土地理院）https://www.gsi.go.jp/bousaichiri/hinanbasho.html をもとに、EVAC LAYER が加工して作成しました（公共データ利用規約 第 1.0 版）。データは市町村が登録したもので、最新でない場合や載っていない場合があります。施設の最新の情報は、各市町村に確認してください。出典は各画面の配信データ（`sources`）と単体の HTML にも入れています。
 - **自治体のハザードマップ PDF** — 各自治体のサイトから読み、`data/municipalities/*.json` にファイル名とページで引用しています。PDF は再配布しません。
 - **警戒レベルの色** — 内閣府の 5 段階の原典の値。
-- **図記号** — Material Symbols（Apache-2.0）6 種、Material の形をもとに描き直した 1 種、このプロジェクトで描いた 7 種（[`app/ASSETS.md`](app/ASSETS.md)）。
+- **図記号** — Material Symbols（Apache-2.0）6 種、Material の形をもとに描き直した 1 種、このプロジェクトで描いた 7 種（[`app/ASSETS.md`](app/ASSETS.md)）。JIS Z 8210 / Z 9098 の図記号ではありません。
 - **フォント** — Noto Sans JP / SC / TC / KR / Thai と Noto Sans（SIL OFL 1.1）。オフラインでも描けるよう同梱しています。
 - **3D のデモ** — Poly Haven の HDRI とテクスチャ（CC0）。地図は OpenStreetMap（© OpenStreetMap contributors）（[`demo/ASSETS.md`](demo/ASSETS.md)）。
-- **動画の音と README の画像** — BGM は Suno で作成（作成者所有）、効果音は Adobe Audition SFX と合成音。README の画像はこのリポジトリで描いたもので、出所は [`demo/ASSETS.md`](demo/ASSETS.md)。
+- **動画の音と README の画像** — BGM は Suno で作成（作成者所有）、効果音は Adobe Audition SFX。README の画像はこのリポジトリで描いたもので、出所は [`demo/ASSETS.md`](demo/ASSETS.md)。
 
 ## EVAC LAYER がしないこと
 
@@ -174,11 +189,14 @@ pnpm -F app test                    # app のビルドとテスト
 - **避難情報を発令しません。** 発令は市町村の役割です。Writer がその名称を使えないよう、検査規則で禁じています。
 - **停電には対応しません。** 建物が停電すれば、画面は消えます。
 - **サイネージの CMS ではありません。** 作るのは緊急時の画面と、それを出すかどうかの承認までです。画面を流すのは、いま使っている CMS です。
+- **実際の運用と、自治体による検証はまだしていません。** 画面はすべて、記録した電文と公式のサンプル電文で作って確かめたものです。
+- **避難先は Claude が選びません。** 国土地理院のデータから規則で選びます。Claude が担うのは、文章を書くことと検査です。
+- **距離と方向は、直線の距離と方角です。** 道のりや、浸水が想定される区域は考えていません。
 
 ## 今後
 
 - **全国の自治体への展開。** API の費用を、いまの数字から粗く見積もると、全 1,740 自治体の資料を読むのに初回だけ $500〜2,000、各自治体に 1 施設ずつ置いて年に約 $22,000、全国 1 万施設で年に約 $47,000 です。前提と内訳は [`docs/evaluation.md`](docs/evaluation.md#what-a-nationwide-roll-out-would-cost-in-api-calls)。
-- **言語の選択。** いまは 10 言語すべてが必須で、導入先ごとに言語を絞ったり入れ替えたりできません。
+- **言語の選択と、母語話者による確認。** いまは 10 言語すべてが必須で、導入先ごとに言語を絞ったり入れ替えたりできません。やさしい日本語以外の訳は、母語話者の確認をまだしていません。
 - **津波予報区の全国対応。** 気象庁の津波予報区と市町村の対応表は、いまはデモの 5 自治体の分だけです。気象庁のコード表から全国分を作ります。
 - **電文の受信と、新しい電文からの画面の生成。** いまは、記録した電文から作った画面のうちどれを出すかを、外から指定する形です。
 - **緯度経度からの自治体の判定。** いまは市町村コードを手で書きます。
@@ -186,9 +204,11 @@ pnpm -F app test                    # app のビルドとテスト
 ## ライセンスと連絡先
 
 AGPL-3.0（[`LICENSE`](LICENSE)）。Copyright (C) 2026 You Tanaka。
-自治体・防災機関・研究・個人の利用は無償です。独自のサイネージ製品への組み込みは、商用ライセンスで対応します。
+AGPL-3.0 の条件で、誰でも使えます。AGPL の条件で公開できない製品への組み込みには、別のライセンスも用意します。
 
-導入や連携の相談: you@ie3.jp（IE3 / ie3.jp）。ハッカソンの期間中（11 月 2〜8 日）は、外部からのコントリビューションを受け付けていません（[`CONTRIBUTING.md`](CONTRIBUTING.md)）。
+このハッカソンは、公開リポジトリで提出することが条件でした。作者の普段の仕事のコードは非公開ばかりです。どうせ公開するなら、オープンソースにして、誰もが使える未来として提案するほうが健全だと考えました。普段の創作活動に社会的な意義を付けられれば、その活動も続けていきやすくなります。EVAC LAYER は、作者たちの環境演出のシステムにも、1 枚のレイヤーとして組み込む形で開発を進めており、そのレイヤーの部分は、オープンソースで誰でも使えます。
+
+導入や連携の相談: [ie3.jp/contact](https://ie3.jp/contact/)（IE3）。ハッカソンの期間中（11 月 2〜8 日）は、外部からのコントリビューションを受け付けていません（[`CONTRIBUTING.md`](CONTRIBUTING.md)）。
 
 **Built with Claude: Japan 2026**（2026 年 11 月 2〜8 日）の期間中に、ゼロから作りました。
 
@@ -198,8 +218,8 @@ AGPL-3.0（[`LICENSE`](LICENSE)）。Copyright (C) 2026 You Tanaka。
 
 > **IDEA** — Screens are everywhere in the city. What if each one knew where it stands, and showed the right evacuation guidance when disaster strikes?
 
-Give EVAC LAYER the latitude, longitude and facing of a site (one venue; its screens share them) and its municipality code, written by hand, and it works out the rest for that spot: the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. The same warning gives each site its own shelter, direction and distance, and a municipality can hold any number of sites. It reads the municipality's hazard-map PDFs with citations (Reader, Claude), parses JMA disaster-prevention XML, writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five base shapes that fit any aspect ratio, and inspects every screen by rules, in a browser and by Vision (Claude). Operators approve the screens in calm times; when a bulletin arrives, only approved screens go out, as `alert` / `clear` events by feed, signed webhook or static files. From 206 recorded JMA bulletins for five municipalities it made 110 layouts.
+Give EVAC LAYER the latitude, longitude and facing of a site (one venue; its screens share them) and its municipality code, written by hand, and it works out the rest for that spot: the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. The same warning gives each site its own shelter, direction and distance, and a municipality can hold any number of sites. It reads the municipality's hazard-map PDFs with citations (Reader, Claude), parses JMA disaster-prevention XML, writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five base shapes that fit any aspect ratio, and inspects every screen by rules, in a browser and by Vision (Claude). Operators approve the screens in calm times; when a bulletin arrives, only approved screens go out, as `alert` / `clear` events by feed, signed webhook or static files. From 206 JMA bulletins for five municipalities (200 recorded from the live feed, 6 official sample bulletins from a drill) it made 110 layouts.
 
-To add your own screens: register a site file, generate and approve its screens once, then take the feed, the webhook or the files. Your JMA receiver switches a site by posting a bulletin id (or `null`) to `POST /api/admin/live`; receiving bulletins and composing screens for new ones are outside this repository. The steps are in [`docs/integration.md`](docs/integration.md). In steady state a screen costs about $0.245 in API calls, roughly $13 per municipality per year.
+To add your own screens: register a site file, generate and approve its screens once, then take the feed, the webhook or the files. Your JMA receiver switches a site by posting a bulletin id (or `null`) to `POST /api/admin/live`; receiving bulletins and composing screens for new ones are outside this repository. The switches in the demo video and the simulator are replays of recorded bulletins. The steps are in [`docs/integration.md`](docs/integration.md). In steady state a screen costs about $0.245 in API calls, roughly $13 per municipality per year.
 
-The only thing deployed publicly is the static simulator on GitHub Pages, and nothing there calls the Claude API. Built from scratch during Built with Claude: Japan 2026 (Nov 2–8) by one lead Claude Code session and eight implementation sessions on their own git worktrees. Licensed AGPL-3.0; free for municipalities, public-safety organizations, research and personal use; commercial license for embedding into proprietary signage products: you@ie3.jp.
+EVAC LAYER does not issue warnings or evacuation orders and has not yet been run in operation or checked by a municipality; evacuation sites are chosen from GSI data by rule (Claude writes and checks the text), and direction and distance are straight-line. JMA data is edited and translated under EVAC LAYER's responsibility with no forecast of its own, and the GSI data should be confirmed with each municipality. The only thing deployed publicly is the static simulator on GitHub Pages, and nothing there calls the Claude API. Built from scratch during Built with Claude: Japan 2026 (Nov 2–8) by one lead Claude Code session and eight implementation sessions on their own git worktrees. The author works almost alone, and the volume here (hazard maps and bulletins, guidance that differs for every place, layouts for every kind of screen) is more than one person could do, so it is solved with systems, algorithms and Claude working in parallel. The hackathon required a public repository; the author's everyday work is almost all private, so it seemed healthier to make this open source and offer it as a future anyone can use, and giving everyday creative work a social purpose makes that work easier to keep going. EVAC LAYER is also being developed as one layer built into the author's team's own ambient-signage system, and that layer is open for anyone. Licensed AGPL-3.0 for anyone; a separate license is available for products that cannot be published under the AGPL: [ie3.jp/contact](https://ie3.jp/contact/).
