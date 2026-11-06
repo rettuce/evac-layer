@@ -95,6 +95,9 @@ const CUTS = {
   'seq-lv3': { seconds: 9.5, startMs: -4000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'ink-bloom' }, ready: LIVE_READY, events: [0] },
   'seq-lv4': { seconds: 5.5, startMs: 8400000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'ink-bloom' }, ready: LIVE_READY, events: [8400000] },
   'seq-lv5': { seconds: 6, startMs: 13800000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'ink-bloom' }, ready: LIVE_READY, events: [13800000] },
+  // Edit material (D-33): 30 s of a calm scene (--scene) on the real-time clock from 15:54:00.
+  'ambient-3': { seconds: 3, startMs: -60000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [] },
+  'ambient-30': { seconds: 30, startMs: -60000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [] },
   // Cut 9 (D-32): the 15:55 level 3 instead of the level 5.
   'alert-real-lv3': { seconds: 12, startMs: 3000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [] },
   // The dashboard counts up in about 4 s of its own clock; a quarter rate stretches that over the cut.

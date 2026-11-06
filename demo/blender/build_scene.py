@@ -35,7 +35,7 @@ SCREENS_DIR = DEMO_DIR / "screens"
 CACHE_DIR = DEMO_DIR / "cache"
 HDRI_PATH = DEMO_DIR / "assets" / "metro_vijzelgracht_1k.hdr"
 PLACEHOLDER_FONT = Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf")
-CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "alert-real-lv3", "seq", "cut08-seq", "off", "test")
+CUTS = ("ambient", "switch", "alert", "ambient-real", "switch-real", "alert-real", "alert-real-lv3", "seq", "ambient-3", "ambient-30", "cut08-seq", "off", "test")
 
 INCH = 0.0254
 JOINT_M = 0.003
@@ -259,6 +259,20 @@ SHOTS = {
     "cut05": {
         "seconds": 21, "screens": "seq", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
         "path": push_from("wide-a", 0.4),
+    },
+    # Edit material (D-33): cut 5's camera over 30 s of one calm scene.
+    "ambient30": {
+        "seconds": 30, "screens": "ambient-30", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
+        "path": push_from("wide-a", 0.4),
+    },
+    # Edit material (D-34): 3 s of a calm scene, held on the first camera of cut 8 and of cut 9.
+    "cut08head": {
+        "seconds": 3, "screens": "ambient-3", "light_scale": 1.0, "lens": CLOSE_LENS_MM, "focus_follows": True,
+        "path": [(STILL_CAMERAS["col-final"]["location"], STILL_CAMERAS["col-final"]["target"])] * 2,
+    },
+    "cut09head": {
+        "seconds": 3, "screens": "ambient-3", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
+        "path": [along_axis(-8.6)] * 2,
     },
     # Cut 8: one camera move column -> ribbon -> back wall, holding on each screen and easing between them; the
     # screens change bulletin as each move starts (demo/capture/cut08_sequence.sh).
