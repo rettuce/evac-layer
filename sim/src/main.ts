@@ -63,7 +63,6 @@ const first = pinned ?? presets.find((preset) => preset.name === INITIAL.preset)
 if (first) rig.jumpTo(first)
 
 const displays = new Displays(room.displayMeshes, crops, INITIAL)
-const summary = `${room.pieces.length} pieces · ${displays.faces.length} faces · ${presets.length} cameras`
 status.textContent = 'loading video …'
 
 let places: Places | undefined
@@ -108,7 +107,8 @@ for (const ambientScene of SCENES) {
   void displays.hasVideo(ambientScene).then((available) => ui.setSceneAvailable(ambientScene, available))
 }
 
-const debugPanels = [document.getElementById('ui')!, document.getElementById('fps')!]
+// [D] leaves only the room and its screens (田中 S-R1 5).
+const debugPanels = ['ui', 'now', 'dock', 'info', 'panel-toggle'].map((id) => document.getElementById(id)!)
 let debugShown = true
 // Steps over scenes whose loop is missing; the scene also changes under EVAC LAYER, for when it comes back.
 function stepScene(direction: 1 | -1): void {
@@ -157,7 +157,7 @@ const ready = displays.hasVideo(INITIAL.scene).then(async (available) => {
   }
   try {
     await displays.start()
-    status.textContent = summary
+    status.textContent = ''
     return true
   } catch (error) {
     status.textContent = String(error)
