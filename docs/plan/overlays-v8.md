@@ -10,7 +10,7 @@ PNG: `demo/compose/overlays/ov-<cut>-<kind>-<n>.png`（1920×1080・RGBA 透過�
 | subtitle | 日本語 Noto Sans JP Bold 44 px（行送り 60）／英語 Public Sans SemiBold 32 px（行送り 42）。白文字 | 黒 55% の帯（左右 32・上下 20 px・角丸なし）に日本語の下に英語。中央揃え。帯の下端が画面下端から 72 px。最大幅 1600 px |
 | telop | 日本語 Noto Sans JP Bold 72 px／英語 Public Sans Bold 48 px。白文字＋ドロップシャドウ（黒 60%・ぼかし 24・y 4）。帯なし | 画面中央（縦横とも）。2 行（日本語の下に英語） |
 | telop（2） | telop と同じ | 左上・左揃え。テロップのブロックの左上が画面の左上から 96 px（x 96・y 96） |
-| telop（2b の見出し） | IDEA: Barlow Semi Condensed SemiBold 29 px（本文 ja 72 の 0.4 倍）・字間 +20%・白・大文字。本文と同じドロップシャドウ | 本文 ja 1 行目の上、行間 1 つ分（28 px = 行送り 100 − 字級 72）あけて中央。字間の末尾ぶん左に 6 px 足して視覚中心をそろえる。日英共通で 1 つ |
+| telop（2b の見出し） | IDEA: Barlow Semi Condensed SemiBold 44 px（本文 ja 72 の約 0.6 倍）・行送り 36・字間 +20%・大文字・警戒レベル 4 の色 #AA00AA（palette.ts CABINET_OFFICE_5[4]）。本文と同じドロップシャドウ | 本文 ja 1 行目の上、中央。字面どうしの空き 34 px を本文の行間の見かけ（32〜33 px）にそろえた。字間の末尾ぶん左に 9 px 足して視覚中心をそろえる。日英共通で 1 つ |
 | telop（0b） | Public Sans Bold 120 px・字間 -2%（ロゴ規則） | 画面中央 |
 | telop（10） | URL Public Sans Bold 64 px／メール Public Sans SemiBold 48 px | 画面中央 |
 | logo | `docs/brand/evac-layer-lockup-run-black.svg` の背景矩形を外して読み込み。幅 1190 px（原寸 2380 の 1/2） | 画面中央。菱形の内側の黒塗りは残してある（黒地のエンドカード前提。黒以外の背景に置くと菱形の内側が黒く出る） |
@@ -82,3 +82,5 @@ Figma のページ「v8 overlays」が文言の正本。該当フレームの文
 2026-11-06 B-19（田中が録音時に変更）: cut 2 の字幕 2 枚を差し替え。subtitle-1 ja「10年以上設計し、納めてきました。」→「10年以上作ってきました。」・en "I have designed and installed signage" → "I have built signage"。subtitle-2 ja「災害のとき、／自分から情報を出すことが…」→「災害時、／自分から情報を能動的に出すことが…」・en "could not put out" → "could not actively put out"。帯の高さは 2 枚とも 252 px のまま。
 
 2026-11-06 B-20（田中確定・11:4x に見出し追加）: cut 2b のテロップを問いの形に差し替え、見出し「IDEA」を追加。依頼は ja 3 行だったが、2 行目「それらが自分の位置を知り、災害時に適切な避難情報を出す。」は 72 px で 2006 px になり画面幅 1920 を超えるため、「知り、」の後で割って 4 行にした（字級は現行のまま）。en も 2 行目を "…where it stands" の後で割って 4 行。代案（ja 3 行のまま 56 px）は Figma の ov-2b-telop-1-alt-ja56（3325:14）に残してある。
+
+2026-11-06 B-21（田中 12:0x）: 2b テロップは 72 px・4 行の案で確定（alt-ja56 は不採用・Figma に残置）。見出し IDEA を 29 px 白 → 44 px・#AA00AA に変更。明度だけ上げた比較案 #C83CC8 は Figma の ov-2b-telop-1-alt-C83CC8（3328:4）に残してある。黒地とのコントラスト比は #AA00AA 3.29:1、#C83CC8 4.94:1。
