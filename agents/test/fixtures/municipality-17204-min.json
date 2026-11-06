@@ -1,6 +1,7 @@
 {
   "id": "17204",
   "name": "輪島市",
+  "name_en": "Wajima",
   "prefecture": "石川県",
   "sources": [{ "type": "gsi", "file": "17204_2.csv", "title": "国土地理院 指定緊急避難場所データ", "year": null, "pages": null }],
   "hazards": [],

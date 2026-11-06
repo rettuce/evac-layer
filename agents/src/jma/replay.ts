@@ -5,12 +5,11 @@ import { formatErrors, validateDoc } from "../schemas.js";
 import { listBodies, mentionsMunicipality, FEED_DIR } from "./feed.js";
 import { parseJmaXml, type Alert } from "./parse.js";
 import { tsunamiRegionsFor } from "./regions.js";
-import { RAW_DIR, REPO_ROOT } from "../paths.js";
+import { SAMPLES_DIR, SAMPLES_LIST_DIR, requireRawDir } from "../paths.js";
 
 // Official JMA sample bulletins (not redistributed) that a municipality replays besides its feed recording, listed in
 // data/samples/<id>.json; a feed recorded in a quiet season has no tsunami bulletin, the samples do.
-export const SAMPLES_DIR = process.env.JMA_SAMPLES_DIR ?? path.join(RAW_DIR, "jma-samples", "unzipped");
-const SAMPLES_LIST_DIR = path.join(REPO_ROOT, "data", "samples");
+export { SAMPLES_DIR };
 
 const REPLAYABLE = /^(VPWW55|VPWW56|VXKO\d{2}|VTSE41)$/;
 
@@ -80,6 +79,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error("usage: pnpm -F agents replay --municipality <id> [--summary] [--out file.json]");
     process.exit(2);
   }
+  requireRawDir(path.join(FEED_DIR, "bodies"), "JMA feed recording (JMA_FEED_DIR)");
   const { entries, errors } = replay(values.municipality);
   for (const e of errors) console.error(`[parse error] ${e.file}: ${e.error}`);
   if (values.summary) {

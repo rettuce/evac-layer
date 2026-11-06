@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evac-layer.dev/schema/municipality-preset.schema.json",
+  "title": "EVAC LAYER municipality preset (data/municipalities/<id>.preset.json)",
+  "description": "What the Reader and the shelters CLI need to build a municipality file: its names and the raw inputs, relative to EVAC_RAW_DIR.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "name_en", "prefecture", "pdfs", "gsi", "gsi_retrieved"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^\\d{5}$" },
+    "name": { "type": "string", "minLength": 1 },
+    "name_en": { "type": "string", "minLength": 1 },
+    "prefecture": { "type": "string", "minLength": 1 },
+    "pdfs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "gsi": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "gsi_retrieved": { "type": "string", "format": "date", "description": "Date the GSI CSVs were downloaded." }
+  }
+}

@@ -1,14 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
-import { REPO_ROOT } from "../paths.js";
+import { LAYOUTS_DIR, REPORTS_DIR, REPO_ROOT } from "../paths.js";
 import type { LoopResult } from "./loop.js";
 
-export const REPORTS_DIR = path.join(REPO_ROOT, "data", "reports");
-export const LAYOUTS_DIR = path.join(REPO_ROOT, "data", "layouts");
+export { LAYOUTS_DIR, REPORTS_DIR };
 
-export function writeReport(args: { municipalityId: string; bulletinId: string; verifier: string; reviser: string; maxAttempts: number; result: LoopResult; writerNote?: string; roots?: { reports: string; layouts: string } }) {
-  const dir = path.join(args.roots?.reports ?? REPORTS_DIR, `${args.municipalityId}-${args.bulletinId}`);
-  const layoutDir = path.join(args.roots?.layouts ?? LAYOUTS_DIR, args.municipalityId, args.bulletinId);
+export function writeReport(args: { siteId: string; municipalityId: string; bulletinId: string; verifier: string; reviser: string; maxAttempts: number; result: LoopResult; writerNote?: string; roots?: { reports: string; layouts: string } }) {
+  const dir = path.join(args.roots?.reports ?? REPORTS_DIR, args.siteId, args.bulletinId);
+  const layoutDir = path.join(args.roots?.layouts ?? LAYOUTS_DIR, args.siteId, args.bulletinId);
   fs.mkdirSync(dir, { recursive: true });
   fs.rmSync(layoutDir, { recursive: true, force: true });
   fs.mkdirSync(layoutDir, { recursive: true });
@@ -20,6 +19,7 @@ export function writeReport(args: { municipalityId: string; bulletinId: string; 
   const report = {
     kind: "evac-loop-report",
     version: "0.1",
+    site: args.siteId,
     municipality: args.municipalityId,
     bulletin_id: args.bulletinId,
     verifier: args.verifier,

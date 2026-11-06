@@ -1,18 +1,18 @@
 import path from "node:path";
 import { parseArgs } from "node:util";
-import { REPO_ROOT } from "../paths.js";
+import { EVAC_URL, REPO_ROOT } from "../paths.js";
 import { ExportStop, exportSite } from "./export.js";
 
 const { values } = parseArgs({
   options: {
     site: { type: "string" },
     out: { type: "string", default: path.join(REPO_ROOT, "dist") },
-    "base-url": { type: "string", default: process.env.EVAC_URL ?? "http://127.0.0.1:3152" },
+    "base-url": { type: "string", default: EVAC_URL },
     "skip-shapes": { type: "string", default: "" },
   },
 });
 if (!values.site) {
-  console.error("usage: pnpm -F agents export --site <site_id> [--out dist/] [--base-url http://127.0.0.1:3152] [--skip-shapes pillar]");
+  console.error("usage: pnpm -F agents export --site <site_id> [--out dist/] [--base-url $EVAC_URL (default http://127.0.0.1:3150)] [--skip-shapes pillar]");
   process.exit(2);
 }
 try {

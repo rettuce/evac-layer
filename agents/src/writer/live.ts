@@ -6,13 +6,13 @@ import { strictestBudgets } from "../composer/budgets.js";
 import { actionPictogramMeaning, actionPictogram, type Situation } from "../composer/rules.js";
 import type { Alert } from "../jma/parse.js";
 import { tsunamiRegionsFor } from "../jma/regions.js";
-import { REPO_ROOT } from "../paths.js";
+import { WRITER_DIR } from "../paths.js";
 import { MODELS, costOf, type CallUsage } from "../reader/pricing.js";
 import { toStructuredSchema } from "../reader/extraction.js";
 import { WRITER_OUTPUT_SCHEMA, writerAlertBlock, writerMunicipalityBlock, writerSystem } from "./request.js";
 import { lintEasyJapanese, lintEnglishScript, lintLatinScript, lintThaiScript, lintTraditionalScript, lintJaEasyScript, lintLevel5, lintMunicipalOrderName, type LintFinding } from "./rules.js";
 
-export const WRITER_DIR = path.join(REPO_ROOT, "data", "writer");
+export { WRITER_DIR };
 const WRITER_ROLES = ["headline", "action", "languages"] as const;
 const MAX_TOKENS = 16_000;
 

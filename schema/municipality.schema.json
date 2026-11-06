@@ -26,6 +26,11 @@
       "type": "string",
       "minLength": 1
     },
+    "name_en": {
+      "type": "string",
+      "minLength": 1,
+      "description": "English name used on the screen's source line (e.g. Yurihonjo). Without it the source line is Japanese only."
+    },
     "prefecture": {
       "type": "string",
       "minLength": 1

@@ -58,7 +58,7 @@ test("stage 2 output is resolved to real citation pages and shelter names are cr
   assert.equal(claims.length, 2);
   const shelters = [{ name: "旧輪島市立河原田小学校（体育館）", kind: "evacuation_shelter" as const, address: "x", lat: 37.37, lng: 136.9, hazards_ok: [], source: { type: "gsi" as const, file: "17204_1.csv", id: "E1" } }];
   const doc = assemble({
-    id: "17204", name: "輪島市", prefecture: "石川県", model: "m", readerVersion: "t",
+    id: "17204", name: "輪島市", name_en: "Test", prefecture: "石川県", model: "m", readerVersion: "t",
     extraction: {
       documents: [{ file: "a.pdf", title: "指定緊急避難場所", year: 2026 }],
       hazards: [{ type: "tsunami", areas: ["海岸部"], notes_ja: "", citation_id: "C2" }],
@@ -81,7 +81,7 @@ test("stage 2 output is resolved to real citation pages and shelter names are cr
 test("an invented citation id stops assembly", () => {
   const { citations } = collectClaims([block("x", 1)], ["a.pdf"]);
   assert.throws(() => assemble({
-    id: "17204", name: "n", prefecture: "p", model: "m", readerVersion: "t",
+    id: "17204", name: "n", name_en: "Test", prefecture: "p", model: "m", readerVersion: "t",
     extraction: { documents: [], hazards: [], routes: [{ text_ja: "高台へ", citation_id: "C9" }], cautions: [], contacts: [], shelter_mentions: [] },
     citations, shelters: [], pdfSources: [], gsiSources: [],
   }), /C9/);
@@ -102,7 +102,7 @@ test("vision facts carry the page the code sent and no quotable text", async () 
   assert.equal(claims.length, 2);
   assert.deepEqual(citations.get("C2"), { file: "map.pdf", page: 2, method: "vision", cited_text: null });
   const doc = assemble({
-    id: "05210", name: "由利本荘市", prefecture: "秋田県", model: "m", readerVersion: "t",
+    id: "05210", name: "由利本荘市", name_en: "Test", prefecture: "秋田県", model: "m", readerVersion: "t",
     extraction: { documents: [], hazards: [{ type: "flood", areas: ["本荘地域"], notes_ja: "想定最大規模降雨 330mm", citation_id: "C2" }], routes: [], cautions: [], contacts: [], shelter_mentions: [] },
     citations, shelters: [],
     pdfSources: [{ type: "pdf", file: "list.pdf", title: "l", year: null, pages: 3 }, { type: "pdf", file: "map.pdf", title: "m", year: null, pages: 13 }],

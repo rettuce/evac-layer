@@ -17,11 +17,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VTSE41-201609010713-ff3dd5d5c94f/16x9.json",
-        "data/layouts/17204/VTSE41-201609010713-ff3dd5d5c94f/9x16.json",
-        "data/layouts/17204/VTSE41-201609010713-ff3dd5d5c94f/32x9.json",
-        "data/layouts/17204/VTSE41-201609010713-ff3dd5d5c94f/1x1.json",
-        "data/layouts/17204/VTSE41-201609010713-ff3dd5d5c94f/pillar.json"
+        "data/layouts/17204-demo/VTSE41-201609010713-ff3dd5d5c94f/16x9.json",
+        "data/layouts/17204-demo/VTSE41-201609010713-ff3dd5d5c94f/9x16.json",
+        "data/layouts/17204-demo/VTSE41-201609010713-ff3dd5d5c94f/32x9.json",
+        "data/layouts/17204-demo/VTSE41-201609010713-ff3dd5d5c94f/1x1.json",
+        "data/layouts/17204-demo/VTSE41-201609010713-ff3dd5d5c94f/pillar.json"
       ],
       "report": "data/reports/17204-VTSE41-201609010713-ff3dd5d5c94f/report.json"
     },
@@ -38,11 +38,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VTSE41-201609010726-05a7380a3e46/16x9.json",
-        "data/layouts/17204/VTSE41-201609010726-05a7380a3e46/9x16.json",
-        "data/layouts/17204/VTSE41-201609010726-05a7380a3e46/32x9.json",
-        "data/layouts/17204/VTSE41-201609010726-05a7380a3e46/1x1.json",
-        "data/layouts/17204/VTSE41-201609010726-05a7380a3e46/pillar.json"
+        "data/layouts/17204-demo/VTSE41-201609010726-05a7380a3e46/16x9.json",
+        "data/layouts/17204-demo/VTSE41-201609010726-05a7380a3e46/9x16.json",
+        "data/layouts/17204-demo/VTSE41-201609010726-05a7380a3e46/32x9.json",
+        "data/layouts/17204-demo/VTSE41-201609010726-05a7380a3e46/1x1.json",
+        "data/layouts/17204-demo/VTSE41-201609010726-05a7380a3e46/pillar.json"
       ],
       "report": "data/reports/17204-VTSE41-201609010726-05a7380a3e46/report.json"
     },
@@ -59,11 +59,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VTSE41-201609010955-5a813306d772/16x9.json",
-        "data/layouts/17204/VTSE41-201609010955-5a813306d772/9x16.json",
-        "data/layouts/17204/VTSE41-201609010955-5a813306d772/32x9.json",
-        "data/layouts/17204/VTSE41-201609010955-5a813306d772/1x1.json",
-        "data/layouts/17204/VTSE41-201609010955-5a813306d772/pillar.json"
+        "data/layouts/17204-demo/VTSE41-201609010955-5a813306d772/16x9.json",
+        "data/layouts/17204-demo/VTSE41-201609010955-5a813306d772/9x16.json",
+        "data/layouts/17204-demo/VTSE41-201609010955-5a813306d772/32x9.json",
+        "data/layouts/17204-demo/VTSE41-201609010955-5a813306d772/1x1.json",
+        "data/layouts/17204-demo/VTSE41-201609010955-5a813306d772/pillar.json"
       ],
       "report": "data/reports/17204-VTSE41-201609010955-5a813306d772/report.json"
     },
@@ -170,11 +170,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/16x9.json",
-        "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/9x16.json",
-        "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/32x9.json",
-        "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/1x1.json",
-        "data/layouts/17204/VPWW55-202610200500-e9e69c6c3b73/pillar.json"
+        "data/layouts/17204-demo/VPWW55-202610200500-e9e69c6c3b73/16x9.json",
+        "data/layouts/17204-demo/VPWW55-202610200500-e9e69c6c3b73/9x16.json",
+        "data/layouts/17204-demo/VPWW55-202610200500-e9e69c6c3b73/32x9.json",
+        "data/layouts/17204-demo/VPWW55-202610200500-e9e69c6c3b73/1x1.json",
+        "data/layouts/17204-demo/VPWW55-202610200500-e9e69c6c3b73/pillar.json"
       ],
       "report": "data/reports/17204-VPWW55-202610200500-e9e69c6c3b73/report.json"
     },
@@ -191,11 +191,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/16x9.json",
-        "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/9x16.json",
-        "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/32x9.json",
-        "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/1x1.json",
-        "data/layouts/17204/VPWW55-202610200711-08afb5e91cb5/pillar.json"
+        "data/layouts/17204-demo/VPWW55-202610200711-08afb5e91cb5/16x9.json",
+        "data/layouts/17204-demo/VPWW55-202610200711-08afb5e91cb5/9x16.json",
+        "data/layouts/17204-demo/VPWW55-202610200711-08afb5e91cb5/32x9.json",
+        "data/layouts/17204-demo/VPWW55-202610200711-08afb5e91cb5/1x1.json",
+        "data/layouts/17204-demo/VPWW55-202610200711-08afb5e91cb5/pillar.json"
       ],
       "report": "data/reports/17204-VPWW55-202610200711-08afb5e91cb5/report.json"
     },
@@ -232,11 +232,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/16x9.json",
-        "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/9x16.json",
-        "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/32x9.json",
-        "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/1x1.json",
-        "data/layouts/17204/VPWW55-202610201141-6bb4c931f4d3/pillar.json"
+        "data/layouts/17204-demo/VPWW55-202610201141-6bb4c931f4d3/16x9.json",
+        "data/layouts/17204-demo/VPWW55-202610201141-6bb4c931f4d3/9x16.json",
+        "data/layouts/17204-demo/VPWW55-202610201141-6bb4c931f4d3/32x9.json",
+        "data/layouts/17204-demo/VPWW55-202610201141-6bb4c931f4d3/1x1.json",
+        "data/layouts/17204-demo/VPWW55-202610201141-6bb4c931f4d3/pillar.json"
       ],
       "report": "data/reports/17204-VPWW55-202610201141-6bb4c931f4d3/report.json"
     },
@@ -323,11 +323,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/16x9.json",
-        "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/9x16.json",
-        "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/32x9.json",
-        "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/1x1.json",
-        "data/layouts/17204/VPWW55-202610211215-0f00f618dc6d/pillar.json"
+        "data/layouts/17204-demo/VPWW55-202610211215-0f00f618dc6d/16x9.json",
+        "data/layouts/17204-demo/VPWW55-202610211215-0f00f618dc6d/9x16.json",
+        "data/layouts/17204-demo/VPWW55-202610211215-0f00f618dc6d/32x9.json",
+        "data/layouts/17204-demo/VPWW55-202610211215-0f00f618dc6d/1x1.json",
+        "data/layouts/17204-demo/VPWW55-202610211215-0f00f618dc6d/pillar.json"
       ],
       "report": "data/reports/17204-VPWW55-202610211215-0f00f618dc6d/report.json"
     },
@@ -344,11 +344,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/16x9.json",
-        "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/9x16.json",
-        "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/32x9.json",
-        "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/1x1.json",
-        "data/layouts/17204/VPWW56-202610211304-1ebf37f5ab8a/pillar.json"
+        "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/16x9.json",
+        "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/9x16.json",
+        "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/32x9.json",
+        "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/1x1.json",
+        "data/layouts/17204-demo/VPWW56-202610211304-1ebf37f5ab8a/pillar.json"
       ],
       "report": "data/reports/17204-VPWW56-202610211304-1ebf37f5ab8a/report.json"
     },
@@ -395,11 +395,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/16x9.json",
-        "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/9x16.json",
-        "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/32x9.json",
-        "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/1x1.json",
-        "data/layouts/17204/VPWW55-202610211942-7720a18f5cfa/pillar.json"
+        "data/layouts/17204-demo/VPWW55-202610211942-7720a18f5cfa/16x9.json",
+        "data/layouts/17204-demo/VPWW55-202610211942-7720a18f5cfa/9x16.json",
+        "data/layouts/17204-demo/VPWW55-202610211942-7720a18f5cfa/32x9.json",
+        "data/layouts/17204-demo/VPWW55-202610211942-7720a18f5cfa/1x1.json",
+        "data/layouts/17204-demo/VPWW55-202610211942-7720a18f5cfa/pillar.json"
       ],
       "report": "data/reports/17204-VPWW55-202610211942-7720a18f5cfa/report.json"
     },
@@ -446,11 +446,11 @@
       "outcome": "pass",
       "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
       "layouts": [
-        "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/16x9.json",
-        "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/9x16.json",
-        "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/32x9.json",
-        "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/1x1.json",
-        "data/layouts/17204/VPWW56-202610220000-d13b2ada2646/pillar.json"
+        "data/layouts/17204-demo/VPWW56-202610220000-d13b2ada2646/16x9.json",
+        "data/layouts/17204-demo/VPWW56-202610220000-d13b2ada2646/9x16.json",
+        "data/layouts/17204-demo/VPWW56-202610220000-d13b2ada2646/32x9.json",
+        "data/layouts/17204-demo/VPWW56-202610220000-d13b2ada2646/1x1.json",
+        "data/layouts/17204-demo/VPWW56-202610220000-d13b2ada2646/pillar.json"
       ],
       "report": "data/reports/17204-VPWW56-202610220000-d13b2ada2646/report.json"
     },

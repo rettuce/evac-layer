@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { parseArgs } from "node:util";
 import type { Site } from "../composer/compose.js";
 import type { ReplayEntry } from "../jma/replay.js";
-import { resolveUserPath } from "../paths.js";
+import { EVAC_URL, resolveUserPath } from "../paths.js";
 import { browserVerifier } from "./browser-verifier.js";
 import { runReplay } from "./replay-run.js";
 import { staticVerifier } from "./static-verifier.js";
@@ -10,7 +10,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { requireApiKey } from "../apikey.js";
 import type { WriterModel } from "../writer/live.js";
 
-const { values } = parseArgs({ options: { replay: { type: "string" }, site: { type: "string" }, verifier: { type: "string", default: "static" }, writer: { type: "string", default: "placeholder" }, "writer-model": { type: "string", default: "opus" }, "base-url": { type: "string", default: process.env.EVAC_URL ?? "http://127.0.0.1:3152" }, "skip-browser-shapes": { type: "string", default: "" } } });
+const { values } = parseArgs({ options: { replay: { type: "string" }, site: { type: "string" }, verifier: { type: "string", default: "static" }, writer: { type: "string", default: "placeholder" }, "writer-model": { type: "string", default: "opus" }, "base-url": { type: "string", default: EVAC_URL }, "skip-browser-shapes": { type: "string", default: "" } } });
 if (!values.replay || !values.site) {
   console.error("usage: pnpm -F agents replay-pipeline --replay <replay.json> --site <site.json> [--verifier static|browser]");
   process.exit(2);

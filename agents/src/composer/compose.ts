@@ -4,7 +4,7 @@ import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { Lang } from "../writer/request.js";
 import { budgetsFor } from "./budgets.js";
 import { shapeContract } from "./template.js";
-import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, DRILL_PREFIX_JA, LANGUAGES_REQUIRED_ON, MONTH_EN, MUNICIPALITY_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor, tsunamiClearedFrom } from "./rules.js";
+import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, DRILL_PREFIX_JA, LANGUAGES_REQUIRED_ON, MONTH_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor, tsunamiClearedFrom } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
 export interface WriterOutput { cells: WriterCell[] }
@@ -43,6 +43,7 @@ interface Citation { file: string; page: number; cited_text: string }
 export interface Municipality {
   id: string;
   name: string;
+  name_en?: string;
   sources: { type: string; file: string; title: string; year: number | null }[];
   hazards: { type: string; source: Citation }[];
   shelters: Shelter[];
@@ -96,7 +97,7 @@ function sourceLine(alert: Alert, m: Municipality): { ja: string; en?: string } 
   const issuedAt = alert.issued_at;
   const t = issuedAt.match(/^\d{4}-(\d{2})-(\d{2})T(\d{2}):(\d{2})/) ?? stop(`issued_at ${issuedAt} has no date and time`);
   const [month, day, hhmm] = [Number(t[1]), Number(t[2]), `${t[3]}:${t[4]}`];
-  const en = MUNICIPALITY_EN[m.id];
+  const en = m.name_en;
   const by = issuer(alert);
   return { ja: `${by.ja} ${month}/${day} ${hhmm} 発表・${m.name}`, ...(en ? { en: `${by.en} ${hhmm}, ${MONTH_EN[month - 1]} ${day} · ${en}` } : {}) };
 }
