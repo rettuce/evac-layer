@@ -99,7 +99,7 @@ export default defineEventHandler(async () => {
         languageVariants += languages ? Object.keys(languages.text).length : 1
         for (const source of layout.sources) sources.add(JSON.stringify(source))
       }
-      if (entry.screen && (await readJsonIfExists(join(root, 'reports', `${code}-${entry.bulletin_id}`, 'report.json')))) reports += 1
+      if (entry.screen && (await readJsonIfExists(join(root, 'reports', site, entry.bulletin_id, 'report.json')))) reports += 1
     }
     const own = findings.filter((f) => f.municipality === code)
     rows.push({
