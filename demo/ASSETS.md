@@ -22,6 +22,8 @@
 
 音（`compose/mix_audio.py`）: Adobe Audition SFX（Adobe 無償配布・各カテゴリの LICENSE.pdf。作品内での使用・改変・配布は可、素材単体での配布は不可）から 3 本 — 環境音 `Ambience_1/Ambience Court House Security Checkpoint Interior Opposite Not Busy 02.wav`、切替の電子音 `Science Fiction/Science Fiction Sci-Fi Electronic Beep 04.wav`（97 ms・2026-11-05 に Alert Beep High 01 から差し替え）、ドローン `Drones/Drone Production Element Imaging Bed Deep Bass 01.wav`。素材の WAV は `compose/audio/`（gitignore）に置き、リポにはミックス後の動画だけを出す。
 
+場面転換の音（`compose/se_scene.py`）: ノイズと 9 kHz 以上の短い音を Python の標準ライブラリで合成した。外部の素材は使っていない。
+
 BGM（`compose/mix_audio.py` の既定・`compose/audio/bgm/grid-cover-1-00254105.wav`・gitignore）: Suno で生成した「Rigorous Grid Study - 175」 https://suno.com/song/00254105-6ec5-4a63-a178-f82a1451777a 。2026-11-05、Suno Pro プランの契約中に作成した（Suno の公式 MCP から、同じく Pro 期間中に作った自作曲 https://suno.com/song/c7d83c10-aa27-429a-bdbc-fb8887831934 のカバーとして生成）。Suno の利用規約では有料プラン契約中に作った曲は作成者が所有し商用利用できる。ファイルに入っている Suno の透かしは除去していない。
 
 ナレーションの自動音声（試作・`demo/out/tts/`・gitignore）:
@@ -29,3 +31,15 @@ BGM（`compose/mix_audio.py` の既定・`compose/audio/bgm/grid-cover-1-0025410
 - VOICEVOX（未導入）: ソフトウェア規約 https://voicevox.hiroshiba.jp/term/ では商用・非商用とも利用可で、「VOICEVOX を利用したことがわかる」クレジットが必要。ただし音声ライブラリ（キャラクター）ごとに別の規約があり、使うキャラクターの規約も確認する必要がある
 
 地図（カット 5c・`compose/cut05c.py`）: OpenStreetMap 標準タイル zoom 16 https://tile.openstreetmap.org/ （© OpenStreetMap contributors・データは ODbL 1.0・https://www.openstreetmap.org/copyright）。タイル利用ポリシーに従い、アプリ名入りの User-Agent で 1 枚ずつ一度だけ取得して `cache/osm/`（gitignore）に置く。画面左上に「地図: © OpenStreetMap contributors にディスプレイと避難場所の位置を追記」をカットの間ずっと表示する。ディスプレイと避難場所の座標は国土地理院 指定緊急避難場所データ（`data/municipalities/05210.shelters.json`）。
+
+## docs/images/ の画像
+
+README で使う画像の出所。画面はすべてこのリポジトリの描画部（`app/`）で描いたもので、文字は同梱の Noto フォント（`app/ASSETS.md`）。
+
+| ファイル | 中身と出所 |
+|---|---|
+| `hero-lv4.jpg`・`kv-alert.jpg`・`kv-ambient.jpg`・`kv-tsunami.jpg`・`levels-same-moment.jpg` | `blender/` で描いたコンコースの 3D に、描画部で録った画面を貼ったもの。テクスチャと HDRI は上の表の Poly Haven（CC0）。平常時の映像は描画部の平時レイヤー（`app/layout/ambient/`）が生成したもの |
+| `where-it-stands.jpg` | カット 5c と同じ組み方。地図は上の「地図」の段落のとおり OpenStreetMap（© OpenStreetMap contributors・ODbL 1.0）で、画面の中にもその表記がある。避難場所の位置は国土地理院のデータ |
+| `screens-from-real-bulletins.jpg` | 背景のタイルはカット 7m と同じ、架空の案内画面（`capture/mosaic_layouts.mjs`。自治体・施設・発表時刻はすべて架空）を描画部で撮ったもの。数字は `/api/dashboard` の集計 |
+| `admin-approval.jpg` | 運営者画面 `/admin` のスクリーンショット |
+| `layout-tuning.png` | 描画部の画面に配置の補助線を重ねたスクリーンショットを、調整の前後で並べたもの |
