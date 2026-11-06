@@ -143,6 +143,8 @@ pnpm -F app test                    # app: ビルド＋ポリシー/サーバの
 
 デモ自治体の知識ファイル・レイアウト・レポートを同梱しているので、運営者画面は API キーなしで動きます。Reader・Writer・Vision 検査を自分で回すには `agents/.env` に `ANTHROPIC_API_KEY` が要ります。各コマンドと費用は `agents/README.md`。
 
+公開しているのは、ブラウザで動く静的なシミュレーター（GitHub Pages）だけです。そこから Claude API を呼ぶ経路はありません。Reader・Writer と運営者画面（`/admin`）は、手元で自分の API キーを使って動かします。
+
 ## データと権利
 
 - **気象庁 防災情報 XML** — 公式サンプル電文を無加工で再生したものと、2026 年 10 月から公開されている長期フィードを記録した電文。記録したフィードは再配布せず、デモ自治体の再生用の電文だけを含みます。
@@ -172,5 +174,7 @@ AGPL-3.0（`LICENSE`）。Copyright (C) 2026 You Tanaka。
 **EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.** The screens are already there, and each one knows where it stands. What is missing is what to draw for that spot, the moment after the takeover. EVAC LAYER draws it, for any screen in Japan, generated with Claude.
 
 Give EVAC LAYER the coordinates of a site (one venue; its screens share them) and it works out the rest for that spot: the municipality whose bulletins apply, the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. Move the coordinates and the shelter, direction and distance follow; today the repository holds one site per municipality. It reads the municipality's own hazard-map PDFs with citations (Reader, Claude), replays recorded JMA disaster-prevention XML (the live receiver is not part of this repository), writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five screen shapes, inspects every screen by rules, in a browser and by Vision (Claude), and fires `alert` / `clear` events carrying only operator-approved screens, as a feed, a signed webhook or static files. Any signage system can act on them. In steady state a screen costs about $0.245 in API calls, roughly $13 per municipality per year. A nationwide estimate, on rough assumptions, is at the end of `docs/evaluation.md`.
+
+The only thing deployed publicly is the static browser simulator on GitHub Pages, and nothing there calls the Claude API; the Reader, the Writer and the operator screen (`/admin`) run locally with your own API key.
 
 Built from scratch during Built with Claude: Japan 2026 (Nov 2–8). Everything in this repository was written from Nov 2, 12:00 JST, by one commander session and eight Claude Code implementation sessions (agents, render, demo, layout, sim, brand, copy and bgm) on their own git worktrees. Licensed AGPL-3.0; free for municipalities, public-safety organizations, research and personal use; commercial license for embedding into proprietary signage products: you@ie3.jp.
