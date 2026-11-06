@@ -161,7 +161,7 @@ if (scenario.value) start()
   <div v-else-if="srcRejected" class="missing" data-error="src-rejected">src must be a same-origin path (production: the layout store only)</div>
   <div v-else-if="remoteError" class="missing" data-error="src-load-failed">{{ remoteError }}</div>
   <div v-else-if="src && !screen" class="missing" data-loading="src">loading {{ src }}</div>
-  <div v-else-if="!layoutName" class="missing" data-error="layout-unspecified">layout 未指定（?layout= または ?src= を指定してください）</div>
+  <div v-else-if="!src && !layoutName" class="missing" data-error="layout-unspecified">layout 未指定（?layout= または ?src= を指定してください）</div>
   <div v-else-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>
 
   <ShapeScreen
