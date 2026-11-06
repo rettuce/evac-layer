@@ -113,7 +113,7 @@ function coordinate(value: unknown, limit: number): number | undefined {
   const n = typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN
   return Number.isFinite(n) && Math.abs(n) <= limit ? n : undefined
 }
-const seed = computed(() => (room.value && crop.value ? roomSeedKey(room.value, route.query.canvas_id) : String(route.query.seed ?? layoutName.value ?? '')))
+const seed = computed(() => (room.value && crop.value ? roomSeedKey(room.value, route.query.canvas_id) : String(route.query.seed ?? route.query.layout ?? DEFAULT_FIXTURE)))
 const siteName = computed(() => String(route.query.site_name ?? screen.value?.municipality.name ?? ''))
 const realStartEpoch = Date.now()
 const clockEpochMs = computed(() => {
