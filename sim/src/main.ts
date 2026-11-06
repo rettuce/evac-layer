@@ -5,6 +5,7 @@ import { Displays } from './displays'
 import { applyRenderMode, loadRoom, type RenderMode } from './room'
 import { SCENES, loadCrops, type AmbientScene, type Content } from './crops'
 import { intro } from './intro'
+import { loadPlaces, placeOf, type Places } from './places'
 import { Timeline, renderNow } from './timeline'
 import { buildUi, fpsMeter } from './ui'
 
@@ -65,14 +66,23 @@ const displays = new Displays(room.displayMeshes, crops, INITIAL)
 const summary = `${room.pieces.length} pieces · ${displays.faces.length} faces · ${presets.length} cameras`
 status.textContent = 'loading video …'
 
+let places: Places | undefined
+function showState(setId: string | undefined): void {
+  renderNow(nowBadge, setId)
+  places?.show(placeOf(setId))
+}
 const timeline = new Timeline(document.getElementById('timeline')!, {
   onShow: (setId) => {
     displays.showSet(setId)
     ui.showContent(setId ? 'evac' : 'calm')
-    renderNow(nowBadge, setId)
+    showState(setId)
   },
 })
-renderNow(nowBadge, undefined)
+showState(undefined)
+void loadPlaces(document.getElementById('places')!, (setId) => timeline.showVariant(setId)).then((loaded) => {
+  places = loaded
+  showState(displays.content === 'evac' ? displays.alertSet?.id : undefined)
+})
 
 const ui = buildUi(document.getElementById('ui')!, presets, INITIAL, {
   onContent: (content) => {
@@ -117,7 +127,7 @@ function toggleRandomAlert(): void {
   if (ui.content === 'calm') displays.setContent('evac')
   else displays.showSet(undefined)
   ui.showContent(displays.content)
-  renderNow(nowBadge, displays.content === 'evac' ? displays.alertSet?.id : undefined)
+  showState(displays.content === 'evac' ? displays.alertSet?.id : undefined)
 }
 document.getElementById('panel-toggle')!.addEventListener('click', () => document.body.classList.toggle('panel-open'))
 addEventListener('keydown', (event) => {
