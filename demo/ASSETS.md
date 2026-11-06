@@ -22,7 +22,7 @@
 
 音（`compose/mix_audio.py`）: Adobe Audition SFX（Adobe 無償配布・各カテゴリの LICENSE.pdf。作品内での使用・改変・配布は可、素材単体での配布は不可）から 3 本 — 環境音 `Ambience_1/Ambience Court House Security Checkpoint Interior Opposite Not Busy 02.wav`、切替の電子音 `Science Fiction/Science Fiction Sci-Fi Electronic Beep 04.wav`（97 ms・2026-11-05 に Alert Beep High 01 から差し替え）、ドローン `Drones/Drone Production Element Imaging Bed Deep Bass 01.wav`。素材の WAV は `compose/audio/`（gitignore）に置き、リポにはミックス後の動画だけを出す。
 
-場面転換の音（`compose/se_scene.py`）: ノイズと 9 kHz 以上の短い音を Python の標準ライブラリで合成した。外部の素材は使っていない。
+場面転換の音（`compose/se_scene.py`）: ノイズと 9 kHz 以上の短い音を Python の標準ライブラリで合成した。外部の素材は使っていない。最終の映像には使っていない（スクリプトは残してある）。
 
 BGM（`compose/mix_audio.py` の既定・`compose/audio/bgm/grid-cover-1-00254105.wav`・gitignore）: Suno で生成した「Rigorous Grid Study - 175」 https://suno.com/song/00254105-6ec5-4a63-a178-f82a1451777a 。2026-11-05、Suno Pro プランの契約中に作成した（Suno の公式 MCP から、同じく Pro 期間中に作った自作曲 https://suno.com/song/c7d83c10-aa27-429a-bdbc-fb8887831934 のカバーとして生成）。Suno の利用規約では有料プラン契約中に作った曲は作成者が所有し商用利用できる。ファイルに入っている Suno の透かしは除去していない。
 
