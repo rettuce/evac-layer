@@ -108,20 +108,20 @@ function markdown(infos, files) {
   const lines = [
     '# Screens',
     '',
-    `Every screen below is drawn from a bulletin of the Japan Meteorological Agency: the Koyoshi River flood sequence in Yurihonjo, Akita (21–22 Oct 2026, real bulletins), and the official sample tsunami bulletins for Yoshida, Shizuoka (a drill, so every screen says so). The wording is written by the Writer agent from the municipal hazard map and checked by the Verifier (static, browser and vision). Stills are taken ${ALERT_AT_MS / 1000} s in, while the language band shows easy Japanese and English.`,
-    `気象庁の電文から作った画面です。秋田県由利本荘市の子吉川の洪水（2026-10-21〜22 の実際の電文）と、静岡県吉田町の津波（気象庁の公式サンプル電文。訓練なので画面にも【訓練】と出ます）。文言は Writer が自治体のハザードマップから書き、Verifier（静的・ブラウザ・画像）が検査しています。言語帯は、やさしい日本語と英語が出ている ${ALERT_AT_MS / 1000} 秒の時点で撮っています。`,
+    `Every screen below is drawn from a bulletin of the Japan Meteorological Agency: the Koyoshi River flood in Yurihonjo, Akita, from the bulletins actually issued on 21–22 Oct 2026, and the tsunami in Yoshida, Shizuoka, from JMA's official sample bulletins. The samples are drill bulletins, so every screen made from them says so. The Writer (Claude) writes the wording from the municipality's hazard map, and the Verifier checks every screen by rules, in a browser and by Vision. Each still is taken at ${ALERT_AT_MS / 1000} s, while the language row shows *yasashii nihongo* and English.`,
+    `気象庁の電文から作った画面です。秋田県由利本荘市の子吉川の洪水は、2026 年 10 月 21〜22 日に実際に発表された電文から、静岡県吉田町の津波は、気象庁の公式のサンプル電文から作りました。サンプルは訓練の電文なので、画面にも【訓練】と出ます。文言は Writer（Claude）が自治体のハザードマップをもとに書き、Verifier が規則・ブラウザ・Vision の 3 段で検査しています。どの画面も、言語の欄にやさしい日本語と英語が出ている ${ALERT_AT_MS / 1000} 秒の時点で撮りました。`,
     '',
-    'Regenerate with `pnpm -F app screens` (production build, loopback admin preview).',
+    'To regenerate: `pnpm -F app screens` (builds the app for production and captures each screen from the admin preview on localhost).',
     '',
   ]
   for (const [shape] of Object.entries(SHAPES)) {
-    lines.push(`## ${shape === 'pillar' ? 'pillar (four faces round a column, shown at 0.25)' : shape}`, '')
+    lines.push(`## ${shape === 'pillar' ? 'pillar (an LED wrapped round a column, four faces, shown at 1/4 size)' : shape}`, '')
     for (const [key] of BULLETINS) {
       const info = infos[key]
       const name = `${key}-${shape}`
       if (!sizeOf(name)) continue
       lines.push(`![${info.headline} (${shape})](screens/${name}.png)`, '')
-      lines.push(`${info.issued} JST · ${info.headline} · ${info.level} — source line: ${info.source}`, '')
+      lines.push(`${info.issued} JST · ${info.headline} · ${info.level} — source shown on the screen: ${info.source}`, '')
     }
   }
   lines.push('## Tsunami (Yoshida, Shizuoka — official sample bulletins, drill)', '')
@@ -129,19 +129,21 @@ function markdown(infos, files) {
     const info = infos[key]
     for (const shape of shapes) {
       lines.push(`![${info.headline} (${shape})](screens/${key}-${shape}.png)`, '')
-      lines.push(`${info.issued} JST · ${info.headline} · ${info.level} — source line: ${info.source}`, '')
+      lines.push(`${info.issued} JST · ${info.headline} · ${info.level} — source shown on the screen: ${info.source}`, '')
     }
   }
-  lines.push('## Ambient (no alert)', '')
+  lines.push('## Ambient (no warning in force)', '')
   for (const scene of SCENES) {
     for (const shape of ['16x9', 'pillar']) {
       lines.push(`![ambient ${scene} (${shape})](screens/ambient-${scene}-${shape}.png)`, '')
-      lines.push(`Ambient scene \`${scene}\` on ${shape}${shape === 'pillar' ? ' (the whole column as one picture, shown at 1280 wide)' : ''}; the clock, the site name and its coordinates sit in one corner (once on the front face of a pillar).`, '')
+      lines.push(shape === 'pillar'
+        ? `The ambient scene \`${scene}\` on the pillar, the whole column as one picture (shown 1280 px wide). The time, the site name and its latitude and longitude appear once, in a corner of the front face.`
+        : `The ambient scene \`${scene}\` on ${shape}. One corner shows the time, the site name and its latitude and longitude.`, '')
     }
   }
-  lines.push('## Switch (ambient → alert)', '')
+  lines.push('## Switch (ambient → warning)', '')
   lines.push('![switch](screens/switch-16x9-strip.png)', '')
-  lines.push(`16:9 at t = ${SWITCH_FRAMES_MS.map((t) => (t / 1000).toFixed(1)).join(', ')} s: ambient, 300 ms of black at ${(SWITCH_AT_MS / 1000).toFixed(1)} s, then the level-4 screen scales in once.`, '')
+  lines.push(`16:9 at t = ${SWITCH_FRAMES_MS.map((t) => (t / 1000).toFixed(1)).join(', ')} s: ambient content, 300 ms of black from ${(SWITCH_AT_MS / 1000).toFixed(1)} s, then the level 4 screen scales in once.`, '')
   return `${lines.join('\n')}\n`
 }
 
