@@ -19,6 +19,8 @@ const MIN_FRAME_MS = 1000 / MAX_FPS - 0.5
 
 const stage = document.getElementById('stage')!
 const status = document.getElementById('status')!
+// Render modes and copy pose are for making the demo, not for visitors: ?dev brings them back.
+document.body.classList.toggle('dev', new URLSearchParams(location.search).has('dev'))
 const nowBadge = document.getElementById('now')!
 const introCard = document.getElementById('intro')!
 
