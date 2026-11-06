@@ -1,5 +1,6 @@
 import { SAMPLES_DIR } from "../src/paths.js";
 import { test } from "node:test";
+import { needsRaw } from "./raw.js";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
@@ -13,21 +14,23 @@ import { AGENTS_DIR } from "../src/paths.js";
 
 const fxPath = (n: string) => path.join(AGENTS_DIR, "test/fixtures", n);
 const fx = <T>(n: string): T => JSON.parse(fs.readFileSync(fxPath(n), "utf8"));
+const ADVISORY = "32-39_12_02_250206_VTSE41.xml";
+const skip = needsRaw({ samples: [ADVISORY] });
 const base = () => ({
-  alert: parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_12_02_250206_VTSE41.xml"))),
+  alert: parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, ADVISORY))),
   municipality: fx<Municipality>("municipality-17204-min.json"),
   site: fx<Site>("site-wajima-test.json"),
   verifier: staticVerifier,
 });
 
-test("a clean Writer output passes on the first attempt", async () => {
+test("a clean Writer output passes on the first attempt", { skip }, async () => {
   const r = await runLoop({ ...base(), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: liveWriterReviser });
   assert.equal(r.outcome, "pass");
   assert.equal(r.attempts.length, 1);
   assert.equal(r.screens.length, 5);
 });
 
-test("repeated distance is sent back and fixed by the next revision", async () => {
+test("repeated distance is sent back and fixed by the next revision", { skip }, async () => {
   const r = await runLoop({
     ...base(), writer: fx<WriterOutput>("writer-tsunami-advisory-distance.json"), writerSource: "distance",
     reviser: fixtureReviser([fxPath("writer-tsunami-advisory.json")]),
@@ -38,7 +41,7 @@ test("repeated distance is sent back and fixed by the next revision", async () =
   assert.deepEqual(r.attempts[1].findings, []);
 });
 
-test("over-budget text becomes a finding, not a crash", async () => {
+test("over-budget text becomes a finding, not a crash", { skip }, async () => {
   const r = await runLoop({
     ...base(), writer: fx<WriterOutput>("writer-tsunami-advisory-long.json"), writerSource: "long",
     reviser: fixtureReviser([fxPath("writer-tsunami-advisory.json")]),
@@ -47,7 +50,7 @@ test("over-budget text becomes a finding, not a crash", async () => {
   assert.equal(r.outcome, "pass");
 });
 
-test("the loop gives up after the attempt limit and says why", async () => {
+test("the loop gives up after the attempt limit and says why", { skip }, async () => {
   const bad = fxPath("writer-tsunami-advisory-distance.json");
   const r = await runLoop({ ...base(), writer: fx<WriterOutput>("writer-tsunami-advisory-distance.json"), writerSource: "distance", reviser: fixtureReviser([bad, bad, bad]), maxAttempts: 3 });
   assert.equal(r.outcome, "fail");
@@ -55,7 +58,7 @@ test("the loop gives up after the attempt limit and says why", async () => {
   assert.match(r.reason!, /after 3 attempts/);
 });
 
-test("findings a rewrite cannot fix stop the loop at once", async () => {
+test("findings a rewrite cannot fix stop the loop at once", { skip }, async () => {
   const flickering: Verifier = { name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "flicker", detail: "3 reversals" }] })) };
   const r = await runLoop({ ...base(), verifier: flickering, writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: liveWriterReviser });
   assert.equal(r.outcome, "fail");
@@ -63,13 +66,13 @@ test("findings a rewrite cannot fix stop the loop at once", async () => {
   assert.match(r.reason!, /not fixable/);
 });
 
-test("without an API key the live reviser declines instead of inventing text", async () => {
+test("without an API key the live reviser declines instead of inventing text", { skip }, async () => {
   const r = await runLoop({ ...base(), writer: fx<WriterOutput>("writer-tsunami-advisory-distance.json"), writerSource: "distance", reviser: liveWriterReviser });
   assert.equal(r.outcome, "fail");
   assert.match(r.reason!, /Day 2/);
 });
 
-test("an overflowing shelter cell is not sent back to the Writer", async () => {
+test("an overflowing shelter cell is not sent back to the Writer", { skip }, async () => {
   const overflowing: Verifier = { name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "shelter", detail: "cell shelter overflows its slot" }] })) };
   const r = await runLoop({ ...base(), verifier: overflowing, writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([fxPath("writer-tsunami-advisory.json")]) });
   assert.equal(r.outcome, "fail");
@@ -77,7 +80,7 @@ test("an overflowing shelter cell is not sent back to the Writer", async () => {
   assert.match(r.reason!, /overflow\[shelter\]/);
 });
 
-test("an action text that contradicts its pictogram goes back to the Writer; a headline pictogram does not", async () => {
+test("an action text that contradicts its pictogram goes back to the Writer; a headline pictogram does not", { skip }, async () => {
   const misuse = (cell: string): Verifier => ({ name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "pictogram-misuse", cell_id: cell, detail: "text and pictogram disagree" }] })) });
   const clean = fxPath("writer-tsunami-advisory.json");
   const action = await runLoop({ ...base(), verifier: misuse("action"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean, clean]), maxAttempts: 2 });
@@ -88,7 +91,7 @@ test("an action text that contradicts its pictogram goes back to the Writer; a h
   assert.match(headline.reason!, /not fixable/);
 });
 
-test("a Japanese overflow stops at once as render-overflow; other languages go to the Writer at most twice", async () => {
+test("a Japanese overflow stops at once as render-overflow; other languages go to the Writer at most twice", { skip }, async () => {
   const overflow = (lang: string): Verifier => ({ name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "headline", lang, detail: `cell headline (${lang}) overflows its slot` }] })) });
   const clean = fxPath("writer-tsunami-advisory.json");
   const ja = await runLoop({ ...base(), verifier: overflow("ja"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });

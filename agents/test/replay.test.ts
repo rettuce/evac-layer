@@ -1,4 +1,5 @@
 import { test } from "node:test";
+import { needsRaw } from "./raw.js";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
@@ -22,10 +23,9 @@ test("the real sequence drives the Composer from no screen to evac-prepare, evac
   assert.deepEqual(plan, ["none", "evac-prepare", "evac-now", "secure-now", "secure-now", "secure-now", "none", "none", "all-clear"]);
 });
 
-test("re-parsing the recorded bulletins reproduces the fixture", () => {
+test("re-parsing the recorded bulletins reproduces the fixture", { skip: needsRaw({ feed: fixture.entries.map((e) => e.file) }) }, () => {
   for (const e of fixture.entries) {
     const file = path.join(FEED_DIR, e.file);
-    if (!fs.existsSync(file)) throw new Error(`recorded bulletin ${file} not found. Set JMA_FEED_DIR.`);
     assert.deepEqual(parseJmaXml(fs.readFileSync(file)), e.alert, e.file);
   }
 });

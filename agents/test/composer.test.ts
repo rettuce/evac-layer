@@ -1,5 +1,6 @@
 import { SAMPLES_DIR, FEED_DIR } from "../src/paths.js";
 import { test } from "node:test";
+import { needsRaw } from "./raw.js";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
@@ -16,9 +17,11 @@ const fx = <T>(name: string): T => JSON.parse(fs.readFileSync(path.join(AGENTS_D
 const municipality = fx<Municipality>("municipality-17204-min.json");
 const site = fx<Site>("site-wajima-test.json");
 const writer = fx<WriterOutput>("writer-tsunami-advisory.json");
-const advisory = () => parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_12_02_250206_VTSE41.xml")));
+const ADVISORY = "32-39_12_02_250206_VTSE41.xml";
+const NEEDS_ADVISORY = needsRaw({ samples: [ADVISORY] });
+const advisory = () => parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, ADVISORY)));
 
-test("tsunami advisory for 石川県能登 composes five valid layouts at display level 2", () => {
+test("tsunami advisory for 石川県能登 composes five valid layouts at display level 2", { skip: NEEDS_ADVISORY }, () => {
   const screens = compose({ alert: advisory(), municipality, site, writer });
   assert.deepEqual(screens.map((s) => s.shape), ["16x9", "9x16", "32x9", "1x1", "pillar"]);
   for (const s of screens) {
@@ -45,7 +48,7 @@ test("level 5 (secure-now) keeps the nearest site and the direction beside the g
   }
 });
 
-test("shelter is the nearest undisputed tsunami site; distance appears once, on the shelter cell", () => {
+test("shelter is the nearest undisputed tsunami site; distance appears once, on the shelter cell", { skip: NEEDS_ADVISORY }, () => {
   const [landscape] = compose({ alert: advisory(), municipality, site, writer });
   const shelter = landscape.cells.find((c) => c.role === "shelter")!;
   const direction = landscape.cells.find((c) => c.role === "direction")!;
@@ -57,14 +60,14 @@ test("shelter is the nearest undisputed tsunami site; distance appears once, on 
   assert.equal(direction.rotation, 180);
 });
 
-test("every emitted cell has a slot in the render template", () => {
+test("every emitted cell has a slot in the render template", { skip: NEEDS_ADVISORY }, () => {
   for (const screen of compose({ alert: advisory(), municipality, site, writer })) {
     const { slots } = shapeContract("evac-now", CELLS_OF[screen.shape]);
     for (const c of screen.cells) assert.ok(slots.has(c.role), `${screen.shape} ${c.role}`);
   }
 });
 
-test("same inputs produce identical output", () => {
+test("same inputs produce identical output", { skip: NEEDS_ADVISORY }, () => {
   assert.deepEqual(compose({ alert: advisory(), municipality, site, writer }), compose({ alert: advisory(), municipality, site, writer }));
 });
 
@@ -73,24 +76,24 @@ test("a shelter named in a conflict is never chosen", () => {
   assert.equal(pickShelter(m, site, "tsunami").shelter.name, "輪島市健康ふれあい広場");
 });
 
-test("text over the shape budget stops composition instead of truncating", () => {
+test("text over the shape budget stops composition instead of truncating", { skip: NEEDS_ADVISORY }, () => {
   const long = structuredClone(writer);
   long.cells[1].text.ja = "ただちに海岸から離れて高台へ";
   assert.throws(() => compose({ alert: advisory(), municipality, site, writer: long }), ComposerStop);
 });
 
-test("a bulletin that does not cover the municipality stops", () => {
+test("a bulletin that does not cover the municipality stops", { skip: needsRaw({ samples: ["32-39_11_02_250206_VTSE41.xml"] }) }, () => {
   const other = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_11_02_250206_VTSE41.xml")));
   assert.throws(() => compose({ alert: other, municipality, site, writer }), /does not cover/);
 });
 
-test("a city the bulletin lists without a level stops instead of falling below the threshold", () => {
+test("a city the bulletin lists without a level stops instead of falling below the threshold", { skip: needsRaw({ samples: ["16_11_03_260312_VXKOii.xml"] }) }, () => {
   const alert = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "16_11_03_260312_VXKOii.xml")));
   assert.equal(alert.areas.find((a) => a.name === "村山市")?.level, null);
   assert.throws(() => compose({ alert, municipality: { ...municipality, id: "06208" }, site: { ...site, municipality_id: "06208" }, writer }), /gives no level for 村山市/);
 });
 
-test("action pictogram follows the template, and a cleared VPWW headline says 解除", async () => {
+test("action pictogram follows the template", async () => {
   const { actionPictogram } = await import("../src/composer/rules.js");
   assert.equal(actionPictogram("flood", "all-clear"), "safe_here");
   assert.equal(actionPictogram("flood", "evac-now"), "directions_run");
@@ -98,13 +101,16 @@ test("action pictogram follows the template, and a cleared VPWW headline says �
   assert.equal(actionPictogram("landslide", "evac-prepare"), "directions_run");
   assert.equal(actionPictogram("flood", "secure-now"), "go_higher");
   assert.equal(actionPictogram("tsunami", "evac-now"), "go_higher");
+});
+
+const CLEARED_VPWW56 = "bodies/20261021/20261021150027_0_VPWW56_170000.xml";
+test("a cleared VPWW headline says 解除", { skip: needsRaw({ feed: [CLEARED_VPWW56] }) }, async () => {
   const { headlineFor } = await import("../src/composer/compose.js");
-    const file = path.join(FEED_DIR, "bodies/20261021/20261021150027_0_VPWW56_170000.xml");
-  if (!fs.existsSync(file)) throw new Error(`recorded bulletin ${file} not found. Set JMA_FEED_DIR.`);
+    const file = path.join(FEED_DIR, CLEARED_VPWW56);
   assert.equal(headlineFor(parseJmaXml(fs.readFileSync(file)), "17204"), "レベル２土砂災害注意報解除");
 });
 
-test("pillar carries the 9:16 cells and is validated as a layout", async () => {
+test("pillar carries the 9:16 cells and is validated as a layout", { skip: NEEDS_ADVISORY }, async () => {
   const { validateDoc } = await import("../src/schemas.js");
   const screens = compose({ alert: advisory(), municipality, site, writer });
   const pillar = screens.find((x) => x.shape === "pillar")!;
@@ -115,7 +121,7 @@ test("pillar carries the 9:16 cells and is validated as a layout", async () => {
   assert.equal(validateDoc({ ...pillar, cells: pillar.cells.filter((c) => c.role !== "languages") }, "layout").ok, false);
 });
 
-test("the source cell names the issuer, its time and the municipality; the details stay in sources[]", () => {
+test("the source cell names the issuer, its time and the municipality; the details stay in sources[]", { skip: NEEDS_ADVISORY }, () => {
   const [landscape] = compose({ alert: advisory(), municipality, site, writer });
   const source = landscape.cells.find((c) => c.id === "source")!;
   assert.match(source.text.ja, /^気象庁 \d{1,2}\/\d{1,2} \d{2}:\d{2} 発表・輪島市$/);
@@ -123,14 +129,14 @@ test("the source cell names the issuer, its time and the municipality; the detai
   assert.ok(landscape.sources.some((s) => s.type === "jma" && s.bulletin_id === landscape.alert.bulletin_id));
 });
 
-test("a designated-river flood forecast (VXKO) names both issuers, JMA and MLIT, in the source cell", () => {
+test("a designated-river flood forecast (VXKO) names both issuers, JMA and MLIT, in the source cell", { skip: NEEDS_ADVISORY }, () => {
   const [landscape] = compose({ alert: { ...advisory(), code: "VXKOii" }, municipality, site, writer });
   const source = landscape.cells.find((c) => c.id === "source")!;
   assert.match(source.text.ja, /^気象庁・国土交通省 \d{1,2}\/\d{1,2} \d{2}:\d{2} 発表・輪島市$/);
   assert.match(source.text.en!, /^JMA · MLIT \d{2}:\d{2}, [A-Z][a-z]{2} \d{1,2} · Wajima$/);
 });
 
-test("a drill bulletin gets 【訓練】 in front of the headline", () => {
+test("a drill bulletin gets 【訓練】 in front of the headline", { skip: NEEDS_ADVISORY }, () => {
   const alert = advisory();
   assert.equal(alert.status, "drill");
   const [landscape] = compose({ alert, municipality, site, writer });
@@ -139,7 +145,7 @@ test("a drill bulletin gets 【訓練】 in front of the headline", () => {
   assert.equal(real[0].cells.find((c) => c.id === "headline")!.text.ja, "津波注意報");
 });
 
-test("a newly issued tsunami warning's headline drops the ：発表 suffix of the JMA kind name", () => {
+test("a newly issued tsunami warning's headline drops the ：発表 suffix of the JMA kind name", { skip: NEEDS_ADVISORY }, () => {
   const alert = advisory();
   assert.equal(alert.areas.find((a) => a.code === "380")!.kind_name, "大津波警報：発表");
   const shizuoka = { ...municipality, id: "22424", name: "吉田町" };
@@ -147,7 +153,7 @@ test("a newly issued tsunami warning's headline drops the ：発表 suffix of th
   assert.equal(landscape.cells.find((cell) => cell.id === "headline")!.text.ja, "【訓練】大津波警報");
 });
 
-test("a region downgraded to a tsunami forecast gets an all-clear naming the warning that ended", () => {
+test("a region downgraded to a tsunami forecast gets an all-clear naming the warning that ended", { skip: needsRaw({ samples: ["32-39_12_13_250206_VTSE41.xml"] }) }, () => {
   const downgraded = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_12_13_250206_VTSE41.xml")));
   const shizuoka = { ...municipality, id: "22424", name: "吉田町" };
   const [landscape] = compose({ alert: downgraded, municipality: shizuoka, site: { ...site, municipality_id: "22424" }, writer });
@@ -156,7 +162,7 @@ test("a region downgraded to a tsunami forecast gets an all-clear naming the war
   assert.equal(landscape.cells.find((cell) => cell.id === "action")!.pictogram, "safe_here");
 });
 
-test("a tsunami forecast that arrives on its own still composes nothing", () => {
+test("a tsunami forecast that arrives on its own still composes nothing", { skip: needsRaw({ samples: ["32-39_11_11_250206_VTSE41.xml"] }) }, () => {
   const standalone = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_11_11_250206_VTSE41.xml")));
   assert.equal(standalone.areas.find((a) => a.code === "360")!.status, "issued");
   assert.throws(() => compose({ alert: standalone, municipality, site, writer }), ComposerStop);
