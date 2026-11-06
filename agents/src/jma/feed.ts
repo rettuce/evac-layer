@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { tsunamiRegionsFor } from "./regions.js";
+import { FEED_DIR } from "../paths.js";
+import { tsunamiRegionsFor, warnIfNoTsunamiRegion } from "./regions.js";
 
-// Hourly recording of the JMA long feeds (bodies/<YYYYMMDD>/<id>.xml), kept outside the public repository.
-export const FEED_DIR = process.env.JMA_FEED_DIR ?? "/Users/you/Dropbox/dev/claude-hackathon-2026/data/jma-feed";
+export { FEED_DIR };
 
 export interface FeedBody { file: string; day: string; code: string; office: string; stamp: string }
 
@@ -23,5 +23,6 @@ export function listBodies(feedDir = FEED_DIR): FeedBody[] {
 export function mentionsMunicipality(xml: string, code: string, municipalityId: string): boolean {
   if (new RegExp(`>${municipalityId}\\d{2}<`).test(xml)) return true;
   if (!code.startsWith("VTSE")) return false;
+  warnIfNoTsunamiRegion(municipalityId);
   return tsunamiRegionsFor(municipalityId).some((r) => xml.includes(`<Code>${r}</Code>`));
 }

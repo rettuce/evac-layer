@@ -1,1 +1,1 @@
-export default defineEventHandler(async (event) => readLayout(parseLayoutQuery(getQuery(event))))
+export default defineEventHandler(async (event) => readLayout(await parseLayoutQuery(getQuery(event))))

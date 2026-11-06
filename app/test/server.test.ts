@@ -14,17 +14,17 @@ const SITE = 'test-site'
 
 async function makeDataDir(): Promise<string> {
   const data = join(await mkdtemp(join(tmpdir(), 'evac-data-')), 'data')
-  const layoutDir = join(data, 'layouts', MUNICIPALITY, BULLETIN)
+  const layoutDir = join(data, 'layouts', SITE, BULLETIN)
   await mkdir(layoutDir, { recursive: true })
   await mkdir(join(data, 'sites'))
   await cp(join(APP_DIR, 'fixtures', 'wajima-tsunami.json'), join(layoutDir, '16x9.json'))
   await writeFile(
-    join(data, 'layouts', MUNICIPALITY, 'index.json'),
+    join(data, 'layouts', SITE, 'index.json'),
     JSON.stringify({
       municipality: MUNICIPALITY,
       name: 'テスト市',
       site: SITE,
-      entries: [{ issued_at: '2026-10-21T15:55:00+09:00', bulletin_id: BULLETIN, raw_title: 'test', municipality_level: 4, screen: true, template: 'evac-now', display_level: 4, layouts: [`data/layouts/${MUNICIPALITY}/${BULLETIN}/16x9.json`] }],
+      entries: [{ issued_at: '2026-10-21T15:55:00+09:00', bulletin_id: BULLETIN, raw_title: 'test', municipality_level: 4, screen: true, template: 'evac-now', display_level: 4, layouts: [`data/layouts/${SITE}/${BULLETIN}/16x9.json`] }],
     }),
   )
   await writeFile(join(data, 'sites', `${SITE}.json`), JSON.stringify({ id: SITE, municipality_id: MUNICIPALITY, lat: 0, lng: 0 }))
@@ -71,12 +71,12 @@ describe('production build', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F 
 
     const approvals = JSON.parse(await readFile(join(dataDir, 'approvals.json'), 'utf8'))
     assert.equal(approvals.sites[SITE].auto_publish, true)
-    assert.equal(approvals.layouts[`${MUNICIPALITY}/${BULLETIN}`].approved, true)
-    assert.match(approvals.layouts[`${MUNICIPALITY}/${BULLETIN}`].digest, /^sha256:[0-9a-f]{64}$/)
+    assert.equal(approvals.layouts[`${SITE}/${BULLETIN}`].approved, true)
+    assert.match(approvals.layouts[`${SITE}/${BULLETIN}`].digest, /^sha256:[0-9a-f]{64}$/)
   })
 
   test('a regenerated layout is stale until it is approved again', async () => {
-    const file = join(dataDir, 'layouts', MUNICIPALITY, BULLETIN, '16x9.json')
+    const file = join(dataDir, 'layouts', SITE, BULLETIN, '16x9.json')
     const screen = JSON.parse(await readFile(file, 'utf8'))
     screen.cells[0].text.ja = `${screen.cells[0].text.ja}（再生成）`
     await writeFile(file, JSON.stringify(screen))
@@ -92,7 +92,7 @@ describe('production build', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F 
   test('an approval written without a digest is stale until it is approved again', async () => {
     const file = join(dataDir, 'approvals.json')
     const approvals = JSON.parse(await readFile(file, 'utf8'))
-    delete approvals.layouts[`${MUNICIPALITY}/${BULLETIN}`].digest
+    delete approvals.layouts[`${SITE}/${BULLETIN}`].digest
     await writeFile(file, JSON.stringify(approvals))
     const stale = await fetch(`${base}${layoutPath}`)
     assert.equal(stale.status, 403)
@@ -144,7 +144,7 @@ describe('production build serving demo/sites layouts', { skip: !existsSync(SERV
     await mkdir(join(root, 'demo', 'sites', 'tsurumai-kaikan'), { recursive: true })
     await cp(join(APP_DIR, 'fixtures', 'wajima-tsunami.json'), join(root, 'demo', 'sites', 'tsurumai-kaikan', '16x9.json'))
     await writeFile(join(root, 'secret.json'), '{"leak":true}')
-    ;({ base, child } = await startServer({ NUXT_REPO_ROOT: root, NUXT_DATA_DIR: await makeDataDir(), NUXT_ADMIN_TOKEN: '' }))
+    ;({ base, child } = await startServer({ NUXT_REPO_ROOT: root, NUXT_DATA_DIR: await makeDataDir(), NUXT_ADMIN_TOKEN: '', EVAC_DEMO: '1' }))
   })
   after(() => child?.kill())
 

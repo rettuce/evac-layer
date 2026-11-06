@@ -18,7 +18,6 @@ const OUT_DIR = `${fileURLToPath(new URL('..', import.meta.url))}app/shots/cover
 const WCAG_AA = 4.5
 const MUNICIPALITY = '05210'
 const BULLETIN = 'VXKOii-202610211815-e713da0e3c05'
-const EXAMPLE_LAYOUT = `data/layouts/${MUNICIPALITY}/${BULLETIN}/16x9.json`
 const FONT_PACKAGES = ['noto-sans-jp', 'noto-sans', 'noto-sans-sc', 'noto-sans-tc', 'noto-sans-kr']
 const READY_TIMEOUT_MS = 30000
 const INK = '#000'
@@ -256,10 +255,10 @@ async function writeSheet(page, name, svg) {
 
 await mkdir(OUT_DIR, { recursive: true })
 const ids = await pictogramIds()
-const layout = JSON.parse(await readFile(`${ROOT}${EXAMPLE_LAYOUT}`, 'utf8'))
-const action = layout.cells.find((c) => c.role === 'action').text
 const { base, child } = await startServer()
-const browser = await puppeteer.launch({ executablePath: CHROME_PATH, args: ['--allow-file-access-from-files'] })
+const layout = await (await fetch(`${base}/api/admin/preview-layout?municipality=${MUNICIPALITY}&bulletin=${BULLETIN}&shape=16x9`)).json()
+const action = layout.cells.find((c) => c.role === 'action').text
+const browser = await puppeteer.launch({ executablePath: CHROME_PATH, args: ['--allow-file-access-from-files', '--disable-gpu-rasterization'] })
 try {
   const page = await browser.newPage()
   const thumbs = []

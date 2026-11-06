@@ -1,0 +1,15 @@
+{
+  "id": "15205",
+  "name": "柏崎市",
+  "name_en": "Kashiwazaki",
+  "prefecture": "新潟県",
+  "pdfs": [
+    "municipal-pdfs/kashiwazaki/kinkyu_hinan_basho_20261002.pdf",
+    "municipal-pdfs/kashiwazaki/dosha_hm_2022.pdf"
+  ],
+  "gsi": [
+    "gsi-shelters/15205_1.csv",
+    "gsi-shelters/15205_2.csv"
+  ],
+  "gsi_retrieved": "2026-11-02"
+}

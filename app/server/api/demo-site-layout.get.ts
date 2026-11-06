@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { isDemoSitePath } from '~~/layout/trust'
 
 export default defineEventHandler(async (event) => {
+  if (process.env.EVAC_DEMO !== '1') throw createError({ status: 404, statusText: 'Not Found', message: 'demo site layouts are served only with EVAC_DEMO=1' })
   const path = getQuery(event).path
   if (!isDemoSitePath(path)) throw createError({ status: 400, message: 'path must be a relative demo/sites/**/*.json path' })
   const repoRoot = useRuntimeConfig().repoRoot

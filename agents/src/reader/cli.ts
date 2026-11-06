@@ -3,14 +3,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import Anthropic, { toFile } from "@anthropic-ai/sdk";
-import { ENV_FILE, MUNICIPALITIES_DIR, RAW_DIR, TMP_DIR } from "../paths.js";
+import { ENV_FILE, MUNICIPALITIES_DIR, RAW_DIR, TMP_DIR, requireRawDir } from "../paths.js";
 import { loadApiKey } from "../apikey.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { assemble, type SourceMeta } from "./assemble.js";
 import { addVisionClaims, collectClaims, renderClaims, type Citation, type Claim } from "./claims.js";
 import { EXTRACTION_SCHEMA, toStructuredSchema, type Extraction } from "./extraction.js";
 import { readGsiCsv } from "./gsi.js";
-import { PRESETS } from "./presets.js";
+import { presetIds, readPreset } from "./presets.js";
 import { estimatePreset } from "./estimate.js";
 import { MODELS, costOf, estimateUsd, type CallUsage, type ModelKey } from "./pricing.js";
 import { STAGE1_SYSTEM, STAGE2_SYSTEM, stage1User } from "./prompts.js";
@@ -77,9 +77,10 @@ function assertFinished(msg: Anthropic.Message, stage: string) {
 const STARTED_AT = Date.now();
 
 async function main() {
+  requireRawDir(RAW_DIR, "Raw inputs (EVAC_RAW_DIR)");
   if (values.estimate) {
-    const ids = values.municipality === "all" ? Object.keys(PRESETS) : [values.municipality!];
-    const rows = ids.map((id) => estimatePreset(PRESETS[id] ?? stop(`no preset for municipality ${id}`)));
+    const ids = values.municipality === "all" ? presetIds() : [values.municipality!];
+    const rows = ids.map((id) => estimatePreset(readPreset(id) ?? stop(`no data/municipalities/${id}.preset.json`)));
     const usd = (r: (typeof rows)[number], m: "sonnet" | "haiku") => `$${r.usd[m].low.toFixed(2)}-${r.usd[m].high.toFixed(2)}`;
     console.log("id     name        text(pdf/pages)  stage1 input tok   vision(pdf/pages)  vision tok   sonnet        haiku");
     for (const r of rows) {
@@ -90,7 +91,7 @@ async function main() {
     console.log(JSON.stringify(rows));
     return;
   }
-  const preset = PRESETS[values.municipality!] ?? stop(`no preset for municipality ${values.municipality}; known: ${Object.keys(PRESETS).join(", ")}`);
+  const preset = readPreset(values.municipality!) ?? stop(`no data/municipalities/${values.municipality}.preset.json; known: ${presetIds().join(", ")}`);
   const modelKey = values.model as ModelKey;
   const model = MODELS[modelKey] ?? stop(`--model must be sonnet or haiku, got ${values.model}`);
 
@@ -225,7 +226,7 @@ async function main() {
   const gsiSources: SourceMeta[] = preset.gsi.map((rel) => ({
     type: "gsi", file: path.basename(rel), title: /_2\.csv$/.test(rel) ? "国土地理院 指定緊急避難場所データ" : "国土地理院 指定避難所データ", year: null, pages: null, sha256: sha256(path.join(RAW_DIR, rel)),
   }));
-  const doc = assemble({ id: preset.id, name: preset.name, prefecture: preset.prefecture, model: model.id, readerVersion: READER_VERSION, extraction, citations, shelters, pdfSources, gsiSources });
+  const doc = assemble({ id: preset.id, name: preset.name, name_en: preset.name_en, prefecture: preset.prefecture, model: model.id, readerVersion: READER_VERSION, extraction, citations, shelters, pdfSources, gsiSources });
   const v = validateDoc(doc, "municipality");
 
   const base = path.join(TMP_DIR, "reader", `${preset.id}.${modelKey}`);

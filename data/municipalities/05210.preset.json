@@ -1,0 +1,18 @@
+{
+  "id": "05210",
+  "name": "由利本荘市",
+  "name_en": "Yurihonjo",
+  "prefecture": "秋田県",
+  "pdfs": [
+    "municipal-pdfs/yurihonjo/hinan_honjo_2026.pdf",
+    "municipal-pdfs/yurihonjo/kozui_dosha_hokubu.pdf",
+    "municipal-pdfs/yurihonjo/kozui_dosha_nanbu.pdf",
+    "municipal-pdfs/yurihonjo/tsunami_honjo_nishime.pdf",
+    "municipal-pdfs/yurihonjo/tsunami_iwaki_matsugasaki.pdf"
+  ],
+  "gsi": [
+    "gsi-shelters/05210_1.csv",
+    "gsi-shelters/05210_2.csv"
+  ],
+  "gsi_retrieved": "2026-11-02"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "22424",
+  "name": "吉田町",
+  "name_en": "Yoshida",
+  "prefecture": "静岡県",
+  "pdfs": [
+    "municipal-pdfs/yoshida/hinanjo_list.pdf",
+    "municipal-pdfs/yoshida/tsunami_hm_map.pdf",
+    "municipal-pdfs/yoshida/kozui_hm_en.pdf"
+  ],
+  "gsi": [
+    "gsi-shelters/22424_1.csv",
+    "gsi-shelters/22424_2.csv"
+  ],
+  "gsi_retrieved": "2026-10-19"
+}

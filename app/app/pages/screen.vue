@@ -34,7 +34,11 @@ const drawIntervalMs = computed(() => {
   const fps = numberQuery(route.query.fps, 0)
   return fps > 0 ? 1000 / fps : undefined
 })
-const layoutName = computed(() => String(route.query.layout ?? 'wajima-tsunami'))
+const DEFAULT_FIXTURE = 'wajima-tsunami'
+// A production screen opened without `layout` must not show an alert nobody chose. Development keeps the
+// fixture as a convenience, and an ambient-only scenario uses it only for its clock and name, never its alert.
+const fixtureByDefault = computed(() => import.meta.dev || (route.query.mode === 'scenario' && route.query.scenario === 'ambient'))
+const layoutName = computed(() => (route.query.layout !== undefined ? String(route.query.layout) : fixtureByDefault.value ? DEFAULT_FIXTURE : undefined))
 const ADMIN_TOKEN_STORAGE_KEY = 'evac-admin-token'
 
 function adminHeadersFor(url: string): Record<string, string> {
@@ -67,7 +71,7 @@ watch(
   { immediate: true },
 )
 
-const screen = computed(() => (src.value ? remote.value : fixtureByName(layoutName.value)))
+const screen = computed(() => (src.value ? remote.value : layoutName.value ? fixtureByName(layoutName.value) : undefined))
 const variant = computed(() => numberQuery(route.query.variant, 0))
 const viewport = computed(() => viewportFromQuery(route.query.w, route.query.h, route.query.aspect))
 const shape = computed(() => {
@@ -109,7 +113,7 @@ function coordinate(value: unknown, limit: number): number | undefined {
   const n = typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN
   return Number.isFinite(n) && Math.abs(n) <= limit ? n : undefined
 }
-const seed = computed(() => (room.value && crop.value ? roomSeedKey(room.value, route.query.canvas_id) : String(route.query.seed ?? layoutName.value)))
+const seed = computed(() => (room.value && crop.value ? roomSeedKey(room.value, route.query.canvas_id) : String(route.query.seed ?? route.query.layout ?? DEFAULT_FIXTURE)))
 const siteName = computed(() => String(route.query.site_name ?? screen.value?.municipality.name ?? ''))
 const realStartEpoch = Date.now()
 const clockEpochMs = computed(() => {
@@ -118,24 +122,27 @@ const clockEpochMs = computed(() => {
   return issued - switchAtMs.value + elapsed.value
 })
 
-const liveMunicipality = computed(() =>
-  route.query.mode === 'live' && isMunicipalityId(route.query.municipality) ? route.query.municipality : undefined,
+const liveMunicipality = computed(() => (isMunicipalityId(route.query.municipality) ? route.query.municipality : undefined))
+const liveSite = computed(() => (typeof route.query.site === 'string' && route.query.site !== '' ? route.query.site : undefined))
+const live = computed(() => route.query.mode === 'live' && (liveMunicipality.value !== undefined || liveSite.value !== undefined))
+// `?site=` alone takes the speed from the site file; the `municipality=` URLs keep their default.
+const liveSpeed = computed(() =>
+  route.query.speed !== undefined || liveMunicipality.value ? numberQuery(route.query.speed, DEFAULT_REPLAY_SPEED) : undefined,
 )
-const liveSpeed = computed(() => numberQuery(route.query.speed, DEFAULT_REPLAY_SPEED))
 
 if (scenario.value) start()
 </script>
 
 <template>
   <LiveScreen
-    v-if="liveMunicipality"
+    v-if="live"
     :municipality="liveMunicipality"
     :shape="shape"
     :speed="liveSpeed"
     :from="typeof route.query.from === 'string' ? route.query.from : undefined"
     :to="typeof route.query.to === 'string' ? route.query.to : undefined"
     :virtual-elapsed-ms="clockMode === 'virtual' ? elapsed : undefined"
-    :site="typeof route.query.site === 'string' ? route.query.site : undefined"
+    :site="liveSite"
     :site-name="typeof route.query.site_name === 'string' ? route.query.site_name : undefined"
     :reset="route.query.reset !== undefined"
     :scene="sceneQuery"
@@ -154,6 +161,7 @@ if (scenario.value) start()
   <div v-else-if="srcRejected" class="missing" data-error="src-rejected">src must be a same-origin path (production: the layout store only)</div>
   <div v-else-if="remoteError" class="missing" data-error="src-load-failed">{{ remoteError }}</div>
   <div v-else-if="src && !screen" class="missing" data-loading="src">loading {{ src }}</div>
+  <div v-else-if="!src && !layoutName" class="missing" data-error="layout-unspecified">layout 未指定（?layout= または ?src= を指定してください）</div>
   <div v-else-if="!screen" class="missing" data-error="fixture-not-found">fixture not found: {{ layoutName }}</div>
 
   <ShapeScreen

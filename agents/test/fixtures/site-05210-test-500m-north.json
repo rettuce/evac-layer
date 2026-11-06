@@ -1,0 +1,8 @@
+{
+  "id": "05210-test-500m-north",
+  "municipality_id": "05210",
+  "lat": 39.39083134,
+  "lng": 140.0563304,
+  "facing_deg": 0,
+  "note": "Test fixture: 05210-demo-honjo-station moved 500 m north. Not a real installation."
+}

@@ -26,17 +26,17 @@ export function approvalState(record: LayoutApproval | undefined, digest: string
   return { approved: !stale, stale }
 }
 
-export function layoutKey(municipality: string, bulletinId: string): string {
-  return `${municipality}/${bulletinId}`
+export function layoutKey(site: string, bulletinId: string): string {
+  return `${site}/${bulletinId}`
 }
 
 export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale'
 
 // Screens only ever show layouts an operator approved, and only at sites with auto publish on. With the current
 // digest of the layout files, the approval must also be for these very files.
-export function liveLayoutGate(approvals: Approvals, site: string | undefined, municipality: string, bulletinId: string, digest?: string): LiveLayoutGate {
-  if (!site || !approvals.sites[site]?.auto_publish) return 'auto-publish-off'
-  const state = approvalState(approvals.layouts[layoutKey(municipality, bulletinId)], digest)
+export function liveLayoutGate(approvals: Approvals, site: string, bulletinId: string, digest?: string): LiveLayoutGate {
+  if (!approvals.sites[site]?.auto_publish) return 'auto-publish-off'
+  const state = approvalState(approvals.layouts[layoutKey(site, bulletinId)], digest)
   if (state.stale) return 'stale'
   if (!state.approved) return 'unapproved'
   return 'ok'

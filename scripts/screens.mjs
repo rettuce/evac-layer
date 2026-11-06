@@ -68,8 +68,8 @@ async function save(page, name, png) {
   return { name, size: bytes.length }
 }
 
-async function layoutInfo(bulletin, municipality = MUNICIPALITY) {
-  const layout = JSON.parse(await readFile(`${ROOT}data/layouts/${municipality}/${bulletin}/16x9.json`, 'utf8'))
+async function layoutInfo(base, bulletin, municipality = MUNICIPALITY) {
+  const layout = await (await fetch(`${base}${decodeURIComponent(previewSrc(bulletin, '16x9', municipality))}`)).json()
   const cell = (role) => layout.cells.find((c) => c.role === role)
   return {
     issued: layout.alert.issued_at.slice(0, 16).replace('T', ' '),
@@ -148,20 +148,20 @@ function markdown(infos, files) {
 async function main() {
   await mkdir(OUT_DIR, { recursive: true })
   const { base, child } = await startServer()
-  const browser = await puppeteer.launch({ executablePath: CHROME_PATH })
+  const browser = await puppeteer.launch({ executablePath: CHROME_PATH, args: ['--disable-gpu-rasterization'] })
   try {
     const page = await browser.newPage()
     const files = []
     const infos = {}
     for (const [key, bulletin] of BULLETINS) {
-      infos[key] = await layoutInfo(bulletin)
+      infos[key] = await layoutInfo(base, bulletin)
       for (const shape of Object.keys(SHAPES)) {
         await capture(page, `${base}/screen?shape=${shape}&clock=virtual&t=${ALERT_AT_MS}&src=${previewSrc(bulletin, shape)}`, shape, '.evac-screen[data-ready="1"]')
         files.push(await save(page, `${key}-${shape}`))
       }
     }
     for (const [key, bulletin, shapes] of TSUNAMI) {
-      infos[key] = await layoutInfo(bulletin, TSUNAMI_MUNICIPALITY)
+      infos[key] = await layoutInfo(base, bulletin, TSUNAMI_MUNICIPALITY)
       for (const shape of shapes) {
         await capture(page, `${base}/screen?shape=${shape}&clock=virtual&t=${ALERT_AT_MS}&src=${previewSrc(bulletin, shape, TSUNAMI_MUNICIPALITY)}`, shape, '.evac-screen[data-ready="1"]')
         files.push(await save(page, `${key}-${shape}`))

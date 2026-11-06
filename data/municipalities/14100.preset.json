@@ -1,0 +1,15 @@
+{
+  "id": "14100",
+  "name": "横浜市",
+  "name_en": "Yokohama",
+  "prefecture": "神奈川県",
+  "pdfs": [
+    "municipal-pdfs/yokohama/bousai_yokohama_ja_2026.pdf",
+    "municipal-pdfs/yokohama/bousai_yokohama_en.pdf"
+  ],
+  "gsi": [
+    "gsi-shelters/14100_1.csv",
+    "gsi-shelters/14100_2.csv"
+  ],
+  "gsi_retrieved": "2026-10-19"
+}

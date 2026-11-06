@@ -1,11 +1,8 @@
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import type { EvacScreen } from '~~/layout/types'
 import type { ReplayRow } from '~~/layout/replay'
 
-interface LayoutIndexFile {
-  name: string
-  entries: (ReplayRow & { layouts?: string[] })[]
-}
+type DashboardEntry = ReplayRow & { layouts?: string[] }
 
 interface VerifierFinding {
   run?: number
@@ -80,16 +77,22 @@ export default defineEventHandler(async () => {
 
   const rows: MunicipalityStats[] = []
   const sources = new Set<string>()
-  const codes = [...new Set([...knowledge, ...(await listDir(join(root, 'layouts'))).filter((code) => /^\d{5}$/.test(code))])].sort()
+  const indexesByCode = new Map<string, { site: string; index: LayoutIndexFile }[]>()
+  for (const site of await listDir(join(root, 'layouts'))) {
+    const index = await readLayoutIndex(site)
+    if (index) indexesByCode.set(index.municipality, [...(indexesByCode.get(index.municipality) ?? []), { site, index }])
+  }
+  const codes = [...new Set([...knowledge, ...indexesByCode.keys()])].sort()
   for (const code of codes) {
-    const index = await readJsonIfExists<LayoutIndexFile>(join(root, 'layouts', code, 'index.json'))
+    const indexes = indexesByCode.get(code) ?? []
+    const entries = indexes.flatMap(({ site, index }) => index.entries.map((entry) => ({ site, entry })))
     const knowledgeFile = await readJsonIfExists<{ name?: string }>(join(root, 'municipalities', `${code}.json`))
     let layouts = 0
     let languageVariants = 0
     let reports = 0
-    for (const entry of index?.entries ?? []) {
-      for (const file of entry.layouts ?? []) {
-        const layout = await readJsonIfExists<EvacScreen>(join(root, file.replace(/^data\//, '')))
+    for (const { site, entry } of entries) {
+      for (const file of (entry as DashboardEntry).layouts ?? []) {
+        const layout = await readJsonIfExists<EvacScreen>(siteLayoutsDir(site, entry.bulletin_id, basename(file)))
         if (!layout) continue
         layouts += 1
         const languages = layout.cells.find((cell) => cell.role === 'languages')
@@ -101,9 +104,9 @@ export default defineEventHandler(async () => {
     const own = findings.filter((f) => f.municipality === code)
     rows.push({
       id: code,
-      name: index?.name ?? knowledgeFile?.name ?? code,
-      bulletins: index?.entries.length ?? 0,
-      screens: index?.entries.filter((e) => e.screen).length ?? 0,
+      name: indexes[0]?.index.name ?? knowledgeFile?.name ?? code,
+      bulletins: entries.length,
+      screens: entries.filter(({ entry }) => entry.screen).length,
       layouts,
       languageVariants,
       reports,

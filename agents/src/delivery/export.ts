@@ -4,9 +4,8 @@ import puppeteer from "puppeteer-core";
 import { SHAPES } from "../../../app/layout/shapes";
 import type { Shape } from "../../../app/layout/types";
 import { SHAPE_ORDER } from "../composer/rules.js";
-import { LAYOUTS_DIR } from "../loop/report.js";
-import { DEFAULT_CHROME } from "../loop/browser-verifier.js";
-import { REPO_ROOT } from "../paths.js";
+import { LAYOUTS_DIR, chromePath } from "../paths.js";
+import { findSite as findSiteFile, siteMunicipality, SiteNotFound, type SiteFile } from "../sites.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { exportable, layoutDigestOf, readApprovals } from "./gate.js";
 import { INLINE_PAGE_SCRIPT } from "./inline-page.js";
@@ -20,13 +19,13 @@ export class ExportStop extends Error {}
 
 interface IndexEntry { bulletin_id: string; issued_at: string; screen: boolean; template?: string; display_level?: number }
 
-export function findSite(siteId: string): { id: string; municipality_id: string } {
-  const dir = path.join(REPO_ROOT, "data", "sites");
-  for (const f of fs.readdirSync(dir).filter((n) => n.endsWith(".json"))) {
-    const s = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
-    if (s.id === siteId) return s;
+export function findSite(siteId: string): SiteFile {
+  try {
+    return findSiteFile(siteId);
+  } catch (e) {
+    if (e instanceof SiteNotFound) throw new ExportStop(e.message);
+    throw e;
   }
-  throw new ExportStop(`no site ${siteId} in data/sites/`);
 }
 
 export async function exportSite(opts: { site: string; out: string; baseUrl: string; chrome?: string; skipShapes?: readonly string[]; log?: (m: string) => void }) {
@@ -34,27 +33,28 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
   const shapes = SHAPE_ORDER.filter((shape) => !opts.skipShapes?.includes(shape));
   for (const shape of SHAPE_ORDER) if (!shapes.includes(shape)) log(`skip shape ${shape} (--skip-shapes)`);
   const site = findSite(opts.site);
-  const m = site.municipality_id;
+  const m = siteMunicipality(site);
+  const siteLayouts = path.join(LAYOUTS_DIR, site.id);
   const approvals = readApprovals();
-  const indexFile = path.join(LAYOUTS_DIR, m, "index.json");
+  const indexFile = path.join(siteLayouts, "index.json");
   if (!fs.existsSync(indexFile)) throw new ExportStop(`${indexFile} not found; run replay-pipeline or fanout first`);
   const index = JSON.parse(fs.readFileSync(indexFile, "utf8")) as { entries: IndexEntry[] };
   const shown = index.entries.filter((e) => e.screen);
-  const gated = shown.map((e) => ({ e, gate: exportable(approvals, site.id, m, e.bulletin_id, layoutDigestOf(path.join(LAYOUTS_DIR, m, e.bulletin_id))) }));
+  const gated = shown.map((e) => ({ e, gate: exportable(approvals, site.id, e.bulletin_id, layoutDigestOf(path.join(siteLayouts, e.bulletin_id))) }));
   const ready = gated.filter((g) => g.gate === "ok").map((g) => g.e);
   for (const g of gated) if (g.gate !== "ok") log(`skip ${g.e.bulletin_id}: ${g.gate}`);
   if (!ready.length) throw new ExportStop(`nothing to export for ${site.id}: ${shown.length ? gated[0].gate : "no browser-verified screens in index.json"}`);
 
   const siteDir = path.join(opts.out, site.id);
   fs.rmSync(siteDir, { recursive: true, force: true });
-  const browser = await puppeteer.launch({ executablePath: opts.chrome ?? DEFAULT_CHROME, headless: true });
+  const browser = await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
   const entries = [];
   try {
     for (const e of ready) {
       const files: Record<string, { json: string; png: string; html: string }> = {};
       let sources: unknown[] = [];
       for (const shape of shapes) {
-        const layoutFile = path.join(LAYOUTS_DIR, m, e.bulletin_id, `${shape}.json`);
+        const layoutFile = path.join(siteLayouts, e.bulletin_id, `${shape}.json`);
         const layout = JSON.parse(fs.readFileSync(layoutFile, "utf8"));
         const v = validateDoc(layout, "layout");
         if (!v.ok) throw new ExportStop(`${layoutFile} fails layout.schema.json:\n${formatErrors(v.errors)}`);
@@ -85,7 +85,7 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
       }
       entries.push({
         bulletin_id: e.bulletin_id, issued_at: e.issued_at, template: e.template!, display_level: e.display_level!,
-        approved_at: approvals.layouts[`${m}/${e.bulletin_id}`].updated_at, files, sources,
+        approved_at: approvals.layouts[`${site.id}/${e.bulletin_id}`].updated_at, files, sources,
       });
     }
   } finally {

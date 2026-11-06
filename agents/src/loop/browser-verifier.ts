@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import puppeteer, { type Browser } from "puppeteer-core";
 import type { Shape } from "../../../app/layout/types";
-import { TMP_DIR } from "../paths.js";
+import { TMP_DIR, chromePath } from "../paths.js";
 import { readScreen, sampleLuminance, type Clock } from "../verifier/browser.js";
 import { MAX_REVERSALS, countReversals, judgeContent, judgeDrill, judgeDropped, judgeFonts, judgeState, type Finding } from "../verifier/checks.js";
 import type { Screen, ScreenVerdict, Verifier, VerifyContext } from "./types.js";
@@ -12,8 +12,6 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { visionCheck } from "../verifier/vision.js";
 import type { CallUsage, ModelKey } from "../reader/pricing.js";
 import { staticVerifier } from "./static-verifier.js";
-
-export const DEFAULT_CHROME = process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 // The renderer's /api/layout only serves .json files under its own repository root, so layouts are staged in
 // this worktree's tmp/ and the renderer must run from the same worktree.
@@ -25,7 +23,7 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
     skippedShapes: opts.skipShapes ?? [],
     async verify(screens: Screen[], ctx?: VerifyContext) {
       const base = await staticVerifier.verify(screens);
-      browser ??= await puppeteer.launch({ executablePath: opts.chrome ?? DEFAULT_CHROME, headless: true });
+      browser ??= await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
       fs.mkdirSync(stageDir, { recursive: true });
       const out: ScreenVerdict[] = [];
       for (const [i, s] of screens.entries()) {

@@ -21,7 +21,7 @@ function candidates(name: string, shelters: Shelter[]): string[] {
 }
 
 export function assemble(args: {
-  id: string; name: string; prefecture: string; model: string; readerVersion: string;
+  id: string; name: string; name_en: string; prefecture: string; model: string; readerVersion: string;
   extraction: Extraction; citations: Map<string, Citation>; shelters: Shelter[]; pdfSources: SourceMeta[]; gsiSources: SourceMeta[];
 }) {
   const { extraction: x, citations, shelters } = args;
@@ -45,6 +45,7 @@ export function assemble(args: {
   return {
     id: args.id,
     name: args.name,
+    name_en: args.name_en,
     prefecture: args.prefecture,
     sources,
     hazards: x.hazards.map((h) => {

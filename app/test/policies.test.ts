@@ -89,20 +89,21 @@ test('admin with a token requires it as a Bearer credential, from anywhere', () 
   assert.equal(adminAccess({ ...remote, authorization: 'Bearer secret' }, 'secret'), 'allow')
 })
 
-test('live screens get a layout only for an approved bulletin at an auto-publish site', () => {
+test('live screens get a layout only for a bulletin approved at that site, with auto publish on', () => {
   const at = '2026-11-02T00:00:00Z'
   const none = { version: '0.1' as const, layouts: {}, sites: {} }
   const siteOn = { ...none, sites: { s1: { auto_publish: true, updated_at: at } } }
   const siteOff = { ...none, sites: { s1: { auto_publish: false, updated_at: at } } }
-  const approved = { ...siteOn, layouts: { '05210/B1': { approved: true, updated_at: at } } }
-  const revoked = { ...siteOn, layouts: { '05210/B1': { approved: false, updated_at: at } } }
-  assert.equal(liveLayoutGate(none, 's1', '05210', 'B1'), 'auto-publish-off')
-  assert.equal(liveLayoutGate(siteOff, 's1', '05210', 'B1'), 'auto-publish-off')
-  assert.equal(liveLayoutGate(approved, undefined, '05210', 'B1'), 'auto-publish-off')
-  assert.equal(liveLayoutGate(siteOn, 's1', '05210', 'B1'), 'unapproved')
-  assert.equal(liveLayoutGate(revoked, 's1', '05210', 'B1'), 'unapproved')
-  assert.equal(liveLayoutGate(approved, 's1', '05210', 'B2'), 'unapproved')
-  assert.equal(liveLayoutGate(approved, 's1', '05210', 'B1'), 'ok')
+  const approved = { ...siteOn, layouts: { 's1/B1': { approved: true, updated_at: at } } }
+  const revoked = { ...siteOn, layouts: { 's1/B1': { approved: false, updated_at: at } } }
+  assert.equal(liveLayoutGate(none, 's1', 'B1'), 'auto-publish-off')
+  assert.equal(liveLayoutGate(siteOff, 's1', 'B1'), 'auto-publish-off')
+  const twoSites = { ...approved, sites: { ...approved.sites, s2: { auto_publish: true, updated_at: at } } }
+  assert.equal(liveLayoutGate(twoSites, 's2', 'B1'), 'unapproved', 'an approval at one site does not open another site in the same municipality')
+  assert.equal(liveLayoutGate(siteOn, 's1', 'B1'), 'unapproved')
+  assert.equal(liveLayoutGate(revoked, 's1', 'B1'), 'unapproved')
+  assert.equal(liveLayoutGate(approved, 's1', 'B2'), 'unapproved')
+  assert.equal(liveLayoutGate(approved, 's1', 'B1'), 'ok')
 })
 
 test('an approval is bound to the layout files it was given for; regenerated files are stale until re-approved', () => {
@@ -112,12 +113,12 @@ test('an approval is bound to the layout files it was given for; regenerated fil
   assert.equal(digest, layoutDigest([...files].reverse()))
   assert.notEqual(digest, layoutDigest([{ shape: '16x9', body: '{"a":2}' }, { shape: '9x16', body: '{"b":2}' }]))
   const sites = { s1: { auto_publish: true, updated_at: at } }
-  const bound = { version: '0.1' as const, sites, layouts: { '05210/B1': { approved: true, updated_at: at, digest } } }
-  const unbound = { version: '0.1' as const, sites, layouts: { '05210/B1': { approved: true, updated_at: at } } }
-  assert.equal(liveLayoutGate(bound, 's1', '05210', 'B1', digest), 'ok')
-  assert.equal(liveLayoutGate(bound, 's1', '05210', 'B1', layoutDigest([{ shape: '16x9', body: '{"a":2}' }])), 'stale')
-  assert.equal(liveLayoutGate(unbound, 's1', '05210', 'B1', digest), 'stale')
-  assert.equal(liveLayoutGate(bound, 's1', '05210', 'B1'), 'ok')
+  const bound = { version: '0.1' as const, sites, layouts: { 's1/B1': { approved: true, updated_at: at, digest } } }
+  const unbound = { version: '0.1' as const, sites, layouts: { 's1/B1': { approved: true, updated_at: at } } }
+  assert.equal(liveLayoutGate(bound, 's1', 'B1', digest), 'ok')
+  assert.equal(liveLayoutGate(bound, 's1', 'B1', layoutDigest([{ shape: '16x9', body: '{"a":2}' }])), 'stale')
+  assert.equal(liveLayoutGate(unbound, 's1', 'B1', digest), 'stale')
+  assert.equal(liveLayoutGate(bound, 's1', 'B1'), 'ok')
 })
 
 test('dev trusts only the forwarded address appended by a local relay', () => {

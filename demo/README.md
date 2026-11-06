@@ -15,7 +15,7 @@
 1. **アプリを本番ビルドで立てる**（dev は HMR で録画中に再読み込みが起きるうえ、管理 API のループバック判定が通らない）
    ```sh
    pnpm -F app build
-   HOST=127.0.0.1 PORT=3151 node app/.output/server/index.mjs
+   EVAC_DEMO=1 HOST=127.0.0.1 PORT=3151 node app/.output/server/index.mjs
    ```
 2. **画面を録る**（仮想時計で 1/30 秒ずつ撮る。同じ電文・同じ時刻なら同じ絵になる）
    ```sh

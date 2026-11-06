@@ -2,11 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { REPO_ROOT } from "../src/paths.js";
+import { LAYOUTS_DIR } from "../src/paths.js";
 import { formatErrors, validateDoc } from "../src/schemas.js";
-import { exportable, type Approvals } from "../src/delivery/gate.js";
+import { exportable, migrateApprovalKeys, type Approvals } from "../src/delivery/gate.js";
 
-const layout = (shape: string) => JSON.parse(fs.readFileSync(path.join(REPO_ROOT, `data/layouts/05210/VXKOii-202610211815-e713da0e3c05/${shape}.json`), "utf8"));
+const layout = (shape: string) => JSON.parse(fs.readFileSync(path.join(LAYOUTS_DIR, `05210-demo-honjo-station/VXKOii-202610211815-e713da0e3c05/${shape}.json`), "utf8"));
 const site = { id: "05210-demo-honjo-station", municipality_id: "05210" };
 const ambient = { feed_version: "0.1", site, state: "ambient", alert: null, bulletin_id: null, issued_at: null, layouts: {}, assets: {}, sources: [], approved_at: null };
 const alertFeed = () => {
@@ -38,13 +38,30 @@ test("alert feed validates with layouts that are valid screens", () => {
 });
 
 test("export follows the live gate: auto publish on and the bulletin approved", () => {
-  const a: Approvals = { version: "0.1", layouts: { "05210/B1": { approved: true, updated_at: "t" }, "05210/B2": { approved: false, updated_at: "t" } }, sites: { S: { auto_publish: true, updated_at: "t" }, T: { auto_publish: false, updated_at: "t" } } };
-  assert.equal(exportable(a, "S", "05210", "B1"), "ok");
-  assert.equal(exportable(a, "S", "05210", "B2"), "unapproved");
-  assert.equal(exportable(a, "T", "05210", "B1"), "auto-publish-off");
-  assert.equal(exportable(a, "U", "05210", "B1"), "auto-publish-off");
-  const bound: Approvals = { ...a, layouts: { ...a.layouts, "05210/B3": { approved: true, updated_at: "2026-11-05T00:00:00Z", digest: "sha256:aa" } } };
-  assert.equal(exportable(bound, "S", "05210", "B3", "sha256:aa"), "ok");
-  assert.equal(exportable(bound, "S", "05210", "B3", "sha256:bb"), "stale");
-  assert.equal(exportable(a, "S", "05210", "B1", "sha256:aa"), "stale");
+  const a: Approvals = { version: "0.1", layouts: { "S/B1": { approved: true, updated_at: "t" }, "S/B2": { approved: false, updated_at: "t" }, "T/B1": { approved: true, updated_at: "t" } }, sites: { S: { auto_publish: true, updated_at: "t" }, T: { auto_publish: false, updated_at: "t" }, V: { auto_publish: true, updated_at: "t" } } };
+  assert.equal(exportable(a, "S", "B1"), "ok");
+  assert.equal(exportable(a, "S", "B2"), "unapproved");
+  assert.equal(exportable(a, "T", "B1"), "auto-publish-off");
+  assert.equal(exportable(a, "U", "B1"), "auto-publish-off");
+  assert.equal(exportable(a, "V", "B1"), "unapproved", "an approval belongs to one site, not to its municipality");
+  const bound: Approvals = { ...a, layouts: { ...a.layouts, "S/B3": { approved: true, updated_at: "2026-11-05T00:00:00Z", digest: "sha256:aa" } } };
+  assert.equal(exportable(bound, "S", "B3", "sha256:aa"), "ok");
+  assert.equal(exportable(bound, "S", "B3", "sha256:bb"), "stale");
+  assert.equal(exportable(a, "S", "B1", "sha256:aa"), "stale");
+});
+
+test("old <municipality>/<bulletin> approvals map to the municipality's only site and are dropped when it has two", () => {
+  const site = (id: string, municipality_id: string, replay?: { municipality: string }) => ({ id, municipality_id, lat: 0, lng: 0, facing_deg: 0, ...(replay ? { replay: { ...replay, from: "a", to: "b", speed: 1 } } : {}) });
+  const a: Approvals = { version: "0.1", sites: {}, layouts: {
+    "05210/B1": { approved: true, updated_at: "old" },
+    "17204/B2": { approved: true, updated_at: "t" },
+    "99999/B3": { approved: true, updated_at: "t" },
+    "one-site/B1": { approved: false, updated_at: "new" },
+  } };
+  const warnings: string[] = [];
+  const m = migrateApprovalKeys(a, [site("one-site", "05210"), site("w-a", "17204"), site("w-b", "17204"), site("borrow", "01100", { municipality: "99999" })], (w) => warnings.push(w));
+  assert.deepEqual(Object.keys(m.layouts).sort(), ["borrow/B3", "one-site/B1"]);
+  assert.equal(m.layouts["one-site/B1"].updated_at, "new", "a key already written per site wins over the old one");
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /17204\/B2.*2 sites/);
 });

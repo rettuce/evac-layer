@@ -22,13 +22,13 @@ const skip = (!existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first') || (
 
 async function makeData(): Promise<string> {
   const dataDir = join(await mkdtemp(join(tmpdir(), 'evac-live-')), 'data')
-  const layoutDir = join(dataDir, 'layouts', MUNICIPALITY, BULLETIN)
+  const layoutDir = join(dataDir, 'layouts', SITE, BULLETIN)
   await mkdir(layoutDir, { recursive: true })
   await mkdir(join(dataDir, 'sites'))
   const fixture = JSON.parse(await readFile(join(APP_DIR, 'fixtures', 'wajima-tsunami.json'), 'utf8'))
   await writeFile(join(layoutDir, '16x9.json'), JSON.stringify({ ...fixture, alert: { ...fixture.alert, bulletin_id: BULLETIN } }))
   await writeFile(
-    join(dataDir, 'layouts', MUNICIPALITY, 'index.json'),
+    join(dataDir, 'layouts', SITE, 'index.json'),
     JSON.stringify({
       municipality: MUNICIPALITY,
       name: 'ライブ市',

@@ -4,8 +4,8 @@ import { Ajv2020, type ValidateFunction, type ErrorObject } from "ajv/dist/2020.
 import addFormatsModule from "ajv-formats";
 import { SCHEMA_DIR } from "./paths.js";
 
-export type SchemaName = "layout" | "alert" | "municipality" | "shelters" | "feed" | "export-manifest";
-const SCHEMA_NAMES: SchemaName[] = ["layout", "alert", "municipality", "shelters", "feed", "export-manifest"];
+export type SchemaName = "layout" | "alert" | "municipality" | "shelters" | "feed" | "export-manifest" | "site" | "municipality-preset";
+const SCHEMA_NAMES: SchemaName[] = ["layout", "alert", "municipality", "shelters", "feed", "export-manifest", "site", "municipality-preset"];
 const addFormats = addFormatsModule as unknown as (ajv: Ajv2020) => void;
 
 export function readSchema(name: string): Record<string, unknown> {
@@ -33,7 +33,9 @@ export function inferSchema(doc: unknown): SchemaName {
   if ("shelters" in d && "municipality_id" in d) return "shelters";
   if ("feed_version" in d && "state" in d) return "feed";
   if ("feed_version" in d && "entries" in d) return "export-manifest";
-  throw new Error("cannot infer schema: expected layout (kind=evac-screen), alert (bulletin_id+code) or municipality (shelters+hazards); pass --schema");
+  if ("municipality_id" in d && "lat" in d && "lng" in d) return "site";
+  if ("pdfs" in d && "gsi" in d) return "municipality-preset";
+  throw new Error("cannot infer schema: expected layout (kind=evac-screen), alert (bulletin_id+code), municipality (shelters+hazards), site (municipality_id+lat+lng) or municipality-preset (pdfs+gsi); pass --schema");
 }
 
 export interface ValidationResult {
