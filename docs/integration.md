@@ -70,15 +70,19 @@ pnpm -F agents fanout --sites my-station-concourse --verifier vision --writer li
 
 Every recorded bulletin for the site's municipality goes through write → compose → verify → revise, into `data/layouts/<site_id>/` with reports in `data/reports/<site_id>/`. `--verifier static|browser|vision` and `--writer placeholder|live` choose the depth; `--municipalities <ids>` means every site in those municipalities.
 
-Open `/admin`, review the screens of each bulletin and approve them. An approval is per site and per bulletin (`<site_id>/<bulletin_id>`) and is bound to the layout files it was given for, so a bulletin whose screens were regenerated is held back until someone approves it again. Then switch automatic delivery on for the site:
+Open `/admin`, review the screens of each bulletin and approve them. An approval is per site and per bulletin (`<site_id>/<bulletin_id>`) and is bound to the layout files it was given for, so a bulletin whose screens were regenerated is held back until someone approves it again. Without the page, approve each bulletin and then switch automatic delivery on for the site:
 
 ```sh
+curl -s -X POST http://127.0.0.1:3150/api/admin/approve \
+  -H 'Authorization: Bearer <admin token>' -H 'Content-Type: application/json' \
+  -d '{"site_id":"my-station-concourse","bulletin_id":"<bulletin id>","approved":true}'
+
 curl -s -X POST http://127.0.0.1:3150/api/admin/site \
   -H 'Authorization: Bearer <admin token>' -H 'Content-Type: application/json' \
   -d '{"site_id":"my-station-concourse","auto_publish":true}'
 ```
 
-Approval without a token works only from localhost (the `/admin` page does the same calls). Switching `auto_publish` off stops delivery from the next state change.
+From localhost no token is needed and the `Authorization` header can be left out; `Content-Type: application/json` is required either way (the `/admin` page does the same calls). `pnpm -F app demo:approve [site id]` approves every screen bulletin of a site and switches its delivery on in one go, for trying the bundled demo. Switching `auto_publish` off stops delivery from the next state change.
 
 ## 3. Drive the state
 
@@ -150,6 +154,7 @@ The signage systems the author runs in venues take EVAC LAYER through this same 
 ## 5. What every integration must keep
 
 - Keep `sources` in the feed as delivered (municipal PDF page, GSI evacuation site data, JMA bulletin id). The screen itself names only the issuer, its time and the municipality; the full attribution may live on the receiving system's information screen. GSI data requires its attribution and the notice that facility details should be confirmed with the municipality.
+- Keep the data notices visible on the receiving side too. JMA: the bulletins come from JMA's disaster-prevention XML (source: https://xml.kishou.go.jp/), EVAC LAYER rephrases them into *yasashii nihongo* and other languages under its own editorial responsibility, the warning names, levels and areas stay as JMA issued them, and no forecast of its own is made. GSI: the evacuation sites are processed by EVAC LAYER from the GSI designated emergency evacuation site data (https://www.gsi.go.jp/bousaichiri/hinanbasho.html, Public Data License 1.0); the data is registered by municipalities and may be out of date or incomplete, so the latest details should be confirmed with the municipality.
 - Do not edit warning names or levels: the headline is the JMA warning name, used verbatim.
 - Do not add blinking. Motion is limited to one scale-in on appearance and a brightness pulse at or below 1 Hz.
 - Typefaces and colours are fixed and not configurable: the Cabinet Office five-level colours and the bundled Noto fonts keep evacuation guidance looking the same on every screen in a city, and the contrast test (`app/test/contrast.test.ts`) and the Verifier's character-height check hold only for them.

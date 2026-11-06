@@ -153,17 +153,20 @@ Claude Code のセッションの 1 つが全体のまとめ役になり、8 つ
 
 ```sh
 pnpm install
-pnpm -F app dev                     # Renderer と運営者の画面 http://127.0.0.1:3150
-open "http://127.0.0.1:3150/screen?site=05210-demo-honjo-station&mode=live"
-pnpm -F agents test                 # agents のテスト（元データがあれば、電文を読むテストも）
-pnpm -F app test                    # app のビルドとテスト
+pnpm -F app dev                     # Renderer と運営者の画面 http://127.0.0.1:3150（/ は /admin へ）
+pnpm -F app demo:approve            # デモの 6 電文を承認し、施設の自動配信を ON（初回だけ。data/approvals.json）
+open "http://127.0.0.1:3150/screen?site=05210-demo-honjo-station&mode=live&reset"   # 約 15 秒でレベル 3、約 21 秒でレベル 4
+pnpm -F agents test
+pnpm -F app test
 ```
+
+承認していない画面は出ない作りなので、デモでは `demo:approve` で 6 件を承認します（`/admin` で 1 件ずつ承認しても同じです。API で承認する手順は [`docs/integration.md`](docs/integration.md) の §2）。`&reset` を付けないと再生の途中から始まり、1 分を過ぎると解除の画面のままになります。
 
 デモの 5 自治体の知識ファイル・レイアウト・検査レポートを同梱しているので、運営者の画面は API キーなしで動きます。設定は環境変数か、リポジトリ直下の `.env` で渡します（項目は `.env.example`）。Reader・Writer・Vision の検査を自分で回すには `ANTHROPIC_API_KEY` が要ります。コマンドと費用は [`agents/README.md`](agents/README.md)。
 
-再配布していない元データ（自治体の PDF・国土地理院の CSV・記録した気象庁の電文）は `EVAC_RAW_DIR`（既定は `data/raw`）に置きます。`pnpm -F agents test` は 87 件で、元データが無いと電文を読む 37 件を飛ばし、置き場所と入手先を表示します。`pnpm -F app test` は 77 件です。
+再配布していない元データ（自治体の PDF・国土地理院の CSV・記録した気象庁の電文）は `EVAC_RAW_DIR`（既定は `data/raw`）に置きます。`pnpm -F agents test` は 87 件で、元データが無いと電文を読む 37 件を飛ばし、置き場所と入手先を表示します。`pnpm -F app test` は 78 件です。
 
-ポート 3150 が使用中なら、`pnpm -F app exec nuxt dev --port <n>` で別のポートに立て、agents からは `EVAC_URL=http://127.0.0.1:<n>` で同じポートを指します。
+ポート 3150 が使用中なら、`pnpm -F app exec nuxt dev --port <n>` で別のポートに立て、agents と `demo:approve` からは `EVAC_URL=http://127.0.0.1:<n>` で同じポートを指します。
 
 公開しているのは、ブラウザで動く静的なシミュレーター（GitHub Pages）だけで、そこから Claude の API を呼ぶ経路はありません。Reader・Writer と運営者の画面は、手元で自分の API キーを使って動かします。
 
