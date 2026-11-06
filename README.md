@@ -7,7 +7,7 @@
 **EVAC LAYER は、いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステムです。**
 警報が届いた瞬間、街のスクリーンは、その場所に合った避難案内に変わります。
 
-- **デモ動画**: 11/8 公開
+- **デモ動画（2 分 51 秒）**: [youtu.be/9XRmnF2DCsM](https://youtu.be/9XRmnF2DCsM)
 - **触れるデモ**: [rettuce.github.io/evac-layer](https://rettuce.github.io/evac-layer/) — 駅のコンコースの 22 面を、平常時と警報時で切り替え、5 つのカメラで見られる 3D シミュレーター
 - **English**: [summary ↓](#english-summary)
 
@@ -191,7 +191,7 @@ AGPL-3.0（[`LICENSE`](LICENSE)）。Copyright (C) 2026 You Tanaka。
 
 ## English summary
 
-**EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.** The moment a warning arrives, every screen turns into evacuation guidance for the spot where it stands.
+**EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.** The moment a warning arrives, every screen turns into evacuation guidance for the spot where it stands. Demo video (2:51): https://youtu.be/9XRmnF2DCsM
 
 > **IDEA** — Screens are everywhere in the city. What if each one knew where it stands, and showed the right evacuation guidance when disaster strikes?
 
