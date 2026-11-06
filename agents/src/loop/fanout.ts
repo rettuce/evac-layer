@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { replay } from "../jma/replay.js";
+import { replay, withinWindow } from "../jma/replay.js";
 import { EVAC_URL, FEED_DIR, requireRawDir } from "../paths.js";
 import { findSite, readSites, siteMunicipality, type SiteFile } from "../sites.js";
 import { browserVerifier } from "./browser-verifier.js";
@@ -13,6 +13,8 @@ const { values } = parseArgs({
   options: {
     sites: { type: "string" },
     municipalities: { type: "string" },
+    from: { type: "string" },
+    to: { type: "string" },
     verifier: { type: "string", default: "static" },
     writer: { type: "string", default: "placeholder" },
     "writer-model": { type: "string", default: "opus" },
@@ -42,7 +44,9 @@ const t0 = Date.now();
 console.log(`${stamp()}  fan-out: ${sites.length} sites, verifier=${values.verifier}, writer=${writer ? `live(${writer.model})` : "placeholder"}`);
 const results = await Promise.all(sites.map(async (site): Promise<(ReplaySummary & { site: string }) | { site: string; error: string }> => {
   const id = site.id;
-  const { entries, errors } = replay(siteMunicipality(site));
+  const recorded = replay(siteMunicipality(site));
+  const errors = recorded.errors;
+  const entries = withinWindow(recorded.entries, { from: values.from, to: values.to });
   if (errors.length) return { site: id, error: `${errors.length} recorded bulletins failed to parse: ${errors[0].file}: ${errors[0].error}` };
   log(id, `start: ${entries.length} recorded bulletins`);
   const visionUsage: import("../reader/pricing.js").CallUsage[] = [];

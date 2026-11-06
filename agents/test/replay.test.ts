@@ -7,6 +7,7 @@ import type { ReplayEntry } from "../src/jma/replay.js";
 import { situationFor, ComposerStop } from "../src/composer/rules.js";
 import { AGENTS_DIR } from "../src/paths.js";
 import { FEED_DIR } from "../src/jma/feed.js";
+import { withinWindow } from "../src/jma/replay.js";
 import { parseJmaXml } from "../src/jma/parse.js";
 
 const fixture = JSON.parse(fs.readFileSync(path.join(AGENTS_DIR, "test/fixtures/replay-05210-koyoshi-20261021.json"), "utf8")) as { entries: ReplayEntry[] };
@@ -39,4 +40,15 @@ test("an all-clear with nothing shown before produces no screen", async () => {
   const s = await runReplay({ municipalityId: "05210", entries: [last], site, verifier: staticVerifier, persist: false, onEvent: (e) => events.push(`${e.outcome}:${e.reason ?? ""}`) });
   assert.equal(s.screens, 0);
   assert.match(events[0], /nothing to clear/);
+});
+
+test("--from/--to keep the bulletins issued inside the window, both ends included", () => {
+  const all = fixture.entries;
+  const [first, last] = [all[0].issued_at, all[all.length - 1].issued_at];
+  assert.deepEqual(withinWindow(all, { from: first, to: last }), all);
+  assert.deepEqual(withinWindow(all, {}), all);
+  const inner = withinWindow(all, { from: all[1].issued_at, to: all[all.length - 2].issued_at });
+  assert.deepEqual(inner.map((e) => e.bulletin_id), all.slice(1, -1).map((e) => e.bulletin_id));
+  assert.deepEqual(withinWindow(all, { from: "2026-10-21T15:55:00+09:00", to: "2026-10-21T06:55:00Z" }).map((e) => e.issued_at), ["2026-10-21T15:55:00+09:00"]);
+  assert.throws(() => withinWindow(all, { from: "yesterday" }), /not a date/);
 });
