@@ -625,7 +625,7 @@
       "template": "evac-now",
       "display_level": 4,
       "outcome": "pass",
-      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3164)",
       "layouts": [
         "data/layouts/15205-demo/VPWW56-202610311653-b3fa1b3a2ced/16x9.json",
         "data/layouts/15205-demo/VPWW56-202610311653-b3fa1b3a2ced/9x16.json",
@@ -676,7 +676,7 @@
       "template": "evac-now",
       "display_level": 4,
       "outcome": "pass",
-      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3164)",
       "layouts": [
         "data/layouts/15205-demo/VPWW56-202610311839-e6123510be74/16x9.json",
         "data/layouts/15205-demo/VPWW56-202610311839-e6123510be74/9x16.json",
@@ -727,7 +727,7 @@
       "template": "all-clear",
       "display_level": 1,
       "outcome": "pass",
-      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3164)",
       "layouts": [
         "data/layouts/15205-demo/VPWW56-202611010401-fc7d8fb812f9/16x9.json",
         "data/layouts/15205-demo/VPWW56-202611010401-fc7d8fb812f9/9x16.json",
