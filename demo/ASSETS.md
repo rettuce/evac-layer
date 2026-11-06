@@ -38,8 +38,7 @@ README で使う画像の出所。画面はすべてこのリポジトリの描�
 
 | ファイル | 中身と出所 |
 |---|---|
-| `hero-lv4.jpg`・`kv-alert.jpg`・`kv-ambient.jpg`・`kv-tsunami.jpg`・`levels-same-moment.jpg` | `blender/` で描いたコンコースの 3D に、描画部で録った画面を貼ったもの。テクスチャと HDRI は上の表の Poly Haven（CC0）。平常時の映像は描画部の平時レイヤー（`app/layout/ambient/`）が生成したもの |
+| `hero-lv4.jpg`・`levels-same-moment.jpg` | `blender/` で描いたコンコースの 3D に、描画部で録った画面を貼ったもの。テクスチャと HDRI は上の表の Poly Haven（CC0）。平常時の映像は描画部の平時レイヤー（`app/layout/ambient/`）が生成したもの |
 | `where-it-stands.jpg` | カット 5c と同じ組み方。地図は上の「地図」の段落のとおり OpenStreetMap（© OpenStreetMap contributors・ODbL 1.0）で、画面の中にもその表記がある。避難場所の位置は国土地理院のデータ |
 | `screens-from-real-bulletins.jpg` | 背景のタイルはカット 7m と同じ、架空の案内画面（`capture/mosaic_layouts.mjs`。自治体・施設・発表時刻はすべて架空）を描画部で撮ったもの。数字は `/api/dashboard` の集計 |
 | `admin-approval.jpg` | 運営者画面 `/admin` のスクリーンショット |
-| `layout-tuning.png` | 描画部の画面に配置の補助線を重ねたスクリーンショットを、調整の前後で並べたもの |

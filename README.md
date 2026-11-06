@@ -53,9 +53,9 @@ EVAC LAYER が作るのは下書きです。施設ごとに、災害 × 警戒�
 
 ### 実際の電文で作り、検査した
 
-![5 自治体・気象庁の電文 206 本・レイアウト 110 枚。背景は生成した画面のモザイク](docs/images/screens-from-real-bulletins.jpg)
+![5 自治体・気象庁の電文 206 本・レイアウト 110。背景のタイルは画面の見た目を示すための架空の例](docs/images/screens-from-real-bulletins.jpg)
 
-3 週間かけて記録した、5 つの自治体に関わる気象庁の電文 206 本から、110 のレイアウト（画面を出す 22 本 × 5 形状）を作りました。すべての画面を、規則の検査・ブラウザでの描画の検査・Claude の画像認識（Vision）による検査の 3 段で確かめています。実データで見つかった問題は[下に](#実データで見つかったこと)まとめています。
+3 週間かけて記録した、5 つの自治体に関わる気象庁の電文 206 本から、110 のレイアウト（画面を出す 22 本 × 5 形状）を作りました。背景のタイルは、画面の並びを見せるための架空の例です。実際の電文から作った画面は [`docs/screens.md`](docs/screens.md) にあります。すべての画面を、規則の検査・ブラウザでの描画の検査・Claude の画像認識（Vision）による検査の 3 段で確かめています。実データで見つかった問題は[下に](#実データで見つかったこと)まとめています。
 
 ## なぜ作るか
 
@@ -164,6 +164,7 @@ pnpm -F app test                    # app のビルドとテスト
 - **図記号** — Material Symbols（Apache-2.0）6 種、Material の形をもとに描き直した 1 種、このプロジェクトで描いた 7 種（[`app/ASSETS.md`](app/ASSETS.md)）。
 - **フォント** — Noto Sans JP / SC / TC / KR / Thai と Noto Sans（SIL OFL 1.1）。オフラインでも描けるよう同梱しています。
 - **3D のデモ** — Poly Haven の HDRI とテクスチャ（CC0）。地図は OpenStreetMap（© OpenStreetMap contributors）（[`demo/ASSETS.md`](demo/ASSETS.md)）。
+- **動画の音と README の画像** — BGM は Suno で作成（作成者所有）、効果音は Adobe Audition SFX と合成音。README の画像はこのリポジトリで描いたもので、出所は [`demo/ASSETS.md`](demo/ASSETS.md)。
 
 ## EVAC LAYER がしないこと
 
