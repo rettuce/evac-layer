@@ -6,6 +6,7 @@ Reader, Writer, Composer, Verifier, the JMA XML parser and the revision loop. Ty
 |---|---|
 | `pnpm -F agents test` | unit and sample-based tests (needs the raw inputs below) |
 | `pnpm -F agents validate <json>` | validate a layout / alert / municipality / shelters / site / municipality preset file against `schema/` |
+| `pnpm -F agents site --id <id> --lat <deg> --lng <deg> [--facing <deg>] [--name <text>] [--municipality <code>]` | writes `data/sites/<id>.json`; `municipality_id` comes from the GSI reverse geocoder unless given, with a warning when the given code differs |
 | `pnpm -F agents jma <bulletin.xml>` | parse one JMA XML bulletin into alert JSON |
 | `pnpm -F agents replay --municipality <id> [--summary]` | recorded JMA bulletins that concern a municipality, in issue order, as alert JSON |
 | `pnpm -F agents shelters [id...]` | GSI shelter CSVs → `data/municipalities/<id>.shelters.json` (names and CSV list from `<id>.preset.json`) |

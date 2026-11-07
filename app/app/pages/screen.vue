@@ -3,6 +3,7 @@ import { DEFAULT_REPLAY_SPEED, isMunicipalityId } from '~~/layout/replay'
 import { DEFAULT_SWITCH_AT_MS, scenarioFrame, type ScenarioName } from '~~/layout/scenario'
 import { designScale, isShape, shapeForViewport, viewportFromQuery } from '~~/layout/shapes'
 import { parseCrop, parseRoom, roomSeedKey } from '~~/layout/ambient/room'
+import { parseCoordinate } from '~~/layout/nearSite'
 import { resolveLayoutSrc } from '~~/layout/trust'
 import type { EvacScreen } from '~~/layout/types'
 import type { ClockMode } from '~/composables/useScreenClock'
@@ -106,13 +107,8 @@ const room = computed(() => parseRoom(route.query.canvas))
 const crop = computed(() => parseCrop(route.query.crop, room.value))
 const bareAmbient = computed(() => route.query.overlay === 'none')
 const seam = computed<'left' | 'right'>(() => (route.query.seam === 'right' ? 'right' : 'left'))
-const lat = computed(() => coordinate(route.query.lat, 90))
-const lng = computed(() => coordinate(route.query.lng, 180))
-
-function coordinate(value: unknown, limit: number): number | undefined {
-  const n = typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN
-  return Number.isFinite(n) && Math.abs(n) <= limit ? n : undefined
-}
+const lat = computed(() => parseCoordinate(route.query.lat, 90))
+const lng = computed(() => parseCoordinate(route.query.lng, 180))
 const seed = computed(() => (room.value && crop.value ? roomSeedKey(room.value, route.query.canvas_id) : String(route.query.seed ?? route.query.layout ?? DEFAULT_FIXTURE)))
 const siteName = computed(() => String(route.query.site_name ?? screen.value?.municipality.name ?? ''))
 const realStartEpoch = Date.now()
@@ -123,7 +119,20 @@ const clockEpochMs = computed(() => {
 })
 
 const liveMunicipality = computed(() => (isMunicipalityId(route.query.municipality) ? route.query.municipality : undefined))
-const liveSite = computed(() => (typeof route.query.site === 'string' && route.query.site !== '' ? route.query.site : undefined))
+const querySite = computed(() => (typeof route.query.site === 'string' && route.query.site !== '' ? route.query.site : undefined))
+const nearSite = ref<string>()
+const nearSiteStatic = useStaticScreen().enabled
+watch(
+  [querySite, liveMunicipality, lat, lng, () => route.query.mode],
+  async ([site, municipality, la, ln]) => {
+    nearSite.value = undefined
+    if (route.query.mode !== 'live' || site || municipality || la === undefined || ln === undefined || nearSiteStatic) return
+    const found = await $fetch<{ site: string | null }>('/api/site-near', { query: { lat: la, lng: ln } }).catch(() => undefined)
+    if (la === lat.value && ln === lng.value) nearSite.value = found?.site ?? undefined
+  },
+  { immediate: true },
+)
+const liveSite = computed(() => querySite.value ?? nearSite.value)
 const live = computed(() => route.query.mode === 'live' && (liveMunicipality.value !== undefined || liveSite.value !== undefined))
 // `?site=` alone takes the speed from the site file; the `municipality=` URLs keep their default.
 const liveSpeed = computed(() =>

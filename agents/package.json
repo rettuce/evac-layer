@@ -7,6 +7,7 @@
   },
   "scripts": {
     "validate": "tsx src/validate.ts",
+    "site": "tsx src/site-cli.ts",
     "jma": "tsx src/jma/cli.ts",
     "reader": "tsx src/reader/cli.ts",
     "test": "tsx --test test/*.test.ts",

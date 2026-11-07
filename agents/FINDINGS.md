@@ -44,9 +44,9 @@
 2. **1 電文だけを live Writer で流す入口が無い。** `pipeline` は `--writer` の fixture が必須（live Writer は後で入れる、という英文の案内が残る）。live Writer は `fanout` / `replay-pipeline` だけで、どちらも `data/layouts/<自治体>` と reports を消して全電文を作り直す（`runReplay` の rmSync）。→ 11-07 に修正（46f0639）。`pipeline` に `--writer live|placeholder` と `--publish --go-live` を足し、1 電文の画面と index.json の行だけを書き換えるようにした（他の電文の画面は消さない）。
 3. **場所は自治体につき 1 サイト。** `data/layouts/<id>/index.json` の `site` は 1 つで、`/api/live-layout`・`/api/feed`・export は自治体と電文で層を引き、サイト id は承認ゲートの鍵にしか使わない。同じ自治体に 2 台目のスクリーンを置くと 1 台目の避難所と方向が出る。任意座標の compose 自体は動く（B）が、その結果を置く場所が無い（`demo/sites/` は契約外）。→ 11-06 に修正（830594e・116963a）。画面一式・承認・フィードを施設ごとに持ち、同じ自治体に何施設でも置ける。
 4. **避難所名が長いと 16:9 で矢印が消える。** B は shelter「砂子下コミュニティセンター」（12 字）が 51.2 px < 64 px で fail（文言で直せない種類）。renderer は `data-shelter-scale="narrow"` に縮めた上で `data-dropped="direction:overflow"` で方向セルを落とし、capture に矢印と「南へ」が無い。Verifier は font-size だけを指摘し、方向の欠落は指摘しない。由利本荘の避難所 220 か所の名前の長さ分布は未確認。→ 11-05 に修正（3129b5a）。方向セルが落ちた画面は Verifier が fail にする。
-5. **人手の段。** サイト JSON の `municipality_id` は手書き（docs/integration.md）。Reader（自治体 PDF → 知識ファイル。05210 は 11-02 に $1.165）と `shelters`（GSI CSV）は事前の手動実行。承認と auto_publish は設計上の人手。→ **未対応**（市町村コードの自動判定は README の「今後」。承認は人が行う設計のまま）。
+5. **人手の段。** サイト JSON の `municipality_id` は手書き（docs/integration.md）。Reader（自治体 PDF → 知識ファイル。05210 は 11-02 に $1.165）と `shelters`（GSI CSV）は事前の手動実行。承認と auto_publish は設計上の人手。→ 11-08 に修正（9be9f59）。緯度経度から国土地理院の逆ジオコーダで市町村コードを引く。承認は人が行う設計のまま。
 6. **承認は内容を見ない。** `data/approvals.json` は自治体/電文の鍵と updated_at だけで、Writer の書き直しや再 fanout の後も承認が残る（出典セルを変えた今回の再生成でも承認済みのまま）。→ 11-05 に修正（7fd5b78・2bb6ca9・acc252d）。承認はその時点の layout のダイジェストに束縛され、作り直した画面は「要再承認」になる。
-7. **`/screen?lat=&lng=` は平時レイヤーの座標表示だけ。** 避難誘導はサイト JSON を Composer が読んで決める。→ **未対応**（仕様のまま）。
+7. **`/screen?lat=&lng=` は平時レイヤーの座標表示だけ。** 避難誘導はサイト JSON を Composer が読んで決める。→ 11-08 に修正（3351b5f）。100 m 以内の登録済みの施設に解決、無ければ施設を指定しなかったときと同じ。
 8. 運用上の注意: main を merge した後は `pnpm install` と dev の再起動が要る（three・@fontsource/noto-sans-thai の追加）。再起動前の実走 3 本は `data-ready` 待ちの 30 s timeout で落ちた。→ 運用上の注意（修正の対象ではない）。
 9. **10 言語の文を別のモデルで逆翻訳して照合した（11-07）。** フィリピン語で「危険な所へ逃げよ」と逆に読まれうる 1 文と、訓練の津波の解除で「もう安全です」と言い過ぎていた欄・「すぐ」「海岸」が落ちていた欄 計 16 欄を直し、画面を作り直した（516c6e6・4177bac）。直した文は字数の上限に合わせて短くした。fil・id の訓練の津波の 4 欄は、字数の上限（24 字）に意味を保って収まる訳が無く未対応（母語話者と相談）。母語話者の確認はまだ。
 

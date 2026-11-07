@@ -43,11 +43,19 @@ A site is one venue whose screens share the coordinates. It is one JSON file, `d
 }
 ```
 
-- `municipality_id` (5-digit JIS code) is written by hand; it is not derived from the coordinates. It selects which bulletins apply and which municipality knowledge file is read.
+- `municipality_id` (5-digit JIS code) selects which bulletins apply and which municipality knowledge file is read. `pnpm -F agents site` fills it from the coordinates (below); a code written by hand is kept.
 - `facing_deg` is the compass direction the viewer faces when looking at the screen; the arrow to the evacuation site is rotated against it.
 - From the coordinates the Composer picks the nearest GSI designated evacuation site that matches the hazard and writes its name, direction and distance into every layout for this site.
 - A municipality may have any number of sites; each gets its own screens and approvals.
 - Leave out `replay`. It makes a site play back a recording, for the demo only.
+
+To write the file from the coordinates:
+
+```sh
+pnpm -F agents site --id my-station-concourse --name "Station concourse, north wall" --lat 39.38633978 --lng 140.0563304 --facing 0
+```
+
+It asks the GSI reverse geocoder (https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress) for the municipality code of the point and writes `data/sites/<id>.json`. With `--municipality <code>` the given code is kept and a warning is printed when GSI places the point elsewhere. When GSI gives no code (no answer within 10 s, or a point outside Japan), nothing is written and the command exits 1. `--facing` defaults to 0 (north); an existing file is overwritten only with `--force`.
 
 `pnpm -F agents validate data/sites/<id>.json` checks the file.
 
