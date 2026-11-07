@@ -72,7 +72,7 @@ Every recorded bulletin for the site's municipality goes through write → compo
 
 Open `/admin`, review the screens of each bulletin and approve them. An approval is per site and per bulletin (`<site_id>/<bulletin_id>`) and is bound to the layout files it was given for, so a bulletin whose wording or arrangement changed is held back until someone approves it again.
 
-Approving a bulletin also approves its class at that site: `<hazard>/<template>/<level>` (for example `flood/evac-now/4`). The class approval is bound to the layout files with the parts that change from bulletin to bulletin taken out: the JMA warning name (the Japanese headline), the source line with the issue time, and the bulletin id. The translated headlines stay in, so a class whose translations change is held back. A later bulletin of the same class whose screens carry the approved wording and arrangement is therefore shown without a new approval. Revoking a bulletin (`"approved": false`) revokes every class approved from it, even when its layout files are gone, and the class of its current files. `data/approvals.json` keeps both:
+Approving a bulletin also approves its class at that site: `<hazard>/<template>/<level>` (for example `flood/evac-now/4`). The class approval is bound to the layout files with the parts that change from bulletin to bulletin taken out: the JMA warning name (the Japanese headline), the source line with the issue time, and the bulletin id. The Composer writes those parts from the parsed bulletin, not the model, so they are left out of the match. The translated headlines stay in, so a class whose translations change is held back. A later bulletin of the same class whose screens carry the approved wording and arrangement is therefore shown without a new approval. Revoking a bulletin (`"approved": false`) revokes every class approved from it, even when its layout files are gone, and the class of its current files. `data/approvals.json` keeps both:
 
 ```json
 {
@@ -88,7 +88,11 @@ Approving a bulletin also approves its class at that site: `<hazard>/<template>/
 }
 ```
 
-A file without `classes` (written before classes existed) works as before, bulletin by bulletin. Without the page, approve each bulletin and then switch automatic delivery on for the site:
+A file without `classes` (written before classes existed) works as before, bulletin by bulletin.
+
+A class approval only helps if the next bulletin of the class is written with the approved wording. After `fanout`, build the Writer cache of each class from the bulletins just written: `pnpm -F agents writer --build-class-cache` takes, for every class, the bulletin with the latest issue time. Only this command writes the class cache; `receive` and `pipeline` read it. They use it only for a bulletin with the same title (`raw_title`, which names the river of a flood forecast) and the same caution (a tsunami clearance down to a sea-level-change forecast has its own wording). Any other bulletin of the class is written by the Writer API, and its new wording is not shown until someone approves it.
+
+Without the page, approve each bulletin and then switch automatic delivery on for the site:
 
 ```sh
 curl -s -X POST http://127.0.0.1:3150/api/admin/approve \
@@ -104,10 +108,10 @@ From localhost no token is needed and the `Authorization` header can be left out
 
 ## 3. Drive the state
 
-From the JMA feed to the screen, `receive` does the whole round for live sites: it records the JMA XML long feeds, takes each new bulletin that concerns a site, writes, composes and verifies its screens into `data/layouts/<site_id>/`, and sets the last one that passed as the site's current bulletin. When the site already has an approval for the same class, the new bulletin is written with the approved wording (the Writer cache of the class, `data/writer/<municipality>/class/`, with no API call), and is shown as soon as it passes the rule and browser checks. Anything else is not shown until an operator approves it in `/admin` (above); until then the site stays ambient. Each round logs the site's feed state for the bulletin it set (`unknown` when the app cannot be reached). Run it beside the app:
+From the JMA feed to the screen, `receive` does the whole round for live sites: it records the JMA XML long feeds, takes each new bulletin that concerns a site, writes, composes and verifies its screens into `data/layouts/<site_id>/`, and sets the last one that passed as the site's current bulletin. When the site already has an approval for the same class, the new bulletin is written with the approved wording (the Writer cache of the class, `data/writer/<municipality>/class/`), and no model is called: it is shown as soon as its own screens pass the rule and browser checks. If a check finds something, the bulletin fails and waits for a person instead of being rewritten. Anything else is not shown until an operator approves it in `/admin` (above); until then the site stays ambient. Each round logs the site's feed state for the bulletin it set (`unknown` when the app cannot be reached). Run it beside the app:
 
 ```sh
-pnpm -F agents receive --sites my-station-concourse --every 600 --writer live --verifier vision
+pnpm -F agents receive --sites my-station-concourse --every 600 --writer live --verifier browser
 ```
 
 Run only one `receive` process per data directory. Without `--every` it runs one round and exits. To keep it running as a service (launchd, systemd) rather than from cron, give it a longer interval: `pnpm -F agents receive --sites my-station-concourse --every 3600`. `pnpm -F agents record` runs the recording step alone, and `pnpm -F agents pipeline --alert <bulletin.xml> --site <site id> --writer live --publish --go-live` does one bulletin by hand.
