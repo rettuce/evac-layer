@@ -117,6 +117,7 @@ export class Timeline {
   private lastNowMs?: number
   private stepIndex = -1
   private playing = false
+  private autoplaying = false
   private following = true
   private readonly track: HTMLElement
   private readonly fill: HTMLElement
@@ -134,7 +135,10 @@ export class Timeline {
     const select = root.querySelector<HTMLSelectElement>('select')!
     this.select = select
     for (const scenario of SCENARIOS) select.add(new Option(`${scenario.placeJa} ${scenario.date.slice(5).replace('-', '/')}`, scenario.id))
-    select.addEventListener('change', () => this.selectScenario(select.value))
+    select.addEventListener('change', () => {
+      this.stopAutoplay()
+      this.selectScenario(select.value)
+    })
     this.playButton.addEventListener('click', () => (this.playing ? this.pause() : this.play()))
     this.buildSegments()
   }
@@ -147,8 +151,10 @@ export class Timeline {
     return this.scenario.steps.findIndex((step) => step.setId)
   }
 
-  play(): void {
+  // The autoplay after the intro card gives way to the first step, site or place the visitor picks; a play they start themselves keeps running.
+  play(auto = false): void {
     this.playing = true
+    this.autoplaying = auto
     this.lastNowMs = undefined
     if (!this.following) this.jump(Math.max(0, this.stepIndex))
     this.renderControls()
@@ -156,6 +162,7 @@ export class Timeline {
 
   pause(): void {
     this.playing = false
+    this.autoplaying = false
     this.renderControls()
   }
 
@@ -202,6 +209,10 @@ export class Timeline {
     this.fill.style.width = `${(100 * this.elapsedMs) / this.totalMs()}%`
   }
 
+  private stopAutoplay(): void {
+    if (this.autoplaying) this.pause()
+  }
+
   private selectScenario(id: string): void {
     this.scenario = SCENARIOS.find((scenario) => scenario.id === id) ?? SCENARIOS[0]!
     this.stepIndex = -1
@@ -241,7 +252,10 @@ export class Timeline {
         setSwatch(swatch, ALERTS[step.setId])
         button.prepend(swatch)
       }
-      button.addEventListener('click', () => this.jump(index))
+      button.addEventListener('click', () => {
+        this.stopAutoplay()
+        this.jump(index)
+      })
       this.track.insertBefore(button, this.fill)
       return button
     })
