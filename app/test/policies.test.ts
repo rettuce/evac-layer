@@ -6,7 +6,7 @@ import { test } from 'node:test'
 import { sourceLines } from '../layout/sources.ts'
 import { isDemoSitePath, isTrustedLayoutSrc, resolveLayoutSrc } from '../layout/trust.ts'
 import { adminAccess, clientAddressFor, type AdminRequest } from '../server/utils/adminPolicy.ts'
-import { classDigest, layoutDigest, liveLayoutGate, liveLayoutGateWith, revokeClasses, screenClass } from '../layout/gate.ts'
+import { classDigest, layoutDigest, liveLayoutGate, liveLayoutGateWith, passedBrowserCheck, revokeClasses, screenClass } from '../layout/gate.ts'
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
 import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
 import { WEBHOOK_RETRIES, webhookRetryDelayMs } from '../layout/feed.ts'
@@ -135,9 +135,9 @@ function floodScreen(bulletin: string, issuedAt: string, action = '高い とこ
   }
 }
 
-function classOf(screen: ReturnType<typeof floodScreen>) {
+function classOf(screen: ReturnType<typeof floodScreen>, report = { outcome: 'pass', verifier: 'browser (http://127.0.0.1:3150)' }) {
   const files = [{ shape: '16x9', body: JSON.stringify(screen) }]
-  return { files, digest: layoutDigest(files), cls: { key: screenClass(screen), digest: classDigest(files) } }
+  return { files, digest: layoutDigest(files), cls: { key: screenClass(screen), digest: classDigest(files), checked: passedBrowserCheck(report) } }
 }
 
 test('a class approval opens a new bulletin of the same class whose headline, time and id alone differ', () => {
@@ -154,7 +154,15 @@ test('a class approval opens a new bulletin of the same class whose headline, ti
   }
   assert.deepEqual(liveLayoutGateWith(approvals, 's1', 'B2', next.digest, next.cls), { gate: 'ok', by: 'class' })
   assert.deepEqual(liveLayoutGateWith(approvals, 's1', 'B1', approved.digest, approved.cls), { gate: 'ok', by: 'bulletin' })
-  assert.equal(liveLayoutGate(approvals, 's2', 'B2', next.digest, next.cls), 'auto-publish-off')
+  const bothSitesOn = { ...approvals, sites: { ...approvals.sites, s2: { auto_publish: true, updated_at: at } } }
+  assert.equal(liveLayoutGate(bothSitesOn, 's2', 'B2', next.digest, next.cls), 'unapproved', 'a class approved at one site does not open another site')
+  assert.equal(liveLayoutGate(bothSitesOn, 's1', 'B2', next.digest, next.cls), 'ok')
+
+  const failedCheck = classOf(floodScreen('B5', '2026-10-22T11:00:00+09:00'), { outcome: 'fail', verifier: 'browser (http://127.0.0.1:3150)' })
+  assert.equal(failedCheck.cls.digest, approved.cls.digest)
+  assert.equal(liveLayoutGate(approvals, 's1', 'B5', failedCheck.digest, failedCheck.cls), 'unapproved', 'a class approval needs the bulletin\'s own screens to pass the browser check')
+  const staticOnly = classOf(floodScreen('B6', '2026-10-22T11:30:00+09:00'), { outcome: 'pass', verifier: 'static' })
+  assert.equal(liveLayoutGate(approvals, 's1', 'B6', staticOnly.digest, staticOnly.cls), 'unapproved', 'a pass without a browser does not count')
 
   const edited = classOf(floodScreen('B3', '2026-10-22T10:00:00+09:00', '高い ところへ にげで'))
   assert.notEqual(edited.cls.digest, approved.cls.digest)

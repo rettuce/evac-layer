@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { type Approvals, classDigest, layoutDigest, screenClass } from '~~/layout/gate'
+import { type Approvals, type LayoutClass, classDigest, layoutDigest, passedBrowserCheck, screenClass } from '~~/layout/gate'
 import { isMunicipalityId } from '~~/layout/replay'
 import { isShape } from '~~/layout/shapes'
 
@@ -44,14 +44,31 @@ async function layoutFiles(site: string, bulletin: string): Promise<{ shape: str
   return Promise.all(shapes.map(async (f) => ({ shape: f.slice(0, -5), body: await readFile(join(dir, f), 'utf8') })))
 }
 
-export async function currentLayoutDigest(site: string, bulletin: string): Promise<string | undefined> {
-  const files = await layoutFiles(site, bulletin)
-  return files.length ? layoutDigest(files) : undefined
+export interface LayoutSnapshot {
+  files: { shape: string; body: string }[]
+  digest: string
+  cls: LayoutClass
 }
 
-export async function currentClassOf(site: string, bulletin: string): Promise<{ key: string; digest: string } | undefined> {
+// One read of a bulletin's shape files and report: the gate decides on these bytes and the feed serves them.
+export async function readLayoutSnapshot(site: string, bulletin: string): Promise<LayoutSnapshot | undefined> {
   const files = await layoutFiles(site, bulletin)
-  return files.length ? { key: screenClass(JSON.parse(files[0]!.body)), digest: classDigest(files) } : undefined
+  if (!files.length) return undefined
+  const report = await readJsonIfExists<{ outcome?: string; verifier?: string }>(join(dataDir(), 'reports', site, bulletin, 'report.json'))
+  return {
+    files,
+    digest: layoutDigest(files),
+    cls: { key: screenClass(JSON.parse(files[0]!.body)), digest: classDigest(files), checked: passedBrowserCheck(report) },
+  }
+}
+
+export async function currentClassKey(site: string, bulletin: string): Promise<string | undefined> {
+  try {
+    const [first] = await layoutFiles(site, bulletin)
+    return first && screenClass(JSON.parse(first.body))
+  } catch {
+    return undefined
+  }
 }
 
 function sortedRecord<T>(record: Record<string, T>): Record<string, T> {

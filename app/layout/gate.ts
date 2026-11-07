@@ -93,26 +93,33 @@ export function layoutKey(site: string, bulletinId: string): string {
 
 export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale'
 export type ApprovedBy = 'bulletin' | 'class' | null
+export interface LayoutClass { key: string; digest: string; checked: boolean }
+
+// The class digest leaves the JMA warning name out, so only a bulletin whose own screens passed the browser check
+// (where an overflowing headline is caught) may go out on a class approval.
+export function passedBrowserCheck(report: { outcome?: string; verifier?: string } | undefined): boolean {
+  return report?.outcome === 'pass' && /browser|vision/.test(report.verifier ?? '')
+}
 
 export function approvalWith(
-  approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string },
+  approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass,
 ): { approved: boolean; stale: boolean; by: ApprovedBy } {
   const record = approvals.layouts[layoutKey(site, bulletinId)]
   const state = approvalState(record, digest)
   if (state.approved) return { ...state, by: 'bulletin' }
   const byClass = cls && approvals.classes?.[classKey(site, cls.key)]
-  if (cls && record?.approved !== false && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
+  if (cls?.checked && record?.approved !== false && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
   return { ...state, by: null }
 }
 
 export function liveLayoutGateWith(
-  approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string },
+  approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass,
 ): { gate: LiveLayoutGate; by: ApprovedBy } {
   if (!approvals.sites[site]?.auto_publish) return { gate: 'auto-publish-off', by: null }
   const state = approvalWith(approvals, site, bulletinId, digest, cls)
   return { gate: state.approved ? 'ok' : state.stale ? 'stale' : 'unapproved', by: state.by }
 }
 
-export function liveLayoutGate(approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string }): LiveLayoutGate {
+export function liveLayoutGate(approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass): LiveLayoutGate {
   return liveLayoutGateWith(approvals, site, bulletinId, digest, cls).gate
 }

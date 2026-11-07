@@ -331,6 +331,16 @@ onUnmounted(() => clearInterval(clockTimer))
             >
               {{ current.approved_by === 'bulletin' ? '承認済み（取り消す）' : current.approved_by === 'class' ? 'この電文として承認する' : current.stale ? '変更後の一式を再承認' : 'この一式を承認' }}
             </button>
+            <button
+              v-if="current.approved_by === 'class'"
+              type="button"
+              class="secondary revoke"
+              :disabled="saving === current.bulletin_id"
+              data-action="revoke"
+              @click="setApproved(current, false)"
+            >
+              この電文を出さない（取り消す）
+            </button>
             <p v-if="approveBlockedReason" class="meta fg-3 blocked">{{ approveBlockedReason }}</p>
           </aside>
         </div>
@@ -531,6 +541,8 @@ button { font-family: var(--ev-sans); }
 }
 .approve { width: 100%; border: 1px solid var(--ev-orange); background: var(--ev-orange); color: var(--ev-bg); }
 .approve.is-on, .secondary { border: 1px solid var(--ev-line); background: var(--ev-panel); color: var(--ev-fg); }
+.revoke { width: 100%; }
+.revoke:disabled { color: var(--ev-fg-3); cursor: not-allowed; }
 .approve:disabled { border-color: var(--ev-line); background: var(--ev-panel); color: var(--ev-fg-3); cursor: not-allowed; }
 
 .sites { padding: 16px; }

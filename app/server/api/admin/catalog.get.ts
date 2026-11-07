@@ -25,14 +25,14 @@ export default defineEventHandler(async () => {
       index.entries.map(async (entry: ReplayRow) => {
         const report = entry.screen ? await readReport(root, site, entry.bulletin_id) : undefined
         const last = report?.attempts.at(-1)
-        const cls = entry.screen ? await currentClassOf(site, entry.bulletin_id) : undefined
-        const approval = approvalWith(approvals, site, entry.bulletin_id, entry.screen ? await currentLayoutDigest(site, entry.bulletin_id) : undefined, cls)
+        const snapshot = entry.screen ? await readLayoutSnapshot(site, entry.bulletin_id) : undefined
+        const approval = approvalWith(approvals, site, entry.bulletin_id, snapshot?.digest, snapshot?.cls)
         return {
           ...entry,
           approved: approval.approved,
           stale: approval.stale,
           approved_by: approval.by,
-          ...(approval.by === 'class' ? { approved_from: approvals.classes![classKey(site, cls!.key)]!.approved_from } : {}),
+          ...(approval.by === 'class' ? { approved_from: approvals.classes![classKey(site, snapshot!.cls.key)]!.approved_from } : {}),
           report: report && {
             outcome: report.outcome,
             verifier: report.verifier,

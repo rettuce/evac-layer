@@ -5,6 +5,7 @@ import { type ApprovedBy, type Approvals, classKey, layoutKey, liveLayoutGateWit
 import { DEFAULT_REPLAY_SPEED, currentBulletinAt, rowsInWindow, type ReplayWindow } from '~~/layout/replay'
 import { SHAPES, isShape } from '~~/layout/shapes'
 import type { EvacScreen, Shape } from '~~/layout/types'
+import type { LayoutSnapshot } from './approvals'
 
 const ALL_SHAPES = Object.keys(SHAPES) as Shape[]
 
@@ -17,16 +18,11 @@ export function deliveryAssetUrl(site: string, bulletin: string, file: string): 
   return `/delivery/${encodeURIComponent(site)}/${encodeURIComponent(bulletin)}/${file}`
 }
 
-async function shapesWithLayout(site: string, bulletin: string): Promise<Shape[]> {
-  const files = await listDir(siteLayoutsDir(site, bulletin))
-  return ALL_SHAPES.filter((shape) => files.includes(`${shape}.json`))
-}
-
-async function readScreens(site: string, bulletin: string): Promise<Partial<Record<Shape, EvacScreen>>> {
+function screensOf(snapshot: LayoutSnapshot): Partial<Record<Shape, EvacScreen>> {
   const layouts: Partial<Record<Shape, EvacScreen>> = {}
-  for (const shape of await shapesWithLayout(site, bulletin)) {
-    const screen = await readJsonIfExists<EvacScreen>(siteLayoutsDir(site, bulletin, `${shape}.json`))
-    if (screen) layouts[shape] = screen
+  for (const shape of ALL_SHAPES) {
+    const file = snapshot.files.find((f) => f.shape === shape)
+    if (file) layouts[shape] = JSON.parse(file.body) as EvacScreen
   }
   return layouts
 }
@@ -42,19 +38,16 @@ async function readAssets(site: string, bulletin: string): Promise<Partial<Recor
   return assets
 }
 
-export async function approvalOf(approvals: Approvals, site: string, bulletin: string): Promise<{ by: ApprovedBy; updated_at?: string; approved_from?: string }> {
-  const digest = await currentLayoutDigest(site, bulletin)
-  if (digest === undefined) return { by: null }
-  const cls = await currentClassOf(site, bulletin)
-  const { gate, by } = liveLayoutGateWith(approvals, site, bulletin, digest, cls)
+function approvalIn(approvals: Approvals, site: string, bulletin: string, snapshot: LayoutSnapshot | undefined): { by: ApprovedBy; updated_at?: string } {
+  if (!snapshot) return { by: null }
+  const { gate, by } = liveLayoutGateWith(approvals, site, bulletin, snapshot.digest, snapshot.cls)
   if (gate !== 'ok') return { by: null }
   if (by === 'bulletin') return { by, updated_at: approvals.layouts[layoutKey(site, bulletin)]!.updated_at }
-  const record = approvals.classes![classKey(site, cls!.key)]!
-  return { by, updated_at: record.updated_at, approved_from: record.approved_from }
+  return { by, updated_at: approvals.classes![classKey(site, snapshot.cls.key)]!.updated_at }
 }
 
 async function deliverableWith(approvals: Approvals, site: string, bulletin: string): Promise<boolean> {
-  return (await approvalOf(approvals, site, bulletin)).by !== null
+  return approvalIn(approvals, site, bulletin, await readLayoutSnapshot(site, bulletin)).by !== null
 }
 
 export async function isDeliverable(site: string, bulletin: string): Promise<boolean> {
@@ -90,8 +83,10 @@ export async function currentFeed(siteId: string): Promise<Feed | undefined> {
   const approvals = await readApprovals()
   const bulletin = site.replay ? await replayedBulletin(site, approvals) : await liveBulletin(site, approvals)
   if (!bulletin) return ambientFeed(feedSite)
-  const { updated_at: approvedAt } = await approvalOf(approvals, site.id, bulletin)
-  return alertFeed(feedSite, await readScreens(site.id, bulletin), await readAssets(site.id, bulletin), approvedAt!)
+  const snapshot = await readLayoutSnapshot(site.id, bulletin)
+  const approval = approvalIn(approvals, site.id, bulletin, snapshot)
+  if (!snapshot || !approval.by) return ambientFeed(feedSite)
+  return alertFeed(feedSite, screensOf(snapshot), await readAssets(site.id, bulletin), approval.updated_at!)
 }
 
 export function feedEtag(body: string): string {
