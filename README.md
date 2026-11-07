@@ -129,7 +129,7 @@ EVAC LAYER は、画面を再生する機能を持たず、サイネージのシ
 
 ## 実データで見つかったこと
 
-以下はすべて、気象庁の公式サンプルだけでは出てこなかった問題です。記録した気象庁の電文（4 種類・全国 703 本）と 5 自治体のハザードマップ PDF でパイプラインを回して見つけました。コミットつきの全件は [`agents/FINDINGS.md`](agents/FINDINGS.md)。
+以下はすべて、気象庁の公式サンプルだけでは出てこなかった問題です。記録した気象庁の電文（4 種類・全国 703 本。記録の総数 20,592 本のうち対応する 4 種類が 703 本で、そのうちデモの 5 自治体に関わるものが 206 本）と 5 自治体のハザードマップ PDF でパイプラインを回して見つけました。コミットつきの全件は [`agents/FINDINGS.md`](agents/FINDINGS.md)。
 
 - **PDF のテキストから文字が消えていた**（「最大津波 16.6m」が「最 津波 16.6m」に）。文字の対応表を持たないフォントのためで、長さや文字の種類の検査では気づけません。Reader はそのテキストに疑わしいと印をつけ、`--allow-vision` でページを画像として読み直し、出典に `method: vision` と書きます。
 - **レベル 5 の洪水の電文で、レベルが空になった。** 浸水が想定される区域が、水位の観測所ではなく堤防が切れる地点ごとに書かれていたためです。区域は予報区のレベルを引き継ぎ、判定できないレベルは「基準未満」とみなさず、理由を添えて止めます。
@@ -144,7 +144,7 @@ API の費用（11 月 5 日までのデータ処理）は、Reader $2.88（5 �
 
 ## Claude とどう作ったか
 
-アプリのコアで Claude が担うのは 3 役です。承認・スキーマ・検査規則はモデルの外に固定してあり、モデルを入れ替えても「人が承認した画面しか出ない」は変わりません。
+アプリのコアで Claude が担うのは 3 役です。平常時に Claude が資料を読み、文を書き、描いた画面を検査します。警報の瞬間は、承認済みの画面を組み直すだけで、モデルを呼びません。承認・スキーマ・検査規則はモデルの外に固定してあり、モデルを入れ替えても「人が承認した画面しか出ない」は変わりません。
 
 | 役 | モデル | すること | 実測 |
 |---|---|---|---|
@@ -245,4 +245,8 @@ Give EVAC LAYER the latitude, longitude and facing of a site (one venue; its scr
 
 To add your own screens: register a site file, generate and approve its screens once, then take the feed, the webhook or the files. `pnpm -F agents receive --sites <id>` reads the JMA long feeds, composes the screens of each new bulletin that concerns the site and switches the site once they are approved, either as that bulletin or through an approval of the same class (hazard × warning level × template) with the same wording; a receiver of your own can switch a site by posting a bulletin id (or `null`) to `POST /api/admin/live`. The switches in the demo video and the simulator are replays of recorded bulletins. The steps are in [`docs/integration.md`](docs/integration.md). In steady state a screen costs about $0.245 in API calls, roughly $13 per municipality per year.
 
-EVAC LAYER does not issue warnings or evacuation orders and has not yet been run in operation or checked by a municipality; evacuation sites are chosen from GSI data by rule (Claude writes and checks the text), and direction and distance are straight-line. JMA data is edited and translated under EVAC LAYER's responsibility with no forecast of its own, and the GSI data should be confirmed with each municipality. The only thing deployed publicly is the static simulator on GitHub Pages, and nothing there calls the Claude API. Built from scratch during Built with Claude: Japan 2026 (Nov 2–8) by one lead Claude Code session and eight implementation sessions on their own git worktrees. The author works almost alone, and the volume here (hazard maps and bulletins, guidance that differs for every place, layouts for every kind of screen) is more than one person could do, so it is solved with systems, algorithms and Claude working in parallel. The hackathon required a public repository; the author's everyday work is almost all private, so it seemed healthier to make this open source and offer it as a future anyone can use, and giving everyday creative work a social purpose makes that work easier to keep going. After the hackathon EVAC LAYER will be built into the author's team's own ambient-signage system as one layer (the design is done; the integration is not), and that layer is open for anyone. What happened before the code (research, the recorded feed, the model choice and the review before submission) is in "Before the code" in [`docs/how-we-built.md`](docs/how-we-built.md). Licensed AGPL-3.0 for anyone; a separate license is available for products that cannot be published under the AGPL: [ie3.jp/contact](https://ie3.jp/contact/).
+EVAC LAYER does not issue warnings or evacuation orders and has not yet been run in operation or checked by a municipality; evacuation sites are chosen from GSI data by rule (Claude writes and checks the text), and direction and distance are straight-line. JMA data is edited and translated under EVAC LAYER's responsibility with no forecast of its own, and the GSI data should be confirmed with each municipality. The only thing deployed publicly is the static simulator on GitHub Pages, and nothing there calls the Claude API.
+
+Built from scratch during Built with Claude: Japan 2026 (Nov 2–8) by one lead Claude Code session and eight implementation sessions on their own git worktrees. The author works almost alone, and the volume here (hazard maps and bulletins, guidance that differs for every place, layouts for every kind of screen) is more than one person could do, so it is solved with systems, algorithms and Claude working in parallel.
+
+The hackathon required a public repository; the author's everyday work is almost all private, so it seemed healthier to make this open source and offer it as a future anyone can use, and giving everyday creative work a social purpose makes that work easier to keep going. After the hackathon EVAC LAYER will be built into the author's team's own ambient-signage system as one layer (the design is done; the integration is not), and that layer is open for anyone. What happened before the code (research, the recorded feed, the model choice and the review before submission) is in "Before the code" in [`docs/how-we-built.md`](docs/how-we-built.md). Licensed AGPL-3.0 for anyone; a separate license is available for products that cannot be published under the AGPL: [ie3.jp/contact](https://ie3.jp/contact/).
