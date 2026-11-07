@@ -31,7 +31,7 @@ export function layoutDigest(files: { shape: string; body: string }[]): string {
 interface ClassedLayout {
   template?: string
   alert?: { hazard?: string; level?: number | null; bulletin_id?: string; issued_at?: string }
-  cells?: { role?: string; text?: unknown }[]
+  cells?: { role?: string; text?: Record<string, unknown> }[]
   sources?: { type?: string; bulletin_id?: string }[]
 }
 
@@ -39,14 +39,23 @@ export function screenClass(layout: ClassedLayout): string {
   return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}`
 }
 
-const BULLETIN_TEXT_ROLES = new Set(['headline', 'source'])
+// The JMA warning name (headline ja) and the source line follow the bulletin; the Writer's translations of the
+// headline do not, so a changed translation is a changed screen.
+function withoutBulletinText({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
+  if (cell.role === 'source') return cell
+  if (cell.role === 'headline' && text) {
+    const { ja: _ja, ...translations } = text
+    return { ...cell, text: translations }
+  }
+  return { ...cell, text }
+}
 
 function withoutBulletin(layout: ClassedLayout): ClassedLayout {
   const { bulletin_id: _id, issued_at: _at, ...alert } = layout.alert ?? {}
   return {
     ...layout,
     ...(layout.alert ? { alert } : {}),
-    ...(layout.cells ? { cells: layout.cells.map(({ text, ...cell }) => (BULLETIN_TEXT_ROLES.has(cell.role ?? '') ? cell : { ...cell, text })) } : {}),
+    ...(layout.cells ? { cells: layout.cells.map(withoutBulletinText) } : {}),
     ...(layout.sources ? { sources: layout.sources.map(({ bulletin_id, ...source }) => (source.type === 'jma' ? source : { ...source, bulletin_id })) } : {}),
   }
 }
@@ -61,13 +70,23 @@ function canonicalJson(value: unknown): string {
 }
 
 // A class approval covers every bulletin of the same kind at the site: the approved wording and arrangement,
-// with only the JMA headline, the issue time and the bulletin id free to change.
+// with only the JMA warning name, the source line, the issue time and the bulletin id free to change.
 export function classDigest(files: { shape: string; body: string }[]): string {
   return layoutDigest(files.map((file) => ({ shape: file.shape, body: canonicalJson(withoutBulletin(JSON.parse(file.body) as ClassedLayout)) })))
 }
 
 export function classKey(site: string, cls: string): string {
   return `${site}/${cls}`
+}
+
+// Revoking a bulletin revokes every class approved from it, whatever its layout files say now, and the class of
+// its current files.
+export function revokeClasses(classes: Record<string, ClassApproval>, site: string, bulletinId: string, currentClassKey: string | undefined, at: string): Record<string, ClassApproval> {
+  return Object.fromEntries(Object.entries(classes).map(([key, record]) => {
+    const fromBulletin = key.startsWith(`${site}/`) && record.approved_from === bulletinId
+    const current = currentClassKey !== undefined && key === classKey(site, currentClassKey)
+    return [key, (fromBulletin || current) && record.approved ? { ...record, approved: false, updated_at: at } : record]
+  }))
 }
 
 export function approvalState(record: LayoutApproval | undefined, digest: string | undefined): { approved: boolean; stale: boolean } {

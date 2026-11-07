@@ -1,4 +1,4 @@
-import { classKey, layoutKey } from '~~/layout/gate'
+import { classKey, layoutKey, revokeClasses } from '~~/layout/gate'
 import { isBulletinId } from '~~/layout/replay'
 
 export default defineEventHandler(async (event) => {
@@ -14,11 +14,10 @@ export default defineEventHandler(async (event) => {
   const key = layoutKey(site, body.bulletin_id)
   const updatedAt = new Date().toISOString()
   approvals.layouts[key] = { approved: body.approved, updated_at: updatedAt, ...(digest ? { digest } : {}) }
-  if (cls) {
-    const classes = (approvals.classes ??= {})
-    const ck = classKey(site, cls.key)
-    if (body.approved) classes[ck] = { approved: true, updated_at: updatedAt, digest: cls.digest, approved_from: body.bulletin_id }
-    else if (classes[ck]) classes[ck] = { ...classes[ck], approved: false, updated_at: updatedAt }
+  if (body.approved && cls) {
+    approvals.classes = { ...approvals.classes, [classKey(site, cls.key)]: { approved: true, updated_at: updatedAt, digest: cls.digest, approved_from: body.bulletin_id } }
+  } else if (!body.approved) {
+    approvals.classes = revokeClasses(approvals.classes ?? {}, site, body.bulletin_id, cls?.key, updatedAt)
   }
   await writeApprovals(approvals)
   return { site_id: site, bulletin_id: body.bulletin_id, ...approvals.layouts[key], ...(cls ? { class: cls.key, class_approval: approvals.classes?.[classKey(site, cls.key)] } : {}) }

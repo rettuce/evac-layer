@@ -6,7 +6,7 @@ import { test } from 'node:test'
 import { sourceLines } from '../layout/sources.ts'
 import { isDemoSitePath, isTrustedLayoutSrc, resolveLayoutSrc } from '../layout/trust.ts'
 import { adminAccess, clientAddressFor, type AdminRequest } from '../server/utils/adminPolicy.ts'
-import { classDigest, layoutDigest, liveLayoutGate, liveLayoutGateWith, screenClass } from '../layout/gate.ts'
+import { classDigest, layoutDigest, liveLayoutGate, liveLayoutGateWith, revokeClasses, screenClass } from '../layout/gate.ts'
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
 import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
 import { WEBHOOK_RETRIES, webhookRetryDelayMs } from '../layout/feed.ts'
@@ -121,13 +121,13 @@ test('an approval is bound to the layout files it was given for; regenerated fil
   assert.equal(liveLayoutGate(bound, 's1', 'B1'), 'ok')
 })
 
-function floodScreen(bulletin: string, issuedAt: string, action = '高い ところへ にげて') {
+function floodScreen(bulletin: string, issuedAt: string, action = '高い ところへ にげて', headlineEn = 'Koyoshi River Flood Lv 4') {
   return {
     version: '0.1', kind: 'evac-screen', municipality: { id: '05210', name: '由利本荘市' },
     alert: { source: 'jma', bulletin_id: bulletin, hazard: 'flood', level: 4, issued_at: issuedAt },
     shape: '16x9', template: 'evac-now', palette: 'cabinet-office-5',
     cells: [
-      { id: 'headline', role: 'headline', text: { ja: `見出し ${bulletin}` } },
+      { id: 'headline', role: 'headline', text: { ja: `見出し ${bulletin}`, en: headlineEn } },
       { id: 'action', role: 'action', text: { ja_easy: action } },
       { id: 'source', role: 'source', text: { ja: `気象庁 ${issuedAt} 発表` } },
     ],
@@ -159,6 +159,8 @@ test('a class approval opens a new bulletin of the same class whose headline, ti
   const edited = classOf(floodScreen('B3', '2026-10-22T10:00:00+09:00', '高い ところへ にげで'))
   assert.notEqual(edited.cls.digest, approved.cls.digest)
   assert.equal(liveLayoutGate(approvals, 's1', 'B3', edited.digest, edited.cls), 'unapproved', 'one changed letter in the action is not the approved screen')
+  const retranslated = classOf(floodScreen('B4', '2026-10-22T10:30:00+09:00', '高い ところへ にげて', 'Koyoshi River Flood Lv 5'))
+  assert.equal(liveLayoutGate(approvals, 's1', 'B4', retranslated.digest, retranslated.cls), 'unapproved', 'one changed letter in a translated headline is not the approved screen')
 
   const revoked = {
     ...approvals,
@@ -166,6 +168,14 @@ test('a class approval opens a new bulletin of the same class whose headline, ti
     classes: { 's1/flood/evac-now/4': { ...approvals.classes['s1/flood/evac-now/4'], approved: false } },
   }
   assert.equal(liveLayoutGate(revoked, 's1', 'B2', next.digest, next.cls), 'unapproved', 'revoking the bulletin revokes its class')
+  const revokedWithoutFiles = {
+    ...approvals,
+    layouts: { 's1/B1': { approved: false, updated_at: at } },
+    classes: revokeClasses(approvals.classes, 's1', 'B1', undefined, at),
+  }
+  assert.equal(revokedWithoutFiles.classes['s1/flood/evac-now/4']!.approved, false, 'the class approved from a bulletin falls with it even when its layout files are gone')
+  assert.equal(liveLayoutGate(revokedWithoutFiles, 's1', 'B2', next.digest, next.cls), 'unapproved')
+  assert.equal(revokeClasses(approvals.classes, 's2', 'B1', undefined, at)['s1/flood/evac-now/4']!.approved, true, 'revoking at another site leaves this site alone')
   const bulletinRevoked = { ...approvals, layouts: { ...approvals.layouts, 's1/B2': { approved: false, updated_at: at } } }
   assert.equal(liveLayoutGate(bulletinRevoked, 's1', 'B2', next.digest, next.cls), 'unapproved', 'a bulletin the operator turned off stays off')
 })
