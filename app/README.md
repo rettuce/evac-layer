@@ -57,7 +57,7 @@ NUXT_REPO_ROOT=/path/to/evac-layer EVAC_DATA_DIR=/path/to/evac-layer/data node a
 
 ### Approval gate
 
-`/api/live-layout?site=<id>&bulletin=<id>&shape=<shape>` returns a layout only when the site has auto publish on and the bulletin is approved for that site in `data/approvals.json`; otherwise 403 and the live screen stays ambient with `data-unapproved`. `/admin` previews read `/api/admin/preview-layout` (same parameters), which skips the gate but needs admin access. `POST /api/admin/approve {site_id, bulletin_id, approved}` binds the approval to the current layout files.
+`/api/live-layout?site=<id>&bulletin=<id>&shape=<shape>` returns a layout only when the site has auto publish on and the bulletin is approved for that site in `data/approvals.json`; otherwise 403 and the live screen stays ambient with `data-unapproved`. `/admin` previews read `/api/admin/preview-layout` (same parameters), which skips the gate but needs admin access. `POST /api/admin/approve {site_id, bulletin_id, approved}` binds the approval to the current layout files. It also writes the class of the screens (`classes["<site_id>/<hazard>/<template>/<level>"]` in `data/approvals.json`), bound to the layout files without the JMA headline, issue time and bulletin id, so a later bulletin of the same class with the same wording and arrangement passes the gate; revoking a bulletin revokes its class. `/admin` marks such a bulletin as approved through its class and offers to approve it as a bulletin as well.
 
 ### Live state
 

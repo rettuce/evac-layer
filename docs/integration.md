@@ -70,7 +70,25 @@ pnpm -F agents fanout --sites my-station-concourse --verifier vision --writer li
 
 Every recorded bulletin for the site's municipality goes through write → compose → verify → revise, into `data/layouts/<site_id>/` with reports in `data/reports/<site_id>/`. `--verifier static|browser|vision` and `--writer placeholder|live` choose the depth; `--municipalities <ids>` means every site in those municipalities.
 
-Open `/admin`, review the screens of each bulletin and approve them. An approval is per site and per bulletin (`<site_id>/<bulletin_id>`) and is bound to the layout files it was given for, so a bulletin whose screens were regenerated is held back until someone approves it again. Without the page, approve each bulletin and then switch automatic delivery on for the site:
+Open `/admin`, review the screens of each bulletin and approve them. An approval is per site and per bulletin (`<site_id>/<bulletin_id>`) and is bound to the layout files it was given for, so a bulletin whose wording or arrangement changed is held back until someone approves it again.
+
+Approving a bulletin also approves its class at that site: `<hazard>/<template>/<level>` (for example `flood/evac-now/4`). The class approval is bound to the layout files with the parts that change from bulletin to bulletin taken out: the JMA headline, the issue time and the bulletin id. A later bulletin of the same class whose screens carry the approved wording and arrangement is therefore shown without a new approval. Revoking a bulletin (`"approved": false`) revokes its class too. `data/approvals.json` keeps both:
+
+```json
+{
+  "version": "0.1",
+  "layouts": { "my-station-concourse/VXKOii-202610211815-e713da0e3c05": { "approved": true, "updated_at": "2026-11-07T10:08:52.057Z", "digest": "sha256:…" } },
+  "sites": { "my-station-concourse": { "auto_publish": true, "updated_at": "2026-11-07T10:08:52.070Z" } },
+  "classes": {
+    "my-station-concourse/flood/evac-now/4": {
+      "approved": true, "updated_at": "2026-11-07T10:08:52.057Z", "digest": "sha256:…",
+      "approved_from": "VXKOii-202610211815-e713da0e3c05"
+    }
+  }
+}
+```
+
+A file without `classes` (written before classes existed) works as before, bulletin by bulletin. Without the page, approve each bulletin and then switch automatic delivery on for the site:
 
 ```sh
 curl -s -X POST http://127.0.0.1:3150/api/admin/approve \
@@ -86,7 +104,7 @@ From localhost no token is needed and the `Authorization` header can be left out
 
 ## 3. Drive the state
 
-From the JMA feed to the screen, `receive` does the whole round for live sites: it records the JMA XML long feeds, takes each new bulletin that concerns a site, writes, composes and verifies its screens into `data/layouts/<site_id>/`, and sets the last one that passed as the site's current bulletin. Nothing new is shown until an operator approves it in `/admin` (above); until then the site stays ambient. Run it beside the app:
+From the JMA feed to the screen, `receive` does the whole round for live sites: it records the JMA XML long feeds, takes each new bulletin that concerns a site, writes, composes and verifies its screens into `data/layouts/<site_id>/`, and sets the last one that passed as the site's current bulletin. When the site already has an approval for the same class, the new bulletin is written with the approved wording (the Writer cache of the class, `data/writer/<municipality>/class/`, with no API call), and is shown as soon as it passes the rule and browser checks. Anything else is not shown until an operator approves it in `/admin` (above); until then the site stays ambient. Each round logs the site's feed state for the bulletin it set (`unknown` when the app cannot be reached). Run it beside the app:
 
 ```sh
 pnpm -F agents receive --sites my-station-concourse --every 600 --writer live --verifier vision
