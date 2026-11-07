@@ -7,7 +7,7 @@
   "fps": 30,
   "capture_spec": "画面収録 16:9・1920×1080・30fps・ブラウザ枠なし（ヘッドレスのビューポートを直接収録）\nタブ・アドレスバー・OS のメニューバー・カーソルを写さない。収録元は app（127.0.0.1:3150）",
   "screen_cuts": {
-    "source": "render 席 /screen の live モード（mode=live&municipality=05210&speed=1200&clock=virtual）。由利本荘市の実電文 9 本を 1200 倍で再生",
+    "source": "/screen の live モード（mode=live&municipality=05210&speed=1200&clock=virtual）。由利本荘市の実電文 9 本を 1200 倍で再生",
     "ambient": {
       "seconds": 12,
       "live_t_ms": [

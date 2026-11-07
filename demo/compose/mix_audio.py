@@ -23,7 +23,7 @@ AUDIO_DIR = HERE / "audio"
 OUT_DIR = HERE.parent / "out"
 RATE = 48000
 # With --narration the voice leads: -16 LUFS over the music at -26, and the ambience and drone dip 6 dB while it
-# speaks, fading 300 ms either side (田中, D-31). Without narration the music stays at BGM_LUFS.
+# speaks, fading 300 ms either side. Without narration the music stays at BGM_LUFS.
 NARRATION_LUFS = -16.0
 NARRATED_BGM_LUFS = -26.0
 DUCK_DB = -6.0

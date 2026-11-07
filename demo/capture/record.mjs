@@ -81,7 +81,7 @@ const CUTS = {
   // Cut 5 opens on 4 s of the calm screen before the 13.1 s level 3 (v9).
   switch: { seconds: 27, startMs: 9100, query: { ...LIVE, scene: 'ink-bloom' }, ready: LIVE_READY, events: LIVE_EVENTS_MS },
   alert: { seconds: 18, startMs: 26000, query: LIVE, ready: LIVE_READY, events: [] },
-  // v8 (D-14): the clock runs at real time everywhere except cut 5. The replay clock starts at the window's first
+  // v8: the clock runs at real time everywhere except cut 5. The replay clock starts at the window's first
   // bulletin, so a negative start shows the calm screen before it: 15:54:55, then the 15:55 level 3 at 5 s.
   'switch-real': { seconds: 13, startMs: -5000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'brush-flow' }, ready: LIVE_READY, events: [0] },
   'ambient-real': { seconds: 16, startMs: -300000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'brush-flow' }, ready: LIVE_READY, events: [] },
@@ -90,15 +90,15 @@ const CUTS = {
   'alert-lv4': { seconds: 6, startMs: 3000, query: previewOf('05210', 'VXKOii-202610211815-e713da0e3c05'), ready: READY_SELECTOR, events: [] },
   'alert-tsunami': { seconds: 6, startMs: 3000, query: previewOf('22424', 'VTSE41-201609010713-ff3dd5d5c94f'), ready: READY_SELECTOR, events: [] },
   'alert-real': { seconds: 27, startMs: 3000, query: { ...LIVE, speed: '1', from: '2026-10-21T19:45+09:00' }, ready: LIVE_READY, events: [] },
-  // Cut 5 (D-32): one real-time replay from 15:55, shown in three spans joined at the bulletins. The calm
+  // Cut 5: one real-time replay from 15:55, shown in three spans joined at the bulletins. The calm
   // ink-bloom for 4 s and the 15:55 level 3; from 18:15 the level 4; from 19:45 the level 5 (switches at 4, 9.5, 15 s).
   'seq-lv3': { seconds: 9.5, startMs: -4000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'ink-bloom' }, ready: LIVE_READY, events: [0] },
   'seq-lv4': { seconds: 5.5, startMs: 8400000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'ink-bloom' }, ready: LIVE_READY, events: [8400000] },
   'seq-lv5': { seconds: 6, startMs: 13800000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00', scene: 'ink-bloom' }, ready: LIVE_READY, events: [13800000] },
-  // Edit material (D-33): 30 s of a calm scene (--scene) on the real-time clock from 15:54:00.
+  // Edit material: 30 s of a calm scene (--scene) on the real-time clock from 15:54:00.
   'ambient-3': { seconds: 3, startMs: -60000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [] },
   'ambient-30': { seconds: 30, startMs: -60000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [] },
-  // Cut 9 (D-32): the 15:55 level 3 instead of the level 5.
+  // Cut 9: the 15:55 level 3 instead of the level 5.
   'alert-real-lv3': { seconds: 12, startMs: 3000, query: { ...LIVE, speed: '1', from: '2026-10-21T15:55+09:00' }, ready: LIVE_READY, events: [] },
   // The dashboard counts up in about 4 s of its own clock; a quarter rate stretches that over the cut.
   dashboard: { seconds: 25, startMs: 0, rate: 0.25, page: '/dashboard', query: {}, ready: '.dashboard[data-ready="1"]', events: [] },

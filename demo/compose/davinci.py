@@ -4,7 +4,7 @@ python3 demo/compose/davinci.py --version v9 --out <review/davinci>
     [--clean demo/out/evac-layer-demo-<version>-clean.mp4] [--vcon demo/out/evac-layer-demo-<version>-vcon.mp4]
     [--stems demo/out/stems-<version>] [--mix demo/out/evac-layer-demo-v1-mix.wav]
 
-Layout and rules: log/specs/davinci-assets.md (田中, 2026-11-05). The previous kit moves to _prev/<its version>/.
+The previous kit moves to _prev/<its version>/.
 compose.py --export-cuts writes video/cuts/ and cuts.csv; this script places everything and writes README.md.
 """
 
@@ -71,9 +71,9 @@ def write_srt(spans, path):
     path.write_text("\n".join(body), encoding="utf-8")
 
 
-# 田中 records narration straight into these folders while editing; a new version never moves or deletes them.
+# The author records narration straight into these folders while editing; a new version never moves or deletes them.
 RECORDINGS = ("narration", "narration-prev")
-RECORDINGS_NOTE = "録音（田中・録音中は davinci.py が触らない）"
+RECORDINGS_NOTE = "録音（作者・録音中は davinci.py が触らない）"
 
 
 def is_recording(rel):
@@ -162,7 +162,7 @@ def mix_balance(out):
     takes = sorted((out / "audio" / "narration").glob("*.wav"))
     if not (out / "audio" / "stems" / "narration.wav").exists():
         return f"BGM set to {BGM_LUFS:.0f} LUFS; no narration"
-    return (f"narration {NARRATION_LUFS:.0f} LUFS: 田中の録音 {len(takes)} 本・cut ごとに頭に配置; BGM {NARRATED_BGM_LUFS:.0f} LUFS; "
+    return (f"narration {NARRATION_LUFS:.0f} LUFS: 作者の録音 {len(takes)} 本・cut ごとに頭に配置; BGM {NARRATED_BGM_LUFS:.0f} LUFS; "
             f"ambience and drone {DUCK_DB:.0f} dB under the narration")
 
 
