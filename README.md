@@ -168,6 +168,18 @@ API の費用（11 月 5 日までのデータ処理）は、Reader $2.88（5 �
 | Writer | Opus 5.5 | その施設とその電文のための行動の文を、形状ごとの字数の上限の中で 10 の言語で書く。検査の指摘を受けて書き直す | 約 $7.08。同じ警報から同じ画面が出るよう出力を記録 |
 | Verifier（Vision） | Sonnet 5.5 | 描いた画面を形状ごとに電文と照らし、図記号の矛盾・欠落・はみ出しを指摘する | $11.34（19 回）。最初に 25 件を指摘し、5 回の実行で 25 → 8 → 4 → 4 → 0 |
 
+作る過程では、Claude Code の機能を次のように使い分けました。
+
+| 機能 | 何のために | どこにあるか |
+|---|---|---|
+| スキル | layout の取り決め、検査の指摘の戻し先、記録した電文の再生の手順を、どのセッションも同じ形で扱うため | [`.claude/skills/`](.claude/skills/)・[`.claude/README.md`](.claude/README.md) |
+| 並行のセッションと git worktree | 8 つの実装のセッションが、互いのファイルを壊さずに同時に作業するため。やり取りはセッション間のメッセージ | [`docs/how-we-built.md`](docs/how-we-built.md)「Sessions」 |
+| サブエージェント | 並行の調査。ハザードマップ PDF を調べるときは自治体ごとに 1 つ | [`docs/how-we-built.md`](docs/how-we-built.md)「Claude Code features」 |
+| フック（PostToolUse） | セッションが書いたレイアウト・自治体・施設・テスト用のデータをスキーマで、Writer の記録を文章の規則で、書いた瞬間に検査して戻すため | [`.claude/settings.json`](.claude/settings.json)・[`.claude/hooks/check-data.sh`](.claude/hooks/check-data.sh) |
+| MCP（開発中だけ） | Suno で BGM を作る。Figma から動画に重ねる文字の画像を書き出す。Claude in Chrome でサイネージの参考を 1 回だけ探す | [`docs/how-we-built.md`](docs/how-we-built.md)「Claude Code features」・[`demo/compose/overlays.md`](demo/compose/overlays.md) |
+| prompt caching | Writer は書き方の指示と自治体の資料を、Vision は検査の指示をキャッシュし、2 回目からの入力を安くするため | [`agents/src/writer/live.ts`](agents/src/writer/live.ts)・[`agents/src/verifier/vision.ts`](agents/src/verifier/vision.ts)・[`docs/evaluation.md`](docs/evaluation.md) |
+| 使わなかったもの | 警報の瞬間のモデル呼び出し（人が承認した文だけを出すため）。自動の承認（承認するのは運営者）。製品の中の MCP（パイプラインを MCP サーバーなしで、画面なしで動かすため）。3D の `blender-mcp`（リポジトリから場面を作り直せるよう、素の `bpy` にした） | [`docs/how-we-built.md`](docs/how-we-built.md)「Built for next year's model」「Claude Code features」・[`demo/APPROACH.md`](demo/APPROACH.md) |
+
 作者は、ほぼ一人で物を作っています。防災の案内には、一人では到底できない物量があります。自治体ごとのハザードマップや気象庁の電文といった膨大な資料、都道府県をまたぐ情報の食い違い（市町村や場所ごとに、避難先も方向も言葉も違う）、千差万別のスクリーンのレイアウト。人がやれば時間も労力もコストも膨大にかかるこの作業を、システムとアルゴリズムの力と、AI を使った並列処理で一気に解こうと考えました。
 
 11 月 2 日より前にあったのは、調査・コンセプト・データの利用条件の確認・元の PDF のダウンロード・気象庁のフィードの記録だけで、コードはありません。このリポジトリは、すべて 11 月 2 日 12:00 から書きました。
@@ -179,10 +191,11 @@ Claude Code のセッションの 1 つが全体のまとめ役になり、8 つ
 - **3 段の検査と書き直しのループ。** 規則・ブラウザ・Vision の検査が先にあり、指摘は書いた本人に戻ります。Writer の文は書き直させ、コードが書く部分（気象庁の見出し・避難先・出典）の問題は理由を添えてループを止めます。
 - **返却の最後に「確かめられなかったこと」と「未解決の点」。** 各セッションは、まとめ役から見えない前提や走らせられなかった検査を自分で書き、まとめ役は次に進む前にそれを 1 つずつ決めます。
 - **承認はモデルの外に置いた。** スキーマ、Verifier が読む DOM の属性、承認の仕組みは固定してあり、モデルを入れ替えても、人が承認した画面しか出ないという決まりは変わりません。
+- **提出物も Claude に審査させた。** 作り手の文脈を持たない新しいセッションの Claude（Opus）を審査員役にして、主催の 4 つの審査基準と配点で採点させ、失格のリスク、HIGH / MEDIUM / LOW の弱点と直し方、締め切りまでに直せるかを返させました。採点は 11 月 7 日に 2 回（74.5 点・79.5 点）、8 日に 1 回（81 点）で、直せる指摘を直してから次の採点に回しています。1 回目の核心の指摘は「承認が電文 ID に束縛され、本物の新しい電文は届いた瞬間に必ず未承認になる」で、承認を施設ごとの画面の種類に束ね直しました（[何を出すかは、事前に人が決める](#何を出すかは事前に人が決める)）。差分のレビューは別のモデル（OpenAI の Codex）にも頼み、10 言語の文は原文を見せない別のモデルに逆翻訳させて照合し、コメントを消す役は別のセッションに分けました（[`docs/how-we-built.md`](docs/how-we-built.md)「Fresh-context review」）。
 
 コードを書く前の調べものと準備、モデルの選び方、提出前のレビューは、[`docs/how-we-built.md`](docs/how-we-built.md) の「Before the code / コードを書く前」にあります。
 
-詳しくは [`docs/how-we-built.md`](docs/how-we-built.md)。
+詳しくは [`docs/how-we-built.md`](docs/how-we-built.md)。スキルとフックの説明は [`.claude/README.md`](.claude/README.md) にあります。
 
 ## 動かす
 
