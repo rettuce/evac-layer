@@ -73,7 +73,6 @@ const name = path.basename(alertFile);
 const code = name.match(BODY_NAME)?.[2] ?? name.match(/_(V[A-Z]{3}\d{2})\.xml$/)?.[1] ?? "";
 const fromFeed = path.relative(FEED_DIR, alertFile);
 const entry = replayEntry(fs.readFileSync(alertFile), fromFeed.startsWith("..") ? alertFile : fromFeed, code, municipality.id);
-// Without --publish the run lands in tmp/, so trying a Writer output never touches the published data tree.
 const roots = values.publish ? undefined : { reports: path.join(TMP_DIR, "pipeline", "reports"), layouts: path.join(TMP_DIR, "pipeline", "layouts") };
 const composed = await composeBulletin({
   entry, municipality, readerRan: loaded.readerRan, site, verifier, writer, roots,

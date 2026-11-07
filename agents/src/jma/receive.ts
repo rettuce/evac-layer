@@ -72,7 +72,6 @@ export async function receiveSite(args: { site: SiteFile; verifier: Verifier; wr
   let lastPass: string | undefined;
   for (const entry of entries) {
     const hazard = entry.alert.hazard;
-    // A clearance only means something to people who saw the warning; per hazard, all-clear follows a shown screen.
     const composed = await composeBulletin({
       entry, municipality: municipality!, readerRan, site, verifier: args.verifier, writer: args.writer, usage: args.usage,
       skipIf: (s) => (s.cleared && !(hazard in state.showing) ? `all-clear for ${hazard} but no ${hazard} screen was shown before; nothing to clear` : undefined),

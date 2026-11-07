@@ -5,7 +5,6 @@ import { LAYOUTS_DIR } from "../paths.js";
 import { writeLive } from "./live.js";
 import { findSite, SiteNotFound } from "../sites.js";
 
-// Writes data/live/<site_id>.json, the same file POST /api/admin/live writes, for a receiver other than `receive`.
 const { values } = parseArgs({ options: { site: { type: "string" }, bulletin: { type: "string" }, clear: { type: "boolean", default: false } } });
 if (!values.site || Boolean(values.bulletin) === values.clear) {
   console.error("usage: pnpm -F agents live --site <site_id> (--bulletin <bulletin_id> | --clear)");

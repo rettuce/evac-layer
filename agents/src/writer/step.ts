@@ -33,7 +33,6 @@ export async function writeForBulletin(
     const used: CallUsage[] = [];
     let r = await writeCells(call);
     used.push(r.usage);
-    // The guideline lint is cheap and deterministic, so its findings go back to the Writer before rendering.
     for (let i = 0; i < 2 && r.lint.length; i++) {
       r = await writeCells({ ...call, feedback: r.lint.map((f) => `${f.rule}: 「${f.match}」`) });
       used.push(r.usage);

@@ -11,8 +11,6 @@ export const TMP_DIR = path.join(REPO_ROOT, "tmp");
 
 const SETTINGS = ["EVAC_DATA_DIR", "EVAC_RAW_DIR", "JMA_FEED_DIR", "JMA_SAMPLES_DIR", "EVAC_URL", "CHROME_PATH"] as const;
 
-// Only the path settings are taken from .env here; the API key keeps its own loader (src/apikey.ts), which reports
-// whether the key came from the shell or the file.
 if (fs.existsSync(ENV_FILE)) {
   const dotenv = parseEnv(fs.readFileSync(ENV_FILE, "utf8"));
   for (const k of SETTINGS) if (process.env[k] === undefined && dotenv[k] !== undefined) process.env[k] = dotenv[k];
@@ -23,7 +21,6 @@ export function resolveUserPath(p: string): string {
   return path.resolve(process.env.INIT_CWD ?? process.cwd(), p);
 }
 
-// Shared with the app (app/server/utils/data.ts reads the same variable).
 export const DATA_DIR = path.resolve(REPO_ROOT, process.env.EVAC_DATA_DIR ?? "data");
 export const SITES_DIR = path.join(DATA_DIR, "sites");
 export const LAYOUTS_DIR = path.join(DATA_DIR, "layouts");
@@ -35,7 +32,6 @@ export const LIVE_DIR = path.join(DATA_DIR, "live");
 export const APPROVALS_FILE = path.join(DATA_DIR, "approvals.json");
 export const TSUNAMI_REGIONS_FILE = path.join(DATA_DIR, "jma", "tsunami-regions.json");
 
-// Raw inputs (municipal PDFs, GSI CSVs, JMA bulletins) are not redistributed with the repository.
 export const RAW_DIR = path.resolve(REPO_ROOT, process.env.EVAC_RAW_DIR ?? "data/raw");
 export const FEED_DIR = path.resolve(REPO_ROOT, process.env.JMA_FEED_DIR ?? path.join(RAW_DIR, "jma-feed"));
 export const SAMPLES_DIR = path.resolve(REPO_ROOT, process.env.JMA_SAMPLES_DIR ?? path.join(RAW_DIR, "jma-samples", "unzipped"));

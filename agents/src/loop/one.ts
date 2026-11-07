@@ -21,7 +21,6 @@ export function bulletinRow(e: ReplayEntry) {
 }
 
 export function screenRow(row: ReturnType<typeof bulletinRow>, a: { situation: Situation; verifier: Verifier; dir: string; report: { outcome: string; reason?: string; layouts: string[] } }) {
-  // Only a pass that went through the renderer may be shown; a static-only pass has not been seen on a screen.
   const browserChecked = a.verifier !== staticVerifier;
   const skipped = (a.verifier.skippedShapes ?? []).filter((shape) => a.report.layouts.some((f) => f.endsWith(`/${shape}.json`)));
   const { report } = a;

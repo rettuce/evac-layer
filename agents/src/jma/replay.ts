@@ -7,8 +7,6 @@ import { parseJmaXml, type Alert } from "./parse.js";
 import { tsunamiRegionsFor } from "./regions.js";
 import { SAMPLES_DIR, SAMPLES_LIST_DIR, requireRawDir } from "../paths.js";
 
-// Official JMA sample bulletins (not redistributed) that a municipality replays besides its feed recording, listed in
-// data/samples/<id>.json; a feed recorded in a quiet season has no tsunami bulletin, the samples do.
 export { SAMPLES_DIR };
 
 export const REPLAYABLE = /^(VPWW55|VPWW56|VXKO\d{2}|VTSE41)$/;

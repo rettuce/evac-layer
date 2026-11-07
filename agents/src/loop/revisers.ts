@@ -2,8 +2,6 @@ import fs from "node:fs";
 import type { WriterOutput } from "../composer/compose.js";
 import { NoRevision, type Reviser } from "./types.js";
 
-// Stands in for the Writer while no API key is present: returns the next hand-written revision in order, so the
-// loop's path can be exercised end to end.
 export function fixtureReviser(files: string[]): Reviser {
   return {
     name: "fixture",
@@ -30,7 +28,6 @@ export function writerApiReviser(args: { client: import("@anthropic-ai/sdk").def
       const feedback = findings.map((f) => `${f.shape} ${f.check}${f.cell_id ? `[${f.cell_id}]` : ""}: ${f.detail}`);
       let r = await writeCells({ ...args, feedback });
       args.usage.push(r.usage);
-      // A revision must pass the same guideline lint as the first write.
       for (let i = 0; i < 2 && r.lint.length; i++) {
         r = await writeCells({ ...args, feedback: [...feedback, ...r.lint.map((l) => `${l.rule}: 「${l.match}」`)] });
         args.usage.push(r.usage);

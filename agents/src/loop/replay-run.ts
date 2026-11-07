@@ -16,7 +16,6 @@ export interface ReplayEvent { municipality: string; issued_at: string; template
 
 export interface ReplaySummary { municipality: string; name: string; bulletins: number; screens: number; pass: number; fail: number; no_screen: number; layouts: number; seconds: number; writer_usd: number; writer_tokens: PromptTokens }
 
-// Prompt tokens split by how they were billed, so a run shows whether the cache breakpoints are being hit.
 export interface PromptTokens { input: number; cache_write: number; cache_read: number }
 export function promptTokens(usage: { input: number; cache_write: number; cache_read: number }[]): PromptTokens {
   return usage.reduce((a, u) => ({ input: a.input + u.input, cache_write: a.cache_write + u.cache_write, cache_read: a.cache_read + u.cache_read }), { input: 0, cache_write: 0, cache_read: 0 });
@@ -28,7 +27,6 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   const { municipality, readerRan } = loadMunicipality(args.municipalityId);
   const layoutsRoot = args.roots?.layouts ?? LAYOUTS_DIR;
   const reportsRoot = args.roots?.reports ?? REPORTS_DIR;
-  // A replay regenerates the site's whole output, so screens from an earlier run cannot linger.
   if (persist) {
     fs.rmSync(path.join(layoutsRoot, args.site.id), { recursive: true, force: true });
     fs.rmSync(path.join(reportsRoot, args.site.id), { recursive: true, force: true });
@@ -38,7 +36,6 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   const notes = [...(live ? [] : [PLACEHOLDER_NOTE]), ...(readerRan ? [] : [READER_MISSING_NOTE])].join(" ");
   const index: unknown[] = [];
   let pass = 0, fail = 0, noScreen = 0, layouts = 0;
-  // A clearance only means something to people who saw the warning; per hazard, all-clear follows a shown screen.
   const showing = new Set<string>();
   for (const e of args.entries) {
     const row = bulletinRow(e);
