@@ -86,6 +86,14 @@ From localhost no token is needed and the `Authorization` header can be left out
 
 ## 3. Drive the state
 
+From the JMA feed to the screen, `receive` does the whole round for live sites: it records the JMA XML long feeds, takes each new bulletin that concerns a site, writes, composes and verifies its screens into `data/layouts/<site_id>/`, and sets the last one that passed as the site's current bulletin. Nothing new is shown until an operator approves it in `/admin` (above); until then the site stays ambient. Run it beside the app:
+
+```sh
+pnpm -F agents receive --sites my-station-concourse --every 600 --writer live --verifier vision
+```
+
+Without `--every` it runs one round and exits. To keep it running as a service (launchd, systemd) rather than from cron, give it a longer interval: `pnpm -F agents receive --sites my-station-concourse --every 3600`. `pnpm -F agents record` runs the recording step alone, and `pnpm -F agents pipeline --alert <bulletin.xml> --site <site id> --writer live --publish --go-live` does one bulletin by hand.
+
 A site without `replay` is live. Its state is the bulletin it should show now, kept in `data/live/<site_id>.json`. Set it through the API (admin access) or the CLI, which write the same file:
 
 ```sh
@@ -98,7 +106,7 @@ pnpm -F agents live --site my-station-concourse --bulletin <bulletin id>     # o
 
 The bulletin is shown only when it is approved for the site and auto publish is on; otherwise the site stays ambient. A site with `replay` answers 409.
 
-Call this from your own JMA receiver when a bulletin for the site arrives. Receiving JMA bulletins, and composing screens for a bulletin that was not in the recording, happen outside this repository.
+`receive` writes the same file. If you already run your own JMA receiver, call this instead when a bulletin for the site arrives, after its screens were composed with `pipeline --publish` and approved.
 
 ## 4. Receive it
 
