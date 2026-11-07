@@ -6,7 +6,7 @@ import { test } from 'node:test'
 import { sourceLines } from '../layout/sources.ts'
 import { isDemoSitePath, isTrustedLayoutSrc, resolveLayoutSrc } from '../layout/trust.ts'
 import { adminAccess, clientAddressFor, type AdminRequest } from '../server/utils/adminPolicy.ts'
-import { layoutDigest, liveLayoutGate } from '../layout/gate.ts'
+import { classDigest, layoutDigest, liveLayoutGate, liveLayoutGateWith, screenClass } from '../layout/gate.ts'
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
 import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
 import { WEBHOOK_RETRIES, webhookRetryDelayMs } from '../layout/feed.ts'
@@ -119,6 +119,64 @@ test('an approval is bound to the layout files it was given for; regenerated fil
   assert.equal(liveLayoutGate(bound, 's1', 'B1', layoutDigest([{ shape: '16x9', body: '{"a":2}' }])), 'stale')
   assert.equal(liveLayoutGate(unbound, 's1', 'B1', digest), 'stale')
   assert.equal(liveLayoutGate(bound, 's1', 'B1'), 'ok')
+})
+
+function floodScreen(bulletin: string, issuedAt: string, action = '高い ところへ にげて') {
+  return {
+    version: '0.1', kind: 'evac-screen', municipality: { id: '05210', name: '由利本荘市' },
+    alert: { source: 'jma', bulletin_id: bulletin, hazard: 'flood', level: 4, issued_at: issuedAt },
+    shape: '16x9', template: 'evac-now', palette: 'cabinet-office-5',
+    cells: [
+      { id: 'headline', role: 'headline', text: { ja: `見出し ${bulletin}` } },
+      { id: 'action', role: 'action', text: { ja_easy: action } },
+      { id: 'source', role: 'source', text: { ja: `気象庁 ${issuedAt} 発表` } },
+    ],
+    sources: [{ type: 'gsi', file: '05210_2.csv' }, { type: 'jma', bulletin_id: bulletin }],
+  }
+}
+
+function classOf(screen: ReturnType<typeof floodScreen>) {
+  const files = [{ shape: '16x9', body: JSON.stringify(screen) }]
+  return { files, digest: layoutDigest(files), cls: { key: screenClass(screen), digest: classDigest(files) } }
+}
+
+test('a class approval opens a new bulletin of the same class whose headline, time and id alone differ', () => {
+  const at = '2026-11-07T00:00:00Z'
+  const approved = classOf(floodScreen('B1', '2026-10-21T18:15:00+09:00'))
+  const next = classOf(floodScreen('B2', '2026-10-22T09:30:00+09:00'))
+  assert.equal(approved.cls.key, 'flood/evac-now/4')
+  assert.equal(next.cls.digest, approved.cls.digest)
+  assert.notEqual(next.digest, approved.digest)
+  const approvals = {
+    version: '0.1' as const, sites: { s1: { auto_publish: true, updated_at: at } },
+    layouts: { 's1/B1': { approved: true, updated_at: at, digest: approved.digest } },
+    classes: { 's1/flood/evac-now/4': { approved: true, updated_at: at, digest: approved.cls.digest, approved_from: 'B1' } },
+  }
+  assert.deepEqual(liveLayoutGateWith(approvals, 's1', 'B2', next.digest, next.cls), { gate: 'ok', by: 'class' })
+  assert.deepEqual(liveLayoutGateWith(approvals, 's1', 'B1', approved.digest, approved.cls), { gate: 'ok', by: 'bulletin' })
+  assert.equal(liveLayoutGate(approvals, 's2', 'B2', next.digest, next.cls), 'auto-publish-off')
+
+  const edited = classOf(floodScreen('B3', '2026-10-22T10:00:00+09:00', '高い ところへ にげで'))
+  assert.notEqual(edited.cls.digest, approved.cls.digest)
+  assert.equal(liveLayoutGate(approvals, 's1', 'B3', edited.digest, edited.cls), 'unapproved', 'one changed letter in the action is not the approved screen')
+
+  const revoked = {
+    ...approvals,
+    layouts: { 's1/B1': { approved: false, updated_at: at } },
+    classes: { 's1/flood/evac-now/4': { ...approvals.classes['s1/flood/evac-now/4'], approved: false } },
+  }
+  assert.equal(liveLayoutGate(revoked, 's1', 'B2', next.digest, next.cls), 'unapproved', 'revoking the bulletin revokes its class')
+  const bulletinRevoked = { ...approvals, layouts: { ...approvals.layouts, 's1/B2': { approved: false, updated_at: at } } }
+  assert.equal(liveLayoutGate(bulletinRevoked, 's1', 'B2', next.digest, next.cls), 'unapproved', 'a bulletin the operator turned off stays off')
+})
+
+test('approvals written before classes existed still gate by bulletin', () => {
+  const at = '2026-11-07T00:00:00Z'
+  const { digest, cls } = classOf(floodScreen('B1', '2026-10-21T18:15:00+09:00'))
+  const legacy = { version: '0.1' as const, sites: { s1: { auto_publish: true, updated_at: at } }, layouts: { 's1/B1': { approved: true, updated_at: at, digest } } }
+  assert.equal(liveLayoutGate(legacy, 's1', 'B1', digest, cls), 'ok')
+  assert.equal(liveLayoutGate(legacy, 's1', 'B1', digest), 'ok')
+  assert.equal(liveLayoutGate(legacy, 's1', 'B2', layoutDigest([{ shape: '16x9', body: '{}' }]), cls), 'unapproved')
 })
 
 test('dev trusts only the forwarded address appended by a local relay', () => {

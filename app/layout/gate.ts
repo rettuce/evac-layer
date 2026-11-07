@@ -6,10 +6,18 @@ export interface LayoutApproval {
   digest?: string
 }
 
+export interface ClassApproval {
+  approved: boolean
+  updated_at: string
+  digest: string
+  approved_from: string
+}
+
 export interface Approvals {
   version: '0.1'
   layouts: Record<string, LayoutApproval>
   sites: Record<string, { auto_publish: boolean; updated_at: string }>
+  classes?: Record<string, ClassApproval>
 }
 
 // An approval is bound to the bytes that were approved: the shape files of the bulletin. A regenerated layout
@@ -18,6 +26,48 @@ export function layoutDigest(files: { shape: string; body: string }[]): string {
   const hash = createHash('sha256')
   for (const file of [...files].sort((a, b) => a.shape.localeCompare(b.shape))) hash.update(`${file.shape}\n${file.body}\n`)
   return `sha256:${hash.digest('hex')}`
+}
+
+interface ClassedLayout {
+  template?: string
+  alert?: { hazard?: string; level?: number | null; bulletin_id?: string; issued_at?: string }
+  cells?: { role?: string; text?: unknown }[]
+  sources?: { type?: string; bulletin_id?: string }[]
+}
+
+export function screenClass(layout: ClassedLayout): string {
+  return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}`
+}
+
+const BULLETIN_TEXT_ROLES = new Set(['headline', 'source'])
+
+function withoutBulletin(layout: ClassedLayout): ClassedLayout {
+  const { bulletin_id: _id, issued_at: _at, ...alert } = layout.alert ?? {}
+  return {
+    ...layout,
+    ...(layout.alert ? { alert } : {}),
+    ...(layout.cells ? { cells: layout.cells.map(({ text, ...cell }) => (BULLETIN_TEXT_ROLES.has(cell.role ?? '') ? cell : { ...cell, text })) } : {}),
+    ...(layout.sources ? { sources: layout.sources.map(({ bulletin_id, ...source }) => (source.type === 'jma' ? source : { ...source, bulletin_id })) } : {}),
+  }
+}
+
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value).filter(([, v]) => v !== undefined).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${canonicalJson(v)}`).join(',')}}`
+  }
+  return JSON.stringify(value)
+}
+
+// A class approval covers every bulletin of the same kind at the site: the approved wording and arrangement,
+// with only the JMA headline, the issue time and the bulletin id free to change.
+export function classDigest(files: { shape: string; body: string }[]): string {
+  return layoutDigest(files.map((file) => ({ shape: file.shape, body: canonicalJson(withoutBulletin(JSON.parse(file.body) as ClassedLayout)) })))
+}
+
+export function classKey(site: string, cls: string): string {
+  return `${site}/${cls}`
 }
 
 export function approvalState(record: LayoutApproval | undefined, digest: string | undefined): { approved: boolean; stale: boolean } {
@@ -31,13 +81,31 @@ export function layoutKey(site: string, bulletinId: string): string {
 }
 
 export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale'
+export type ApprovedBy = 'bulletin' | 'class' | null
+
+// With `cls`, a layout is also approved when its class was approved for the same content under another bulletin.
+// Revoking a bulletin keeps it off even if its class is approved.
+export function approvalWith(
+  approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string },
+): { approved: boolean; stale: boolean; by: ApprovedBy } {
+  const record = approvals.layouts[layoutKey(site, bulletinId)]
+  const state = approvalState(record, digest)
+  if (state.approved) return { ...state, by: 'bulletin' }
+  const byClass = cls && approvals.classes?.[classKey(site, cls.key)]
+  if (cls && record?.approved !== false && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
+  return { ...state, by: null }
+}
 
 // Screens only ever show layouts an operator approved, and only at sites with auto publish on. With the current
 // digest of the layout files, the approval must also be for these very files.
-export function liveLayoutGate(approvals: Approvals, site: string, bulletinId: string, digest?: string): LiveLayoutGate {
-  if (!approvals.sites[site]?.auto_publish) return 'auto-publish-off'
-  const state = approvalState(approvals.layouts[layoutKey(site, bulletinId)], digest)
-  if (state.stale) return 'stale'
-  if (!state.approved) return 'unapproved'
-  return 'ok'
+export function liveLayoutGateWith(
+  approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string },
+): { gate: LiveLayoutGate; by: ApprovedBy } {
+  if (!approvals.sites[site]?.auto_publish) return { gate: 'auto-publish-off', by: null }
+  const state = approvalWith(approvals, site, bulletinId, digest, cls)
+  return { gate: state.approved ? 'ok' : state.stale ? 'stale' : 'unapproved', by: state.by }
+}
+
+export function liveLayoutGate(approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string }): LiveLayoutGate {
+  return liveLayoutGateWith(approvals, site, bulletinId, digest, cls).gate
 }
