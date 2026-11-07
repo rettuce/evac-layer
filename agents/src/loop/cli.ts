@@ -47,7 +47,7 @@ if (values["go-live"] && !values.publish) stop("--go-live needs --publish: only 
 if (values.revisions!.length && (values.writer === "live" || values.writer === "placeholder")) stop("--revisions go with a fixture first draft: pass --writer <writer.json>");
 
 const readJson = <T>(p: string): T => JSON.parse(fs.readFileSync(resolveUserPath(p), "utf8")) as T;
-const siteIdStop = (id: unknown) => stop(`[pipeline stopped] site id "${String(id)}" must match ${SITE_ID} (letters, digits, "_" and "-", starting with a letter or digit)`);
+const siteIdStop = (id: unknown) => stop(`[pipeline stopped] site id "${String(id)}" must match ${SITE_ID} (1 to 80 letters, digits, "_" or "-")`);
 if (!values.site!.endsWith(".json") && !isSiteId(values.site)) siteIdStop(values.site);
 const site: SiteFile = values.site!.endsWith(".json") ? readJson<SiteFile>(values.site!) : findSite(values.site!);
 if (!isSiteId(site.id)) siteIdStop(site.id);

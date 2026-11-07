@@ -10,7 +10,7 @@ export interface SiteFile extends Site {
 
 export class SiteNotFound extends Error {}
 
-export const SITE_ID = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
+export const SITE_ID = /^[A-Za-z0-9_-]{1,80}$/;
 
 export function isSiteId(id: unknown): id is string {
   return typeof id === "string" && SITE_ID.test(id);
