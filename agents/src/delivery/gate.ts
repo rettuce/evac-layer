@@ -15,8 +15,6 @@ export { APPROVALS_FILE };
 
 const LEGACY_KEY = /^(\d{5})\/(.+)$/;
 
-// Approvals made before layouts moved under site ids are keyed <municipality>/<bulletin>. Such a key still means
-// "this screen" only while the municipality has exactly one site; with two or more it is ambiguous and dropped.
 export function migrateApprovalKeys(a: Approvals, sites: readonly SiteFile[], warn: (m: string) => void = console.warn): Approvals {
   const siteIds = new Set(sites.map((s) => s.id));
   const layouts: Approvals["layouts"] = {};
@@ -41,9 +39,6 @@ export function readApprovals(file = APPROVALS_FILE, sites: readonly SiteFile[] 
   return migrateApprovalKeys(raw, sites);
 }
 
-// Same rule as the renderer's live gate (app/layout/gate.ts): an operator approved the bulletin, or the same
-// content under another bulletin of its class, and the site has auto publish on. The export also reads screens
-// through /api/live-layout, which enforces it again.
 export function exportable(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string }): "ok" | "auto-publish-off" | "unapproved" | "stale" {
   return exportGate(a, site, bulletinId, digest, cls).gate;
 }
@@ -60,7 +55,6 @@ function layoutFilesOf(dir: string): { shape: string; body: string }[] {
   return files.map((f) => ({ shape: f.slice(0, -5), body: fs.readFileSync(path.join(dir, f), "utf8") }));
 }
 
-// The digest the renderer's approval is bound to: the bulletin's shape files, byte for byte.
 export function layoutDigestOf(dir: string): string | undefined {
   const files = layoutFilesOf(dir);
   return files.length ? layoutDigest(files) : undefined;

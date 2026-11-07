@@ -25,8 +25,6 @@ function areasFor(alert: Alert, municipalityId: string) {
   return alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
 }
 
-// The Writer sees only what concerns this municipality: its own areas of the bulletin and the PDF-derived facts
-// for the alert's hazard, each with its source page.
 function writerContext(alert: Alert, m: Municipality, municipalityId: string) {
   const mine = areasFor(alert, municipalityId);
   const facts = m as unknown as { hazards: unknown[]; cautions?: unknown[]; name: string };
@@ -40,8 +38,6 @@ function writerContext(alert: Alert, m: Municipality, municipalityId: string) {
   };
 }
 
-// The languages cell repeats the action in every language by contract; copying it in code keeps the two from
-// drifting apart between runs.
 export function normalizeWriter(out: WriterOutput): WriterOutput {
   const action = out.cells.find((c) => c.role === "action");
   return action ? { cells: out.cells.map((c) => (c.role === "languages" ? { ...c, text: { ...action.text } } : c)) } : out;
@@ -148,9 +144,6 @@ export function saveWriterForClass(municipalityId: string, cls: string, record: 
   fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
 }
 
-// The wording of a class may be reused only for a bulletin of the same title: a flood warning of another river
-// shares the class but not the river name in the translated headline. A sea-level-change clearance needs its own
-// action, so it shares no wording with a plain all-clear.
 export function classWriterFits(record: ClassWriterRecord, alert: Alert, situation: Situation): boolean {
   return record.raw_title === alert.raw_title && record.caution === situation.caution;
 }

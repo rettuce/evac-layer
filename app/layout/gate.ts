@@ -20,8 +20,6 @@ export interface Approvals {
   classes?: Record<string, ClassApproval>
 }
 
-// An approval is bound to the bytes that were approved: the shape files of the bulletin. A regenerated layout
-// gets a new digest and falls back to unapproved until an operator looks at it again.
 export function layoutDigest(files: { shape: string; body: string }[]): string {
   const hash = createHash('sha256')
   for (const file of [...files].sort((a, b) => a.shape.localeCompare(b.shape))) hash.update(`${file.shape}\n${file.body}\n`)
@@ -39,8 +37,6 @@ export function screenClass(layout: ClassedLayout): string {
   return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}`
 }
 
-// The JMA warning name (headline ja) and the source line follow the bulletin; the Writer's translations of the
-// headline do not, so a changed translation is a changed screen.
 function withoutBulletinText({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
   if (cell.role === 'source') return cell
   if (cell.role === 'headline' && text) {
@@ -69,8 +65,6 @@ function canonicalJson(value: unknown): string {
   return JSON.stringify(value)
 }
 
-// A class approval covers every bulletin of the same kind at the site: the approved wording and arrangement,
-// with only the JMA warning name, the source line, the issue time and the bulletin id free to change.
 export function classDigest(files: { shape: string; body: string }[]): string {
   return layoutDigest(files.map((file) => ({ shape: file.shape, body: canonicalJson(withoutBulletin(JSON.parse(file.body) as ClassedLayout)) })))
 }
@@ -79,8 +73,6 @@ export function classKey(site: string, cls: string): string {
   return `${site}/${cls}`
 }
 
-// Revoking a bulletin revokes every class approved from it, whatever its layout files say now, and the class of
-// its current files.
 export function revokeClasses(classes: Record<string, ClassApproval>, site: string, bulletinId: string, currentClassKey: string | undefined, at: string): Record<string, ClassApproval> {
   return Object.fromEntries(Object.entries(classes).map(([key, record]) => {
     const fromBulletin = key.startsWith(`${site}/`) && record.approved_from === bulletinId
@@ -102,8 +94,6 @@ export function layoutKey(site: string, bulletinId: string): string {
 export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale'
 export type ApprovedBy = 'bulletin' | 'class' | null
 
-// With `cls`, a layout is also approved when its class was approved for the same content under another bulletin.
-// Revoking a bulletin keeps it off even if its class is approved.
 export function approvalWith(
   approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string },
 ): { approved: boolean; stale: boolean; by: ApprovedBy } {
@@ -115,8 +105,6 @@ export function approvalWith(
   return { ...state, by: null }
 }
 
-// Screens only ever show layouts an operator approved, and only at sites with auto publish on. With the current
-// digest of the layout files, the approval must also be for these very files.
 export function liveLayoutGateWith(
   approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string },
 ): { gate: LiveLayoutGate; by: ApprovedBy } {

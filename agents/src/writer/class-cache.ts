@@ -11,7 +11,6 @@ export function bulletinXmlPath(file: string): string {
 
 interface IndexEntry { bulletin_id: string; file: string; screen?: boolean }
 
-// Every class takes the wording of its latest bulletin that already has a Writer cache.
 export function buildClassCache(opts: { layoutsDir?: string; xmlPath?: (file: string) => string; log?: (m: string) => void } = {}): string[] {
   const layoutsDir = opts.layoutsDir ?? LAYOUTS_DIR;
   const xmlPath = opts.xmlPath ?? bulletinXmlPath;

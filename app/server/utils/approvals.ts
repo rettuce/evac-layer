@@ -11,8 +11,6 @@ export function approvalsFile(): string {
   return join(dataDir(), 'approvals.json')
 }
 
-// Before sites, approvals were keyed `<municipality>/<bulletin>`. Such a key still stands for the
-// municipality's only site; with two or more sites nobody can say which screen was approved, so it is dropped.
 async function withSiteKeys(approvals: Approvals): Promise<Approvals> {
   const sites = await readSites()
   const siteIds = new Set(sites.map((site) => site.id))

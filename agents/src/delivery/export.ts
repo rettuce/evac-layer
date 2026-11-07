@@ -10,7 +10,6 @@ import { formatErrors, validateDoc } from "../schemas.js";
 import { exportGate, layoutClassOf, layoutDigestOf, readApprovals } from "./gate.js";
 import { INLINE_PAGE_SCRIPT } from "./inline-page.js";
 
-// pillar is drawn at its logical size and captured at half scale (6616 × 5046 → 3308 × 2523).
 const CAPTURE_SCALE: Partial<Record<Shape, number>> = { pillar: 0.5 };
 const READY_TIMEOUT_MS = 30_000;
 const SETTLE_MS = 500;

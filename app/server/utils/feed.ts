@@ -83,8 +83,6 @@ async function liveBulletin(site: SiteFile, approvals: Approvals): Promise<strin
   return bulletin && (await deliverableWith(approvals, site.id, bulletin)) ? bulletin : undefined
 }
 
-// A site with `replay` plays a recorded record back (the demo); any other site shows the bulletin the
-// receiver last posted to /api/admin/live.
 export async function currentFeed(siteId: string): Promise<Feed | undefined> {
   const site = await readSite(siteId)
   if (!site) return undefined
