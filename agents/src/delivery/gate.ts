@@ -39,10 +39,6 @@ export function readApprovals(file = APPROVALS_FILE, sites: readonly SiteFile[] 
   return migrateApprovalKeys(raw, sites);
 }
 
-export function exportable(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass): "ok" | "auto-publish-off" | "unapproved" | "stale" {
-  return exportGate(a, site, bulletinId, digest, cls).gate;
-}
-
 export function exportGate(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass) {
   const { gate, by } = liveLayoutGateWith(a, site, bulletinId, digest, cls);
   const record = by === "bulletin" ? a.layouts[`${site}/${bulletinId}`] : by === "class" && cls ? a.classes?.[classKey(site, cls.key)] : undefined;

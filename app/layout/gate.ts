@@ -37,7 +37,7 @@ export function screenClass(layout: ClassedLayout): string {
   return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}`
 }
 
-function withoutBulletinText({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
+function withoutJmaWarningNameAndSource({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
   if (cell.role === 'source') return cell
   if (cell.role === 'headline' && text) {
     const { ja: _ja, ...translations } = text
@@ -51,7 +51,7 @@ function withoutBulletin(layout: ClassedLayout): ClassedLayout {
   return {
     ...layout,
     ...(layout.alert ? { alert } : {}),
-    ...(layout.cells ? { cells: layout.cells.map(withoutBulletinText) } : {}),
+    ...(layout.cells ? { cells: layout.cells.map(withoutJmaWarningNameAndSource) } : {}),
     ...(layout.sources ? { sources: layout.sources.map(({ bulletin_id, ...source }) => (source.type === 'jma' ? source : { ...source, bulletin_id })) } : {}),
   }
 }
@@ -107,8 +107,9 @@ export function approvalWith(
   const record = approvals.layouts[layoutKey(site, bulletinId)]
   const state = approvalState(record, digest)
   if (state.approved) return { ...state, by: 'bulletin' }
+  const revoked = record?.approved === false
   const byClass = cls && approvals.classes?.[classKey(site, cls.key)]
-  if (cls?.checked && record?.approved !== false && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
+  if (cls?.checked && !revoked && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
   return { ...state, by: null }
 }
 

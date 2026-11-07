@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { LAYOUTS_DIR } from "../src/paths.js";
 import { formatErrors, validateDoc } from "../src/schemas.js";
-import { exportable, migrateApprovalKeys, type Approvals } from "../src/delivery/gate.js";
+import { exportGate, migrateApprovalKeys, type Approvals } from "../src/delivery/gate.js";
 
 const layout = (shape: string) => JSON.parse(fs.readFileSync(path.join(LAYOUTS_DIR, `05210-demo-honjo-station/VXKOii-202610211815-e713da0e3c05/${shape}.json`), "utf8"));
 const site = { id: "05210-demo-honjo-station", municipality_id: "05210" };
@@ -39,15 +39,15 @@ test("alert feed validates with layouts that are valid screens", () => {
 
 test("export follows the live gate: auto publish on and the bulletin approved", () => {
   const a: Approvals = { version: "0.1", layouts: { "S/B1": { approved: true, updated_at: "t" }, "S/B2": { approved: false, updated_at: "t" }, "T/B1": { approved: true, updated_at: "t" } }, sites: { S: { auto_publish: true, updated_at: "t" }, T: { auto_publish: false, updated_at: "t" }, V: { auto_publish: true, updated_at: "t" } } };
-  assert.equal(exportable(a, "S", "B1"), "ok");
-  assert.equal(exportable(a, "S", "B2"), "unapproved");
-  assert.equal(exportable(a, "T", "B1"), "auto-publish-off");
-  assert.equal(exportable(a, "U", "B1"), "auto-publish-off");
-  assert.equal(exportable(a, "V", "B1"), "unapproved", "an approval belongs to one site, not to its municipality");
+  assert.equal(exportGate(a, "S", "B1").gate, "ok");
+  assert.equal(exportGate(a, "S", "B2").gate, "unapproved");
+  assert.equal(exportGate(a, "T", "B1").gate, "auto-publish-off");
+  assert.equal(exportGate(a, "U", "B1").gate, "auto-publish-off");
+  assert.equal(exportGate(a, "V", "B1").gate, "unapproved", "an approval belongs to one site, not to its municipality");
   const bound: Approvals = { ...a, layouts: { ...a.layouts, "S/B3": { approved: true, updated_at: "2026-11-05T00:00:00Z", digest: "sha256:aa" } } };
-  assert.equal(exportable(bound, "S", "B3", "sha256:aa"), "ok");
-  assert.equal(exportable(bound, "S", "B3", "sha256:bb"), "stale");
-  assert.equal(exportable(a, "S", "B1", "sha256:aa"), "stale");
+  assert.equal(exportGate(bound, "S", "B3", "sha256:aa").gate, "ok");
+  assert.equal(exportGate(bound, "S", "B3", "sha256:bb").gate, "stale");
+  assert.equal(exportGate(a, "S", "B1", "sha256:aa").gate, "stale");
 });
 
 test("old <municipality>/<bulletin> approvals map to the municipality's only site and are dropped when it has two", () => {

@@ -11,7 +11,7 @@ export function bulletinXmlPath(file: string): string {
 
 interface IndexEntry { bulletin_id: string; file: string; screen?: boolean }
 
-export function buildClassCache(opts: { layoutsDir?: string; xmlPath?: (file: string) => string; log?: (m: string) => void } = {}): string[] {
+export function cacheLatestWriterPerClass(opts: { layoutsDir?: string; xmlPath?: (file: string) => string; log?: (m: string) => void } = {}): string[] {
   const layoutsDir = opts.layoutsDir ?? LAYOUTS_DIR;
   const xmlPath = opts.xmlPath ?? bulletinXmlPath;
   const log = opts.log ?? (() => {});

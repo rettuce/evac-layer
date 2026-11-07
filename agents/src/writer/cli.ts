@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { parseArgs } from "node:util";
 import { parseJmaXml } from "../jma/parse.js";
 import { resolveUserPath } from "../paths.js";
-import { buildClassCache } from "./class-cache.js";
+import { cacheLatestWriterPerClass } from "./class-cache.js";
 import { WRITER_OUTPUT_SCHEMA, writerSystem, writerUser, type CellBudget } from "./request.js";
 
 const DEFAULT_BUDGETS: CellBudget[] = [
@@ -13,7 +13,7 @@ const DEFAULT_BUDGETS: CellBudget[] = [
 
 const { values } = parseArgs({ options: { alert: { type: "string" }, municipality: { type: "string" }, "dry-run": { type: "boolean", default: false }, "build-class-cache": { type: "boolean", default: false } } });
 if (values["build-class-cache"]) {
-  for (const line of buildClassCache({ log: (m) => console.error(m) })) console.log(line);
+  for (const line of cacheLatestWriterPerClass({ log: (m) => console.error(m) })) console.log(line);
   process.exit(0);
 }
 if (!values.alert || !values["dry-run"]) {

@@ -7,7 +7,7 @@ import { liveWriterReviser, writerApiReviser } from "../loop/revisers.js";
 import type { Reviser } from "../loop/types.js";
 import type { CallUsage } from "../reader/pricing.js";
 import { placeholderWriter } from "./placeholder.js";
-import { cachedWriter, cachedWriterForClass, classWriterFits, saveWriter, screenClassFor, writeCellsUntilClean, type WriterModel } from "./live.js";
+import { cachedWriter, cachedWriterForClass, writerCacheFitsBulletin, saveWriter, screenClassFor, writeCellsUntilClean, type WriterModel } from "./live.js";
 
 export interface LiveWriter { client: Anthropic; model: WriterModel }
 
@@ -30,7 +30,7 @@ export async function writeForBulletin(
   if (cached) {
     writer = cached;
     writerSource = "writer-cache";
-  } else if (classCached && classWriterFits(classCached, alert, situation)) {
+  } else if (classCached && writerCacheFitsBulletin(classCached, alert, situation)) {
     return { writer: classCached.output, writerSource: `writer-class-cache:${classCached.bulletin_id}`, reviser: liveWriterReviser, afterLoop: () => {} };
   } else {
     const used: CallUsage[] = [];
