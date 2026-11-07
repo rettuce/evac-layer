@@ -3,11 +3,11 @@
     {
       "id": "yurihonjo-lv4",
       "name": "由利本荘市 警戒レベル4",
-      "description": "2026-10-21 18:15 気象庁発表の氾濫危険警報（VXKO）。危険な場所から避難、鶴舞小学校 570 m（南西へ）。demo 席 D-13 の静止画",
+      "description": "2026-10-21 18:15 気象庁・国土交通省発表の氾濫危険警報（子吉川）。危険な場所から避難、鶴舞小学校 570 m（南西へ）",
       "issued": "2026-10-21T18:15+09:00",
       "issuer": "気象庁・国土交通省",
-      "bulletin": "氾濫危険警報（子吉川）",
-      "bulletin_en": "Flood danger warning (Koyoshi River)",
+      "issuer_en": "JMA and MLIT",
+      "bulletin": "子吉川レベル４氾濫危険警報",
       "pairs": [
         "ja_easy-en",
         "zh_hans-zh_hant",
@@ -22,8 +22,8 @@
       "description": "2026-10-21 15:55 気象庁・国土交通省発表の氾濫警報（子吉川）。高齢者は避難、鶴舞小学校 570 m（南西へ）",
       "issued": "2026-10-21T15:55+09:00",
       "issuer": "気象庁・国土交通省",
-      "bulletin": "氾濫警報（子吉川）",
-      "bulletin_en": "Flood warning (Koyoshi River)",
+      "issuer_en": "JMA and MLIT",
+      "bulletin": "子吉川レベル３氾濫警報",
       "pairs": [
         "ja_easy-en",
         "zh_hans-zh_hant",
@@ -38,8 +38,8 @@
       "description": "2026-10-21 19:45 気象庁・国土交通省発表の氾濫特別警報（子吉川）。高い所へ上がって、鶴舞小学校 570 m（南西へ）",
       "issued": "2026-10-21T19:45+09:00",
       "issuer": "気象庁・国土交通省",
-      "bulletin": "氾濫特別警報（子吉川）",
-      "bulletin_en": "Flood emergency warning (Koyoshi River)",
+      "issuer_en": "JMA and MLIT",
+      "bulletin": "子吉川レベル５氾濫特別警報",
       "pairs": [
         "ja_easy-en",
         "zh_hans-zh_hant",
@@ -54,8 +54,9 @@
       "description": "2016-09-01 07:13 気象庁発表の訓練用電文。高い所へ避難、津波避難タワーＭ 910 m（南へ）",
       "issued": "2016-09-01T07:13+09:00",
       "issuer": "気象庁",
+      "issuer_en": "JMA",
       "bulletin": "【訓練】大津波警報",
-      "bulletin_en": "[Drill] Major tsunami warning",
+      "drill": true,
       "pairs": [
         "ja_easy-en",
         "zh_hans-zh_hant",
@@ -70,8 +71,8 @@
       "description": "2026-10-31 16:53 気象庁発表の土砂災害危険警報。危険な場所から避難、産業文化会館 230 m（北へ）",
       "issued": "2026-10-31T16:53+09:00",
       "issuer": "気象庁",
-      "bulletin": "土砂災害危険警報",
-      "bulletin_en": "Landslide danger warning",
+      "issuer_en": "JMA",
+      "bulletin": "新潟県土砂災害警報・注意報",
       "pairs": [
         "ja_easy-en",
         "zh_hans-zh_hant",
@@ -83,11 +84,11 @@
     {
       "id": "yurihonjo-lv4-tsurumai-kaikan",
       "name": "由利本荘市 警戒レベル4（鶴舞会館）",
-      "description": "2026-10-21 18:15 の氾濫危険警報（VXKO）を 鶴舞会館 の位置で組んだ画面。危険な場所から避難、本荘公園前広場 160 m（東へ）。sim/scripts/site-alerts.mjs で書き出し、[E] のランダムには入れない",
+      "description": "2026-10-21 18:15 気象庁・国土交通省発表の氾濫危険警報（子吉川）を鶴舞会館の位置で組んだ画面。危険な場所から避難、本荘公園前広場 160 m（東へ）",
       "issued": "2026-10-21T18:15+09:00",
       "issuer": "気象庁・国土交通省",
-      "bulletin": "氾濫危険警報（子吉川）",
-      "bulletin_en": "Flood danger warning (Koyoshi River)",
+      "issuer_en": "JMA and MLIT",
+      "bulletin": "子吉川レベル４氾濫危険警報",
       "pairs": [
         "ja_easy-en",
         "zh_hans-zh_hant",
@@ -100,11 +101,11 @@
     {
       "id": "yurihonjo-lv4-yuri-hs-ground",
       "name": "由利本荘市 警戒レベル4（由利高校）",
-      "description": "2026-10-21 18:15 の氾濫危険警報（VXKO）を 由利高等学校グラウンド の位置で組んだ画面。危険な場所から避難、南内越公民館・体育館 210 m（南東へ）。sim/scripts/site-alerts.mjs で書き出し、[E] のランダムには入れない",
+      "description": "2026-10-21 18:15 気象庁・国土交通省発表の氾濫危険警報（子吉川）を由利高等学校グラウンドの位置で組んだ画面。危険な場所から避難、南内越公民館・体育館 210 m（南東へ）",
       "issued": "2026-10-21T18:15+09:00",
       "issuer": "気象庁・国土交通省",
-      "bulletin": "氾濫危険警報（子吉川）",
-      "bulletin_en": "Flood danger warning (Koyoshi River)",
+      "issuer_en": "JMA and MLIT",
+      "bulletin": "子吉川レベル４氾濫危険警報",
       "pairs": [
         "ja_easy-en",
         "zh_hans-zh_hant",
@@ -117,11 +118,11 @@
     {
       "id": "yurihonjo-lv4-ishiwaki-park",
       "name": "由利本荘市 警戒レベル4（石脇公園）",
-      "description": "2026-10-21 18:15 の氾濫危険警報（VXKO）を 石脇公園グラウンド の位置で組んだ画面。危険な場所から避難、石脇体育館 80 m（北へ）。sim/scripts/site-alerts.mjs で書き出し、[E] のランダムには入れない",
+      "description": "2026-10-21 18:15 気象庁・国土交通省発表の氾濫危険警報（子吉川）を石脇公園グラウンドの位置で組んだ画面。危険な場所から避難、石脇体育館 80 m（北へ）",
       "issued": "2026-10-21T18:15+09:00",
       "issuer": "気象庁・国土交通省",
-      "bulletin": "氾濫危険警報（子吉川）",
-      "bulletin_en": "Flood danger warning (Koyoshi River)",
+      "issuer_en": "JMA and MLIT",
+      "bulletin": "子吉川レベル４氾濫危険警報",
       "pairs": [
         "ja_easy-en",
         "zh_hans-zh_hant",
