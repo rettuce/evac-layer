@@ -82,6 +82,35 @@ function drawPillarFaces(ctx: CanvasRenderingContext2D, frame: AmbientFrame, sha
   }
 }
 
+// A player without WebGL (or any scene that throws) gets a still dark ground under the clock instead of
+// an error thrown out of the draw watcher; the alert layers do not depend on the ambient scene.
+const STILL_GROUND = '#111'
+const STILL_INK = 'light'
+let sceneFailed = false
+
+function renderScene(ctx: CanvasRenderingContext2D, width: number, height: number): boolean {
+  if (!sceneFailed) {
+    try {
+      if (props.room && props.crop) {
+        const frame = roomFrame(width, height, props.room, props.crop)
+        const roomShape = shapeForViewport(props.room.width, props.room.height)
+        if (props.shape === 'pillar' && props.seam === 'right') drawPillarFaces(ctx, frame, roomShape)
+        else drawRoom(ctx, frame, roomShape)
+      }
+      else pick.value.scene.render(ctx, props.clockEpochMs, pick.value.seed, props.shape, { width, height, view: { x: 0, y: 0, width, height } })
+      return true
+    }
+    catch (error) {
+      sceneFailed = true
+      console.warn(`ambient scene "${pick.value.scene.id}" could not draw (${error instanceof Error ? error.message : String(error)}); showing the still ambient screen`)
+    }
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.fillStyle = STILL_GROUND
+  ctx.fillRect(0, 0, width, height)
+  return false
+}
+
 // The backing store follows the device pixel ratio: a pillar captured at 0.5 is drawn at a quarter of
 // the pixels it would take at full size, and a 1x panel keeps its full resolution.
 let lastDrawAt = -Infinity
@@ -102,19 +131,13 @@ function draw() {
   // CPU-backed canvas: the GPU path rasterised the same gradients slightly differently between runs.
   const ctx = el.getContext('2d', { willReadFrequently: true })!
   ctx.setTransform(1, 0, 0, 1, 0, 0)
-  if (props.room && props.crop) {
-    const frame = roomFrame(width, height, props.room, props.crop)
-    const roomShape = shapeForViewport(props.room.width, props.room.height)
-    if (props.shape === 'pillar' && props.seam === 'right') drawPillarFaces(ctx, frame, roomShape)
-    else drawRoom(ctx, frame, roomShape)
-  }
-  else pick.value.scene.render(ctx, props.clockEpochMs, pick.value.seed, props.shape, { width, height, view: { x: 0, y: 0, width, height } })
+  const drawn = renderScene(ctx, width, height)
   const content = {
     siteName: props.siteName,
     coords: props.lat !== undefined && props.lng !== undefined ? formatCoords(props.lat, props.lng) : undefined,
     time: formatClockJst(props.clockEpochMs),
     sweep: clockSweep(props.clockEpochMs),
-    ink: pick.value.scene.ink,
+    ink: drawn ? pick.value.scene.ink : STILL_INK,
   }
   if (!props.bare) drawOverlay(ctx, overlayFor(width, height), content)
 }
