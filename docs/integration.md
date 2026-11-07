@@ -108,10 +108,11 @@ From localhost no token is needed and the `Authorization` header can be left out
 
 ## 3. Drive the state
 
-From the JMA feed to the screen, `receive` does the whole round for live sites: it records the JMA XML long feeds, takes each new bulletin that concerns a site, writes, composes and verifies its screens into `data/layouts/<site_id>/`, and sets the last one that passed as the site's current bulletin. When the site already has an approval for the same class, the new bulletin is written with the wording of the bulletin the class was approved from (§2), and the Writer is not called: it is shown as soon as its own screens pass the rule and browser checks, with a report that names the very layout files on screen and no shape left out of the browser check. With `--verifier vision` the Writer is still not called, but the check also calls the Vision model. If a check finds something, the bulletin fails and waits for a person instead of being rewritten. Anything else is not shown until an operator approves it in `/admin` (above); until then the site stays ambient. Each round logs the site's feed state for the bulletin it set (`unknown` when the app cannot be reached). Run it beside the app:
+From the JMA feed to the screen, `receive` does the whole round for live sites: it records the JMA XML long feeds, takes each new bulletin that concerns a site, writes, composes and verifies its screens into `data/layouts/<site_id>/`, and sets the last one that passed as the site's current bulletin. When the site already has an approval for the same class, the new bulletin is written with the wording of the bulletin the class was approved from (§2), and the Writer is not called: it is shown as soon as its own screens pass the rule and browser checks, with a report that names the very layout files on screen and no shape left out of the browser check. With `--verifier vision` the Writer is still not called, but the check also calls the Vision model. If a check finds something, the bulletin fails and waits for a person instead of being rewritten. Anything else is not shown until an operator approves it in `/admin` (above); until then the site keeps the bulletin it showed before (`fallback_bulletin_id` in the live state, one step back), or stays ambient when that one is not approved either. The Writer caches are read with or without an API key: `--writer live` is needed only to write, through the API, a bulletin whose class has no approved wording yet. Each round logs the site's feed state for the bulletin it set (`unknown` when the app cannot be reached). Run it beside the app:
 
 ```sh
-pnpm -F agents receive --sites my-station-concourse --every 600 --writer live --verifier browser
+pnpm -F agents receive --sites my-station-concourse --every 600 --verifier browser
+# add --writer live to write bulletins of a new class through the API (they then wait for approval)
 ```
 
 Run only one `receive` process per data directory. Without `--every` it runs one round and exits. To keep it running as a service (launchd, systemd) rather than from cron, give it a longer interval: `pnpm -F agents receive --sites my-station-concourse --every 3600`. `pnpm -F agents record` runs the recording step alone, and `pnpm -F agents pipeline --alert <bulletin.xml> --site <site id> --writer live --publish --go-live` does one bulletin by hand.
@@ -126,7 +127,7 @@ curl -s -X POST http://127.0.0.1:3150/api/admin/live \
 pnpm -F agents live --site my-station-concourse --bulletin <bulletin id>     # or --clear
 ```
 
-The bulletin is shown only when it is approved for the site and auto publish is on; otherwise the site stays ambient. A site with `replay` answers 409.
+Posting a bulletin moves the one that was live into `fallback_bulletin_id` (posting `null` clears both). The posted bulletin is shown when it is approved for the site and auto publish is on; otherwise the site keeps showing the fallback if that one is approved, and stays ambient if not. A site with `replay` answers 409.
 
 `receive` writes the same file. If you already run your own JMA receiver, call this instead when a bulletin for the site arrives, after its screens were composed with `pipeline --publish` and approved.
 
