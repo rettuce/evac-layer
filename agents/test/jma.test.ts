@@ -9,9 +9,6 @@ import { parseJmaXml, type Alert } from "../src/jma/parse.js";
 import { formatErrors, validateDoc } from "../src/schemas.js";
 import { tsunamiRegionsFor } from "../src/jma/regions.js";
 
-// The official JMA sample bulletins are not redistributed in this repository; point JMA_SAMPLES_DIR at the unzipped
-// jmaxml_20260917_Samples.zip (https://xml.kishou.go.jp/).
-
 function load(name: string): Alert {
   const file = path.join(SAMPLES_DIR, name);
   if (!fs.existsSync(file)) {

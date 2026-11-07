@@ -68,7 +68,11 @@ test("a reverse geocoder that does not answer in time is aborted after one reque
   const gsi = counting(
     (init) =>
       new Promise<Response>((_resolve, reject) => {
-        init?.signal?.addEventListener("abort", () => reject(init.signal!.reason));
+        const openSocket = setInterval(() => {}, 1_000);
+        init?.signal?.addEventListener("abort", () => {
+          clearInterval(openSocket);
+          reject(init.signal!.reason);
+        });
       }),
   );
   await assert.rejects(municipalityAt(HONJO.lat, HONJO.lng, gsi.fn, 20), (e: Error) => e instanceof MunicipalityLookupFailed && /timeout|abort/i.test(e.message));
