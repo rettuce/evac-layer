@@ -10,6 +10,7 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 - **デモ動画（2 分 51 秒）**: [youtu.be/W_wwWq_1ob8](https://youtu.be/W_wwWq_1ob8)
 - **触れるデモ**: [rettuce.github.io/evac-layer](https://rettuce.github.io/evac-layer/) — 駅のコンコースの 22 面を、平常時と警報時で切り替え、5 つのカメラで見られる 3D シミュレーター
 - **40 行で試す**: [`examples/minimal-cms/`](examples/minimal-cms/)（自分のサイネージに組み込む最小の例）
+- **リポジトリの地図**: [`MAP.md`](MAP.md)（何がどこにあり、この README の主張の裏付けがどのファイルにあるか）
 - **English**: [summary ↓](#english-summary)
 
 ### 3 分で見る

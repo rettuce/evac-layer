@@ -1,5 +1,6 @@
 # EVAC LAYER — conventions
 
+- Reading this repository: start with `MAP.md` (what is where, which file backs each claim in `README.md`), then `README.md` and `docs/how-we-built.md`.
 - Language: TypeScript (Node 22, pnpm). Nuxt for the app in `app/`. Agents in `agents/`. JSON Schemas in `schema/`. Municipality knowledge files in `data/municipalities/`. Blender scripts in `demo/blender/` (Python, bpy).
 - Commits and code comments may be English. Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`).
 - Comments: keep only the "why" that code cannot express. No narration, no commented-out code.
