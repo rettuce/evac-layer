@@ -245,7 +245,7 @@ pnpm -F app test
 - **図記号** — Material Symbols（Apache-2.0）6 種、Material の形をもとに描き直した 1 種、このプロジェクトで描いた 7 種（[`app/ASSETS.md`](app/ASSETS.md)）。JIS Z 8210 / Z 9098 の図記号ではありません。
 - **フォント** — Noto Sans JP / SC / TC / KR / Thai と Noto Sans（SIL OFL 1.1）。オフラインでも描けるよう同梱しています。
 - **3D のデモ** — Poly Haven の HDRI とテクスチャ（CC0）。地図は OpenStreetMap（© OpenStreetMap contributors）（[`demo/ASSETS.md`](demo/ASSETS.md)）。
-- **動画の音と README の画像** — BGM は Suno で作成（作成者所有）、効果音は Adobe Audition SFX。README の画像はこのリポジトリで描いたもので、出所は [`demo/ASSETS.md`](demo/ASSETS.md)。
+- **動画の音と README の画像** — BGM は Suno（Pro プラン・商用利用可）で作成し、権利は作成者が持ちます。効果音は Adobe Audition SFX。README の画像はこのリポジトリで描いたもので、出所は [`demo/ASSETS.md`](demo/ASSETS.md)。
 
 ## EVAC LAYER がしないこと
 
@@ -260,7 +260,7 @@ pnpm -F app test
 ## この先
 
 - **どのサイネージにも組み込める。** EVAC LAYER は特定のサイネージ専用に閉じていません。承認済みの画面を HTTP（Pull・署名付きの Webhook・ファイル）で渡すだけなので、サイネージのソフトウェアを作る人なら誰でも、自分のシステムに同じように組み込めます（40 行の例: [`examples/minimal-cms/`](examples/minimal-cms/)）。
-- **自分たちのサイネージで動かす。** その最初の 1 件として、作者が IE3 で開発している環境演出のシステムに、オプションの 1 枚のレイヤーとして組み込みます。いまは設計まで済んでいて、ハッカソンの後に同じ口で受ける開発を進めます。平常時の演出はそのシステムが、災害のときだけ EVAC LAYER が画面を受け持ちます。
+- **自分たちのサイネージで動かす。** その最初の 1 件として、作者が IE3 で開発している環境演出のシステムに、オプションの 1 枚のレイヤーとして組み込みます。いまは設計まで済んでいて、ハッカソンが終わったらすぐに組み込みの開発を始めます。その後は、このシステムを使う案件に EVAC LAYER をモジュールとして最初から載せて納め、使うかどうかは施設が決めます。平常時の演出はそのシステムが、災害のときだけ EVAC LAYER が画面を受け持ちます。
 - **実証の相手を探しています。** 記録した 5 自治体（由利本荘市・横浜市・柏崎市・輪島市・吉田町）の資料と電文で画面は作ってあります。サイネージを持つ施設、自治体、組み込みたい事業者の方は [ie3.jp/contact](https://ie3.jp/contact/) へ。最初の実証に要るのは 3 つです。スクリーンの緯度経度、その自治体の資料（ハザードマップと指定緊急避難場所の一覧）、承認済みの画面を受け取る HTTP の口 1 本。運用の費用は 1 自治体あたり年に約 $13 の見込みです（[`docs/evaluation.md`](docs/evaluation.md)）。進め方は [`docs/pilot.md`](docs/pilot.md)。
 - **公開のまま続けます。** 審査の期間は main を止め、その後も AGPL-3.0 のまま開発を続けます。
 
