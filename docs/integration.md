@@ -55,7 +55,7 @@ To write the file from the coordinates:
 pnpm -F agents site --id my-station-concourse --name "Station concourse, north wall" --lat 39.38633978 --lng 140.0563304 --facing 0
 ```
 
-It asks the GSI reverse geocoder (https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress) for the municipality code of the point and writes `data/sites/<id>.json`. With `--municipality <code>` the given code is kept and a warning is printed when GSI places the point elsewhere. When GSI gives no code (no answer within 10 s, or a point outside Japan), nothing is written and the command exits 1. `--facing` defaults to 0 (north); an existing file is overwritten only with `--force`.
+It asks the GSI reverse geocoder (https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress) for the municipality code of the point and writes `data/sites/<id>.json`. With `--municipality <code>` the given code is kept and a warning is printed when GSI places the point elsewhere. With `--municipality <code>`, the file is also written when the reverse geocoder does not answer, with the given code and a warning. Without it, when GSI gives no code (no answer within 10 s, or a point outside Japan), nothing is written and the command exits 1. An invalid id or coordinates outside ±90 / ±180 are refused before the request. `--facing` defaults to 0 (north); an existing file is overwritten only with `--force`.
 
 `pnpm -F agents validate data/sites/<id>.json` checks the file.
 

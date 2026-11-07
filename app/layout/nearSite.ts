@@ -1,5 +1,5 @@
 export const SITE_MATCH_RADIUS_M = 100
-const EARTH_RADIUS_M = 6_371_008.8
+const EARTH_RADIUS_M = 6_371_000
 
 export interface Point {
   lat: number
@@ -7,8 +7,9 @@ export interface Point {
 }
 
 export function parseCoordinate(value: unknown, limit: number): number | undefined {
-  const n = typeof value === 'string' && value.trim() !== '' ? Number(value) : NaN
-  return Number.isFinite(n) && Math.abs(n) <= limit ? n : undefined
+  if (typeof value === 'number') return Number.isFinite(value) && Math.abs(value) <= limit ? value : undefined
+  if (typeof value !== 'string' || value.trim() === '') return undefined
+  return parseCoordinate(Number(value), limit)
 }
 
 export function haversineMeters(a: Point, b: Point): number {
@@ -19,16 +20,19 @@ export function haversineMeters(a: Point, b: Point): number {
   return 2 * EARTH_RADIUS_M * Math.asin(Math.min(1, Math.sqrt(h)))
 }
 
-export function nearestSiteWithin<S extends { lat?: number; lng?: number }>(
+export function nearestSiteWithin<S extends { id: string; lat?: unknown; lng?: unknown }>(
   sites: readonly S[],
   point: Point,
   radiusM = SITE_MATCH_RADIUS_M,
 ): { site: S; distanceM: number } | undefined {
   let best: { site: S; distanceM: number } | undefined
   for (const site of sites) {
-    if (typeof site.lat !== 'number' || typeof site.lng !== 'number') continue
-    const distanceM = haversineMeters(point, { lat: site.lat, lng: site.lng })
-    if (distanceM <= radiusM && (!best || distanceM < best.distanceM)) best = { site, distanceM }
+    const lat = typeof site.lat === 'number' ? parseCoordinate(site.lat, 90) : undefined
+    const lng = typeof site.lng === 'number' ? parseCoordinate(site.lng, 180) : undefined
+    if (lat === undefined || lng === undefined) continue
+    const distanceM = haversineMeters(point, { lat, lng })
+    if (distanceM > radiusM) continue
+    if (!best || distanceM < best.distanceM || (distanceM === best.distanceM && site.id < best.site.id)) best = { site, distanceM }
   }
   return best
 }

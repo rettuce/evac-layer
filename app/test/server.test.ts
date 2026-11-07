@@ -54,6 +54,14 @@ describe('production build', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F 
   })
   after(() => child?.kill())
 
+  test('site-near answers 400 without valid coordinates and names the registered site within 100 m', async () => {
+    for (const query of ['', '?lat=0', '?lat=&lng=0', '?lat=x&lng=0', '?lat=91&lng=0', '?lat=0&lng=181']) {
+      assert.equal((await fetch(`${base}/api/site-near${query}`)).status, 400, query)
+    }
+    assert.deepEqual(await (await fetch(`${base}/api/site-near?lat=0.0008&lng=0`)).json(), { radius_m: 100, site: SITE, distance_m: 89 })
+    assert.equal((await (await fetch(`${base}/api/site-near?lat=0.001&lng=0`)).json()).site, null)
+  })
+
   test('live layout is gated by auto publish, then by approval', async () => {
     const off = await fetch(`${base}${layoutPath}`)
     assert.equal(off.status, 403)
