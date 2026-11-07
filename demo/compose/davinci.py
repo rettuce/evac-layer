@@ -11,6 +11,7 @@ compose.py --export-cuts writes video/cuts/ and cuts.csv; this script places eve
 import argparse
 import csv
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -24,7 +25,7 @@ HERE = Path(__file__).resolve().parent
 DEMO = HERE.parent
 OVERLAY_PNGS = HERE / "overlays"
 SWITCH_WAV = HERE / "audio" / "switch.wav"
-TEXT_TABLE = Path("/Users/you/Dropbox/dev/claude-hackathon-2026/docs/plan/demo-v8-text.md")
+TEXT_TABLE = Path(os.environ["EVAC_DEMO_TEXT"]) if os.environ.get("EVAC_DEMO_TEXT") else None
 PRORES = ["-c:v", "prores_ks", "-profile:v", "2", "-pix_fmt", "yuv422p10le", "-an"]
 
 
@@ -149,7 +150,9 @@ def assemble(args, edl):
         shutil.copyfile(stem, out / "audio" / "stems" / stem.name)
     mix = out / "audio" / "mix" / f"evac-layer-{v}-mix.wav"
     shutil.copyfile(args.mix, mix)
-    if TEXT_TABLE.exists():
+    if TEXT_TABLE:
+        if not TEXT_TABLE.is_file():
+            raise SystemExit(f"EVAC_DEMO_TEXT points to {TEXT_TABLE}, which is not a file. Unset it to skip the text table.")
         shutil.copyfile(TEXT_TABLE, out / "docs" / TEXT_TABLE.name)
     write_readme(out, v, edl, missing, mix, args.note)
     return missing
