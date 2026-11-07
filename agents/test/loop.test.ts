@@ -69,7 +69,7 @@ test("findings a rewrite cannot fix stop the loop at once", { skip }, async () =
 test("without an API key the live reviser declines instead of inventing text", { skip }, async () => {
   const r = await runLoop({ ...base(), writer: fx<WriterOutput>("writer-tsunami-advisory-distance.json"), writerSource: "distance", reviser: liveWriterReviser });
   assert.equal(r.outcome, "fail");
-  assert.match(r.reason!, /Day 2/);
+  assert.match(r.reason!, /no Writer to revise with/);
 });
 
 test("an overflowing shelter cell is not sent back to the Writer", { skip }, async () => {

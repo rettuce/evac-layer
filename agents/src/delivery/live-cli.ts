@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
-import { LAYOUTS_DIR, LIVE_DIR } from "../paths.js";
+import { LAYOUTS_DIR } from "../paths.js";
+import { writeLive } from "./live.js";
 import { findSite, SiteNotFound } from "../sites.js";
 
-// Writes data/live/<site_id>.json, the same file POST /api/admin/live writes. A JMA receiver outside this
-// repository calls this (or the endpoint) when a new bulletin for the site has been composed and approved.
+// Writes data/live/<site_id>.json, the same file POST /api/admin/live writes, for a receiver other than `receive`.
 const { values } = parseArgs({ options: { site: { type: "string" }, bulletin: { type: "string" }, clear: { type: "boolean", default: false } } });
 if (!values.site || Boolean(values.bulletin) === values.clear) {
   console.error("usage: pnpm -F agents live --site <site_id> (--bulletin <bulletin_id> | --clear)");
@@ -22,9 +22,5 @@ const bulletin = values.clear ? null : values.bulletin!;
 if (bulletin && !fs.existsSync(path.join(LAYOUTS_DIR, values.site, bulletin))) {
   console.warn(`[warn] no screens for ${bulletin} under ${path.join(LAYOUTS_DIR, values.site)}; the site stays ambient until they exist and are approved`);
 }
-const file = path.join(LIVE_DIR, `${values.site}.json`);
-const doc = { bulletin_id: bulletin, updated_at: new Date().toISOString() };
-fs.mkdirSync(LIVE_DIR, { recursive: true });
-fs.writeFileSync(`${file}.tmp`, JSON.stringify(doc, null, 2) + "\n");
-fs.renameSync(`${file}.tmp`, file);
+const { file, doc } = writeLive(values.site, bulletin);
 console.log(`${file}: ${JSON.stringify(doc)}`);

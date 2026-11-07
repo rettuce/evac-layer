@@ -18,7 +18,7 @@ export function fixtureReviser(files: string[]): Reviser {
 export const liveWriterReviser: Reviser = {
   name: "writer-api",
   async revise() {
-    throw new NoRevision("live Writer revision lands on Day 2 (needs ANTHROPIC_API_KEY); pass fixture revisions to exercise the loop");
+    throw new NoRevision("no Writer to revise with: pass --writer live (needs ANTHROPIC_API_KEY) or --revisions <fixture.json>");
   },
 };
 
