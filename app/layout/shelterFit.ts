@@ -5,7 +5,7 @@ import { TYPE_PX } from './typography'
 export const SHELTER_STEP_RATIO = 0.92
 export const SHELTER_MAX_EXTRA_STEPS = 6
 
-// The Verifier's ARTBOARD_FLOOR_PX for shelter names (司令官 2026-11-05: 田中's narrow size × 0.92², floored).
+// The Verifier's ARTBOARD_FLOOR_PX for shelter names (decision 2026-11-05: the author's narrow size × 0.92², floored).
 const SHELTER_ARTBOARD_FLOOR_PX: Partial<Record<Shape, number>> = { '16x9': 53, '1x1': 43 }
 
 // Mirrors the Verifier (agents/src/verifier: requiredPx('shelter', …, 'primary', shape) at the shape's type scale,

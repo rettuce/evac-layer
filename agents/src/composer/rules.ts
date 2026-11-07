@@ -73,7 +73,7 @@ export const SHELTER_HAZARDS: Record<string, string[]> = {
 export interface Situation { level: number; template: TemplateId; cleared: boolean; caution?: "sea_level_change" }
 
 // Cabinet Office level 5 (緊急安全確保) says moving to a shelter may itself be dangerous; the screen still shows the
-// nearest site and the way to it beside "go higher" (田中 2026-11-05, provisional until a real deployment revisits it).
+// nearest site and the way to it beside "go higher" (author, 2026-11-05, provisional until a real deployment revisits it).
 export const NO_SHELTER_TEMPLATES = new Set<string>([]);
 
 export function situationFor(alert: Alert, municipalityId: string): Situation {

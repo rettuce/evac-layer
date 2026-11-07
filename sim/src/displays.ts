@@ -250,7 +250,7 @@ export class Displays {
     for (const set of sets) if (set.random !== false) this.loadAlertSet(set)
   }
 
-  // Every switch to EVAC LAYER draws a different set than the last one (田中 S-14); the place variants of S-R2 sit out.
+  // Every switch to EVAC LAYER draws a different set than the last one (author, S-14); the place variants of S-R2 sit out.
   private pickAlertSet(): void {
     const drawable = this.sets.flatMap((set, index) => (set.random === false || index === this.activeSet ? [] : [index]))
     if (drawable.length) this.activeSet = drawable[Math.floor(Math.random() * drawable.length)]!

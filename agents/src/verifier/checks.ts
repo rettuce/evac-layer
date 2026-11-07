@@ -28,7 +28,7 @@ export interface ScreenState { shape: string; template: string; variant: string;
 export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker" | "direction-dropped"; cell_id?: string; lang?: string; detail: string }
 export interface CellText { id: string; role: Role; text: string }
 
-// 田中's artboards (L-4/L-5, 2026-11-05) set these lines below the viewing-distance floor; the floor follows the
+// The author's artboards (L-4/L-5, 2026-11-05) set these lines below the viewing-distance floor; the floor follows the
 // design, in the shape's own pixels, until a real deployment revisits the distances (agents/FINDINGS.md).
 export const ARTBOARD_FLOOR_PX: Partial<Record<string, Partial<Record<`${Role}:${TextKind}`, number>>>> = {
   "16x9": { "action:primary": 120, "languages:primary": 54, "languages:label": 24, "source:primary": 24, "shelter:primary": 53 },

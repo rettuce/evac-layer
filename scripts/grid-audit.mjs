@@ -1,4 +1,4 @@
-// Machine gate for anything shown to 田中 (proposal pages now, /screen later): measures every text line box and
+// Machine gate for anything shown to the author (proposal pages now, /screen later): measures every text line box and
 // pictogram ink box in the browser and reports value / threshold / OK|NG per element.
 //   node scripts/grid-audit.mjs --proposal            audits app/shots/layout-review/proposal.html (A and B)
 //   node scripts/grid-audit.mjs --proposal --shape 16x9
@@ -17,8 +17,8 @@ const PANEL = { '16x9': [1920, 1080, 1.5], '9x16': [1080, 1920, 1.5], '32x9': [3
 const FAR_M = { '16x9': 8, '9x16': 5, '1x1': 5, '32x9': 15, pillar: 5 }
 const UNITS_PER_M = 8.758
 
-// Thresholds. The proposal set is the commander's first spec (720-unit mock); the app set is recalibrated so that
-// 田中's 9:16 artboard (2026-11-04) passes every row: line-height 1.1 em, 8 px between elements, pictograms by ink,
+// Thresholds. The proposal set is the first spec (720-unit mock); the app set is recalibrated so that
+// the author's 9:16 artboard (2026-11-04) passes every row: line-height 1.1 em, 8 px between elements, pictograms by ink,
 // labels at 30 px. px = CSS px of the rendered screen (1080 short side), u = 720-unit design units.
 export const RULES_PROPOSAL = {
   jaLineHeightEm: 1.3,

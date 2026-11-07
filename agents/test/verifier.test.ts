@@ -19,7 +19,7 @@ test("labels are held to the fine distance, action sub-lines to the guide distan
   assert.equal(requiredPx("headline", 2, "primary").px, TYPE_PX.guide * 2);
 });
 
-test("the 16:9 and 1:1 artboards lower the floor for the lines 田中 set smaller; everything else keeps the viewing distance", () => {
+test("the 16:9 and 1:1 artboards lower the floor for the lines the author set smaller; everything else keeps the viewing distance", () => {
   assert.deepEqual(requiredPx("action", 1, "primary", "16x9"), { step: "artboard", px: 120 });
   assert.deepEqual(requiredPx("languages", 1, "primary", "16x9"), { step: "artboard", px: 54 });
   assert.deepEqual(requiredPx("source", 1, "primary", "16x9"), { step: "artboard", px: 24 });

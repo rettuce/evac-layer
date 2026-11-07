@@ -2,12 +2,12 @@ import type { Role, Shape, ShapeLayout, TemplateDef, TemplateId, Track } from '.
 
 export const STACKED_BAND_MIN_PX = 200
 
-// 16:9 is 田中's Figma artboard (2026-11-05, file H213MoFcJtIZ96s6qdmBZ8 node 3223:4, 1920 × 1080): the band 172,
+// 16:9 is the author's Figma artboard (2026-11-05, file H213MoFcJtIZ96s6qdmBZ8 node 3223:4, 1920 × 1080): the band 172,
 // the action in a 720 column from x 52 with the run pictogram's ink under the text, the direction and the shelter
 // right-aligned in a column from x 971 to 1868 (the shelter's distance box reaches 1872), the languages across both
 // columns from y 830, the source on the
 // foot. Tracks are the artboard's px: the fr column takes a wider screen, the fr row above the languages a taller one.
-// The shelter also owns the rows under it down to the languages, so a two-line name (司令官 2026-11-05: shrink → two lines → ellipsis,
+// The shelter also owns the rows under it down to the languages, so a two-line name (decision 2026-11-05: shrink → two lines → ellipsis,
 // the direction and the distance never move) stays inside its cell.
 const FIGMA_LANDSCAPE_TYPE = { headline: 64, level: 64, action: 120, direction: 122, shelter: 79, shelterNarrow: 63, kind: 32, distance: 92, distanceNarrow: 73, label: 24, languages: 54, languagesNarrow: 46, source: 24 }
 const LANDSCAPE: ShapeLayout = {
@@ -43,7 +43,7 @@ const LANDSCAPE_CLEAR: ShapeLayout = {
   pictogramPx: { headline: 98, action: 225 },
 }
 
-// 9:16 is 田中's Figma artboard (2026-11-04, file H213MoFcJtIZ96s6qdmBZ8 node 3212:5, 1080 × 1920): one column
+// 9:16 is the author's Figma artboard (2026-11-04, file H213MoFcJtIZ96s6qdmBZ8 node 3212:5, 1080 × 1920): one column
 // from x 48 to 1043, the band 200, and the blocks placed so that every pictogram's ink and every text box start
 // on x 48. Row gaps are the measured distances between the ink of one block and the box of the next (the site
 // pictogram's box is its ink, 3 px shorter than wide); the source
@@ -87,7 +87,7 @@ const PORTRAIT_CLEAR: ShapeLayout = {
   pictogramPx: { headline: 124, action: 333 },
 }
 
-// 32:9 is 田中's Figma artboard (2026-11-05, node 3223:80, 3840 × 1080): the level colour fills a 780 panel on the
+// 32:9 is the author's Figma artboard (2026-11-05, node 3223:80, 3840 × 1080): the level colour fills a 780 panel on the
 // left with the hazard pictogram, the two-line headline and the level label; the source sits on the top of the white
 // field, the action and the run pictogram's ink in a 1369 column from x 887, the direction from x 2979 and the
 // shelter from x 2256, both ending at x 3748, and the languages side by side in a 294 band at the foot with their labels above the text.
@@ -138,11 +138,11 @@ const RIBBON_CLEAR: ShapeLayout = {
   pictogramPx: { headline: 310, action: 344 },
 }
 
-// 1:1 is 田中's Figma artboard (2026-11-05 L-5, node 3230:4 with the 3266:25 parts, 1080 × 1080): the band 200, the
+// 1:1 is the author's Figma artboard (2026-11-05 L-5, node 3230:4 with the 3266:25 parts, 1080 × 1080): the band 200, the
 // two-line action from x 48, the run pictogram's ink 144 × 193 at (51, 590) as the hero beside the shelter group
 // (site ink at (275, 602), texts from x 398, the distance "570 m" right-aligned at x 1044) and the direction under it
 // from x 766, and a black language band from y 820 with white labels above the text. The artboard has no source
-// line; 司令官 2026-11-05 adds one (the sources are a condition of the data providers) on the band's label line,
+// line; a decision of 2026-11-05 adds one (the sources are a condition of the data providers) on the band's label line,
 // right-aligned at 1032, so no placed element moves: its cell is the fr row above the band and the line hangs
 // from that row's foot into the band (screen.css). The fr row takes a taller screen.
 const FIGMA_SQUARE_TYPE = { headline: 76, level: 66, action: 150, direction: 70, shelter: 64, shelterNarrow: 51, kind: 30, distance: 72, distanceNarrow: 57, label: 30, languages: 56, languagesNarrow: 47, source: 24 }
@@ -199,7 +199,7 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
     '32x9': [requireShelterInsteadOfDirection(RIBBON)],
     '1x1': [SQUARE],
   },
-  // Level 5 keeps the shelter and the direction on screen (田中 2026-11-05): the same slots as evac-now.
+  // Level 5 keeps the shelter and the direction on screen (author, 2026-11-05): the same slots as evac-now.
   'secure-now': {
     '16x9': [LANDSCAPE],
     '9x16': [PORTRAIT],
@@ -214,7 +214,7 @@ export const TEMPLATES: Partial<Record<TemplateId, TemplateDef>> = {
   },
 }
 
-// The pillar is 田中's Figma artboard (2026-11-05, node 3230:68, 6616 × 5046: four faces of 1654, the colour band 320
+// The pillar is the author's Figma artboard (2026-11-05, node 3230:68, 6616 × 5046: four faces of 1654, the colour band 320
 // across the top and the foot band from 4500 with the source in white). A face in strip px: the run pictogram's ink
 // 842 × 1132 from (353, 627) above the two-line action from y 2182, the languages from y 2834 with labels centred on
 // their lines, the shelter group from y 3496 (the 32:9 group), the direction from y 3892, every text from x 80 and

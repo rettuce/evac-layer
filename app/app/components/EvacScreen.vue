@@ -239,7 +239,7 @@ async function fit() {
     if (generation !== fitGeneration) return
     // A facility name that does not fit its line is set smaller step by step down to the Verifier's floor; one
     // that still breaks takes room from the distance beside it (one step) and the name steps again from its full
-    // size, so names that fit today keep their screens (田中 2026-11-05/06). On the artboard the distance then
+    // size, so names that fit today keep their screens (author, 2026-11-05/06). On the artboard the distance then
     // moves under a name that still needs two lines.
     if (shelterNameWraps()) {
       if (shelterStep.value < shelterStepCount.value) {
