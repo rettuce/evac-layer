@@ -85,14 +85,17 @@
       #intro .links { margin: 0; font-size: 11px; color: #888; }
       #intro .links a { color: #ccc; }
       #intro .start { padding: 6px 16px; }
-      #panel-toggle { display: none; position: fixed; top: 8px; left: 8px; background: #111; color: #ccc; border-color: #444; padding: 8px 12px; font: inherit; }
+      #panel-toggle, #dock-toggle { display: none; position: fixed; background: #111; color: #ccc; border-color: #444; padding: 8px 12px; font: inherit; }
+      #panel-toggle { top: 8px; left: 8px; }
+      #dock-toggle { right: 8px; bottom: 8px; }
       @media (max-width: 700px) {
-        #panel-toggle { display: block; }
+        #panel-toggle, #dock-toggle { display: block; }
         #ui { display: none; top: 112px; left: 8px; max-height: calc(100vh - 460px); }
         body.panel-open #ui { display: flex; }
         #info { display: none; }
         #now { top: 8px; right: 8px; max-width: calc(100vw - 96px); }
-        #dock { left: 8px; right: 8px; bottom: 8px; width: auto; }
+        #dock { display: none; left: 8px; right: 8px; bottom: 52px; width: auto; }
+        body.dock-open #dock { display: flex; }
         #places .mapbox { width: 96px; }
         #places .buttons { align-content: stretch; }
         #places .buttons button { min-height: 36px; }
@@ -129,6 +132,7 @@
     </div>
     </div>
     <button id="panel-toggle" class="panel" type="button">panel</button>
+    <button id="dock-toggle" class="panel" type="button" aria-controls="dock" aria-expanded="false">map</button>
     <div id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title" hidden>
       <div class="card panel">
         <h2 id="intro-title">EVAC LAYER — IDEA</h2>
