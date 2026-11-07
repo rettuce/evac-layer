@@ -100,6 +100,18 @@ export async function writeCells(args: {
   return { output, usage: costOf(args.model, `writer ${args.alert.bulletin_id}`, msg.usage), lint: lintWriter(output, args.situation.level) };
 }
 
+export const MAX_LINT_RETRIES = 2;
+
+export async function writeCellsUntilClean(call: Omit<Parameters<typeof writeCells>[0], "feedback">, feedback: string[], usage: CallUsage[]): Promise<{ output: WriterOutput; lint: LintFinding[] }> {
+  let r = await writeCells({ ...call, feedback });
+  usage.push(r.usage);
+  for (let i = 0; i < MAX_LINT_RETRIES && r.lint.length; i++) {
+    r = await writeCells({ ...call, feedback: [...feedback, ...r.lint.map((l) => `${l.rule}: 「${l.match}」`)] });
+    usage.push(r.usage);
+  }
+  return { output: r.output, lint: r.lint };
+}
+
 export function cachedWriter(municipalityId: string, bulletinId: string): WriterOutput | undefined {
   const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
   return fs.existsSync(f) ? normalizeWriter((JSON.parse(fs.readFileSync(f, "utf8")) as { output: WriterOutput }).output) : undefined;

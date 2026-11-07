@@ -10,6 +10,7 @@ function cellText(c: LayoutCell): CellText {
 
 export const staticVerifier: Verifier = {
   name: "static",
+  rendersScreens: false,
   async verify(screens, ctx) {
     return screens.map((s): ScreenVerdict => {
       const findings: Finding[] = [];

@@ -20,6 +20,7 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
   const stageDir = path.join(TMP_DIR, "verifier-src");
   return {
     name: `static+browser${opts.vision ? `+vision(${opts.vision.model})` : ""}(${opts.baseUrl})`,
+    rendersScreens: true,
     skippedShapes: opts.skipShapes ?? [],
     async verify(screens: Screen[], ctx?: VerifyContext) {
       const base = await staticVerifier.verify(screens);

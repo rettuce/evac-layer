@@ -12,7 +12,7 @@ const DEFAULT_BUDGETS: CellBudget[] = [
 
 const { values } = parseArgs({ options: { alert: { type: "string" }, municipality: { type: "string" }, "dry-run": { type: "boolean", default: false } } });
 if (!values.alert || !values["dry-run"]) {
-  console.error("usage: pnpm -F agents writer --dry-run --alert <bulletin.xml> [--municipality data/municipalities/<id>.json]\n(the live call lands on Day 2)");
+  console.error("usage: pnpm -F agents writer --dry-run --alert <bulletin.xml> [--municipality data/municipalities/<id>.json]\n(the live call runs inside pipeline --writer live, fanout and replay-pipeline)");
   process.exit(2);
 }
 const alert = parseJmaXml(fs.readFileSync(resolveUserPath(values.alert)));

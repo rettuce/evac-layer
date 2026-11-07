@@ -9,13 +9,11 @@ export const SCHEMA_DIR = path.join(REPO_ROOT, "schema");
 export const ENV_FILE = path.join(REPO_ROOT, ".env");
 export const TMP_DIR = path.join(REPO_ROOT, "tmp");
 
-const SETTINGS = ["EVAC_DATA_DIR", "EVAC_RAW_DIR", "JMA_FEED_DIR", "JMA_SAMPLES_DIR", "EVAC_URL", "CHROME_PATH"] as const;
+const PATH_SETTINGS = ["EVAC_DATA_DIR", "EVAC_RAW_DIR", "JMA_FEED_DIR", "JMA_SAMPLES_DIR", "EVAC_URL", "CHROME_PATH"] as const;
 
-// Only the path settings are taken from .env here; the API key keeps its own loader (src/apikey.ts), which reports
-// whether the key came from the shell or the file.
 if (fs.existsSync(ENV_FILE)) {
   const dotenv = parseEnv(fs.readFileSync(ENV_FILE, "utf8"));
-  for (const k of SETTINGS) if (process.env[k] === undefined && dotenv[k] !== undefined) process.env[k] = dotenv[k];
+  for (const k of PATH_SETTINGS) if (process.env[k] === undefined && dotenv[k] !== undefined) process.env[k] = dotenv[k];
 }
 
 // pnpm -F runs scripts inside agents/, so user-supplied relative paths are resolved against the invoking directory.
@@ -23,7 +21,6 @@ export function resolveUserPath(p: string): string {
   return path.resolve(process.env.INIT_CWD ?? process.cwd(), p);
 }
 
-// Shared with the app (app/server/utils/data.ts reads the same variable).
 export const DATA_DIR = path.resolve(REPO_ROOT, process.env.EVAC_DATA_DIR ?? "data");
 export const SITES_DIR = path.join(DATA_DIR, "sites");
 export const LAYOUTS_DIR = path.join(DATA_DIR, "layouts");
@@ -35,7 +32,6 @@ export const LIVE_DIR = path.join(DATA_DIR, "live");
 export const APPROVALS_FILE = path.join(DATA_DIR, "approvals.json");
 export const TSUNAMI_REGIONS_FILE = path.join(DATA_DIR, "jma", "tsunami-regions.json");
 
-// Raw inputs (municipal PDFs, GSI CSVs, JMA bulletins) are not redistributed with the repository.
 export const RAW_DIR = path.resolve(REPO_ROOT, process.env.EVAC_RAW_DIR ?? "data/raw");
 export const FEED_DIR = path.resolve(REPO_ROOT, process.env.JMA_FEED_DIR ?? path.join(RAW_DIR, "jma-feed"));
 export const SAMPLES_DIR = path.resolve(REPO_ROOT, process.env.JMA_SAMPLES_DIR ?? path.join(RAW_DIR, "jma-samples", "unzipped"));
@@ -43,7 +39,7 @@ export const SAMPLES_DIR = path.resolve(REPO_ROOT, process.env.JMA_SAMPLES_DIR ?
 export const EVAC_URL = process.env.EVAC_URL ?? "http://127.0.0.1:3150";
 
 const RAW_HELP = `Raw inputs are not part of the repository. Put them under EVAC_RAW_DIR (now ${RAW_DIR}) or point the variables at them in .env:
-  - JMA_FEED_DIR (now ${FEED_DIR}): a recording of the JMA XML long feeds as bodies/<YYYYMMDD>/<id>.xml. Record it from https://www.data.jma.go.jp/developer/xml/feed/extra_l.xml and regular_l.xml (any poller that saves each linked bulletin).
+  - JMA_FEED_DIR (now ${FEED_DIR}): a recording of the JMA XML long feeds as bodies/<YYYYMMDD>/<id>.xml. Record it with "pnpm -F agents record" (the JMA long feeds at https://www.data.jma.go.jp/developer/xml/feed/).
   - JMA_SAMPLES_DIR (now ${SAMPLES_DIR}): the official JMA sample bulletins, unzipped, from https://xml.kishou.go.jp/ (技術資料 → サンプル電文). Needed for the municipalities listed in data/samples/.
   - EVAC_RAW_DIR/gsi-shelters/<id>_1.csv and <id>_2.csv: GSI designated shelter CSVs from https://hinanmap.gsi.go.jp/hinanjocp/defaultFtpData/csv/ (Reader and shelters only).
   - EVAC_RAW_DIR/municipal-pdfs/...: the municipal hazard-map PDFs named in data/municipalities/<id>.preset.json (Reader only).`;
