@@ -195,7 +195,7 @@ Claude Code のセッションの 1 つが全体のまとめ役になり、8 つ
 
 コードを書く前の調べものと準備、モデルの選び方、提出前のレビューは、[`docs/how-we-built.md`](docs/how-we-built.md) の「Before the code / コードを書く前」にあります。
 
-詳しくは [`docs/how-we-built.md`](docs/how-we-built.md)。スキルとフックの説明は [`.claude/README.md`](.claude/README.md) にあります。
+詳しくは [`docs/how-we-built.md`](docs/how-we-built.md)。スキルとフックの説明は [`.claude/README.md`](.claude/README.md) にあります。試行錯誤の跡は、[前と後の画像](docs/how-we-built.md#before-and-after--試行錯誤の跡)で並べています。
 
 ## 動かす
 

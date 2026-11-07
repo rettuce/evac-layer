@@ -82,6 +82,35 @@ The other reviews were kept apart from the authors in the same way. A model from
 
 ほかのレビューも、同じように作り手から切り離しています。別の会社のモデル（OpenAI の Codex）に差分をレビューさせ、承認のモデルで 11 件（採用 9 件）、市町村コードと 100 m の施設の解決で 11 件（採用 10 件）の指摘を反映しました。10 言語の文は、原文を見せない別のモデルに逆翻訳させて照合しました（`agents/FINDINGS.md` の 9）。コメントを消すのは、それだけをする別のセッションに任せ、コードを書いた本人がコメントを擁護しないようにしました。
 
+## Before and after / 試行錯誤の跡
+
+Four places where the first version was replaced, each with the screen before and after.
+
+ほかの案に置き換えた 4 か所を、前と後の画面で並べます。
+
+| Before / 前 | After / 後 |
+|---|---|
+| ![Two ways to show the alert level on Nov 2: five boxes in the corner of the band, and a layout modelled on a station's service information](images/trial-1-before.jpg) | ![The final 16:9 screen with the level as a label in the band](images/trial-1-after.jpg) |
+| ![The first 14 pictograms: six Material Symbols and eight drawn for this project](images/trial-2-before.jpg) | ![The final sheet of 14 pictograms and 10 languages](images/trial-2-after.jpg) |
+| ![The pillar with lines at its height from the floor: 3.6 m, 2.2 m, 1.0 m, 0.75 m and 0.4 m](images/trial-3-before.jpg) | ![The final pillar, the same screen on four faces](images/trial-3-after.jpg) |
+| ![The 9:16 screen drawn over the author's Figma artboard](images/trial-4-before.jpg) | ![The same bulletin on 16 aspect ratios](images/trial-4-after.jpg) |
+
+1. **The alert level.** On Nov 2 the level was drawn as a five-step scale: five boxes in the corner of the band, or a layout modelled on a station's service information. Both were dropped and the band went back to a single label, 警戒レベル4. The author chose to take something away rather than add.
+2. **The pictograms.** ISO 7010 pictograms may not be published online, so the first set was six Material Symbols and eight drawn here. The first Vision pass found 25 findings where the action pictogram contradicted the screen; after the rule that the action pictogram shows the action only, the findings went 25 → 8 → 4 → 4 → 0 (`agents/FINDINGS.md`).
+3. **The pillar.** The LED column was divided by height from the floor: the band at the top up to 3.6 m, the action text, direction and shelter at eye height between 2.2 m and 1.0 m, and a band at the feet between 0.75 m and 0.4 m with the sources. The final screen keeps the band at the top and the sources at the feet, and drops the level boxes, as in 1.
+4. **The layout.** The layout first derived by rules from the grid was set aside. The author laid out 9:16 in Figma, and the renderer reproduces it: all 16 measured elements fall within 4 px of the artboard (`app/layout/GRID.md` §8). The other shapes followed the same hierarchy, and every aspect ratio takes the nearest shape. The author draws the layout; the system carries it to every screen.
+
+1. **警戒レベルの見せ方。** 11 月 2 日は、レベルを 5 段の目盛りで見せる案を 2 つ作りました。帯の隅に 5 つの箱を置く案と、駅の運行情報を参考にした構成です。どちらもやめ、帯の「警戒レベル4」のラベルに戻しました。足すより外す判断を、作者がしました。
+2. **図記号。** ISO 7010 の図記号はネットに載せられないため、最初の組は Material Symbols の 6 個と、このプロジェクトで描いた 8 個でした。Vision の初回の検査では、行動の図記号が画面の内容と矛盾する 25 件が見つかりました。「行動の図記号は行動だけを表す」と決めてからは、指摘が 25 → 8 → 4 → 4 → 0 になりました（`agents/FINDINGS.md`）。
+3. **柱の LED。** 床からの高さで情報を振り分けました。3.6 m までの上端に帯、目の高さの 2.2〜1.0 m に行動の文・行き先・避難先、足元の 0.75〜0.4 m に出典の帯です。最終の画面も上端の帯と足元の出典を保ち、1 と同じくレベルの箱を外しました。
+4. **レイアウト。** グリッドから規則で導いた最初の配置はやめました。作者が Figma で 9:16 を組み直し、Renderer はそれを再現しています。測った 16 の要素は、すべて Figma の画面と 4 px 以内で揃います（`app/layout/GRID.md` の §8）。ほかの形状も同じ組み方に従い、どの画角も近い形状の配置で描きます。組むのは作者で、すべての画面に広げるのはシステムです。
+
+![The same shapes for four alerts in three municipalities: flood level 3 and level 5, a drill major tsunami warning at level 4, and a landslide warning at level 4, on 32:9 and 9:16](images/trial-5.jpg)
+
+The same 32:9 and 9:16 layouts carry four different alerts from three municipalities: a flood at level 3 and level 5, a drill major tsunami warning at level 4, and a landslide warning at level 4.
+
+同じ 32:9 と 9:16 の配置で、3 つの自治体の 4 つの警報を描いたものです。洪水のレベル 3 とレベル 5、訓練の大津波警報（レベル 4）、土砂災害のレベル 4 です。
+
 ## Built for next year's model
 
 The parts that decide what a screen may say are fixed outside the model: the layout, alert, municipality and feed schemas in `schema/`, the renderer's DOM attributes that the Verifier reads, and the approval gate (`/api/live-layout` serves a layout only at a site with automatic delivery switched on, and only for an approved bulletin or for a new bulletin of an approved kind of screen whose own browser check passed; approvals live in `data/approvals.json`, and the only parts a person has not seen are the JMA warning name and the issue time). The Reader, the Writer and the Vision Verifier sit inside that frame. A newer model can replace any of them, write better text or catch more defects, and the screens still have the same cells, the same checks and the same rule that nothing reaches a screen without a person's approval. The Reader was chosen this way during the week: Haiku and Sonnet were run on the same 輪島市 documents and compared on the same output schema (`agents/README.md`).
