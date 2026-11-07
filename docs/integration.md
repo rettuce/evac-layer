@@ -92,7 +92,7 @@ From the JMA feed to the screen, `receive` does the whole round for live sites: 
 pnpm -F agents receive --sites my-station-concourse --every 600 --writer live --verifier vision
 ```
 
-Without `--every` it runs one round and exits. To keep it running as a service (launchd, systemd) rather than from cron, give it a longer interval: `pnpm -F agents receive --sites my-station-concourse --every 3600`. `pnpm -F agents record` runs the recording step alone, and `pnpm -F agents pipeline --alert <bulletin.xml> --site <site id> --writer live --publish --go-live` does one bulletin by hand.
+Run only one `receive` process per data directory. Without `--every` it runs one round and exits. To keep it running as a service (launchd, systemd) rather than from cron, give it a longer interval: `pnpm -F agents receive --sites my-station-concourse --every 3600`. `pnpm -F agents record` runs the recording step alone, and `pnpm -F agents pipeline --alert <bulletin.xml> --site <site id> --writer live --publish --go-live` does one bulletin by hand.
 
 A site without `replay` is live. Its state is the bulletin it should show now, kept in `data/live/<site_id>.json`. Set it through the API (admin access) or the CLI, which write the same file:
 

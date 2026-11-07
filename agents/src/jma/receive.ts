@@ -6,7 +6,7 @@ import { requireApiKey } from "../apikey.js";
 import { liveGateWarning, REPLAY_SITE_MESSAGE, writeLive } from "../delivery/live.js";
 import { browserVerifier } from "../loop/browser-verifier.js";
 import { loadMunicipality } from "../loop/municipality.js";
-import { composeBulletin, type WriterChoice } from "../loop/one.js";
+import { byIssue, composeBulletin, indexedBulletins, type WriterChoice } from "../loop/one.js";
 import { staticVerifier } from "../loop/static-verifier.js";
 import type { Verifier } from "../loop/types.js";
 import { EVAC_URL, FEED_DIR, LIVE_DIR } from "../paths.js";
@@ -35,68 +35,99 @@ function writeReceiverState(siteId: string, state: ReceiverState, liveDir = LIVE
   fs.renameSync(`${file}.tmp`, file);
 }
 
-export function recordedSince(since: string, feedDir = FEED_DIR): { entry: IndexedEntry; file: string; code: string }[] {
-  const t = Date.parse(since);
+export const LOOKBACK_MS = 24 * 60 * 60 * 1000;
+
+export interface RecordedBody { entry: IndexedEntry; file: string; code: string }
+
+export function recordedSince(since: string, feedDir = FEED_DIR): RecordedBody[] {
+  const from = Date.parse(since) - LOOKBACK_MS;
+  const ids = new Set<string>();
   return FEEDS_WITH_BODIES.flatMap((feed) => readIndex(feedDir, feed))
-    .filter((e) => e.url && Date.parse(e.updated) > t)
+    .filter((e) => e.url && Date.parse(e.updated) >= from)
     .flatMap((entry) => {
-      const file = bodyPath(feedDir, entry.url);
+      if (ids.has(entry.id)) return [];
+      ids.add(entry.id);
+      let file: string;
+      try {
+        file = bodyPath(feedDir, entry.url);
+      } catch {
+        return [];
+      }
       const code = path.basename(file).match(BODY_NAME)?.[2];
       return code && REPLAYABLE.test(code) && fs.existsSync(file) ? [{ entry, file, code }] : [];
     })
-    .sort((a, b) => Date.parse(a.entry.updated) - Date.parse(b.entry.updated));
+    .sort((a, b) => Date.parse(a.entry.updated) - Date.parse(b.entry.updated) || a.file.localeCompare(b.file));
 }
 
 export interface SiteRound { site: string; bulletins: { entry: ReplayEntry; outcome: string; reason?: string }[]; live?: string; errors: string[] }
 
-export async function receiveSite(args: { site: SiteFile; verifier: Verifier; writer: WriterChoice; usage: CallUsage[]; initialSince: string; feedDir?: string; log?: (m: string) => void }): Promise<SiteRound> {
+export async function receiveSite(args: {
+  site: SiteFile; verifier: Verifier; writer: WriterChoice; usage: CallUsage[]; initialSince: string;
+  feedDir?: string; roots?: { reports: string; layouts: string }; liveDir?: string; log?: (m: string) => void;
+}): Promise<SiteRound> {
   const { site } = args;
   const log = args.log ?? (() => {});
   const feedDir = args.feedDir ?? FEED_DIR;
+  const liveDir = args.liveDir ?? LIVE_DIR;
   const municipalityId = siteMunicipality(site);
-  const state = readReceiverState(site.id, args.initialSince);
+  const state = readReceiverState(site.id, args.initialSince, liveDir);
   const round: SiteRound = { site: site.id, bulletins: [], errors: [] };
   const bodies = recordedSince(state.since, feedDir);
-  const entries: ReplayEntry[] = [];
+  const done = indexedBulletins(site.id, args.roots?.layouts);
+  const failed = new Set<RecordedBody>();
+  const fail = (b: RecordedBody, e: unknown) => {
+    failed.add(b);
+    round.errors.push(`${path.relative(feedDir, b.file)}: ${(e as Error).message}`);
+  };
+  const todo: { entry: ReplayEntry; body: RecordedBody }[] = [];
   for (const b of bodies) {
-    const xml = fs.readFileSync(b.file);
-    if (!mentionsMunicipality(xml.toString("utf8"), b.code, municipalityId)) continue;
     try {
-      entries.push(replayEntry(xml, path.relative(feedDir, b.file), b.code, municipalityId));
+      const xml = fs.readFileSync(b.file);
+      if (!mentionsMunicipality(xml.toString("utf8"), b.code, municipalityId)) continue;
+      const entry = replayEntry(xml, path.relative(feedDir, b.file), b.code, municipalityId);
+      if (done.has(entry.bulletin_id)) continue;
+      done.add(entry.bulletin_id);
+      todo.push({ entry, body: b });
     } catch (e) {
-      round.errors.push(`${path.relative(feedDir, b.file)}: ${(e as Error).message}`);
+      fail(b, e);
     }
   }
-  entries.sort((a, b) => a.issued_at.localeCompare(b.issued_at) || a.file.localeCompare(b.file));
-  const { municipality, readerRan } = entries.length ? loadMunicipality(municipalityId) : { municipality: undefined, readerRan: false };
-  let lastPass: string | undefined;
-  for (const entry of entries) {
+  todo.sort((a, b) => byIssue(a.entry, b.entry));
+  const { municipality, readerRan } = todo.length ? loadMunicipality(municipalityId) : { municipality: undefined, readerRan: false };
+  let lastShown: string | undefined;
+  for (const { entry, body } of todo) {
     const hazard = entry.alert.hazard;
-    const composed = await composeBulletin({
-      entry, municipality: municipality!, readerRan, site, verifier: args.verifier, writer: args.writer, usage: args.usage,
-      skipIf: (s) => (s.cleared && !(hazard in state.showing) ? `all-clear for ${hazard} but no ${hazard} screen was shown before; nothing to clear` : undefined),
-    });
-    if (composed.outcome === "no-screen") {
-      round.bulletins.push({ entry, outcome: "no-screen", reason: composed.reason });
-      log(`  [${site.id}] ${entry.issued_at} ${entry.bulletin_id} no-screen — ${composed.reason}`);
+    let composed;
+    try {
+      composed = await composeBulletin({
+        entry, municipality: municipality!, readerRan, site, verifier: args.verifier, writer: args.writer, usage: args.usage, roots: args.roots,
+        skipIf: (s) => (s.cleared && !(hazard in state.showing) ? `all-clear for ${hazard} but no ${hazard} screen was shown before; nothing to clear` : undefined),
+      });
+    } catch (e) {
+      fail(body, e);
+      log(`  [${site.id}] ${entry.issued_at} ${entry.bulletin_id} error — ${(e as Error).message}`);
       continue;
     }
     round.bulletins.push({ entry, outcome: composed.outcome, reason: composed.reason });
-    log(`  [${site.id}] ${entry.issued_at} ${entry.bulletin_id} ${composed.situation?.template} L${composed.situation?.level} ${composed.outcome}${composed.reason ? ` — ${composed.reason}` : ""}`);
-    if (composed.outcome !== "pass") continue;
+    const what = composed.outcome === "no-screen" ? "no-screen" : `${composed.situation?.template} L${composed.situation?.level} ${composed.outcome}`;
+    log(`  [${site.id}] ${entry.issued_at} ${entry.bulletin_id} ${what}${composed.reason ? ` — ${composed.reason}` : ""}`);
+    if (composed.row.screen !== true) continue;
     if (composed.situation!.cleared) delete state.showing[hazard];
     else state.showing[hazard] = entry.bulletin_id;
-    lastPass = entry.bulletin_id;
+    lastShown = entry.bulletin_id;
   }
-  if (lastPass) {
-    writeLive(site.id, lastPass);
-    round.live = lastPass;
-    log(`  [${site.id}] live → ${lastPass}`);
-    const warning = liveGateWarning(site.id, lastPass);
+  if (lastShown) {
+    writeLive(site.id, lastShown, liveDir);
+    round.live = lastShown;
+    log(`  [${site.id}] live → ${lastShown}`);
+    const warning = liveGateWarning(site.id, lastShown, args.roots?.layouts);
     if (warning) log(warning);
   }
-  if (bodies.length) state.since = bodies[bodies.length - 1].entry.updated;
-  writeReceiverState(site.id, state);
+  const firstFailure = bodies.findIndex((b) => failed.has(b));
+  const cleared = firstFailure < 0 ? bodies : bodies.slice(0, firstFailure);
+  const reached = cleared.at(-1)?.entry.updated;
+  if (reached && Date.parse(reached) > Date.parse(state.since)) state.since = reached;
+  writeReceiverState(site.id, state, liveDir);
   return round;
 }
 
@@ -128,14 +159,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const t0 = Date.now();
     const { feeds, saved } = await recordFeeds({});
     console.log(`${roundLine(t0, feeds)}  saved=${saved.length}`);
+    for (const f of feeds) if (f.failed) console.error(`[record] ${f.feed}: ${f.failed}`);
     const usage: CallUsage[] = [];
     const visionUsage: CallUsage[] = [];
     for (const site of sites) {
       const browser = values.verifier === "static" ? undefined : browserVerifier({ baseUrl: values["base-url"]!, ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) });
       try {
         const r = await receiveSite({ site, verifier: browser ?? staticVerifier, writer, usage, initialSince, log: (m) => console.log(m) });
-        for (const err of r.errors) console.error(`  [${site.id}] [parse error] ${err}`);
-        console.log(`  [${site.id}] ${r.bulletins.length} bulletins${r.live ? `, live ${r.live}` : ", live unchanged"}`);
+        for (const err of r.errors) console.error(`  [${site.id}] [error] ${err}`);
+        console.log(`  [${site.id}] ${r.bulletins.length} bulletins${r.errors.length ? `, ${r.errors.length} errors (retried next round)` : ""}${r.live ? `, live ${r.live}` : ", live unchanged"}`);
+      } catch (e) {
+        console.error(`  [${site.id}] [round failed] ${(e as Error).message}`);
       } finally {
         await browser?.close();
       }
