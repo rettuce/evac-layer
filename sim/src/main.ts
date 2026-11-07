@@ -110,7 +110,7 @@ for (const ambientScene of SCENES) {
 }
 
 // [D] leaves only the room and its screens (田中 S-R1 5).
-const debugPanels = ['ui', 'now', 'dock', 'info', 'panel-toggle'].map((id) => document.getElementById(id)!)
+const debugPanels = ['ui', 'now', 'dock', 'info', 'panel-toggle', 'dock-toggle'].map((id) => document.getElementById(id)!)
 let debugShown = true
 // Steps over scenes whose loop is missing; the scene also changes under EVAC LAYER, for when it comes back.
 function stepScene(direction: 1 | -1): void {
@@ -132,6 +132,12 @@ function toggleRandomAlert(): void {
   showState(displays.content === 'evac' ? displays.alertSet?.id : undefined)
 }
 document.getElementById('panel-toggle')!.addEventListener('click', () => document.body.classList.toggle('panel-open'))
+const dockToggle = document.getElementById('dock-toggle')!
+dockToggle.addEventListener('click', () => {
+  const open = document.body.classList.toggle('dock-open')
+  dockToggle.textContent = open ? 'close' : 'map'
+  dockToggle.setAttribute('aria-expanded', String(open))
+})
 addEventListener('keydown', (event) => {
   if (event.metaKey || event.ctrlKey || event.altKey || !introCard.hidden) return
   switch (event.key) {
