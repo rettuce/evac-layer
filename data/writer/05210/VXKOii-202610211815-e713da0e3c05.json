@@ -29,7 +29,7 @@
           "ko": "위험한 곳에서 대피",
           "th": "ออกจากที่อันตราย",
           "vi": "Rời nơi nguy hiểm",
-          "fil": "Lumikas sa mapanganib",
+          "fil": "Lumikas mula sa panganib",
           "id": "Tinggalkan area bahaya"
         },
         "basis": "警報 level 4（headline_text【警戒レベル４相当情報［洪水］】）とテンプレート evac-now の図記号 directions_run（危険な場所から避難する）。避難情報の名称は使わず行動として記載"
@@ -45,7 +45,7 @@
           "ko": "위험한 곳에서 대피",
           "th": "ออกจากที่อันตราย",
           "vi": "Rời nơi nguy hiểm",
-          "fil": "Lumikas sa mapanganib",
+          "fil": "Lumikas mula sa panganib",
           "id": "Tinggalkan area bahaya"
         },
         "basis": "action セルと同じ内容（警報 level 4、図記号 directions_run: 危険な場所から避難する）を各言語で表示"
