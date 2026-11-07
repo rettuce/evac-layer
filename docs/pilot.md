@@ -24,7 +24,7 @@ EVAC LAYER を実際のサイネージで動かす最初の実証の形です。
 
 ## 期間と作業量の目安
 
-- **準備は 1〜2 日。** 主な作業は、資料の読み取り結果の確認と、画面の承認です。
+- **準備の作業は 2 つ。** 資料の読み取り結果の確認と、画面の承認。
 - **運用は無人。** 承認済みの種類の警報なら、人の操作なしに切り替わります。新しい種類の電文は、承認を待ちます。
 - **API の費用は、1 自治体あたり年に約 $13 の見込みです。** 前提と内訳は [`docs/evaluation.md`](evaluation.md)。
 
@@ -56,5 +56,5 @@ EVAC LAYER を実際のサイネージで動かす最初の実証の形です。
 - A first pilot pairs one venue that runs signage with the municipality it sits in.
 - Inputs: each screen's coordinates and facing, the municipality's hazard-map PDFs and GSI evacuation sites, and one HTTP endpoint (pull, signed webhook or files).
 - Steps: register the site, read the PDFs with the Reader, generate screens with fanout, approve them in /admin, then `receive` switches to the approved screens on a warning and to the all-clear screen when it is lifted.
-- Preparation takes about one to two days; operation is unattended; API cost is about $13 per municipality per year.
+- Preparation is checking the Reader's output and approving the screens; operation is unattended; API cost is about $13 per municipality per year.
 - To agree beforehand: who approves, how all-clears are handled, the Level 5 display, native-speaker review, and who is responsible for what is shown.
