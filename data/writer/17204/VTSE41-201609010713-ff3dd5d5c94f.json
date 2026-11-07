@@ -30,7 +30,7 @@
           "th": "ฝึกซ้อม: ขึ้นที่สูง",
           "vi": "Diễn tập: Lên chỗ cao",
           "fil": "Pagsasanay: Sa mataas",
-          "id": "Latihan: Naik ke atas"
+          "id": "Latihan: Ke tanah tinggi"
         },
         "basis": "Template evac-now action pictogram go_higher (move up to higher ground from where you are); alert.hazard=tsunami, alert.areas[0].kind_name=津波注意報; alert.status=drill (training prefix on all languages except ja)"
       },
@@ -46,7 +46,7 @@
           "th": "ฝึกซ้อม: ขึ้นที่สูง",
           "vi": "Diễn tập: Lên chỗ cao",
           "fil": "Pagsasanay: Sa mataas",
-          "id": "Latihan: Naik ke atas"
+          "id": "Latihan: Ke tanah tinggi"
         },
         "basis": "Same content as action cell (go_higher pictogram); alert.status=drill (training prefix on all languages except ja)"
       }
