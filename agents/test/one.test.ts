@@ -11,6 +11,7 @@ import { staticVerifier } from "../src/loop/static-verifier.js";
 import { receiveSite } from "../src/jma/receive.js";
 import { AGENTS_DIR, FEED_DIR } from "../src/paths.js";
 import { needsRaw } from "./raw.js";
+import { isSiteId } from "../src/sites.js";
 
 const fx = <T>(n: string): T => JSON.parse(fs.readFileSync(path.join(AGENTS_DIR, "test/fixtures", n), "utf8"));
 const { entries } = fx<{ entries: ReplayEntry[] }>("replay-05210-koyoshi-20261021.json");
@@ -43,6 +44,19 @@ test("composeBulletin writes one bulletin's layouts, report and index row, keepi
 
   await composeBulletin({ ...base, entry: L3 });
   assert.deepEqual(index().entries.map((e) => e.bulletin_id), [L2.bulletin_id, L3.bulletin_id, L4.bulletin_id]);
+});
+
+test("site ids follow the app's rule: 1 to 80 letters, digits, _ or -", () => {
+  for (const id of ["05210-demo-honjo-station", "_x", "-x", "a".repeat(80)]) assert.ok(isSiteId(id), id);
+  for (const id of ["", "../evil", "a/b", "a.b", "a b", "a".repeat(81)]) assert.ok(!isSiteId(id), id);
+});
+
+test("composeBulletin refuses a site id outside the rule before writing anything", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "evac-one-"));
+  const roots = { layouts: path.join(root, "layouts"), reports: path.join(root, "reports") };
+  const { municipality, readerRan } = loadMunicipality("05210");
+  await assert.rejects(composeBulletin({ entry: L3, municipality, readerRan, site: { ...site, id: "../evil" }, verifier: staticVerifier, writer: { kind: "placeholder" }, roots }), /site id "\.\.\/evil" must match/);
+  assert.deepEqual(fs.readdirSync(root), []);
 });
 
 test("a skipped bulletin gets a no-screen row and no layouts", async () => {
