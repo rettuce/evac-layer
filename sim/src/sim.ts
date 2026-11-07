@@ -173,7 +173,7 @@ const ready = displays.hasVideo(INITIAL.scene).then(async (available) => {
   }
 })
 void Promise.all([ready, intro(introCard)]).then(([started]) => {
-  if (started) timeline.play()
+  if (started && new URLSearchParams(location.search).get('autoplay') !== '0') timeline.play(true)
 })
 
 // Measurement switches for DevTools (S-4 v2): uncapped draws, WebGL off, and the last loop times.

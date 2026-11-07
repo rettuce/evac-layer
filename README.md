@@ -12,6 +12,12 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 - **40 行で試す**: [`examples/minimal-cms/`](examples/minimal-cms/)（自分のサイネージに組み込む最小の例）
 - **English**: [summary ↓](#english-summary)
 
+### 3 分で見る
+
+1. **動画（2 分 51 秒）**: [youtu.be/W_wwWq_1ob8](https://youtu.be/W_wwWq_1ob8) で、警報から解除までの 1 日を見る
+2. **3D シミュレーター**: [開いて](https://rettuce.github.io/evac-layer/)「はじめる」を押すと由利本荘市の 10 月 21 日が再生される。右下のタイムラインで 15:55 / 18:15 / 19:45 を押し、「表示する場所」で駅・会館・高校・公園を切り替えると、同じ警報でも避難先と方向が変わる。最後に [D] でパネルを隠して眺める
+3. **手元で動かす**: [動かす](#動かす) の `pnpm install` → `pnpm -F app dev` → `pnpm -F app demo:approve` → `/screen?site=05210-demo-honjo-station&mode=live&reset` を開く（約 15 秒でレベル 3）
+
 **何が新しいか**
 
 - スクリーンが自分の場所を知り、その場所のための避難先・方向・距離を出す
