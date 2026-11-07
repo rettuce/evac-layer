@@ -90,7 +90,7 @@ Approving a bulletin also approves its class at that site: `<hazard>/<template>/
 
 A file without `classes` (written before classes existed) works as before, bulletin by bulletin.
 
-A class approval only helps if the next bulletin of the class is written with the approved wording. After `fanout`, build the Writer cache of each class from the bulletins just written: `pnpm -F agents writer --build-class-cache` takes, for every class, the bulletin with the latest issue time. Only this command writes the class cache; `receive` and `pipeline` read it. They use it only for a bulletin with the same title (`raw_title`, which names the river of a flood forecast) and the same caution (a tsunami clearance down to a sea-level-change forecast has its own wording). Any other bulletin of the class is written by the Writer API, and its new wording is not shown until someone approves it.
+A class approval only helps if the next bulletin of the class is written with the approved wording. At the end of a run, `fanout` builds the Writer cache of each class of the municipalities it ran, from the bulletin with the latest issue time, and prints one line per class after its table. To rebuild it by hand, run `pnpm -F agents writer --build-class-cache`. Only these two write the class cache; `receive` and `pipeline` read it. They use it only for a bulletin with the same title (`raw_title`, which names the river of a flood forecast) and the same caution (a tsunami clearance down to a sea-level-change forecast has its own wording). Any other bulletin of the class is written by the Writer API, and its new wording is not shown until someone approves it.
 
 Without the page, approve each bulletin and then switch automatic delivery on for the site:
 

@@ -339,8 +339,9 @@ onUnmounted(() => clearInterval(clockTimer))
               data-action="revoke"
               @click="setApproved(current, false)"
             >
-              この電文を出さない（取り消す）
+              この種類の画面を出さない（取り消す）
             </button>
+            <p v-if="current.approved_by === 'class'" class="meta fg-3 revoke-note">同じ種類の新しい電文も止まります。元の電文の承認は残ります</p>
             <p v-if="approveBlockedReason" class="meta fg-3 blocked">{{ approveBlockedReason }}</p>
           </aside>
         </div>
@@ -542,6 +543,7 @@ button { font-family: var(--ev-sans); }
 .approve { width: 100%; border: 1px solid var(--ev-orange); background: var(--ev-orange); color: var(--ev-bg); }
 .approve.is-on, .secondary { border: 1px solid var(--ev-line); background: var(--ev-panel); color: var(--ev-fg); }
 .revoke { width: 100%; }
+.revoke-note { margin-top: -8px; }
 .revoke:disabled { color: var(--ev-fg-3); cursor: not-allowed; }
 .approve:disabled { border-color: var(--ev-line); background: var(--ev-panel); color: var(--ev-fg-3); cursor: not-allowed; }
 

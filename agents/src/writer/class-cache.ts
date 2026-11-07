@@ -11,7 +11,7 @@ export function bulletinXmlPath(file: string): string {
 
 interface IndexEntry { bulletin_id: string; file: string; screen?: boolean }
 
-export function cacheLatestWriterPerClass(opts: { layoutsDir?: string; xmlPath?: (file: string) => string; log?: (m: string) => void } = {}): string[] {
+export function cacheLatestWriterPerClass(opts: { layoutsDir?: string; xmlPath?: (file: string) => string; log?: (m: string) => void; municipalities?: ReadonlySet<string> } = {}): string[] {
   const layoutsDir = opts.layoutsDir ?? LAYOUTS_DIR;
   const xmlPath = opts.xmlPath ?? bulletinXmlPath;
   const log = opts.log ?? (() => {});
@@ -21,6 +21,7 @@ export function cacheLatestWriterPerClass(opts: { layoutsDir?: string; xmlPath?:
     const indexFile = path.join(layoutsDir, site, "index.json");
     if (!fs.existsSync(indexFile)) continue;
     const index = JSON.parse(fs.readFileSync(indexFile, "utf8")) as { municipality: string; entries: IndexEntry[] };
+    if (opts.municipalities && !opts.municipalities.has(index.municipality)) continue;
     for (const entry of index.entries.filter((e) => e.screen)) {
       const id = `${index.municipality}/${entry.bulletin_id}`;
       if (seen.has(id) || !cachedWriter(index.municipality, entry.bulletin_id)) continue;
