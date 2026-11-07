@@ -106,7 +106,7 @@ A rough extrapolation from the figures above; it assumes the same models and pro
 | Item | Basis | Estimate |
 |---|---|---|
 | Reader, once per municipality | $0.26–$1.17 per municipality over the five (page count of the municipal documents) | about 1,740 municipalities × $0.3–1.2 ≈ **$500–2,000, once** |
-| Rendered screens per municipality per year | 200 recorded bulletins for 5 municipalities in 23 days (2026-10-11 to 11-03), 16 of them warning-level and thus rendered (the 6 tsunami screens from the official sample series are left out) → about 51 rendered screens per municipality per year | — |
+| Rendered screens per municipality per year | 200 recorded bulletins for 5 municipalities in 23 days (2026-10-11 to 11-02), 16 of them warning-level and thus rendered (the 6 tsunami screens from the official sample series are left out) → about 51 rendered screens per municipality per year | — |
 | Writer + Vision per rendered screen | $0.245 steady state (Writer once, Vision on 5 shapes) | **about $13 per municipality per year** |
 | All municipalities, one site each | 1,740 × $13 | **about $22,000 per year** |
 | Each additional site in a municipality | the Writer output is cached per municipality and hazard, so an extra site pays for Vision only: $0.053 per screen (5 shapes) × 51 | **about $3 per extra site per year**; 10,000 sites nationwide ≈ $22,000 + 8,260 × $3 ≈ **$47,000 per year** |
