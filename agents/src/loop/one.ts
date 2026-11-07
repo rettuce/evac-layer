@@ -74,7 +74,7 @@ export async function composeBulletin(args: {
   const maxAttempts = args.maxAttempts ?? MAX_ATTEMPTS;
   const result = await runLoop({ alert: e.alert, municipality, site: args.site, writer: step.writer, writerSource: step.writerSource, verifier: args.verifier, reviser: step.reviser, maxAttempts });
   step.afterLoop(result);
-  const notes = [...(args.writer.kind === "placeholder" ? [PLACEHOLDER_NOTE] : []), ...(args.readerRan ? [] : [READER_MISSING_NOTE])].join(" ");
+  const notes = [...(step.writerSource === "placeholder" ? [PLACEHOLDER_NOTE] : []), ...(args.readerRan ? [] : [READER_MISSING_NOTE])].join(" ");
   const { dir, report } = writeReport({ siteId: args.site.id, municipalityId: municipality.id, roots: args.roots, bulletinId: e.bulletin_id, verifier: args.verifier.name, skippedShapes: args.verifier.skippedShapes, reviser: step.reviser.name, maxAttempts, result, writerNote: notes || undefined });
   const indexRow = screenRow(row, { situation, verifier: args.verifier, dir, report });
   upsertIndexRow({ layoutsRoot: args.roots?.layouts, site: args.site, municipality, row: indexRow });
