@@ -4,6 +4,7 @@ import type { Municipality, Site, WriterOutput } from "../composer/compose.js";
 import { ComposerStop, situationFor, type Situation } from "../composer/rules.js";
 import type { ReplayEntry } from "../jma/replay.js";
 import { REPO_ROOT } from "../paths.js";
+import { isSiteId, SITE_ID } from "../sites.js";
 import type { CallUsage } from "../reader/pricing.js";
 import { writeForBulletin, type LiveWriter, type WriterStep } from "../writer/step.js";
 import { MAX_ATTEMPTS, runLoop } from "./loop.js";
@@ -51,6 +52,7 @@ export async function composeBulletin(args: {
   persistWriter?: boolean; usage?: CallUsage[]; maxAttempts?: number; roots?: { reports: string; layouts: string };
   skipIf?: (situation: Situation) => string | undefined;
 }): Promise<Composed> {
+  if (!isSiteId(args.site.id)) throw new Error(`site id "${args.site.id}" must match ${SITE_ID}`);
   const { entry: e, municipality } = args;
   const row = bulletinRow(e);
   let situation: Situation;
@@ -86,12 +88,20 @@ export function upsertIndexRow(args: { layoutsRoot?: string; site: Site; municip
   const doc = fs.existsSync(file)
     ? (JSON.parse(fs.readFileSync(file, "utf8")) as { entries: IndexRow[] })
     : { municipality: args.municipality.id, name: args.municipality.name, site: args.site.id, writer_note: "", entries: [] as IndexRow[] };
-  const entries = doc.entries.filter((r) => r.bulletin_id !== args.row.bulletin_id);
-  const t = Date.parse(args.row.issued_at);
-  const at = entries.findIndex((r) => Date.parse(r.issued_at) > t);
-  entries.splice(at < 0 ? entries.length : at, 0, args.row);
+  const entries = [...doc.entries.filter((r) => r.bulletin_id !== args.row.bulletin_id), args.row].sort(byIssue);
+  const partial = `${file}.${process.pid}.tmp`;
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(`${file}.tmp`, JSON.stringify({ ...doc, entries }, null, 2) + "\n");
-  fs.renameSync(`${file}.tmp`, file);
+  fs.writeFileSync(partial, JSON.stringify({ ...doc, entries }, null, 2) + "\n");
+  fs.renameSync(partial, file);
   return file;
+}
+
+export function byIssue(a: { issued_at: string; file?: unknown }, b: { issued_at: string; file?: unknown }): number {
+  return Date.parse(a.issued_at) - Date.parse(b.issued_at) || String(a.file ?? "").localeCompare(String(b.file ?? ""));
+}
+
+export function indexedBulletins(siteId: string, layoutsRoot = LAYOUTS_DIR): Set<string> {
+  const file = path.join(layoutsRoot, siteId, "index.json");
+  if (!fs.existsSync(file)) return new Set();
+  return new Set((JSON.parse(fs.readFileSync(file, "utf8")) as { entries: IndexRow[] }).entries.map((r) => r.bulletin_id));
 }

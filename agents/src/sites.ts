@@ -10,6 +10,12 @@ export interface SiteFile extends Site {
 
 export class SiteNotFound extends Error {}
 
+export const SITE_ID = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
+
+export function isSiteId(id: unknown): id is string {
+  return typeof id === "string" && SITE_ID.test(id);
+}
+
 export function readSites(dir = SITES_DIR): SiteFile[] {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir).filter((n) => n.endsWith(".json")).sort().map((n) => JSON.parse(fs.readFileSync(path.join(dir, n), "utf8")) as SiteFile);

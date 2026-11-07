@@ -9,7 +9,7 @@ import { BODY_NAME } from "../jma/feed.js";
 import { replayEntry } from "../jma/replay.js";
 import { EVAC_URL, FEED_DIR, TMP_DIR, resolveUserPath } from "../paths.js";
 import type { CallUsage } from "../reader/pricing.js";
-import { findSite, siteMunicipality, type SiteFile } from "../sites.js";
+import { findSite, isSiteId, SITE_ID, siteMunicipality, type SiteFile } from "../sites.js";
 import type { WriterModel } from "../writer/live.js";
 import { browserVerifier } from "./browser-verifier.js";
 import { MAX_ATTEMPTS } from "./loop.js";
@@ -47,7 +47,10 @@ if (values["go-live"] && !values.publish) stop("--go-live needs --publish: only 
 if (values.revisions!.length && (values.writer === "live" || values.writer === "placeholder")) stop("--revisions go with a fixture first draft: pass --writer <writer.json>");
 
 const readJson = <T>(p: string): T => JSON.parse(fs.readFileSync(resolveUserPath(p), "utf8")) as T;
+const siteIdStop = (id: unknown) => stop(`[pipeline stopped] site id "${String(id)}" must match ${SITE_ID} (letters, digits, "_" and "-", starting with a letter or digit)`);
+if (!values.site!.endsWith(".json") && !isSiteId(values.site)) siteIdStop(values.site);
 const site: SiteFile = values.site!.endsWith(".json") ? readJson<SiteFile>(values.site!) : findSite(values.site!);
+if (!isSiteId(site.id)) siteIdStop(site.id);
 if (values["go-live"] && site.replay) stop(`[pipeline stopped] ${REPLAY_SITE_MESSAGE(site.id)}`);
 const loaded = values["municipality-file"]
   ? { municipality: readJson<Municipality>(values["municipality-file"]), readerRan: true }
