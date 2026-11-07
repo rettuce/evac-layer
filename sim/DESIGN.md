@@ -77,7 +77,7 @@ switch between colour×AO, white×AO and wire without a second material set in t
   `demo/capture/record.mjs` does before a recording, through the loopback-only admin API.
 - Camera flights: position and focal length sampled every 100 ms follow the ease-in-out curve over 1.2 s.
 
-## S-2 (2026-11-04, 田中 FB)
+## S-2 (2026-11-04, author feedback)
 
 - **Column corners showed a dark line.** Numbers: the LED wrap's face arc length is 1.0471 m (1.000 flat +
   2 × 0.0236 of arc), so the flat CSS3D plane ended 0.5236 m from the column centre while the corner edge is
@@ -103,7 +103,7 @@ switch between colour×AO, white×AO and wire without a second material set in t
 - The three wall screens moved to louver-gap centres (x −2.85 / 0 / 2.85 m) with D-8, which only needed the
   re-export.
 
-## S-4 v2 (2026-11-05, 田中 FB: too heavy, slow switching, GitHub Pages)
+## S-4 v2 (2026-11-05, author feedback: too heavy, slow switching, GitHub Pages)
 
 Measured first (hero, 22 faces, calm, 60 fps cap off, 300 draws, Chrome on a 120 Hz Mac):
 

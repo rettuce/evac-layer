@@ -45,7 +45,7 @@ describe('the shelter floor matches the Verifier', { skip: !existsSync(TSX) && '
 
 const skip = (!existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first') || (!existsSync(CHROME_PATH) && `no Chrome at ${CHROME_PATH}`)
 
-// 吉田's 津波避難タワーＭ broke into two lines on 32:9 at the single narrow step (田中 2026-11-05).
+// 吉田's 津波避難タワーＭ broke into two lines on 32:9 at the single narrow step (author, 2026-11-05).
 describe('a shelter name is set smaller until it fits on one line', { skip }, () => {
   let base = ''
   let child: ChildProcess | undefined
@@ -92,7 +92,7 @@ describe('a shelter name is set smaller until it fits on one line', { skip }, ()
   }
 })
 
-// 田中 2026-11-06: 輪島市立港公民館 fits one 16:9 line once the distance beside it takes one step down.
+// Author, 2026-11-06: 輪島市立港公民館 fits one 16:9 line once the distance beside it takes one step down.
 describe('the distance gives way only to a name that still breaks at its floor', { skip }, () => {
   let base = ''
   let child: ChildProcess | undefined

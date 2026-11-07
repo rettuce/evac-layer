@@ -13,7 +13,7 @@ const INITIAL: { content: Content; scene: AmbientScene; mode: RenderMode; preset
 const NEAR_M = 0.05
 const FAR_M = 100
 // Frames are skipped so a 120 Hz display still draws 60 per second; the half-millisecond keeps vsync jitter on
-// a 120 Hz screen from dropping every third frame (田中 S-2 2026-11-04). Camera flights run on real time.
+// a 120 Hz screen from dropping every third frame (author, S-2 2026-11-04). Camera flights run on real time.
 const MAX_FPS = 60
 const MIN_FRAME_MS = 1000 / MAX_FPS - 0.5
 
@@ -50,14 +50,14 @@ const [room, crops] = await Promise.all([loadRoom(`${import.meta.env.BASE_URL}ro
 scene.add(room.scene)
 applyRenderMode(room, INITIAL.mode)
 
-// The four views the demo is judged on (田中 2026-11-05: hero, the wall, the headwall ribbon as in demo cut 8,
+// The four views the demo is judged on (author, 2026-11-05: hero, the wall, the headwall ribbon as in demo cut 8,
 // the column); the glb still carries every still camera.
 const SHOWN_CAMERAS: Record<string, string> = { hero: 'hero', 'wall-final': 'wall-final', 'rib-final': 'rib-final', 'col-final': 'col-final' }
 const presets = presetsFromGltf(room.cameras)
   .filter((preset) => preset.name in SHOWN_CAMERAS)
   .map((preset) => ({ ...preset, name: SHOWN_CAMERAS[preset.name]! }))
   .sort((a, b) => Object.values(SHOWN_CAMERAS).indexOf(a.name) - Object.values(SHOWN_CAMERAS).indexOf(b.name))
-// hero2: 田中's own pose of 2026-11-05 (copy pose), not a Blender camera.
+// hero2: the author's own pose of 2026-11-05 (copy pose), not a Blender camera.
 const HERO2 = presetFromQuery('hero2', '3.32,1.24,8.33,-0.91,2.81,-8.69,28')!
 presets.splice(1, 0, HERO2)
 const pinned = presetFromQuery('cam', new URLSearchParams(location.search).get('cam'))
@@ -109,7 +109,7 @@ for (const ambientScene of SCENES) {
   void displays.hasVideo(ambientScene).then((available) => ui.setSceneAvailable(ambientScene, available))
 }
 
-// [D] leaves only the room and its screens (田中 S-R1 5).
+// [D] leaves only the room and its screens (author, S-R1 5).
 const debugPanels = ['ui', 'now', 'dock', 'info', 'panel-toggle', 'dock-toggle'].map((id) => document.getElementById(id)!)
 let debugShown = true
 // Steps over scenes whose loop is missing; the scene also changes under EVAC LAYER, for when it comes back.

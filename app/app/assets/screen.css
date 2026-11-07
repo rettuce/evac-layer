@@ -111,7 +111,7 @@ body {
 }
 
 
-/* 9:16 after 田中's Figma artboard (templates.ts PORTRAIT): type sizes per element, pictograms placed by ink,
+/* 9:16 after the author's Figma artboard (templates.ts PORTRAIT): type sizes per element, pictograms placed by ink,
    no cap trimming, labels in #555. Values are the artboard's px at 1080 × 1920. */
 .evac-screen.shape-portrait .is-figma .role-headline.is-stacked {
   display: block;
