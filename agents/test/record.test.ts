@@ -92,7 +92,48 @@ test("a body that keeps failing is retried next round and is not written to the 
   const r = await recordFeeds({ feedDir, fetchImpl: failing, sleep: async (ms) => { waits.push(ms); }, log: () => {} });
   assert.deepEqual(waits, [5000, 15000, 45000]);
   assert.equal(r.feeds[0].bodies, 0);
+  assert.match(r.feeds[0].failed ?? "", /^1 bodies failed after retries$/);
   assert.deepEqual(readIndex(feedDir, "extra_l").map((e) => path.basename(e.url)), [TRANSITION]);
   const again = await recordFeeds({ feedDir, fetchImpl: fakeFeed().fetchImpl, sleep: noWait });
-  assert.deepEqual([again.feeds[0].new, again.feeds[0].bodies], [1, 1]);
+  assert.deepEqual([again.feeds[0].new, again.feeds[0].bodies, again.feeds[0].failed], [1, 1, undefined]);
+});
+
+test("parseFeed refuses a document that is not an Atom feed or an entry without id or updated", () => {
+  assert.throws(() => parseFeed("<html><body>maintenance</body></html>"), /no <feed> root/);
+  assert.throws(() => parseFeed(atom(entry(RAIN, "2026-11-07T07:12:56Z", "t").replace(/<id>.*<\/id>/, ""))), /no id or updated/);
+  assert.throws(() => parseFeed(atom(entry(RAIN, "", "t"))), /no id or updated/);
+});
+
+test("bodyPath refuses a file name that is not a plain .xml name", () => {
+  for (const url of [`${DATA}evil%2F..%2Fx.xml`, `${DATA}notes.txt`, `${DATA}a b.xml`, DATA, `${DATA}a%5Cb.xml`]) {
+    assert.throws(() => bodyPath("/feed", url), /bad body name/, url);
+  }
+  const feedDir = tmpFeed();
+  const logs: string[] = [];
+  const bad = `${DATA}20261107071258_0_VPWW55_0500%2F00.xml`;
+  const fetchImpl: FetchImpl = async (url) => new Response(url === `${FEED_BASE}extra_l.xml` ? atom(entry(bad.slice(DATA.length), "2026-11-07T07:12:56Z", "t")) : atom());
+  return recordFeeds({ feedDir, fetchImpl, sleep: noWait, log: (m) => logs.push(m) }).then((r) => {
+    assert.equal(r.feeds[0].new, 0);
+    assert.deepEqual(readIndex(feedDir, "extra_l"), []);
+    assert.match(logs.join("\n"), /skip .*bad body name/);
+  });
+});
+
+test("an id listed twice in one response is indexed once", async () => {
+  const feedDir = tmpFeed();
+  const twice = atom(entry(RAIN, "2026-11-07T07:12:56Z", "t"), entry(RAIN, "2026-11-07T07:12:56Z", "t"));
+  const fetchImpl: FetchImpl = async (url) => new Response(url === `${FEED_BASE}extra_l.xml` ? twice : url.startsWith(FEED_BASE) ? atom() : "<Report/>");
+  const r = await recordFeeds({ feedDir, fetchImpl, sleep: noWait });
+  assert.deepEqual([r.feeds[0].new, r.feeds[0].bodies], [1, 1]);
+  assert.equal(readIndex(feedDir, "extra_l").length, 1);
+});
+
+test("a bulletin already in the index but missing its body is fetched again", async () => {
+  const feedDir = tmpFeed();
+  await recordFeeds({ feedDir, fetchImpl: fakeFeed().fetchImpl, sleep: noWait });
+  fs.rmSync(bodyPath(feedDir, `${DATA}${RAIN}`));
+  const r = await recordFeeds({ feedDir, fetchImpl: fakeFeed().fetchImpl, sleep: noWait });
+  assert.deepEqual([r.feeds[0].new, r.feeds[0].bodies], [0, 1]);
+  assert.ok(fs.existsSync(bodyPath(feedDir, `${DATA}${RAIN}`)));
+  assert.equal(readIndex(feedDir, "extra_l").length, 2);
 });

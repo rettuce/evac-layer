@@ -26,7 +26,8 @@ const text = (v: unknown): string => (v && typeof v === "object" ? String((v as 
 
 export function parseFeed(xml: string | Buffer): Entry[] {
   const feed = parser.parse(xml).feed as { entry?: Record<string, unknown>[] } | undefined;
-  return (feed?.entry ?? []).map((e) => ({
+  if (!feed || typeof feed !== "object") throw new Error("not an Atom feed: no <feed> root");
+  const entries = (feed.entry ?? []).map((e) => ({
     id: text(e.id),
     title: text(e.title),
     updated: text(e.updated),
@@ -34,10 +35,16 @@ export function parseFeed(xml: string | Buffer): Entry[] {
     url: ((e.link as { "@href"?: string }[] | undefined) ?? [])[0]?.["@href"] ?? "",
     content: text(e.content),
   }));
+  const broken = entries.findIndex((e) => !e.id || !e.updated);
+  if (broken >= 0) throw new Error(`Atom entry ${broken + 1} has no id or updated`);
+  return entries;
 }
 
+const BODY_FILE = /^[A-Za-z0-9_.-]+\.xml$/;
+
 export function bodyPath(feedDir: string, url: string): string {
-  const name = url.slice(url.lastIndexOf("/") + 1);
+  const name = new URL(url).pathname.split("/").pop() ?? "";
+  if (!BODY_FILE.test(name) || name.startsWith(".")) throw new Error(`bad body name: ${name || url}`);
   return path.join(feedDir, "bodies", name.slice(0, 8), name);
 }
 
@@ -99,34 +106,47 @@ export async function recordFeeds(opts: { feedDir?: string; fetchImpl?: FetchImp
       result.failed = (e as Error).message;
       continue;
     }
-    let failures = 0;
-    for (const entry of entries.filter((e) => !seen.has(e.id))) {
-      if (withBodies && entry.url && wanted(entry)) {
-        const target = bodyPath(feedDir, entry.url);
-        if (!fs.existsSync(target)) {
+    let inARow = 0;
+    let failed = 0;
+    let aborted = false;
+    for (const entry of entries) {
+      if (withBodies && entry.url) {
+        let target: string;
+        try {
+          target = bodyPath(feedDir, entry.url);
+        } catch (e) {
+          log(`  skip ${entry.url}: ${(e as Error).message}`);
+          continue;
+        }
+        if (wanted(entry) && !fs.existsSync(target)) {
           try {
             const bytes = await fetchWithRetry(fetchImpl, entry.url, sleep);
+            const part = `${target}.${process.pid}.part`;
             fs.mkdirSync(path.dirname(target), { recursive: true });
-            fs.writeFileSync(`${target}.part`, bytes);
-            fs.renameSync(`${target}.part`, target);
+            fs.writeFileSync(part, bytes);
+            fs.renameSync(part, target);
             result.bodies++;
             saved.push({ feed, file: target, entry });
-            failures = 0;
+            inARow = 0;
             await sleep(BODY_INTERVAL_MS);
           } catch (e) {
-            failures++;
+            inARow++;
+            failed++;
             log(`  skip ${entry.url}: ${(e as Error).message}`);
-            if (failures >= MAX_CONSECUTIVE_FAILURES) {
-              result.failed = `${failures} bodies failed in a row; the rest is left for the next round`;
+            if (inARow >= MAX_CONSECUTIVE_FAILURES) {
+              aborted = true;
               break;
             }
             continue;
           }
         }
       }
+      if (seen.has(entry.id)) continue;
       fs.appendFileSync(indexFile, JSON.stringify({ ...entry, recorded_at: now().toISOString().replace(/\.\d{3}Z$/, "+00:00") }) + "\n");
+      seen.add(entry.id);
       result.new++;
     }
+    if (failed) result.failed = `${failed} bodies failed after retries${aborted ? `, ${MAX_CONSECUTIVE_FAILURES} in a row; the rest is left for the next round` : ""}`;
   }
   return { feeds, saved };
 }
