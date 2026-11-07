@@ -72,7 +72,7 @@ Every recorded bulletin for the site's municipality goes through write → compo
 
 Open `/admin`, review the screens of each bulletin and approve them. An approval is per site and per bulletin (`<site_id>/<bulletin_id>`) and is bound to the layout files it was given for, so a bulletin whose wording or arrangement changed is held back until someone approves it again.
 
-Approving a bulletin also approves its class at that site: `<hazard>/<template>/<level>` (for example `flood/evac-now/4`). The class approval is bound to the layout files with the parts that change from bulletin to bulletin taken out: the JMA headline, the issue time and the bulletin id. A later bulletin of the same class whose screens carry the approved wording and arrangement is therefore shown without a new approval. Revoking a bulletin (`"approved": false`) revokes its class too. `data/approvals.json` keeps both:
+Approving a bulletin also approves its class at that site: `<hazard>/<template>/<level>` (for example `flood/evac-now/4`). The class approval is bound to the layout files with the parts that change from bulletin to bulletin taken out: the JMA warning name (the Japanese headline), the source line with the issue time, and the bulletin id. The translated headlines stay in, so a class whose translations change is held back. A later bulletin of the same class whose screens carry the approved wording and arrangement is therefore shown without a new approval. Revoking a bulletin (`"approved": false`) revokes every class approved from it, even when its layout files are gone, and the class of its current files. `data/approvals.json` keeps both:
 
 ```json
 {
