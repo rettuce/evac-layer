@@ -10,7 +10,7 @@
     "site": "tsx src/site-cli.ts",
     "jma": "tsx src/jma/cli.ts",
     "reader": "tsx src/reader/cli.ts",
-    "test": "tsx --test test/*.test.ts",
+    "test": "tsx --import ./test/fixture-env.ts --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
     "writer": "tsx src/writer/cli.ts",
     "lint-writer": "tsx src/writer/lint-cli.ts",

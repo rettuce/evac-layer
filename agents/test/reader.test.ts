@@ -87,12 +87,13 @@ test("an invented citation id stops assembly", () => {
   }), /C9/);
 });
 
-test("Wajima GSI CSVs load with hazard columns", { skip: !fs.existsSync(path.join(RAW_DIR, "gsi-shelters/17204_2.csv")) && "raw data not available" }, () => {
-  const sites = readGsiCsv(path.join(RAW_DIR, "gsi-shelters/17204_2.csv"));
+const GSI_DIR = [path.join(RAW_DIR, "gsi-shelters"), path.join(import.meta.dirname, "fixtures", "gsi-shelters")].find((d) => fs.existsSync(path.join(d, "17204_2.csv")));
+test("Wajima GSI CSVs load with hazard columns", { skip: !GSI_DIR && "raw data not available" }, () => {
+  const sites = readGsiCsv(path.join(GSI_DIR!, "17204_2.csv"));
   assert.equal(sites.length, 75);
   const route = sites.find((s) => s.name === "ホテル　ルートイン輪島")!;
   assert.deepEqual(route.hazards_ok, ["tsunami"]);
-  assert.equal(readGsiCsv(path.join(RAW_DIR, "gsi-shelters/17204_1.csv")).length, 37);
+  assert.equal(readGsiCsv(path.join(GSI_DIR!, "17204_1.csv")).length, 37);
 });
 
 test("vision facts carry the page the code sent and no quotable text", async () => {
