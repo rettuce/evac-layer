@@ -16,6 +16,7 @@ const { writeForBulletin } = await import("../src/writer/step.js");
 const { layoutDigest, screenClass } = await import("../../app/layout/gate");
 const { writeReport } = await import("../src/loop/report.js");
 const { needsRaw } = await import("./raw.js");
+const { writeLive } = await import("../src/delivery/live.js");
 import type Anthropic from "@anthropic-ai/sdk";
 import type { Municipality, WriterOutput } from "../src/composer/compose.js";
 import type { ReplayEntry } from "../src/jma/replay.js";
@@ -86,5 +87,20 @@ test("the class wording comes from the bulletin the class was approved from", { 
   const step = await writeForBulletin({ alert, municipality, situation: situationFor(alert, "05210"), site: { id: SITE } }, { live: { client: noApi, model: "opus" }, persist: false, usage: [] });
   assert.equal(step.writerSource, `writer-class-cache:${L4.bulletin_id}`);
   assert.equal(step.writer.cells.find((c) => c.role === "action")!.text.ja_easy, "しょうにんした ぶん");
+  const withoutKey = await writeForBulletin({ alert, municipality, situation: situationFor(alert, "05210"), site: { id: SITE } }, { persist: false, usage: [] });
+  assert.equal(withoutKey.writerSource, `writer-class-cache:${L4.bulletin_id}`, "the approved wording is used without an API key too");
+  assert.equal(withoutKey.writer.cells.find((c) => c.role === "action")!.text.ja_easy, "しょうにんした ぶん");
   fs.rmSync(APPROVALS_FILE);
+});
+
+test("writeLive moves the bulletin that was live into fallback_bulletin_id, and a clear empties both", () => {
+  const dir = path.join(dataDir, "live-test");
+  assert.equal(writeLive(SITE, "B1", dir).doc.fallback_bulletin_id, null);
+  const { doc } = writeLive(SITE, "B2", dir);
+  assert.equal(doc.bulletin_id, "B2");
+  assert.equal(doc.fallback_bulletin_id, "B1");
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dir, `${SITE}.json`), "utf8")).fallback_bulletin_id, "B1");
+  const cleared = writeLive(SITE, null, dir).doc;
+  assert.equal(cleared.bulletin_id, null);
+  assert.equal(cleared.fallback_bulletin_id, null);
 });

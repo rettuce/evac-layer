@@ -141,7 +141,7 @@ describe('sites in one municipality', { skip }, () => {
     assert.equal((await postJson(base, '/api/admin/approve', { site_id: SITE_A, bulletin_id: BULLETIN, approved: true })).status, 200)
     const posted = await setLive(base, SITE_A, BULLETIN)
     assert.equal(posted.bulletin_id, BULLETIN)
-    assert.deepEqual(JSON.parse(await readFile(join(dataDir, 'live', `${SITE_A}.json`), 'utf8')), { bulletin_id: BULLETIN, updated_at: posted.updated_at })
+    assert.deepEqual(JSON.parse(await readFile(join(dataDir, 'live', `${SITE_A}.json`), 'utf8')), { bulletin_id: BULLETIN, fallback_bulletin_id: null, updated_at: posted.updated_at })
     assert.equal((await getJson(base, `/api/feed/${SITE_A}`)).bulletin_id, BULLETIN)
     const replay = await getJson(base, `/api/replay?site=${SITE_A}`)
     assert.deepEqual(replay.rows.map((row: { bulletin_id: string }) => row.bulletin_id), [BULLETIN])
