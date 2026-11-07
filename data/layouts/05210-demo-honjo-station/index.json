@@ -316,7 +316,7 @@
       "template": "evac-now",
       "display_level": 4,
       "outcome": "pass",
-      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3152)",
+      "verified_by": "static+browser(http://127.0.0.1:3190)",
       "layouts": [
         "data/layouts/05210-demo-honjo-station/VXKOii-202610211815-e713da0e3c05/16x9.json",
         "data/layouts/05210-demo-honjo-station/VXKOii-202610211815-e713da0e3c05/9x16.json",
