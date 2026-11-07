@@ -11,7 +11,7 @@ process.env.EVAC_DATA_DIR = dataDir;
 
 const { AGENTS_DIR, APPROVALS_FILE, LAYOUTS_DIR, REPO_ROOT, WRITER_DIR } = await import("../src/paths.js");
 const { situationFor } = await import("../src/composer/rules.js");
-const { cachedWriterForClass, saveWriterForClass, screenClassFor } = await import("../src/writer/live.js");
+const { cachedWriter, cachedWriterForClass, saveWriterForClass, screenClassFor } = await import("../src/writer/live.js");
 const { writeForBulletin } = await import("../src/writer/step.js");
 const { layoutDigest, screenClass } = await import("../../app/layout/gate");
 const { writeReport } = await import("../src/loop/report.js");
@@ -60,6 +60,13 @@ test("a new bulletin of a cached class is written from the class cache, without 
   const before = fs.readFileSync(classFile, "utf8");
   step.afterLoop({ outcome: "pass", writer: { cells: [] } } as never);
   assert.equal(fs.readFileSync(classFile, "utf8"), before, "only --build-class-cache writes the class cache");
+  const persisted = await writeForBulletin({ alert, municipality, situation, site: { id: SITE } }, { live: { client: noApi, model: "opus" }, persist: true, usage: [] });
+  persisted.afterLoop({ outcome: "fail", writer: persisted.writer } as never);
+  assert.equal(fs.existsSync(path.join(WRITER_DIR, "05210", `${alert.bulletin_id}.json`)), false, "a failed screen leaves no bulletin cache");
+  persisted.afterLoop({ outcome: "pass", writer: persisted.writer } as never);
+  assert.deepEqual(cachedWriter("05210", alert.bulletin_id), persisted.writer, "a passed class-cached bulletin keeps its wording as its own cache");
+  assert.equal(fs.readFileSync(classFile, "utf8"), before);
+  fs.rmSync(path.join(WRITER_DIR, "05210", `${alert.bulletin_id}.json`));
 
   const otherRiver = { ...alert, raw_title: "芋川レベル４氾濫危険警報" };
   await assert.rejects(writeForBulletin({ alert: otherRiver, municipality, situation, site: { id: SITE } }, { live: { client: noApi, model: "opus" }, persist: false, usage: [] }), /Writer API was called/);

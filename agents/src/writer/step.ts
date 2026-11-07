@@ -26,7 +26,14 @@ export async function writeForBulletin(
     ? undefined
     : [approvedWriterForClass(ctx.site.id, municipality.id, cls), cachedWriterForClass(municipality.id, cls)].find((r) => r && writerCacheFitsBulletin(r, alert, situation));
   const fixed = (writer: WriterOutput, writerSource: string): WriterStep => ({ writer, writerSource, reviser: liveWriterReviser, afterLoop: () => {} });
-  if (classCached) return fixed(classCached.output, `writer-class-cache:${classCached.bulletin_id}`);
+  if (classCached) {
+    return {
+      ...fixed(classCached.output, `writer-class-cache:${classCached.bulletin_id}`),
+      afterLoop(result) {
+        if (opts.persist && result.outcome === "pass") saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [] });
+      },
+    };
+  }
   const live = opts.live;
   if (!live) return cached ? fixed(cached, "writer-cache") : placeholder;
   const usageStart = opts.usage.length;
