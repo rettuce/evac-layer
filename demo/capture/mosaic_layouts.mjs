@@ -5,7 +5,7 @@
 // Output: demo/capture/out/mosaic/{layouts/*.json, tiles/*.jpg, manifest.json}. The layouts are served from
 // demo/sites/_mosaic/ while the stills are taken (the production build reads layouts only from the layout store
 // or demo/sites/), and that directory is removed afterwards.
-import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { glob, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
@@ -154,7 +154,18 @@ function synthesize(count, seed) {
 async function dashboardTotals() {
   const response = await fetch(`${values['base-url']}/api/dashboard`)
   const { totals } = await response.json()
-  return { municipalities: totals.municipalities, bulletins: totals.bulletins, layouts: totals.layouts }
+  return { municipalities: totals.municipalities, bulletins: totals.bulletins, layouts: totals.layouts, languages: await layoutLanguages() }
+}
+
+async function layoutLanguages() {
+  const counts = new Set()
+  for await (const file of glob('data/layouts/*/*/*.json', { cwd: REPO })) {
+    const { cells } = JSON.parse(await readFile(`${REPO}${file}`, 'utf8'))
+    const languages = cells.find((cell) => cell.role === 'languages')
+    if (languages) counts.add(Object.keys(languages.text).length)
+  }
+  if (counts.size !== 1) throw new Error(`layouts disagree on the language count: ${[...counts].join(', ')}`)
+  return [...counts][0]
 }
 
 const layouts = synthesize(Number(values.count), Number(values.seed))

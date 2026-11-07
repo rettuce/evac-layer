@@ -175,6 +175,7 @@ const NUMBERS = [
   { value: manifest.totals.municipalities, ja: '自治体', en: 'municipalities' },
   { value: manifest.totals.bulletins, ja: '気象庁の電文', en: 'JMA bulletins' },
   { value: manifest.totals.layouts, ja: 'レイアウト', en: 'layouts' },
+  { value: manifest.totals.languages, ja: '言語', en: 'languages' },
 ]
 
 function drawTotals(ctx, t) {
@@ -184,9 +185,9 @@ function drawTotals(ctx, t) {
   ctx.globalAlpha = smoothstep(u * 3)
   ctx.fillStyle = '#fff'
   ctx.textAlign = 'center'
-  const columnW = 520
+  const columnW = 440
   NUMBERS.forEach((n, i) => {
-    const x = W / 2 + (i - 1) * columnW
+    const x = W / 2 + (i - 1.5) * columnW
     ctx.font = '700 168px "Noto Sans JP"'
     ctx.fillText(String(Math.round(n.value * easeOut(u))), x, H / 2 + 40)
     ctx.font = '400 40px "Noto Sans JP"'
