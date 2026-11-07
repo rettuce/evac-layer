@@ -1,0 +1,58 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル４土砂災害危険警報",
+          "ja_easy": "レベル４ どしゃさいがい けいほう",
+          "en": "Lv4 Landslide Warning",
+          "zh_hans": "4级土砂灾害危险警报",
+          "zh_hant": "4級土砂災害危險警報",
+          "ko": "레벨4 토사재해 위험경보",
+          "th": "คำเตือนภัยดินถล่มระดับ4",
+          "vi": "Cảnh báo nguy hiểm sạt lở đất cấp 4",
+          "fil": "Babala sa Panganib ng Pagguho ng Lupa, Antas 4",
+          "id": "Peringatan Bahaya Tanah Longsor Level 4"
+        },
+        "basis": "警報 areas[0].kind_name「レベル４土砂災害危険警報」・level 4・hazard landslide（新潟地方気象台、status normal のため訓練語なし）"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "危険な場所から避難",
+          "ja_easy": "あぶない ところから にげて",
+          "en": "Leave danger areas",
+          "zh_hans": "从危险处避难",
+          "zh_hant": "從危險處避難",
+          "ko": "위험한 곳에서 대피",
+          "th": "ออกจากที่อันตราย",
+          "vi": "Rời khỏi nơi nguy hiểm",
+          "fil": "Lumikas mula sa panganib",
+          "id": "Tinggalkan zona bahaya"
+        },
+        "basis": "警報 level 4（レベル４土砂災害危険警報）と図記号 directions_run（危険な場所から避難する）。避難指示の名称は使わず行動として記載。柏崎市知識ファイル cautions「テレビやラジオ等から情報を収集し、早めに避難しましょう！」(dosha_hm_2022.pdf p.1)"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "危険な場所から避難",
+          "ja_easy": "あぶない ところから にげて",
+          "en": "Leave danger areas",
+          "zh_hans": "从危险处避难",
+          "zh_hant": "從危險處避難",
+          "ko": "위험한 곳에서 대피",
+          "th": "ออกจากที่อันตราย",
+          "vi": "Rời khỏi nơi nguy hiểm",
+          "fil": "Lumikas mula sa panganib",
+          "id": "Tinggalkan zona bahaya"
+        },
+        "basis": "action セルと同じ内容: 警報 level 4 と図記号 directions_run（危険な場所から避難する）。柏崎市 dosha_hm_2022.pdf p.1「早めに避難しましょう」"
+      }
+    ]
+  },
+  "bulletin_id": "VPWW56-202610311839-e6123510be74",
+  "issued_at": "2026-10-31T18:39:00+09:00",
+  "raw_title": "新潟県土砂災害警報・注意報"
+}

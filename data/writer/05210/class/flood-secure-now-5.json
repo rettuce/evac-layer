@@ -1,0 +1,58 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル５氾濫特別警報",
+          "ja_easy": "こよしがわが あふれて います",
+          "en": "Koyoshi River Flooding",
+          "zh_hans": "子吉川5级泛滥特别警报",
+          "zh_hant": "子吉川5級氾濫特別警報",
+          "ko": "고요시강 레벨5 범람 특별경보",
+          "th": "ประกาศเตือนพิเศษน้ำล้นตลิ่งระดับ5แม่น้ำโคโยชิ",
+          "vi": "Cảnh báo đặc biệt lũ tràn cấp 5 sông Koyoshi",
+          "fil": "Espesyal na Babala sa Pag-apaw ng Ilog Koyoshi, Level 5",
+          "id": "Peringatan Khusus Banjir Luapan Level 5 Sungai Koyoshi"
+        },
+        "basis": "警報 raw_title「子吉川レベル５氾濫特別警報」と areas[0].kind_name「レベル５氾濫特別警報」。ja_easy・en は headline_text「子吉川では、越水による氾濫が発生中」に基づき文字数予算内で表現"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "高い所・上の階へ",
+          "ja_easy": "たかい ところへ あがって",
+          "en": "Go higher/upstairs",
+          "zh_hans": "往高处或楼上",
+          "zh_hant": "往高處或樓上",
+          "ko": "높은 곳·위층으로",
+          "th": "ขึ้นที่สูงหรือชั้นบน",
+          "vi": "Lên chỗ cao, tầng trên",
+          "fil": "Umakyat sa itaas",
+          "id": "Naik ke tempat tinggi"
+        },
+        "basis": "警報 level 5（警戒レベル５相当・氾濫発生中, headline_text）。テンプレート secure-now と図記号 go_higher（いまいる場所から高い所へ上がる）。レベル5のため避難場所への移動ではなく、いまいる場所で高い所・上の階へ上がる行動として記載（プロジェクト取り決め）"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "高い所・上の階へ",
+          "ja_easy": "たかい ところへ あがって",
+          "en": "Go higher/upstairs",
+          "zh_hans": "往高处或楼上",
+          "zh_hant": "往高處或樓上",
+          "ko": "높은 곳·위층으로",
+          "th": "ขึ้นที่สูงหรือชั้นบน",
+          "vi": "Lên chỗ cao, tầng trên",
+          "fil": "Umakyat sa itaas",
+          "id": "Naik ke tempat tinggi"
+        },
+        "basis": "action セルと同じ内容の多言語表示（警報 level 5・headline_text の氾濫発生、図記号 go_higher）"
+      }
+    ]
+  },
+  "bulletin_id": "VXKOii-202610212115-34469436adbc",
+  "issued_at": "2026-10-21T21:15:00+09:00",
+  "raw_title": "子吉川レベル５氾濫特別警報"
+}

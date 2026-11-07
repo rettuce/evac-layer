@@ -1,0 +1,58 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "津波注意報解除",
+          "ja_easy": "くんれん つなみちゅういほう おわり",
+          "en": "DRILL: Tsunami all clear",
+          "zh_hans": "演习：海啸注意报解除",
+          "zh_hant": "演習：海嘯注意報解除",
+          "ko": "훈련: 쓰나미 주의보 해제",
+          "th": "ฝึกซ้อม: ยกเลิกประกาศเฝ้าระวังสึนามิ",
+          "vi": "Diễn tập: Dỡ bỏ khuyến cáo sóng thần",
+          "fil": "Pagsasanay: Inalis na ang Tsunami Advisory",
+          "id": "Latihan: Imbauan tsunami dicabut"
+        },
+        "basis": "alert.status=drill (training word at the start); alert.areas[0].kind_name=津波注意報解除 (code 60, status=cleared) for 石川県能登. ja keeps the JMA name 津波注意報解除. en avoids an abbreviated official name and states the clearance within the 24-character budget."
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "もう避難は不要です",
+          "ja_easy": "くんれん もう あんぜんです",
+          "en": "DRILL: Safe now",
+          "zh_hans": "演习：已安全",
+          "zh_hant": "演習：已安全",
+          "ko": "훈련: 이제 안전합니다",
+          "th": "ฝึกซ้อม: ปลอดภัยแล้ว",
+          "vi": "Diễn tập: Đã an toàn",
+          "fil": "Pagsasanay: Ligtas na",
+          "id": "Latihan: Sudah aman"
+        },
+        "basis": "alert.areas[0].status=cleared (津波注意報解除) for the all-clear template, with the safe_here pictogram (no need to evacuate). alert.status=drill, so the training word starts every language except ja."
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "もう避難は不要です",
+          "ja_easy": "くんれん もう あんぜんです",
+          "en": "DRILL: Safe now",
+          "zh_hans": "演习：已安全",
+          "zh_hant": "演習：已安全",
+          "ko": "훈련: 이제 안전합니다",
+          "th": "ฝึกซ้อม: ปลอดภัยแล้ว",
+          "vi": "Diễn tập: Đã an toàn",
+          "fil": "Pagsasanay: Ligtas na",
+          "id": "Latihan: Sudah aman"
+        },
+        "basis": "Same content as the action cell: alert.areas[0].status=cleared (津波注意報解除) with the safe_here pictogram. alert.status=drill, so the training word starts every language except ja."
+      }
+    ]
+  },
+  "bulletin_id": "VTSE41-201609010955-5a813306d772",
+  "issued_at": "2016-09-01T09:55:00+09:00",
+  "raw_title": "津波予報"
+}

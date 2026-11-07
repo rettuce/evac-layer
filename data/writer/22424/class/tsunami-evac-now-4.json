@@ -1,0 +1,58 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "大津波警報",
+          "ja_easy": "くんれん おおつなみけいほう",
+          "en": "DRILL: Major Tsunami",
+          "zh_hans": "演习：大海啸警报",
+          "zh_hant": "演習：大海嘯警報",
+          "ko": "훈련: 대형 쓰나미 경보",
+          "th": "ฝึกซ้อม: คำเตือนสึนามิขนาดใหญ่",
+          "vi": "Diễn tập: Cảnh báo sóng thần lớn",
+          "fil": "Pagsasanay: Babala sa Malaking Tsunami",
+          "id": "Latihan: Peringatan Tsunami Besar"
+        },
+        "basis": "alert.areas[0].kind_name=大津波警報 (静岡県, status continued), alert.tsunami.highest_category=major_warning, alert.status=drill. The official English name 'Major Tsunami Warning' does not fit the 24-character budget once the 'DRILL: ' prefix is added. 'Warning' is therefore omitted, and 'Major Tsunami' keeps the severity."
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "すぐ高い所へ避難",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：快到高处",
+          "zh_hant": "演習：快到高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม: ขึ้นที่สูง",
+          "vi": "Diễn tập: Lên chỗ cao",
+          "fil": "Pagsasanay: Umakyat agad",
+          "id": "Latihan: Naik ke atas"
+        },
+        "basis": "alert.headline_text「ただちに避難してください。」, the go_higher pictogram, and alert.status=drill. The ja_easy text has no verb because of the 14-character budget."
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "すぐ高い所へ避難",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：快到高处",
+          "zh_hant": "演習：快到高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม: ขึ้นที่สูง",
+          "vi": "Diễn tập: Lên chỗ cao",
+          "fil": "Pagsasanay: Umakyat agad",
+          "id": "Latihan: Naik ke atas"
+        },
+        "basis": "Same content as the action cell: alert.headline_text「ただちに避難してください。」, the go_higher pictogram, and alert.status=drill."
+      }
+    ]
+  },
+  "bulletin_id": "VTSE41-201609010726-05a7380a3e46",
+  "issued_at": "2016-09-01T07:26:00+09:00",
+  "raw_title": "大津波警報・津波警報・津波注意報"
+}

@@ -1,0 +1,58 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "津波注意報",
+          "ja_easy": "くんれん つなみちゅういほう",
+          "en": "DRILL: Tsunami Advisory",
+          "zh_hans": "演习：海啸注意报",
+          "zh_hant": "演習：海嘯注意報",
+          "ko": "훈련: 쓰나미 주의보",
+          "th": "ฝึกซ้อม: ประกาศเฝ้าระวังสึนามิ",
+          "vi": "Diễn tập: Khuyến cáo sóng thần",
+          "fil": "Pagsasanay: Abiso sa Tsunami",
+          "id": "Latihan: Imbauan Tsunami"
+        },
+        "basis": "alert.areas[0].kind_name「津波注意報」（石川県能登, status continued）をそのまま使用。alert.status = drill のため訓練語を先頭に付加。英語は気象庁公式表記 Tsunami Advisory。"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "高い所へ上がって",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：往高处",
+          "zh_hant": "演習：往高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม: ขึ้นที่สูง",
+          "vi": "Diễn tập: Lên chỗ cao",
+          "fil": "Pagsasanay: Umakyat",
+          "id": "Latihan: Naik ke atas"
+        },
+        "basis": "alert.hazard = tsunami、alert.areas[0].kind_name 津波注意報、図記号 go_higher（いまいる場所から高い所へ上がる）に合わせた行動。alert.status = drill のため ja 以外に訓練語を先頭に付加。"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "高い所へ上がって",
+          "ja_easy": "くんれん たかい ところへ",
+          "en": "DRILL: Go higher",
+          "zh_hans": "演习：往高处",
+          "zh_hant": "演習：往高處",
+          "ko": "훈련: 높은 곳으로",
+          "th": "ฝึกซ้อม: ขึ้นที่สูง",
+          "vi": "Diễn tập: Lên chỗ cao",
+          "fil": "Pagsasanay: Umakyat",
+          "id": "Latihan: Naik ke atas"
+        },
+        "basis": "action セルと同じ内容（alert.hazard = tsunami、津波注意報、図記号 go_higher）。alert.status = drill のため ja 以外に訓練語を先頭に付加。"
+      }
+    ]
+  },
+  "bulletin_id": "VTSE41-201609010726-05a7380a3e46",
+  "issued_at": "2016-09-01T07:26:00+09:00",
+  "raw_title": "大津波警報・津波警報・津波注意報"
+}
