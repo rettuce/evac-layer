@@ -99,8 +99,8 @@ export function renderNow(root: HTMLElement, setId: string | undefined, set: Ale
     ? `${scenario.placeJa}${alert.site ? ` ${alert.site}` : ''} · ${scenario.date} ${alert.issuedAt} JST`
     : ''
   const issuedHm = set?.issued.slice(11, 16)
-  root.querySelector('.bulletin')!.textContent = set ? `${issuedHm} ${set.issuer} ${set.bulletin}` : ''
-  root.querySelector('.bulletin-en')!.textContent = set ? `${issuedHm} JST ${set.bulletin_en}` : ''
+  root.querySelector('.bulletin')!.textContent = set ? `${set.issuer} ${issuedHm} 発表「${set.bulletin}」` : ''
+  root.querySelector('.bulletin-en')!.textContent = set ? `Issued ${issuedHm} JST by ${set.issuer_en}${set.drill ? ' (drill)' : ''}` : ''
   const shelter = alert?.shelter
   root.querySelector('.shelter')!.textContent = shelter ? `避難先 ${shelter.name} ${shelter.direction} ${shelter.distanceM} m` : ''
   root.querySelector('.shelter-en')!.textContent = shelter ? `Shelter ${shelter.distanceM} m ${shelter.directionEn}` : ''

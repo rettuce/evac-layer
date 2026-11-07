@@ -43,8 +43,9 @@ export interface AlertSet {
   description: string
   issued: string
   issuer: string
+  issuer_en: string
   bulletin: string
-  bulletin_en: string
+  drill?: boolean
   pairs: string[]
   random?: boolean
 }
