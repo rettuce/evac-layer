@@ -211,6 +211,8 @@ Claude Code のセッションの 1 つが全体のまとめ役になり、8 つ
 
 ![CI](https://github.com/rettuce/evac-layer/actions/workflows/ci.yml/badge.svg)
 
+CI は typecheck と agents のテスト 122 件を回します。app のブラウザのテスト 87 件は Chrome が要るので、手元で `pnpm -F app test` を回します。
+
 ```sh
 pnpm install
 pnpm -F app dev                     # Renderer と運営者の画面 http://127.0.0.1:3150（/ は /admin へ）
