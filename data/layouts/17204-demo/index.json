@@ -57,7 +57,7 @@
       "template": "all-clear",
       "display_level": 1,
       "outcome": "pass",
-      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3164)",
+      "verified_by": "static+browser(http://127.0.0.1:3190)",
       "layouts": [
         "data/layouts/17204-demo/VTSE41-201609010955-5a813306d772/16x9.json",
         "data/layouts/17204-demo/VTSE41-201609010955-5a813306d772/9x16.json",
