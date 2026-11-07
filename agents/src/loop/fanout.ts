@@ -8,6 +8,7 @@ import { staticVerifier } from "./static-verifier.js";
 import Anthropic from "@anthropic-ai/sdk";
 import { requireApiKey } from "../apikey.js";
 import type { WriterModel } from "../writer/live.js";
+import { cacheLatestWriterPerClass } from "../writer/class-cache.js";
 
 const { values } = parseArgs({
   options: {
@@ -75,6 +76,11 @@ console.log("");
 console.log("site                      bulletins  screens  pass  fail  layouts  seconds");
 for (const r of ok) console.log(`${r.site.padEnd(24)}  ${String(r.bulletins).padStart(9)}  ${String(r.screens).padStart(7)}  ${String(r.pass).padStart(4)}  ${String(r.fail).padStart(4)}  ${String(r.layouts).padStart(7)}  ${r.seconds.toFixed(1).padStart(7)}`);
 console.log(`${"total".padEnd(24)}  ${String(sum("bulletins")).padStart(9)}  ${String(sum("screens")).padStart(7)}  ${String(sum("pass")).padStart(4)}  ${String(sum("fail")).padStart(4)}  ${String(sum("layouts")).padStart(7)}  ${((Date.now() - t0) / 1000).toFixed(1).padStart(7)}`);
+const municipalityOf = new Map(sites.map((site) => [site.id, siteMunicipality(site)]));
+const failedMunicipalities = new Map(failed.map((f) => [municipalityOf.get(f.site)!, f.site]));
+for (const [municipality, site] of failedMunicipalities) console.log(`class cache skipped for ${municipality} (${site} failed)`);
+const finished = new Set([...municipalityOf.values()].filter((m) => !failedMunicipalities.has(m)));
+for (const line of cacheLatestWriterPerClass({ municipalities: finished, log: (m) => console.log(m) })) console.log(`class cache  ${line}`);
 for (const f of failed) console.log(`[${f.site}] stopped: ${f.error}`);
 process.exitCode = failed.length || sum("fail") ? 1 : 0;
 

@@ -1,0 +1,58 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル２大雨注意報",
+          "ja_easy": "おおあめ ちゅういほうは おわり",
+          "en": "Heavy rain advisory over",
+          "zh_hans": "大雨注意报解除",
+          "zh_hant": "大雨注意報解除",
+          "ko": "호우주의보 해제",
+          "th": "ยกเลิกประกาศเตือนฝนตกหนัก",
+          "vi": "Đã hủy cảnh báo mưa lớn",
+          "fil": "Tapos na ang abiso sa malakas na ulan",
+          "id": "Peringatan hujan lebat dicabut"
+        },
+        "basis": "警報 areas[0]: 輪島市 kind_name「レベル２大雨注意報」status「cleared」（金沢地方気象台、2026-10-21T19:42+09:00）"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "避難は不要です",
+          "ja_easy": "にげなくて だいじょうぶです",
+          "en": "No need to flee",
+          "zh_hans": "无需避难",
+          "zh_hant": "無需避難",
+          "ko": "대피할 필요 없음",
+          "th": "ไม่จำเป็นต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
+        },
+        "basis": "警報 areas[0] 輪島市の大雨注意報 status「cleared」と図記号 safe_here（解除・避難の必要なし）。知識ファイルに該当 hazards なし"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "避難は不要です",
+          "ja_easy": "にげなくて だいじょうぶです",
+          "en": "No need to flee",
+          "zh_hans": "无需避难",
+          "zh_hant": "無需避難",
+          "ko": "대피할 필요 없음",
+          "th": "ไม่จำเป็นต้องอพยพ",
+          "vi": "Không cần sơ tán",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tidak perlu mengungsi"
+        },
+        "basis": "action セルと同じ内容（警報 areas[0] 輪島市の大雨注意報 status「cleared」、図記号 safe_here）"
+      }
+    ]
+  },
+  "bulletin_id": "VPWW55-202610211942-7720a18f5cfa",
+  "issued_at": "2026-10-21T19:42:00+09:00",
+  "raw_title": "石川県大雨警報・注意報"
+}

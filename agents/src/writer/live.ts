@@ -25,8 +25,6 @@ function areasFor(alert: Alert, municipalityId: string) {
   return alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
 }
 
-// The Writer sees only what concerns this municipality: its own areas of the bulletin and the PDF-derived facts
-// for the alert's hazard, each with its source page.
 function writerContext(alert: Alert, m: Municipality, municipalityId: string) {
   const mine = areasFor(alert, municipalityId);
   const facts = m as unknown as { hazards: unknown[]; cautions?: unknown[]; name: string };
@@ -40,9 +38,7 @@ function writerContext(alert: Alert, m: Municipality, municipalityId: string) {
   };
 }
 
-// The languages cell repeats the action in every language by contract; copying it in code keeps the two from
-// drifting apart between runs.
-export function normalizeWriter(out: WriterOutput): WriterOutput {
+export function copyActionIntoLanguages(out: WriterOutput): WriterOutput {
   const action = out.cells.find((c) => c.role === "action");
   return action ? { cells: out.cells.map((c) => (c.role === "languages" ? { ...c, text: { ...action.text } } : c)) } : out;
 }
@@ -96,7 +92,7 @@ export async function writeCells(args: {
   // The headline is the JMA warning name verbatim (Meteorological Service Act art. 23); code sets it, not the model.
   const top = [...areasFor(args.alert, args.municipalityId)].sort((a, b) => (b.level ?? 0) - (a.level ?? 0))[0];
   cells[0] = { ...cells[0], text: { ...cells[0].text, ja: top?.kind_name || args.alert.raw_title } };
-  const output = normalizeWriter({ cells });
+  const output = copyActionIntoLanguages({ cells });
   return { output, usage: costOf(args.model, `writer ${args.alert.bulletin_id}`, msg.usage), lint: lintWriter(output, args.situation.level) };
 }
 
@@ -114,11 +110,40 @@ export async function writeCellsUntilClean(call: Omit<Parameters<typeof writeCel
 
 export function cachedWriter(municipalityId: string, bulletinId: string): WriterOutput | undefined {
   const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
-  return fs.existsSync(f) ? normalizeWriter((JSON.parse(fs.readFileSync(f, "utf8")) as { output: WriterOutput }).output) : undefined;
+  return fs.existsSync(f) ? copyActionIntoLanguages((JSON.parse(fs.readFileSync(f, "utf8")) as { output: WriterOutput }).output) : undefined;
 }
 
 export function saveWriter(municipalityId: string, bulletinId: string, record: { model: string; output: WriterOutput; usage: CallUsage[]; lint: LintFinding[] }) {
   const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
   fs.mkdirSync(path.dirname(f), { recursive: true });
   fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
+}
+
+export function screenClassFor(hazard: string, situation: Pick<Situation, "template" | "level">): string {
+  return `${hazard}/${situation.template}/${situation.level}`;
+}
+
+export interface ClassWriterRecord {
+  model: string; output: WriterOutput; bulletin_id: string; issued_at: string; raw_title: string; caution?: Situation["caution"];
+}
+
+function classWriterFile(municipalityId: string, cls: string): string {
+  return path.join(WRITER_DIR, municipalityId, "class", `${cls.replaceAll("/", "-")}.json`);
+}
+
+export function cachedWriterForClass(municipalityId: string, cls: string): ClassWriterRecord | undefined {
+  const f = classWriterFile(municipalityId, cls);
+  if (!fs.existsSync(f)) return undefined;
+  const record = JSON.parse(fs.readFileSync(f, "utf8")) as ClassWriterRecord;
+  return { ...record, output: copyActionIntoLanguages(record.output) };
+}
+
+export function saveWriterForClass(municipalityId: string, cls: string, record: ClassWriterRecord) {
+  const f = classWriterFile(municipalityId, cls);
+  fs.mkdirSync(path.dirname(f), { recursive: true });
+  fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
+}
+
+export function writerCacheFitsBulletin(record: ClassWriterRecord, alert: Alert, situation: Situation): boolean {
+  return record.raw_title === alert.raw_title && record.caution === situation.caution;
 }

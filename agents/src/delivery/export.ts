@@ -4,13 +4,12 @@ import puppeteer from "puppeteer-core";
 import { SHAPES } from "../../../app/layout/shapes";
 import type { Shape } from "../../../app/layout/types";
 import { SHAPE_ORDER } from "../composer/rules.js";
-import { LAYOUTS_DIR, chromePath } from "../paths.js";
+import { LAYOUTS_DIR, REPORTS_DIR, chromePath } from "../paths.js";
 import { findSite as findSiteFile, siteMunicipality, SiteNotFound, type SiteFile } from "../sites.js";
 import { formatErrors, validateDoc } from "../schemas.js";
-import { exportable, layoutDigestOf, readApprovals } from "./gate.js";
+import { exportGate, layoutClassOf, layoutDigestOf, readApprovals } from "./gate.js";
 import { INLINE_PAGE_SCRIPT } from "./inline-page.js";
 
-// pillar is drawn at its logical size and captured at half scale (6616 × 5046 → 3308 × 2523).
 const CAPTURE_SCALE: Partial<Record<Shape, number>> = { pillar: 0.5 };
 const READY_TIMEOUT_MS = 30_000;
 const SETTLE_MS = 500;
@@ -40,7 +39,8 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
   if (!fs.existsSync(indexFile)) throw new ExportStop(`${indexFile} not found; run replay-pipeline or fanout first`);
   const index = JSON.parse(fs.readFileSync(indexFile, "utf8")) as { entries: IndexEntry[] };
   const shown = index.entries.filter((e) => e.screen);
-  const gated = shown.map((e) => ({ e, gate: exportable(approvals, site.id, e.bulletin_id, layoutDigestOf(path.join(siteLayouts, e.bulletin_id))) }));
+  const gated = shown.map((e) => ({ e, ...exportGate(approvals, site.id, e.bulletin_id, layoutDigestOf(path.join(siteLayouts, e.bulletin_id)), layoutClassOf(path.join(siteLayouts, e.bulletin_id), path.join(REPORTS_DIR, site.id, e.bulletin_id, "report.json"))) }));
+  const approvedAt = new Map(gated.map((g) => [g.e.bulletin_id, g.approved_at]));
   const ready = gated.filter((g) => g.gate === "ok").map((g) => g.e);
   for (const g of gated) if (g.gate !== "ok") log(`skip ${g.e.bulletin_id}: ${g.gate}`);
   if (!ready.length) throw new ExportStop(`nothing to export for ${site.id}: ${shown.length ? gated[0].gate : "no browser-verified screens in index.json"}`);
@@ -85,7 +85,7 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
       }
       entries.push({
         bulletin_id: e.bulletin_id, issued_at: e.issued_at, template: e.template!, display_level: e.display_level!,
-        approved_at: approvals.layouts[`${site.id}/${e.bulletin_id}`].updated_at, files, sources,
+        approved_at: approvedAt.get(e.bulletin_id)!, files, sources,
       });
     }
   } finally {

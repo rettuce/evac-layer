@@ -1,0 +1,58 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル２土砂災害注意報",
+          "ja_easy": "どしゃくずれの ちゅういほう おわり",
+          "en": "Landslide Advisory Ended",
+          "zh_hans": "2级土砂灾害注意报已解除",
+          "zh_hant": "2級土砂災害注意報已解除",
+          "ko": "레벨2 토사재해 주의보 해제",
+          "th": "ยกเลิกประกาศเฝ้าระวังภัยดินถล่มระดับ2",
+          "vi": "Đã hủy cảnh báo sạt lở đất cấp 2",
+          "fil": "Inalis na ang Level 2 Landslide Advisory",
+          "id": "Peringatan Tanah Longsor Level 2 Dicabut"
+        },
+        "basis": "警報 areas[0].kind_name「レベル２土砂災害注意報」・areas[0].status=cleared・headline_text「注意報を解除します。」（新潟地方気象台、柏崎市）。status=normal のため訓練語なし"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "避難の必要なし",
+          "ja_easy": "もう にげなくて いいです",
+          "en": "No need to flee",
+          "zh_hans": "无需再避难",
+          "zh_hant": "無需再避難",
+          "ko": "이제 대피 안 해도 됩니다",
+          "th": "ไม่ต้องอพยพแล้ว",
+          "vi": "Không cần sơ tán nữa",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tak perlu mengungsi lagi"
+        },
+        "basis": "警報 areas[0].status=cleared（柏崎市のレベル２土砂災害注意報の解除）とテンプレート all-clear の図記号 safe_here。市町村の避難情報名は使わず、注意・警戒の呼びかけは加えない"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "避難の必要なし",
+          "ja_easy": "もう にげなくて いいです",
+          "en": "No need to flee",
+          "zh_hans": "无需再避难",
+          "zh_hant": "無需再避難",
+          "ko": "이제 대피 안 해도 됩니다",
+          "th": "ไม่ต้องอพยพแล้ว",
+          "vi": "Không cần sơ tán nữa",
+          "fil": "Di na kailangang lumikas",
+          "id": "Tak perlu mengungsi lagi"
+        },
+        "basis": "action と同じ内容（警報 areas[0].status=cleared、図記号 safe_here）を各言語で表示"
+      }
+    ]
+  },
+  "bulletin_id": "VPWW56-202611010401-fc7d8fb812f9",
+  "issued_at": "2026-11-01T04:01:00+09:00",
+  "raw_title": "新潟県土砂災害警報・注意報"
+}

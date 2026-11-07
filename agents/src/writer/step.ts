@@ -7,14 +7,15 @@ import { liveWriterReviser, writerApiReviser } from "../loop/revisers.js";
 import type { Reviser } from "../loop/types.js";
 import type { CallUsage } from "../reader/pricing.js";
 import { placeholderWriter } from "./placeholder.js";
-import { cachedWriter, saveWriter, writeCellsUntilClean, type WriterModel } from "./live.js";
+import { approvedWriterForClass } from "./class-cache.js";
+import { cachedWriter, cachedWriterForClass, writerCacheFitsBulletin, saveWriter, screenClassFor, writeCellsUntilClean, type WriterModel } from "./live.js";
 
 export interface LiveWriter { client: Anthropic; model: WriterModel }
 
 export interface WriterStep { writer: WriterOutput; writerSource: string; reviser: Reviser; afterLoop(result: LoopResult): void }
 
 export async function writeForBulletin(
-  ctx: { alert: Alert; municipality: Municipality; situation: Situation },
+  ctx: { alert: Alert; municipality: Municipality; situation: Situation; site: { id: string } },
   opts: { live?: LiveWriter; persist: boolean; usage: CallUsage[] },
 ): Promise<WriterStep> {
   const { alert, municipality, situation } = ctx;
@@ -26,9 +27,15 @@ export async function writeForBulletin(
   let writer: WriterOutput;
   let writerSource: string;
   const cached = cachedWriter(municipality.id, alert.bulletin_id);
+  const cls = screenClassFor(alert.hazard, situation);
+  const classCached = cached
+    ? undefined
+    : [approvedWriterForClass(ctx.site.id, municipality.id, cls), cachedWriterForClass(municipality.id, cls)].find((r) => r && writerCacheFitsBulletin(r, alert, situation));
   if (cached) {
     writer = cached;
     writerSource = "writer-cache";
+  } else if (classCached) {
+    return { writer: classCached.output, writerSource: `writer-class-cache:${classCached.bulletin_id}`, reviser: liveWriterReviser, afterLoop: () => {} };
   } else {
     const used: CallUsage[] = [];
     const r = await writeCellsUntilClean(call, [], used);

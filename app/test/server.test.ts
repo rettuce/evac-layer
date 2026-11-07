@@ -78,7 +78,8 @@ describe('production build', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F 
   test('a regenerated layout is stale until it is approved again', async () => {
     const file = join(dataDir, 'layouts', SITE, BULLETIN, '16x9.json')
     const screen = JSON.parse(await readFile(file, 'utf8'))
-    screen.cells[0].text.ja = `${screen.cells[0].text.ja}（再生成）`
+    const action = screen.cells.find((cell: { role: string }) => cell.role === 'action')
+    action.text.ja = `${action.text.ja}（再生成）`
     await writeFile(file, JSON.stringify(screen))
     const stale = await fetch(`${base}${layoutPath}`)
     assert.equal(stale.status, 403)
@@ -93,6 +94,7 @@ describe('production build', { skip: !existsSync(SERVER_ENTRY) && 'run `pnpm -F 
     const file = join(dataDir, 'approvals.json')
     const approvals = JSON.parse(await readFile(file, 'utf8'))
     delete approvals.layouts[`${SITE}/${BULLETIN}`].digest
+    delete approvals.classes
     await writeFile(file, JSON.stringify(approvals))
     const stale = await fetch(`${base}${layoutPath}`)
     assert.equal(stale.status, 403)

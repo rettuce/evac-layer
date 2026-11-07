@@ -1,0 +1,58 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル３土砂災害警報",
+          "ja_easy": "レベル３ どしゃさいがい けいほう",
+          "en": "Lv.3 Landslide Warning",
+          "zh_hans": "3级泥石流灾害警报",
+          "zh_hant": "3級土石災害警報",
+          "ko": "레벨3 토사재해 경보",
+          "th": "คำเตือนภัยดินถล่มระดับ3",
+          "vi": "Cảnh báo sạt lở đất cấp 3",
+          "fil": "Babala sa Pagguho ng Lupa Lv.3",
+          "id": "Peringatan Tanah Longsor Lv.3"
+        },
+        "basis": "Alert areas[0].kind_name「レベル３土砂災害警報」(輪島市, level 3, status upgraded); bulletin VPWW56 issued 2026-10-21T13:04+09:00 by 金沢地方気象台"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "高齢者は避難",
+          "ja_easy": "おとしよりは にげてください",
+          "en": "Elderly: evacuate",
+          "zh_hans": "老年人请避难",
+          "zh_hant": "老年人請避難",
+          "ko": "고령자는 대피",
+          "th": "ผู้สูงอายุให้อพยพ",
+          "vi": "Người cao tuổi sơ tán",
+          "fil": "Lumikas ang matatanda",
+          "id": "Lansia, mengungsilah"
+        },
+        "basis": "Alert level 3 (hazard landslide) + template evac-prepare pictogram directions_run (Level 3: elderly etc. evacuate, others prepare). Municipality file has no landslide hazard entries; no municipal facts used."
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "高齢者は避難",
+          "ja_easy": "おとしよりは にげてください",
+          "en": "Elderly: evacuate",
+          "zh_hans": "老年人请避难",
+          "zh_hant": "老年人請避難",
+          "ko": "고령자는 대피",
+          "th": "ผู้สูงอายุให้อพยพ",
+          "vi": "Người cao tuổi sơ tán",
+          "fil": "Lumikas ang matatanda",
+          "id": "Lansia, mengungsilah"
+        },
+        "basis": "Same content as action cell: alert level 3 landslide warning (輪島市) + pictogram directions_run meaning for Level 3"
+      }
+    ]
+  },
+  "bulletin_id": "VPWW56-202610211304-1ebf37f5ab8a",
+  "issued_at": "2026-10-21T13:04:00+09:00",
+  "raw_title": "石川県土砂災害警報・注意報"
+}

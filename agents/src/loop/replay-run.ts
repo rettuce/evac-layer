@@ -56,7 +56,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       args.onEvent?.({ municipality: municipality.id, issued_at: e.issued_at, outcome: "no-screen", reason });
       continue;
     }
-    const step = await writeForBulletin({ alert: e.alert, municipality, situation }, { live, persist, usage: writerUsage });
+    const step = await writeForBulletin({ alert: e.alert, municipality, situation, site: args.site }, { live, persist, usage: writerUsage });
     const result = await runLoop({
       alert: e.alert, municipality, site: args.site,
       writer: step.writer, writerSource: step.writerSource,
@@ -64,7 +64,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
     });
     step.afterLoop(result);
     const { dir, report } = persist
-      ? writeReport({ siteId: args.site.id, municipalityId: municipality.id, roots: args.roots, bulletinId: e.bulletin_id, verifier: args.verifier.name, reviser: step.reviser.name, maxAttempts: 3, result, writerNote: notes || undefined })
+      ? writeReport({ siteId: args.site.id, municipalityId: municipality.id, roots: args.roots, bulletinId: e.bulletin_id, verifier: args.verifier.name, skippedShapes: args.verifier.skippedShapes, reviser: step.reviser.name, maxAttempts: 3, result, writerNote: notes || undefined })
       : { dir: "", report: { outcome: result.outcome, reason: result.reason, layouts: result.screens.map((x) => `${x.shape}.json`) } };
     const indexRow = screenRow(row, { situation, verifier: args.verifier, dir, report });
     const screen = indexRow.screen;

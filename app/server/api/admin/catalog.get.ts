@@ -1,16 +1,11 @@
 import { join } from 'node:path'
-import { approvalState, layoutKey } from '~~/layout/gate'
+import { type CheckReport, approvalWith, classKey } from '~~/layout/gate'
 import type { ReplayRow } from '~~/layout/replay'
 
-interface ReportFile {
+interface ReportFile extends CheckReport {
   outcome: string
   verifier: string
-  writer_note?: string
   attempts: { n: number; findings: unknown[]; screens_ok: Record<string, boolean> }[]
-}
-
-function readReport(root: string, site: string, bulletin: string): Promise<ReportFile | undefined> {
-  return readJsonIfExists<ReportFile>(join(root, 'reports', site, bulletin, 'report.json'))
 }
 
 export default defineEventHandler(async () => {
@@ -23,11 +18,17 @@ export default defineEventHandler(async () => {
     if (!index) continue
     const entries = await Promise.all(
       index.entries.map(async (entry: ReplayRow) => {
-        const report = entry.screen ? await readReport(root, site, entry.bulletin_id) : undefined
+        const snapshot = entry.screen ? await readLayoutSnapshot(site, entry.bulletin_id) : undefined
+        const report = snapshot?.report as ReportFile | undefined
         const last = report?.attempts.at(-1)
+        const approval = approvalWith(approvals, site, entry.bulletin_id, snapshot?.digest, snapshot?.cls)
         return {
           ...entry,
-          ...approvalState(approvals.layouts[layoutKey(site, entry.bulletin_id)], entry.screen ? await currentLayoutDigest(site, entry.bulletin_id) : undefined),
+          approved: approval.approved,
+          stale: approval.stale,
+          approved_by: approval.by,
+          ...(snapshot ? { digest: snapshot.digest } : {}),
+          ...(approval.by === 'class' ? { approved_from: approvals.classes![classKey(site, snapshot!.cls.key)]!.approved_from } : {}),
           report: report && {
             outcome: report.outcome,
             verifier: report.verifier,

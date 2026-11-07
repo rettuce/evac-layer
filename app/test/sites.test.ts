@@ -123,6 +123,7 @@ describe('sites in one municipality', { skip }, () => {
     const approvals = JSON.parse(await readFile(file, 'utf8'))
     delete approvals.layouts[`${SOLO}/${BULLETIN}`]
     delete approvals.layouts[`${SITE_B}/${BULLETIN}`]
+    approvals.classes = {}
     const digest = layoutDigest([{ shape: '16x9', body: soloBody }])
     approvals.layouts[`${SOLO_MUNICIPALITY}/${BULLETIN}`] = { approved: true, updated_at: '2026-11-06T00:00:00Z', digest }
     approvals.layouts[`${SHARED_MUNICIPALITY}/${BULLETIN}`] = { approved: true, updated_at: '2026-11-06T00:00:00Z', digest }

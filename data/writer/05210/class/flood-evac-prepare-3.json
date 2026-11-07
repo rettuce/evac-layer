@@ -1,0 +1,58 @@
+{
+  "model": "opus",
+  "output": {
+    "cells": [
+      {
+        "role": "headline",
+        "text": {
+          "ja": "レベル３氾濫警報",
+          "ja_easy": "こよしがわ はんらん けいほう",
+          "en": "Koyoshi R. Flood Warning",
+          "zh_hans": "子吉川3级泛滥警报",
+          "zh_hant": "子吉川3級氾濫警報",
+          "ko": "고요시강 레벨3 범람경보",
+          "th": "คำเตือนน้ำล้นตลิ่งระดับ3แม่น้ำโคโยชิ",
+          "vi": "Cảnh báo lũ cấp 3 sông Koyoshi",
+          "fil": "Babala sa Baha Lebel 3: Ilog Koyoshi",
+          "id": "Peringatan Banjir Level 3 Sungai Koyoshi"
+        },
+        "basis": "警報 raw_title「子吉川レベル３氾濫警報」、areas[0].kind_name「レベル３氾濫警報」（由利本荘市）。ja は警報名をそのまま使用"
+      },
+      {
+        "role": "action",
+        "text": {
+          "ja": "高齢者は避難",
+          "ja_easy": "おとしよりは にげてください",
+          "en": "Elderly: evacuate",
+          "zh_hans": "老年人请避难",
+          "zh_hant": "老年人請避難",
+          "ko": "고령자는 대피하세요",
+          "th": "ผู้สูงอายุอพยพ",
+          "vi": "Người cao tuổi sơ tán",
+          "fil": "Matatanda: lumikas",
+          "id": "Lansia harap mengungsi"
+        },
+        "basis": "警報 level 3（headline_text【警戒レベル３相当情報［洪水］】）と図記号 directions_run（レベル3では高齢者等が避難）。避難情報の名称は使わず行動として記載"
+      },
+      {
+        "role": "languages",
+        "text": {
+          "ja": "高齢者は避難",
+          "ja_easy": "おとしよりは にげてください",
+          "en": "Elderly: evacuate",
+          "zh_hans": "老年人请避难",
+          "zh_hant": "老年人請避難",
+          "ko": "고령자는 대피하세요",
+          "th": "ผู้สูงอายุอพยพ",
+          "vi": "Người cao tuổi sơ tán",
+          "fil": "Matatanda: lumikas",
+          "id": "Lansia harap mengungsi"
+        },
+        "basis": "action セルと同じ内容（警報 level 3、図記号 directions_run）を各言語で表示"
+      }
+    ]
+  },
+  "bulletin_id": "VXKOii-202610211555-d5ccc7c6b547",
+  "issued_at": "2026-10-21T15:55:00+09:00",
+  "raw_title": "子吉川レベル３氾濫警報"
+}

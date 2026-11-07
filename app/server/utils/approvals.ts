@@ -1,18 +1,16 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { type Approvals, layoutDigest } from '~~/layout/gate'
+import { type Approvals, type CheckReport, type LayoutClass, classDigest, layoutDigest, passedBrowserCheck, screenClass } from '~~/layout/gate'
 import { isMunicipalityId } from '~~/layout/replay'
 import { isShape } from '~~/layout/shapes'
 
-const EMPTY: Approvals = { version: '0.1', layouts: {}, sites: {} }
+const EMPTY: Approvals = { version: '0.1', layouts: {}, sites: {}, classes: {} }
 const warnedLegacyKeys = new Set<string>()
 
 export function approvalsFile(): string {
   return join(dataDir(), 'approvals.json')
 }
 
-// Before sites, approvals were keyed `<municipality>/<bulletin>`. Such a key still stands for the
-// municipality's only site; with two or more sites nobody can say which screen was approved, so it is dropped.
 async function withSiteKeys(approvals: Approvals): Promise<Approvals> {
   const sites = await readSites()
   const siteIds = new Set(sites.map((site) => site.id))
@@ -37,15 +35,43 @@ async function withSiteKeys(approvals: Approvals): Promise<Approvals> {
 
 export async function readApprovals(): Promise<Approvals> {
   const stored = await readJsonIfExists<Approvals>(approvalsFile())
-  return stored ? withSiteKeys(stored) : structuredClone(EMPTY)
+  return stored ? withSiteKeys({ ...stored, classes: stored.classes ?? {} }) : structuredClone(EMPTY)
 }
 
-export async function currentLayoutDigest(site: string, bulletin: string): Promise<string | undefined> {
+async function layoutFiles(site: string, bulletin: string): Promise<{ shape: string; body: string }[]> {
   const dir = siteLayoutsDir(site, bulletin)
   const shapes = (await listDir(dir)).filter((f) => f.endsWith('.json') && isShape(f.slice(0, -5)))
-  if (!shapes.length) return undefined
-  const files = await Promise.all(shapes.map(async (f) => ({ shape: f.slice(0, -5), body: await readFile(join(dir, f), 'utf8') })))
-  return layoutDigest(files)
+  return Promise.all(shapes.map(async (f) => ({ shape: f.slice(0, -5), body: await readFile(join(dir, f), 'utf8') })))
+}
+
+export interface LayoutSnapshot {
+  files: { shape: string; body: string }[]
+  digest: string
+  cls: LayoutClass
+  report?: CheckReport
+}
+
+// One read of a bulletin's shape files and report: the gate decides on these bytes and the feed serves them.
+export async function readLayoutSnapshot(site: string, bulletin: string): Promise<LayoutSnapshot | undefined> {
+  const files = await layoutFiles(site, bulletin)
+  if (!files.length) return undefined
+  const report = await readJsonIfExists<CheckReport>(join(dataDir(), 'reports', site, bulletin, 'report.json'))
+  const digest = layoutDigest(files)
+  return {
+    files,
+    digest,
+    cls: { key: screenClass(JSON.parse(files[0]!.body)), digest: classDigest(files), checked: passedBrowserCheck(report, digest) },
+    ...(report ? { report } : {}),
+  }
+}
+
+export async function currentClassKey(site: string, bulletin: string): Promise<string | undefined> {
+  try {
+    const [first] = await layoutFiles(site, bulletin)
+    return first && screenClass(JSON.parse(first.body))
+  } catch {
+    return undefined
+  }
 }
 
 function sortedRecord<T>(record: Record<string, T>): Record<string, T> {
@@ -53,6 +79,6 @@ function sortedRecord<T>(record: Record<string, T>): Record<string, T> {
 }
 
 export async function writeApprovals(approvals: Approvals): Promise<void> {
-  const stable: Approvals = { version: '0.1', layouts: sortedRecord(approvals.layouts), sites: sortedRecord(approvals.sites) }
+  const stable: Approvals = { version: '0.1', layouts: sortedRecord(approvals.layouts), sites: sortedRecord(approvals.sites), classes: sortedRecord(approvals.classes ?? {}) }
   await writeFile(approvalsFile(), `${JSON.stringify(stable, null, 2)}\n`)
 }

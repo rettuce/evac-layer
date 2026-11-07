@@ -2,20 +2,19 @@ import fs from "node:fs";
 import path from "node:path";
 import { APPROVALS_FILE } from "../paths.js";
 import { readSites, siteMunicipality, type SiteFile } from "../sites.js";
-import { layoutDigest } from "../../../app/layout/gate";
+import { type CheckReport, type ClassApproval, type LayoutClass, classDigest, classKey, layoutDigest, liveLayoutGateWith, passedBrowserCheck, screenClass } from "../../../app/layout/gate";
 
 export interface Approvals {
   version: "0.1";
   layouts: Record<string, { approved: boolean; updated_at: string; digest?: string }>;
   sites: Record<string, { auto_publish: boolean; updated_at: string }>;
+  classes?: Record<string, ClassApproval>;
 }
 
 export { APPROVALS_FILE };
 
 const LEGACY_KEY = /^(\d{5})\/(.+)$/;
 
-// Approvals made before layouts moved under site ids are keyed <municipality>/<bulletin>. Such a key still means
-// "this screen" only while the municipality has exactly one site; with two or more it is ambiguous and dropped.
 export function migrateApprovalKeys(a: Approvals, sites: readonly SiteFile[], warn: (m: string) => void = console.warn): Approvals {
   const siteIds = new Set(sites.map((s) => s.id));
   const layouts: Approvals["layouts"] = {};
@@ -40,20 +39,26 @@ export function readApprovals(file = APPROVALS_FILE, sites: readonly SiteFile[] 
   return migrateApprovalKeys(raw, sites);
 }
 
-// Same rule as the renderer's live gate (app/server/utils/gate.ts): an operator approved the bulletin and the
-// site has auto publish on. The export also reads screens through /api/live-layout, which enforces it again.
-export function exportable(a: Approvals, site: string, bulletinId: string, digest?: string): "ok" | "auto-publish-off" | "unapproved" | "stale" {
-  if (!a.sites[site]?.auto_publish) return "auto-publish-off";
-  const record = a.layouts[`${site}/${bulletinId}`];
-  if (!record?.approved) return "unapproved";
-  if (digest !== undefined && record.digest !== digest) return "stale";
-  return "ok";
+export function exportGate(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass) {
+  const { gate, by } = liveLayoutGateWith(a, site, bulletinId, digest, cls);
+  const record = by === "bulletin" ? a.layouts[`${site}/${bulletinId}`] : by === "class" && cls ? a.classes?.[classKey(site, cls.key)] : undefined;
+  return { gate, approved_at: record?.updated_at };
 }
 
-// The digest the renderer's approval is bound to: the bulletin's shape files, byte for byte.
-export function layoutDigestOf(dir: string): string | undefined {
-  if (!fs.existsSync(dir)) return undefined;
+function layoutFilesOf(dir: string): { shape: string; body: string }[] {
+  if (!fs.existsSync(dir)) return [];
   const files = fs.readdirSync(dir).filter((f) => /^[0-9x]+\.json$|^pillar\.json$/.test(f)).sort();
+  return files.map((f) => ({ shape: f.slice(0, -5), body: fs.readFileSync(path.join(dir, f), "utf8") }));
+}
+
+export function layoutDigestOf(dir: string): string | undefined {
+  const files = layoutFilesOf(dir);
+  return files.length ? layoutDigest(files) : undefined;
+}
+
+export function layoutClassOf(dir: string, reportFile: string): LayoutClass | undefined {
+  const files = layoutFilesOf(dir);
   if (!files.length) return undefined;
-  return layoutDigest(files.map((f) => ({ shape: f.slice(0, -5), body: fs.readFileSync(path.join(dir, f), "utf8") })));
+  const report = fs.existsSync(reportFile) ? (JSON.parse(fs.readFileSync(reportFile, "utf8")) as CheckReport) : undefined;
+  return { key: screenClass(JSON.parse(files[0].body)), digest: classDigest(files), checked: passedBrowserCheck(report, layoutDigest(files)) };
 }

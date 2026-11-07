@@ -59,11 +59,26 @@ export function recordedSince(since: string, feedDir = FEED_DIR): RecordedBody[]
     .sort((a, b) => Date.parse(a.entry.updated) - Date.parse(b.entry.updated) || a.file.localeCompare(b.file));
 }
 
+const FEED_TIMEOUT_MS = 5_000;
+
+export async function feedStateLine(baseUrl: string, siteId: string, bulletinId: string): Promise<string> {
+  let feed: { state?: string; bulletin_id?: string | null };
+  try {
+    const res = await fetch(`${baseUrl}/api/feed/${encodeURIComponent(siteId)}`, { signal: AbortSignal.timeout(FEED_TIMEOUT_MS) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    feed = (await res.json()) as typeof feed;
+  } catch (e) {
+    return `  [${siteId}] feed unknown — ${(e as Error).message}`;
+  }
+  const shown = feed.state === "alert" && feed.bulletin_id === bulletinId;
+  return `  [${siteId}] feed ${feed.state} ${feed.bulletin_id ?? "-"} — ${bulletinId} ${shown ? "is on screen (approved for the bulletin or its class)" : "is not on screen yet (no approval for the bulletin or its class)"}`;
+}
+
 export interface SiteRound { site: string; bulletins: { entry: ReplayEntry; outcome: string; reason?: string }[]; live?: string; errors: string[] }
 
 export async function receiveSite(args: {
   site: SiteFile; verifier: Verifier; writer: WriterChoice; usage: CallUsage[]; initialSince: string;
-  feedDir?: string; roots?: { reports: string; layouts: string }; liveDir?: string; log?: (m: string) => void;
+  feedDir?: string; roots?: { reports: string; layouts: string }; liveDir?: string; log?: (m: string) => void; baseUrl?: string;
 }): Promise<SiteRound> {
   const { site } = args;
   const log = args.log ?? (() => {});
@@ -120,8 +135,9 @@ export async function receiveSite(args: {
     writeLive(site.id, lastShown, liveDir);
     round.live = lastShown;
     log(`  [${site.id}] live → ${lastShown}`);
-    const warning = liveGateWarning(site.id, lastShown, args.roots?.layouts);
+    const warning = liveGateWarning(site.id, lastShown, args.roots);
     if (warning) log(warning);
+    if (args.baseUrl) log(await feedStateLine(args.baseUrl, site.id, lastShown));
   }
   const firstFailure = bodies.findIndex((b) => failed.has(b));
   const cleared = firstFailure < 0 ? bodies : bodies.slice(0, firstFailure);
@@ -165,7 +181,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     for (const site of sites) {
       const browser = values.verifier === "static" ? undefined : browserVerifier({ baseUrl: values["base-url"]!, ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) });
       try {
-        const r = await receiveSite({ site, verifier: browser ?? staticVerifier, writer, usage, initialSince, log: (m) => console.log(m) });
+        const r = await receiveSite({ site, verifier: browser ?? staticVerifier, writer, usage, initialSince, log: (m) => console.log(m), baseUrl: values["base-url"] });
         for (const err of r.errors) console.error(`  [${site.id}] [error] ${err}`);
         console.log(`  [${site.id}] ${r.bulletins.length} bulletins${r.errors.length ? `, ${r.errors.length} errors (retried next round)` : ""}${r.live ? `, live ${r.live}` : ", live unchanged"}`);
       } catch (e) {

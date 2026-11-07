@@ -14,6 +14,9 @@ interface CatalogEntry {
   reason?: string
   approved: boolean
   stale?: boolean
+  approved_by?: 'bulletin' | 'class' | null
+  digest?: string
+  approved_from?: string
   report?: { outcome: string; verifier: string; attempts: number; findings: unknown[]; screens_ok: Record<string, boolean> }
 }
 interface Catalog {
@@ -157,6 +160,14 @@ function hhmm(iso: string) {
   return iso.slice(5, 16).replace('T', ' ')
 }
 
+function inheritedFrom(entry: CatalogEntry): string {
+  const id = entry.approved_from ?? ''
+  const source = siteLayouts.value.find((l) => l.site_id === selected.value?.site)?.entries.find((e) => e.bulletin_id === id)
+  if (source) return hhmm(source.issued_at)
+  const t = /-\d{4}(\d{2})(\d{2})(\d{2})(\d{2})-/.exec(id)
+  return t ? `${t[1]}-${t[2]} ${t[3]}:${t[4]}` : id
+}
+
 const approveBlockedReason = computed(() => {
   if (!current.value) return undefined
   if (saving.value === current.value.bulletin_id) return '保存中'
@@ -164,12 +175,20 @@ const approveBlockedReason = computed(() => {
   return undefined
 })
 
+const approveError = ref<string>()
+
 async function setApproved(entry: CatalogEntry, approved: boolean) {
   if (!selected.value) return
   saving.value = entry.bulletin_id
-  await $fetch('/api/admin/approve', { method: 'POST', headers: adminHeaders(), body: { site_id: selected.value.site, bulletin_id: entry.bulletin_id, approved } })
-  await load()
-  saving.value = undefined
+  approveError.value = undefined
+  try {
+    await $fetch('/api/admin/approve', { method: 'POST', headers: adminHeaders(), body: { site_id: selected.value.site, bulletin_id: entry.bulletin_id, approved, ...(approved && entry.digest ? { digest: entry.digest } : {}) } })
+  } catch (error) {
+    approveError.value = (error as { statusCode?: number }).statusCode === 409 ? '画面の内容が変わりました。読み直したので、もう一度確かめてから承認してください' : '保存できませんでした'
+  } finally {
+    await load()
+    saving.value = undefined
+  }
 }
 
 async function setAutoPublish(siteId: string, autoPublish: boolean) {
@@ -298,6 +317,7 @@ onUnmounted(() => clearInterval(clockTimer))
               <dt>承認</dt>
               <dd :data-approval="current.stale ? 'stale' : current.approved ? 'approved' : 'none'">
                 <template v-if="current.stale"><span class="dot is-warn" />内容が変わりました・再承認が必要</template>
+                <template v-else-if="current.approved_by === 'class'"><span class="dot is-orange" />承認済み（同じ種類の画面の承認を引き継ぎ: <span class="mono">{{ inheritedFrom(current) }}</span>）・配信対象</template>
                 <template v-else-if="current.approved"><span class="dot is-orange" />承認済み・配信対象</template>
                 <span v-else class="fg-2">未承認</span>
               </dd>
@@ -312,15 +332,27 @@ onUnmounted(() => clearInterval(clockTimer))
             <button
               type="button"
               class="approve"
-              :class="{ 'is-on': current.approved }"
+              :class="{ 'is-on': current.approved_by === 'bulletin' }"
               :disabled="saving === current.bulletin_id || current.report?.outcome !== 'pass'"
-              :aria-pressed="current.approved"
+              :aria-pressed="current.approved_by === 'bulletin'"
               data-action="approve"
-              @click="setApproved(current, !current.approved)"
+              @click="setApproved(current, current.approved_by !== 'bulletin')"
             >
-              {{ current.approved ? '承認済み（取り消す）' : current.stale ? '変更後の一式を再承認' : 'この一式を承認' }}
+              {{ current.approved_by === 'bulletin' ? '承認済み（取り消す）' : current.approved_by === 'class' ? 'この電文として承認する' : current.stale ? '変更後の一式を再承認' : 'この一式を承認' }}
             </button>
+            <button
+              v-if="current.approved_by === 'class'"
+              type="button"
+              class="secondary revoke"
+              :disabled="saving === current.bulletin_id"
+              data-action="revoke"
+              @click="setApproved(current, false)"
+            >
+              この種類の画面を出さない（取り消す）
+            </button>
+            <p v-if="current.approved_by === 'class'" class="meta fg-3 revoke-note">同じ種類の新しい電文も止まります。元の電文の承認は残ります</p>
             <p v-if="approveBlockedReason" class="meta fg-3 blocked">{{ approveBlockedReason }}</p>
+            <p v-if="approveError" class="meta blocked" data-error="approve">{{ approveError }}</p>
           </aside>
         </div>
 
@@ -520,6 +552,9 @@ button { font-family: var(--ev-sans); }
 }
 .approve { width: 100%; border: 1px solid var(--ev-orange); background: var(--ev-orange); color: var(--ev-bg); }
 .approve.is-on, .secondary { border: 1px solid var(--ev-line); background: var(--ev-panel); color: var(--ev-fg); }
+.revoke { width: 100%; }
+.revoke-note { margin-top: -8px; }
+.revoke:disabled { color: var(--ev-fg-3); cursor: not-allowed; }
 .approve:disabled { border-color: var(--ev-line); background: var(--ev-panel); color: var(--ev-fg-3); cursor: not-allowed; }
 
 .sites { padding: 16px; }
