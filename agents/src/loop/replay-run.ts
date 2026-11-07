@@ -33,7 +33,8 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   }
   const live = args.writer;
   const writerUsage: CallUsage[] = [];
-  const notes = [...(live ? [] : [PLACEHOLDER_NOTE]), ...(readerRan ? [] : [READER_MISSING_NOTE])].join(" ");
+  const notesFor = (placeholder: boolean) => [...(placeholder ? [PLACEHOLDER_NOTE] : []), ...(readerRan ? [] : [READER_MISSING_NOTE])].join(" ");
+  let usedPlaceholder = false;
   const index: unknown[] = [];
   let pass = 0, fail = 0, noScreen = 0, layouts = 0;
   const showing = new Set<string>();
@@ -57,6 +58,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       continue;
     }
     const step = await writeForBulletin({ alert: e.alert, municipality, situation, site: args.site }, { live, persist, usage: writerUsage });
+    if (step.writerSource === "placeholder") usedPlaceholder = true;
     const result = await runLoop({
       alert: e.alert, municipality, site: args.site,
       writer: step.writer, writerSource: step.writerSource,
@@ -64,7 +66,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
     });
     step.afterLoop(result);
     const { dir, report } = persist
-      ? writeReport({ siteId: args.site.id, municipalityId: municipality.id, roots: args.roots, bulletinId: e.bulletin_id, verifier: args.verifier.name, skippedShapes: args.verifier.skippedShapes, reviser: step.reviser.name, maxAttempts: 3, result, writerNote: notes || undefined })
+      ? writeReport({ siteId: args.site.id, municipalityId: municipality.id, roots: args.roots, bulletinId: e.bulletin_id, verifier: args.verifier.name, skippedShapes: args.verifier.skippedShapes, reviser: step.reviser.name, maxAttempts: 3, result, writerNote: notesFor(step.writerSource === "placeholder") || undefined })
       : { dir: "", report: { outcome: result.outcome, reason: result.reason, layouts: result.screens.map((x) => `${x.shape}.json`) } };
     const indexRow = screenRow(row, { situation, verifier: args.verifier, dir, report });
     const screen = indexRow.screen;
@@ -79,6 +81,6 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   }
   const indexFile = path.join(layoutsRoot, args.site.id, "index.json");
   if (persist) fs.mkdirSync(path.dirname(indexFile), { recursive: true });
-  if (persist) fs.writeFileSync(indexFile, JSON.stringify({ municipality: municipality.id, name: municipality.name, site: args.site.id, writer_note: notes, entries: index }, null, 2) + "\n");
+  if (persist) fs.writeFileSync(indexFile, JSON.stringify({ municipality: municipality.id, name: municipality.name, site: args.site.id, writer_note: notesFor(usedPlaceholder), entries: index }, null, 2) + "\n");
   return { municipality: municipality.id, name: municipality.name, bulletins: args.entries.length, screens: pass + fail, pass, fail, no_screen: noScreen, layouts, seconds: (Date.now() - t0) / 1000, writer_usd: writerUsage.reduce((n, u) => n + u.usd, 0), writer_tokens: promptTokens(writerUsage) };
 }

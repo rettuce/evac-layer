@@ -11,11 +11,12 @@ process.env.EVAC_DATA_DIR = dataDir;
 
 const { AGENTS_DIR, APPROVALS_FILE, LAYOUTS_DIR, REPO_ROOT, WRITER_DIR } = await import("../src/paths.js");
 const { situationFor } = await import("../src/composer/rules.js");
-const { cachedWriterForClass, saveWriterForClass, screenClassFor } = await import("../src/writer/live.js");
+const { cachedWriter, cachedWriterForClass, saveWriterForClass, screenClassFor } = await import("../src/writer/live.js");
 const { writeForBulletin } = await import("../src/writer/step.js");
 const { layoutDigest, screenClass } = await import("../../app/layout/gate");
 const { writeReport } = await import("../src/loop/report.js");
 const { needsRaw } = await import("./raw.js");
+const { writeLive } = await import("../src/delivery/live.js");
 import type Anthropic from "@anthropic-ai/sdk";
 import type { Municipality, WriterOutput } from "../src/composer/compose.js";
 import type { ReplayEntry } from "../src/jma/replay.js";
@@ -59,6 +60,13 @@ test("a new bulletin of a cached class is written from the class cache, without 
   const before = fs.readFileSync(classFile, "utf8");
   step.afterLoop({ outcome: "pass", writer: { cells: [] } } as never);
   assert.equal(fs.readFileSync(classFile, "utf8"), before, "only --build-class-cache writes the class cache");
+  const persisted = await writeForBulletin({ alert, municipality, situation, site: { id: SITE } }, { live: { client: noApi, model: "opus" }, persist: true, usage: [] });
+  persisted.afterLoop({ outcome: "fail", writer: persisted.writer } as never);
+  assert.equal(fs.existsSync(path.join(WRITER_DIR, "05210", `${alert.bulletin_id}.json`)), false, "a failed screen leaves no bulletin cache");
+  persisted.afterLoop({ outcome: "pass", writer: persisted.writer } as never);
+  assert.deepEqual(cachedWriter("05210", alert.bulletin_id), persisted.writer, "a passed class-cached bulletin keeps its wording as its own cache");
+  assert.equal(fs.readFileSync(classFile, "utf8"), before);
+  fs.rmSync(path.join(WRITER_DIR, "05210", `${alert.bulletin_id}.json`));
 
   const otherRiver = { ...alert, raw_title: "芋川レベル４氾濫危険警報" };
   await assert.rejects(writeForBulletin({ alert: otherRiver, municipality, situation, site: { id: SITE } }, { live: { client: noApi, model: "opus" }, persist: false, usage: [] }), /Writer API was called/);
@@ -86,5 +94,20 @@ test("the class wording comes from the bulletin the class was approved from", { 
   const step = await writeForBulletin({ alert, municipality, situation: situationFor(alert, "05210"), site: { id: SITE } }, { live: { client: noApi, model: "opus" }, persist: false, usage: [] });
   assert.equal(step.writerSource, `writer-class-cache:${L4.bulletin_id}`);
   assert.equal(step.writer.cells.find((c) => c.role === "action")!.text.ja_easy, "しょうにんした ぶん");
+  const withoutKey = await writeForBulletin({ alert, municipality, situation: situationFor(alert, "05210"), site: { id: SITE } }, { persist: false, usage: [] });
+  assert.equal(withoutKey.writerSource, `writer-class-cache:${L4.bulletin_id}`, "the approved wording is used without an API key too");
+  assert.equal(withoutKey.writer.cells.find((c) => c.role === "action")!.text.ja_easy, "しょうにんした ぶん");
   fs.rmSync(APPROVALS_FILE);
+});
+
+test("writeLive moves the bulletin that was live into fallback_bulletin_id, and a clear empties both", () => {
+  const dir = path.join(dataDir, "live-test");
+  assert.equal(writeLive(SITE, "B1", dir).doc.fallback_bulletin_id, null);
+  const { doc } = writeLive(SITE, "B2", dir);
+  assert.equal(doc.bulletin_id, "B2");
+  assert.equal(doc.fallback_bulletin_id, "B1");
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dir, `${SITE}.json`), "utf8")).fallback_bulletin_id, "B1");
+  const cleared = writeLive(SITE, null, dir).doc;
+  assert.equal(cleared.bulletin_id, null);
+  assert.equal(cleared.fallback_bulletin_id, null);
 });

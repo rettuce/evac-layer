@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 
 ## できること
 
-デモ動画とシミュレーターの切り替えは、記録した実際の電文を再生したものです。実際の運用では、`pnpm -F agents receive` が気象庁のフィードを読み、その施設に当たる新しい電文から画面を作って、承認済みなら表示を切り替えます。自前の受信系から `POST /api/admin/live` を呼ぶこともできます。
+デモ動画とシミュレーターの切り替えは、記録した実際の電文を再生したものです。実際の運用では、`pnpm -F agents receive` が気象庁のフィードを読み、その施設に当たる新しい電文から画面を作って、承認済みなら表示を切り替えます。未承認なら直前の承認済みの画面を保ちます。自前の受信系から `POST /api/admin/live` を呼ぶこともできます。
 
 ### 警報が届いた瞬間、すべてのスクリーンが切り替わる
 
@@ -110,7 +110,7 @@ EVAC LAYER は、画面を再生する機能を持たず、サイネージのシ
    - **Push**: 施設ごとの Webhook。HMAC-SHA256 の署名と時刻・配信 ID つきで、なりすましと再送を防げます。
    - **Files**: `pnpm -F agents export --site <id>` で、形状ごとの PNG と、単体で開ける HTML を書き出します。画像しか受け取れない CMS 向けです。
 
-表示を切り替えるのは `pnpm -F agents receive --sites <id>` です。気象庁の長期フィードを読み、その施設に当たる新しい電文から画面を作り、同じ種類の画面が承認済みなら表示を切り替えます。自前の受信系があるなら、電文の ID を `POST /api/admin/live`（または `pnpm -F agents live`）に渡しても同じで、`null` を渡すと平常時に戻ります。手順と環境変数の全体は [`docs/integration.md`](docs/integration.md)。
+表示を切り替えるのは `pnpm -F agents receive --sites <id>` です。気象庁の長期フィードを読み、その施設に当たる新しい電文から画面を作り、同じ種類の画面が承認済みなら表示を切り替えます。未承認なら直前の承認済みの画面を保ちます。実際の運用では、フィードを読む間隔（`--every 600` なら 10 分）とブラウザの検査の分だけ、警報から表示までに遅れがあります。シミュレーターと動画は記録した電文の再生なので瞬時です。自前の受信系があるなら、電文の ID を `POST /api/admin/live`（または `pnpm -F agents live`）に渡しても同じで、`null` を渡すと平常時に戻ります。手順と環境変数の全体は [`docs/integration.md`](docs/integration.md)。
 
 回線が切れても、画面は直前の状態を保ち、60 秒を過ぎると「同期が途絶えている」印を出します。書き出したファイルを端末に置いておけば、配信元に届かなくても承認済みの画面を出せます。
 
@@ -183,7 +183,7 @@ pnpm -F app test
 
 デモの 5 自治体の知識ファイル・レイアウト・検査レポートを同梱しているので、運営者の画面は API キーなしで動きます。設定は環境変数か、リポジトリ直下の `.env` で渡します（項目は `.env.example`）。Reader・Writer・Vision の検査を自分で回すには `ANTHROPIC_API_KEY` が要ります。コマンドと費用は [`agents/README.md`](agents/README.md)。
 
-再配布していない元データ（自治体の PDF・国土地理院の CSV・記録した気象庁の電文）は `EVAC_RAW_DIR`（既定は `data/raw`）に置きます。`pnpm -F agents test` は 109 件で、元データが無いと電文を読む 40 件を飛ばし、置き場所と入手先を表示します。`pnpm -F app test` は 80 件です。
+再配布していない元データ（自治体の PDF・国土地理院の CSV・記録した気象庁の電文）は `EVAC_RAW_DIR`（既定は `data/raw`）に置きます。`pnpm -F agents test` は 110 件で、元データが無いと電文を読む 40 件を飛ばし、置き場所と入手先を表示します。`pnpm -F app test` は 81 件です。
 
 ポート 3150 が使用中なら、`pnpm -F app exec nuxt dev --port <n>` で別のポートに立て、agents と `demo:approve` からは `EVAC_URL=http://127.0.0.1:<n>` で同じポートを指します。
 

@@ -1,10 +1,8 @@
 import { mkdir, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { type LiveState, nextLiveState } from '~~/layout/liveState'
 
-export interface LiveState {
-  bulletin_id: string | null
-  updated_at: string
-}
+export type { LiveState }
 
 export function liveStateFile(site: string): string {
   return join(dataDir(), 'live', `${site}.json`)
@@ -15,7 +13,7 @@ export async function readLiveState(site: string): Promise<LiveState | undefined
 }
 
 export async function writeLiveState(site: string, bulletinId: string | null): Promise<LiveState> {
-  const state: LiveState = { bulletin_id: bulletinId, updated_at: new Date().toISOString() }
+  const state = nextLiveState(await readLiveState(site), bulletinId, new Date().toISOString())
   const file = liveStateFile(site)
   await mkdir(join(dataDir(), 'live'), { recursive: true })
   const partial = `${file}.${process.pid}.tmp`

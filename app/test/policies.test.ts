@@ -10,6 +10,7 @@ import { type CheckReport, classDigest, layoutDigest, liveLayoutGate, liveLayout
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
 import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
 import { WEBHOOK_RETRIES, webhookRetryDelayMs } from '../layout/feed.ts'
+import { firstDeliverable, nextLiveState } from '../layout/liveState.ts'
 
 test('dev layout bridge serves only .json files inside the repository', async () => {
   const sandbox = await mkdtemp(join(tmpdir(), 'evac-repo-'))
@@ -192,6 +193,22 @@ test('a class approval opens a new bulletin of the same class whose headline, ti
   assert.equal(revokeClasses(approvals.classes, 's2', 'B1', undefined, at)['s1/flood/evac-now/4']!.approved, true, 'revoking at another site leaves this site alone')
   const bulletinRevoked = { ...approvals, layouts: { ...approvals.layouts, 's1/B2': { approved: false, updated_at: at } } }
   assert.equal(liveLayoutGate(bulletinRevoked, 's1', 'B2', next.digest, next.cls), 'unapproved', 'a bulletin the operator turned off stays off')
+})
+
+test('an unapproved new bulletin keeps the screen that was live before it, one step back', async () => {
+  const at = '2026-11-07T00:00:00Z'
+  const first = nextLiveState(undefined, 'B1', at)
+  assert.deepEqual(first, { bulletin_id: 'B1', fallback_bulletin_id: null, updated_at: at })
+  const second = nextLiveState(first, 'B2', at)
+  assert.equal(second.fallback_bulletin_id, 'B1')
+  assert.equal(nextLiveState(second, 'B2', at).fallback_bulletin_id, 'B1', 'posting the same bulletin again keeps its fallback')
+  assert.deepEqual(nextLiveState(second, null, at), { bulletin_id: null, fallback_bulletin_id: null, updated_at: at })
+
+  const approved = (ids: string[]) => async (id: string) => ids.includes(id)
+  assert.equal(await firstDeliverable(second, approved(['B1', 'B2'])), 'B2')
+  assert.equal(await firstDeliverable(second, approved(['B1'])), 'B1', 'the previous approved screen stays while the new one is unapproved')
+  assert.equal(await firstDeliverable(second, approved([])), undefined, 'neither approved: ambient')
+  assert.equal(await firstDeliverable({ bulletin_id: 'B2', updated_at: at }, approved(['B1'])), undefined, 'a live file written before fallbacks existed')
 })
 
 test('approvals written before classes existed still gate by bulletin', () => {

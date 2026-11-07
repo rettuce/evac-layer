@@ -20,22 +20,29 @@ export async function writeForBulletin(
 ): Promise<WriterStep> {
   const { alert, municipality, situation } = ctx;
   const placeholder: WriterStep = { writer: placeholderWriter(alert, municipality.id, situation.level, situation.cleared), writerSource: "placeholder", reviser: liveWriterReviser, afterLoop: () => {} };
-  const live = opts.live;
-  if (!live) return placeholder;
-  const usageStart = opts.usage.length;
-  const call = { client: live.client, model: live.model, alert, municipality, municipalityId: municipality.id, situation };
-  let writer: WriterOutput;
-  let writerSource: string;
   const cached = cachedWriter(municipality.id, alert.bulletin_id);
   const cls = screenClassFor(alert.hazard, situation);
   const classCached = cached
     ? undefined
     : [approvedWriterForClass(ctx.site.id, municipality.id, cls), cachedWriterForClass(municipality.id, cls)].find((r) => r && writerCacheFitsBulletin(r, alert, situation));
+  const fixed = (writer: WriterOutput, writerSource: string): WriterStep => ({ writer, writerSource, reviser: liveWriterReviser, afterLoop: () => {} });
+  if (classCached) {
+    return {
+      ...fixed(classCached.output, `writer-class-cache:${classCached.bulletin_id}`),
+      afterLoop(result) {
+        if (opts.persist && result.outcome === "pass") saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [] });
+      },
+    };
+  }
+  const live = opts.live;
+  if (!live) return cached ? fixed(cached, "writer-cache") : placeholder;
+  const usageStart = opts.usage.length;
+  const call = { client: live.client, model: live.model, alert, municipality, municipalityId: municipality.id, situation };
+  let writer: WriterOutput;
+  let writerSource: string;
   if (cached) {
     writer = cached;
     writerSource = "writer-cache";
-  } else if (classCached) {
-    return { writer: classCached.output, writerSource: `writer-class-cache:${classCached.bulletin_id}`, reviser: liveWriterReviser, afterLoop: () => {} };
   } else {
     const used: CallUsage[] = [];
     const r = await writeCellsUntilClean(call, [], used);

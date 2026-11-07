@@ -6,6 +6,7 @@ import { DEFAULT_REPLAY_SPEED, currentBulletinAt, rowsInWindow, type ReplayWindo
 import { SHAPES, isShape } from '~~/layout/shapes'
 import type { EvacScreen, Shape } from '~~/layout/types'
 import type { LayoutSnapshot } from './approvals'
+import { firstDeliverable } from '~~/layout/liveState'
 
 const ALL_SHAPES = Object.keys(SHAPES) as Shape[]
 
@@ -72,8 +73,7 @@ async function replayedBulletin(site: SiteFile, approvals: Approvals): Promise<s
 }
 
 async function liveBulletin(site: SiteFile, approvals: Approvals): Promise<string | undefined> {
-  const bulletin = (await readLiveState(site.id))?.bulletin_id
-  return bulletin && (await deliverableWith(approvals, site.id, bulletin)) ? bulletin : undefined
+  return firstDeliverable(await readLiveState(site.id), (id) => deliverableWith(approvals, site.id, id))
 }
 
 export async function currentFeed(siteId: string): Promise<Feed | undefined> {
