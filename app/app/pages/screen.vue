@@ -122,13 +122,15 @@ const liveMunicipality = computed(() => (isMunicipalityId(route.query.municipali
 const querySite = computed(() => (typeof route.query.site === 'string' && route.query.site !== '' ? route.query.site : undefined))
 const nearSite = ref<string>()
 const nearSiteStatic = useStaticScreen().enabled
+let nearSiteGeneration = 0
 watch(
   [querySite, liveMunicipality, lat, lng, () => route.query.mode],
-  async ([site, municipality, la, ln]) => {
+  async ([site, municipality, la, ln, mode]) => {
+    const generation = ++nearSiteGeneration
     nearSite.value = undefined
-    if (route.query.mode !== 'live' || site || municipality || la === undefined || ln === undefined || nearSiteStatic) return
+    if (mode !== 'live' || site || municipality || la === undefined || ln === undefined || nearSiteStatic) return
     const found = await $fetch<{ site: string | null }>('/api/site-near', { query: { lat: la, lng: ln } }).catch(() => undefined)
-    if (la === lat.value && ln === lng.value) nearSite.value = found?.site ?? undefined
+    if (generation === nearSiteGeneration) nearSite.value = found?.site ?? undefined
   },
   { immediate: true },
 )
