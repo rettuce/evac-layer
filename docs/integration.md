@@ -157,7 +157,7 @@ PNGs are captured at each shape's base resolution (pillar at half scale), not at
 
 ### In the author's own installations
 
-The signage systems the author runs in venues take EVAC LAYER through this same HTTP surface: they receive the approved screen URLs and an `alert` / `clear` event, show the emergency layer over the ambient content, and remove it on `clear`. Nothing in EVAC LAYER depends on any particular signage system.
+The signage systems the author runs in venues will take EVAC LAYER through this same HTTP surface after the hackathon: the design is done, the integration is not. They will receive the approved screen URLs and an `alert` / `clear` event, show the emergency layer over the ambient content, and remove it on `clear`. Nothing in EVAC LAYER depends on any particular signage system.
 
 ## 5. What every integration must keep
 
