@@ -9,7 +9,6 @@ import type { CallUsage } from "../reader/pricing.js";
 import { writeForBulletin, type LiveWriter, type WriterStep } from "../writer/step.js";
 import { MAX_ATTEMPTS, runLoop } from "./loop.js";
 import { LAYOUTS_DIR, writeReport } from "./report.js";
-import { staticVerifier } from "./static-verifier.js";
 import type { Reviser, Verifier } from "./types.js";
 
 export type IndexRow = Record<string, unknown> & { issued_at: string; bulletin_id: string };
@@ -22,7 +21,7 @@ export function bulletinRow(e: ReplayEntry) {
 }
 
 export function screenRow(row: ReturnType<typeof bulletinRow>, a: { situation: Situation; verifier: Verifier; dir: string; report: { outcome: string; reason?: string; layouts: string[] } }) {
-  const browserChecked = a.verifier !== staticVerifier;
+  const browserChecked = a.verifier.rendersScreens;
   const skipped = (a.verifier.skippedShapes ?? []).filter((shape) => a.report.layouts.some((f) => f.endsWith(`/${shape}.json`)));
   const { report } = a;
   return {
@@ -31,6 +30,11 @@ export function screenRow(row: ReturnType<typeof bulletinRow>, a: { situation: S
     layouts: report.layouts, report: path.relative(REPO_ROOT, path.join(a.dir, "report.json")),
     ...(skipped.length ? { browser_skipped: skipped } : {}),
   };
+}
+
+export function clearanceSkipReason(situation: Situation, hazard: string, showing: ReadonlySet<string>): string | undefined {
+  if (!situation.cleared || showing.has(hazard)) return undefined;
+  return `all-clear for ${hazard} but no ${hazard} screen was shown before; nothing to clear`;
 }
 
 export type WriterChoice =

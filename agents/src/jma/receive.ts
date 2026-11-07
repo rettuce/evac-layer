@@ -6,7 +6,7 @@ import { requireApiKey } from "../apikey.js";
 import { liveGateWarning, REPLAY_SITE_MESSAGE, writeLive } from "../delivery/live.js";
 import { browserVerifier } from "../loop/browser-verifier.js";
 import { loadMunicipality } from "../loop/municipality.js";
-import { byIssue, composeBulletin, indexedBulletins, type WriterChoice } from "../loop/one.js";
+import { byIssue, clearanceSkipReason, composeBulletin, indexedBulletins, type WriterChoice } from "../loop/one.js";
 import { staticVerifier } from "../loop/static-verifier.js";
 import type { Verifier } from "../loop/types.js";
 import { EVAC_URL, FEED_DIR, LIVE_DIR } from "../paths.js";
@@ -101,7 +101,7 @@ export async function receiveSite(args: {
     try {
       composed = await composeBulletin({
         entry, municipality: municipality!, readerRan, site, verifier: args.verifier, writer: args.writer, usage: args.usage, roots: args.roots,
-        skipIf: (s) => (s.cleared && !(hazard in state.showing) ? `all-clear for ${hazard} but no ${hazard} screen was shown before; nothing to clear` : undefined),
+        skipIf: (s) => clearanceSkipReason(s, hazard, new Set(Object.keys(state.showing))),
       });
     } catch (e) {
       fail(body, e);

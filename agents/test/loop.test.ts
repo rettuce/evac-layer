@@ -59,7 +59,7 @@ test("the loop gives up after the attempt limit and says why", { skip }, async (
 });
 
 test("findings a rewrite cannot fix stop the loop at once", { skip }, async () => {
-  const flickering: Verifier = { name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "flicker", detail: "3 reversals" }] })) };
+  const flickering: Verifier = { name: "stub", rendersScreens: false, verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "flicker", detail: "3 reversals" }] })) };
   const r = await runLoop({ ...base(), verifier: flickering, writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: liveWriterReviser });
   assert.equal(r.outcome, "fail");
   assert.equal(r.attempts.length, 1);
@@ -73,7 +73,7 @@ test("without an API key the live reviser declines instead of inventing text", {
 });
 
 test("an overflowing shelter cell is not sent back to the Writer", { skip }, async () => {
-  const overflowing: Verifier = { name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "shelter", detail: "cell shelter overflows its slot" }] })) };
+  const overflowing: Verifier = { name: "stub", rendersScreens: false, verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "shelter", detail: "cell shelter overflows its slot" }] })) };
   const r = await runLoop({ ...base(), verifier: overflowing, writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([fxPath("writer-tsunami-advisory.json")]) });
   assert.equal(r.outcome, "fail");
   assert.equal(r.attempts.length, 1);
@@ -81,7 +81,7 @@ test("an overflowing shelter cell is not sent back to the Writer", { skip }, asy
 });
 
 test("an action text that contradicts its pictogram goes back to the Writer; a headline pictogram does not", { skip }, async () => {
-  const misuse = (cell: string): Verifier => ({ name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "pictogram-misuse", cell_id: cell, detail: "text and pictogram disagree" }] })) });
+  const misuse = (cell: string): Verifier => ({ name: "stub", rendersScreens: false, verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "pictogram-misuse", cell_id: cell, detail: "text and pictogram disagree" }] })) });
   const clean = fxPath("writer-tsunami-advisory.json");
   const action = await runLoop({ ...base(), verifier: misuse("action"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean, clean]), maxAttempts: 2 });
   assert.equal(action.attempts.length, 2);
@@ -92,7 +92,7 @@ test("an action text that contradicts its pictogram goes back to the Writer; a h
 });
 
 test("a headline font-size finding stops at once instead of going to the Writer", { skip }, async () => {
-  const small: Verifier = { name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "font-size", cell_id: "headline", detail: "headline text is 60.8px; the guide type step needs 64.0px" }] })) };
+  const small: Verifier = { name: "stub", rendersScreens: false, verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "font-size", cell_id: "headline", detail: "headline text is 60.8px; the guide type step needs 64.0px" }] })) };
   const clean = fxPath("writer-tsunami-advisory.json");
   const r = await runLoop({ ...base(), verifier: small, writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean, clean]) });
   assert.equal(r.attempts.length, 1);
@@ -101,7 +101,7 @@ test("a headline font-size finding stops at once instead of going to the Writer"
 });
 
 test("a Japanese overflow stops at once as render-overflow; other languages go to the Writer at most twice", { skip }, async () => {
-  const overflow = (lang: string): Verifier => ({ name: "stub", verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "headline", lang, detail: `cell headline (${lang}) overflows its slot` }] })) });
+  const overflow = (lang: string): Verifier => ({ name: "stub", rendersScreens: false, verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "headline", lang, detail: `cell headline (${lang}) overflows its slot` }] })) });
   const clean = fxPath("writer-tsunami-advisory.json");
   const ja = await runLoop({ ...base(), verifier: overflow("ja"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });
   assert.equal(ja.attempts.length, 1);

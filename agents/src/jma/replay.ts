@@ -7,8 +7,6 @@ import { parseJmaXml, type Alert } from "./parse.js";
 import { tsunamiRegionsFor } from "./regions.js";
 import { SAMPLES_DIR, SAMPLES_LIST_DIR, requireRawDir } from "../paths.js";
 
-export { SAMPLES_DIR };
-
 export const REPLAYABLE = /^(VPWW55|VPWW56|VXKO\d{2}|VTSE41)$/;
 
 export interface ReplayEntry {

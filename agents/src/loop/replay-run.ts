@@ -5,7 +5,7 @@ import type { ReplayEntry } from "../jma/replay.js";
 import { runLoop } from "./loop.js";
 import { loadMunicipality } from "./municipality.js";
 import { LAYOUTS_DIR, REPORTS_DIR, writeReport } from "./report.js";
-import { PLACEHOLDER_NOTE, READER_MISSING_NOTE, bulletinRow, screenRow } from "./one.js";
+import { PLACEHOLDER_NOTE, READER_MISSING_NOTE, bulletinRow, clearanceSkipReason, screenRow } from "./one.js";
 import { writeForBulletin, type LiveWriter } from "../writer/step.js";
 import type { CallUsage } from "../reader/pricing.js";
 import type { Verifier } from "./types.js";
@@ -49,8 +49,8 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       args.onEvent?.({ municipality: municipality.id, issued_at: e.issued_at, outcome: "no-screen", reason: err.message });
       continue;
     }
-    if (situation.cleared && !showing.has(e.alert.hazard)) {
-      const reason = `all-clear for ${e.alert.hazard} but no ${e.alert.hazard} screen was shown before; nothing to clear`;
+    const reason = clearanceSkipReason(situation, e.alert.hazard, showing);
+    if (reason) {
       index.push({ ...row, screen: false, reason });
       noScreen++;
       args.onEvent?.({ municipality: municipality.id, issued_at: e.issued_at, outcome: "no-screen", reason });

@@ -9,11 +9,11 @@ export const SCHEMA_DIR = path.join(REPO_ROOT, "schema");
 export const ENV_FILE = path.join(REPO_ROOT, ".env");
 export const TMP_DIR = path.join(REPO_ROOT, "tmp");
 
-const SETTINGS = ["EVAC_DATA_DIR", "EVAC_RAW_DIR", "JMA_FEED_DIR", "JMA_SAMPLES_DIR", "EVAC_URL", "CHROME_PATH"] as const;
+const PATH_SETTINGS = ["EVAC_DATA_DIR", "EVAC_RAW_DIR", "JMA_FEED_DIR", "JMA_SAMPLES_DIR", "EVAC_URL", "CHROME_PATH"] as const;
 
 if (fs.existsSync(ENV_FILE)) {
   const dotenv = parseEnv(fs.readFileSync(ENV_FILE, "utf8"));
-  for (const k of SETTINGS) if (process.env[k] === undefined && dotenv[k] !== undefined) process.env[k] = dotenv[k];
+  for (const k of PATH_SETTINGS) if (process.env[k] === undefined && dotenv[k] !== undefined) process.env[k] = dotenv[k];
 }
 
 // pnpm -F runs scripts inside agents/, so user-supplied relative paths are resolved against the invoking directory.

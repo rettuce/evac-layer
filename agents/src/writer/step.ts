@@ -7,7 +7,7 @@ import { liveWriterReviser, writerApiReviser } from "../loop/revisers.js";
 import type { Reviser } from "../loop/types.js";
 import type { CallUsage } from "../reader/pricing.js";
 import { placeholderWriter } from "./placeholder.js";
-import { cachedWriter, saveWriter, writeCells, type WriterModel } from "./live.js";
+import { cachedWriter, saveWriter, writeCellsUntilClean, type WriterModel } from "./live.js";
 
 export interface LiveWriter { client: Anthropic; model: WriterModel }
 
@@ -31,12 +31,7 @@ export async function writeForBulletin(
     writerSource = "writer-cache";
   } else {
     const used: CallUsage[] = [];
-    let r = await writeCells(call);
-    used.push(r.usage);
-    for (let i = 0; i < 2 && r.lint.length; i++) {
-      r = await writeCells({ ...call, feedback: r.lint.map((f) => `${f.rule}: 「${f.match}」`) });
-      used.push(r.usage);
-    }
+    const r = await writeCellsUntilClean(call, [], used);
     if (r.lint.length) throw new Error(`Writer output for ${alert.bulletin_id} still breaks the easy-Japanese rules: ${r.lint.map((f) => f.rule).join(", ")}`);
     writer = r.output;
     writerSource = `writer-api:${live.model}`;

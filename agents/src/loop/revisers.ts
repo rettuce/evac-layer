@@ -24,14 +24,9 @@ export function writerApiReviser(args: { client: import("@anthropic-ai/sdk").def
   return {
     name: `writer-api(${args.model})`,
     async revise(_current, findings) {
-      const { writeCells } = await import("../writer/live.js");
+      const { writeCellsUntilClean } = await import("../writer/live.js");
       const feedback = findings.map((f) => `${f.shape} ${f.check}${f.cell_id ? `[${f.cell_id}]` : ""}: ${f.detail}`);
-      let r = await writeCells({ ...args, feedback });
-      args.usage.push(r.usage);
-      for (let i = 0; i < 2 && r.lint.length; i++) {
-        r = await writeCells({ ...args, feedback: [...feedback, ...r.lint.map((l) => `${l.rule}: 「${l.match}」`)] });
-        args.usage.push(r.usage);
-      }
+      const r = await writeCellsUntilClean(args, feedback, args.usage);
       if (r.lint.length) throw new NoRevision(`revised Writer text still breaks the easy-Japanese rules: ${r.lint.map((l) => l.rule).join(", ")}`);
       return { writer: r.output, source: `writer-api:${args.model}` };
     },
