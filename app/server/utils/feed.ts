@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 import { alertFeed, ambientFeed, type Feed, type FeedAsset, type FeedSite } from '~~/layout/feed'
-import { type Approvals, layoutKey, liveLayoutGate } from '~~/layout/gate'
+import { type ApprovedBy, type Approvals, classKey, layoutKey, liveLayoutGateWith } from '~~/layout/gate'
 import { DEFAULT_REPLAY_SPEED, currentBulletinAt, rowsInWindow, type ReplayWindow } from '~~/layout/replay'
 import { SHAPES, isShape } from '~~/layout/shapes'
 import type { EvacScreen, Shape } from '~~/layout/types'
@@ -42,9 +42,19 @@ async function readAssets(site: string, bulletin: string): Promise<Partial<Recor
   return assets
 }
 
-async function deliverableWith(approvals: Approvals, site: string, bulletin: string): Promise<boolean> {
+export async function approvalOf(approvals: Approvals, site: string, bulletin: string): Promise<{ by: ApprovedBy; updated_at?: string; approved_from?: string }> {
   const digest = await currentLayoutDigest(site, bulletin)
-  return digest !== undefined && liveLayoutGate(approvals, site, bulletin, digest) === 'ok'
+  if (digest === undefined) return { by: null }
+  const cls = await currentClassOf(site, bulletin)
+  const { gate, by } = liveLayoutGateWith(approvals, site, bulletin, digest, cls)
+  if (gate !== 'ok') return { by: null }
+  if (by === 'bulletin') return { by, updated_at: approvals.layouts[layoutKey(site, bulletin)]!.updated_at }
+  const record = approvals.classes![classKey(site, cls!.key)]!
+  return { by, updated_at: record.updated_at, approved_from: record.approved_from }
+}
+
+async function deliverableWith(approvals: Approvals, site: string, bulletin: string): Promise<boolean> {
+  return (await approvalOf(approvals, site, bulletin)).by !== null
 }
 
 export async function isDeliverable(site: string, bulletin: string): Promise<boolean> {
@@ -82,8 +92,8 @@ export async function currentFeed(siteId: string): Promise<Feed | undefined> {
   const approvals = await readApprovals()
   const bulletin = site.replay ? await replayedBulletin(site, approvals) : await liveBulletin(site, approvals)
   if (!bulletin) return ambientFeed(feedSite)
-  const approvedAt = approvals.layouts[layoutKey(site.id, bulletin)]!.updated_at
-  return alertFeed(feedSite, await readScreens(site.id, bulletin), await readAssets(site.id, bulletin), approvedAt)
+  const { updated_at: approvedAt } = await approvalOf(approvals, site.id, bulletin)
+  return alertFeed(feedSite, await readScreens(site.id, bulletin), await readAssets(site.id, bulletin), approvedAt!)
 }
 
 export function feedEtag(body: string): string {

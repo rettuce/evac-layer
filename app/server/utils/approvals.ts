@@ -1,10 +1,10 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { type Approvals, layoutDigest } from '~~/layout/gate'
+import { type Approvals, classDigest, layoutDigest, screenClass } from '~~/layout/gate'
 import { isMunicipalityId } from '~~/layout/replay'
 import { isShape } from '~~/layout/shapes'
 
-const EMPTY: Approvals = { version: '0.1', layouts: {}, sites: {} }
+const EMPTY: Approvals = { version: '0.1', layouts: {}, sites: {}, classes: {} }
 const warnedLegacyKeys = new Set<string>()
 
 export function approvalsFile(): string {
@@ -37,15 +37,23 @@ async function withSiteKeys(approvals: Approvals): Promise<Approvals> {
 
 export async function readApprovals(): Promise<Approvals> {
   const stored = await readJsonIfExists<Approvals>(approvalsFile())
-  return stored ? withSiteKeys(stored) : structuredClone(EMPTY)
+  return stored ? withSiteKeys({ ...stored, classes: stored.classes ?? {} }) : structuredClone(EMPTY)
+}
+
+async function layoutFiles(site: string, bulletin: string): Promise<{ shape: string; body: string }[]> {
+  const dir = siteLayoutsDir(site, bulletin)
+  const shapes = (await listDir(dir)).filter((f) => f.endsWith('.json') && isShape(f.slice(0, -5)))
+  return Promise.all(shapes.map(async (f) => ({ shape: f.slice(0, -5), body: await readFile(join(dir, f), 'utf8') })))
 }
 
 export async function currentLayoutDigest(site: string, bulletin: string): Promise<string | undefined> {
-  const dir = siteLayoutsDir(site, bulletin)
-  const shapes = (await listDir(dir)).filter((f) => f.endsWith('.json') && isShape(f.slice(0, -5)))
-  if (!shapes.length) return undefined
-  const files = await Promise.all(shapes.map(async (f) => ({ shape: f.slice(0, -5), body: await readFile(join(dir, f), 'utf8') })))
-  return layoutDigest(files)
+  const files = await layoutFiles(site, bulletin)
+  return files.length ? layoutDigest(files) : undefined
+}
+
+export async function currentClassOf(site: string, bulletin: string): Promise<{ key: string; digest: string } | undefined> {
+  const files = await layoutFiles(site, bulletin)
+  return files.length ? { key: screenClass(JSON.parse(files[0]!.body)), digest: classDigest(files) } : undefined
 }
 
 function sortedRecord<T>(record: Record<string, T>): Record<string, T> {
@@ -53,6 +61,6 @@ function sortedRecord<T>(record: Record<string, T>): Record<string, T> {
 }
 
 export async function writeApprovals(approvals: Approvals): Promise<void> {
-  const stable: Approvals = { version: '0.1', layouts: sortedRecord(approvals.layouts), sites: sortedRecord(approvals.sites) }
+  const stable: Approvals = { version: '0.1', layouts: sortedRecord(approvals.layouts), sites: sortedRecord(approvals.sites), classes: sortedRecord(approvals.classes ?? {}) }
   await writeFile(approvalsFile(), `${JSON.stringify(stable, null, 2)}\n`)
 }
