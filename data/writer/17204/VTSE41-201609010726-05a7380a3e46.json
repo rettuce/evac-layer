@@ -30,7 +30,7 @@
           "th": "ฝึกซ้อม: ขึ้นที่สูง",
           "vi": "Diễn tập: Lên chỗ cao",
           "fil": "Pagsasanay: Umakyat",
-          "id": "Latihan: Naik ke atas"
+          "id": "Latihan: Ke tanah tinggi"
         },
         "basis": "alert.hazard = tsunami、alert.areas[0].kind_name 津波注意報、図記号 go_higher（いまいる場所から高い所へ上がる）に合わせた行動。alert.status = drill のため ja 以外に訓練語を先頭に付加。"
       },
@@ -46,7 +46,7 @@
           "th": "ฝึกซ้อม: ขึ้นที่สูง",
           "vi": "Diễn tập: Lên chỗ cao",
           "fil": "Pagsasanay: Umakyat",
-          "id": "Latihan: Naik ke atas"
+          "id": "Latihan: Ke tanah tinggi"
         },
         "basis": "action セルと同じ内容（alert.hazard = tsunami、津波注意報、図記号 go_higher）。alert.status = drill のため ja 以外に訓練語を先頭に付加。"
       }
