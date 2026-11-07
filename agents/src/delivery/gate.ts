@@ -2,12 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { APPROVALS_FILE } from "../paths.js";
 import { readSites, siteMunicipality, type SiteFile } from "../sites.js";
-import { layoutDigest } from "../../../app/layout/gate";
+import { type ClassApproval, classDigest, classKey, layoutDigest, liveLayoutGateWith, screenClass } from "../../../app/layout/gate";
 
 export interface Approvals {
   version: "0.1";
   layouts: Record<string, { approved: boolean; updated_at: string; digest?: string }>;
   sites: Record<string, { auto_publish: boolean; updated_at: string }>;
+  classes?: Record<string, ClassApproval>;
 }
 
 export { APPROVALS_FILE };
@@ -40,20 +41,32 @@ export function readApprovals(file = APPROVALS_FILE, sites: readonly SiteFile[] 
   return migrateApprovalKeys(raw, sites);
 }
 
-// Same rule as the renderer's live gate (app/server/utils/gate.ts): an operator approved the bulletin and the
-// site has auto publish on. The export also reads screens through /api/live-layout, which enforces it again.
-export function exportable(a: Approvals, site: string, bulletinId: string, digest?: string): "ok" | "auto-publish-off" | "unapproved" | "stale" {
-  if (!a.sites[site]?.auto_publish) return "auto-publish-off";
-  const record = a.layouts[`${site}/${bulletinId}`];
-  if (!record?.approved) return "unapproved";
-  if (digest !== undefined && record.digest !== digest) return "stale";
-  return "ok";
+// Same rule as the renderer's live gate (app/layout/gate.ts): an operator approved the bulletin, or the same
+// content under another bulletin of its class, and the site has auto publish on. The export also reads screens
+// through /api/live-layout, which enforces it again.
+export function exportable(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string }): "ok" | "auto-publish-off" | "unapproved" | "stale" {
+  return exportGate(a, site, bulletinId, digest, cls).gate;
+}
+
+export function exportGate(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string }) {
+  const { gate, by } = liveLayoutGateWith(a, site, bulletinId, digest, cls);
+  const record = by === "bulletin" ? a.layouts[`${site}/${bulletinId}`] : by === "class" && cls ? a.classes?.[classKey(site, cls.key)] : undefined;
+  return { gate, approved_at: record?.updated_at };
+}
+
+function layoutFilesOf(dir: string): { shape: string; body: string }[] {
+  if (!fs.existsSync(dir)) return [];
+  const files = fs.readdirSync(dir).filter((f) => /^[0-9x]+\.json$|^pillar\.json$/.test(f)).sort();
+  return files.map((f) => ({ shape: f.slice(0, -5), body: fs.readFileSync(path.join(dir, f), "utf8") }));
 }
 
 // The digest the renderer's approval is bound to: the bulletin's shape files, byte for byte.
 export function layoutDigestOf(dir: string): string | undefined {
-  if (!fs.existsSync(dir)) return undefined;
-  const files = fs.readdirSync(dir).filter((f) => /^[0-9x]+\.json$|^pillar\.json$/.test(f)).sort();
-  if (!files.length) return undefined;
-  return layoutDigest(files.map((f) => ({ shape: f.slice(0, -5), body: fs.readFileSync(path.join(dir, f), "utf8") })));
+  const files = layoutFilesOf(dir);
+  return files.length ? layoutDigest(files) : undefined;
+}
+
+export function layoutClassOf(dir: string): { key: string; digest: string } | undefined {
+  const files = layoutFilesOf(dir);
+  return files.length ? { key: screenClass(JSON.parse(files[0].body)), digest: classDigest(files) } : undefined;
 }

@@ -122,3 +122,35 @@ export function saveWriter(municipalityId: string, bulletinId: string, record: {
   fs.mkdirSync(path.dirname(f), { recursive: true });
   fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
 }
+
+export function screenClassFor(hazard: string, situation: Pick<Situation, "template" | "level">): string {
+  return `${hazard}/${situation.template}/${situation.level}`;
+}
+
+export interface ClassWriterRecord {
+  model: string; output: WriterOutput; bulletin_id: string; issued_at: string; raw_title: string; caution?: Situation["caution"];
+}
+
+function classWriterFile(municipalityId: string, cls: string): string {
+  return path.join(WRITER_DIR, municipalityId, "class", `${cls.replaceAll("/", "-")}.json`);
+}
+
+export function cachedWriterForClass(municipalityId: string, cls: string): ClassWriterRecord | undefined {
+  const f = classWriterFile(municipalityId, cls);
+  if (!fs.existsSync(f)) return undefined;
+  const record = JSON.parse(fs.readFileSync(f, "utf8")) as ClassWriterRecord;
+  return { ...record, output: normalizeWriter(record.output) };
+}
+
+export function saveWriterForClass(municipalityId: string, cls: string, record: ClassWriterRecord) {
+  const f = classWriterFile(municipalityId, cls);
+  fs.mkdirSync(path.dirname(f), { recursive: true });
+  fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
+}
+
+// The wording of a class may be reused only for a bulletin of the same title: a flood warning of another river
+// shares the class but not the river name in the translated headline. A sea-level-change clearance needs its own
+// action, so it shares no wording with a plain all-clear.
+export function classWriterFits(record: ClassWriterRecord, alert: Alert, situation: Situation): boolean {
+  return record.raw_title === alert.raw_title && record.caution === situation.caution;
+}
