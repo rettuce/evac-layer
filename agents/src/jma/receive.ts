@@ -135,7 +135,7 @@ export async function receiveSite(args: {
     writeLive(site.id, lastShown, liveDir);
     round.live = lastShown;
     log(`  [${site.id}] live → ${lastShown}`);
-    const warning = liveGateWarning(site.id, lastShown, args.roots?.layouts);
+    const warning = liveGateWarning(site.id, lastShown, args.roots);
     if (warning) log(warning);
     if (args.baseUrl) log(await feedStateLine(args.baseUrl, site.id, lastShown));
   }

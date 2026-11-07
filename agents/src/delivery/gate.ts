@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { APPROVALS_FILE } from "../paths.js";
 import { readSites, siteMunicipality, type SiteFile } from "../sites.js";
-import { type ClassApproval, classDigest, classKey, layoutDigest, liveLayoutGateWith, screenClass } from "../../../app/layout/gate";
+import { type ClassApproval, type LayoutClass, classDigest, classKey, layoutDigest, liveLayoutGateWith, passedBrowserCheck, screenClass } from "../../../app/layout/gate";
 
 export interface Approvals {
   version: "0.1";
@@ -39,11 +39,11 @@ export function readApprovals(file = APPROVALS_FILE, sites: readonly SiteFile[] 
   return migrateApprovalKeys(raw, sites);
 }
 
-export function exportable(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string }): "ok" | "auto-publish-off" | "unapproved" | "stale" {
+export function exportable(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass): "ok" | "auto-publish-off" | "unapproved" | "stale" {
   return exportGate(a, site, bulletinId, digest, cls).gate;
 }
 
-export function exportGate(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: { key: string; digest: string }) {
+export function exportGate(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass) {
   const { gate, by } = liveLayoutGateWith(a, site, bulletinId, digest, cls);
   const record = by === "bulletin" ? a.layouts[`${site}/${bulletinId}`] : by === "class" && cls ? a.classes?.[classKey(site, cls.key)] : undefined;
   return { gate, approved_at: record?.updated_at };
@@ -60,7 +60,9 @@ export function layoutDigestOf(dir: string): string | undefined {
   return files.length ? layoutDigest(files) : undefined;
 }
 
-export function layoutClassOf(dir: string): { key: string; digest: string } | undefined {
+export function layoutClassOf(dir: string, reportFile: string): LayoutClass | undefined {
   const files = layoutFilesOf(dir);
-  return files.length ? { key: screenClass(JSON.parse(files[0].body)), digest: classDigest(files) } : undefined;
+  if (!files.length) return undefined;
+  const report = fs.existsSync(reportFile) ? (JSON.parse(fs.readFileSync(reportFile, "utf8")) as { outcome?: string; verifier?: string }) : undefined;
+  return { key: screenClass(JSON.parse(files[0].body)), digest: classDigest(files), checked: passedBrowserCheck(report) };
 }

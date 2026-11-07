@@ -51,6 +51,11 @@ test("a new bulletin of a cached class is written from the class cache, without 
   const step = await writeForBulletin({ alert, municipality, situation }, { live: { client: noApi, model: "opus" }, persist: false, usage: [] });
   assert.equal(step.writerSource, `writer-class-cache:${L4.bulletin_id}`);
   assert.equal(step.writer.cells.find((c) => c.role === "action")!.text.ja_easy, "たかい ところへ にげて");
+  await assert.rejects(step.reviser.revise(step.writer, [], 1), /no Writer to revise with/, "a class-cached screen is not rewritten on findings; it fails and waits for a person");
+  const classFile = path.join(WRITER_DIR, "05210/class/flood-evac-now-4.json");
+  const before = fs.readFileSync(classFile, "utf8");
+  step.afterLoop({ outcome: "pass", writer: { cells: [] } } as never);
+  assert.equal(fs.readFileSync(classFile, "utf8"), before, "only --build-class-cache writes the class cache");
 
   const otherRiver = { ...alert, raw_title: "芋川レベル４氾濫危険警報" };
   await assert.rejects(writeForBulletin({ alert: otherRiver, municipality, situation }, { live: { client: noApi, model: "opus" }, persist: false, usage: [] }), /Writer API was called/);
