@@ -94,6 +94,7 @@
         body.panel-open #ui { display: flex; }
         #info { display: none; }
         #now { top: 8px; right: 8px; max-width: calc(100vw - 96px); }
+        #now .bulletin .title { display: block; }
         #dock { display: none; left: 8px; right: 8px; bottom: 52px; width: auto; }
         body.dock-open #dock { display: flex; }
         #places .mapbox { width: 96px; }
@@ -115,7 +116,7 @@
       <div id="status">loading room.glb…</div>
       <a id="repo" href="https://github.com/rettuce/evac-layer" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
-    <div id="now" class="panel" aria-live="polite"><div class="ja"><i class="swatch" hidden></i><span class="label"></span></div><div class="en"></div><div class="bulletin"></div><div class="bulletin-en"></div><div class="where"></div><div class="shelter"></div><div class="shelter-en"></div></div>
+    <div id="now" class="panel" aria-live="polite"><div class="ja"><i class="swatch" hidden></i><span class="label"></span></div><div class="en"></div><div class="bulletin"><span class="by"></span><span class="title"></span></div><div class="bulletin-en"></div><div class="where"></div><div class="shelter"></div><div class="shelter-en"></div></div>
     <div id="dock">
     <div id="places" class="panel">
       <h2>表示する場所 / Display site · Lv4 18:15</h2>
