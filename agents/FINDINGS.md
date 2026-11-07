@@ -40,7 +40,7 @@
 
 主張どおりに動かない箇所（11-05 時点。各項目の末尾にその後の対応）:
 
-下の 9 件はいずれも対応済みです。各項目の「→」以降が対応の内容と commit で、8 は運用上の注意、9 は照合の結果です。
+下の 1〜7 は修正済みです（各項目の「→」以降が修正日と commit）。8 は修正の対象ではない運用上の注意、9 は逆翻訳の照合で直した記録です。
 
 1. **信号の受け口が公開リポに無い。** 気象庁長期フィードの取得は private の `tools/jma-feed-recorder`（launchd・1 時間毎・Python）で、本体は録音（`bodies/`）を `replay` で読む。app の「今の電文」は `sharedReplayOrigin`（サーバ起動時刻からの仮想時計 × speed）で決まり、`/api/feed` は実時間に届いた警報では切り替わらない。「電文が届いたら画面が変わる」経路は未実装。外から施設の表示を切り替える口（`POST /api/admin/live`・`pnpm -F agents live`）は 11-06 に追加した（116963a）。→ 11-07 に修正（2e5b927・9b991bf）。気象庁の長期フィードを読んで本文を保存する `pnpm -F agents record` と、新しい電文から画面を作って表示を切り替える `pnpm -F agents receive` を足した。
 2. **1 電文だけを live Writer で流す入口が無い。** `pipeline` は `--writer` の fixture が必須（live Writer は後で入れる、という英文の案内が残る）。live Writer は `fanout` / `replay-pipeline` だけで、どちらも `data/layouts/<自治体>` と reports を消して全電文を作り直す（`runReplay` の rmSync）。→ 11-07 に修正（46f0639）。`pipeline` に `--writer live|placeholder` と `--publish --go-live` を足し、1 電文の画面と index.json の行だけを書き換えるようにした（他の電文の画面は消さない）。
