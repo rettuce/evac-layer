@@ -186,6 +186,8 @@ Claude Code のセッションの 1 つが全体のまとめ役になり、8 つ
 
 ## 動かす
 
+![CI](https://github.com/rettuce/evac-layer/actions/workflows/ci.yml/badge.svg)
+
 ```sh
 pnpm install
 pnpm -F app dev                     # Renderer と運営者の画面 http://127.0.0.1:3150（/ は /admin へ）
