@@ -27,7 +27,7 @@ SHEET_BACKGROUND = "white"
 STAGE_SECONDS = 2.5
 LOGO = REPO / "docs" / "brand" / "evac-layer-logo-2line-black.svg"
 REPO_URL = "github.com/rettuce/evac-layer"
-CONTACT = "you@ie3.jp"
+CONTACT = "ie3.jp/contact"
 LOGO_WIDTH_PX = 760
 DIM_OPACITY = 0.6
 # Zones as drawn by docs/diagrams/system.py: (first column, last column, row) per stage, in reading order.

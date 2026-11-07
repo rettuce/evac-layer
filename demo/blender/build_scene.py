@@ -237,7 +237,7 @@ def pan_right_from(name, metres):
 
 
 
-# Cut 2's dolly line: 田中 (v9) wanted it closer than the first -8.6 m, same direction and length.
+# Cut 2's dolly line (v9): closer than the first -8.6 m, same direction and length.
 CUT02_DOLLY_Y = -6.0
 
 SHOTS = {
@@ -260,12 +260,12 @@ SHOTS = {
         "seconds": 21, "screens": "seq", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
         "path": push_from("wide-a", 0.4),
     },
-    # Edit material (D-33): cut 5's camera over 30 s of one calm scene.
+    # Edit material: cut 5's camera over 30 s of one calm scene.
     "ambient30": {
         "seconds": 30, "screens": "ambient-30", "light_scale": 1.0, "lens": WIDE_OPTIONS["wide-a"]["lens"],
         "path": push_from("wide-a", 0.4),
     },
-    # README switch (D-36): calm brush-flow -> level 3 -> 4 -> 5 on the KV's fixed hero and hero2 cameras.
+    # README switch: calm brush-flow -> level 3 -> 4 -> 5 on the KV's fixed hero and hero2 cameras.
     "herosw": {
         "seconds": 8.6, "screens": "hsw", "light_scale": 1.0, "lens": STILL_CAMERAS["hero"]["lens"], "focus": "pillar",
         "path": [(STILL_CAMERAS["hero"]["location"], STILL_CAMERAS["hero"]["target"])] * 2,
@@ -275,12 +275,12 @@ SHOTS = {
         "focus_point": STILL_CAMERAS["hero2"]["target"],
         "path": [(STILL_CAMERAS["hero2"]["location"], STILL_CAMERAS["hero2"]["target"])] * 2,
     },
-    # Edit material (D-34): 3 s of a calm scene, held on the first camera of cut 8 and of cut 9.
+    # Edit material: 3 s of a calm scene, held on the first camera of cut 8 and of cut 9.
     "cut08head": {
         "seconds": 3, "screens": "ambient-3", "light_scale": 1.0, "lens": CLOSE_LENS_MM, "focus_follows": True,
         "path": [(STILL_CAMERAS["col-final"]["location"], STILL_CAMERAS["col-final"]["target"])] * 2,
     },
-    # D-35: cut 9's own 10 s move, rendered for its first 3 s only (render_s), so the motion matches the cut.
+    # Cut 9's own 10 s move, rendered for its first 3 s only (render_s), so the motion matches the cut.
     "cut09head": {
         "seconds": 10, "render_s": 3, "screens": "ambient-3", "light_scale": 1.0, "lens": HERO_LENS_MM, "focus": "pillar",
         "path": [along_axis(-8.6), along_axis(-7.9)],
