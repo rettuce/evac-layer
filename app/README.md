@@ -61,7 +61,7 @@ NUXT_REPO_ROOT=/path/to/evac-layer EVAC_DATA_DIR=/path/to/evac-layer/data node a
 
 ### Live state
 
-A site with `replay` plays the recorded bulletins back from a shared start (the demo). Any other site is live: `POST /api/admin/live {site_id, bulletin_id}` (admin access; `bulletin_id: null` clears) writes `data/live/<site_id>.json` `{bulletin_id, updated_at}`, and `pnpm -F agents live --site <id> --bulletin <id>|--clear` writes the same file. The posted bulletin is shown only when it is approved for the site and auto publish is on; otherwise the site stays ambient. A site with `replay` answers 409. Receiving JMA bulletins and composing screens for new ones happen outside this repository; a receiver only calls this endpoint.
+A site with `replay` plays the recorded bulletins back from a shared start (the demo). Any other site is live: `POST /api/admin/live {site_id, bulletin_id}` (admin access; `bulletin_id: null` clears) writes `data/live/<site_id>.json` `{bulletin_id, updated_at}`, and `pnpm -F agents live --site <id> --bulletin <id>|--clear` writes the same file. The posted bulletin is shown only when it is approved for the site and auto publish is on; otherwise the site stays ambient. A site with `replay` answers 409. `pnpm -F agents receive --sites <id>` records the JMA long feeds, composes the screens of each new bulletin that concerns the site and writes this same file; a receiver of your own only calls this endpoint.
 
 ### Delivery
 
