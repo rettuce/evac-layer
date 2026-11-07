@@ -11,7 +11,7 @@ import { SAMPLES_DIR, SAMPLES_LIST_DIR, requireRawDir } from "../paths.js";
 // data/samples/<id>.json; a feed recorded in a quiet season has no tsunami bulletin, the samples do.
 export { SAMPLES_DIR };
 
-const REPLAYABLE = /^(VPWW55|VPWW56|VXKO\d{2}|VTSE41)$/;
+export const REPLAYABLE = /^(VPWW55|VPWW56|VXKO\d{2}|VTSE41)$/;
 
 export interface ReplayEntry {
   issued_at: string;
@@ -37,32 +37,33 @@ export function withinWindow<T extends { issued_at: string }>(entries: T[], wind
   });
 }
 
+export function replayEntry(xml: Buffer, file: string, code: string, municipalityId: string, regions = new Set(tsunamiRegionsFor(municipalityId))): ReplayEntry {
+  const alert = parseJmaXml(xml);
+  const v = validateDoc(alert, "alert");
+  if (!v.ok) throw new Error(`alert fails alert.schema.json: ${formatErrors(v.errors)}`);
+  const mine = alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
+  const levels = mine.map((a) => a.level).filter((l): l is number => l !== null);
+  return {
+    issued_at: alert.issued_at,
+    file,
+    wmo_code: code,
+    bulletin_id: alert.bulletin_id,
+    municipality_level: levels.length ? Math.max(...levels) : null,
+    municipality_status: [...new Set(mine.map((a) => a.status))].sort(),
+    alert,
+  };
+}
+
 export function replay(municipalityId: string, feedDir = FEED_DIR) {
   const entries: ReplayEntry[] = [];
   const errors: { file: string; error: string }[] = [];
   const regions = new Set(tsunamiRegionsFor(municipalityId));
-  const entryFor = (xml: Buffer, file: string, code: string): ReplayEntry => {
-    const alert = parseJmaXml(xml);
-    const v = validateDoc(alert, "alert");
-    if (!v.ok) throw new Error(`alert fails alert.schema.json: ${formatErrors(v.errors)}`);
-    const mine = alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
-    const levels = mine.map((a) => a.level).filter((l): l is number => l !== null);
-    return {
-      issued_at: alert.issued_at,
-      file,
-      wmo_code: code,
-      bulletin_id: alert.bulletin_id,
-      municipality_level: levels.length ? Math.max(...levels) : null,
-      municipality_status: [...new Set(mine.map((a) => a.status))].sort(),
-      alert,
-    };
-  };
   for (const b of listBodies(feedDir).filter((x) => REPLAYABLE.test(x.code))) {
     const xml = fs.readFileSync(b.file);
     if (!mentionsMunicipality(xml.toString("utf8"), b.code, municipalityId)) continue;
     const file = path.relative(feedDir, b.file);
     try {
-      entries.push(entryFor(xml, file, b.code));
+      entries.push(replayEntry(xml, file, b.code, municipalityId, regions));
     } catch (e) {
       errors.push({ file, error: (e as Error).message });
     }
@@ -77,7 +78,7 @@ export function replay(municipalityId: string, feedDir = FEED_DIR) {
         if (!code || !REPLAYABLE.test(code)) throw new Error(`not a replayable sample name: ${name}`);
         const xml = fs.readFileSync(path.join(SAMPLES_DIR, name));
         if (!mentionsMunicipality(xml.toString("utf8"), code, municipalityId)) throw new Error(`sample does not mention ${municipalityId}`);
-        entries.push(entryFor(xml, file, code));
+        entries.push(replayEntry(xml, file, code, municipalityId, regions));
       } catch (e) {
         errors.push({ file, error: (e as Error).message });
       }

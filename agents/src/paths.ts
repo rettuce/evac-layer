@@ -43,7 +43,7 @@ export const SAMPLES_DIR = path.resolve(REPO_ROOT, process.env.JMA_SAMPLES_DIR ?
 export const EVAC_URL = process.env.EVAC_URL ?? "http://127.0.0.1:3150";
 
 const RAW_HELP = `Raw inputs are not part of the repository. Put them under EVAC_RAW_DIR (now ${RAW_DIR}) or point the variables at them in .env:
-  - JMA_FEED_DIR (now ${FEED_DIR}): a recording of the JMA XML long feeds as bodies/<YYYYMMDD>/<id>.xml. Record it from https://www.data.jma.go.jp/developer/xml/feed/extra_l.xml and regular_l.xml (any poller that saves each linked bulletin).
+  - JMA_FEED_DIR (now ${FEED_DIR}): a recording of the JMA XML long feeds as bodies/<YYYYMMDD>/<id>.xml. Record it with "pnpm -F agents record" (the JMA long feeds at https://www.data.jma.go.jp/developer/xml/feed/).
   - JMA_SAMPLES_DIR (now ${SAMPLES_DIR}): the official JMA sample bulletins, unzipped, from https://xml.kishou.go.jp/ (技術資料 → サンプル電文). Needed for the municipalities listed in data/samples/.
   - EVAC_RAW_DIR/gsi-shelters/<id>_1.csv and <id>_2.csv: GSI designated shelter CSVs from https://hinanmap.gsi.go.jp/hinanjocp/defaultFtpData/csv/ (Reader and shelters only).
   - EVAC_RAW_DIR/municipal-pdfs/...: the municipal hazard-map PDFs named in data/municipalities/<id>.preset.json (Reader only).`;

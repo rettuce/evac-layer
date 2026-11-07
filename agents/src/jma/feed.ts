@@ -7,7 +7,7 @@ export { FEED_DIR };
 
 export interface FeedBody { file: string; day: string; code: string; office: string; stamp: string }
 
-const BODY_NAME = /^(\d{14})_\d+_([A-Z0-9]{6})_(\d{6})\.xml$/;
+export const BODY_NAME = /^(\d{14})_\d+_([A-Z0-9]{6})_(\d{6})\.xml$/;
 
 export function listBodies(feedDir = FEED_DIR): FeedBody[] {
   const root = path.join(feedDir, "bodies");
