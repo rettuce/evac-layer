@@ -36,7 +36,7 @@
       "template": "evac-now",
       "display_level": 4,
       "outcome": "pass",
-      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3164)",
+      "verified_by": "static+browser(http://127.0.0.1:3190)",
       "layouts": [
         "data/layouts/22424-demo/VTSE41-201609010726-05a7380a3e46/16x9.json",
         "data/layouts/22424-demo/VTSE41-201609010726-05a7380a3e46/9x16.json",
@@ -57,7 +57,7 @@
       "template": "all-clear",
       "display_level": 1,
       "outcome": "pass",
-      "verified_by": "static+browser+vision(sonnet)(http://127.0.0.1:3164)",
+      "verified_by": "static+browser(http://127.0.0.1:3190)",
       "layouts": [
         "data/layouts/22424-demo/VTSE41-201609010955-5a813306d772/16x9.json",
         "data/layouts/22424-demo/VTSE41-201609010955-5a813306d772/9x16.json",
