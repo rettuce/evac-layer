@@ -79,7 +79,7 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 
 ![承認画面: 電文の一覧、選んだ電文の 4 形状の画面、検査の結果と出典、施設ごとの自動配信のスイッチ](docs/images/admin-approval.jpg)
 
-EVAC LAYER が作るのは下書きです。施設ごとに、災害 × 警戒レベル × 形状の画面を一式作り、各画面に出典（自治体の資料のページ・国土地理院のデータ・気象庁の電文 ID）と自動検査の結果を添えます。運営者は平常時にそれを確かめて承認し、施設ごとに自動配信を入れます。承認は、施設ごとの「災害 × 警戒レベル × 形状」の画面の種類に対して行います。新しい電文が届くと、承認済みの文と組み方のまま画面を組み直し、規則とブラウザの検査を通ったものがそのまま出ます。気象庁の見出しと発表時刻だけが電文のものに変わり、文章を新しく生成したり、人の判断を挟んだりはしません。止めるのも運営者で、`/admin` で自動配信を切れば、次の電文からは表示されません。
+EVAC LAYER が作るのは下書きです。施設ごとに、災害 × 警戒レベル × 形状の画面を一式作り、各画面に出典（自治体の資料のページ・国土地理院のデータ・気象庁の電文 ID）と自動検査の結果を添えます。運営者は平常時にそれを確かめて承認し、施設ごとに自動配信を入れます。承認は、施設ごとの「災害 × 案内の型（避難・解除など）× 警戒レベル」の画面の種類に対して行います。新しい電文が届くと、承認済みの文と組み方のまま画面を組み直し、規則とブラウザの検査を通ったものがそのまま出ます。気象庁の見出しと発表時刻だけが電文のものに変わり、文章を新しく生成したり、人の判断を挟んだりはしません。止めるのも運営者で、`/admin` で自動配信を切れば、次の電文からは表示されません。
 
 ### 実際の電文で作り、検査した
 
@@ -118,10 +118,10 @@ EVAC LAYER が作るのは下書きです。施設ごとに、災害 × 警戒�
 | ディレクトリ | 中身 |
 |---|---|
 | `agents/` | Reader・気象庁 XML の parser・Writer・Composer・Verifier・書き直しのループ・一括処理・書き出し（[`agents/README.md`](agents/README.md)） |
-| `app/` | Renderer（`/screen`）・運営者の画面（`/admin`・`/dashboard`）・承認・フィードと Webhook の配信（[`app/README.md`](app/README.md)） |
+| `app/` | Renderer（`/screen`）・運営者の画面（`/admin`・`/dashboard`）・承認・フィードと Webhook の配信（[`app/README.md`](app/README.md)）。`app/layout/` は Nuxt の layouts ではなく、承認ゲートと配置の中核 |
 | `schema/` | agents と app の間の取り決め（layout・alert・site・municipality・feed・書き出し） |
 | `data/` | デモの 5 自治体の知識ファイル・施設・レイアウト・検査レポート |
-| `sim/` | ブラウザで動くコンコースの 3D シミュレーター（[`sim/README.md`](sim/README.md)） |
+| `sim/` | ブラウザで動くコンコースの 3D シミュレーター（[`sim/README.md`](sim/README.md)）。workspace の外の独立パッケージ（`cd sim && pnpm install --ignore-workspace`） |
 | `demo/` | Blender のコンコース・録画・動画の合成 |
 | `examples/minimal-cms/` | フィードだけで動く 40 行のサイネージ |
 
@@ -136,7 +136,7 @@ EVAC LAYER は、画面を再生する機能を持たず、サイネージのシ
    - **Push**: 施設ごとの Webhook。HMAC-SHA256 の署名と時刻・配信 ID つきで、なりすましと再送を防げます。
    - **Files**: `pnpm -F agents export --site <id>` で、形状ごとの PNG と、単体で開ける HTML を書き出します。画像しか受け取れない CMS 向けです。
 
-表示を切り替えるのは `pnpm -F agents receive --sites <id>` です。気象庁の長期フィードを読み、その施設に当たる新しい電文から画面を作り、同じ種類の画面が承認済みなら表示を切り替えます。未承認なら直前の承認済みの画面を保ちます。実際の運用では、フィードを読む間隔（`--every 600` なら 10 分）とブラウザの検査の分だけ、警報から表示までに遅れがあります。シミュレーターと動画は記録した電文の再生なので瞬時です。自前の受信系があるなら、電文の ID を `POST /api/admin/live`（または `pnpm -F agents live`）に渡しても同じで、`null` を渡すと平常時に戻ります。手順と環境変数の全体は [`docs/integration.md`](docs/integration.md)。
+表示を切り替えるのは `pnpm -F agents receive --sites <id>` です。気象庁の長期フィードを読み、その施設に当たる新しい電文から画面を作り、同じ種類の画面が承認済みなら表示を切り替えます。このときモデルは呼ばず、承認済みの文をそのまま使います（既定の `--writer placeholder`）。未承認なら直前の承認済みの画面を保ちます。実際の運用では、フィードを読む間隔（`--every 600` なら 10 分）とブラウザの検査の分だけ、警報から表示までに遅れがあります。シミュレーターと動画は記録した電文の再生なので瞬時です。自前の受信系があるなら、電文の ID を `POST /api/admin/live`（または `pnpm -F agents live`）に渡しても同じで、`null` を渡すと平常時に戻ります。手順と環境変数の全体は [`docs/integration.md`](docs/integration.md)。
 
 回線が切れても、画面は直前の状態を保ち、60 秒を過ぎると「同期が途絶えている」印を出します。書き出したファイルを端末に置いておけば、配信元に届かなくても承認済みの画面を出せます。
 
@@ -162,7 +162,7 @@ EVAC LAYER は、画面を再生する機能を持たず、サイネージのシ
 - **最初の一括処理では、22 枚のうち 9 枚が、出していない警報の「解除」の画面だった。** 再生の側で、災害の種類ごとに表示中の警報を覚え、出したものだけを解除するようにしました。
 - **県の大雨注意報が、レベル 5 の画面を平常時に戻してしまった。** 表示の状態を、電文の系統ごとに持つようにしました。
 - **長い施設名が、距離を画面の外へ押し出した。** 規則の検査では見えず、描いた PNG を見て分かりました。避難場所の欄は名前だけを持ち、種類の見出しは Renderer が固定で描きます。
-- **Vision の検査は、最初に図記号の矛盾を 25 件見つけた**（解除の画面に「避難する」人の図記号など）。5 回の実行で 25 → 8 → 4 → 4 → 0。図記号は行動だけを表すことにし、Writer は書く前に図記号の意味を受け取ります。
+- **Vision の検査は、最初に図記号の矛盾を 25 件見つけた**（解除の画面に「避難する」人の図記号など）。図記号の指摘は 2 回の修正で 25 → 8 → 0 になり、続く 2 回に残った 4 件はブラウザ検査のはみ出しで、5 回目で 0 になりました。図記号は行動だけを表すことにし、Writer は書く前に図記号の意味を受け取ります。
 - **Writer が、市町村の避難情報の名称を使った**（「高齢者等避難」）。気象庁の警報から作った画面にこう書くと、市が発令したように読めてしまうので、検査規則で禁じました。
 - **英語の欄に漢字が入った**（「子吉川 Lv3 Flood Warning」）。英語の欄にラテン文字以外を禁じる検査規則を足しました。
 
@@ -178,7 +178,7 @@ API の費用（11 月 5 日までのデータ処理）は、Reader $2.88（5 �
 |---|---|---|---|
 | Reader | Sonnet 5.5 | 自治体のハザードマップ PDF と国土地理院のデータを、出典のページつきの知識ファイルにする。文字が欠けた PDF はページを画像として読み直す | 5 自治体で $2.88。同じ輪島市の資料で Haiku は $0.009 で施設 19 件・津波の高さは取れず、Sonnet は $0.257 で施設 113 件（[`docs/how-we-built.md`](docs/how-we-built.md)） |
 | Writer | Opus 5.5 | その施設とその電文のための行動の文を、形状ごとの字数の上限の中で 10 の言語で書く。検査の指摘を受けて書き直す | 約 $7.08。同じ警報から同じ画面が出るよう出力を記録 |
-| Verifier（Vision） | Sonnet 5.5 | 描いた画面を形状ごとに電文と照らし、図記号の矛盾・欠落・はみ出しを指摘する | $11.34（19 回）。最初に 25 件を指摘し、5 回の実行で 25 → 8 → 4 → 4 → 0 |
+| Verifier（Vision） | Sonnet 5.5 | 描いた画面を形状ごとに電文と照らし、図記号の矛盾・欠落・はみ出しを指摘する | $11.34（19 回）。最初に 25 件を指摘し、2 回の修正で 0 に（続く 2 回の 4 件はブラウザ検査のはみ出し。5 回目で 0） |
 
 作る過程では、Claude Code の機能を次のように使い分けました。
 
@@ -261,7 +261,7 @@ pnpm -F app test
 
 - **どのサイネージにも組み込める。** EVAC LAYER は特定のサイネージ専用に閉じていません。承認済みの画面を HTTP（Pull・署名付きの Webhook・ファイル）で渡すだけなので、サイネージのソフトウェアを作る人なら誰でも、自分のシステムに同じように組み込めます（40 行の例: [`examples/minimal-cms/`](examples/minimal-cms/)）。
 - **自分たちのサイネージで動かす。** その最初の 1 件として、作者が IE3 で開発している環境演出のシステムに、オプションの 1 枚のレイヤーとして組み込みます。いまは設計まで済んでいて、ハッカソンが終わったらすぐに組み込みの開発を始めます。その後は、このシステムを使う案件に EVAC LAYER をモジュールとして最初から載せて納め、使うかどうかは施設が決めます。平常時の演出はそのシステムが、災害のときだけ EVAC LAYER が画面を受け持ちます。
-- **実証の相手を探しています。** 記録した 5 自治体（由利本荘市・横浜市・柏崎市・輪島市・吉田町）の資料と電文で画面は作ってあります。サイネージを持つ施設、自治体、組み込みたい事業者の方は [ie3.jp/contact](https://ie3.jp/contact/) へ。最初の実証に要るのは 3 つです。スクリーンの緯度経度、その自治体の資料（ハザードマップと指定緊急避難場所の一覧）、承認済みの画面を受け取る HTTP の口 1 本。運用の費用は 1 自治体あたり年に約 $13 の見込みです（[`docs/evaluation.md`](docs/evaluation.md)）。進め方は [`docs/pilot.md`](docs/pilot.md)。
+- **実証の相手を探しています。** 記録した 5 自治体（由利本荘市・横浜市・柏崎市・輪島市・吉田町）の資料と電文があり、警報の出た 4 自治体の画面は作ってあります（横浜市は期間中に警報が無く、画面は 0）。サイネージを持つ施設、自治体、組み込みたい事業者の方は [ie3.jp/contact](https://ie3.jp/contact/) へ。最初の実証に要るのは 3 つです。スクリーンの緯度経度、その自治体の資料（ハザードマップと指定緊急避難場所の一覧）、承認済みの画面を受け取る HTTP の口 1 本。運用の費用は 1 自治体あたり年に約 $13 の見込みです（[`docs/evaluation.md`](docs/evaluation.md)）。進め方は [`docs/pilot.md`](docs/pilot.md)。
 - **公開のまま続けます。** 審査の期間は main を止め、その後も AGPL-3.0 のまま開発を続けます。
 
 ## 今後
@@ -287,7 +287,11 @@ AGPL-3.0 の条件で、誰でも使えます。AGPL の条件で公開できな
 
 > **IDEA** — Screens are everywhere in the city. What if each one knew where it stands, and showed the right evacuation guidance when disaster strikes?
 
-Give EVAC LAYER the latitude, longitude and facing of a site (one venue; its screens share them) and its municipality code, written by hand, and it works out the rest for that spot: the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. The same warning gives each site its own shelter, direction and distance, and a municipality can hold any number of sites. It reads the municipality's hazard-map PDFs with citations (Reader, Claude), parses JMA disaster-prevention XML, writes the guidance in ten languages (Japanese, *yasashii nihongo*, English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five base shapes that fit any aspect ratio, and inspects every screen by rules, in a browser and by Vision (Claude). Operators approve the screens in calm times; when a bulletin arrives, only approved screens go out, as `alert` / `clear` events by feed, signed webhook or static files. From 206 JMA bulletins for five municipalities (200 recorded from the live feed, 6 official sample bulletins from a drill) it made 110 layouts.
+The author has made public signage for more than ten years: the LED visions of Shibuya Sakura Stage, the six synchronized screens of Komazawa-Daigaku station, the ten-floor LED wall beside the escalators of Daimaru Shinsaibashi. In a disaster those screens keep playing advertising or go black. After the tsunami of the 2024 Noto earthquake, Joetsu City wrote in its review that foreign residents and visitors who heard the loudspeaker calls could not tell whether they had to evacuate or where to go. The call arrived; the next line, "southwest, 570 m", did not. Japan has 3.77 million foreign residents and 42.7 million visitors a year. EVAC LAYER is for the people the Japanese announcement does not reach.
+
+To see it: open [rettuce.github.io/evac-layer](https://rettuce.github.io/evac-layer/) and press はじめる (start). The bulletins actually issued for Yurihonjo, Akita on 21 October 2026 replay from warning level 3 to 4 to 5 across the 22 screens of a station concourse. The timeline at bottom right picks a time; 表示する場所 (place) moves the same warning to a station, a hall, a high school or a park, and the shelter, direction and distance change with the spot. D hides the panels. The 2:51 video shows the same day from warning to all-clear.
+
+Give EVAC LAYER the latitude, longitude and facing of a site (one venue; its screens share them) and its municipality code, written by hand, and it works out the rest for that spot: the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. The same warning gives each site its own shelter, direction and distance, and a municipality can hold any number of sites. It reads the municipality's hazard-map PDFs with citations (Reader, Claude), parses JMA disaster-prevention XML, writes the guidance in ten languages (Japanese, *yasashii nihongo* (plain Japanese for non-native readers), English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five base shapes that fit any aspect ratio, and inspects every screen by rules, in a browser and by Vision (Claude). Operators approve the screens in calm times; when a bulletin arrives, only approved screens go out, as `alert` / `clear` events by feed, signed webhook or static files. From 206 JMA bulletins for five municipalities (200 recorded from the live feed, 6 official sample bulletins from a drill) it made 110 layouts.
 
 To add your own screens: register a site file, generate and approve its screens once, then take the feed, the webhook or the files. `pnpm -F agents receive --sites <id>` reads the JMA long feeds, composes the screens of each new bulletin that concerns the site and switches the site once they are approved, either as that bulletin or through an approval of the same class (hazard × warning level × template) with the same wording; a receiver of your own can switch a site by posting a bulletin id (or `null`) to `POST /api/admin/live`. The switches in the demo video and the simulator are replays of recorded bulletins. The steps are in [`docs/integration.md`](docs/integration.md). In steady state a screen costs about $0.245 in API calls, roughly $13 per municipality per year.
 
