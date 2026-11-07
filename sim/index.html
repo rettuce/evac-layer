@@ -46,6 +46,7 @@
       #now .ja { color: #ddd; }
       #now .en, #now .where, #timeline .caption { color: #888; font-size: 10px; letter-spacing: .04em; }
       #now .where:empty, #now .shelter:empty, #now .shelter-en:empty { display: none; }
+      #now .bulletin, #now .bulletin-en { min-height: 1.4em; color: rgba(255,255,255,.7); font-size: 10px; letter-spacing: .04em; }
       #now .shelter { margin-top: 2px; color: #ddd; }
       #now .shelter-en { color: #888; font-size: 10px; letter-spacing: .04em; }
       #dock { position: fixed; right: 12px; bottom: 12px; width: 420px; display: flex; flex-direction: column; gap: 6px; }
@@ -111,7 +112,7 @@
       <div id="status">loading room.glb…</div>
       <a id="repo" href="https://github.com/rettuce/evac-layer" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
-    <div id="now" class="panel" aria-live="polite"><div class="ja"><i class="swatch" hidden></i><span class="label"></span></div><div class="en"></div><div class="where"></div><div class="shelter"></div><div class="shelter-en"></div></div>
+    <div id="now" class="panel" aria-live="polite"><div class="ja"><i class="swatch" hidden></i><span class="label"></span></div><div class="en"></div><div class="bulletin"></div><div class="bulletin-en"></div><div class="where"></div><div class="shelter"></div><div class="shelter-en"></div></div>
     <div id="dock">
     <div id="places" class="panel">
       <h2>表示する場所 / Display site · Lv4 18:15</h2>
