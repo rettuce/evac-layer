@@ -74,16 +74,18 @@
       #intro[hidden] { display: none; }
       #intro .card { width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; box-sizing: border-box; padding: 20px 22px; background: rgba(0,0,0,.85); }
       #intro h2 { margin: 0 0 12px; font-size: 10px; font-weight: 400; letter-spacing: .08em; color: #888; }
-      #intro .idea { margin: 0; font-size: 15px; line-height: 1.7; color: #e8e8e8; }
-      #intro .en { margin: 4px 0 14px; font-size: 11px; color: #888; }
+      #intro .idea, #nowebgl .idea { margin: 0; font-size: 15px; line-height: 1.7; color: #e8e8e8; }
+      #intro .en, #nowebgl .en { margin: 4px 0 14px; font-size: 11px; color: #888; }
       #intro .about { margin: 0; color: #ddd; }
       #intro ul { margin: 0 0 16px; padding-left: 1.2em; color: #ccc; }
       #intro li { margin-bottom: 4px; }
       #intro li .en { display: block; margin: 0; }
       #intro .note { margin: 0; color: #ccc; }
       #intro .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-      #intro .links { margin: 0; font-size: 11px; color: #888; }
-      #intro .links a { color: #ccc; }
+      #intro .links, #nowebgl .links { margin: 0; font-size: 11px; color: #888; }
+      #intro .links a, #nowebgl .links a { color: #ccc; }
+      #nowebgl { position: fixed; inset: 0; z-index: 2; display: grid; place-items: center; padding: 16px; background: #000; text-align: center; }
+      #nowebgl[hidden] { display: none; }
       #intro .start { padding: 6px 16px; }
       #panel-toggle, #dock-toggle { display: none; position: fixed; background: #111; color: #ccc; border-color: #444; padding: 8px 12px; font: inherit; }
       #panel-toggle { top: 8px; left: 8px; }
@@ -155,6 +157,13 @@
           <button class="start" type="button">はじめる / Start</button>
           <p class="links"><a href="https://github.com/rettuce/evac-layer" target="_blank" rel="noopener">GitHub</a> · <a href="https://youtu.be/W_wwWq_1ob8" target="_blank" rel="noopener">動画 / Video</a></p>
         </div>
+      </div>
+    </div>
+    <div id="nowebgl" role="alert" hidden>
+      <div>
+        <p class="idea">この環境では 3D を表示できません（WebGL が無効）。デモ動画をご覧ください</p>
+        <p class="en">This browser cannot show the 3D view (WebGL is disabled). Please watch the demo video.</p>
+        <p class="links"><a href="https://youtu.be/W_wwWq_1ob8" target="_blank" rel="noopener">動画 / Video</a> · <a href="https://github.com/rettuce/evac-layer" target="_blank" rel="noopener">GitHub</a></p>
       </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
