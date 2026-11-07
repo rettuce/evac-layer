@@ -41,6 +41,10 @@ export interface AlertSet {
   id: string
   name: string
   description: string
+  issued: string
+  issuer: string
+  bulletin: string
+  bulletin_en: string
   pairs: string[]
   random?: boolean
 }
@@ -222,6 +226,10 @@ export class Displays {
 
   get alertSet(): AlertSet | undefined {
     return this.sets[this.activeSet]
+  }
+
+  setById(id: string): AlertSet | undefined {
+    return this.sets.find((set) => set.id === id)
   }
 
   async start(): Promise<void> {

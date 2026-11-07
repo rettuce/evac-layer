@@ -1,5 +1,6 @@
 import { CABINET_OFFICE_5, rgbCss } from '../../app/layout/palette'
 import type { AlertLevel } from '../../app/layout/types'
+import type { AlertSet } from './displays'
 
 export interface Shelter {
   name: string
@@ -87,7 +88,7 @@ export function scenarioOf(setId: string): Scenario | undefined {
 }
 
 // The corner badge reads what the faces show, so the random set of [E] is named as well as the timeline's.
-export function renderNow(root: HTMLElement, setId: string | undefined): void {
+export function renderNow(root: HTMLElement, setId: string | undefined, set: AlertSet | undefined): void {
   const alert = setId ? ALERTS[setId] : undefined
   const scenario = setId ? scenarioOf(setId) : undefined
   setSwatch(root.querySelector<HTMLElement>('.swatch')!, alert)
@@ -97,6 +98,9 @@ export function renderNow(root: HTMLElement, setId: string | undefined): void {
   root.querySelector('.where')!.textContent = alert && scenario
     ? `${scenario.placeJa}${alert.site ? ` ${alert.site}` : ''} · ${scenario.date} ${alert.issuedAt} JST`
     : ''
+  const issuedHm = set?.issued.slice(11, 16)
+  root.querySelector('.bulletin')!.textContent = set ? `${issuedHm} ${set.issuer} ${set.bulletin}` : ''
+  root.querySelector('.bulletin-en')!.textContent = set ? `${issuedHm} JST ${set.bulletin_en}` : ''
   const shelter = alert?.shelter
   root.querySelector('.shelter')!.textContent = shelter ? `避難先 ${shelter.name} ${shelter.direction} ${shelter.distanceM} m` : ''
   root.querySelector('.shelter-en')!.textContent = shelter ? `Shelter ${shelter.distanceM} m ${shelter.directionEn}` : ''

@@ -69,7 +69,7 @@ status.textContent = 'loading video …'
 
 let places: Places | undefined
 function showState(setId: string | undefined): void {
-  renderNow(nowBadge, setId)
+  renderNow(nowBadge, setId, setId ? displays.setById(setId) : undefined)
   places?.show(placeOf(setId))
 }
 const timeline = new Timeline(document.getElementById('timeline')!, {
