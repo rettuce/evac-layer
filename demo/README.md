@@ -4,7 +4,7 @@
 
 ## 最終の編集は DaVinci Resolve で手で行った
 
-提出した動画は https://youtu.be/9XRmnF2DCsM （2:51）です。
+提出した動画は https://youtu.be/W_wwWq_1ob8 （2:51）です。
 
 このディレクトリのスクリプト（`compose/compose.py`・`compose/mix_audio.py`・`compose/davinci.py`）が出すのは、編集の素材一式までです。カットごとの映像、字幕とテロップ（PNG と時刻の表）、音（BGM・効果音・場面転換の音）を、DaVinci Resolve のタイムラインに置ける形で書き出します。カットの並べ替え、尺の調整、ロゴの重ねは、作者が DaVinci Resolve で手で行いました。下の「流れ」をそのまま回しても、提出した動画と同じ 1 本にはなりません。
 
