@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { APPROVALS_FILE } from "../paths.js";
 import { readSites, siteMunicipality, type SiteFile } from "../sites.js";
-import { type ClassApproval, type LayoutClass, classDigest, classKey, layoutDigest, liveLayoutGateWith, passedBrowserCheck, screenClass } from "../../../app/layout/gate";
+import { type CheckReport, type ClassApproval, type LayoutClass, classDigest, classKey, layoutDigest, liveLayoutGateWith, passedBrowserCheck, screenClass } from "../../../app/layout/gate";
 
 export interface Approvals {
   version: "0.1";
@@ -59,6 +59,6 @@ export function layoutDigestOf(dir: string): string | undefined {
 export function layoutClassOf(dir: string, reportFile: string): LayoutClass | undefined {
   const files = layoutFilesOf(dir);
   if (!files.length) return undefined;
-  const report = fs.existsSync(reportFile) ? (JSON.parse(fs.readFileSync(reportFile, "utf8")) as { outcome?: string; verifier?: string }) : undefined;
-  return { key: screenClass(JSON.parse(files[0].body)), digest: classDigest(files), checked: passedBrowserCheck(report) };
+  const report = fs.existsSync(reportFile) ? (JSON.parse(fs.readFileSync(reportFile, "utf8")) as CheckReport) : undefined;
+  return { key: screenClass(JSON.parse(files[0].body)), digest: classDigest(files), checked: passedBrowserCheck(report, layoutDigest(files)) };
 }

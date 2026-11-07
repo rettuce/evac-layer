@@ -97,8 +97,10 @@ export interface LayoutClass { key: string; digest: string; checked: boolean }
 
 // The class digest leaves the JMA warning name out, so only a bulletin whose own screens passed the browser check
 // (where an overflowing headline is caught) may go out on a class approval.
-export function passedBrowserCheck(report: { outcome?: string; verifier?: string } | undefined): boolean {
-  return report?.outcome === 'pass' && /browser|vision/.test(report.verifier ?? '')
+export interface CheckReport { outcome?: string; verifier?: string; layout_digest?: string; browser_skipped?: string[] }
+
+export function passedBrowserCheck(report: CheckReport | undefined, layoutDigestNow: string): boolean {
+  return report?.outcome === 'pass' && /browser|vision/.test(report.verifier ?? '') && !report.browser_skipped?.length && report.layout_digest === layoutDigestNow
 }
 
 export function approvalWith(

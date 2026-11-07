@@ -70,12 +70,12 @@ export async function composeBulletin(args: {
   if (skipped) return { ...noScreen(args, row, skipped), situation };
   const step: WriterStep = args.writer.kind === "fixture"
     ? { writer: args.writer.writer, writerSource: args.writer.source, reviser: args.writer.reviser, afterLoop: () => {} }
-    : await writeForBulletin({ alert: e.alert, municipality, situation }, { live: args.writer.kind === "live" ? args.writer.live : undefined, persist: args.persistWriter ?? true, usage: args.usage ?? [] });
+    : await writeForBulletin({ alert: e.alert, municipality, situation, site: args.site }, { live: args.writer.kind === "live" ? args.writer.live : undefined, persist: args.persistWriter ?? true, usage: args.usage ?? [] });
   const maxAttempts = args.maxAttempts ?? MAX_ATTEMPTS;
   const result = await runLoop({ alert: e.alert, municipality, site: args.site, writer: step.writer, writerSource: step.writerSource, verifier: args.verifier, reviser: step.reviser, maxAttempts });
   step.afterLoop(result);
   const notes = [...(args.writer.kind === "placeholder" ? [PLACEHOLDER_NOTE] : []), ...(args.readerRan ? [] : [READER_MISSING_NOTE])].join(" ");
-  const { dir, report } = writeReport({ siteId: args.site.id, municipalityId: municipality.id, roots: args.roots, bulletinId: e.bulletin_id, verifier: args.verifier.name, reviser: step.reviser.name, maxAttempts, result, writerNote: notes || undefined });
+  const { dir, report } = writeReport({ siteId: args.site.id, municipalityId: municipality.id, roots: args.roots, bulletinId: e.bulletin_id, verifier: args.verifier.name, skippedShapes: args.verifier.skippedShapes, reviser: step.reviser.name, maxAttempts, result, writerNote: notes || undefined });
   const indexRow = screenRow(row, { situation, verifier: args.verifier, dir, report });
   upsertIndexRow({ layoutsRoot: args.roots?.layouts, site: args.site, municipality, row: indexRow });
   return { row: indexRow, outcome: report.outcome, reason: report.reason, situation, dir, attempts: report.attempts };

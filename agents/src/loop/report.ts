@@ -1,11 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { LAYOUTS_DIR, REPORTS_DIR, REPO_ROOT } from "../paths.js";
+import { layoutDigestOf } from "../delivery/gate.js";
 import type { LoopResult } from "./loop.js";
 
 export { LAYOUTS_DIR, REPORTS_DIR };
 
-export function writeReport(args: { siteId: string; municipalityId: string; bulletinId: string; verifier: string; reviser: string; maxAttempts: number; result: LoopResult; writerNote?: string; roots?: { reports: string; layouts: string } }) {
+export function writeReport(args: { siteId: string; municipalityId: string; bulletinId: string; verifier: string; skippedShapes?: readonly string[]; reviser: string; maxAttempts: number; result: LoopResult; writerNote?: string; roots?: { reports: string; layouts: string } }) {
   const dir = path.join(args.roots?.reports ?? REPORTS_DIR, args.siteId, args.bulletinId);
   const layoutDir = path.join(args.roots?.layouts ?? LAYOUTS_DIR, args.siteId, args.bulletinId);
   fs.mkdirSync(dir, { recursive: true });
@@ -30,6 +31,8 @@ export function writeReport(args: { siteId: string; municipalityId: string; bull
     ...(args.result.reason ? { reason: args.result.reason } : {}),
     attempts: args.result.attempts,
     layouts,
+    ...(layouts.length ? { layout_digest: layoutDigestOf(layoutDir) } : {}),
+    browser_skipped: (args.skippedShapes ?? []).filter((shape) => args.result.screens.some((s) => s.shape === shape)),
   };
   fs.writeFileSync(path.join(dir, "report.json"), JSON.stringify(report, null, 2) + "\n");
   return { dir, report };

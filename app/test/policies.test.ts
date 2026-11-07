@@ -6,7 +6,7 @@ import { test } from 'node:test'
 import { sourceLines } from '../layout/sources.ts'
 import { isDemoSitePath, isTrustedLayoutSrc, resolveLayoutSrc } from '../layout/trust.ts'
 import { adminAccess, clientAddressFor, type AdminRequest } from '../server/utils/adminPolicy.ts'
-import { classDigest, layoutDigest, liveLayoutGate, liveLayoutGateWith, passedBrowserCheck, revokeClasses, screenClass } from '../layout/gate.ts'
+import { type CheckReport, classDigest, layoutDigest, liveLayoutGate, liveLayoutGateWith, passedBrowserCheck, revokeClasses, screenClass } from '../layout/gate.ts'
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
 import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
 import { WEBHOOK_RETRIES, webhookRetryDelayMs } from '../layout/feed.ts'
@@ -135,9 +135,11 @@ function floodScreen(bulletin: string, issuedAt: string, action = '高い とこ
   }
 }
 
-function classOf(screen: ReturnType<typeof floodScreen>, report = { outcome: 'pass', verifier: 'browser (http://127.0.0.1:3150)' }) {
+function classOf(screen: ReturnType<typeof floodScreen>, report: CheckReport = {}) {
   const files = [{ shape: '16x9', body: JSON.stringify(screen) }]
-  return { files, digest: layoutDigest(files), cls: { key: screenClass(screen), digest: classDigest(files), checked: passedBrowserCheck(report) } }
+  const digest = layoutDigest(files)
+  const checked = passedBrowserCheck({ outcome: 'pass', verifier: 'browser (http://127.0.0.1:3150)', layout_digest: digest, browser_skipped: [], ...report }, digest)
+  return { files, digest, cls: { key: screenClass(screen), digest: classDigest(files), checked } }
 }
 
 test('a class approval opens a new bulletin of the same class whose headline, time and id alone differ', () => {
@@ -163,6 +165,10 @@ test('a class approval opens a new bulletin of the same class whose headline, ti
   assert.equal(liveLayoutGate(approvals, 's1', 'B5', failedCheck.digest, failedCheck.cls), 'unapproved', 'a class approval needs the bulletin\'s own screens to pass the browser check')
   const staticOnly = classOf(floodScreen('B6', '2026-10-22T11:30:00+09:00'), { outcome: 'pass', verifier: 'static' })
   assert.equal(liveLayoutGate(approvals, 's1', 'B6', staticOnly.digest, staticOnly.cls), 'unapproved', 'a pass without a browser does not count')
+  const skippedShape = classOf(floodScreen('B7', '2026-10-22T12:00:00+09:00'), { browser_skipped: ['pillar'] })
+  assert.equal(liveLayoutGate(approvals, 's1', 'B7', skippedShape.digest, skippedShape.cls), 'unapproved', 'a shape the browser did not open was not checked')
+  const otherFiles = classOf(floodScreen('B8', '2026-10-22T12:30:00+09:00'), { layout_digest: approved.digest })
+  assert.equal(liveLayoutGate(approvals, 's1', 'B8', otherFiles.digest, otherFiles.cls), 'unapproved', 'a report about other layout files does not vouch for these')
 
   const edited = classOf(floodScreen('B3', '2026-10-22T10:00:00+09:00', '高い ところへ にげで'))
   assert.notEqual(edited.cls.digest, approved.cls.digest)

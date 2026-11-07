@@ -2,8 +2,8 @@ import { classKey, layoutKey, revokeClasses } from '~~/layout/gate'
 import { isBulletinId } from '~~/layout/replay'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{ site_id?: unknown; municipality?: unknown; bulletin_id?: unknown; approved?: unknown }>(event)
-  if (!isBulletinId(body.bulletin_id) || typeof body.approved !== 'boolean') {
+  const body = await readBody<{ site_id?: unknown; municipality?: unknown; bulletin_id?: unknown; approved?: unknown; digest?: unknown }>(event)
+  if (!isBulletinId(body.bulletin_id) || typeof body.approved !== 'boolean' || (body.digest !== undefined && typeof body.digest !== 'string')) {
     throw createError({ status: 400, statusText: 'Bad Request', message: 'site_id (or municipality), bulletin_id and approved are required' })
   }
   const site = (await resolveSite({ site: body.site_id, municipality: body.municipality })).id
@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
   if (body.approved) {
     const snapshot = await readLayoutSnapshot(site, bulletin)
     if (!snapshot) throw createError({ status: 404, statusText: 'Not Found', message: `no layout files for ${site}/${bulletin}` })
+    if (body.digest !== undefined && body.digest !== snapshot.digest) throw createError({ status: 409, statusText: 'Conflict', message: 'the screens changed since you looked; reload' })
     const approvals = await readApprovals()
     const classRecord = { approved: true, updated_at: updatedAt, digest: snapshot.cls.digest, approved_from: bulletin }
     approvals.layouts[key] = { approved: true, updated_at: updatedAt, digest: snapshot.digest }

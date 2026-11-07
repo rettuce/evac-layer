@@ -15,6 +15,7 @@ interface CatalogEntry {
   approved: boolean
   stale?: boolean
   approved_by?: 'bulletin' | 'class' | null
+  digest?: string
   approved_from?: string
   report?: { outcome: string; verifier: string; attempts: number; findings: unknown[]; screens_ok: Record<string, boolean> }
 }
@@ -174,12 +175,20 @@ const approveBlockedReason = computed(() => {
   return undefined
 })
 
+const approveError = ref<string>()
+
 async function setApproved(entry: CatalogEntry, approved: boolean) {
   if (!selected.value) return
   saving.value = entry.bulletin_id
-  await $fetch('/api/admin/approve', { method: 'POST', headers: adminHeaders(), body: { site_id: selected.value.site, bulletin_id: entry.bulletin_id, approved } })
-  await load()
-  saving.value = undefined
+  approveError.value = undefined
+  try {
+    await $fetch('/api/admin/approve', { method: 'POST', headers: adminHeaders(), body: { site_id: selected.value.site, bulletin_id: entry.bulletin_id, approved, ...(approved && entry.digest ? { digest: entry.digest } : {}) } })
+  } catch (error) {
+    approveError.value = (error as { statusCode?: number }).statusCode === 409 ? '画面の内容が変わりました。読み直したので、もう一度確かめてから承認してください' : '保存できませんでした'
+  } finally {
+    await load()
+    saving.value = undefined
+  }
 }
 
 async function setAutoPublish(siteId: string, autoPublish: boolean) {
@@ -343,6 +352,7 @@ onUnmounted(() => clearInterval(clockTimer))
             </button>
             <p v-if="current.approved_by === 'class'" class="meta fg-3 revoke-note">同じ種類の新しい電文も止まります。元の電文の承認は残ります</p>
             <p v-if="approveBlockedReason" class="meta fg-3 blocked">{{ approveBlockedReason }}</p>
+            <p v-if="approveError" class="meta blocked" data-error="approve">{{ approveError }}</p>
           </aside>
         </div>
 

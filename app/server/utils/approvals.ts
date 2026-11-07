@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { type Approvals, type LayoutClass, classDigest, layoutDigest, passedBrowserCheck, screenClass } from '~~/layout/gate'
+import { type Approvals, type CheckReport, type LayoutClass, classDigest, layoutDigest, passedBrowserCheck, screenClass } from '~~/layout/gate'
 import { isMunicipalityId } from '~~/layout/replay'
 import { isShape } from '~~/layout/shapes'
 
@@ -48,17 +48,20 @@ export interface LayoutSnapshot {
   files: { shape: string; body: string }[]
   digest: string
   cls: LayoutClass
+  report?: CheckReport
 }
 
 // One read of a bulletin's shape files and report: the gate decides on these bytes and the feed serves them.
 export async function readLayoutSnapshot(site: string, bulletin: string): Promise<LayoutSnapshot | undefined> {
   const files = await layoutFiles(site, bulletin)
   if (!files.length) return undefined
-  const report = await readJsonIfExists<{ outcome?: string; verifier?: string }>(join(dataDir(), 'reports', site, bulletin, 'report.json'))
+  const report = await readJsonIfExists<CheckReport>(join(dataDir(), 'reports', site, bulletin, 'report.json'))
+  const digest = layoutDigest(files)
   return {
     files,
-    digest: layoutDigest(files),
-    cls: { key: screenClass(JSON.parse(files[0]!.body)), digest: classDigest(files), checked: passedBrowserCheck(report) },
+    digest,
+    cls: { key: screenClass(JSON.parse(files[0]!.body)), digest: classDigest(files), checked: passedBrowserCheck(report, digest) },
+    ...(report ? { report } : {}),
   }
 }
 
