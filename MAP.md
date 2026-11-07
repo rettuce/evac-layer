@@ -10,8 +10,8 @@ A map of this repository for first-time readers and AI: what is where, and which
 
 | ディレクトリ | 中身 | 入口 |
 |---|---|---|
-| `agents/` | 気象庁 XML の parser・Reader・Writer・Composer・Verifier・書き直しのループ・受信・書き出し | `agents/package.json` の scripts（`receive` → `src/jma/receive.ts`、`fanout` → `src/loop/fanout.ts`、`reader` → `src/reader/cli.ts`） |
-| `app/` | Nuxt。Renderer（`/screen`）・運営者の画面（`/admin`・`/dashboard`）・配信 API | `app/server/api/`（`live-layout.get.ts`・`feed/[site].get.ts`・`admin/`） |
+| `agents/` | 気象庁 XML の parser・Reader・Writer・Composer・Verifier・書き直しのループ・受信・書き出し | `agents/package.json` の scripts（`receive` → `agents/src/jma/receive.ts`、`fanout` → `agents/src/loop/fanout.ts`、`reader` → `agents/src/reader/cli.ts`） |
+| `app/` | Nuxt。Renderer（`/screen`）・運営者の画面（`/admin`・`/dashboard`）・配信 API | `app/server/api/`（`live-layout.get.ts`・`app/server/api/feed/[site].get.ts`・`admin/`） |
 | `app/layout/` | Nuxt の layouts ではない。承認ゲート・配置・距離の当てはめなど、app と agents が共有する中核ロジック | `app/layout/gate.ts`（承認ゲート）・`GRID.md`（グリッドの設計） |
 | `app/server/middleware/` | admin API の認証 | `admin-auth.ts` |
 | `schema/` | agents と app の間の取り決め（layout・alert・site・municipality・feed・書き出し） | `schema/README.md` |
@@ -30,17 +30,17 @@ A map of this repository for first-time readers and AI: what is where, and which
 
 誤解しやすい点:
 - `data/layouts/14100-demo/` には `index.json` しかありません。横浜市は記録期間に警報が出ず、画面は 0 枚です（`docs/evaluation.md:13`）。
-- `agents/src/jma/receive.ts` は Anthropic SDK を import します。ただしモデルを呼ぶのは `--writer live` か `--verifier vision` を明示したときだけです。既定の Writer は `placeholder` で、承認済みの文を再利用します（`receive.ts:151`・`171-172`、`agents/src/writer/step.ts:22-38`）。
+- `agents/src/jma/receive.ts` は Anthropic SDK を import します。ただしモデルを呼ぶのは `--writer live` か `--verifier vision` を明示したときだけです。既定の Writer は `placeholder` で、承認済みの文を再利用します（`agents/src/jma/receive.ts:151`・`agents/src/jma/receive.ts:171-172`、`agents/src/writer/step.ts:22-38`）。
 - `docs/how-we-built.md` は、英語の段落のあとに同じ内容の日本語が続きます。
 
 ## README の主張と裏付け
 
 | 主張 | 裏付け |
 |---|---|
-| スクリーンが自分の場所を知り、避難先・方向・距離を出す | `agents/src/composer/compose.ts:24-38`（方位と向き）・`compose.ts:63`（`pickShelter`）・`app/layout/nearSite.ts:1`（100 m の施設解決） |
-| 承認はモデルの外にある | `app/layout/gate.ts:36-38`（種類のキー）・`gate.ts:68-70`（警報名と時刻を除いた digest）・`gate.ts:106-123`（ゲート） |
+| スクリーンが自分の場所を知り、避難先・方向・距離を出す | `agents/src/composer/compose.ts:24-38`（方位と向き）・`agents/src/composer/compose.ts:63`（`pickShelter`）・`app/layout/nearSite.ts:1`（100 m の施設解決） |
+| 承認はモデルの外にある | `app/layout/gate.ts:36-38`（種類のキー）・`app/layout/gate.ts:68-70`（警報名と時刻を除いた digest）・`app/layout/gate.ts:106-123`（ゲート） |
 | 未承認の画面は配信されない | `app/server/api/live-layout.get.ts:7-8`（ゲートを通らなければ 403） |
-| 警報時はモデルを呼ばない | `agents/src/jma/receive.ts:151`・`171-172`・`agents/src/writer/step.ts:22-38` |
+| 警報時はモデルを呼ばない | `agents/src/jma/receive.ts:151`・`agents/src/jma/receive.ts:171-172`・`agents/src/writer/step.ts:22-38` |
 | 気象庁のフィードを読む | `agents/src/jma/record.ts:79`（`recordFeeds`） |
 | 実電文で作り、3 段で検査する | `agents/src/loop/static-verifier.ts`・`browser-verifier.ts`・`agents/src/verifier/vision.ts`・指摘の種類は `agents/src/verifier/checks.ts:28`・最大 3 回は `agents/src/loop/loop.ts:6` |
 | レイアウト 110 | `data/layouts/` の `index.json` 以外の JSON が 110 ファイル |
@@ -51,9 +51,9 @@ A map of this repository for first-time readers and AI: what is where, and which
 | prompt caching | `agents/src/writer/live.ts:77`・`82`・`agents/src/verifier/vision.ts:65` |
 | モデルの使い分け | `agents/src/reader/pricing.ts:10-11`・選定の比較は `docs/how-we-built.md:9` |
 | フックとスキル | `.claude/settings.json`・`.claude/hooks/check-data.sh:8-13`・`.claude/skills/` |
-| Vision の誤検知率と費用 | `docs/evaluation.md:49-58`（誤検知）・`evaluation.md:88-112`（費用） |
+| Vision の誤検知率と費用 | `docs/evaluation.md:49-58`（誤検知）・`docs/evaluation.md:88-112`（費用） |
 | 実行ごとの指摘数 | `docs/evaluation.md:17-47` |
-| Webhook の署名と宛先の制限 | `app/server/utils/webhook.ts:24`（HMAC-SHA256）・`webhook.ts:28`（私設アドレス宛を拒否） |
+| Webhook の署名と宛先の制限 | `app/server/utils/webhook.ts:24`（HMAC-SHA256）・`app/server/utils/webhook.ts:28`（私設アドレス宛を拒否） |
 | admin API の認証 | `app/server/middleware/admin-auth.ts:15-18`（401・403） |
 | CI | `.github/workflows/ci.yml`（typecheck と agents のテスト） |
 | コードは 11 月 2 日から | 最初のコミットは 2026-11-02 13:03（`git log --reverse`） |
