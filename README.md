@@ -14,18 +14,21 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 - **リポジトリの地図**: [`MAP.md`](MAP.md)（何がどこにあり、この README の主張の裏付けがどのファイルにあるか）
 - **English**: [summary ↓](#english-summary)
 
+いまの段階: 記録した実際の電文で検証した、実証前のプロトタイプです。最初の利用先は作者が IE3 で開発しているサイネージのシステムで、実証の相手を募集しています（[この先](#この先)）。
+
 ### 3 分で見る
 
-1. **動画（2 分 51 秒）**: [youtu.be/W_wwWq_1ob8](https://youtu.be/W_wwWq_1ob8) で、警報から解除までの 1 日を見る
-2. **3D シミュレーター**: [開いて](https://rettuce.github.io/evac-layer/)「はじめる」を押すと由利本荘市の 10 月 21 日が再生される。右下のタイムラインで 15:55 / 18:15 / 19:45 を押し、「表示する場所」で駅・会館・高校・公園を切り替えると、同じ警報でも避難先と方向が変わる。最後に [D] でパネルを隠して眺める
+1. **動画（2 分 51 秒）**: [youtu.be/W_wwWq_1ob8](https://youtu.be/W_wwWq_1ob8) で、警報がレベル 3・4・5 と上がる 1 日と、場所ごとに変わる案内、事前の承認を見る
+2. **3D シミュレーター**: [開いて](https://rettuce.github.io/evac-layer/)「はじめる」を押すと由利本荘市の 10 月 21 日が再生される。右下のタイムラインで 15:55 / 18:15 / 19:45 を押し、「表示する場所」で駅・会館・高校・公園を切り替えると、同じ警報でも避難先と方向が変わる。最後に [D] で表示を消して眺める
 3. **手元で動かす**: [動かす](#動かす) の `pnpm install` → `pnpm -F app dev` → `pnpm -F app demo:approve` → `/screen?site=05210-demo-honjo-station&mode=live&reset` を開く（約 16 秒でレベル 3、約 23 秒でレベル 4）
 
 **何が新しいか**
 
 - スクリーンが自分の場所を知り、その場所のための避難先・方向・距離を出す
 - 承認済みの画面だけが、警報の瞬間に自動で出る（出す前に人が見る）
-- 実際に発表された気象庁の電文 206 本で作り、規則・ブラウザ・Vision の 3 段で検査した
-- 既存のどのサイネージにも、HTTP で 1 枚のレイヤーとして載る。特定の製品のために閉じていない
+- 気象庁が実際に発表した電文 206 本を判定し、警報に当たる 22 本から 110 のレイアウトを作って、規則・ブラウザ・Vision の 3 段で検査した
+- HTTP で画像か HTML を受け取れる既存のどのサイネージにも、1 枚のレイヤーとして載る。特定の製品のために閉じていない
+- Claude が自治体の資料を読み、10 の言語で書き、描いた画面を検査する。人が承認し、警報の瞬間はモデルを呼ばない
 
 > **IDEA**
 >
@@ -63,7 +66,7 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 
 ![同じレベル 4 の警報でも、ディスプレイの位置によって、避難先・方向・距離が変わる 4 か所の地図と画面](docs/images/where-it-stands.jpg)
 
-同じ警報でも、スクリーンの位置が違えば、避難先も方向も距離も変わります。上の 4 枚は、同じレベル 4 の警報を、市内の 4 か所に置いたスクリーンで描いたものです（南西へ 570 m・東へ 160 m・南東へ 210 m・北へ 80 m）。スクリーンの緯度経度と向きから、国土地理院の指定緊急避難場所のうち最寄りの場所を選び、見る人から見た方向と距離を出します。
+同じ警報でも、スクリーンの位置が違えば、避難先も方向も距離も変わります。上の 4 枚は、同じレベル 4 の警報を、市内の 4 か所に置いたスクリーンで描いたものです（南西へ 570 m・東へ 160 m・南東へ 210 m・北へ 80 m）。スクリーンの緯度経度と向きから、国土地理院の指定緊急避難場所のうち最寄りの場所を選び、見る人から見た方向と距離を出します。避難先は災害の種類に対応する指定緊急避難場所のうち直線距離で最寄りの候補で、矢印と距離は経路案内ではなく、道路や浸水の範囲は考慮していません。
 
 ### 災害の種類とレベル、10 の言語、どんな形のスクリーンにも
 
@@ -89,7 +92,7 @@ EVAC LAYER が作るのは下書きです。施設ごとに、災害 × 警戒�
 
 ![5 自治体・気象庁の電文 206 本・レイアウト 110・10 言語。背景のタイルは画面の見た目を示すための架空の例](docs/images/screens-from-real-bulletins.jpg)
 
-3 週間かけて記録した、5 つの自治体に関わる気象庁の電文 206 本（うち 6 本は気象庁の公式のサンプル電文で、訓練の電文）から、110 のレイアウト（画面を出す 22 本 × 5 形状）を作りました。背景のタイルは、画面の並びを見せるための架空の例です。実際の電文から作った画面は [`docs/screens.md`](docs/screens.md) にあります。すべての画面を、規則の検査・ブラウザでの描画の検査・Claude の画像認識（Vision）による検査の 3 段で確かめています。実データで見つかった問題は[下に](#実データで見つかったこと)まとめています。
+3 週間かけて記録した、5 つの自治体に関わる気象庁の電文 206 本（うち 6 本は気象庁の公式のサンプル電文で、訓練の電文）から、110 のレイアウト（画面を出す 22 本 × 5 形状）を作りました。背景のタイルは、画面の並びを見せるための架空の例です。実際の電文から作った画面は [`docs/screens.md`](docs/screens.md) にあります。画面は開発の過程で、規則の検査・ブラウザでの描画の検査・Claude の画像認識（Vision）による検査の 3 段で確かめました（実行ごとの記録は [`docs/evaluation.md`](docs/evaluation.md)）。実データで見つかった問題は[下に](#実データで見つかったこと)まとめています。
 
 ### 10 月 21 日、由利本荘市。警報から解除まで
 
@@ -102,7 +105,7 @@ EVAC LAYER が作るのは下書きです。施設ごとに、災害 × 警戒�
 | 10/21 19:45 | 子吉川レベル５氾濫特別警報（気象庁・国土交通省） | 5 | 鶴舞小学校へ・南西へ・570 m「高い所へ上がって」 | <img src="docs/images/yurihonjo-1021-lv5.jpg" width="240" alt="レベル5の画面: 高い所へ上がって、南西へ、鶴舞小学校 570m"> |
 | 10/22 06:20 | 子吉川レベル２氾濫注意報解除（気象庁・国土交通省） | 解除 | 「避難は不要です」 | <img src="docs/images/yurihonjo-1021-clear.jpg" width="240" alt="解除の画面: 避難は不要です"> |
 
-レベル 5 の画面にも避難先と方向を添えています。これは暫定の判断で、経緯は [`agents/FINDINGS.md`](agents/FINDINGS.md) にあります。画面はどれも、やさしい日本語と英語が出ている時点の静止画です。同じ電文を受けたとき、別の場所に置いたスクリーンが出す案内は『[スクリーンが自分の場所を知っている](#スクリーンが自分の場所を知っている)』の節のとおり変わります。
+レベル 5 の画面にも避難先と方向を添えています。これは暫定の判断で、実運用の前に自治体と表示の方針を決めます。経緯は [`agents/FINDINGS.md`](agents/FINDINGS.md) にあります。画面はどれも、やさしい日本語と英語が出ている時点の静止画です。同じ電文を受けたとき、別の場所に置いたスクリーンが出す案内は『[スクリーンが自分の場所を知っている](#スクリーンが自分の場所を知っている)』の節のとおり変わります。
 
 ## 仕組み
 
@@ -140,7 +143,7 @@ EVAC LAYER は、画面を再生する機能を持たず、サイネージのシ
    - **Push**: 施設ごとの Webhook。HMAC-SHA256 の署名と時刻・配信 ID つきで、なりすましと再送を防げます。
    - **Files**: `pnpm -F agents export --site <id>` で、形状ごとの PNG と、単体で開ける HTML を書き出します。画像しか受け取れない CMS 向けです。
 
-表示を切り替えるのは `pnpm -F agents receive --sites <id>` です。気象庁の長期フィードを読み、その施設に当たる新しい電文から画面を作り、同じ種類の画面が承認済みなら表示を切り替えます。このときモデルは呼ばず、承認済みの文をそのまま使います（既定の `--writer placeholder`）。未承認なら直前の承認済みの画面を保ちます。実際の運用では、フィードを読む間隔（`--every 600` なら 10 分）とブラウザの検査の分だけ、警報から表示までに遅れがあります。シミュレーターと動画は記録した電文の再生なので瞬時です。自前の受信系があるなら、電文の ID を `POST /api/admin/live`（または `pnpm -F agents live`）に渡しても同じで、`null` を渡すと平常時に戻ります。手順と環境変数の全体は [`docs/integration.md`](docs/integration.md)。
+表示を切り替えるのは `pnpm -F agents receive --sites <id>` です。気象庁の長期フィードを読み、その施設に当たる新しい電文から画面を作り、同じ種類の画面が承認済みなら表示を切り替えます。このときモデルは呼ばず、承認済みの文をそのまま使います（既定の `--writer placeholder`）。未承認なら、直前の電文が承認済みならその画面を保ちます（未承認が 2 件続くと平常時の表示に戻ります）。実際の運用では、フィードを読む間隔（`--every 600` なら 10 分）とブラウザの検査の分だけ、警報から表示までに遅れがあります。シミュレーターと動画は記録した電文の再生なので瞬時です。自前の受信系があるなら、電文の ID を `POST /api/admin/live`（または `pnpm -F agents live`）に渡しても同じで、`null` を渡すと平常時に戻ります。手順と環境変数の全体は [`docs/integration.md`](docs/integration.md)。
 
 回線が切れても、画面は直前の状態を保ち、60 秒を過ぎると「同期が途絶えている」印を出します。書き出したファイルを端末に置いておけば、配信元に届かなくても承認済みの画面を出せます。
 
@@ -152,13 +155,13 @@ EVAC LAYER は、画面を再生する機能を持たず、サイネージのシ
 | 既存システムの変更 | 画面を再生する機能はそのまま。新しい機器・専用の端末は要らない |
 | 実行環境 | HTTP が使えるものなら何でも。Pull は `GET` 1 本、Push は Webhook の受け口 1 本、Files は PNG と HTML。言語もベンダーも問わない |
 | 平常時の運用への影響 | なし。フィードは `ambient` を返し続け、承認済みの警報の画面があるときだけ `alert` に変わる |
-| 運用の費用 | 1 自治体あたり年に約 $13 の API 呼び出し（[`docs/evaluation.md`](docs/evaluation.md)） |
+| 運用の費用 | 1 自治体あたり年に約 $13 の API 呼び出し（画面を毎回 Writer と Vision で作る前提の試算。サーバー・回線・人件費は含まない。[`docs/evaluation.md`](docs/evaluation.md)） |
 
 同じ契約で書いた受け側の例が 2 つあります。Node の 40 行（[`examples/minimal-cms/`](examples/minimal-cms/)）と、Python の標準ライブラリだけで書いた 1 ファイル（[`examples/python-player/`](examples/python-player/)）。どちらも EVAC LAYER を知らず、自分の平常時の内容を流しながらフィードを読んでいるだけで、同じ電文が届いた瞬間に両方が承認済みの画面に変わります。
 
 ## 既存の災害対応サイネージとの違い
 
-公開資料で確認できた範囲では、国内の災害対応サイネージ（2012〜2019 年の大手メーカーの製品・実証）の災害時の動きは「公的な配信を受けて割り込み表示し、元に戻る」までです。EVAC LAYER はそこに次の点を足します。
+公開資料で確認できた範囲では、国内の災害対応サイネージ（2012〜2019 年の大手メーカーの製品・実証）の災害時の動きは「公的な配信を受けて割り込み表示し、元に戻る」までです。既存の製品に同等の機能が無いと確かめたわけではありません。EVAC LAYER はそこに次の点を足します。
 
 - **スクリーンが自分の場所を知っている。** スクリーンごとの緯度経度から、最寄りの指定緊急避難場所を「どちらへ・何 m」で出します。資料にあったのは「どこに配信するか」の選び分けまででした。
 - **全国の場所ごとの画面を、生成で作る。** 総務省のデジタルサイネージの相互運用のガイドライン（2016）は、「共通の形式が無く、システムごとに制作・個別開発・調整が要る」ことを課題に挙げています。自治体ごとの資料を読み、場所ごとの案内を組み、検査するところまでを Claude で回すのが、EVAC LAYER の答えです。
@@ -219,7 +222,7 @@ Claude Code のセッションの 1 つが全体のまとめ役になり、8 つ
 - **3 段の検査と書き直しのループ。** 規則・ブラウザ・Vision の検査が先にあり、指摘は書いた本人に戻ります。Writer の文は書き直させ、コードが書く部分（気象庁の見出し・避難先・出典）の問題は理由を添えてループを止めます。
 - **返却の最後に「確かめられなかったこと」と「未解決の点」。** 各セッションは、まとめ役から見えない前提や走らせられなかった検査を自分で書き、まとめ役は次に進む前にそれを 1 つずつ決めます。
 - **承認はモデルの外に置いた。** スキーマ、Verifier が読む DOM の属性、承認の仕組みは固定してあり、モデルを入れ替えても、人が承認した画面しか出ないという決まりは変わりません。
-- **提出物も Claude に読ませ、審査させた。** 作り手の文脈を持たない新しいセッションの Claude を審査員役にして、提出物だけを読ませました。目的は点数ではなく、事前の知識が無い読み手がこのプロジェクトを正しく理解できるか、README の主張とコードが一致しているかを確かめることです。主催の 4 つの審査基準と配点で採点させ、失格のリスク、HIGH / MEDIUM / LOW の弱点と直し方、締め切りまでに直せるかを返させ、直せる指摘を直してから次の読み手に回す、を繰り返しました。1 回目の核心の指摘は「承認が電文 ID に束縛され、本物の新しい電文は届いた瞬間に必ず未承認になる」で、承認を施設ごとの画面の種類に束ね直しました（[何を出すかは、事前に人が決める](#何を出すかは事前に人が決める)）。最後は、リポジトリ全体を読む読み手・README だけを読む読み手・英語だけを読む読み手の 3 通りで読ませ、理解のずれ（承認の単位の書き方・横浜市の画面の数・英語要約に無かった動機）を直し、何がどこにあるかの地図 [`MAP.md`](MAP.md) を置きました。差分のレビューは別のモデル（OpenAI の Codex）にも頼み、10 言語の文は原文を見せない別のモデルに逆翻訳させて照合し、コメントを消す役は別のセッションに分けました（[`docs/how-we-built.md`](docs/how-we-built.md)「Fresh-context review」）。
+- **提出物も Claude に読ませ、審査させた。** 作り手の文脈を持たない新しいセッションの Claude（Opus と Fable）を審査員役にして、提出物だけを読ませました。目的は点数ではなく、事前の知識が無い読み手がこのプロジェクトを正しく理解できるか、README の主張とコードが一致しているかを確かめることです。主催の 4 つの審査基準と配点で採点させ、失格のリスク、HIGH / MEDIUM / LOW の弱点と直し方、締め切りまでに直せるかを返させ、直せる指摘を直してから次の読み手に回す、を繰り返しました。1 回目の核心の指摘は「承認が電文 ID に束縛され、本物の新しい電文は届いた瞬間に必ず未承認になる」で、承認を施設ごとの画面の種類に束ね直しました（[何を出すかは、事前に人が決める](#何を出すかは事前に人が決める)）。最後は、リポジトリ全体を読む読み手・README だけを読む読み手・英語だけを読む読み手の 3 通りで読ませ、理解のずれ（承認の単位の書き方・横浜市の画面の数・英語要約に無かった動機）を直し、何がどこにあるかの地図 [`MAP.md`](MAP.md) を置きました。差分のレビューは別のモデル（OpenAI の Codex）にも頼み、10 言語の文は原文を見せない別のモデルに逆翻訳させて照合し、コメントを消す役は別のセッションに分けました（[`docs/how-we-built.md`](docs/how-we-built.md)「Fresh-context review」）。
 
 コードを書く前の調べものと準備、モデルの選び方、提出前のレビューは、[`docs/how-we-built.md`](docs/how-we-built.md) の「Before the code / コードを書く前」にあります。
 
@@ -277,13 +280,13 @@ pnpm -F app test
 
 - **どのサイネージにも組み込める。** EVAC LAYER は特定のサイネージ専用に閉じていません。承認済みの画面を HTTP（Pull・署名付きの Webhook・ファイル）で渡すだけなので、サイネージのソフトウェアを作る人なら誰でも、自分のシステムに同じように組み込めます（40 行の例: [`examples/minimal-cms/`](examples/minimal-cms/)）。
 - **自分たちのサイネージで動かす。** その最初の 1 件として、作者が IE3 で開発している環境演出のシステムに、オプションの 1 枚のレイヤーとして組み込みます。いまは設計まで済んでいて、ハッカソンが終わったらすぐに組み込みの開発を始めます。その後は、このシステムを使う案件に EVAC LAYER をモジュールとして最初から載せて納め、使うかどうかは施設が決めます。平常時の演出はそのシステムが、災害のときだけ EVAC LAYER が画面を受け持ちます。
-- **実証の相手を探しています。** 記録した 5 自治体（由利本荘市・横浜市・柏崎市・輪島市・吉田町）の資料と電文があり、警報の出た 4 自治体の画面は作ってあります（横浜市は期間中に警報が無く、画面は 0）。サイネージを持つ施設、自治体、組み込みたい事業者の方は [ie3.jp/contact](https://ie3.jp/contact/) へ。最初の実証に要るのは 3 つです。スクリーンの緯度経度、その自治体の資料（ハザードマップと指定緊急避難場所の一覧）、承認済みの画面を受け取る HTTP の口 1 本。運用の費用は 1 自治体あたり年に約 $13 の見込みです（[`docs/evaluation.md`](docs/evaluation.md)）。進め方は [`docs/pilot.md`](docs/pilot.md)。
+- **実証の相手を探しています。** 記録した 5 自治体（由利本荘市・横浜市・柏崎市・輪島市・吉田町）の資料と電文があり、警報の出た 4 自治体の画面は作ってあります（横浜市は期間中に警報が無く、画面は 0）。サイネージを持つ施設、自治体、組み込みたい事業者の方は [ie3.jp/contact](https://ie3.jp/contact/) へ。最初の実証に要るのは 3 つです。スクリーンの緯度経度、その自治体の資料（ハザードマップと指定緊急避難場所の一覧）、承認済みの画面を受け取る HTTP の口 1 本。API の費用は 1 自治体あたり年に約 $13 の見込みです（[`docs/evaluation.md`](docs/evaluation.md)）。進め方は [`docs/pilot.md`](docs/pilot.md)。
 - **公開のまま続けます。** 審査の期間は main を止め、その後も AGPL-3.0 のまま開発を続けます。
 
 ## 今後
 
 - **全国の自治体への展開。** API の費用を、いまの数字から粗く見積もると、全 1,740 自治体の資料を読むのに初回だけ $500〜2,000、各自治体に 1 施設ずつ置いて年に約 $22,000、全国 1 万施設で年に約 $47,000 です。前提と内訳は [`docs/evaluation.md`](docs/evaluation.md#what-a-nationwide-roll-out-would-cost-in-api-calls)。
-- **言語の選択と、母語話者による確認。** いまは 10 言語すべてが必須で、導入先ごとに言語を絞ったり入れ替えたりできません。やさしい日本語以外の訳は、母語話者の確認をまだしていません。別のモデルによる逆翻訳の照合は行いました（`agents/FINDINGS.md`）。
+- **言語の選択と、母語話者による確認。** いまは 10 言語すべてが必須で、導入先ごとに言語を絞ったり入れ替えたりできません。やさしい日本語以外の訳は、母語話者の確認をまだしていません。別のモデルによる逆翻訳の照合は行いました（`agents/FINDINGS.md`）。逆翻訳で直せなかった欄（訓練の津波案内のフィリピン語 4 欄・インドネシア語 2 欄）が残っています。
 - **津波予報区の全国対応。** 気象庁の津波予報区と市町村の対応表は、いまはデモの 5 自治体の分だけです。気象庁のコード表から全国分を作ります。
 
 ## ライセンスと連絡先
@@ -305,9 +308,9 @@ AGPL-3.0 の条件で、誰でも使えます。AGPL の条件で公開できな
 
 The author has made public signage for more than ten years: the LED visions of Shibuya Sakura Stage, the six synchronized screens of Komazawa-Daigaku station, the ten-floor LED wall beside the escalators of Daimaru Shinsaibashi. In a disaster those screens keep playing advertising or go black. After the tsunami of the 2024 Noto earthquake, Joetsu City wrote in its review that foreign residents and visitors who heard the loudspeaker calls could not tell whether they had to evacuate or where to go. The call arrived; the next line, "southwest, 570 m", did not. Japan has 3.77 million foreign residents and 42.7 million visitors a year. EVAC LAYER is for the people the Japanese announcement does not reach.
 
-To see it: open [rettuce.github.io/evac-layer](https://rettuce.github.io/evac-layer/) and press はじめる (start). The bulletins actually issued for Yurihonjo, Akita on 21 October 2026 replay from warning level 3 to 4 to 5 across the 22 screens of a station concourse. The timeline at bottom right picks a time; 表示する場所 (place) moves the same warning to a station, a hall, a high school or a park, and the shelter, direction and distance change with the spot. D hides the panels. The 2:51 video shows the same day from warning to all-clear.
+To see it: open [rettuce.github.io/evac-layer](https://rettuce.github.io/evac-layer/) and press はじめる (start). The bulletins actually issued for Yurihonjo, Akita on 21 October 2026 replay from warning level 3 to 4 to 5 across the 22 screens of a station concourse. The timeline at bottom right picks a time; 表示する場所 (place) moves the same warning to a station, a hall, a high school or a park, and the shelter, direction and distance change with the spot. D hides the panels. The 2:51 video shows the same day as the warnings rise from level 3 to 5.
 
-Give EVAC LAYER the latitude, longitude and facing of a site (one venue; its screens share them) and its municipality code, written by hand, and it works out the rest for that spot: the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. The same warning gives each site its own shelter, direction and distance, and a municipality can hold any number of sites. It reads the municipality's hazard-map PDFs with citations (Reader, Claude), parses JMA disaster-prevention XML, writes the guidance in ten languages (Japanese, *yasashii nihongo* (plain Japanese for non-native readers), English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five base shapes that fit any aspect ratio, and inspects every screen by rules, in a browser and by Vision (Claude). Operators approve the screens in calm times; when a bulletin arrives, only approved screens go out, as `alert` / `clear` events by feed, signed webhook or static files. From 206 JMA bulletins for five municipalities (200 recorded from the live feed, 6 official sample bulletins from a drill) it made 110 layouts.
+Give EVAC LAYER the latitude, longitude and facing of a site (one venue; its screens share them) and its municipality code (resolved from the coordinates by GSI's reverse geocoder, or written by hand), and it works out the rest for that spot: the nearest designated evacuation site from GSI data, and the direction and distance from where the viewer stands. The same warning gives each site its own shelter, direction and distance, and a municipality can hold any number of sites. It reads the municipality's hazard-map PDFs with citations (Reader, Claude), parses JMA disaster-prevention XML, writes the guidance in ten languages (Japanese, *yasashii nihongo* (plain Japanese for non-native readers), English, Simplified and Traditional Chinese, Korean, Thai, Vietnamese, Filipino and Indonesian) with action pictograms (Writer, Claude), composes it for five base shapes that fit any aspect ratio, and inspects every screen by rules, in a browser and by Vision (Claude). Operators approve the screens in calm times; when a bulletin arrives, only approved screens go out, as `alert` / `clear` events by feed, signed webhook or static files. From 206 JMA bulletins for five municipalities (200 recorded from the live feed, 6 official sample bulletins from a drill) it made 110 layouts.
 
 To add your own screens: register a site file, generate and approve its screens once, then take the feed, the webhook or the files. `pnpm -F agents receive --sites <id>` reads the JMA long feeds, composes the screens of each new bulletin that concerns the site and switches the site once they are approved, either as that bulletin or through an approval of the same class (hazard × warning level × template) with the same wording; a receiver of your own can switch a site by posting a bulletin id (or `null`) to `POST /api/admin/live`. The switches in the demo video and the simulator are replays of recorded bulletins. The steps are in [`docs/integration.md`](docs/integration.md). In steady state a screen costs about $0.245 in API calls, roughly $13 per municipality per year.
 

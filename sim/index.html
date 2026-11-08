@@ -86,6 +86,7 @@
       #intro .links a, #nowebgl .links a { color: #ccc; }
       #nowebgl { position: fixed; inset: 0; z-index: 2; display: grid; place-items: center; padding: 16px; background: #000; text-align: center; }
       #nowebgl[hidden] { display: none; }
+      #nowebgl .card, #nowebgl p { max-width: 100%; overflow-wrap: anywhere; }
       #intro .start { padding: 6px 16px; }
       #panel-toggle, #dock-toggle { display: none; position: fixed; background: #111; color: #ccc; border-color: #444; padding: 8px 12px; font: inherit; }
       #panel-toggle { top: 8px; left: 8px; }
@@ -114,7 +115,7 @@
     <div id="ui"></div>
     <div id="info">
       <div id="fps">— fps</div>
-      <div id="hint">[D] : debug toggle&ensp;&ensp;[←→] : scene&ensp;&ensp;[E] : evac</div>
+      <div id="hint">[D] : hide panels&ensp;&ensp;[←→] : scene&ensp;&ensp;[E] : evac</div>
       <div id="status">loading room.glb…</div>
       <a id="repo" href="https://github.com/rettuce/evac-layer" target="_blank" rel="noopener">GitHub ↗</a>
     </div>
