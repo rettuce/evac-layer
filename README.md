@@ -4,6 +4,8 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 
 # EVAC LAYER
 
+**Turn every screen into a lifeline.** 街にある、あらゆる画面を、命を守るインフラへ。
+
 **EVAC LAYER は、いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステムです。**
 警報が届いた瞬間、街のスクリーンは、その場所に合った避難案内に変わります。
 
@@ -43,6 +45,8 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 日本には 2024 年末時点で 376 万 8,977 人の外国人が暮らし（[出入国在留管理庁](https://www.moj.go.jp/isa/publications/press/13_00052.html)）、2025 年には 4,268 万人が訪れました（[日本政府観光局](https://www.jnto.go.jp/statistics/data/visitors-statistics/)、確定値）。日本語の呼びかけだけでは、次の一言が届かない人がいます。
 
 この問題は能登だけのものではありません。横浜市は 2023 年、横浜駅周辺の 9 事業者と覚書を結び、142 か所のサイネージに、市が用意した 13 枚 × 4 か国語の定型画面を流す運用を始めました（[横浜市 2023 年 7 月 19 日 記者発表](https://www.city.yokohama.lg.jp/city-info/koho-kocho/press/toshi/2023/zyouhouhaxtusin.html)）。画面を切り替える仕組みは、もう街にあります。足りないのは、その 142 か所それぞれの場所のための避難案内です。案内を出す効果も測られています。見知らぬ建物で、静的な避難サインに気づいた人は 38%、動的に点灯するサインには 77% が気づき、気づいた全員がそれに従いました（Galea ほか 2014、[Fire Safety Science 11](https://gala.gre.ac.uk/id/eprint/14393/1/14393_GALEA_Dynamic_Signage_Systems_2014.pdf)、参加者 53 人）。津波の避難情報を伝えるうえでの課題を自治体に尋ねた調査では、多言語化の不足が 37.8% で最も多い回答でした（[日本大学理工学部 学術講演会 J-5](https://www.cst.nihon-u.ac.jp/research/gakujutu/69/pdf/J-5.pdf)）。
+
+スマートフォンの防災アプリはすでにあります。けれど災害の瞬間に、その場の全員が自分の端末を見られるわけではありません。訪日客は日本のアプリを入れておらず、子どもや高齢者は端末を持たないことがあり、呼びかけが聞こえても画面を探す余裕のない人もいます。街と施設にすでにあるスクリーンなら、インストールなしに、その場にいる全員へ同時に、同じ案内を出せます。
 
 スクリーンは自分がどこにあるかを知ることができます。足りないのは、その場所のための避難案内です。EVAC LAYER はそれを Claude で作り、既存のサイネージに 1 枚のレイヤーとして重ねます。
 
@@ -140,6 +144,16 @@ EVAC LAYER は、画面を再生する機能を持たず、サイネージのシ
 表示を切り替えるのは `pnpm -F agents receive --sites <id>` です。気象庁の長期フィードを読み、その施設に当たる新しい電文から画面を作り、同じ種類の画面が承認済みなら表示を切り替えます。このときモデルは呼ばず、承認済みの文をそのまま使います（既定の `--writer placeholder`）。未承認なら直前の承認済みの画面を保ちます。実際の運用では、フィードを読む間隔（`--every 600` なら 10 分）とブラウザの検査の分だけ、警報から表示までに遅れがあります。シミュレーターと動画は記録した電文の再生なので瞬時です。自前の受信系があるなら、電文の ID を `POST /api/admin/live`（または `pnpm -F agents live`）に渡しても同じで、`null` を渡すと平常時に戻ります。手順と環境変数の全体は [`docs/integration.md`](docs/integration.md)。
 
 回線が切れても、画面は直前の状態を保ち、60 秒を過ぎると「同期が途絶えている」印を出します。書き出したファイルを端末に置いておけば、配信元に届かなくても承認済みの画面を出せます。
+
+導入の軽さを、数字で:
+
+| 項目 | EVAC LAYER |
+|---|---|
+| 受け側に足すコード | 40 行（[`examples/minimal-cms/`](examples/minimal-cms/)。フィードを読み、`alert` のあいだ承認済みの PNG を上に出すだけ） |
+| 既存システムの変更 | 画面を再生する機能はそのまま。新しい機器・専用の端末は要らない |
+| 実行環境 | HTTP が使えるものなら何でも。Pull は `GET` 1 本、Push は Webhook の受け口 1 本、Files は PNG と HTML。言語もベンダーも問わない |
+| 平常時の運用への影響 | なし。フィードは `ambient` を返し続け、承認済みの警報の画面があるときだけ `alert` に変わる |
+| 運用の費用 | 1 自治体あたり年に約 $13 の API 呼び出し（[`docs/evaluation.md`](docs/evaluation.md)） |
 
 ## 既存の災害対応サイネージとの違い
 
@@ -284,7 +298,7 @@ AGPL-3.0 の条件で、誰でも使えます。AGPL の条件で公開できな
 
 ## English summary
 
-**EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes.** The moment a warning arrives, every screen turns into evacuation guidance for the spot where it stands. Demo video (2:51): https://youtu.be/W_wwWq_1ob8
+**Turn every screen into a lifeline.** EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes, without replacing the systems in place. The moment a warning arrives, every screen turns into evacuation guidance for the spot where it stands. Demo video (2:51): https://youtu.be/W_wwWq_1ob8
 
 > **IDEA** — Screens are everywhere in the city. What if each one knew where it stands, and showed the right evacuation guidance when disaster strikes?
 
