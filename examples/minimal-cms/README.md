@@ -23,4 +23,5 @@ Try it with the bundled 柏崎市 site `15205-demo` and its level 4 landslide bu
 - Polls every 2 s with `If-None-Match`; an unchanged feed is a bodyless 304. Any other non-200 answer (a wrong site id is 404) is logged.
 - Node 18 or later, no dependencies.
 - PNGs exist only for bulletins exported with `pnpm -F agents export --site <id>`; the EVAC LAYER server serves them from `dist/` under `/delivery/…` while the bulletin stays approved.
+- The same contract in Python, standard library only: [`examples/python-player/`](../python-player/).
 - A real player would also take the webhook (`POST /api/admin/subscriptions`) to switch without waiting for the next poll; see [`docs/integration.md`](../../docs/integration.md).
