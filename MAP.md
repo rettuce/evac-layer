@@ -23,7 +23,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | `sim/` | ブラウザの 3D シミュレーター。pnpm workspace の外にある独立パッケージ（`pnpm install --ignore-workspace`） | `sim/README.md`・`sim/src/main.ts`・`sim/src/timeline.ts` |
 | `demo/` | Blender のコンコース・録画・動画の合成 | `demo/README.md`・`demo/APPROACH.md` |
 | `examples/minimal-cms/` | フィードだけで動く 40 行のサイネージ | `index.mjs` |
-| `examples/python-player/` | 同じ契約を Python 標準ライブラリだけで書いた 1 ファイルの再生機（README の 2 サイネージの図の右側） | `player.py` |
+| `examples/python-player/` | 同じ契約を Python 標準ライブラリだけで書いた 1 ファイルの再生機 | `player.py` |
 | `scripts/` | app のテスト・全画面の書き出し・デモの承認 | `demo-approve.mjs`・`screens.mjs` |
 | `.claude/` | Claude Code のスキル 3 本とフック 1 本 | `.claude/README.md` |
 | `.github/workflows/` | CI（typecheck と agents のテスト）と GitHub Pages | `ci.yml`・`pages.yml` |
@@ -49,7 +49,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | 10 言語と逆翻訳の照合 | `agents/FINDINGS.md` の 9（照合で直した 16 欄と commit 516c6e6・4177bac） |
 | HTTP の 3 通りの口 | `docs/integration.md:142-188`・ETag は `app/server/api/feed/[site].get.ts:8-13` |
 | 40 行の組み込み例 | `examples/minimal-cms/index.mjs:1-40` |
-| 作りの違う 2 つのサイネージで同時に切り替わる | `examples/python-player/player.py`・`docs/images/two-signage.jpg`・README「あなたのサイネージに導入する」 |
+| 同じ契約の受け側が 2 つ（Node と Python） | `examples/minimal-cms/index.mjs`・`examples/python-player/player.py`・README「あなたのサイネージに導入する」 |
 | prompt caching | `agents/src/writer/live.ts:77`・`82`・`agents/src/verifier/vision.ts:65` |
 | モデルの使い分け | `agents/src/reader/pricing.ts:10-11`・選定の比較は `docs/how-we-built.md:9` |
 | フックとスキル | `.claude/settings.json`・`.claude/hooks/check-data.sh:8-13`・`.claude/skills/` |
