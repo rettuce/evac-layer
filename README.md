@@ -155,7 +155,7 @@ EVAC LAYER は、画面を再生する機能を持たず、サイネージのシ
 | 平常時の運用への影響 | なし。フィードは `ambient` を返し続け、承認済みの警報の画面があるときだけ `alert` に変わる |
 | 運用の費用 | 1 自治体あたり年に約 $13 の API 呼び出し（[`docs/evaluation.md`](docs/evaluation.md)） |
 
-同じレイヤーを、作りの違う 2 つのサイネージに載せた例です。左は Node の 40 行（[`examples/minimal-cms/`](examples/minimal-cms/)）、右は Python の標準ライブラリだけで書いた 1 ファイル（[`examples/python-player/`](examples/python-player/)）。どちらも EVAC LAYER を知らず、自分の平常時の内容を流しながらフィードを読んでいるだけです。同じ電文を出した瞬間に両方が承認済みの画面に変わり、解除で両方が元に戻ります。
+同じレイヤーを、作りの違う 2 つのサイネージに載せた例です。左は Node の 40 行（[`examples/minimal-cms/`](examples/minimal-cms/)）、右は Python の標準ライブラリだけで書いた 1 ファイル（[`examples/python-player/`](examples/python-player/)）。どちらも EVAC LAYER を知らず、自分の平常時の内容を流しながらフィードを読んでいるだけです。同じ電文が届いた瞬間に両方が承認済みの画面に変わり、フィードが平常時に戻れば、どちらも自分の内容に戻ります。
 
 ![同じ警報で、Node と Python の 2 つのサイネージが同時に切り替わる](docs/images/two-signage.jpg)
 
