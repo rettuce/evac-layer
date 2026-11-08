@@ -4,7 +4,7 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 
 # EVAC LAYER
 
-**Turn every screen into a lifeline.** 街にある、あらゆる画面を、命を守るインフラへ。
+**Turn every screen into a lifeline.** すべての画面を、命を守るインフラへ
 
 **EVAC LAYER は、いまある既存のサイネージに、災害時の緊急案内のレイヤーを自動で追加するシステムです。**
 警報が届いた瞬間、街のスクリーンは、その場所に合った避難案内に変わります。
