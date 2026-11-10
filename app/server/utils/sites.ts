@@ -20,10 +20,12 @@ export interface SiteFile {
   lng?: number
   facing_deg?: number
   facility_id?: string
+  location_updated_at?: string
   replay?: SiteReplay
 }
 
 const misnamed = new Set<string>()
+const unreadable = new Set<string>()
 
 export function isSiteId(value: unknown): value is string {
   return typeof value === 'string' && SITE_ID.test(value)
@@ -34,7 +36,16 @@ export async function readSites(): Promise<SiteFile[]> {
   const files = (await listDir(dir)).filter((f) => f.endsWith('.json'))
   const sites = await Promise.all(
     files.map(async (file) => {
-      const site = await readJsonIfExists<SiteFile>(join(dir, file))
+      let site: SiteFile | undefined
+      try {
+        site = await readJsonIfExists<SiteFile>(join(dir, file))
+      } catch (error) {
+        if (!unreadable.has(file)) {
+          unreadable.add(file)
+          console.warn(`[sites] ${file} is skipped: ${(error as Error).message}`)
+        }
+        return undefined
+      }
       if (site && `${site.id}.json` === file) return site
       if (site && !misnamed.has(file)) {
         misnamed.add(file)
@@ -68,9 +79,13 @@ export async function readVisibleSite(id: string, admin: AdminPrincipal | undefi
   }
 }
 
+export function siteNotFound(id: string) {
+  return createError({ status: 404, statusText: 'Not Found', message: `no site ${id}` })
+}
+
 export async function readSiteOr404(id: string, admin: AdminPrincipal | undefined): Promise<SiteFile> {
   const site = await readVisibleSite(id, admin)
-  if (!site) throw createError({ status: 404, statusText: 'Not Found', message: `no site ${id}` })
+  if (!site) throw siteNotFound(id)
   return site
 }
 
@@ -84,7 +99,9 @@ function badRequest(message: string): never {
 
 // `site` names the screen. `municipality` alone is the pre-site alias: it stands for the municipality's
 // only site, because with two sites it cannot tell whose arrows and shelters to serve.
-// A facility credential always names the site: the alias would resolve through sites it may not see.
+// A facility credential always names the site: the alias would resolve through sites it may not see. So does every
+// caller without a credential on a server of several facilities, where a facility could add a site to a municipality
+// to change what the alias names.
 export async function resolveSite({ site, municipality }: { site?: unknown; municipality?: unknown }, admin?: AdminPrincipal): Promise<SiteFile> {
   if (site !== undefined) {
     if (!isSiteId(site)) badRequest('site id is invalid')
@@ -95,6 +112,7 @@ export async function resolveSite({ site, municipality }: { site?: unknown; muni
     return found
   }
   if (admin?.kind === 'facility') badRequest('site is required')
+  if (!admin && (await isMultiFacilityServer())) badRequest('site is required on this server')
   if (!isMunicipalityId(municipality)) badRequest('site is required (or municipality, when it has exactly one site)')
   const sites = await sitesOf(municipality)
   if (sites.length === 1) return sites[0]!

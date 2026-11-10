@@ -8,13 +8,22 @@ export default defineEventHandler(async (event) => {
   }
   const check = checkWebhookUrl(body.url)
   if (!check.ok) throw createError({ status: 400, statusText: 'Bad Request', message: check.reason })
-  await readSiteOr404(body.site_id, event.context.admin)
-  try {
-    await assertWebhookTarget(check.url, webhookAllowsPrivate())
-  } catch (error) {
-    throw createError({ status: 400, statusText: 'Bad Request', message: (error as Error).message })
-  }
-  const { id, site_id, url, created_at } = await addSubscription({ site_id: body.site_id, url: check.url.href, secret: body.secret })
+  const siteId = body.site_id
+  const secret = body.secret
+  const admin = event.context.admin
+  const created = await guardedSiteWrite(siteId, {
+    visible: async () => (await readVisibleSite(siteId, admin)) !== undefined,
+    prepare: async () => {
+      try {
+        await assertWebhookTarget(check.url, webhookAllowsPrivate())
+      } catch (error) {
+        throw createError({ status: 400, statusText: 'Bad Request', message: (error as Error).message })
+      }
+    },
+    write: () => addSubscription({ site_id: siteId, url: check.url.href, secret }),
+  })
+  if (!created) throw siteNotFound(siteId)
+  const { id, site_id, url, created_at } = created.value
   setResponseStatus(event, 201)
   return { id, site_id, url, created_at }
 })

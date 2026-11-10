@@ -43,7 +43,9 @@ export default defineEventHandler(async (event): Promise<ReplayStatus> => {
   const replay = await loadReplayIndex(site)
   if (!replay) throw createError({ status: 404, statusText: 'Not Found', message: `no replay data for ${site.id}` })
   const rows = rowsInWindow(replay.rows, window)
-  const origin = sharedReplayOrigin(site.id, speed, window, query.reset !== undefined)
+  // With several facilities anyone could restart another facility's replay.
+  const reset = query.reset !== undefined && !(await isMultiFacilityServer())
+  const origin = sharedReplayOrigin(site.id, speed, window, reset)
   const elapsedMs = query.t !== undefined ? Number(query.t) : Date.now() - origin
 
   return { ...replay, rows, window, speed, elapsedMs, index: rowIndexAt(rows, elapsedMs, speed) }

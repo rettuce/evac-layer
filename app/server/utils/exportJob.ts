@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process'
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { EXPORT_DIGEST_FILE } from '~~/layout/feed'
 import type { ReplayRow } from '~~/layout/replay'
@@ -86,23 +86,35 @@ function run(command: string[], args: string[]): Promise<{ ok: boolean; output: 
   })
 }
 
-async function exportNow(command: string[], site: string, bulletin: string, digest: string): Promise<void> {
-  await recordJob(site, bulletin, { status: 'running', digest })
+// A site deleted since the export was queued, perhaps registered again by another facility under the same id, is
+// not the one these screens were made for.
+async function exportNow(command: string[], site: string, bulletin: string, digest: string, generation: number): Promise<void> {
+  const started = await withSiteLock(site, async () => {
+    if (siteGeneration(site) !== generation) return false
+    await recordJob(site, bulletin, { status: 'running', digest })
+    return true
+  })
+  if (!started) return
   const baseUrl = ownBaseUrl()
   const args = [`--site=${site}`, `--bulletin=${bulletin}`, `--out=${resolve(distDir())}`, ...(baseUrl ? [`--base-url=${baseUrl}`] : [])]
   const { ok, output } = await run(command, args)
   if (!ok) console.warn(`[export] ${site} ${bulletin} failed: ${output}`)
-  await recordJob(site, bulletin, ok ? { status: 'ok', digest } : { status: 'failed', digest, message: output })
+  await withSiteLock(site, async () => {
+    if (siteGeneration(site) === generation) return recordJob(site, bulletin, ok ? { status: 'ok', digest } : { status: 'failed', digest, message: output })
+    // Exports run one at a time, so what dist/<site>/ holds now is this job's output and nothing of the new site.
+    await rm(join(distDir(), site), { recursive: true, force: true })
+  })
 }
 
 // Chrome renders one bulletin at a time. A bulletin composed again while its export waits or runs is picked up by
 // the next sweep, because its export then carries another digest than its screens.
 function enqueue(command: string[], site: string, bulletin: string, digest: string): void {
-  const key = `${site}/${bulletin}`
+  const generation = siteGeneration(site)
+  const key = `${site}/${bulletin}#${generation}`
   if (pending.has(key)) return
   pending.add(key)
   lastJob = lastJob.then(() =>
-    exportNow(command, site, bulletin, digest)
+    exportNow(command, site, bulletin, digest, generation)
       .catch((error: Error) => console.warn(`[export] ${key} stopped: ${error.message}`))
       .finally(() => pending.delete(key)),
   )

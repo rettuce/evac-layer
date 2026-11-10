@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { APPROVALS_FILE } from "../paths.js";
 import { readSites, siteMunicipality, type SiteFile } from "../sites.js";
+import { holdsFacilities } from "../tokens.js";
 import { type CheckReport, type ClassApproval, type LayoutClass, classDigest, classKey, layoutDigest, liveLayoutGateWith, passedBrowserCheck, screenClass } from "../../../app/layout/gate";
 
 export interface Approvals {
@@ -15,13 +16,18 @@ export { APPROVALS_FILE };
 
 const LEGACY_KEY = /^(\d{5})\/(.+)$/;
 
-export function migrateApprovalKeys(a: Approvals, sites: readonly SiteFile[], warn: (m: string) => void = console.warn): Approvals {
+// As in the app: with facility tokens, whose an old key would be depends on the sites facilities register and delete.
+export function migrateApprovalKeys(a: Approvals, sites: readonly SiteFile[], warn: (m: string) => void = console.warn, multiFacility = false): Approvals {
   const siteIds = new Set(sites.map((s) => s.id));
   const layouts: Approvals["layouts"] = {};
   for (const [key, record] of Object.entries(a.layouts)) {
     const m = key.match(LEGACY_KEY);
     if (!m || siteIds.has(m[1])) {
       layouts[key] = record;
+      continue;
+    }
+    if (multiFacility) {
+      warn(`[warn] approval ${key} uses the old <municipality>/<bulletin> key on a server with facility tokens; ignored. Approve it again per site.`);
       continue;
     }
     const owners = sites.filter((s) => siteMunicipality(s) === m[1]);
@@ -34,9 +40,9 @@ export function migrateApprovalKeys(a: Approvals, sites: readonly SiteFile[], wa
   return { ...a, layouts };
 }
 
-export function readApprovals(file = APPROVALS_FILE, sites: readonly SiteFile[] = readSites()): Approvals {
+export function readApprovals(file = APPROVALS_FILE, sites: readonly SiteFile[] = readSites(), multiFacility = holdsFacilities()): Approvals {
   const raw: Approvals = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : { version: "0.1", layouts: {}, sites: {} };
-  return migrateApprovalKeys(raw, sites);
+  return migrateApprovalKeys(raw, sites, console.warn, multiFacility);
 }
 
 export function exportGate(a: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass) {

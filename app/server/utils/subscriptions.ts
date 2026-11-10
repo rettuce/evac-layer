@@ -68,6 +68,14 @@ export function removeSubscription(id: string): Promise<boolean> {
   })
 }
 
+export function removeSubscriptionsOf(siteId: string): Promise<void> {
+  return serialized(async () => {
+    const subscriptions = await readSubscriptions()
+    const kept = subscriptions.filter((s) => s.site_id !== siteId)
+    if (kept.length !== subscriptions.length) await writeSubscriptions(kept)
+  })
+}
+
 export function recordDelivered(id: string, bulletinId: string | null): Promise<void> {
   return serialized(async () => {
     const subscriptions = await readSubscriptions()

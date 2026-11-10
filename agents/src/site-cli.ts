@@ -3,7 +3,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { SITES_DIR } from "./paths.js";
 import { formatErrors, validateDoc } from "./schemas.js";
-import { assertCoordinates, buildSite } from "./site-register.js";
+import { assertCoordinates, buildSite, GSI_REVERSE_GEOCODER, type RegisteredSite } from "./site-register.js";
 import { isSiteId } from "./sites.js";
 import { isFacilityId } from "./tokens.js";
 
@@ -21,6 +21,21 @@ const { values } = parseArgs({
     force: { type: "boolean", default: false },
   },
 });
+
+function readPrevious(file: string): RegisteredSite | undefined {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8")) as RegisteredSite;
+  } catch {
+    return undefined;
+  }
+}
+
+// Screens composed before a move point the wrong way, so the admin API reports such a site as needing new screens.
+function locationStamp(previous: RegisteredSite | undefined, site: RegisteredSite): string | undefined {
+  if (!previous) return undefined;
+  const moved = (["lat", "lng", "facing_deg", "municipality_id"] as const).some((k) => previous[k] !== site[k]);
+  return moved ? new Date().toISOString() : previous.location_updated_at;
+}
 
 function fail(message: string, code = 1): never {
   console.error(message);
@@ -40,8 +55,12 @@ if (path.dirname(file) !== sitesDir) fail(`site file ${file} is outside ${sitesD
 try {
   const { lat, lng } = assertCoordinates(values.lat, values.lng);
   if (!values.force && fs.existsSync(file)) fail(`${file} exists; pass --force to overwrite`);
-  const { site, warnings } = await buildSite({ id: values.id, name: values.name, lat, lng, facing_deg: facing, municipality_id: values.municipality });
+  const previous = values.force && fs.existsSync(file) ? readPrevious(file) : undefined;
+  const geocoder = { url: process.env.EVAC_REVERSE_GEOCODER_URL || GSI_REVERSE_GEOCODER };
+  const { site, warnings } = await buildSite({ id: values.id, name: values.name, lat, lng, facing_deg: facing, municipality_id: values.municipality }, fetch, geocoder);
   if (values.facility) site.facility_id = values.facility;
+  const stamp = locationStamp(previous, site);
+  if (stamp) site.location_updated_at = stamp;
   for (const w of warnings) console.warn(`WARN ${w}`);
   const result = validateDoc(site, "site");
   if (!result.ok) fail(`site does not validate:\n${formatErrors(result.errors)}`);

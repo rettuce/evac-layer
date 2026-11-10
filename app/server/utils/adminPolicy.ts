@@ -40,6 +40,10 @@ const FACILITY_ROUTES: readonly { method: string; path: RegExp }[] = [
   { method: 'GET', path: /^\/api\/admin\/subscriptions$/ },
   { method: 'POST', path: /^\/api\/admin\/subscriptions$/ },
   { method: 'DELETE', path: /^\/api\/admin\/subscriptions\/[^/]+$/ },
+  { method: 'GET', path: /^\/api\/admin\/sites$/ },
+  { method: 'GET', path: /^\/api\/admin\/sites\/[^/]+$/ },
+  { method: 'PUT', path: /^\/api\/admin\/sites\/[^/]+$/ },
+  { method: 'DELETE', path: /^\/api\/admin\/sites\/[^/]+$/ },
 ]
 
 // nuxi dev relays requests to the Nitro worker, so the real client is the entry the relay appended to
@@ -109,6 +113,12 @@ function facilityTokenFor(given: string, tokens: readonly FacilityToken[], now: 
   return match.expires_at === undefined || Date.parse(match.expires_at) > now ? match : undefined
 }
 
+// A server with any facility token, or a ledger it cannot read, serves several facilities: what one facility
+// registers must not decide what another one's screens show.
+export function holdsFacilities(ledger: TokenLedger): boolean {
+  return ledger === 'broken' || ledger.length > 0
+}
+
 // A path added later stays closed to facilities until it is listed here with a rule of its own.
 export function facilityRouteAllowed(method: string, pathname: string): boolean {
   return FACILITY_ROUTES.some((route) => route.method === method && route.path.test(pathname))
@@ -125,6 +135,6 @@ export function adminPrincipal(req: AdminRequest, operatorToken: string, ledger:
     const facility = facilityTokenFor(bearer, ledger, now)
     if (facility) return { kind: 'facility', facility_id: facility.facility_id, label: facility.label }
   }
-  if (operatorToken || ledger.length) return 401
+  if (operatorToken || holdsFacilities(ledger)) return 401
   return LOOPBACK_ADDRESSES.has(req.clientAddress) && isLocalBrowserSafe(req) ? { kind: 'operator' } : 403
 }
