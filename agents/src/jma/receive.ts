@@ -14,7 +14,7 @@ import type { CallUsage } from "../reader/pricing.js";
 import { findSite, siteMunicipality, SiteNotFound, type SiteFile } from "../sites.js";
 import type { WriterModel } from "../writer/live.js";
 import { BODY_NAME, mentionsMunicipality } from "./feed.js";
-import { bodyPath, FEEDS_WITH_BODIES, readIndex, recordFeeds, roundLine, type IndexedEntry } from "./record.js";
+import { bodyPath, FEEDS_WITH_BODIES, isLongFeed, readIndex, recordFeeds, roundLine, type FeedResult, type FetchImpl, type IndexedEntry, type SavedBody } from "./record.js";
 import { REPLAYABLE, replayEntry, type ReplayEntry } from "./replay.js";
 
 export interface ReceiverState { since: string; showing: Record<string, string>; received_at?: string }
@@ -57,6 +57,27 @@ export function recordedSince(since: string, feedDir = FEED_DIR): RecordedBody[]
       return code && REPLAYABLE.test(code) && fs.existsSync(file) ? [{ entry, file, code }] : [];
     })
     .sort((a, b) => Date.parse(a.entry.updated) - Date.parse(b.entry.updated) || a.file.localeCompare(b.file));
+}
+
+export const LONG_FEED_EVERY_MS = 60 * 60 * 1000;
+
+export function readsLongFeeds(lastLongAt: Date | undefined, now: Date): boolean {
+  return lastLongAt === undefined || now.getTime() - lastLongAt.getTime() >= LONG_FEED_EVERY_MS;
+}
+
+export interface RecordRound { feeds: FeedResult[]; saved: SavedBody[]; receivedAt?: string; lastLongAt?: Date }
+
+export async function recordRound(opts: { lastLongAt?: Date; feedDir?: string; fetchImpl?: FetchImpl; now?: () => Date; sleep?: (ms: number) => Promise<void>; log?: (m: string) => void }): Promise<RecordRound> {
+  const { lastLongAt, ...rest } = opts;
+  const t0 = (opts.now ?? (() => new Date()))();
+  const withLong = readsLongFeeds(lastLongAt, t0);
+  const { feeds, saved } = await recordFeeds({ ...rest, feeds: withLong ? "both" : "frequent" });
+  const longFetched = withLong && feeds.filter((f) => isLongFeed(f.feed)).every((f) => !f.failed);
+  return {
+    feeds, saved,
+    receivedAt: feeds.some((f) => f.failed) ? undefined : t0.toISOString(),
+    lastLongAt: longFetched ? t0 : lastLongAt,
+  };
 }
 
 const FEED_TIMEOUT_MS = 5_000;
@@ -153,7 +174,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const every = values.every === undefined ? undefined : Number(values.every);
   const ids = (values.sites ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   if (!ids.length || !["placeholder", "live"].includes(values.writer!) || !["static", "browser", "vision"].includes(values.verifier!) || (every !== undefined && !(every > 0)) || (values.since !== undefined && Number.isNaN(Date.parse(values.since)))) {
-    console.error("usage: pnpm -F agents receive --sites <id,...> [--every <sec>] [--writer placeholder|live] [--verifier static|browser|vision] [--base-url <url>] [--since <ISO>]");
+    console.error("usage: pnpm -F agents receive --sites <id,...> [--every <sec> (60 recommended)] [--writer placeholder|live] [--verifier static|browser|vision] [--base-url <url>] [--since <ISO>]");
     process.exit(2);
   }
   let sites: SiteFile[] = [];
@@ -172,12 +193,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (values.writer === "live" || values.verifier === "vision") requireApiKey();
   const writer: WriterChoice = values.writer === "live" ? { kind: "live", live: { client: new Anthropic(), model: values["writer-model"] as WriterModel } } : { kind: "placeholder" };
   const initialSince = values.since ?? new Date().toISOString();
+  let lastLongAt: Date | undefined;
   const round = async () => {
     const t0 = Date.now();
-    const { feeds, saved } = await recordFeeds({});
+    const recorded = await recordRound({ lastLongAt });
+    lastLongAt = recorded.lastLongAt;
+    const { feeds, saved, receivedAt } = recorded;
     console.log(`${roundLine(t0, feeds)}  saved=${saved.length}`);
     for (const f of feeds) if (f.failed) console.error(`[record] ${f.feed}: ${f.failed}`);
-    const receivedAt = feeds.some((f) => f.failed) ? undefined : new Date(t0).toISOString();
     const usage: CallUsage[] = [];
     const visionUsage: CallUsage[] = [];
     for (const site of sites) {
