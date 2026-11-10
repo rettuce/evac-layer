@@ -102,6 +102,6 @@ export function etagMatches(ifNoneMatch: string | undefined, etag: string): bool
 }
 
 export function isDeliveryFile(file: string): boolean {
-  const match = /^([0-9x]+)\.(png|html|json)$/.exec(file)
+  const match = /^([0-9a-z]+)\.(png|html|json)$/.exec(file)
   return match !== null && isShape(match[1])
 }

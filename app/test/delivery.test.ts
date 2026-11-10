@@ -35,6 +35,8 @@ async function makeDelivery(): Promise<{ dataDir: string; distDir: string }> {
   }
   await writeFile(join(assetDir, '16x9.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]))
   await writeFile(join(assetDir, '16x9.html'), '<!doctype html><title>16x9</title>')
+  await writeFile(join(assetDir, 'pillar.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]))
+  await writeFile(join(assetDir, 'pillar.html'), '<!doctype html><title>pillar</title>')
   await writeFile(
     join(dataDir, 'layouts', SITE, 'index.json'),
     JSON.stringify({
@@ -96,6 +98,7 @@ describe('feed', { skip }, () => {
     assert.deepEqual(Object.keys(alertFeed.layouts).sort(), [...SHAPES].sort())
     assert.deepEqual(alertFeed.assets, {
       '16x9': { png: `/delivery/${SITE}/${BULLETIN}/16x9.png`, html: `/delivery/${SITE}/${BULLETIN}/16x9.html` },
+      pillar: { png: `/delivery/${SITE}/${BULLETIN}/pillar.png`, html: `/delivery/${SITE}/${BULLETIN}/pillar.html` },
     })
     assert.match(await validateWithAgents(alertFeed), /^OK /)
 
@@ -106,6 +109,8 @@ describe('feed', { skip }, () => {
     const png = await fetch(`${base}${alertFeed.assets['16x9'].png}`)
     assert.equal(png.status, 200)
     assert.equal(png.headers.get('content-type'), 'image/png')
+    assert.equal((await fetch(`${base}${alertFeed.assets.pillar.png}`)).status, 200)
+    assert.equal((await fetch(`${base}${alertFeed.assets.pillar.html}`)).status, 200)
     assert.equal((await fetch(`${base}/delivery/${SITE}/${BULLETIN}/..%2F..%2Fsites%2F${SITE}.json`)).status, 404)
 
     await approve(base, false)
