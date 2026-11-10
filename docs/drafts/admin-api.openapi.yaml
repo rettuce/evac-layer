@@ -21,12 +21,12 @@ info:
        its prefix, and repeating the call after a lost response is harmless.
     4. Composing screens is a job: `POST` starts it and answers 202, `GET` reports progress.
        It never runs inside the request.
-    6. Looking a feed up by coordinates never crosses credential scopes (see `GET /api/feed`).
-       The same holds for `/screen?lat=&lng=` and `GET /api/site-near`, which exist today and
-       pick the nearest site whoever registered it.
     5. Preparing a municipality (reading its hazard-map PDFs into `data/municipalities/`) is
        the operator's work and is not offered over HTTP. A site in a municipality that is not
        prepared can be registered but not composed.
+    6. Looking a feed up by coordinates never crosses credential scopes (see `GET /api/feed`).
+       The same holds for `/screen?lat=&lng=` and `GET /api/site-near`, which exist today and
+       pick the nearest site whoever registered it.
   license:
     name: AGPL-3.0-only
     identifier: AGPL-3.0-only
