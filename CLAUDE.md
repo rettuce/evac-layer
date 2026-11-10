@@ -2,6 +2,8 @@
 
 - Reading this repository: start with `MAP.md` (what is where, which file backs each claim in `README.md`), then `README.md` and `docs/how-we-built.md`.
 - Language: TypeScript (Node 22, pnpm). Nuxt for the app in `app/`. Agents in `agents/`. JSON Schemas in `schema/`. Municipality knowledge files in `data/municipalities/`. Blender scripts in `demo/blender/` (Python, bpy).
+- Branches: work on a branch cut from `develop` and merge it back there. `main` moves only at releases, together with the README and the public demo; the hackathon submission is tag `v0.1.0`. Integrators pin tags, which are cut from `develop` or `main`.
+- This repository is public. Every commit message, branch name, draft and comment is read by strangers: no local paths, no customer or venue names that are not public, no credentials, and nothing about a third party's system beyond its public interface.
 - Commits and code comments may be English. Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`).
 - Comments: keep only the "why" that code cannot express. No narration, no commented-out code.
 - Secrets live in `.env` (gitignored). Never commit keys. The `ANTHROPIC_API_KEY` is read by scripts, not by the editor session.
