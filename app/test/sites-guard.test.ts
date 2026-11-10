@@ -6,6 +6,7 @@ import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs
 import { type Server, createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { once } from 'node:events'
 import { after, before, describe, test } from 'node:test'
 import { promisify } from 'node:util'
 import { layoutDigest } from '../layout/gate.ts'
@@ -138,11 +139,10 @@ describe('site registration under contention, on a server that holds facilities'
   let dataDir = ''
   let distDir = ''
   let calls = ''
-  let legacyDigest = ''
-  let agentsViewBefore: unknown
   const hookCalls: string[] = []
   let hookServer: Server | undefined
   let hook = ''
+  let serverEnv: Record<string, string> = {}
 
   const put = (id: string, body: unknown, token: string) =>
     fetch(`${base}/api/admin/sites/${id}`, { method: 'PUT', headers: { 'content-type': 'application/json', ...bearer(token) }, body: JSON.stringify(body) })
@@ -169,7 +169,7 @@ describe('site registration under contention, on a server that holds facilities'
     for (const [id, municipality_id] of [['legacy-solo', SOLO_MUNI], ['twin-a', TWIN_MUNI], ['twin-b', TWIN_MUNI]]) {
       await writeFile(siteFile(id!), JSON.stringify({ id, municipality_id, ...PLACE }))
     }
-    legacyDigest = await writeScreen(dataDir, 'legacy-solo', SOLO_MUNI, LEGACY_BULLETIN)
+    const legacyDigest = await writeScreen(dataDir, 'legacy-solo', SOLO_MUNI, LEGACY_BULLETIN)
     const at = '2026-11-01T00:00:00.000Z'
     const record = { approved: true, updated_at: at, digest: legacyDigest }
     await writeFile(join(dataDir, 'approvals.json'), JSON.stringify({
@@ -178,7 +178,6 @@ describe('site registration under contention, on a server that holds facilities'
       sites: { 'legacy-solo': { auto_publish: true, updated_at: at } },
       classes: {},
     }))
-    agentsViewBefore = await agentsApprovalView(dataDir)
 
     const exporter = join(root, 'slow-exporter.mjs')
     await writeFile(exporter, SLOW_EXPORTER)
@@ -195,7 +194,7 @@ describe('site registration under contention, on a server that holds facilities'
     await new Promise<void>((resolve) => hookServer!.listen(hookPort, '127.0.0.1', resolve))
     hook = `http://127.0.0.1:${hookPort}/hook`
 
-    ;({ base, child } = await startServer({
+    serverEnv = {
       NUXT_DATA_DIR: dataDir,
       NUXT_DIST_DIR: distDir,
       NUXT_ADMIN_TOKEN: OPERATOR_TOKEN,
@@ -203,7 +202,8 @@ describe('site registration under contention, on a server that holds facilities'
       NUXT_EXPORT_COMMAND: exporter,
       SLOW_EXPORT_CALLS: calls,
       NUXT_REVERSE_GEOCODER_URL: `http://127.0.0.1:${await freePort()}/unreachable`,
-    }))
+    }
+    ;({ base, child } = await startServer(serverEnv))
   })
   after(async () => {
     child?.kill()
@@ -211,21 +211,12 @@ describe('site registration under contention, on a server that holds facilities'
     await rm(root, { recursive: true, force: true })
   })
 
-  test('old <municipality>/<bulletin> approval keys are rewritten at startup; keys that name no single site stay', async () => {
-    const migrated = await until(approvalsFile, (a) => `legacy-solo/${LEGACY_BULLETIN}` in a.layouts, 'migration')
-    assert.deepEqual(Object.keys(migrated.layouts).sort(), [`${TWIN_MUNI}/${LEGACY_BULLETIN}`, `${EMPTY_MUNI}/${LEGACY_BULLETIN}`, `legacy-solo/${LEGACY_BULLETIN}`].sort())
-    assert.equal(migrated.layouts[`legacy-solo/${LEGACY_BULLETIN}`].digest, legacyDigest)
-    assert.deepEqual(await agentsApprovalView(dataDir), agentsViewBefore, 'the agents read the same approvals as before')
-  })
-
-  test('another facility registering in the same municipality, and deleting again, leaves the old approval in place', async () => {
-    const approved = async () => (await stateOf('legacy-solo')).classes[0]?.approved
-    assert.equal(await approved(), true)
-    assert.equal((await put('intruder-hall', placeIn(SOLO_MUNI), TOKEN_B)).status, 201)
-    assert.equal(await approved(), true)
-    assert.equal((await del('/api/admin/sites/intruder-hall', TOKEN_B)).status, 204)
-    assert.equal(await approved(), true)
-    assert.ok(`legacy-solo/${LEGACY_BULLETIN}` in (await approvalsFile()).layouts)
+  test('with facility tokens, old <municipality>/<bulletin> keys are neither rewritten at startup nor read, by the app or the agents', async () => {
+    await sleep(500)
+    const stored = await approvalsFile()
+    assert.deepEqual(Object.keys(stored.layouts).sort(), [`${SOLO_MUNI}/${LEGACY_BULLETIN}`, `${TWIN_MUNI}/${LEGACY_BULLETIN}`, `${EMPTY_MUNI}/${LEGACY_BULLETIN}`].sort())
+    assert.equal((await stateOf('legacy-solo')).classes[0].approved, false)
+    assert.deepEqual(await agentsApprovalView(dataDir), {})
   })
 
   test('an old key of a municipality without sites does not approve the first site registered there', async () => {
@@ -249,6 +240,19 @@ describe('site registration under contention, on a server that holds facilities'
     assert.equal((await postJson(base, '/api/admin/approve', { site_id: 'legacy-solo', bulletin_id: LEGACY_BULLETIN, approved: true }, bearer(OPERATOR_TOKEN))).status, 200)
     const layouts = (await approvalsFile()).layouts
     for (const key of [`${TWIN_MUNI}/${LEGACY_BULLETIN}`, `${EMPTY_MUNI}/${LEGACY_BULLETIN}`]) assert.ok(key in layouts, key)
+  })
+
+  test('a restart does not hand old keys to sites registered or left alone since the last one', async () => {
+    const before = (await approvalsFile()).layouts
+    const exited = once(child!, 'exit')
+    child!.kill()
+    await exited
+    ;({ base, child } = await startServer(serverEnv))
+    await sleep(500)
+    for (const id of ['empty-claim', 'twin-b']) assert.equal((await stateOf(id)).classes[0].approved, false, id)
+    const layouts = (await approvalsFile()).layouts
+    for (const key of [`${TWIN_MUNI}/${LEGACY_BULLETIN}`, `${EMPTY_MUNI}/${LEGACY_BULLETIN}`]) assert.deepEqual(layouts[key], before[key], key)
+    assert.ok(!Object.keys(layouts).some((key) => /^(empty-claim|twin-b)\//.test(key)))
   })
 
   test('the municipality alias is refused on the public paths, without naming any site', async () => {
@@ -374,6 +378,7 @@ describe('the audit log and lookups on a single-facility server', { skip }, () =
   let root = ''
   let dataDir = ''
   const AUDIT_MAX_BYTES = 2000
+  let agentsViewBefore: unknown
 
   const auditFiles = async () => (await readdir(dataDir)).filter((f) => f.startsWith('audit.jsonl')).sort()
   async function allAuditLines(): Promise<string[]> {
@@ -387,12 +392,22 @@ describe('the audit log and lookups on a single-facility server', { skip }, () =
     dataDir = join(root, 'data')
     await mkdir(join(dataDir, 'sites'), { recursive: true })
     await writeFile(join(dataDir, 'sites', 'rot-site.json'), JSON.stringify({ id: 'rot-site', municipality_id: SOLO_MUNI, ...PLACE }))
-    await writeScreen(dataDir, 'rot-site', SOLO_MUNI, 'TEST-RO-1')
+    const digest = await writeScreen(dataDir, 'rot-site', SOLO_MUNI, 'TEST-RO-1')
+    const record = { approved: true, updated_at: '2026-11-01T00:00:00.000Z', digest }
+    await writeFile(join(dataDir, 'approvals.json'), JSON.stringify({ version: '0.1', layouts: { [`${SOLO_MUNI}/TEST-RO-1`]: record, [`${EMPTY_MUNI}/TEST-RO-1`]: record }, sites: {}, classes: {} }))
+    agentsViewBefore = await agentsApprovalView(dataDir)
     ;({ base, child } = await startServer({ NUXT_DATA_DIR: dataDir, NUXT_DIST_DIR: join(root, 'dist'), NUXT_ADMIN_TOKEN: '', NUXT_AUDIT_MAX_BYTES: String(AUDIT_MAX_BYTES) }))
   })
   after(async () => {
     child?.kill()
     await rm(root, { recursive: true, force: true })
+  })
+
+  test('without facility tokens, old keys of a municipality with one site are rewritten at startup and the others stay', async () => {
+    const read = () => readFile(join(dataDir, 'approvals.json'), 'utf8').then((text) => JSON.parse(text))
+    const migrated = await until(read, (a) => 'rot-site/TEST-RO-1' in a.layouts, 'migration')
+    assert.deepEqual(Object.keys(migrated.layouts).sort(), [`${EMPTY_MUNI}/TEST-RO-1`, 'rot-site/TEST-RO-1'])
+    assert.deepEqual(await agentsApprovalView(dataDir), agentsViewBefore, 'the agents read the same approvals as before')
   })
 
   test('an actor name with line breaks still makes one line', async () => {

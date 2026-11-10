@@ -65,6 +65,17 @@ function readTokens(file: string): FacilityToken[] {
   return tokens;
 }
 
+// Same rule as the app's holdsFacilities: a broken ledger counts as one with facility tokens, never as none.
+export function holdsFacilities(file = TOKENS_FILE): boolean {
+  if (!fs.existsSync(file)) return false;
+  try {
+    return readTokens(file).length > 0;
+  } catch (e) {
+    if (e instanceof BrokenTokenLedger) return true;
+    throw e;
+  }
+}
+
 function sleepSync(ms: number): void {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }

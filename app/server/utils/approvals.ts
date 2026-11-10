@@ -95,9 +95,11 @@ async function writeApprovals(approvals: Approvals): Promise<void> {
 }
 
 // Each old key whose municipality has exactly one site becomes that site's key in the file, so that a site registered
-// in the municipality later cannot change whose approval it is.
+// in the municipality later cannot change whose approval it is. Not with facility tokens: the one site there may be one
+// a facility registered after the key was written.
 export function migrateLegacyApprovalKeys(): Promise<number> {
   return approvalsQueue(async () => {
+    if (await isMultiFacilityServer()) return 0
     const stored = await readJsonIfExists<Approvals>(approvalsFile())
     if (!stored?.layouts) return 0
     const sites = await readSites()

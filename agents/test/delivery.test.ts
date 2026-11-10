@@ -1,11 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { LAYOUTS_DIR } from "../src/paths.js";
 import { formatErrors, validateDoc } from "../src/schemas.js";
 import { mergeEntries } from "../src/delivery/export.js";
-import { exportGate, migrateApprovalKeys, type Approvals } from "../src/delivery/gate.js";
+import { exportGate, migrateApprovalKeys, readApprovals, type Approvals } from "../src/delivery/gate.js";
+import { holdsFacilities } from "../src/tokens.js";
 
 const layout = (shape: string) => JSON.parse(fs.readFileSync(path.join(LAYOUTS_DIR, `05210-demo-honjo-station/VXKOii-202610211815-e713da0e3c05/${shape}.json`), "utf8"));
 const site = { id: "05210-demo-honjo-station", municipality_id: "05210" };
@@ -72,4 +74,27 @@ test("exporting some bulletins replaces their manifest entries, keeps the other 
   const kept = [entry("B1", "old"), entry("B2", "old"), entry("B3", "old")];
   assert.deepEqual(mergeEntries(kept, [entry("B2", "new"), entry("B4", "new")], ["B1", "B2", "B4"]), [entry("B1", "old"), entry("B2", "new"), entry("B4", "new")]);
   assert.deepEqual(mergeEntries([], [entry("B2", "new")], ["B1", "B2"]), [entry("B2", "new")]);
+});
+
+test("old <municipality>/<bulletin> approvals are not read as a site's once the token ledger holds facility tokens or is broken", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "evac-legacy-gate-"));
+  try {
+    const approvalsFile = path.join(dir, "approvals.json");
+    const tokensFile = path.join(dir, "tokens.json");
+    const digest = "sha256:aa";
+    fs.writeFileSync(approvalsFile, JSON.stringify({ version: "0.1", sites: { "one-site": { auto_publish: true, updated_at: "t" } }, layouts: { "05210/B1": { approved: true, updated_at: "t", digest } } }));
+    const sites = [{ id: "one-site", municipality_id: "05210", lat: 0, lng: 0, facing_deg: 0 }];
+    const gateWith = () => exportGate(readApprovals(approvalsFile, sites, holdsFacilities(tokensFile)), "one-site", "B1", digest).gate;
+
+    assert.equal(gateWith(), "ok", "no ledger");
+    fs.writeFileSync(tokensFile, JSON.stringify({ version: "0.1", tokens: [] }));
+    assert.equal(gateWith(), "ok", "an empty ledger");
+    const token = { id: "t1", label: "alpha signage", facility_id: "alpha-fac", sha256: "a".repeat(64), created_at: "2026-11-01T00:00:00Z" };
+    fs.writeFileSync(tokensFile, JSON.stringify({ version: "0.1", tokens: [token] }));
+    assert.equal(gateWith(), "unapproved", "a facility token");
+    fs.writeFileSync(tokensFile, "not json");
+    assert.equal(gateWith(), "unapproved", "a broken ledger");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });
