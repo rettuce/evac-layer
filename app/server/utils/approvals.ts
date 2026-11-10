@@ -12,7 +12,9 @@ export function approvalsFile(): string {
   return join(dataDir(), 'approvals.json')
 }
 
-async function withSiteKeys(approvals: Approvals): Promise<Approvals> {
+// On a server of several facilities an old key is never read as a site's: whose it would be depends on which sites
+// exist in the municipality, and facilities register and delete those. Such keys are kept in the file untouched.
+async function withSiteKeys(approvals: Approvals, multiFacility: boolean): Promise<{ view: Approvals; kept: Approvals['layouts'] }> {
   const sites = await readSites()
   const siteIds = new Set(sites.map((site) => site.id))
   const layouts: Approvals['layouts'] = {}
@@ -22,6 +24,7 @@ async function withSiteKeys(approvals: Approvals): Promise<Approvals> {
     if (!siteIds.has(owner) && isMunicipalityId(owner)) legacy.push([key, owner, bulletin])
     else layouts[key] = record
   }
+  if (multiFacility) return { view: { ...approvals, layouts }, kept: Object.fromEntries(legacy.map(([key]) => [key, approvals.layouts[key]!])) }
   for (const [key, municipality, bulletin] of legacy) {
     const owners = sites.filter((site) => site.municipality_id === municipality)
     if (owners.length === 1) {
@@ -31,12 +34,17 @@ async function withSiteKeys(approvals: Approvals): Promise<Approvals> {
       console.warn(`[approvals] ${key} is ignored: municipality ${municipality} has ${owners.length} sites; approve it again per site`)
     }
   }
-  return { ...approvals, layouts }
+  return { view: { ...approvals, layouts }, kept: {} }
+}
+
+async function readApprovalsKeeping(): Promise<{ view: Approvals; kept: Approvals['layouts'] }> {
+  const stored = await readJsonIfExists<Approvals>(approvalsFile())
+  if (!stored) return { view: structuredClone(EMPTY), kept: {} }
+  return withSiteKeys({ ...stored, classes: stored.classes ?? {} }, await isMultiFacilityServer())
 }
 
 export async function readApprovals(): Promise<Approvals> {
-  const stored = await readJsonIfExists<Approvals>(approvalsFile())
-  return stored ? withSiteKeys({ ...stored, classes: stored.classes ?? {} }) : structuredClone(EMPTY)
+  return (await readApprovalsKeeping()).view
 }
 
 async function layoutFiles(site: string, bulletin: string): Promise<{ shape: string; body: string }[]> {
@@ -115,9 +123,9 @@ export function migrateLegacyApprovalKeys(): Promise<number> {
 // The only way to change approvals.json. A change that throws leaves the file as it was.
 export function updateApprovals<T>(change: (approvals: Approvals) => T | Promise<T>): Promise<T> {
   return approvalsQueue(async () => {
-    const approvals = await readApprovals()
+    const { view: approvals, kept } = await readApprovalsKeeping()
     const result = await change(approvals)
-    await writeApprovals(approvals)
+    await writeApprovals({ ...approvals, layouts: { ...kept, ...approvals.layouts } })
     return result
   })
 }

@@ -228,6 +228,29 @@ describe('site registration under contention, on a server that holds facilities'
     assert.ok(`legacy-solo/${LEGACY_BULLETIN}` in (await approvalsFile()).layouts)
   })
 
+  test('an old key of a municipality without sites does not approve the first site registered there', async () => {
+    assert.equal((await put('empty-claim', placeIn(EMPTY_MUNI), TOKEN_A)).status, 201)
+    await writeScreen(dataDir, 'empty-claim', EMPTY_MUNI, LEGACY_BULLETIN)
+    const state = await stateOf('empty-claim')
+    assert.equal(state.classes[0].bulletin_id, LEGACY_BULLETIN)
+    assert.equal(state.classes[0].approved, false)
+    assert.ok(`${EMPTY_MUNI}/${LEGACY_BULLETIN}` in (await approvalsFile()).layouts)
+  })
+
+  test('an old key of a two-site municipality does not pass to the site left after a delete, and stays in the file', async () => {
+    await writeScreen(dataDir, 'twin-b', TWIN_MUNI, LEGACY_BULLETIN)
+    assert.equal((await del('/api/admin/sites/twin-a', OPERATOR_TOKEN)).status, 204)
+    assert.equal((await stateOf('twin-b')).classes[0].approved, false)
+    assert.ok(`${TWIN_MUNI}/${LEGACY_BULLETIN}` in (await approvalsFile()).layouts)
+  })
+
+  test('old keys stay in the file through approvals and auto publish changes', async () => {
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: 'twin-b', auto_publish: true }, bearer(OPERATOR_TOKEN))).status, 200)
+    assert.equal((await postJson(base, '/api/admin/approve', { site_id: 'legacy-solo', bulletin_id: LEGACY_BULLETIN, approved: true }, bearer(OPERATOR_TOKEN))).status, 200)
+    const layouts = (await approvalsFile()).layouts
+    for (const key of [`${TWIN_MUNI}/${LEGACY_BULLETIN}`, `${EMPTY_MUNI}/${LEGACY_BULLETIN}`]) assert.ok(key in layouts, key)
+  })
+
   test('the municipality alias is refused on the public paths, without naming any site', async () => {
     for (const path of [
       `/api/replay?municipality=${TWIN_MUNI}`,
@@ -237,7 +260,7 @@ describe('site registration under contention, on a server that holds facilities'
       const response = await fetch(`${base}${path}`)
       assert.equal(response.status, 400, path)
       const text = await response.text()
-      for (const id of ['legacy-solo', 'twin-a', 'twin-b']) assert.ok(!text.includes(id), `${path}: ${text}`)
+      for (const id of ['legacy-solo', 'twin-a', 'twin-b', 'empty-claim']) assert.ok(!text.includes(id), `${path}: ${text}`)
     }
     assert.equal((await fetch(`${base}/api/live-layout?site=legacy-solo&bulletin=${LEGACY_BULLETIN}&shape=16x9`)).status, 200)
   })
