@@ -99,13 +99,17 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
       const dir = stagingDir(siteDir, e.bulletin_id);
       fs.rmSync(dir, { recursive: true, force: true });
       fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, EXPORT_DIGEST_FILE), layoutDigestOf(path.join(siteLayouts, e.bulletin_id))!);
+      const layoutDir = path.join(siteLayouts, e.bulletin_id);
+      const digest = layoutDigestOf(layoutDir)!;
       try {
         for (const shape of shapes) {
           const rendered = await renderShape(browser, { baseUrl: opts.baseUrl, site: site.id, municipality: m, bulletinId: e.bulletin_id, shape, layoutFile: path.join(siteLayouts, e.bulletin_id, `${shape}.json`), dir, log });
           files[shape] = rendered.files;
           sources = rendered.sources;
         }
+        // The pages were read from the layout files while they rendered; the digest vouches for them only if the files did not change meanwhile.
+        if (layoutDigestOf(layoutDir) !== digest) throw new ExportStop(`${e.bulletin_id} was composed again during the export; export it again`);
+        fs.writeFileSync(path.join(dir, EXPORT_DIGEST_FILE), digest);
       } catch (error) {
         fs.rmSync(dir, { recursive: true, force: true });
         throw error;
