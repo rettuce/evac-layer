@@ -20,10 +20,12 @@ export interface SiteFile {
   lng?: number
   facing_deg?: number
   facility_id?: string
+  location_updated_at?: string
   replay?: SiteReplay
 }
 
 const misnamed = new Set<string>()
+const unreadable = new Set<string>()
 
 export function isSiteId(value: unknown): value is string {
   return typeof value === 'string' && SITE_ID.test(value)
@@ -34,7 +36,16 @@ export async function readSites(): Promise<SiteFile[]> {
   const files = (await listDir(dir)).filter((f) => f.endsWith('.json'))
   const sites = await Promise.all(
     files.map(async (file) => {
-      const site = await readJsonIfExists<SiteFile>(join(dir, file))
+      let site: SiteFile | undefined
+      try {
+        site = await readJsonIfExists<SiteFile>(join(dir, file))
+      } catch (error) {
+        if (!unreadable.has(file)) {
+          unreadable.add(file)
+          console.warn(`[sites] ${file} is skipped: ${(error as Error).message}`)
+        }
+        return undefined
+      }
       if (site && `${site.id}.json` === file) return site
       if (site && !misnamed.has(file)) {
         misnamed.add(file)
