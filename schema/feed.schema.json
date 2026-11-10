@@ -62,7 +62,8 @@
       }
     },
     "sources": { "type": "array", "items": { "$ref": "layout.schema.json#/$defs/source" } },
-    "approved_at": { "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] }
+    "approved_at": { "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] },
+    "last_received_at": { "type": "string", "format": "date-time", "description": "When `receive` last fetched the JMA feeds without error. Absent when no receiver has run for this site (for example a replay site). Use it to tell a stalled receiver from a quiet day." }
   },
   "allOf": [
     {

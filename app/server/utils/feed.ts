@@ -79,6 +79,17 @@ async function liveBulletin(site: SiteFile, approvals: Approvals): Promise<strin
 export async function currentFeed(siteId: string): Promise<Feed | undefined> {
   const site = await readSite(siteId)
   if (!site) return undefined
+  const receivedAt = await lastReceivedAt(site.id)
+  const feed = await feedFor(site)
+  return receivedAt ? { ...feed, last_received_at: receivedAt } : feed
+}
+
+async function lastReceivedAt(siteId: string): Promise<string | undefined> {
+  const state = await readJsonIfExists<{ received_at?: unknown }>(join(dataDir(), 'live', `${siteId}.receiver.json`))
+  return typeof state?.received_at === 'string' ? state.received_at : undefined
+}
+
+async function feedFor(site: SiteFile): Promise<Feed> {
   const feedSite: FeedSite = { id: site.id, municipality_id: site.municipality_id, ...(site.name ? { name: site.name } : {}) }
   const approvals = await readApprovals()
   const bulletin = site.replay ? await replayedBulletin(site, approvals) : await liveBulletin(site, approvals)

@@ -17,7 +17,7 @@ import { BODY_NAME, mentionsMunicipality } from "./feed.js";
 import { bodyPath, FEEDS_WITH_BODIES, readIndex, recordFeeds, roundLine, type IndexedEntry } from "./record.js";
 import { REPLAYABLE, replayEntry, type ReplayEntry } from "./replay.js";
 
-export interface ReceiverState { since: string; showing: Record<string, string> }
+export interface ReceiverState { since: string; showing: Record<string, string>; received_at?: string }
 
 export function receiverStateFile(siteId: string, liveDir = LIVE_DIR): string {
   return path.join(liveDir, `${siteId}.receiver.json`);
@@ -78,7 +78,7 @@ export interface SiteRound { site: string; bulletins: { entry: ReplayEntry; outc
 
 export async function receiveSite(args: {
   site: SiteFile; verifier: Verifier; writer: WriterChoice; usage: CallUsage[]; initialSince: string;
-  feedDir?: string; roots?: { reports: string; layouts: string }; liveDir?: string; log?: (m: string) => void; baseUrl?: string;
+  feedDir?: string; roots?: { reports: string; layouts: string }; liveDir?: string; log?: (m: string) => void; baseUrl?: string; receivedAt?: string;
 }): Promise<SiteRound> {
   const { site } = args;
   const log = args.log ?? (() => {});
@@ -143,6 +143,7 @@ export async function receiveSite(args: {
   const cleared = firstFailure < 0 ? bodies : bodies.slice(0, firstFailure);
   const reached = cleared.at(-1)?.entry.updated;
   if (reached && Date.parse(reached) > Date.parse(state.since)) state.since = reached;
+  if (args.receivedAt) state.received_at = args.receivedAt;
   writeReceiverState(site.id, state, liveDir);
   return round;
 }
@@ -176,12 +177,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const { feeds, saved } = await recordFeeds({});
     console.log(`${roundLine(t0, feeds)}  saved=${saved.length}`);
     for (const f of feeds) if (f.failed) console.error(`[record] ${f.feed}: ${f.failed}`);
+    const receivedAt = feeds.some((f) => f.failed) ? undefined : new Date(t0).toISOString();
     const usage: CallUsage[] = [];
     const visionUsage: CallUsage[] = [];
     for (const site of sites) {
       const browser = values.verifier === "static" ? undefined : browserVerifier({ baseUrl: values["base-url"]!, ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) });
       try {
-        const r = await receiveSite({ site, verifier: browser ?? staticVerifier, writer, usage, initialSince, log: (m) => console.log(m), baseUrl: values["base-url"] });
+        const r = await receiveSite({ site, verifier: browser ?? staticVerifier, writer, usage, initialSince, log: (m) => console.log(m), baseUrl: values["base-url"], receivedAt });
         for (const err of r.errors) console.error(`  [${site.id}] [error] ${err}`);
         console.log(`  [${site.id}] ${r.bulletins.length} bulletins${r.errors.length ? `, ${r.errors.length} errors (retried next round)` : ""}${r.live ? `, live ${r.live}` : ", live unchanged"}`);
       } catch (e) {

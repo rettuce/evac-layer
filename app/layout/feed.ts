@@ -24,6 +24,7 @@ export interface Feed {
   assets: Partial<Record<Shape, FeedAsset>>
   sources: ScreenSource[]
   approved_at: string | null
+  last_received_at?: string
 }
 
 export type FeedEvent = 'alert' | 'clear'

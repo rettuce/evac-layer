@@ -17,6 +17,7 @@ const SHAPES = ['16x9', '9x16', '32x9', '1x1', 'pillar'] as const
 const SECRET = 'a-shared-secret-of-enough-length'
 const WEBHOOK_WAIT_MS = 8000
 
+const RECEIVED_AT = '2026-11-10T05:00:00.000Z'
 const skip = !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first'
 
 async function makeDelivery(): Promise<{ dataDir: string; distDir: string }> {
@@ -46,6 +47,8 @@ async function makeDelivery(): Promise<{ dataDir: string; distDir: string }> {
       entries: [{ issued_at: '2026-10-21T15:55:00+09:00', bulletin_id: BULLETIN, wmo_code: 'VXKO50', raw_title: 'test', municipality_level: 4, screen: true }],
     }),
   )
+  await mkdir(join(dataDir, 'live'))
+  await writeFile(join(dataDir, 'live', `${SITE}.receiver.json`), JSON.stringify({ since: '2026-10-21T06:55:19Z', showing: {}, received_at: RECEIVED_AT }))
   await writeFile(
     join(dataDir, 'sites', `${SITE}.json`),
     JSON.stringify({ id: SITE, municipality_id: MUNICIPALITY, replay: { municipality: MUNICIPALITY, speed: 1200 } }),
@@ -80,6 +83,7 @@ describe('feed', { skip }, () => {
     assert.equal(ambient.status, 200)
     const ambientFeed = await ambient.json()
     assert.equal(ambientFeed.state, 'ambient')
+    assert.equal(ambientFeed.last_received_at, RECEIVED_AT)
     assert.deepEqual(ambientFeed.layouts, {})
     assert.match(await validateWithAgents(ambientFeed), /^OK /)
 
@@ -93,6 +97,7 @@ describe('feed', { skip }, () => {
     assert.notEqual(alert.headers.get('etag'), etag)
     const alertFeed = await alert.json()
     assert.equal(alertFeed.state, 'alert')
+    assert.equal(alertFeed.last_received_at, RECEIVED_AT)
     assert.equal(alertFeed.bulletin_id, BULLETIN)
     assert.equal(alertFeed.alert.template, 'evac-now')
     assert.deepEqual(Object.keys(alertFeed.layouts).sort(), [...SHAPES].sort())

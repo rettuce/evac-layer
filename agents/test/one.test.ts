@@ -96,7 +96,7 @@ function receiveSetup() {
     fs.mkdirSync(path.join(feedDir, "index"), { recursive: true });
     fs.writeFileSync(path.join(feedDir, "index", "extra_l.jsonl"), lines.join("\n") + "\n");
   };
-  const run = (initialSince: string) => receiveSite({ site, verifier: staticVerifier, writer: { kind: "placeholder" }, usage: [], initialSince, feedDir, roots, liveDir });
+  const run = (initialSince: string, receivedAt?: string) => receiveSite({ site, verifier: staticVerifier, writer: { kind: "placeholder" }, usage: [], initialSince, feedDir, roots, liveDir, receivedAt });
   const state = () => JSON.parse(fs.readFileSync(path.join(liveDir, `${site.id}.receiver.json`), "utf8"));
   return { add, run, state, roots, liveDir };
 }
@@ -114,6 +114,17 @@ test("receive looks back 24 hours and does not move its cursor past a bulletin t
   const second = await r.run("2026-11-07T00:00:00Z");
   assert.equal(second.errors.length, 1);
   assert.equal(r.state().since, "2026-11-07T00:00:00Z");
+});
+
+test("receive records when the feed was last fetched, and keeps the previous time when a round could not fetch it", async () => {
+  const r = receiveSetup();
+  r.add("20261107020000_0_VPWW55_050000.xml", "2026-11-07T02:00:00Z", "<Report/>");
+  await r.run("2026-11-07T00:00:00Z");
+  assert.equal(r.state().received_at, undefined);
+  await r.run("2026-11-07T00:00:00Z", "2026-11-10T05:00:00.000Z");
+  assert.equal(r.state().received_at, "2026-11-10T05:00:00.000Z");
+  await r.run("2026-11-07T00:00:00Z");
+  assert.equal(r.state().received_at, "2026-11-10T05:00:00.000Z");
 });
 
 const RAW_L3 = path.join(FEED_DIR, L3.file);
