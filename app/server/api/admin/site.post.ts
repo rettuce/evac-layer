@@ -3,10 +3,10 @@ export default defineEventHandler(async (event) => {
   if (!isSiteId(body.site_id) || typeof body.auto_publish !== 'boolean') {
     throw createError({ status: 400, statusText: 'Bad Request', message: 'site_id and auto_publish are required' })
   }
-  await readSiteOr404(body.site_id, event.context.admin)
-  const approvals = await readApprovals()
-  approvals.sites[body.site_id] = { auto_publish: body.auto_publish, updated_at: new Date().toISOString() }
-  await writeApprovals(approvals)
-  if (body.auto_publish) await requestMissingExports(body.site_id).catch((error: Error) => console.warn(`[export] ${body.site_id} not queued: ${error.message}`))
-  return approvals.sites[body.site_id]
+  const siteId = body.site_id
+  const autoPublish = body.auto_publish
+  await readSiteOr404(siteId, event.context.admin)
+  const record = await updateApprovals((approvals) => (approvals.sites[siteId] = { auto_publish: autoPublish, updated_at: new Date().toISOString() }))
+  if (autoPublish) await requestMissingExports(siteId).catch((error: Error) => console.warn(`[export] ${siteId} not queued: ${error.message}`))
+  return record
 })

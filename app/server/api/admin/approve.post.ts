@@ -14,19 +14,20 @@ export default defineEventHandler(async (event) => {
     const snapshot = await readLayoutSnapshot(site, bulletin)
     if (!snapshot) throw createError({ status: 404, statusText: 'Not Found', message: `no layout files for ${site}/${bulletin}` })
     if (body.digest !== undefined && body.digest !== snapshot.digest) throw createError({ status: 409, statusText: 'Conflict', message: 'the screens changed since you looked; reload' })
-    const approvals = await readApprovals()
-    const classRecord = { approved: true, updated_at: updatedAt, digest: snapshot.cls.digest, approved_from: bulletin }
-    approvals.layouts[key] = { approved: true, updated_at: updatedAt, digest: snapshot.digest }
-    approvals.classes = { ...approvals.classes, [classKey(site, snapshot.cls.key)]: classRecord }
-    await writeApprovals(approvals)
+    const approved = await updateApprovals((approvals) => {
+      const classRecord = { approved: true, updated_at: updatedAt, digest: snapshot.cls.digest, approved_from: bulletin }
+      approvals.layouts[key] = { approved: true, updated_at: updatedAt, digest: snapshot.digest }
+      approvals.classes = { ...approvals.classes, [classKey(site, snapshot.cls.key)]: classRecord }
+      return { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], class: snapshot.cls.key, class_approval: classRecord }
+    })
     await requestMissingExports(site).catch((error: Error) => console.warn(`[export] ${site} not queued: ${error.message}`))
-    return { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], class: snapshot.cls.key, class_approval: classRecord }
+    return approved
   }
-  const approvals = await readApprovals()
-  approvals.layouts[key] = { approved: false, updated_at: updatedAt }
-  approvals.classes = revokeClasses(approvals.classes ?? {}, site, bulletin, undefined, updatedAt)
   const current = await currentClassKey(site, bulletin)
-  if (current) approvals.classes = revokeClasses(approvals.classes, site, bulletin, current, updatedAt)
-  await writeApprovals(approvals)
-  return { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], ...(current ? { class: current } : {}) }
+  return updateApprovals((approvals) => {
+    approvals.layouts[key] = { approved: false, updated_at: updatedAt }
+    approvals.classes = revokeClasses(approvals.classes ?? {}, site, bulletin, undefined, updatedAt)
+    if (current) approvals.classes = revokeClasses(approvals.classes, site, bulletin, current, updatedAt)
+    return { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], ...(current ? { class: current } : {}) }
+  })
 })
