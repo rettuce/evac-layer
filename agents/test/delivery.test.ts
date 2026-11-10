@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { LAYOUTS_DIR } from "../src/paths.js";
 import { formatErrors, validateDoc } from "../src/schemas.js";
+import { mergeEntries } from "../src/delivery/export.js";
 import { exportGate, migrateApprovalKeys, type Approvals } from "../src/delivery/gate.js";
 
 const layout = (shape: string) => JSON.parse(fs.readFileSync(path.join(LAYOUTS_DIR, `05210-demo-honjo-station/VXKOii-202610211815-e713da0e3c05/${shape}.json`), "utf8"));
@@ -64,4 +65,11 @@ test("old <municipality>/<bulletin> approvals map to the municipality's only sit
   assert.equal(m.layouts["one-site/B1"].updated_at, "new", "a key already written per site wins over the old one");
   assert.equal(warnings.length, 1);
   assert.match(warnings[0], /17204\/B2.*2 sites/);
+});
+
+test("exporting some bulletins replaces their manifest entries, keeps the other approved ones and drops what is no longer approved", () => {
+  const entry = (bulletin_id: string, approved_at: string) => ({ bulletin_id, approved_at });
+  const kept = [entry("B1", "old"), entry("B2", "old"), entry("B3", "old")];
+  assert.deepEqual(mergeEntries(kept, [entry("B2", "new"), entry("B4", "new")], ["B1", "B2", "B4"]), [entry("B1", "old"), entry("B2", "new"), entry("B4", "new")]);
+  assert.deepEqual(mergeEntries([], [entry("B2", "new")], ["B1", "B2"]), [entry("B2", "new")]);
 });

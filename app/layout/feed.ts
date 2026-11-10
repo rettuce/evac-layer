@@ -2,6 +2,9 @@ import type { EvacScreen, ScreenSource, Shape, TemplateId } from './types'
 
 export const FEED_VERSION = '0.1'
 
+// Written beside the exported PNG and HTML of a bulletin: the digest of the layout files they were rendered from.
+export const EXPORT_DIGEST_FILE = 'layout.digest'
+
 export interface FeedSite {
   id: string
   municipality_id: string
@@ -24,6 +27,7 @@ export interface Feed {
   assets: Partial<Record<Shape, FeedAsset>>
   sources: ScreenSource[]
   approved_at: string | null
+  last_received_at?: string
 }
 
 export type FeedEvent = 'alert' | 'clear'

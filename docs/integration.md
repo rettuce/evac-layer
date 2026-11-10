@@ -2,7 +2,7 @@
 
 EVAC LAYER turns an official JMA warning into approved emergency screens for five shapes (16:9, 9:16, 32:9, 1:1 and the four-faced pillar). Any signage CMS can take them in one of three ways. Every way delivers the same thing and follows the same rule: **only bulletins an operator approved, at sites with auto publish switched on**. Everything else stays ambient.
 
-The payload is fixed by [`schema/feed.schema.json`](../schema/feed.schema.json): the site, `state` (`ambient` | `alert`), the alert (hazard, Cabinet Office level, template), one layout JSON per shape, PNG/HTML asset URLs, the sources (municipal PDF page, GSI data, JMA bulletin id) and `approved_at`.
+The payload is fixed by [`schema/feed.schema.json`](../schema/feed.schema.json): the site, `state` (`ambient` | `alert`), the alert (hazard, Cabinet Office level, template), one layout JSON per shape, PNG/HTML asset URLs, the sources (municipal PDF page, GSI data, JMA bulletin id) and `approved_at`. When a receiver runs for the site, the feed also carries `last_received_at`: the last time `receive` fetched the JMA feeds without error. A receiver that has stopped shows as an old `last_received_at` while `state` stays `ambient`, so compare it with the clock instead of treating a quiet feed as a healthy one. The field is optional and was added without changing `feed_version`.
 
 ## 0. What you need
 
@@ -151,6 +151,10 @@ curl -s -H 'If-None-Match: "<etag from last time>"' http://127.0.0.1:3150/api/fe
 
 When `state` is `alert`, show `assets["16x9"].png` (or the HTML, or render `layouts["16x9"]` yourself) full screen; when it returns to `ambient`, go back to your normal content. Use the shape that matches the panel.
 
+`assets` fills in shortly after the approval, not with it. When an approval lets bulletins of a site go out (a bulletin is approved while auto publish is on, or auto publish is switched on), the server exports each of them that has no export of its current screens, one bulletin at a time in the background, with `pnpm -F agents export --bulletin`: Chrome renders the five shapes, about ten seconds per bulletin on a laptop. Until a bulletin's export finishes the feed is already `alert` with `layouts` and an empty `assets`; then `assets` lists every shape at once and the `ETag` changes, so a poller picks them up on its next request. `assets` only ever links files rendered from the screens the feed is showing: each export records the digest of its layout files, and after the screens are composed again the old files are no longer linked, whether or not a new export has run. `data/live/<site_id>.export.json` keeps the outcome of the last export of each bulletin (`running`, `ok` or `failed` with the exporter's output; a failed one is not retried by itself).
+
+Three cases are not exported automatically, and `pnpm -F agents export --site <site_id>` covers each: a bulletin that `receive` puts on the feed on the approval of its screen class, with no approval action at that moment; exports that were waiting or running when the server stopped; and a server started with `NUXT_EXPORT_COMMAND=off`. A receiver that must show something in every case should render `layouts` when `assets` has no entry for its shape. A webhook delivery carries the feed as it was when the state changed, so its `assets` may still be empty; fetch the feed again for the files.
+
 ### Push: receive a webhook
 
 Register a URL once (admin access; the secret is at least 16 characters) and EVAC LAYER posts the feed body to it whenever the site's state changes:
@@ -182,7 +186,7 @@ For systems that can only take image or HTML files:
 pnpm -F agents export --site my-station-concourse --out dist/
 ```
 
-This writes `dist/<site>/<bulletin_id>/<shape>.{json,png,html}` and `dist/<site>/manifest.json` (fixed by [`schema/export-manifest.schema.json`](../schema/export-manifest.schema.json)). Only approved bulletins are exported; the others are skipped with the reason. The app serves these files under `/delivery/<site>/<bulletin>/<shape>.{png,html,json}` while the bulletin stays approved, and the feed links them in `assets`.
+This writes `dist/<site>/<bulletin_id>/<shape>.{json,png,html}` and `dist/<site>/manifest.json` (fixed by [`schema/export-manifest.schema.json`](../schema/export-manifest.schema.json)). Only approved bulletins are exported; the others are skipped with the reason. `--bulletin <bulletin_id>` (repeatable) exports only those bulletins and replaces their entries in the manifest; the other approved entries stay as they are and entries of bulletins that are no longer approved are dropped. This is what the server runs after an approval. Each bulletin directory also holds `layout.digest`, the digest of the layout files it was rendered from; exports made before v0.2.0 have none and are not linked in the feed until they are exported again. The app serves these files under `/delivery/<site>/<bulletin>/<shape>.{png,html,json}` while the bulletin stays approved, and the feed links them in `assets`.
 
 PNGs are captured at each shape's base resolution (pillar at half scale), not at your panel's size. For any other resolution, use the HTML, or open `/screen?w=<px>&h=<px>` with the layout: it picks the nearest base shape and fits its canvas into that size. Each HTML file is self-contained: styles, pictograms and only the font subsets the screen uses are embedded, so it opens offline and matches the PNG pixel for pixel (the language rotation is frozen on the language shown at capture).
 

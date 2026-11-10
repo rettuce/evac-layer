@@ -28,7 +28,9 @@ function screensOf(snapshot: LayoutSnapshot): Partial<Record<Shape, EvacScreen>>
   return layouts
 }
 
-async function readAssets(site: string, bulletin: string): Promise<Partial<Record<Shape, FeedAsset>>> {
+// Files rendered from other layout bytes than the ones on the feed are an older screen, so they are not linked.
+async function readAssets(site: string, bulletin: string, digest: string): Promise<Partial<Record<Shape, FeedAsset>>> {
+  if ((await exportedDigest(site, bulletin)) !== digest) return {}
   const files = await listDir(join(distDir(), site, bulletin))
   const assets: Partial<Record<Shape, FeedAsset>> = {}
   for (const shape of ALL_SHAPES) {
@@ -47,8 +49,13 @@ function approvalIn(approvals: Approvals, site: string, bulletin: string, snapsh
   return { by, updated_at: approvals.classes![classKey(site, snapshot.cls.key)]!.updated_at }
 }
 
+export async function deliverableDigest(approvals: Approvals, site: string, bulletin: string): Promise<string | undefined> {
+  const snapshot = await readLayoutSnapshot(site, bulletin)
+  return approvalIn(approvals, site, bulletin, snapshot).by === null ? undefined : snapshot!.digest
+}
+
 async function deliverableWith(approvals: Approvals, site: string, bulletin: string): Promise<boolean> {
-  return approvalIn(approvals, site, bulletin, await readLayoutSnapshot(site, bulletin)).by !== null
+  return (await deliverableDigest(approvals, site, bulletin)) !== undefined
 }
 
 export async function isDeliverable(site: string, bulletin: string): Promise<boolean> {
@@ -79,6 +86,17 @@ async function liveBulletin(site: SiteFile, approvals: Approvals): Promise<strin
 export async function currentFeed(siteId: string): Promise<Feed | undefined> {
   const site = await readSite(siteId)
   if (!site) return undefined
+  const receivedAt = await lastReceivedAt(site.id)
+  const feed = await feedFor(site)
+  return receivedAt ? { ...feed, last_received_at: receivedAt } : feed
+}
+
+async function lastReceivedAt(siteId: string): Promise<string | undefined> {
+  const state = await readJsonIfExists<{ received_at?: unknown }>(join(dataDir(), 'live', `${siteId}.receiver.json`))
+  return typeof state?.received_at === 'string' ? state.received_at : undefined
+}
+
+async function feedFor(site: SiteFile): Promise<Feed> {
   const feedSite: FeedSite = { id: site.id, municipality_id: site.municipality_id, ...(site.name ? { name: site.name } : {}) }
   const approvals = await readApprovals()
   const bulletin = site.replay ? await replayedBulletin(site, approvals) : await liveBulletin(site, approvals)
@@ -86,7 +104,7 @@ export async function currentFeed(siteId: string): Promise<Feed | undefined> {
   const snapshot = await readLayoutSnapshot(site.id, bulletin)
   const approval = approvalIn(approvals, site.id, bulletin, snapshot)
   if (!snapshot || !approval.by) return ambientFeed(feedSite)
-  return alertFeed(feedSite, screensOf(snapshot), await readAssets(site.id, bulletin), approval.updated_at!)
+  return alertFeed(feedSite, screensOf(snapshot), await readAssets(site.id, bulletin, snapshot.digest), approval.updated_at!)
 }
 
 export function feedEtag(body: string): string {
@@ -102,6 +120,6 @@ export function etagMatches(ifNoneMatch: string | undefined, etag: string): bool
 }
 
 export function isDeliveryFile(file: string): boolean {
-  const match = /^([0-9x]+)\.(png|html|json)$/.exec(file)
+  const match = /^([0-9a-z]+)\.(png|html|json)$/.exec(file)
   return match !== null && isShape(match[1])
 }

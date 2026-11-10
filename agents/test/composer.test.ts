@@ -12,6 +12,7 @@ import { formatErrors, validateDoc } from "../src/schemas.js";
 import { AGENTS_DIR, REPO_ROOT } from "../src/paths.js";
 import { loadMunicipality } from "../src/loop/municipality.js";
 import type { Alert } from "../src/jma/parse.js";
+import { layoutDigest } from "../../app/layout/gate";
 
 const fx = <T>(name: string): T => JSON.parse(fs.readFileSync(path.join(AGENTS_DIR, "test/fixtures", name), "utf8"));
 const municipality = fx<Municipality>("municipality-17204-min.json");
@@ -46,6 +47,19 @@ test("level 5 (secure-now) keeps the nearest site and the direction beside the g
     const { slots } = shapeContract("secure-now", CELLS_OF[s.shape]);
     if (slots.has("shelter")) assert.ok(s.cells.some((c) => c.role === "shelter") && s.cells.some((c) => c.role === "direction"), `${s.shape}: shelter and direction expected`);
   }
+});
+
+test("moving a site keeps the approval digest while shelter, distance and direction stay the same, and changes it when they do not", () => {
+  const koyoshi = fx<{ entries: { alert: Alert; municipality_level: number | null; bulletin_id: string }[] }>("replay-05210-koyoshi-20261021.json");
+  const lv4 = koyoshi.entries.find((e) => e.municipality_level === 4)!;
+  const { municipality: yurihonjo } = loadMunicipality("05210");
+  const honjo = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "data/sites/05210-demo-honjo-station.json"), "utf8")) as Site;
+  const cached = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "data/writer/05210", `${lv4.bulletin_id}.json`), "utf8")).output as WriterOutput;
+  const digestAt = (moved: Partial<Site>) =>
+    layoutDigest(compose({ alert: lv4.alert, municipality: yurihonjo, site: { ...honjo, ...moved }, writer: cached }).map((s) => ({ shape: s.shape, body: JSON.stringify(s) })));
+  const ONE_METRE_LAT = 0.000009;
+  assert.equal(digestAt({ lat: honjo.lat + ONE_METRE_LAT }), digestAt({}), "a correction of about a metre shows the same screens");
+  assert.notEqual(digestAt({ lat: honjo.lat + 100 * ONE_METRE_LAT }), digestAt({}), "100 m further the distance on the screen changes");
 });
 
 test("shelter is the nearest undisputed tsunami site; distance appears once, on the shelter cell", { skip: NEEDS_ADVISORY }, () => {
