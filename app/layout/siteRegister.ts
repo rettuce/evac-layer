@@ -6,6 +6,8 @@ const REVERSE_GEOCODER_TIMEOUT_MS = 10_000
 export { parseCoordinate }
 
 export class MunicipalityLookupFailed extends Error {}
+// The geocoder answered, but the point is in no municipality (at sea, outside Japan): asking again will not help.
+export class NoMunicipalityAt extends MunicipalityLookupFailed {}
 export class InvalidCoordinates extends Error {}
 
 export interface RegisteredSite {
@@ -16,6 +18,7 @@ export interface RegisteredSite {
   facing_deg: number
   name?: string
   facility_id?: string
+  location_updated_at?: string
 }
 
 export interface GeocoderOptions {
@@ -42,8 +45,11 @@ export async function municipalityAt(lat: number, lng: number, fetchFn: typeof f
     throw new MunicipalityLookupFailed(`GSI reverse geocoder failed for ${lat},${lng}: ${(e as Error).message}`)
   }
   const code = (body as { results?: { muniCd?: unknown } } | null)?.results?.muniCd
+  if (code === undefined || code === null || code === '') {
+    throw new NoMunicipalityAt(`GSI reverse geocoder places ${lat},${lng} in no municipality (outside Japan or at sea?)`)
+  }
   if (typeof code !== 'string' || !/^\d{5}$/.test(code)) {
-    throw new MunicipalityLookupFailed(`GSI reverse geocoder returned no municipality code for ${lat},${lng} (outside Japan or at sea?)`)
+    throw new MunicipalityLookupFailed(`GSI reverse geocoder returned an unusable municipality code for ${lat},${lng}`)
   }
   return code
 }
