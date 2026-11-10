@@ -12,9 +12,14 @@ demo/renders/
 demo/cache/
 tmp/
 data/approvals.json
+data/approvals.json.*
 data/subscriptions.json
+data/subscriptions.json.*
+data/tokens.json
+data/tokens.json.*
 data/raw/
 data/live/
 app/dist
 sim/dist-pages/
 sim/public/ambient/
+.claude/worktrees/

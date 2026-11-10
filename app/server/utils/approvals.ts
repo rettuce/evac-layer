@@ -1,10 +1,11 @@
-import { readFile, writeFile } from 'node:fs/promises'
+import { readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { type Approvals, type CheckReport, type LayoutClass, classDigest, layoutDigest, passedBrowserCheck, screenClass } from '~~/layout/gate'
 import { isMunicipalityId } from '~~/layout/replay'
 import { isShape } from '~~/layout/shapes'
 
 const EMPTY: Approvals = { version: '0.1', layouts: {}, sites: {}, classes: {} }
+const approvalsQueue = serialQueue()
 const warnedLegacyKeys = new Set<string>()
 
 export function approvalsFile(): string {
@@ -78,7 +79,19 @@ function sortedRecord<T>(record: Record<string, T>): Record<string, T> {
   return Object.fromEntries(Object.entries(record).sort(([a], [b]) => a.localeCompare(b)))
 }
 
-export async function writeApprovals(approvals: Approvals): Promise<void> {
+async function writeApprovals(approvals: Approvals): Promise<void> {
   const stable: Approvals = { version: '0.1', layouts: sortedRecord(approvals.layouts), sites: sortedRecord(approvals.sites), classes: sortedRecord(approvals.classes ?? {}) }
-  await writeFile(approvalsFile(), `${JSON.stringify(stable, null, 2)}\n`)
+  const partial = `${approvalsFile()}.${process.pid}.tmp`
+  await writeFile(partial, `${JSON.stringify(stable, null, 2)}\n`)
+  await rename(partial, approvalsFile())
+}
+
+// The only way to change approvals.json. A change that throws leaves the file as it was.
+export function updateApprovals<T>(change: (approvals: Approvals) => T | Promise<T>): Promise<T> {
+  return approvalsQueue(async () => {
+    const approvals = await readApprovals()
+    const result = await change(approvals)
+    await writeApprovals(approvals)
+    return result
+  })
 }

@@ -25,7 +25,7 @@ Settings are read from the environment, then from `.env` at the repository root 
 | `JMA_FEED_DIR` | `<EVAC_RAW_DIR>/jma-feed` | recorded JMA bulletins as `bodies/<YYYYMMDD>/<id>.xml` |
 | `EVAC_URL` | `http://127.0.0.1:3150` | the app, for browser verification and export |
 | `CHROME_PATH` | first usual Chrome / Chromium path | headless Chrome |
-| `NUXT_ADMIN_TOKEN` | unset | admin API access from anywhere but localhost (sent as `Authorization: Bearer <token>`); without it `/api/admin/*` answers loopback clients only |
+| `NUXT_ADMIN_TOKEN` | unset | the operator credential for the admin API, from anywhere (sent as `Authorization: Bearer <token>`); without it and without facility tokens (`pnpm -F agents tokens`, see `app/README.md` "Access") `/api/admin/*` answers loopback clients only. With facility tokens and no `NUXT_ADMIN_TOKEN` there is no operator: `POST /api/admin/live` admits no one |
 | `HOST` / `PORT` | `127.0.0.1` / `3150` | where the production server (`node app/.output/server/index.mjs`) listens. `pnpm -F app dev` is fixed at `127.0.0.1:3150` |
 
 ## 1. Register a site
@@ -112,7 +112,7 @@ curl -s -X POST http://127.0.0.1:3150/api/admin/site \
   -d '{"site_id":"my-station-concourse","auto_publish":true}'
 ```
 
-From localhost no token is needed and the `Authorization` header can be left out; `Content-Type: application/json` is required either way (the `/admin` page does the same calls). `pnpm -F app demo:approve [site id]` approves every screen bulletin of a site and switches its delivery on in one go, for trying the bundled demo. Switching `auto_publish` off stops delivery from the next state change.
+From localhost no token is needed and the `Authorization` header can be left out, unless a facility token exists in `data/tokens.json`; `Content-Type: application/json` is required either way (the `/admin` page does the same calls). `pnpm -F app demo:approve [site id]` approves every screen bulletin of a site and switches its delivery on in one go, for trying the bundled demo. Switching `auto_publish` off stops delivery from the next state change.
 
 ## 3. Drive the state
 

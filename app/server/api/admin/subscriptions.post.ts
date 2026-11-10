@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   }
   const check = checkWebhookUrl(body.url)
   if (!check.ok) throw createError({ status: 400, statusText: 'Bad Request', message: check.reason })
-  if (!(await readSite(body.site_id))) throw createError({ status: 404, statusText: 'Not Found', message: `no site ${body.site_id}` })
+  await readSiteOr404(body.site_id, event.context.admin)
   try {
     await assertWebhookTarget(check.url, webhookAllowsPrivate())
   } catch (error) {

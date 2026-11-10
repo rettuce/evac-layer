@@ -5,6 +5,7 @@ import { SITES_DIR } from "./paths.js";
 
 export interface SiteFile extends Site {
   name?: string;
+  facility_id?: string;
   replay?: { municipality?: string; from: string; to: string; speed: number };
 }
 

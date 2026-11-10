@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { isShape } from '~~/layout/shapes'
 import { isBulletinId } from '~~/layout/replay'
 import type { Shape } from '~~/layout/types'
+import type { AdminPrincipal } from './adminPolicy'
 
 export interface LayoutQuery {
   site: string
@@ -13,12 +14,12 @@ export function siteLayoutsDir(site: string, ...rest: string[]): string {
   return join(dataDir(), 'layouts', site, ...rest)
 }
 
-export async function parseLayoutQuery(query: Record<string, unknown>): Promise<LayoutQuery> {
+export async function parseLayoutQuery(query: Record<string, unknown>, admin?: AdminPrincipal): Promise<LayoutQuery> {
   const { bulletin, shape } = query
   if (!isBulletinId(bulletin) || !isShape(shape)) {
     throw createError({ status: 400, statusText: 'Bad Request', message: 'site (or municipality), bulletin and shape are required' })
   }
-  const site = await resolveSite(query)
+  const site = await resolveSite(query, admin)
   return { site: site.id, bulletin, shape }
 }
 
