@@ -5,7 +5,7 @@ A 40-line signage player that knows nothing about EVAC LAYER except the feed. It
 Try it with the bundled 柏崎市 site `15205-demo` and its level 4 landslide bulletin of 2026-10-31 16:53, with the app running (`pnpm -F app dev`):
 
 1. In `/admin`, approve `VPWW56-202610311653-b3fa1b3a2ced` for `15205-demo` and switch its auto publish on.
-2. Export the approved screens, so the feed has PNGs to link: `pnpm -F agents export --site 15205-demo`
+2. Wait about ten seconds: the server exports the approved screens in the background, so the feed has PNGs to link (`pnpm -F agents export --site 15205-demo` does the same by hand, and `data/live/15205-demo.export.json` says how it went).
 3. Start the player:
 
    ```sh
@@ -22,6 +22,6 @@ Try it with the bundled 柏崎市 site `15205-demo` and its level 4 landslide bu
 
 - Polls every 2 s with `If-None-Match`; an unchanged feed is a bodyless 304. Any other non-200 answer (a wrong site id is 404) is logged.
 - Node 18 or later, no dependencies.
-- PNGs exist only for bulletins exported with `pnpm -F agents export --site <id>`; the EVAC LAYER server serves them from `dist/` under `/delivery/…` while the bulletin stays approved.
+- PNGs exist only for exported bulletins (the server exports on approval; `pnpm -F agents export --site <id>` by hand); the EVAC LAYER server serves them from `dist/` under `/delivery/…` while the bulletin stays approved.
 - The same contract in Python, standard library only: [`examples/python-player/`](../python-player/).
 - A real player would also take the webhook (`POST /api/admin/subscriptions`) to switch without waiting for the next poll; see [`docs/integration.md`](../../docs/integration.md).

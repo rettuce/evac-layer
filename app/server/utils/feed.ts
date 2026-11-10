@@ -28,7 +28,9 @@ function screensOf(snapshot: LayoutSnapshot): Partial<Record<Shape, EvacScreen>>
   return layouts
 }
 
-async function readAssets(site: string, bulletin: string): Promise<Partial<Record<Shape, FeedAsset>>> {
+// Files rendered from other layout bytes than the ones on the feed are an older screen, so they are not linked.
+async function readAssets(site: string, bulletin: string, digest: string): Promise<Partial<Record<Shape, FeedAsset>>> {
+  if ((await exportedDigest(site, bulletin)) !== digest) return {}
   const files = await listDir(join(distDir(), site, bulletin))
   const assets: Partial<Record<Shape, FeedAsset>> = {}
   for (const shape of ALL_SHAPES) {
@@ -47,8 +49,13 @@ function approvalIn(approvals: Approvals, site: string, bulletin: string, snapsh
   return { by, updated_at: approvals.classes![classKey(site, snapshot.cls.key)]!.updated_at }
 }
 
+export async function deliverableDigest(approvals: Approvals, site: string, bulletin: string): Promise<string | undefined> {
+  const snapshot = await readLayoutSnapshot(site, bulletin)
+  return approvalIn(approvals, site, bulletin, snapshot).by === null ? undefined : snapshot!.digest
+}
+
 async function deliverableWith(approvals: Approvals, site: string, bulletin: string): Promise<boolean> {
-  return approvalIn(approvals, site, bulletin, await readLayoutSnapshot(site, bulletin)).by !== null
+  return (await deliverableDigest(approvals, site, bulletin)) !== undefined
 }
 
 export async function isDeliverable(site: string, bulletin: string): Promise<boolean> {
@@ -97,7 +104,7 @@ async function feedFor(site: SiteFile): Promise<Feed> {
   const snapshot = await readLayoutSnapshot(site.id, bulletin)
   const approval = approvalIn(approvals, site.id, bulletin, snapshot)
   if (!snapshot || !approval.by) return ambientFeed(feedSite)
-  return alertFeed(feedSite, screensOf(snapshot), await readAssets(site.id, bulletin), approval.updated_at!)
+  return alertFeed(feedSite, screensOf(snapshot), await readAssets(site.id, bulletin, snapshot.digest), approval.updated_at!)
 }
 
 export function feedEtag(body: string): string {

@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
     approvals.layouts[key] = { approved: true, updated_at: updatedAt, digest: snapshot.digest }
     approvals.classes = { ...approvals.classes, [classKey(site, snapshot.cls.key)]: classRecord }
     await writeApprovals(approvals)
+    await requestMissingExports(site, ownBaseUrl(event)).catch((error: Error) => console.warn(`[export] ${site} not queued: ${error.message}`))
     return { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], class: snapshot.cls.key, class_approval: classRecord }
   }
   const approvals = await readApprovals()
