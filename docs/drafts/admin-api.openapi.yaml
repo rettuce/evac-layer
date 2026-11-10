@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: EVAC LAYER admin API for hosted installations (DRAFT, not implemented)
-  version: 0.3.0-draft.3
+  version: 0.3.0-draft.4
   description: |
     Draft for review. Nothing in this file is implemented unless a path says "exists today".
 
@@ -45,6 +45,9 @@ info:
        | `GET /api/admin/catalog` | its own sites only |
        | `POST /api/admin/approve` | `site_id` of its own facility; no `municipality` alias |
        | `POST /api/admin/site` | `site_id` of its own facility |
+       | `GET /api/admin/classes` (new) | its own facility only |
+       | `POST /api/admin/class-approvals` (new) | sites of its own facility; any other id in `site_ids` is skipped as `not-found` |
+       | `/api/admin/sites...` (new, below) | sites of its own facility |
        | `GET /api/admin/preview-layout` | `site` of its own facility; no `municipality` alias |
        | `GET /api/admin/subscriptions` | `site` required, of its own facility |
        | `POST /api/admin/subscriptions` | `site_id` of its own facility |
@@ -99,6 +102,16 @@ tags:
       An approval is bound to the digest of the layout files. Composing again leaves the
       approval in place for a class whose screens came out byte-identical (`unchanged`) and
       makes the others wait for a new approval.
+      Approving in bulk. What a person decides is whether this kind of guidance goes out at
+      all; between two sites of one facility the screens of a class differ only in the
+      shelter, distance and direction the Composer computed for each place, and not every
+      facility can look at every screen. So a class can be approved for all sites of a
+      facility, or some of them, in one request. Each approval is still recorded per site
+      and bound to that site's layout digest, so a site whose screens are composed again and
+      come out different waits for a new approval. Only screens that passed the browser
+      check can be approved, in bulk or one by one; in bulk the check is the only thing that
+      looked at them. Every approval records its `mode`: `reviewed` when the caller sent the
+      digest of the screens a person looked at, `bulk` when it did not.
   - name: feed
 paths:
   /api/admin/sites:
@@ -330,6 +343,101 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+  /api/admin/classes:
+    get:
+      tags: [approval]
+      summary: The classes of the caller's facility, with every site's state
+      description: |
+        One request draws a management screen: one row per class, and under it the sites.
+        For the operator credential `facility_id` is required.
+      parameters:
+        - name: facility_id
+          in: query
+          description: Operator credential only.
+          schema:
+            $ref: '#/components/schemas/FacilityId'
+      responses:
+        '200':
+          description: The classes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [classes]
+                properties:
+                  classes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ClassSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/admin/class-approvals:
+    post:
+      tags: [approval]
+      summary: Approve or revoke a class for many sites at once
+      description: |
+        Approves the class at every site of the caller's facility, or at the sites named in
+        `site_ids`. A site is skipped, and the others still approved, when its screens of the
+        class did not pass the browser check, when it has no screens of the class, or when it
+        is not a site of the caller's facility (reported as `not-found`, like anywhere else).
+        The answer says what happened at each site. Approvals made here have `mode: bulk`.
+
+        The class goes in the body and not in the path because a class key contains slashes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [class, approved]
+              properties:
+                class:
+                  $ref: '#/components/schemas/ClassKey'
+                approved:
+                  type: boolean
+                site_ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Omit for every site of the facility.
+                facility_id:
+                  $ref: '#/components/schemas/FacilityId'
+                actor:
+                  $ref: '#/components/schemas/Actor'
+      responses:
+        '200':
+          description: What happened at each site.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [class, results]
+                properties:
+                  class:
+                    $ref: '#/components/schemas/ClassKey'
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [site_id, result]
+                      properties:
+                        site_id:
+                          type: string
+                        result:
+                          enum: [approved, revoked, skipped]
+                        reason:
+                          enum: [not-passed, no-screens, not-found]
+                          description: Why the site was skipped.
+                        state:
+                          $ref: '#/components/schemas/ClassState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /api/admin/catalog:
     get:
       tags: [approval]
@@ -354,8 +462,8 @@ paths:
 
         `digest` is the layout digest the person looked at (`ClassState.digest`, or the `ETag`
         of the preview). When the screens were composed again in the meantime the server
-        answers 409 `screens-changed` instead of approving something nobody saw. Optional
-        today; required for facility credentials.
+        answers 409 `screens-changed` instead of approving something nobody saw. An approval
+        with `digest` is recorded as `mode: reviewed`, one without as `mode: bulk`.
 
         The `municipality` alias (a municipality with exactly one site) is refused for
         facility credentials, because it names a site the caller did not choose.
@@ -675,12 +783,18 @@ components:
         approved_by:
           type: object
           additionalProperties: false
-          required: [token_label]
+          required: [token_label, mode]
           properties:
             token_label:
               type: string
+            mode:
+              enum: [reviewed, bulk]
+              description: '`reviewed`: the approval named the digest of the screens a person looked at. `bulk`: it did not.'
             actor:
               $ref: '#/components/schemas/Actor'
+        live:
+          type: boolean
+          description: True while a bulletin of this class is the one the site is showing.
         previews:
           description: Path of the preview PNG per shape, empty until the class has passed.
           type: object
@@ -688,6 +802,47 @@ components:
             type: string
           propertyNames:
             $ref: '#/components/schemas/Shape'
+    ClassSummary:
+      type: object
+      additionalProperties: false
+      required: [class, total, approved, pending, blocked, live, sites]
+      properties:
+        class:
+          $ref: '#/components/schemas/ClassKey'
+        total:
+          type: integer
+          description: Sites of the facility that have screens of the class.
+        approved:
+          type: integer
+        pending:
+          type: integer
+          description: Sites whose screens passed the browser check and wait for an approval.
+        blocked:
+          type: object
+          additionalProperties: false
+          required: [count, reasons]
+          description: Sites whose screens did not pass and cannot be approved.
+          properties:
+            count:
+              type: integer
+            reasons:
+              type: array
+              items:
+                type: string
+        live:
+          type: boolean
+          description: True while any site of the facility is showing a bulletin of the class.
+        sites:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [site_id, state]
+            properties:
+              site_id:
+                type: string
+              state:
+                $ref: '#/components/schemas/ClassState'
     Generation:
       type: object
       additionalProperties: false
