@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { sourceLines } from '../layout/sources.ts'
 import { isDemoSitePath, isTrustedLayoutSrc, resolveLayoutSrc } from '../layout/trust.ts'
-import { adminAccess, clientAddressFor, type AdminRequest } from '../server/utils/adminPolicy.ts'
+import { type AdminRequest, type FacilityToken, adminPrincipal, clientAddressFor, facilityRouteAllowed, tokenSha256 } from '../server/utils/adminPolicy.ts'
 import { type CheckReport, classDigest, layoutDigest, liveLayoutGate, liveLayoutGateWith, passedBrowserCheck, revokeClasses, screenClass } from '../layout/gate.ts'
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
 import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
@@ -66,10 +66,12 @@ const localPost: AdminRequest = {
   contentType: 'application/json',
 }
 
+const OPERATOR = { kind: 'operator' }
+
 test('admin without a token accepts only local, same-origin JSON requests', () => {
-  assert.equal(adminAccess(localPost, ''), 'allow')
-  assert.equal(adminAccess({ ...localPost, origin: undefined, secFetchSite: undefined }, ''), 'allow')
-  assert.equal(adminAccess({ method: 'GET', clientAddress: '::1', host: 'localhost:3160' }, ''), 'allow')
+  assert.deepEqual(adminPrincipal(localPost, '', []), OPERATOR)
+  assert.deepEqual(adminPrincipal({ ...localPost, origin: undefined, secFetchSite: undefined }, '', []), OPERATOR)
+  assert.deepEqual(adminPrincipal({ method: 'GET', clientAddress: '::1', host: 'localhost:3160' }, '', []), OPERATOR)
   const refused: [string, AdminRequest][] = [
     ['LAN client', { ...localPost, clientAddress: '192.168.0.92' }],
     ['rebound Host', { ...localPost, host: 'evil.example:3160', origin: 'http://evil.example:3160' }],
@@ -79,15 +81,78 @@ test('admin without a token accepts only local, same-origin JSON requests', () =
     ['form post', { ...localPost, contentType: 'text/plain' }],
     ['missing Host', { ...localPost, host: undefined }],
   ]
-  for (const [label, req] of refused) assert.equal(adminAccess(req, ''), 403, label)
+  for (const [label, req] of refused) assert.equal(adminPrincipal(req, '', []), 403, label)
 })
 
 test('admin with a token requires it as a Bearer credential, from anywhere', () => {
   const remote = { ...localPost, clientAddress: '192.168.0.92', host: 'signage.example' }
-  assert.equal(adminAccess(remote, 'secret'), 401)
-  assert.equal(adminAccess({ ...remote, authorization: 'Bearer wrong' }, 'secret'), 401)
-  assert.equal(adminAccess({ ...localPost, authorization: 'Bearer secre' }, 'secret'), 401)
-  assert.equal(adminAccess({ ...remote, authorization: 'Bearer secret' }, 'secret'), 'allow')
+  assert.equal(adminPrincipal(remote, 'secret', []), 401)
+  assert.equal(adminPrincipal({ ...remote, authorization: 'Bearer wrong' }, 'secret', []), 401)
+  assert.equal(adminPrincipal({ ...localPost, authorization: 'Bearer secre' }, 'secret', []), 401)
+  assert.deepEqual(adminPrincipal({ ...remote, authorization: 'Bearer secret' }, 'secret', []), OPERATOR)
+})
+
+const NOW = Date.parse('2026-11-11T00:00:00Z')
+
+function facilityToken(token: string, facility_id: string, expires_at?: string): FacilityToken {
+  return { id: `id-${facility_id}`, label: `${facility_id} signage`, facility_id, sha256: tokenSha256(token), created_at: '2026-11-01T00:00:00Z', ...(expires_at ? { expires_at } : {}) }
+}
+
+const tokens = [
+  facilityToken('token-alpha', 'alpha-fac'),
+  facilityToken('token-beta', 'beta-fac', '2026-12-01T00:00:00Z'),
+  facilityToken('token-old', 'alpha-fac', '2026-11-10T00:00:00Z'),
+]
+
+test('a facility token is matched by its SHA-256 and names its facility; the operator token still wins', () => {
+  const remote = { ...localPost, clientAddress: '192.168.0.92', host: 'signage.example' }
+  assert.equal(tokenSha256('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')
+  assert.deepEqual(adminPrincipal({ ...remote, authorization: 'Bearer token-alpha' }, 'secret', tokens, NOW), { kind: 'facility', facility_id: 'alpha-fac', label: 'alpha-fac signage' })
+  assert.deepEqual(adminPrincipal({ ...remote, authorization: 'Bearer token-beta' }, '', tokens, NOW), { kind: 'facility', facility_id: 'beta-fac', label: 'beta-fac signage' })
+  assert.deepEqual(adminPrincipal({ ...remote, authorization: 'Bearer secret' }, 'secret', tokens, NOW), OPERATOR)
+})
+
+test('an expired, unknown or missing facility token answers 401 alike', () => {
+  const remote = { ...localPost, clientAddress: '192.168.0.92', host: 'signage.example' }
+  for (const operator of ['', 'secret']) {
+    assert.equal(adminPrincipal({ ...remote, authorization: 'Bearer token-old' }, operator, tokens, NOW), 401, `expired, operator "${operator}"`)
+    assert.equal(adminPrincipal({ ...remote, authorization: 'Bearer token-unknown' }, operator, tokens, NOW), 401, `unknown, operator "${operator}"`)
+    assert.equal(adminPrincipal(remote, operator, tokens, NOW), 401, `none, operator "${operator}"`)
+  }
+  assert.equal(adminPrincipal({ ...remote, authorization: 'Bearer token-beta' }, '', tokens, Date.parse('2026-12-01T00:00:00Z')), 401, 'expires at that instant')
+  const unreadable = [{ ...facilityToken('token-alpha', 'alpha-fac'), expires_at: 'someday' }]
+  assert.equal(adminPrincipal({ ...remote, authorization: 'Bearer token-alpha' }, '', unreadable, NOW), 401, 'an unreadable expiry counts as expired')
+})
+
+test('loopback without a token is the operator only while no facility token is registered', () => {
+  assert.deepEqual(adminPrincipal(localPost, '', [], NOW), OPERATOR)
+  assert.equal(adminPrincipal(localPost, '', tokens, NOW), 401)
+  assert.equal(adminPrincipal(localPost, '', [facilityToken('token-old', 'alpha-fac', '2026-11-10T00:00:00Z')], NOW), 401, 'an expired token still switches loopback off')
+  assert.deepEqual(adminPrincipal({ ...localPost, authorization: 'Bearer token-alpha' }, '', tokens, NOW), { kind: 'facility', facility_id: 'alpha-fac', label: 'alpha-fac signage' })
+})
+
+test('a facility credential reaches only the admin paths that have a facility rule', () => {
+  const admitted: [string, string][] = [
+    ['GET', '/api/admin/catalog'],
+    ['POST', '/api/admin/approve'],
+    ['POST', '/api/admin/site'],
+    ['GET', '/api/admin/preview-layout'],
+    ['GET', '/api/admin/subscriptions'],
+    ['POST', '/api/admin/subscriptions'],
+    ['DELETE', '/api/admin/subscriptions/0b6c3e1e-5f0e-4c1a-9c55-3f1f0f6f2a10'],
+  ]
+  for (const [method, path] of admitted) assert.equal(facilityRouteAllowed(method, path), true, `${method} ${path}`)
+  const refused: [string, string][] = [
+    ['POST', '/api/admin/live'],
+    ['GET', '/api/admin/live'],
+    ['POST', '/api/admin/catalog'],
+    ['DELETE', '/api/admin/subscriptions'],
+    ['DELETE', '/api/admin/subscriptions/a/b'],
+    ['GET', '/api/admin/catalog/'],
+    ['GET', '/api/admin/some-later-path'],
+    ['HEAD', '/api/admin/catalog'],
+  ]
+  for (const [method, path] of refused) assert.equal(facilityRouteAllowed(method, path), false, `${method} ${path}`)
 })
 
 test('live screens get a layout only for a bulletin approved at that site, with auto publish on', () => {

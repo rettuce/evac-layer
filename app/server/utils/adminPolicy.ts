@@ -1,4 +1,4 @@
-import { timingSafeEqual } from 'node:crypto'
+import { createHash, timingSafeEqual } from 'node:crypto'
 
 const LOOPBACK_ADDRESSES = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1'])
 const LOOPBACK_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]'])
@@ -13,7 +13,30 @@ export interface AdminRequest {
   authorization?: string
 }
 
-export type AdminDecision = 'allow' | 401 | 403
+export interface FacilityToken {
+  id: string
+  label: string
+  facility_id: string
+  sha256: string
+  created_at: string
+  expires_at?: string
+}
+
+export type AdminPrincipal = { kind: 'operator' } | { kind: 'facility'; facility_id: string; label: string }
+
+export type AdminDecision = AdminPrincipal | 401 | 403
+
+const SHA256_HEX = /^[0-9a-f]{64}$/
+
+const FACILITY_ROUTES: readonly { method: string; path: RegExp }[] = [
+  { method: 'GET', path: /^\/api\/admin\/catalog$/ },
+  { method: 'POST', path: /^\/api\/admin\/approve$/ },
+  { method: 'POST', path: /^\/api\/admin\/site$/ },
+  { method: 'GET', path: /^\/api\/admin\/preview-layout$/ },
+  { method: 'GET', path: /^\/api\/admin\/subscriptions$/ },
+  { method: 'POST', path: /^\/api\/admin\/subscriptions$/ },
+  { method: 'DELETE', path: /^\/api\/admin\/subscriptions\/[^/]+$/ },
+]
 
 // nuxi dev relays requests to the Nitro worker, so the real client is the entry the relay appended to
 // x-forwarded-for (the right-most one). Only a relay on this machine is trusted to have appended it.
@@ -51,8 +74,31 @@ function isLocalBrowserSafe(req: AdminRequest): boolean {
   return true
 }
 
-// Behind a reverse proxy every client looks like loopback, so such deployments must set a token.
-export function adminAccess(req: AdminRequest, token: string): AdminDecision {
-  if (token) return sameToken((req.authorization ?? '').replace(/^Bearer\s+/i, ''), token) ? 'allow' : 401
-  return LOOPBACK_ADDRESSES.has(req.clientAddress) && isLocalBrowserSafe(req) ? 'allow' : 403
+export function tokenSha256(token: string): string {
+  return createHash('sha256').update(token).digest('hex')
+}
+
+function facilityTokenFor(given: string, tokens: readonly FacilityToken[], now: number): FacilityToken | undefined {
+  const digest = Buffer.from(tokenSha256(given), 'hex')
+  const match = tokens.find((t) => SHA256_HEX.test(t.sha256) && timingSafeEqual(Buffer.from(t.sha256, 'hex'), digest))
+  if (!match) return undefined
+  return match.expires_at === undefined || Date.parse(match.expires_at) > now ? match : undefined
+}
+
+// A path added later stays closed to facilities until it is listed here with a rule of its own.
+export function facilityRouteAllowed(method: string, pathname: string): boolean {
+  return FACILITY_ROUTES.some((route) => route.method === method && route.path.test(pathname))
+}
+
+// Behind a reverse proxy every client looks like loopback, so such deployments must set a token. A facility
+// token switches loopback off too: a request from this machine must not outrank the facilities' credentials.
+export function adminPrincipal(req: AdminRequest, operatorToken: string, facilityTokens: readonly FacilityToken[], now = Date.now()): AdminDecision {
+  const given = (req.authorization ?? '').replace(/^Bearer\s+/i, '')
+  if (operatorToken && sameToken(given, operatorToken)) return { kind: 'operator' }
+  if (given) {
+    const facility = facilityTokenFor(given, facilityTokens, now)
+    if (facility) return { kind: 'facility', facility_id: facility.facility_id, label: facility.label }
+  }
+  if (operatorToken || facilityTokens.length) return 401
+  return LOOPBACK_ADDRESSES.has(req.clientAddress) && isLocalBrowserSafe(req) ? { kind: 'operator' } : 403
 }

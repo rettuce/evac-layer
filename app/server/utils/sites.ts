@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 import { isMunicipalityId } from '~~/layout/replay'
+import type { AdminPrincipal } from './adminPolicy'
 
 const SITE_ID = /^[A-Za-z0-9_-]{1,80}$/
 
@@ -18,6 +19,7 @@ export interface SiteFile {
   lat?: number
   lng?: number
   facing_deg?: number
+  facility_id?: string
   replay?: SiteReplay
 }
 
@@ -50,6 +52,17 @@ export async function readSite(id: string): Promise<SiteFile | undefined> {
   return site?.id === id ? site : undefined
 }
 
+export function siteVisibleTo(admin: AdminPrincipal | undefined, site: SiteFile): boolean {
+  return admin?.kind !== 'facility' || (site.facility_id !== undefined && site.facility_id === admin.facility_id)
+}
+
+// A site of another facility answers exactly as a missing one, so a facility cannot find others by probing ids.
+export async function readSiteOr404(id: string, admin: AdminPrincipal | undefined): Promise<SiteFile> {
+  const site = await readSite(id)
+  if (!site || !siteVisibleTo(admin, site)) throw createError({ status: 404, statusText: 'Not Found', message: `no site ${id}` })
+  return site
+}
+
 export async function sitesOf(municipality: string): Promise<SiteFile[]> {
   return (await readSites()).filter((site) => site.municipality_id === municipality)
 }
@@ -60,16 +73,17 @@ function badRequest(message: string): never {
 
 // `site` names the screen. `municipality` alone is the pre-site alias: it stands for the municipality's
 // only site, because with two sites it cannot tell whose arrows and shelters to serve.
-export async function resolveSite({ site, municipality }: { site?: unknown; municipality?: unknown }): Promise<SiteFile> {
+// A facility credential always names the site: the alias would resolve through sites it may not see.
+export async function resolveSite({ site, municipality }: { site?: unknown; municipality?: unknown }, admin?: AdminPrincipal): Promise<SiteFile> {
   if (site !== undefined) {
     if (!isSiteId(site)) badRequest('site id is invalid')
-    const found = await readSite(site)
-    if (!found) throw createError({ status: 404, statusText: 'Not Found', message: `no site ${site}` })
+    const found = await readSiteOr404(site, admin)
     if (municipality !== undefined && municipality !== found.municipality_id && municipality !== found.replay?.municipality) {
       badRequest(`site ${site} is in municipality ${found.municipality_id}, not ${String(municipality)}`)
     }
     return found
   }
+  if (admin?.kind === 'facility') badRequest('site is required')
   if (!isMunicipalityId(municipality)) badRequest('site is required (or municipality, when it has exactly one site)')
   const sites = await sitesOf(municipality)
   if (sites.length === 1) return sites[0]!

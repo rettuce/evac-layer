@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   if (!isBulletinId(body.bulletin_id) || typeof body.approved !== 'boolean' || (body.digest !== undefined && typeof body.digest !== 'string')) {
     throw createError({ status: 400, statusText: 'Bad Request', message: 'site_id (or municipality), bulletin_id and approved are required' })
   }
-  const site = (await resolveSite({ site: body.site_id, municipality: body.municipality })).id
+  const site = (await resolveSite({ site: body.site_id, municipality: body.municipality }, event.context.admin)).id
   const bulletin = body.bulletin_id
   const key = layoutKey(site, bulletin)
   const updatedAt = new Date().toISOString()

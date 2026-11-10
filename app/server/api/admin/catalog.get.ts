@@ -8,12 +8,16 @@ interface ReportFile extends CheckReport {
   attempts: { n: number; findings: unknown[]; screens_ok: Record<string, boolean> }[]
 }
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
   const root = dataDir()
+  const admin = event.context.admin
   const approvals = await readApprovals()
+  const visibleSites = (await readSites()).filter((site) => siteVisibleTo(admin, site))
+  const visibleIds = new Set(visibleSites.map((site) => site.id))
 
   const layouts = []
   for (const site of await listDir(join(root, 'layouts'))) {
+    if (admin?.kind === 'facility' && !visibleIds.has(site)) continue
     const index = await readLayoutIndex(site)
     if (!index) continue
     const entries = await Promise.all(
@@ -42,7 +46,7 @@ export default defineEventHandler(async () => {
     layouts.push({ site_id: site, municipality_id: index.municipality, name: index.name, writer_note: index.writer_note, entries })
   }
 
-  const sites = (await readSites()).map((site) => ({ ...site, auto_publish: approvals.sites[site.id]?.auto_publish ?? false }))
+  const sites = visibleSites.map((site) => ({ ...site, auto_publish: approvals.sites[site.id]?.auto_publish ?? false }))
 
   return { layouts, sites, approvals_file: 'data/approvals.json' }
 })
