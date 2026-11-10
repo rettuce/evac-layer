@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: EVAC LAYER admin API for hosted installations (DRAFT, not implemented)
-  version: 0.3.0-draft.2
+  version: 0.3.0-draft.3
   description: |
     Draft for review. Nothing in this file is implemented unless a path says "exists today".
 
@@ -35,6 +35,24 @@ info:
        it, have to go off with it.
     8. Every change records who made it: the label of the credential and, when the caller
        sends one, the person behind the request (`actor`).
+    9. A facility credential is refused (403 `operator-only`) on every `/api/admin/` path that
+       has no facility rule. The check lives in the admin middleware and names the paths it
+       admits, so a path added later is closed to facilities until someone gives it a rule.
+       The paths that exist today, all of them:
+
+       | Path | Facility credential |
+       |---|---|
+       | `GET /api/admin/catalog` | its own sites only |
+       | `POST /api/admin/approve` | `site_id` of its own facility; no `municipality` alias |
+       | `POST /api/admin/site` | `site_id` of its own facility |
+       | `GET /api/admin/preview-layout` | `site` of its own facility; no `municipality` alias |
+       | `GET /api/admin/subscriptions` | `site` required, of its own facility |
+       | `POST /api/admin/subscriptions` | `site_id` of its own facility |
+       | `DELETE /api/admin/subscriptions/{id}` | a registration of one of its own sites; 404 otherwise |
+       | `POST /api/admin/live` | operator only: the live bulletin is set by `receive`, and a facility that could set it could put an old warning back on its screens |
+
+       A request that names no site where the rule needs one answers 400 for a facility
+       credential, never "all sites".
 
     Open, and each blocks part of the implementation:
     - `facing_deg` is required by `schema/site.schema.json`, and a signage system that does
@@ -151,6 +169,7 @@ paths:
             `site-id-taken`: the id belongs to a site the caller may not act on. This is the
             one place where the existence of another facility's site shows; the alternative,
             404 on a PUT, would leave the caller unable to tell why it can never create the id.
+            The body carries `code` and `message` only and never says whose site it is.
           content:
             application/json:
               schema:
@@ -721,6 +740,7 @@ components:
             - screens-changed
             - no-site-near
             - place-lookup-disabled
+            - operator-only
           description: What a caller branches on. `message` is for people.
         message:
           type: string
