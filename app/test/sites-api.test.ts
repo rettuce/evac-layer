@@ -68,12 +68,14 @@ async function validateWithAgents(file: string): Promise<string> {
   return stdout
 }
 
-// A stand-in for the GSI reverse geocoder: answers GSI_CODE unless a place is mapped to another code.
 function fakeGeocoder() {
   const codes = new Map<string, string>()
-  const state = { down: false, calls: 0 }
-  const server: Server = createServer((req, res) => {
+  const state = { down: false, calls: 0, inflight: 0, maxInflight: 0, delayMs: 0 }
+  const server: Server = createServer(async (req, res) => {
     state.calls++
+    state.maxInflight = Math.max(state.maxInflight, ++state.inflight)
+    if (state.delayMs) await sleep(state.delayMs)
+    state.inflight--
     const url = new URL(req.url ?? '/', 'http://localhost')
     if (state.down) {
       res.statusCode = 503
@@ -82,7 +84,7 @@ function fakeGeocoder() {
     }
     const code = codes.get(`${url.searchParams.get('lat')},${url.searchParams.get('lon')}`) ?? GSI_CODE
     res.setHeader('content-type', 'application/json')
-    res.end(JSON.stringify({ results: { muniCd: code, lv01Nm: 'test' } }))
+    res.end(JSON.stringify(code ? { results: { muniCd: code, lv01Nm: 'test' } } : {}))
   })
   return { server, codes, state }
 }
@@ -495,6 +497,37 @@ describe('site registration over HTTP on a server that holds facilities', { skip
     } finally {
       await rm(broken)
     }
+  })
+
+  test('a PUT that keeps lat and lng reuses the stored municipality instead of asking the geocoder', async () => {
+    const stored = await readSiteFile('alpha-lobby')
+    const calls = gsi.state.calls
+    const response = await put('alpha-lobby', { lat: stored.lat, lng: stored.lng, facing_deg: 45 }, TOKEN_A)
+    assert.equal(response.status, 200)
+    assert.equal(gsi.state.calls, calls)
+    assert.equal((await readSiteFile('alpha-lobby')).municipality_id, stored.municipality_id)
+  })
+
+  test('the geocoder is asked one request at a time', async () => {
+    gsi.state.delayMs = 100
+    gsi.state.maxInflight = 0
+    try {
+      const responses = await Promise.all(Array.from({ length: 5 }, (_, i) => put(`alpha-queue-${i}`, { ...PLACE, lat: 35.6 + i / 100 }, TOKEN_A)))
+      assert.deepEqual(responses.map((r) => r.status), [201, 201, 201, 201, 201])
+      assert.equal(gsi.state.maxInflight, 1)
+    } finally {
+      gsi.state.delayMs = 0
+    }
+  })
+
+  test('a place where the geocoder finds no municipality answers 400 invalid-request, not 502', async () => {
+    gsi.codes.set('30,150', '')
+    const response = await put('alpha-at-sea', { lat: 30, lng: 150, facing_deg: 0 }, TOKEN_A)
+    assert.equal(response.status, 400)
+    const body = await response.json()
+    assert.equal(body.data?.code, 'invalid-request')
+    assert.match(body.message, /no municipality/)
+    assert.equal(existsSync(siteFile('alpha-at-sea')), false)
   })
 })
 

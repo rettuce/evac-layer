@@ -1,12 +1,13 @@
 import { mkdir, rename, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { GSI_REVERSE_GEOCODER, InvalidCoordinates, MunicipalityLookupFailed, buildSite } from '~~/layout/siteRegister'
+import { GSI_REVERSE_GEOCODER, InvalidCoordinates, MunicipalityLookupFailed, NoMunicipalityAt, buildSite } from '~~/layout/siteRegister'
 import type { AdminPrincipal } from './adminPolicy'
 
-// The patterns of schema/site.schema.json. The server has no JSON Schema validator; the tests check written
-// files against the schema itself.
+// The server has no JSON Schema validator; the tests check the files it writes against schema/site.schema.json.
 const SCHEMA_SITE_ID = /^[a-z0-9][a-z0-9-]{2,63}$/
 const MUNICIPALITY_ID = /^\d{5}$/
+// An id of five digits reads as a municipality in an old `<municipality>/<bulletin>` approval key.
+const LEGACY_KEY_OWNER = /^\d{5}$/
 const SITE_FIELDS = new Set(['id', 'municipality_id', 'lat', 'lng', 'facing_deg', 'name', 'note', 'facility_id', 'location_updated_at', 'replay'])
 const REPLAY_FIELDS = new Set(['municipality', 'from', 'to', 'speed'])
 const INPUT_FIELDS = new Set(['lat', 'lng', 'facing_deg', 'name', 'municipality_id', 'actor'])
@@ -19,9 +20,9 @@ export interface SiteInput {
   municipality_id?: string
 }
 
-type StoredSite = { kind: 'none' } | { kind: 'site'; site: SiteFile } | { kind: 'unreadable'; error: unknown }
+type StoredSite = { kind: 'none' } | { kind: 'site'; site: SiteFile } | { kind: 'unreadable'; error: unknown } | { kind: 'taken-by-case' }
 
-const siteLocks = new Map<string, ReturnType<typeof serialQueue>>()
+const geocoderQueue = serialQueue()
 let partialCounter = 0
 
 function invalid(message: string): never {
@@ -74,8 +75,11 @@ export function siteFilePath(id: string): string {
   return join(dataDir(), 'sites', `${id}.json`)
 }
 
-// A file that cannot be read, or that names another id, may belong to anyone: it is never taken as "no site".
+// A file that cannot be read, or that names another id, may belong to anyone: it is never taken as "no site". On a
+// file system that ignores case, <id>.json would open (and the write would replace) a site spelled in other case.
 async function storedSite(id: string): Promise<StoredSite> {
+  const names = await listDir(join(dataDir(), 'sites'))
+  if (names.some((name) => name !== `${id}.json` && name.toLowerCase() === `${id}.json`)) return { kind: 'taken-by-case' }
   try {
     const site = await readJsonIfExists<SiteFile>(siteFilePath(id))
     if (site === undefined) return { kind: 'none' }
@@ -86,6 +90,8 @@ async function storedSite(id: string): Promise<StoredSite> {
 }
 
 function assertMayWrite(id: string, admin: AdminPrincipal, stored: StoredSite): void {
+  if (stored.kind === 'none' && LEGACY_KEY_OWNER.test(id)) invalid('a site id of five digits only is not accepted: it would read as a municipality code')
+  if (stored.kind === 'taken-by-case') throw problem(409, 'site-id-taken', `site id ${id} is taken; choose another id`)
   if (admin.kind === 'operator') {
     if (stored.kind === 'unreadable') throw stored.error
     return
@@ -94,16 +100,16 @@ function assertMayWrite(id: string, admin: AdminPrincipal, stored: StoredSite): 
   throw problem(409, 'site-id-taken', `site id ${id} is taken; choose another id`)
 }
 
-export function withSiteLock<T>(id: string, task: () => Promise<T>): Promise<T> {
-  let lock = siteLocks.get(id)
-  if (!lock) siteLocks.set(id, (lock = serialQueue()))
-  return lock(task)
-}
-
-async function placeSite(id: string, input: SiteInput) {
+async function placeSite(id: string, input: SiteInput, stored: StoredSite) {
+  const known = stored.kind === 'site' ? stored.site : undefined
+  if (known && known.lat === input.lat && known.lng === input.lng) {
+    const site = { id, municipality_id: input.municipality_id ?? known.municipality_id, lat: input.lat, lng: input.lng, facing_deg: input.facing_deg, ...(input.name ? { name: input.name } : {}) }
+    return { site, warnings: [] }
+  }
   try {
-    return await buildSite({ id, ...input }, fetch, { url: useRuntimeConfig().reverseGeocoderUrl || GSI_REVERSE_GEOCODER })
+    return await geocoderQueue(() => buildSite({ id, ...input }, fetch, { url: useRuntimeConfig().reverseGeocoderUrl || GSI_REVERSE_GEOCODER }))
   } catch (error) {
+    if (error instanceof NoMunicipalityAt) invalid(`${error.message}; give municipality_id if the place is right`)
     if (error instanceof MunicipalityLookupFailed) throw problem(502, 'geocoder-unavailable', `${error.message}; give municipality_id to register without it`)
     if (error instanceof InvalidCoordinates) invalid(error.message)
     throw error
@@ -112,7 +118,12 @@ async function placeSite(id: string, input: SiteInput) {
 
 // Spreading the stored site first keeps its field order, so the same body twice writes the same bytes.
 function mergedSite(previous: SiteFile | undefined, placed: SiteFile, admin: AdminPrincipal): SiteFile {
-  const moved = !previous || previous.lat !== placed.lat || previous.lng !== placed.lng || previous.facing_deg !== placed.facing_deg
+  const moved =
+    !previous ||
+    previous.lat !== placed.lat ||
+    previous.lng !== placed.lng ||
+    previous.facing_deg !== placed.facing_deg ||
+    previous.municipality_id !== placed.municipality_id
   return {
     ...previous,
     id: placed.id,
@@ -135,8 +146,9 @@ async function writeSiteFile(site: SiteFile): Promise<void> {
 }
 
 export async function putSite(id: string, input: SiteInput, admin: AdminPrincipal): Promise<{ site: SiteFile; created: boolean; warnings: string[] }> {
-  assertMayWrite(id, admin, await storedSite(id))
-  const { site: placed, warnings } = await placeSite(id, input)
+  const stored = await storedSite(id)
+  assertMayWrite(id, admin, stored)
+  const { site: placed, warnings } = await placeSite(id, input, stored)
   return withSiteLock(id, async () => {
     const stored = await storedSite(id)
     assertMayWrite(id, admin, stored)
@@ -158,6 +170,7 @@ function withoutSite<T>(record: Record<string, T>, id: string): Record<string, T
 export function deleteSite(id: string, admin: AdminPrincipal): Promise<boolean> {
   return withSiteLock(id, async () => {
     if (!(await readVisibleSite(id, admin))) return false
+    advanceSiteGeneration(id)
     await removeSubscriptionsOf(id)
     await updateApprovals((approvals) => {
       approvals.layouts = withoutSite(approvals.layouts, id)

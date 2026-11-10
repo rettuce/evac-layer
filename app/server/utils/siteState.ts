@@ -32,7 +32,6 @@ async function exists(file: string): Promise<boolean> {
   return access(file).then(() => true, () => false)
 }
 
-// The newest screen of each class stands for it: an approval of the class is checked against that bulletin.
 async function representatives(site: string, rows: ReplayRow[]): Promise<Map<string, { row: ReplayRow; snapshot: LayoutSnapshot }>> {
   const byClass = new Map<string, { row: ReplayRow; snapshot: LayoutSnapshot }>()
   for (const row of rows) {

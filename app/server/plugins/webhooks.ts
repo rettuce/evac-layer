@@ -14,6 +14,7 @@ export default defineNitroPlugin((nitroApp) => {
     let lastError = ''
     for (let retry = 0; retry <= WEBHOOK_RETRIES; retry++) {
       if (generation.get(subscription.id) !== deliveryGeneration) return
+      if (!(await readSubscriptions()).some((s) => s.id === subscription.id)) return
       let status = 0
       try {
         status = await postWebhook(subscription.url, subscription.secret, feedEvent(feed), body)

@@ -18,6 +18,7 @@ data/subscriptions.json.*
 data/tokens.json
 data/tokens.json.*
 data/audit.jsonl
+data/audit.jsonl.*
 data/raw/
 data/live/
 app/dist

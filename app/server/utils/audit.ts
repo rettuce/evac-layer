@@ -1,4 +1,4 @@
-import { appendFile, mkdir } from 'node:fs/promises'
+import { appendFile, mkdir, rename, rm, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { H3Event } from 'h3'
 import type { AdminPrincipal } from './adminPolicy'
@@ -22,6 +22,8 @@ declare module 'h3' {
 }
 
 const ACTOR_FIELD_MAX = 120
+const AUDIT_MAX_BYTES = 10 * 1024 * 1024
+const AUDIT_KEPT_FILES = 5
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 const SITE_PATH = /^\/api\/admin\/sites\/([^/]+)$/
 const auditQueue = serialQueue()
@@ -59,7 +61,6 @@ function actorFromHeaders(id: string | undefined, encodedName: string | undefine
   return { id: actorField(id, 'id'), name: actorField(name, 'name') }
 }
 
-// A request with a body names its actor in the body; one without (DELETE) can only use the headers.
 export function actorOf(body: unknown, headers: { id?: string; name?: string }): Actor | undefined {
   if (typeof body === 'object' && body !== null && !Array.isArray(body)) {
     const actor = (body as { actor?: unknown }).actor
@@ -79,6 +80,19 @@ export function auditFile(): string {
   return join(dataDir(), 'audit.jsonl')
 }
 
+function auditMaxBytes(): number {
+  const configured = Number(useRuntimeConfig().auditMaxBytes)
+  return configured > 0 ? configured : AUDIT_MAX_BYTES
+}
+
+async function rotateIfFull(file: string): Promise<void> {
+  const size = await stat(file).then((s) => s.size, () => 0)
+  if (size < auditMaxBytes()) return
+  await rm(`${file}.${AUDIT_KEPT_FILES}`, { force: true })
+  for (let n = AUDIT_KEPT_FILES - 1; n >= 1; n--) await rename(`${file}.${n}`, `${file}.${n + 1}`).catch(() => undefined)
+  await rename(file, `${file}.1`)
+}
+
 export async function recordAudit(event: H3Event, status: number): Promise<void> {
   const audit = event.context.audit
   if (!audit || audit.recorded) return
@@ -95,6 +109,7 @@ export async function recordAudit(event: H3Event, status: number): Promise<void>
   try {
     await auditQueue(async () => {
       await mkdir(dataDir(), { recursive: true })
+      await rotateIfFull(auditFile())
       await appendFile(auditFile(), `${JSON.stringify(line)}\n`)
     })
   } catch (error) {

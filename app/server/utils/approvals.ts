@@ -86,6 +86,32 @@ async function writeApprovals(approvals: Approvals): Promise<void> {
   await rename(partial, approvalsFile())
 }
 
+// Each old key whose municipality has exactly one site becomes that site's key in the file, so that a site registered
+// in the municipality later cannot change whose approval it is.
+export function migrateLegacyApprovalKeys(): Promise<number> {
+  return approvalsQueue(async () => {
+    const stored = await readJsonIfExists<Approvals>(approvalsFile())
+    if (!stored?.layouts) return 0
+    const sites = await readSites()
+    const siteIds = new Set(sites.map((site) => site.id))
+    const layouts: Approvals['layouts'] = {}
+    let migrated = 0
+    for (const [key, record] of Object.entries(stored.layouts)) {
+      const [owner = '', bulletin = ''] = key.split('/')
+      const owners = !siteIds.has(owner) && isMunicipalityId(owner) ? sites.filter((site) => site.municipality_id === owner) : []
+      if (owners.length !== 1) {
+        layouts[key] = record
+        continue
+      }
+      const target = `${owners[0]!.id}/${bulletin}`
+      if (!(target in stored.layouts)) layouts[target] = record
+      migrated++
+    }
+    if (migrated) await writeApprovals({ ...stored, layouts, sites: stored.sites ?? {} })
+    return migrated
+  })
+}
+
 // The only way to change approvals.json. A change that throws leaves the file as it was.
 export function updateApprovals<T>(change: (approvals: Approvals) => T | Promise<T>): Promise<T> {
   return approvalsQueue(async () => {
