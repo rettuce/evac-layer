@@ -21,6 +21,9 @@ info:
        its prefix, and repeating the call after a lost response is harmless.
     4. Composing screens is a job: `POST` starts it and answers 202, `GET` reports progress.
        It never runs inside the request.
+    6. Looking a feed up by coordinates never crosses credential scopes (see `GET /api/feed`).
+       The same holds for `/screen?lat=&lng=` and `GET /api/site-near`, which exist today and
+       pick the nearest site whoever registered it.
     5. Preparing a municipality (reading its hazard-map PDFs into `data/municipalities/`) is
        the operator's work and is not offered over HTTP. A site in a municipality that is not
        prepared can be registered but not composed.
@@ -223,6 +226,15 @@ paths:
 
         Like the feed by id, this needs no credential: a feed only ever carries approved,
         public information.
+
+        The match must not cross venues. A venue chooses the coordinates of its own sites, so
+        without a rule it could register a site next to another venue's screen and have that
+        screen's receiver resolve to it, showing screens the other venue never approved. So
+        the lookup answers only when every site inside the radius was registered under one
+        credential scope; when sites of two scopes fall inside it, it answers 409 and the
+        receiver has to use `GET /api/feed/{site_id}`. A receiver that belongs to a venue with
+        neighbours within 100 m (the same building, a station concourse) should use the site
+        id from the start.
       security: []
       parameters:
         - name: lat
@@ -256,6 +268,12 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '404':
           description: No site within 100 m.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '409':
+          description: '`ambiguous-place`: sites of more than one credential scope are within 100 m. Use the feed by site id.'
           content:
             application/json:
               schema:
