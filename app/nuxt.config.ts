@@ -34,6 +34,7 @@ export default defineNuxtConfig({
     '@fontsource/noto-sans-thai/400.css',
     '@fontsource/noto-sans-thai/700.css',
     '~/assets/screen.css',
+    '~/assets/north-up.css',
   ],
   app: {
     head: {

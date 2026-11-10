@@ -1,0 +1,126 @@
+/* The north-up dial (northUp.ts): drawn in the ink and the page colour only, and still; the arrow turns once, by the
+   layout's rotation. The ring opens behind N and 北 so that the marks read as part of the circle. */
+.north-dial {
+  position: relative;
+  flex: none;
+  width: calc(var(--dial) * var(--px));
+  height: calc((var(--dial) + var(--mark) * 0.5) * var(--px));
+}
+.north-ring,
+.north-arrow {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(var(--dial) * var(--px));
+  height: calc(var(--dial) * var(--px));
+}
+.north-ring {
+  display: block;
+  overflow: visible;
+}
+.north-arrow {
+  display: grid;
+  place-items: center;
+}
+.north-marks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc((var(--mark) * 0.5 + var(--dial) * 0.04 - var(--mark) * 0.55) * var(--px));
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+.evac-screen .north-marks .north-mark {
+  margin: 0;
+  padding: 0 calc(var(--mark) * 0.1 * var(--px));
+  background: var(--bg);
+  color: var(--ink);
+  font-size: calc(var(--mark) * var(--px));
+  line-height: 1.1;
+  font-weight: 700;
+  opacity: 1;
+  white-space: nowrap;
+}
+.evac-screen .north-marks .north-mark:lang(ja) {
+  justify-self: start;
+}
+
+.evac-screen.is-north-up .is-figma .role-direction {
+  box-sizing: border-box;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+}
+.evac-screen.is-north-up .is-figma .role-direction .direction-text,
+.evac-screen.is-north-up .is-figma .role-direction .north-distance {
+  flex: none;
+  margin: 0;
+  font-size: calc(var(--type-direction) * var(--px));
+  line-height: 1.1;
+  font-weight: 700;
+  text-wrap: nowrap;
+  white-space: nowrap;
+}
+.evac-screen.is-north-up .is-figma .role-direction .north-distance {
+  font-variant-numeric: tabular-nums;
+}
+.north-words {
+  display: flex;
+  flex: none;
+}
+.north-words.is-stack {
+  flex-direction: column;
+  gap: calc(4 * var(--px));
+}
+.north-words.is-line {
+  flex-direction: row;
+  align-items: baseline;
+  gap: calc(var(--type-direction) * 0.3 * var(--px));
+}
+
+/* 16:9: the dial and the two lines right-aligned in the direction column, from the top of the action (mock B). */
+.evac-screen.shape-landscape.is-north-up .is-figma .role-direction {
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: calc(44 * var(--px));
+  padding-top: calc(8 * var(--px));
+}
+.evac-screen.shape-landscape.is-north-up .is-figma .north-words {
+  padding-top: calc(26 * var(--px));
+}
+
+.evac-screen.shape-portrait.is-north-up .is-figma .role-direction {
+  gap: calc(44 * var(--px));
+}
+
+.evac-screen.shape-ribbon.is-north-up .is-figma .role-direction {
+  justify-content: flex-end;
+  gap: calc(60 * var(--px));
+}
+
+.evac-screen.shape-pillar.is-north-up .is-figma .role-direction {
+  gap: calc(88 * var(--px));
+  padding-left: calc(50 * var(--px));
+}
+.evac-screen.shape-pillar.is-north-up .is-figma .role-direction .direction-text,
+.evac-screen.shape-pillar.is-north-up .is-figma .role-direction .north-distance {
+  line-height: 1;
+}
+
+/* 1:1: the designation over the dial, the name and "南西へ 570 m" beside it (mock B). The shelter and the direction
+   share the middle row, so the name starts after the dial and the direction line sits on the block's foot. */
+.evac-screen.shape-square.is-north-up .is-figma .shelter-name {
+  padding-left: 0;
+}
+.evac-screen.shape-square.is-north-up .is-figma .role-shelter .name-row {
+  padding-left: calc(166 * var(--px));
+}
+.evac-screen.shape-square.is-north-up .is-figma .role-direction {
+  align-items: flex-start;
+  gap: calc(30 * var(--px));
+}
+.evac-screen.shape-square.is-north-up .is-figma .north-words {
+  align-self: flex-end;
+}
