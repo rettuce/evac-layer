@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import type { H3Event } from 'h3'
 import { join } from 'node:path'
 import { alertFeed, ambientFeed, type Feed, type FeedAsset, type FeedSite } from '~~/layout/feed'
 import { type ApprovedBy, type Approvals, classKey, layoutKey, liveLayoutGateWith } from '~~/layout/gate'
@@ -117,6 +118,24 @@ export function etagMatches(ifNoneMatch: string | undefined, etag: string): bool
     const trimmed = tag.trim()
     return trimmed === '*' || trimmed.replace(/^W\//, '') === etag
   })
+}
+
+export function feedResponse(event: H3Event, feed: Feed, contentLocation?: string): string | null {
+  const body = JSON.stringify(feed)
+  const etag = feedEtag(body)
+  setResponseHeaders(event, {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Expose-Headers': contentLocation ? 'ETag, Content-Location' : 'ETag',
+    'Cache-Control': 'no-cache',
+    ETag: etag,
+    ...(contentLocation ? { 'Content-Location': contentLocation } : {}),
+  })
+  if (etagMatches(getHeader(event, 'if-none-match'), etag)) {
+    setResponseStatus(event, 304)
+    return null
+  }
+  setResponseHeader(event, 'Content-Type', 'application/json; charset=utf-8')
+  return body
 }
 
 export function isDeliveryFile(file: string): boolean {

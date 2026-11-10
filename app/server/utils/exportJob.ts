@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process'
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { access, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { EXPORT_DIGEST_FILE } from '~~/layout/feed'
 import type { ReplayRow } from '~~/layout/replay'
@@ -86,13 +86,24 @@ function run(command: string[], args: string[]): Promise<{ ok: boolean; output: 
   })
 }
 
+const siteExists = (site: string) => access(siteFilePath(site)).then(() => true, () => false)
+
+// Under the site's lock, so that an export finishing after the site was deleted does not bring its files back.
 async function exportNow(command: string[], site: string, bulletin: string, digest: string): Promise<void> {
-  await recordJob(site, bulletin, { status: 'running', digest })
+  const started = await withSiteLock(site, async () => {
+    if (!(await siteExists(site))) return false
+    await recordJob(site, bulletin, { status: 'running', digest })
+    return true
+  })
+  if (!started) return
   const baseUrl = ownBaseUrl()
   const args = [`--site=${site}`, `--bulletin=${bulletin}`, `--out=${resolve(distDir())}`, ...(baseUrl ? [`--base-url=${baseUrl}`] : [])]
   const { ok, output } = await run(command, args)
   if (!ok) console.warn(`[export] ${site} ${bulletin} failed: ${output}`)
-  await recordJob(site, bulletin, ok ? { status: 'ok', digest } : { status: 'failed', digest, message: output })
+  await withSiteLock(site, async () => {
+    if (await siteExists(site)) return recordJob(site, bulletin, ok ? { status: 'ok', digest } : { status: 'failed', digest, message: output })
+    await rm(join(distDir(), site), { recursive: true, force: true })
+  })
 }
 
 // Chrome renders one bulletin at a time. A bulletin composed again while its export waits or runs is picked up by

@@ -1,6 +1,7 @@
 import { nearestSiteWithin, parseCoordinate, SITE_MATCH_RADIUS_M } from '~~/layout/nearSite'
 
 export default defineEventHandler(async (event) => {
+  if (await isMultiFacilityServer()) throw problem(404, 'place-lookup-disabled', 'this server holds several facilities; open /screen?site=<site id>')
   const query = getQuery(event)
   const lat = parseCoordinate(query.lat, 90)
   const lng = parseCoordinate(query.lng, 180)
