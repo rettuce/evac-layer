@@ -15,7 +15,7 @@ export interface RegisteredSite {
   municipality_id: string
   lat: number
   lng: number
-  facing_deg: number
+  facing_deg?: number
   name?: string
   facility_id?: string
   location_updated_at?: string
@@ -58,7 +58,7 @@ export interface SiteRegistration {
   id: string
   lat: number
   lng: number
-  facing_deg: number
+  facing_deg?: number
   name?: string
   municipality_id?: string
 }
@@ -80,7 +80,7 @@ export async function buildSite(input: SiteRegistration, fetchFn: typeof fetch =
   if (input.municipality_id && input.municipality_id !== looked) {
     warnings.push(`municipality_id ${input.municipality_id} was given, but GSI places ${lat},${lng} in ${looked}; keeping ${input.municipality_id}`)
   }
-  const site: RegisteredSite = { id: input.id, municipality_id, lat, lng, facing_deg: input.facing_deg }
+  const site: RegisteredSite = { id: input.id, municipality_id, lat, lng, ...(input.facing_deg === undefined ? {} : { facing_deg: input.facing_deg }) }
   if (input.name) site.name = input.name
   return { site, warnings }
 }

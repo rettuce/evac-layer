@@ -7,7 +7,7 @@ import { assertCoordinates, buildSite, GSI_REVERSE_GEOCODER, type RegisteredSite
 import { isSiteId } from "./sites.js";
 import { isFacilityId } from "./tokens.js";
 
-const USAGE = "usage: pnpm -F agents site --id <id> --lat <deg> --lng <deg> [--facing <deg, default 0>] [--name <text>] [--municipality <5-digit code>] [--facility <facility id>] [--force]";
+const USAGE = "usage: pnpm -F agents site --id <id> --lat <deg> --lng <deg> [--facing <deg; leave out when not known>] [--name <text>] [--municipality <5-digit code>] [--facility <facility id>] [--force]";
 
 const { values } = parseArgs({
   options: {
@@ -15,7 +15,7 @@ const { values } = parseArgs({
     name: { type: "string" },
     lat: { type: "string" },
     lng: { type: "string" },
-    facing: { type: "string", default: "0" },
+    facing: { type: "string" },
     municipality: { type: "string" },
     facility: { type: "string" },
     force: { type: "boolean", default: false },
@@ -45,8 +45,9 @@ function fail(message: string, code = 1): never {
 if (!values.id || values.lat === undefined || values.lng === undefined) fail(USAGE, 2);
 if (!isSiteId(values.id)) fail(`site id ${JSON.stringify(values.id)} is invalid: use 1-80 of A-Z a-z 0-9 _ -`);
 if (values.facility !== undefined && !isFacilityId(values.facility)) fail(`facility id ${JSON.stringify(values.facility)} is invalid: use 3-64 of a-z 0-9 -, not starting with -`);
-const facing = Number(values.facing);
-if (values.facing.trim() === "" || !Number.isFinite(facing)) fail(`--facing ${JSON.stringify(values.facing)} is not a number`);
+// Without --facing nothing is assumed: a default of 0 would turn every arrow as if the viewer faced north.
+const facing = values.facing === undefined ? undefined : Number(values.facing);
+if (values.facing !== undefined && (values.facing.trim() === "" || !Number.isFinite(facing))) fail(`--facing ${JSON.stringify(values.facing)} is not a number`);
 
 const sitesDir = path.resolve(SITES_DIR);
 const file = path.resolve(sitesDir, `${values.id}.json`);

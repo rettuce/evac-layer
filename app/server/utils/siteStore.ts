@@ -15,7 +15,7 @@ const INPUT_FIELDS = new Set(['lat', 'lng', 'facing_deg', 'name', 'municipality_
 export interface SiteInput {
   lat: number
   lng: number
-  facing_deg: number
+  facing_deg?: number
   name?: string
   municipality_id?: string
 }
@@ -37,16 +37,16 @@ export function isSchemaSiteId(id: unknown): id is string {
 }
 
 export function parseSiteInput(body: unknown): SiteInput {
-  if (typeof body !== 'object' || body === null || Array.isArray(body)) invalid('the body must be an object { lat, lng, facing_deg, name?, municipality_id?, actor? }')
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) invalid('the body must be an object { lat, lng, facing_deg?, name?, municipality_id?, actor? }')
   const input = body as Record<string, unknown>
   const unknown = Object.keys(input).find((key) => !INPUT_FIELDS.has(key))
   if (unknown) invalid(`unknown field ${unknown}`)
   if (!isNumberIn(input.lat, -90, 90)) invalid('lat must be a number within ±90')
   if (!isNumberIn(input.lng, -180, 180)) invalid('lng must be a number within ±180')
-  if (!isNumberIn(input.facing_deg, 0, 360)) invalid('facing_deg must be a number from 0 to 360')
+  if (input.facing_deg !== undefined && !isNumberIn(input.facing_deg, 0, 360)) invalid('facing_deg must be a number from 0 to 360, or left out when the facing is not known')
   if (input.name !== undefined && !isText(input.name)) invalid('name must be a non-empty string')
   if (input.municipality_id !== undefined && !(typeof input.municipality_id === 'string' && MUNICIPALITY_ID.test(input.municipality_id))) invalid('municipality_id must be 5 digits')
-  return { lat: input.lat, lng: input.lng, facing_deg: input.facing_deg, name: input.name as string | undefined, municipality_id: input.municipality_id as string | undefined }
+  return { lat: input.lat, lng: input.lng, facing_deg: input.facing_deg as number | undefined, name: input.name as string | undefined, municipality_id: input.municipality_id as string | undefined }
 }
 
 function schemaProblem(site: Record<string, unknown>): string | undefined {
@@ -54,7 +54,7 @@ function schemaProblem(site: Record<string, unknown>): string | undefined {
   if (unknown) return `the site would carry ${unknown}, which schema/site.schema.json does not allow`
   if (!isSchemaSiteId(site.id)) return 'id must be 3-64 of a-z 0-9 -, not starting with -'
   if (!(typeof site.municipality_id === 'string' && MUNICIPALITY_ID.test(site.municipality_id))) return 'municipality_id must be 5 digits'
-  if (!isNumberIn(site.lat, -90, 90) || !isNumberIn(site.lng, -180, 180) || !isNumberIn(site.facing_deg, 0, 360)) return 'lat, lng or facing_deg is out of range'
+  if (!isNumberIn(site.lat, -90, 90) || !isNumberIn(site.lng, -180, 180) || (site.facing_deg !== undefined && !isNumberIn(site.facing_deg, 0, 360))) return 'lat, lng or facing_deg is out of range'
   if (site.name !== undefined && !isText(site.name)) return 'name must be a non-empty string'
   if (site.note !== undefined && typeof site.note !== 'string') return 'note must be a string'
   if (site.facility_id !== undefined && !isSchemaSiteId(site.facility_id)) return 'facility_id is invalid'
@@ -103,7 +103,7 @@ function assertMayWrite(id: string, admin: AdminPrincipal, stored: StoredSite): 
 async function placeSite(id: string, input: SiteInput, stored: StoredSite) {
   const known = stored.kind === 'site' ? stored.site : undefined
   if (known && known.lat === input.lat && known.lng === input.lng) {
-    const site = { id, municipality_id: input.municipality_id ?? known.municipality_id, lat: input.lat, lng: input.lng, facing_deg: input.facing_deg, ...(input.name ? { name: input.name } : {}) }
+    const site = { id, municipality_id: input.municipality_id ?? known.municipality_id, lat: input.lat, lng: input.lng, ...(input.facing_deg === undefined ? {} : { facing_deg: input.facing_deg }), ...(input.name ? { name: input.name } : {}) }
     return { site, warnings: [] }
   }
   try {
@@ -116,7 +116,9 @@ async function placeSite(id: string, input: SiteInput, stored: StoredSite) {
   }
 }
 
-// Spreading the stored site first keeps its field order, so the same body twice writes the same bytes.
+// Spreading the stored site first keeps its field order, so the same body twice writes the same bytes. A PUT replaces
+// the place as a whole: a body without facing_deg removes a stored one (undefined is not written), which is how a site
+// goes back to "facing not known".
 function mergedSite(previous: SiteFile | undefined, placed: SiteFile, admin: AdminPrincipal): SiteFile {
   const moved =
     !previous ||

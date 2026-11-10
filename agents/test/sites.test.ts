@@ -25,7 +25,7 @@ test("every site file is named <id>.json and validates against site.schema.json"
     assert.equal(r.schema, "site");
     assert.ok(r.ok, `${f}\n${formatErrors(r.errors)}`);
   }
-  assert.equal(validateDoc({ id: "x-site", municipality_id: "05210", lat: 39, lng: 140 }, "site").ok, false, "facing_deg is required");
+  assert.equal(validateDoc({ id: "x-site", municipality_id: "05210", lat: 39, lng: 140 }, "site").ok, true, "facing_deg is optional: a site without it gets a north-up arrow");
   assert.equal(validateDoc({ ...read(path.join(SITES_DIR, files[0])), extra: 1 }, "site").ok, false);
 });
 

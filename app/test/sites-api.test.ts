@@ -192,7 +192,8 @@ describe('site registration over HTTP on a server that holds facilities', { skip
 
   test('a body or id that does not validate answers 400 invalid-request and writes nothing', async () => {
     const bad: [string, string, unknown][] = [
-      ['no facing', 'alpha-bad', { lat: 35, lng: 139 }],
+      ['facing as a string', 'alpha-bad', { ...PLACE, facing_deg: '90' }],
+      ['facing as null', 'alpha-bad', { ...PLACE, facing_deg: null }],
       ['lat out of range', 'alpha-bad', { ...PLACE, lat: 91 }],
       ['lat as a string', 'alpha-bad', { ...PLACE, lat: '35' }],
       ['facing out of range', 'alpha-bad', { ...PLACE, facing_deg: 361 }],
@@ -528,6 +529,31 @@ describe('site registration over HTTP on a server that holds facilities', { skip
     assert.equal(body.data?.code, 'invalid-request')
     assert.match(body.message, /no municipality/)
     assert.equal(existsSync(siteFile('alpha-at-sea')), false)
+  })
+
+  test('facing_deg is optional: a site without it is created, and a PUT without it removes a stored one and stamps the move', async () => {
+    const { facing_deg: _facing, ...place } = PLACE
+    const created = await put('alpha-kiosk', place, TOKEN_A)
+    assert.equal(created.status, 201)
+    assert.equal('facing_deg' in (await readSiteFile('alpha-kiosk')), false)
+    assert.match(await validateWithAgents(siteFile('alpha-kiosk')), /^OK /)
+
+    assert.equal((await put('alpha-kiosk', PLACE, TOKEN_A)).status, 200)
+    const turned = await readSiteFile('alpha-kiosk')
+    assert.equal(turned.facing_deg, 90)
+    assert.ok(!Number.isNaN(Date.parse(turned.location_updated_at)), 'gaining a facing is a move')
+
+    await sleep(5)
+    const cleared = await put('alpha-kiosk', place, TOKEN_A)
+    assert.equal(cleared.status, 200)
+    const after = await readSiteFile('alpha-kiosk')
+    assert.equal('facing_deg' in after, false, 'a PUT replaces the place as a whole')
+    assert.ok(Date.parse(after.location_updated_at) > Date.parse(turned.location_updated_at), 'losing it is one too')
+    assert.match(await validateWithAgents(siteFile('alpha-kiosk')), /^OK /)
+
+    const again = await put('alpha-kiosk', place, TOKEN_A)
+    assert.equal(again.status, 200)
+    assert.equal((await readSiteFile('alpha-kiosk')).location_updated_at, after.location_updated_at, 'the same body twice is not a move')
   })
 })
 

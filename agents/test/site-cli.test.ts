@@ -45,3 +45,23 @@ test("site --force stamps location_updated_at when the place or the municipality
     fs.rmSync(dataDir, { recursive: true, force: true });
   }
 });
+
+test("site without --facing writes no facing_deg, so the screen shows a north-up arrow instead of assuming north", async () => {
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "evac-site-cli-"));
+  const env = { ...process.env, EVAC_DATA_DIR: dataDir, EVAC_REVERSE_GEOCODER_URL: `http://127.0.0.1:${await closedPort()}/unreachable` };
+  const site = (...args: string[]) => promisify(execFile)("pnpm", ["-s", "exec", "tsx", "src/site-cli.ts", "--id", "cli-kiosk", "--lat", "35.68", "--lng", "139.76", "--municipality", "13101", ...args], { cwd: AGENTS_DIR, env });
+  const stored = () => JSON.parse(fs.readFileSync(path.join(dataDir, "sites", "cli-kiosk.json"), "utf8"));
+  try {
+    await site();
+    assert.equal("facing_deg" in stored(), false);
+    await site("--force", "--facing", "0");
+    assert.equal(stored().facing_deg, 0);
+    const turned = stored().location_updated_at;
+    assert.ok(!Number.isNaN(Date.parse(turned)), "gaining a facing is a change of place");
+    await site("--force");
+    assert.equal("facing_deg" in stored(), false);
+    assert.ok(Date.parse(stored().location_updated_at) >= Date.parse(turned), "losing it is one too");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
