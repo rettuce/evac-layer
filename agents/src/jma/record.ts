@@ -7,9 +7,17 @@ import { BODY_NAME } from "./feed.js";
 import { REPLAYABLE } from "./replay.js";
 
 export const FEED_BASE = "https://www.data.jma.go.jp/developer/xml/feed/";
-export const FEEDS_WITH_BODIES = ["extra_l", "eqvol_l", "other_l"] as const;
-export const FEEDS_INDEX_ONLY = ["regular_l"] as const;
-const USER_AGENT = "evac-layer/0.1 (+https://github.com/rettuce/evac-layer)";
+export const FEED_SETS = {
+  frequent: { withBodies: ["extra", "eqvol", "other"], indexOnly: ["regular"] },
+  long: { withBodies: ["extra_l", "eqvol_l", "other_l"], indexOnly: ["regular_l"] },
+} as const;
+export type FeedSet = keyof typeof FEED_SETS;
+export type FeedChoice = FeedSet | "both";
+const FEED_CHOICES: Record<FeedChoice, FeedSet[]> = { long: ["long"], frequent: ["frequent"], both: ["frequent", "long"] };
+export const isFeedChoice = (s: string | undefined): s is FeedChoice => s !== undefined && Object.hasOwn(FEED_CHOICES, s);
+export const FEEDS_WITH_BODIES = [...FEED_SETS.frequent.withBodies, ...FEED_SETS.long.withBodies];
+export const isLongFeed = (feed: string) => (FEED_SETS.long.withBodies as readonly string[]).includes(feed) || (FEED_SETS.long.indexOnly as readonly string[]).includes(feed);
+export const USER_AGENT = "evac-layer/0.1 (+https://github.com/rettuce/evac-layer)";
 const BODY_INTERVAL_MS = 1000;
 const TIMEOUT_MS = 60_000;
 const RETRY_WAITS_MS = [5000, 15_000, 45_000];
@@ -56,27 +64,60 @@ export function readIndex(feedDir: string, feed: string): IndexedEntry[] {
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
+const request = (fetchImpl: FetchImpl, url: string, headers: Record<string, string> = {}) =>
+  fetchImpl(url, { headers: { "User-Agent": USER_AGENT, ...headers }, signal: AbortSignal.timeout(TIMEOUT_MS) });
+
 async function fetchBytes(fetchImpl: FetchImpl, url: string): Promise<Buffer> {
-  const res = await fetchImpl(url, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(TIMEOUT_MS) });
+  const res = await request(fetchImpl, url);
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
   return Buffer.from(await res.arrayBuffer());
 }
 
-async function fetchWithRetry(fetchImpl: FetchImpl, url: string, sleep: (ms: number) => Promise<void>): Promise<Buffer> {
+interface Validators { etag?: string; last_modified?: string }
+
+async function fetchFeedFile(fetchImpl: FetchImpl, url: string, prev: Validators): Promise<{ xml?: Buffer; validators: Validators }> {
+  const conditional: Record<string, string> = {};
+  if (prev.etag) conditional["If-None-Match"] = prev.etag;
+  if (prev.last_modified) conditional["If-Modified-Since"] = prev.last_modified;
+  const res = await request(fetchImpl, url, conditional);
+  if (res.status === 304 && Object.keys(conditional).length) return { validators: prev };
+  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
+  const validators: Validators = {};
+  const etag = res.headers.get("etag");
+  const lastModified = res.headers.get("last-modified");
+  if (etag) validators.etag = etag;
+  if (lastModified) validators.last_modified = lastModified;
+  return { xml: Buffer.from(await res.arrayBuffer()), validators };
+}
+
+function readValidators(file: string): Validators {
+  return fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf8")) as Validators) : {};
+}
+
+function writeValidators(file: string, validators: Validators) {
+  if (!validators.etag && !validators.last_modified) {
+    fs.rmSync(file, { force: true });
+    return;
+  }
+  fs.writeFileSync(`${file}.tmp`, JSON.stringify(validators) + "\n");
+  fs.renameSync(`${file}.tmp`, file);
+}
+
+async function withRetry<T>(once: () => Promise<T>, sleep: (ms: number) => Promise<void>): Promise<T> {
   for (const ms of RETRY_WAITS_MS) {
     try {
-      return await fetchBytes(fetchImpl, url);
+      return await once();
     } catch {
       await sleep(ms);
     }
   }
-  return fetchBytes(fetchImpl, url);
+  return once();
 }
 
 export interface FeedResult { feed: string; new: number; bodies: number; failed?: string }
 export interface SavedBody { feed: string; file: string; entry: Entry }
 
-export async function recordFeeds(opts: { feedDir?: string; fetchImpl?: FetchImpl; codes?: Codes; since?: string; now?: () => Date; sleep?: (ms: number) => Promise<void>; log?: (m: string) => void }): Promise<{ feeds: FeedResult[]; saved: SavedBody[] }> {
+export async function recordFeeds(opts: { feedDir?: string; fetchImpl?: FetchImpl; feeds?: FeedChoice; codes?: Codes; since?: string; now?: () => Date; sleep?: (ms: number) => Promise<void>; log?: (m: string) => void }): Promise<{ feeds: FeedResult[]; saved: SavedBody[] }> {
   const feedDir = opts.feedDir ?? FEED_DIR;
   const fetchImpl = opts.fetchImpl ?? fetch;
   const codes = opts.codes ?? "replayable";
@@ -92,16 +133,24 @@ export async function recordFeeds(opts: { feedDir?: string; fetchImpl?: FetchImp
   };
   const feeds: FeedResult[] = [];
   const saved: SavedBody[] = [];
-  const plan = [...FEEDS_WITH_BODIES.map((f) => [f, true] as const), ...FEEDS_INDEX_ONLY.map((f) => [f, false] as const)];
+  const plan = FEED_CHOICES[opts.feeds ?? "long"].flatMap((set) => [
+    ...FEED_SETS[set].withBodies.map((f) => [f, true] as const),
+    ...FEED_SETS[set].indexOnly.map((f) => [f, false] as const),
+  ]);
   for (const [feed, withBodies] of plan) {
     const result: FeedResult = { feed, new: 0, bodies: 0 };
     feeds.push(result);
     const indexFile = path.join(feedDir, "index", `${feed}.jsonl`);
+    const stateFile = path.join(feedDir, "index", `${feed}.state.json`);
     fs.mkdirSync(path.dirname(indexFile), { recursive: true });
     const seen = new Set(readIndex(feedDir, feed).map((e) => e.id));
     let entries: Entry[];
+    let validators: Validators;
     try {
-      entries = parseFeed(await fetchWithRetry(fetchImpl, `${FEED_BASE}${feed}.xml`, sleep));
+      const got = await withRetry(() => fetchFeedFile(fetchImpl, `${FEED_BASE}${feed}.xml`, readValidators(stateFile)), sleep);
+      if (!got.xml) continue;
+      entries = parseFeed(got.xml);
+      validators = got.validators;
     } catch (e) {
       result.failed = (e as Error).message;
       continue;
@@ -120,7 +169,7 @@ export async function recordFeeds(opts: { feedDir?: string; fetchImpl?: FetchImp
         }
         if (wanted(entry) && !fs.existsSync(target)) {
           try {
-            const bytes = await fetchWithRetry(fetchImpl, entry.url, sleep);
+            const bytes = await withRetry(() => fetchBytes(fetchImpl, entry.url), sleep);
             const part = `${target}.${process.pid}.part`;
             fs.mkdirSync(path.dirname(target), { recursive: true });
             fs.writeFileSync(part, bytes);
@@ -147,6 +196,8 @@ export async function recordFeeds(opts: { feedDir?: string; fetchImpl?: FetchImp
       result.new++;
     }
     if (failed) result.failed = `${failed} bodies failed after retries${aborted ? `, ${MAX_CONSECUTIVE_FAILURES} in a row; the rest is left for the next round` : ""}`;
+    // A 304 would hide the entries whose bodies failed, so the next round must read the feed in full.
+    writeValidators(stateFile, failed ? {} : validators);
   }
   return { feeds, saved };
 }
@@ -157,15 +208,16 @@ export function roundLine(t0: number, feeds: FeedResult[]): string {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const { values } = parseArgs({ options: { once: { type: "boolean", default: false }, every: { type: "string" }, codes: { type: "string", default: "replayable" }, since: { type: "string" } } });
+  const { values } = parseArgs({ options: { once: { type: "boolean", default: false }, every: { type: "string" }, feeds: { type: "string", default: "long" }, codes: { type: "string", default: "replayable" }, since: { type: "string" } } });
   const every = values.every === undefined ? undefined : Number(values.every);
-  if ((values.codes !== "replayable" && values.codes !== "all") || (every !== undefined && !(every > 0)) || (values.once && every !== undefined)) {
-    console.error("usage: pnpm -F agents record [--once | --every <sec>] [--codes replayable|all] [--since <ISO>]");
+  const feedChoice = values.feeds;
+  if ((values.codes !== "replayable" && values.codes !== "all") || !isFeedChoice(feedChoice) || (every !== undefined && !(every > 0)) || (values.once && every !== undefined)) {
+    console.error("usage: pnpm -F agents record [--once | --every <sec>] [--feeds long|frequent|both] [--codes replayable|all] [--since <ISO>]");
     process.exit(2);
   }
   const round = async () => {
     const t0 = Date.now();
-    const { feeds } = await recordFeeds({ codes: values.codes as Codes, since: values.since });
+    const { feeds } = await recordFeeds({ feeds: feedChoice, codes: values.codes as Codes, since: values.since });
     console.log(roundLine(t0, feeds));
     return feeds.every((f) => !f.failed);
   };
