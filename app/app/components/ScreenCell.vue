@@ -2,7 +2,7 @@
 import { headlineParts } from '~~/layout/headline'
 import { shelterNameSegments } from '~~/layout/shelterName'
 import { HEADLINE_STACKED_MAX_LINES, HTML_LANG, LANG_LABEL, LANGUAGES_AT_ONCE, LANGUAGE_ROTATION, SHELTER_KIND_LABEL, SHELTER_NAME_MAX_LINES } from '~~/layout/typography'
-import type { LangKey, LayoutCell } from '~~/layout/types'
+import type { LangKey, LayoutCell, NorthDial } from '~~/layout/types'
 
 const props = defineProps<{
   cell: LayoutCell
@@ -17,6 +17,7 @@ const props = defineProps<{
   figmaRules?: boolean
   distanceBelow?: boolean
   distanceUnitSpace?: boolean
+  north?: NorthDial
   languageIndex: number
   languageStyle: Record<string, string | number>
 }>()
@@ -57,6 +58,14 @@ const headlineMaxLines = computed(() =>
       <div v-if="(cell.pictogram && pictogramPx) || (cell.text.ja_easy && easyInAction)" class="action-sub">
         <PictogramMark v-if="cell.pictogram && pictogramPx" :id="cell.pictogram" :size-px="pictogramPx" :fit-ink="figmaRules" />
         <p v-if="cell.text.ja_easy && easyInAction" class="t-guide" lang="ja" data-lang="ja_easy">{{ cell.text.ja_easy }}</p>
+      </div>
+    </template>
+
+    <template v-else-if="cell.role === 'direction' && cell.orientation === 'north-up' && north">
+      <NorthDial :pictogram="cell.pictogram ?? 'arrow_forward'" :rotation="cell.rotation" :dial-px="north.dialPx" :mark-px="north.markPx" />
+      <div class="north-words" :class="`is-${north.words}`">
+        <p class="t-guide direction-text">{{ cell.text.ja }}</p>
+        <p v-if="cell.distance_m !== undefined" class="t-guide north-distance" lang="en">{{ distanceText }}</p>
       </div>
     </template>
 

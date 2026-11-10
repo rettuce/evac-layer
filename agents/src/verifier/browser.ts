@@ -1,7 +1,7 @@
 import type { Browser, Page } from "puppeteer-core";
 import type { Shape } from "../../../app/layout/types";
 import { PILLAR, SHAPES } from "../../../app/layout/shapes";
-import type { CellText, ScreenState, TextSample } from "./checks.js";
+import type { CellText, NorthUpRead, ScreenState, TextSample } from "./checks.js";
 
 const READY_TIMEOUT_MS = 30_000;
 const FLICKER_FRAMES = 3;
@@ -69,7 +69,7 @@ export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape
             role: c.dataset.role as TextSample["role"],
             step_class: (["action", "guide", "fine"].find((s) => el.classList.contains(`t-${s}`)) ?? null) as TextSample["step_class"],
             font_px: parseFloat(getComputedStyle(el).fontSize),
-            kind: (["lang-label", "shelter-kind"].some((c) => el.classList.contains(c)) ? "label" : c.dataset.role === "action" && !el.classList.contains("action-text") ? "secondary" : "primary") as TextSample["kind"],
+            kind: (["lang-label", "shelter-kind", "north-mark"].some((c) => el.classList.contains(c)) ? "label" : c.dataset.role === "action" && !el.classList.contains("action-text") ? "secondary" : "primary") as TextSample["kind"],
             text: el.innerText.replace(/\s+/g, " ").trim(),
           }));
       }),
@@ -77,7 +77,33 @@ export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape
     const cells = await page.$$eval(`${cellsRoot(shape)}[data-cell-id]`, (els): CellText[] =>
       els.map((el) => ({ id: (el as HTMLElement).dataset.cellId!, role: (el as HTMLElement).dataset.role as CellText["role"], text: (el as HTMLElement).innerText.replace(/\s+/g, " ").trim() })),
     );
-    return { state, samples, cells, pngs, scale: typeScale(shape) };
+    // The angle is read from the arrow as drawn (its computed transform), not from the layout, so a renderer that turns
+    // it some other way is caught too.
+    const north = await page.$$eval(`${cellsRoot(shape)}[data-cell-id][data-orientation="north-up"]`, (els): NorthUpRead[] =>
+      els.map((el) => {
+        const c = el as HTMLElement;
+        const cellBox = c.getBoundingClientRect();
+        const dial = c.querySelector<HTMLElement>("[data-north-dial]");
+        const ring = dial?.querySelector(".north-ring")?.getBoundingClientRect();
+        const glyph = dial?.querySelector<HTMLElement>(".pictogram .glyph");
+        const m = glyph ? new DOMMatrixReadOnly(getComputedStyle(glyph).transform === "none" ? undefined : getComputedStyle(glyph).transform) : undefined;
+        const marks = [...(dial?.querySelectorAll<HTMLElement>(".north-mark") ?? [])].map((mark) => {
+          const r = mark.getBoundingClientRect();
+          const cs = getComputedStyle(mark);
+          const inCell = r.left >= cellBox.left - 1 && r.right <= cellBox.right + 1 && r.top >= cellBox.top - 1 && r.bottom <= cellBox.bottom + 1;
+          const visible = mark.offsetParent !== null && cs.visibility !== "hidden" && cs.display !== "none" && Number(cs.opacity) > 0 && r.width > 0 && r.height > 0 && inCell;
+          const onDial = !!ring && r.bottom >= ring.top && r.top <= ring.top + ring.height * 0.25 && r.right >= ring.left && r.left <= ring.right;
+          return { text: mark.innerText.trim(), visible, onDial };
+        });
+        return {
+          id: c.dataset.cellId!,
+          word: c.querySelector<HTMLElement>(".direction-text")?.innerText.trim() ?? "",
+          rotation: m ? ((Math.round((Math.atan2(m.b, m.a) * 180) / Math.PI) % 360) + 360) % 360 : undefined,
+          marks,
+        };
+      }),
+    );
+    return { state, samples, cells, north, pngs, scale: typeScale(shape) };
   } finally {
     await page.close();
   }

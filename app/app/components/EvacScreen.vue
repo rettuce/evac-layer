@@ -4,7 +4,8 @@ import { frameStyle, languageStep, motionFrame } from '~~/layout/motion'
 import { CABINET_OFFICE_5, DARK_BAND, LANG_LABEL_OPACITY, PAGE_BACKGROUND, PAGE_INK, SHELTER_KIND_OPACITY, contrastRatio, inkOn, levelLabelFor, rgbCss } from '~~/layout/palette'
 import { SHAPES, designScale } from '~~/layout/shapes'
 import { shelterFloorPx, shelterSizes } from '~~/layout/shelterFit'
-import { STACKED_BAND_MIN_PX, resolveLayout } from '~~/layout/templates'
+import { resolveScreenLayout } from '~~/layout/northUp'
+import { STACKED_BAND_MIN_PX } from '~~/layout/templates'
 import { OVERFLOW_PICTOGRAM, overflowAttr, type CellOverflow } from '~~/layout/overflow'
 import type { DroppedCell, EvacScreen, LayoutCell, Shape } from '~~/layout/types'
 import { LINE_HEIGHT, headlineStepScale, SHELTER_STEP_DOWN, SOURCE_STEP_DOWN, TYPE_PX } from '~~/layout/typography'
@@ -38,12 +39,18 @@ const distanceBelow = ref(false)
 const distanceNarrow = ref(false)
 const languagesNarrow = ref(false)
 const sourceNarrow = ref(false)
+const northCompact = ref(false)
 const stackedHeadline = computed(() => ['portrait', 'square', 'pillar'].includes(SHAPES[props.shape].cls))
 // 32:9 sets the headline in a narrow column, so it gets the same two-line limit as the stacked bands.
 const headlineLimited = computed(() => stackedHeadline.value || SHAPES[props.shape].cls === 'ribbon')
 const ready = ref(false)
 
-const layout = computed(() => resolveLayout(props.screen.template, props.shape, props.variant))
+const orientation = computed(() => props.screen.cells.find((cell) => cell.role === 'direction')?.orientation)
+const layout = computed(() => resolveScreenLayout(props.screen.template, props.shape, props.variant, orientation.value))
+const north = computed(() => {
+  const dial = layout.value.north
+  return dial?.compact && northCompact.value ? { ...dial, ...dial.compact } : dial
+})
 const headlineFloorScale = computed(() =>
   headlineStepScale(layout.value.figma ? (layout.value.type?.headline ?? TYPE_PX.guide) : TYPE_PX.guide * (layout.value.typeScale?.headline ?? 1)),
 )
@@ -113,7 +120,7 @@ const languageStyle = computed(() =>
 )
 
 function cellStyle(cell: LayoutCell) {
-  const base = { gridArea: cell.role, '--type-scale': layout.value.typeScale?.[cell.role] ?? 1 }
+  const base = { gridArea: layout.value.placement?.[cell.role] ?? cell.role, '--type-scale': layout.value.typeScale?.[cell.role] ?? 1 }
   if (!ready.value) return base
   return {
     ...base,
@@ -231,6 +238,7 @@ async function fit() {
   distanceNarrow.value = false
   languagesNarrow.value = false
   sourceNarrow.value = false
+  northCompact.value = false
   await loadFonts()
   for (;;) {
     await nextTick()
@@ -281,6 +289,10 @@ async function fit() {
       languagesNarrow.value = true
       continue
     }
+    if (layout.value.north?.compact && !northCompact.value) {
+      northCompact.value = true
+      continue
+    }
     const victim = nextOverflowVictim(placed.value, layout.value)
     if (!victim) {
       overflow.value = overflowAttr(over.cells, over.screen)
@@ -324,7 +336,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
   <main
     ref="root"
     class="evac-screen"
-    :class="`shape-${SHAPES[shape].cls}`"
+    :class="[`shape-${SHAPES[shape].cls}`, { 'is-north-up': layout.north }]"
     :style="rootStyle"
     :data-shape="shape"
     :data-template="screen.template"
@@ -339,6 +351,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
     :data-distance-scale="distanceNarrow ? 'narrow' : undefined"
     :data-languages-scale="languagesNarrow ? 'narrow' : undefined"
     :data-source-scale="sourceNarrow ? 'narrow' : undefined"
+    :data-north="northCompact ? 'compact' : undefined"
     :data-ready="ready ? '1' : '0'"
     :data-bulletin-id="screen.alert.bulletin_id"
   >
@@ -355,6 +368,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
       :data-role="cell.role"
       :data-priority="cell.priority"
       :data-motion="cell.motion"
+      :data-orientation="cell.orientation"
     >
       <ScreenCell
         :cell="cell"
@@ -369,6 +383,7 @@ watch(() => [props.screen, props.shape, props.variant], fit)
         :figma-rules="layout.figma === true"
         :distance-below="distanceBelow"
         :distance-unit-space="layout.distanceUnitSpace"
+        :north="north"
         :language-index="language.index"
         :language-style="languageStyle"
       />

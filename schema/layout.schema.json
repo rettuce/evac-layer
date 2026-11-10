@@ -161,8 +161,15 @@
           "exclusiveMaximum": 360
         },
         "distance_m": {
+          "description": "Metres to the shelter, shown once: on the shelter cell, or on a north-up direction cell where the template puts it beside the direction word.",
           "type": "number",
           "minimum": 0
+        },
+        "orientation": {
+          "description": "Direction cell only. north-up: the site's facing is unknown, so rotation is the 8-point map bearing (north = 270, up) drawn on a dial marked N / 北, not turned to the viewer. Absent: rotation is relative to the viewer's facing.",
+          "enum": [
+            "north-up"
+          ]
         },
         "kind": {
           "description": "Shelter designation from GSI data; the renderer draws its fixed multilingual label, so text.ja carries the facility name only.",
@@ -229,6 +236,25 @@
               "required": [
                 "kind"
               ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "orientation": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "orientation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "role": {
+                "const": "direction"
+              }
             }
           }
         },

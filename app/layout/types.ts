@@ -14,6 +14,7 @@ export type Role =
 export type LangKey = 'ja' | 'ja_easy' | 'en' | 'zh_hans' | 'zh_hant' | 'ko' | 'th' | 'vi' | 'fil' | 'id'
 export type Motion = 'scale-in' | 'pulse' | 'static'
 export type AlertLevel = 1 | 2 | 3 | 4 | 5
+export type Orientation = 'north-up'
 
 export type LocalizedText = { ja: string } & Partial<Record<Exclude<LangKey, 'ja'>, string>>
 
@@ -26,6 +27,7 @@ export interface LayoutCell {
   rotation?: number
   distance_m?: number
   kind?: ShelterKind
+  orientation?: Orientation
   motion: Motion
 }
 
@@ -79,6 +81,18 @@ export interface ShapeLayout {
   distanceBelow?: boolean
   // The artboard writes the distance as "570 m" (a space before the unit) instead of "570m".
   distanceUnitSpace?: boolean
+  north?: NorthDial
+  // Line-based grid areas for roles whose cells overlap (northUp.ts, 1:1); a role listed here is placeable.
+  placement?: Partial<Record<Role, string>>
+}
+
+export interface NorthDial {
+  dialPx: number
+  markPx: number
+  words: 'stack' | 'line'
+  distanceOn: 'direction' | 'shelter'
+  // A smaller dial, taken when the full one does not fit (EvacScreen fit).
+  compact?: { dialPx: number; markPx: number }
 }
 
 export type TemplateDef = Record<PanelShape, ShapeLayout[]>
