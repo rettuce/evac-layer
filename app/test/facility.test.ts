@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import type { ChildProcess } from 'node:child_process'
 import { createHash, randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { after, before, describe, test } from 'node:test'
@@ -24,14 +24,23 @@ const skip = !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first'
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` })
 const sha256 = (token: string) => createHash('sha256').update(token).digest('hex')
 
-function tokenRecord(token: string, facility_id: string, expires_at?: string) {
+function tokenRecordFor(token: string, facility_id: string, expires_at?: string) {
   return { id: randomUUID().slice(0, 8), label: `${facility_id} signage`, facility_id, sha256: sha256(token), created_at: '2026-11-01T00:00:00Z', ...(expires_at ? { expires_at } : {}) }
 }
 
 const TOKENS_FILE = {
   version: '0.1',
-  tokens: [tokenRecord(TOKEN_A, OWN.facility_id), tokenRecord(TOKEN_B, OTHER.facility_id, '2099-01-01T00:00:00Z'), tokenRecord(TOKEN_EXPIRED, OWN.facility_id, '2020-01-01T00:00:00Z')],
+  tokens: [tokenRecordFor(TOKEN_A, OWN.facility_id), tokenRecordFor(TOKEN_B, OTHER.facility_id, '2099-01-01T00:00:00Z'), tokenRecordFor(TOKEN_EXPIRED, OWN.facility_id, '2020-01-01T00:00:00Z')],
 }
+
+const BROKEN_LEDGERS = [
+  '{}',
+  'null',
+  '{"tokens":null}',
+  '{"tokens":{}}',
+  JSON.stringify({ version: '0.1', tokens: [tokenRecordFor(TOKEN_A, OWN.facility_id), { id: 'x', facility_id: 'beta-fac' }] }),
+  'not json',
+]
 
 async function addSite(dataDir: string, site: { id: string; municipality_id: string; facility_id?: string }) {
   const fixture = JSON.parse(await readFile(join(APP_DIR, 'fixtures', 'wajima-tsunami.json'), 'utf8'))
@@ -63,10 +72,13 @@ async function observed(response: Response, askedFor: string) {
   return { status: response.status, body: (await response.text()).replaceAll(askedFor, '<asked>') }
 }
 
+const isJson = (response: Response) => (response.headers.get('content-type') ?? '').startsWith('application/json')
+
 describe('facility credentials', { skip }, () => {
   let base = ''
   let child: ChildProcess | undefined
   let root = ''
+  let dataDir = ''
   let hook = ''
 
   const get = (path: string, token: string) => fetch(`${base}${path}`, { headers: bearer(token) })
@@ -83,10 +95,15 @@ describe('facility credentials', { skip }, () => {
     ['subscribe', (site, token) => subscribe(site, token)],
   ]
 
+  const writeLedger = (body: string) => writeFile(join(dataDir, 'tokens.json'), body, { mode: 0o600 })
+  const stored = async () => ({
+    approvals: await readFile(join(dataDir, 'approvals.json'), 'utf8'),
+    subscriptions: await readFile(join(dataDir, 'subscriptions.json'), 'utf8'),
+  })
+
   before(async () => {
-    let dataDir = ''
     ;({ root, dataDir } = await makeDataDir())
-    await writeFile(join(dataDir, 'tokens.json'), JSON.stringify(TOKENS_FILE), { mode: 0o600 })
+    await writeLedger(JSON.stringify(TOKENS_FILE))
     hook = `http://127.0.0.1:${await freePort()}/hook`
     ;({ base, child } = await startServer({ NUXT_DATA_DIR: dataDir, NUXT_ADMIN_TOKEN: OPERATOR_TOKEN, NUXT_WEBHOOK_ALLOW_PRIVATE: '1' }))
   })
@@ -170,6 +187,104 @@ describe('facility credentials', { skip }, () => {
     assert.equal((await get(`/api/admin/preview-layout?municipality=${OTHER.municipality_id}&bulletin=${BULLETIN}&shape=16x9`, OPERATOR_TOKEN)).status, 200)
     assert.equal((await postJson(base, '/api/admin/live', { site_id: UNOWNED.id, bulletin_id: null }, bearer(OPERATOR_TOKEN))).status, 200)
   })
+
+  test('refused requests leave the stored approvals and registrations of every facility as they were', async () => {
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: OTHER.id, auto_publish: true }, bearer(TOKEN_B))).status, 200)
+    assert.equal((await subscribe(OTHER.id, TOKEN_B)).status, 201)
+    const otherSubscription = (await (await get(`/api/admin/subscriptions?site=${OTHER.id}`, TOKEN_B)).json()).subscriptions[0].id
+    const before = await stored()
+
+    for (const [label, call] of siteRoutes) assert.equal((await call(OTHER.id, TOKEN_A)).status, 404, label)
+    assert.equal((await postJson(base, '/api/admin/approve', { municipality: OTHER.municipality_id, bulletin_id: BULLETIN, approved: false }, bearer(TOKEN_A))).status, 400)
+    assert.equal((await postJson(base, '/api/admin/live', { site_id: OTHER.id, bulletin_id: null }, bearer(TOKEN_A))).status, 403)
+    assert.equal((await del(`/api/admin/subscriptions/${otherSubscription}`, TOKEN_A)).status, 404)
+    assert.equal((await postJson(base, '/api/admin/approve', { site_id: OWN.id, bulletin_id: BULLETIN, approved: true, digest: 'not-the-digest' }, bearer(TOKEN_A))).status, 409)
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: OWN.id, auto_publish: 'yes' }, bearer(TOKEN_A))).status, 400)
+
+    assert.deepEqual(await stored(), before)
+  })
+
+  test('two facilities switching auto publish at the same moment both keep their last change', async () => {
+    const auto = async () => JSON.parse(await readFile(join(dataDir, 'approvals.json'), 'utf8')).sites
+    const REQUESTS_EACH = 20
+    for (const own of [false, true, false]) {
+      const calls = Array.from({ length: REQUESTS_EACH }, () => [
+        postJson(base, '/api/admin/site', { site_id: OWN.id, auto_publish: own }, bearer(TOKEN_A)),
+        postJson(base, '/api/admin/site', { site_id: OTHER.id, auto_publish: !own }, bearer(TOKEN_B)),
+      ]).flat()
+      for (const response of await Promise.all(calls)) assert.equal(response.status, 200)
+      const sites = await auto()
+      assert.equal(sites[OWN.id].auto_publish, own, `own site after setting ${own}`)
+      assert.equal(sites[OTHER.id].auto_publish, !own, `other site after setting ${!own}`)
+    }
+  })
+
+  test('a broken token ledger shuts every facility and loopback out, and the operator token still works', async () => {
+    try {
+      for (const body of BROKEN_LEDGERS) {
+        await writeLedger(body)
+        assert.equal((await get('/api/admin/catalog', TOKEN_A)).status, 401, body)
+        assert.equal((await fetch(`${base}/api/admin/catalog`)).status, 401, body)
+        assert.equal((await get('/api/admin/catalog', OPERATOR_TOKEN)).status, 200, body)
+      }
+    } finally {
+      await writeLedger(JSON.stringify(TOKENS_FILE))
+    }
+  })
+
+  test('a token taken out of the ledger is refused from the next request on', async () => {
+    const extra = 'facility-a-second-token-for-tests'
+    try {
+      await writeLedger(JSON.stringify({ ...TOKENS_FILE, tokens: [...TOKENS_FILE.tokens, tokenRecordFor(extra, OWN.facility_id)] }))
+      assert.equal((await get('/api/admin/catalog', extra)).status, 200)
+      await writeLedger(JSON.stringify(TOKENS_FILE))
+      assert.equal((await get('/api/admin/catalog', extra)).status, 401)
+    } finally {
+      await writeLedger(JSON.stringify(TOKENS_FILE))
+    }
+  })
+
+  test('a facility token is not taken without the Bearer scheme', async () => {
+    assert.equal((await fetch(`${base}/api/admin/catalog`, { headers: { authorization: TOKEN_A } })).status, 401)
+  })
+
+  test('other spellings of the admin path never answer with admin data', async () => {
+    for (const path of ['/api/Admin/catalog', '/api//admin/catalog', '/api/admin%2Fcatalog', '/API/admin/catalog']) {
+      for (const headers of [bearer(TOKEN_A), {}]) {
+        const response = await fetch(`${base}${path}`, { headers })
+        assert.equal(isJson(response), false, `${path}: ${response.status} ${response.headers.get('content-type')}`)
+        await response.body?.cancel()
+      }
+    }
+    for (const path of ['/api/%61dmin/catalog', '/api/admin/catalog/']) assert.equal((await fetch(`${base}${path}`)).status, 401, path)
+  })
+
+  test('a site file that cannot be read answers a facility as a site that does not exist', async () => {
+    const broken = { id: 'gamma-hall', facility_id: 'gamma-fac', municipality_id: '00024' }
+    const file = join(dataDir, 'sites', `${broken.id}.json`)
+    await writeFile(file, JSON.stringify({ ...broken, lat: 35, lng: 139, facing_deg: 0 }))
+    const registration = await subscribe(broken.id, OPERATOR_TOKEN)
+    assert.equal(registration.status, 201)
+    const { id } = await registration.json()
+    try {
+      for (const damage of [() => writeFile(file, '{"id": "gamma-hall", '), () => chmod(file, 0o000)]) {
+        await writeFile(file, JSON.stringify({ ...broken, lat: 35, lng: 139, facing_deg: 0 }))
+        await chmod(file, 0o644)
+        await damage()
+        for (const [label, call] of siteRoutes) {
+          const missing = await observed(await call(MISSING, TOKEN_A), MISSING)
+          assert.deepEqual(await observed(await call(broken.id, TOKEN_A), broken.id), missing, label)
+        }
+        const missingId = randomUUID()
+        const missing = await observed(await del(`/api/admin/subscriptions/${missingId}`, TOKEN_A), missingId)
+        assert.deepEqual(await observed(await del(`/api/admin/subscriptions/${id}`, TOKEN_A), id), missing)
+      }
+    } finally {
+      await chmod(file, 0o644)
+      await rm(file)
+      await del(`/api/admin/subscriptions/${id}`, OPERATOR_TOKEN)
+    }
+  })
 })
 
 describe('loopback admin and facility tokens', { skip }, () => {
@@ -199,6 +314,14 @@ describe('loopback admin and facility tokens', { skip }, () => {
     assert.equal((await localCatalog()).status, 401, 'a facility token exists')
     assert.equal((await postJson(base, '/api/admin/site', { site_id: OWN.id, auto_publish: true })).status, 401)
     assert.equal((await fetch(`${base}/api/admin/catalog`, { headers: bearer(TOKEN_A) })).status, 200)
+  })
+
+  test('a broken token ledger switches loopback off and admits no facility', async () => {
+    for (const body of BROKEN_LEDGERS) {
+      await writeFile(tokensFile, body, { mode: 0o600 })
+      assert.equal((await localCatalog()).status, 401, body)
+      assert.equal((await fetch(`${base}/api/admin/catalog`, { headers: bearer(TOKEN_A) })).status, 401, body)
+    }
   })
 
   test('with facility tokens and no operator token, operator-only paths admit no one', async () => {

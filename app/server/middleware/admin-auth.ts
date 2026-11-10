@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import type { AdminPrincipal, FacilityToken } from '../utils/adminPolicy'
+import type { AdminPrincipal, TokenLedger } from '../utils/adminPolicy'
 
 declare module 'h3' {
   interface H3EventContext {
@@ -7,14 +7,19 @@ declare module 'h3' {
   }
 }
 
-interface TokensFile {
-  version: '0.1'
-  tokens: FacilityToken[]
-}
+let reportedBroken = false
 
 // Read on every request so that a token revoked with the CLI stops working at once, without a restart.
-async function facilityTokens(): Promise<FacilityToken[]> {
-  return (await readJsonIfExists<TokensFile>(join(dataDir(), 'tokens.json')))?.tokens ?? []
+async function tokenLedger(): Promise<TokenLedger> {
+  let ledger: TokenLedger
+  try {
+    ledger = tokenLedgerFrom(await readJsonIfExists<unknown>(join(dataDir(), 'tokens.json')))
+  } catch {
+    ledger = 'broken'
+  }
+  if (ledger === 'broken' && !reportedBroken) console.warn('[admin] data/tokens.json cannot be read as a token ledger: facility tokens and loopback access are off until it is fixed')
+  reportedBroken = ledger === 'broken'
+  return ledger
 }
 
 export default defineEventHandler(async (event) => {
@@ -30,7 +35,7 @@ export default defineEventHandler(async (event) => {
       authorization: getHeader(event, 'authorization'),
     },
     useRuntimeConfig().adminToken,
-    await facilityTokens(),
+    await tokenLedger(),
   )
   if (decision === 401) throw createError({ status: 401, statusText: 'Unauthorized' })
   if (decision === 403) {

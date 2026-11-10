@@ -56,10 +56,21 @@ export function siteVisibleTo(admin: AdminPrincipal | undefined, site: SiteFile)
   return admin?.kind !== 'facility' || (site.facility_id !== undefined && site.facility_id === admin.facility_id)
 }
 
-// A site of another facility answers exactly as a missing one, so a facility cannot find others by probing ids.
+// A site of another facility answers exactly as a missing one, so a facility cannot find others by probing
+// ids; a site file that cannot be read may be another facility's, so it answers a facility the same way.
+export async function readVisibleSite(id: string, admin: AdminPrincipal | undefined): Promise<SiteFile | undefined> {
+  try {
+    const site = await readSite(id)
+    return site && siteVisibleTo(admin, site) ? site : undefined
+  } catch (error) {
+    if (admin?.kind === 'facility') return undefined
+    throw error
+  }
+}
+
 export async function readSiteOr404(id: string, admin: AdminPrincipal | undefined): Promise<SiteFile> {
-  const site = await readSite(id)
-  if (!site || !siteVisibleTo(admin, site)) throw createError({ status: 404, statusText: 'Not Found', message: `no site ${id}` })
+  const site = await readVisibleSite(id, admin)
+  if (!site) throw createError({ status: 404, statusText: 'Not Found', message: `no site ${id}` })
   return site
 }
 

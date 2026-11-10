@@ -26,7 +26,11 @@ export type AdminPrincipal = { kind: 'operator' } | { kind: 'facility'; facility
 
 export type AdminDecision = AdminPrincipal | 401 | 403
 
-const SHA256_HEX = /^[0-9a-f]{64}$/
+// 'broken' is a ledger that exists but cannot be trusted: it must not read as "no facility tokens", which
+// would hand loopback the operator's rights.
+export type TokenLedger = readonly FacilityToken[] | 'broken'
+
+const SHA256_HEX = /^[0-9a-f]{64}$/i
 
 const FACILITY_ROUTES: readonly { method: string; path: RegExp }[] = [
   { method: 'GET', path: /^\/api\/admin\/catalog$/ },
@@ -78,9 +82,29 @@ export function tokenSha256(token: string): string {
   return createHash('sha256').update(token).digest('hex')
 }
 
+function isFacilityToken(value: unknown): value is FacilityToken {
+  if (typeof value !== 'object' || value === null) return false
+  const t = value as Record<string, unknown>
+  return (
+    typeof t.id === 'string' &&
+    typeof t.label === 'string' &&
+    typeof t.facility_id === 'string' &&
+    typeof t.sha256 === 'string' &&
+    SHA256_HEX.test(t.sha256) &&
+    (t.expires_at === undefined || typeof t.expires_at === 'string')
+  )
+}
+
+// `doc` is the parsed data/tokens.json, undefined when there is no such file.
+export function tokenLedgerFrom(doc: unknown): TokenLedger {
+  if (doc === undefined) return []
+  const tokens = typeof doc === 'object' && doc !== null ? (doc as { tokens?: unknown }).tokens : undefined
+  return Array.isArray(tokens) && tokens.every(isFacilityToken) ? tokens : 'broken'
+}
+
 function facilityTokenFor(given: string, tokens: readonly FacilityToken[], now: number): FacilityToken | undefined {
   const digest = Buffer.from(tokenSha256(given), 'hex')
-  const match = tokens.find((t) => SHA256_HEX.test(t.sha256) && timingSafeEqual(Buffer.from(t.sha256, 'hex'), digest))
+  const match = tokens.find((t) => timingSafeEqual(Buffer.from(t.sha256, 'hex'), digest))
   if (!match) return undefined
   return match.expires_at === undefined || Date.parse(match.expires_at) > now ? match : undefined
 }
@@ -92,13 +116,15 @@ export function facilityRouteAllowed(method: string, pathname: string): boolean 
 
 // Behind a reverse proxy every client looks like loopback, so such deployments must set a token. A facility
 // token switches loopback off too: a request from this machine must not outrank the facilities' credentials.
-export function adminPrincipal(req: AdminRequest, operatorToken: string, facilityTokens: readonly FacilityToken[], now = Date.now()): AdminDecision {
-  const given = (req.authorization ?? '').replace(/^Bearer\s+/i, '')
-  if (operatorToken && sameToken(given, operatorToken)) return { kind: 'operator' }
-  if (given) {
-    const facility = facilityTokenFor(given, facilityTokens, now)
+export function adminPrincipal(req: AdminRequest, operatorToken: string, ledger: TokenLedger, now = Date.now()): AdminDecision {
+  const authorization = req.authorization ?? ''
+  if (operatorToken && sameToken(authorization.replace(/^Bearer\s+/i, ''), operatorToken)) return { kind: 'operator' }
+  if (ledger === 'broken') return 401
+  const bearer = /^Bearer\s+(\S+)\s*$/i.exec(authorization)?.[1]
+  if (bearer) {
+    const facility = facilityTokenFor(bearer, ledger, now)
     if (facility) return { kind: 'facility', facility_id: facility.facility_id, label: facility.label }
   }
-  if (operatorToken || facilityTokens.length) return 401
+  if (operatorToken || ledger.length) return 401
   return LOOPBACK_ADDRESSES.has(req.clientAddress) && isLocalBrowserSafe(req) ? { kind: 'operator' } : 403
 }

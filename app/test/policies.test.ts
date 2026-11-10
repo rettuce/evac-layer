@@ -5,7 +5,8 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { sourceLines } from '../layout/sources.ts'
 import { isDemoSitePath, isTrustedLayoutSrc, resolveLayoutSrc } from '../layout/trust.ts'
-import { type AdminRequest, type FacilityToken, adminPrincipal, clientAddressFor, facilityRouteAllowed, tokenSha256 } from '../server/utils/adminPolicy.ts'
+import { type AdminRequest, type FacilityToken, adminPrincipal, clientAddressFor, facilityRouteAllowed, tokenLedgerFrom, tokenSha256 } from '../server/utils/adminPolicy.ts'
+import { serialQueue } from '../server/utils/serialQueue.ts'
 import { type CheckReport, classDigest, layoutDigest, liveLayoutGate, liveLayoutGateWith, passedBrowserCheck, revokeClasses, screenClass } from '../layout/gate.ts'
 import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
 import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
@@ -33,6 +34,13 @@ test('dev layout bridge serves only .json files inside the repository', async ()
   assert.equal(await checkRepoJsonPath(join(repo, 'data', 'escape.json'), repo).then((r) => !r.ok && r.status), 403)
   assert.equal(await checkRepoJsonPath(join(repo, 'data', 'env.json'), repo).then((r) => !r.ok && r.status), 403)
   assert.equal(await checkRepoJsonPath(join(repo, 'data', 'missing.json'), repo).then((r) => !r.ok && r.status), 404)
+
+  const ledgers = ['tokens.json', 'subscriptions.json', 'approvals.json', 'tokens.json.123.tmp', 'approvals.json.123.tmp', 'tokens.json.lock', 'tokens.json.123.tmp.json']
+  for (const name of ledgers) await writeFile(join(repo, 'data', name), '{}')
+  await symlink(join(repo, 'data', 'tokens.json'), join(repo, 'data', 'innocent.json'))
+  for (const name of [...ledgers, 'innocent.json', 'TOKENS.json']) {
+    assert.equal(await checkRepoJsonPath(join(repo, 'data', name), repo).then((r) => !r.ok && r.status), 403, name)
+  }
 })
 
 test('production screens accept only the layout store as src', () => {
@@ -129,6 +137,65 @@ test('loopback without a token is the operator only while no facility token is r
   assert.equal(adminPrincipal(localPost, '', tokens, NOW), 401)
   assert.equal(adminPrincipal(localPost, '', [facilityToken('token-old', 'alpha-fac', '2026-11-10T00:00:00Z')], NOW), 401, 'an expired token still switches loopback off')
   assert.deepEqual(adminPrincipal({ ...localPost, authorization: 'Bearer token-alpha' }, '', tokens, NOW), { kind: 'facility', facility_id: 'alpha-fac', label: 'alpha-fac signage' })
+})
+
+const BROKEN_LEDGERS: [string, unknown][] = [
+  ['an empty object', {}],
+  ['null', null],
+  ['tokens null', { tokens: null }],
+  ['tokens an object', { tokens: {} }],
+  ['a number', 3],
+  ['a record without a label', { tokens: [facilityToken('token-alpha', 'alpha-fac'), { id: 'x', facility_id: 'beta-fac', sha256: tokenSha256('token-beta'), created_at: '2026-11-01T00:00:00Z' }] }],
+  ['a hash that is not 64 hex', { tokens: [{ ...facilityToken('token-alpha', 'alpha-fac'), sha256: 'abc' }] }],
+  ['a numeric expiry', { tokens: [{ ...facilityToken('token-alpha', 'alpha-fac'), expires_at: 1 }] }],
+  ['a record that is null', { tokens: [null] }],
+]
+
+test('the token ledger is a list of well-formed records, or no file at all; anything else is broken', () => {
+  assert.deepEqual(tokenLedgerFrom(undefined), [])
+  assert.deepEqual(tokenLedgerFrom({ version: '0.1', tokens: [] }), [])
+  assert.deepEqual(tokenLedgerFrom({ version: '0.1', tokens }), tokens)
+  for (const [label, doc] of BROKEN_LEDGERS) assert.equal(tokenLedgerFrom(doc), 'broken', label)
+})
+
+test('a broken ledger admits no facility and no loopback, and the operator token still works', () => {
+  const remote = { ...localPost, clientAddress: '192.168.0.92', host: 'signage.example' }
+  assert.equal(adminPrincipal(localPost, '', 'broken', NOW), 401)
+  assert.equal(adminPrincipal({ ...localPost, authorization: 'Bearer token-alpha' }, '', 'broken', NOW), 401)
+  assert.equal(adminPrincipal({ ...remote, authorization: 'Bearer token-alpha' }, 'secret', 'broken', NOW), 401)
+  assert.deepEqual(adminPrincipal({ ...remote, authorization: 'Bearer secret' }, 'secret', 'broken', NOW), OPERATOR)
+  assert.deepEqual(adminPrincipal({ ...remote, authorization: 'secret' }, 'secret', 'broken', NOW), OPERATOR)
+})
+
+test('a facility token counts only as a Bearer credential; the operator token keeps its old leniency', () => {
+  const remote = { ...localPost, clientAddress: '192.168.0.92', host: 'signage.example' }
+  assert.equal(adminPrincipal({ ...remote, authorization: 'token-alpha' }, 'secret', tokens, NOW), 401)
+  assert.equal(adminPrincipal({ ...remote, authorization: 'Basic token-alpha' }, '', tokens, NOW), 401)
+  assert.deepEqual(adminPrincipal({ ...remote, authorization: 'bearer token-alpha' }, '', tokens, NOW), { kind: 'facility', facility_id: 'alpha-fac', label: 'alpha-fac signage' })
+  assert.deepEqual(adminPrincipal({ ...remote, authorization: 'secret' }, 'secret', tokens, NOW), OPERATOR)
+})
+
+test('a serial queue keeps both of two read-modify-write updates started together', async () => {
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 5))
+  const store = { value: { a: 0, b: 0 } }
+  const update = async (key: 'a' | 'b') => {
+    const read = { ...store.value }
+    await tick()
+    read[key] += 1
+    await tick()
+    store.value = read
+  }
+  await Promise.all([update('a'), update('b')])
+  assert.notDeepEqual(store.value, { a: 1, b: 1 }, 'without the queue one update is lost, so this test can tell')
+
+  store.value = { a: 0, b: 0 }
+  const queue = serialQueue()
+  const failing = queue(async () => {
+    throw new Error('a failed update')
+  })
+  await Promise.all([queue(() => update('a')), failing.catch(() => undefined), queue(() => update('b'))])
+  assert.deepEqual(store.value, { a: 1, b: 1 })
+  await assert.rejects(failing, /a failed update/)
 })
 
 test('a facility credential reaches only the admin paths that have a facility rule', () => {
