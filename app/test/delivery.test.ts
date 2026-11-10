@@ -18,7 +18,8 @@ const SITE = 'feed-site'
 const SHAPES = ['16x9', '9x16', '32x9', '1x1', 'pillar'] as const
 const SECRET = 'a-shared-secret-of-enough-length'
 const WEBHOOK_WAIT_MS = 8000
-const EXPORT_WAIT_MS = 8000
+const EXPORT_WAIT_MS = 15000
+const EXPORT_SWEEP_MS = 5000
 
 const RECEIVED_AT = '2026-11-10T05:00:00.000Z'
 const skip = !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first'
@@ -166,8 +167,13 @@ for (const shape of ${JSON.stringify(SHAPES)}) {
 writeFileSync(join(dir, '${EXPORT_DIGEST_FILE}'), process.env.FAKE_EXPORT_DIGEST)
 `
 
-async function startExportingServer(env: Record<string, string>) {
+async function startExportingServer(env: Record<string, string>, approvedBeforeStart = false) {
   const { dataDir, distDir, digest } = await makeDelivery()
+  if (approvedBeforeStart) {
+    const at = '2026-11-10T00:00:00.000Z'
+    const approvals = { version: '0.1', layouts: { [`${SITE}/${BULLETIN}`]: { approved: true, updated_at: at, digest } }, sites: { [SITE]: { auto_publish: true, updated_at: at } }, classes: {} }
+    await writeFile(join(dataDir, 'approvals.json'), JSON.stringify(approvals))
+  }
   await rm(join(distDir, SITE), { recursive: true })
   const exporter = join(dataDir, 'fake-export.mjs')
   const calls = join(dataDir, 'fake-export-calls.log')
@@ -245,6 +251,26 @@ describe('export on approval', { skip }, () => {
     const job = await exportJob(dataDir, 'failed')
     assert.match(job.message ?? '', /no Chrome found/)
     assert.deepEqual((await feedOnAlert(base)).assets, {})
+  })
+
+  test('a bulletin that is on the feed with no approval action since the server started is exported by the sweep', async () => {
+    const { base, child, dataDir, calls } = await startExportingServer({}, true)
+    children.push(child)
+    await feedOnAlert(base)
+
+    await exportJob(dataDir, 'ok')
+    assert.deepEqual(Object.keys((await feedOnAlert(base)).assets).sort(), [...SHAPES].sort())
+    assert.equal(await readFile(calls, 'utf8'), `${SITE} ${BULLETIN}\n`)
+  })
+
+  test('the sweep does not export the same screens again after their export failed', async () => {
+    const { base, child, dataDir, calls } = await startExportingServer({ FAKE_EXPORT_FAILS: '1' }, true)
+    children.push(child)
+    await feedOnAlert(base)
+
+    await exportJob(dataDir, 'failed')
+    await new Promise((resolve) => setTimeout(resolve, 2 * EXPORT_SWEEP_MS))
+    assert.equal(await readFile(calls, 'utf8'), `${SITE} ${BULLETIN}\n`)
   })
 })
 
