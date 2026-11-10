@@ -7,6 +7,6 @@ export default defineEventHandler(async (event) => {
   const approvals = await readApprovals()
   approvals.sites[body.site_id] = { auto_publish: body.auto_publish, updated_at: new Date().toISOString() }
   await writeApprovals(approvals)
-  if (body.auto_publish) await requestMissingExports(body.site_id, ownBaseUrl(event)).catch((error: Error) => console.warn(`[export] ${body.site_id} not queued: ${error.message}`))
+  if (body.auto_publish) await requestMissingExports(body.site_id).catch((error: Error) => console.warn(`[export] ${body.site_id} not queued: ${error.message}`))
   return approvals.sites[body.site_id]
 })
