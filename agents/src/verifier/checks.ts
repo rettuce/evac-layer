@@ -25,7 +25,7 @@ export const MAX_REVERSALS = 1;
 export type TextKind = "primary" | "secondary" | "label";
 export interface TextSample { cell_id: string; role: Role; step_class: TypeStep | null; font_px: number; kind: TextKind; text: string }
 export interface ScreenState { shape: string; template: string; variant: string; level: string; dropped: string; overflow: string | null; missing_required: string | null }
-export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker" | "direction-dropped"; cell_id?: string; lang?: string; detail: string }
+export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker" | "direction-dropped" | "direction-mismatch" | "north-missing"; cell_id?: string; lang?: string; detail: string }
 export interface CellText { id: string; role: Role; text: string }
 
 // The author's artboards (L-4/L-5, 2026-11-05) set these lines below the viewing-distance floor; the floor follows the
@@ -84,7 +84,7 @@ export function countReversals(luminances: number[]): number {
 
 const DISTANCE = /\d[\d,.]*\s*(m|km|メートル)(?![a-z])/i;
 
-// Contract: the distance to the shelter is shown once, on the shelter cell; the direction cell carries only the way to go.
+// Contract: the distance to the shelter is shown once: on the shelter cell, or on a north-up direction cell that took it.
 export function judgeContent(cells: CellText[]): Finding[] {
   const shelterHasDistance = cells.some((c) => c.role === "shelter" && DISTANCE.test(c.text));
   return cells
@@ -110,4 +110,30 @@ export function judgeDrill(cells: { id: string; role: string; text: Record<strin
     .flatMap((c) => Object.entries(c.text)
       .filter(([lang, text]) => text !== undefined && DRILL_MARKERS[lang] && !(c.role !== "headline" && lang === "ja") && !DRILL_MARKERS[lang].test(text))
       .map(([lang]) => ({ check: "drill-marker" as const, cell_id: c.id, lang, detail: `drill bulletin, but the ${lang} ${c.role} does not open with the drill word` })));
+}
+
+// Screen angles (clockwise from pointing right) of the eight words on a north-up dial; the Verifier keeps its own table
+// instead of the Composer's bearing so that a word and an arrow that disagree are caught whoever wrote them.
+export const NORTH_UP_ROTATION: Record<string, number> = {
+  北へ: 270, 北東へ: 315, 東へ: 0, 南東へ: 45, 南へ: 90, 南西へ: 135, 西へ: 180, 北西へ: 225,
+};
+const ANGLE_TOLERANCE_DEG = 1;
+
+export interface NorthMark { text: string; visible: boolean; onDial: boolean }
+export interface NorthUpRead { id: string; word: string; rotation: number | undefined; marks?: NorthMark[] }
+
+// A north-up arrow read as "ahead of me" sends people the wrong way, so the dial must carry N and 北 where they are seen
+// with it, and the arrow must point the way its word says. marks is what the browser saw; the static layer has none.
+export function judgeNorthUp(cells: NorthUpRead[]): Finding[] {
+  return cells.flatMap((c) => {
+    const out: Finding[] = [];
+    const want = NORTH_UP_ROTATION[c.word];
+    const off = want === undefined || c.rotation === undefined ? Infinity : Math.abs((((c.rotation - want) % 360) + 540) % 360 - 180);
+    if (off > ANGLE_TOLERANCE_DEG) out.push({ check: "direction-mismatch", cell_id: c.id, detail: `north-up arrow at ${c.rotation ?? "no"}° does not point ${JSON.stringify(c.word)}${want === undefined ? " (not one of the eight words)" : ` (${want}°)`}` });
+    if (c.marks) {
+      const missing = ["N", "北"].filter((t) => !c.marks!.some((m) => m.text === t && m.visible && m.onDial));
+      if (missing.length) out.push({ check: "north-missing", cell_id: c.id, detail: `north-up dial does not show ${missing.join(" and ")} on the circle` });
+    }
+    return out;
+  });
 }

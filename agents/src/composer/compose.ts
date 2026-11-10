@@ -1,4 +1,5 @@
-import type { LayoutCell, PanelShape } from "../../../app/layout/types";
+import { northDistanceOn } from "../../../app/layout/northUp";
+import type { LayoutCell, Orientation, PanelShape } from "../../../app/layout/types";
 import type { Alert } from "../jma/parse.js";
 import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { Lang } from "../writer/request.js";
@@ -14,7 +15,7 @@ export interface Site {
   municipality_id: string;
   lat: number;
   lng: number;
-  direction?: { text_ja: string; rotation: number };
+  direction?: Way;
   facing_deg?: number;
   note?: string;
 }
@@ -28,12 +29,18 @@ function bearingDeg(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
 }
 
+export interface Way { text_ja: string; rotation: number; orientation?: Orientation }
+
 // Screen rotation is clockwise from pointing right; facing_deg is the compass direction the viewer faces while
-// reading the screen, so a target straight ahead points up (270).
-export function directionToward(site: Site, target: { lat: number; lng: number }): { text_ja: string; rotation: number } {
+// reading the screen, so a target straight ahead points up (270). Without it the arrow is drawn on a north-up dial
+// at the same 8-point bearing as the word, so the two cannot disagree.
+export function directionToward(site: Site, target: { lat: number; lng: number }): Way {
   if (site.direction) return site.direction;
-  if (site.facing_deg === undefined) stop(`site ${site.id} has neither a direction nor facing_deg`);
   const bearing = bearingDeg(site, target);
+  if (site.facing_deg === undefined) {
+    const point = Math.round(bearing / 45) % 8;
+    return { text_ja: `${COMPASS_JA[point]}へ`, rotation: (point * 45 + 270) % 360, orientation: "north-up" };
+  }
   const rotation = Math.round(((bearing - site.facing_deg! + 270) % 360) / 45) * 45 % 360;
   return { text_ja: `${COMPASS_JA[Math.round(bearing / 45) % 8]}へ`, rotation };
 }
@@ -133,7 +140,8 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
 
   return SHAPE_ORDER.map((shape) => {
     const cellShape = CELLS_OF[shape];
-    const { slots, required } = shapeContract(situation.template, cellShape);
+    const { slots, required } = shapeContract(situation.template, cellShape, way?.orientation);
+    const distanceOnDirection = way?.orientation === "north-up" && slots.has("direction") && northDistanceOn(situation.template, shape) === "direction";
     const w = writerFor(input.writer, cellShape);
     const text = (role: string) => {
       const c = w.cells.find((x) => x.role === role);
@@ -146,8 +154,9 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     add({ id: "headline", role: "headline", priority: 1, text: { ...headlineText, ja: headline }, pictogram: HAZARD_PICTOGRAM[alert.hazard], motion: "scale-in" });
     add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: actionPictogram(alert.hazard, situation.template), motion: "pulse" });
     if (guide && way) {
-      add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: way.text_ja }, pictogram: "arrow_forward", rotation: way.rotation, motion: "static" });
-      add({ id: "shelter", role: "shelter", priority: 2, text: { ja: guide.shelter.name }, kind: guide.shelter.kind, pictogram: "emergency_evacuation_site", distance_m: guide.distance_m, motion: "static" } as LayoutCell);
+      const reference = way.orientation ? { orientation: way.orientation, ...(distanceOnDirection ? { distance_m: guide.distance_m } : {}) } : {};
+      add({ id: "direction", role: "direction", priority: 2, text: text("direction") ?? { ja: way.text_ja }, pictogram: "arrow_forward", rotation: way.rotation, ...reference, motion: "static" });
+      add({ id: "shelter", role: "shelter", priority: 2, text: { ja: guide.shelter.name }, kind: guide.shelter.kind, pictogram: "emergency_evacuation_site", ...(distanceOnDirection ? {} : { distance_m: guide.distance_m }), motion: "static" } as LayoutCell);
     }
     const languages = text("languages");
     if (languages) add({ id: "languages", role: "languages", priority: 3, text: languages, motion: "static" });

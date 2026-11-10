@@ -265,7 +265,7 @@ const PILLAR_FACE_LAYOUTS: Partial<Record<TemplateId, ShapeLayout>> = {
 }
 
 export function areaRoles(layout: ShapeLayout): Set<string> {
-  return new Set(layout.areas.flatMap((row) => row.split(/\s+/)).filter((name) => name !== '.'))
+  return new Set([...layout.areas.flatMap((row) => row.split(/\s+/)).filter((name) => name !== '.'), ...Object.keys(layout.placement ?? {})])
 }
 
 const ROLE_ORDER: Role[] = ['headline', 'hazard', 'action', 'direction', 'shelter', 'languages', 'source', 'pictogram']
@@ -299,7 +299,10 @@ export function resolveLayout(templateId: TemplateId, shape: Shape, variant = 0)
 }
 
 export function resolveTemplate(templateId: TemplateId, shape: Shape): ResolvedTemplate {
-  const layout = resolveLayout(templateId, shape)
+  return describeLayout(resolveLayout(templateId, shape))
+}
+
+export function describeLayout(layout: ShapeLayout): ResolvedTemplate {
   const placeable = areaRoles(layout)
   return {
     required: ROLE_ORDER.filter((role) => layout.required.includes(role)),
