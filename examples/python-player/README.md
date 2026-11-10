@@ -1,5 +1,7 @@
 # python player
 
+MIT licensed ([`../LICENSE`](../LICENSE)), unlike the rest of the repository: copy it into your own player.
+
 A one-file signage player in Python 3, standard library only, with the same contract as [`examples/minimal-cms/`](../minimal-cms/): it reads `GET /api/feed/<site>` every 2 s and, while the feed says `state: "alert"`, shows the approved screen PNG for its shape full-screen on top of its own content (a shop and transport board). When the feed goes back to `ambient`, its own content returns. It knows nothing about EVAC LAYER except the feed.
 
 With the app running (`pnpm -F app dev`), a site approved in `/admin` and its screens exported (`pnpm -F agents export --site <id>`, see the minimal CMS README for the full steps):

@@ -1,5 +1,7 @@
 # minimal CMS
 
+MIT licensed ([`../LICENSE`](../LICENSE)), unlike the rest of the repository: copy it into your own player.
+
 A 40-line signage player that knows nothing about EVAC LAYER except the feed. It shows its own content ("いつもの広告・お知らせ") and, while the site's feed says `state: "alert"`, the approved screen PNG for its shape full-screen on top. When the feed goes back to `ambient`, its own content returns.
 
 Try it with the bundled 柏崎市 site `15205-demo` and its level 4 landslide bulletin of 2026-10-31 16:53, with the app running (`pnpm -F app dev`):

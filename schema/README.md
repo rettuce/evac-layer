@@ -1,5 +1,7 @@
 # schema/
 
+Everything in this directory is dedicated to the public domain under CC0 1.0 ([`LICENSE`](LICENSE)), so a receiving system can ship these schemas inside a product of any licence. The rest of the repository is AGPL-3.0.
+
 | File | Written by | Read by |
 |---|---|---|
 | `layout.schema.json` | Composer | Renderer, Verifier |
