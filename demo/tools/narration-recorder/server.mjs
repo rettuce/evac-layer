@@ -2,7 +2,6 @@ import { execFile } from 'node:child_process'
 import { createServer } from 'node:http'
 import { createReadStream } from 'node:fs'
 import { mkdir, open, readdir, readFile, rename, stat, writeFile } from 'node:fs/promises'
-import { homedir } from 'node:os'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs, promisify } from 'node:util'
@@ -21,7 +20,7 @@ const { values: opts } = parseArgs({
   options: {
     port: { type: 'string', default: '3190' },
     out: { type: 'string', default: join(REPO, 'demo/compose/audio/narration') },
-    cuts: { type: 'string', default: join(homedir(), 'Dropbox/dev/claude-hackathon-2026/review/davinci/video/cuts') },
+    cuts: { type: 'string', default: join(REPO, 'demo/compose/cuts') },
   },
 })
 const OUT_DIR = resolve(opts.out)

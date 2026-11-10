@@ -16,6 +16,8 @@ https://github.com/user-attachments/assets/36f29444-921e-4abf-bd5f-bd79b15147da
 
 いまの段階: 記録した実際の電文で検証した、実証前のプロトタイプです。最初の利用先は作者が IE3 で開発しているサイネージのシステムで、実証の相手を募集しています（[この先](#この先)）。
 
+ハッカソン（Built with Claude: Japan 2026・ファイナリスト）に提出した時点のコードは、タグ [`v0.1.0`](https://github.com/rettuce/evac-layer/releases/tag/v0.1.0) です。`main` はそこから進んでいます。開発は `develop` ブランチで続け、リリースの節目に `main` へ入れます。
+
 ### 3 分で見る
 
 1. **動画（2 分 51 秒）**: [youtu.be/W_wwWq_1ob8](https://youtu.be/W_wwWq_1ob8) で、警報がレベル 3・4・5 と上がる 1 日と、場所ごとに変わる案内、事前の承認を見る
@@ -301,6 +303,8 @@ AGPL-3.0 の条件で、誰でも使えます。AGPL の条件で公開できな
 **Built with Claude: Japan 2026**（2026 年 11 月 2〜8 日）の期間中に、ゼロから作りました。
 
 ## English summary
+
+The hackathon submission (Built with Claude: Japan 2026, finalist) is tag [`v0.1.0`](https://github.com/rettuce/evac-layer/releases/tag/v0.1.0). `main` has moved on since then; ongoing work is on the `develop` branch and lands here at releases.
 
 **Turn every screen into a lifeline.** EVAC LAYER adds an emergency-guidance layer to the signage a city already has, automatically, when disaster strikes, without replacing the systems in place. The moment a warning arrives, every screen turns into evacuation guidance for the spot where it stands. Demo video (2:51): https://youtu.be/W_wwWq_1ob8
 

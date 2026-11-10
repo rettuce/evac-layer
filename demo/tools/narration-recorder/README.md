@@ -15,7 +15,7 @@ Host が `127.0.0.1:<port>` か `localhost:<port>` でない要求と、Origin �
 |---|---|---|
 | `--port` | `3190` | 待ち受けるポート |
 | `--out` | `demo/compose/audio/narration` | WAV の置き場。前の 1 本は隣の `<out>-prev/` に退避 |
-| `--cuts` | `~/Dropbox/dev/claude-hackathon-2026/review/davinci/video/cuts` | 場面の静止画を作る `NN-cut<id>.mov` の置き場。無ければ「素材なし」と出るだけで録音はできる |
+| `--cuts` | `demo/compose/cuts` | 場面の静止画を作る `NN-cut<id>.mov` の置き場。無ければ「素材なし」と出るだけで録音はできる |
 
 ## 使い方
 
@@ -36,10 +36,10 @@ Host が `127.0.0.1:<port>` か `localhost:<port>` でない要求と、Origin �
 - 一覧の「窓」は `mix_audio.py` の `narration_track` と同じ計算（その cut の頭から次にナレーションのある cut の頭まで。cut 0 は頭から 5.0 s 後に置くのでその分短い）。台本は `demo/compose/edl.json` を毎回読み直す
 - 頭と末尾の無音は足さない。台本の注意どおり、話す前に 0.2 s・話し終えて 0.5 s 待ってから止める
 
-## HOME で使う
+## 別のマシンで使う
 
 ```sh
-cd ~/Documents/local_dev/evac-layer
+cd evac-layer   # clone した場所
 git pull
 node demo/tools/narration-recorder/server.mjs
 open http://127.0.0.1:3190/
