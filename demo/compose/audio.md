@@ -1,6 +1,6 @@
 # 音の下準備（合成は後工程）
 
-素材元は Adobe Audition の無償 SFX ライブラリ（各カテゴリの `LICENSE.pdf` に従う）。ローカルの `$SFX = ~/Dropbox/dev/material/sound/adobe-audition-sfx/` から**読むだけ**で、ここにはパスと長さだけを書く。採用が決まった素材だけを `demo/compose/audio/` に複製し、出典を `demo/ASSETS.md` に 1 行足す。最終選択は試聴で決める（`afplay "<path>"`）。
+素材元は Adobe Audition の無償 SFX ライブラリ（各カテゴリの `LICENSE.pdf` に従う）。ローカルに置いたライブラリ（以下 `$SFX`）から**読むだけ**で、ここにはパスと長さだけを書く。採用が決まった素材だけを `demo/compose/audio/` に複製し、出典を `demo/ASSETS.md` に 1 行足す。最終選択は試聴で決める（`afplay "<path>"`）。
 
 ## 駅の環境音（ambience・カット 1〜2・5・8 の床）
 
