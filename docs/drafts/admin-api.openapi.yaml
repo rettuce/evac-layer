@@ -1,0 +1,406 @@
+openapi: 3.1.0
+info:
+  title: EVAC LAYER admin API for hosted installations (DRAFT, not implemented)
+  version: 0.3.0-draft.1
+  description: |
+    Draft for review. Nothing in this file is implemented unless a path says "exists today".
+
+    Why: one EVAC LAYER server is going to serve many venues, and each venue's signage system
+    registers its own screens, has their warning screens composed, approves them and reads its
+    feed. Today the admin API has one credential for everything (`NUXT_ADMIN_TOKEN`), or none
+    on loopback. With one credential, any venue could rewrite or approve the screens of every
+    other venue. This draft makes the credential part of the contract before the new paths
+    exist.
+
+    Decisions this draft proposes (each is open until reviewed):
+    1. A credential carries a scope: the site ids it may act on, given as a prefix. The
+       operator credential has the empty prefix and may act on every site.
+    2. A site outside the caller's scope answers 404, the same as a site that does not exist,
+       so a venue cannot list other venues by probing ids.
+    3. Registering a site is `PUT /api/admin/sites/{site_id}`: the caller chooses the id inside
+       its prefix, and repeating the call after a lost response is harmless.
+    4. Composing screens is a job: `POST` starts it and answers 202, `GET` reports progress.
+       It never runs inside the request.
+    5. Preparing a municipality (reading its hazard-map PDFs into `data/municipalities/`) is
+       the operator's work and is not offered over HTTP. A site in a municipality that is not
+       prepared can be registered but not composed.
+  license:
+    name: AGPL-3.0-only
+    identifier: AGPL-3.0-only
+servers:
+  - url: http://127.0.0.1:3150
+    description: local development
+security:
+  - siteToken: []
+tags:
+  - name: sites
+  - name: generations
+  - name: approval
+  - name: feed
+paths:
+  /api/admin/sites/{site_id}:
+    parameters:
+      - $ref: '#/components/parameters/SiteId'
+    put:
+      tags: [sites]
+      summary: Register a site or update its place
+      description: |
+        Writes `data/sites/<site_id>.json`. `municipality_id` is taken from the GSI reverse
+        geocoder unless given. The call is idempotent: the same body twice leaves one site.
+
+        Moving a site does not touch its screens or approvals. Screens are approved by the
+        digest of their layout files, so after the next generation a screen whose shelter,
+        distance and direction came out the same keeps its approval and the others wait for
+        a new one. `needs_generation` tells the caller that the place changed since the
+        screens were composed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteInput'
+      responses:
+        '200':
+          description: The site existed and now has this place.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteState'
+        '201':
+          description: The site was created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotInScope'
+        '502':
+          description: The GSI reverse geocoder did not answer and no `municipality_id` was given.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+    get:
+      tags: [sites]
+      summary: Read a site and where its screens stand
+      responses:
+        '200':
+          description: The site.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteState'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotInScope'
+  /api/admin/sites/{site_id}/generations:
+    parameters:
+      - $ref: '#/components/parameters/SiteId'
+    post:
+      tags: [generations]
+      summary: Compose the warning screens of a site
+      description: |
+        Starts one job that composes, verifies in a browser and writes the screens of the site
+        for every screen class the municipality can receive (hazard x template x level), so
+        that a new site has every class to approve before its first real warning.
+
+        Open: where the bulletins of each class come from. `pnpm -F agents fanout --sites
+        <site_id>` composes today from a recorded feed, which only holds the classes that
+        happened to be issued for the municipality while it was recorded; `data/samples/`
+        lists official JMA sample bulletins for two municipalities only. A source that covers
+        every class for any municipality does not exist yet and is part of this work.
+
+        One job per site at a time. Composing calls the Writer once per class that has no
+        cached text for the municipality, which costs API usage on the operator's account;
+        the server limits how often a site may start a job.
+      responses:
+        '202':
+          description: The job was queued.
+          headers:
+            Location:
+              description: URL of the job.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Generation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotInScope'
+        '409':
+          description: |
+            `generation-running`: the site already has a job that is queued or running
+            (its id is in `generation_id`). `municipality-not-prepared`: the operator has not
+            prepared the municipality yet.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          description: The site started jobs too often. `Retry-After` says when to try again.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /api/admin/sites/{site_id}/generations/{generation_id}:
+    parameters:
+      - $ref: '#/components/parameters/SiteId'
+      - name: generation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^[a-z0-9]{8,32}$'
+    get:
+      tags: [generations]
+      summary: Progress and result of one job
+      description: Poll every few seconds. A finished job stays readable for at least a day.
+      responses:
+        '200':
+          description: The job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Generation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotInScope'
+  /api/admin/catalog:
+    get:
+      tags: [approval]
+      summary: Screens and their approval state (exists today; to be limited to the caller's sites)
+      description: |
+        Exists today and returns every site. With scoped credentials it returns only the sites
+        in the caller's scope. The body is unchanged.
+      responses:
+        '200':
+          description: See `app/server/api/admin/catalog.get.ts`.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/admin/approve:
+    post:
+      tags: [approval]
+      summary: Approve or revoke the screens of one bulletin (exists today; to be scoped)
+      description: |
+        Exists today. With scoped credentials a `site_id` outside the caller's scope answers
+        404. The `municipality` alias (a municipality with exactly one site) is refused for
+        scoped credentials, because it names a site the caller did not choose.
+      responses:
+        '200':
+          description: See `app/server/api/admin/approve.post.ts`.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotInScope'
+  /api/admin/site:
+    post:
+      tags: [approval]
+      summary: Switch auto publish of a site (exists today; to be scoped)
+      responses:
+        '200':
+          description: See `app/server/api/admin/site.post.ts`.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotInScope'
+  /api/feed:
+    get:
+      tags: [feed]
+      summary: The feed of the site at a place
+      description: |
+        Answers with the feed of the site nearest to `lat`,`lng` within 100 m, the same match
+        `/screen?lat=&lng=` and `GET /api/site-near` use today, so a receiver does not have to
+        store a site id. The body, `ETag` and `If-None-Match` behave as in
+        `GET /api/feed/{site_id}`; `Content-Location` names that URL.
+
+        Like the feed by id, this needs no credential: a feed only ever carries approved,
+        public information.
+      security: []
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            minimum: -90
+            maximum: 90
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+            minimum: -180
+            maximum: 180
+      responses:
+        '200':
+          description: The feed (`schema/feed.schema.json`).
+          headers:
+            Content-Location:
+              schema:
+                type: string
+              description: '`/api/feed/<site_id>` of the matched site.'
+            ETag:
+              schema:
+                type: string
+        '304':
+          description: Unchanged since the `ETag` sent in `If-None-Match`.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: No site within 100 m.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  securitySchemes:
+    siteToken:
+      type: http
+      scheme: bearer
+      description: |
+        `Authorization: Bearer <token>`. The server keeps, per token, a SHA-256 of the token, a
+        label and a site id prefix (`data/tokens.json`, mode 600, written by an operator CLI;
+        tokens are never returned by the API). A token with prefix `kawasaki-hall-` may act on
+        `kawasaki-hall-lobby` and `kawasaki-hall-b1`, and on no other site. `NUXT_ADMIN_TOKEN`
+        stays as the operator credential with the empty prefix.
+
+        The loopback rule of today (no token set, requests from this machine are admitted)
+        stays for a single-venue installation and is switched off as soon as any scoped token
+        exists.
+  parameters:
+    SiteId:
+      name: site_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-z0-9][a-z0-9-]{2,63}$'
+      description: As in `schema/site.schema.json`. Must start with the caller's prefix.
+  responses:
+    BadRequest:
+      description: The request does not validate.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: No token, or a token the server does not know.
+    NotInScope:
+      description: No such site, or a site outside the caller's scope. The two are not told apart.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    SiteInput:
+      type: object
+      additionalProperties: false
+      required: [lat, lng, facing_deg]
+      properties:
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+        facing_deg:
+          type: number
+          minimum: 0
+          maximum: 360
+          description: |
+            Compass bearing the viewer faces while reading the screen. Required today
+            (`schema/site.schema.json`); whether it becomes optional is a separate open
+            request and this draft does not decide it.
+        name:
+          type: string
+          minLength: 1
+        municipality_id:
+          type: string
+          pattern: '^\d{5}$'
+          description: Only to override the reverse geocoder; a mismatch is reported in `warnings`.
+    SiteState:
+      type: object
+      additionalProperties: false
+      required: [site, auto_publish, municipality_prepared, needs_generation, warnings]
+      properties:
+        site:
+          description: The stored site (`schema/site.schema.json`).
+          type: object
+        auto_publish:
+          type: boolean
+        municipality_prepared:
+          type: boolean
+          description: False until the operator has prepared the site's municipality.
+        needs_generation:
+          type: boolean
+          description: True when the site has no screens, or its place changed after they were composed.
+        last_generation:
+          $ref: '#/components/schemas/Generation'
+        warnings:
+          type: array
+          items:
+            type: string
+    Generation:
+      type: object
+      additionalProperties: false
+      required: [generation_id, site_id, status, created_at, classes]
+      properties:
+        generation_id:
+          type: string
+        site_id:
+          type: string
+        status:
+          enum: [queued, running, done, failed]
+        created_at:
+          type: string
+          format: date-time
+        finished_at:
+          type: string
+          format: date-time
+        error:
+          type: string
+          description: Why the whole job failed (status `failed`).
+        classes:
+          description: One entry per screen class, filled in as the job goes.
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [class, bulletin_id, outcome]
+            properties:
+              class:
+                type: string
+                description: '`<hazard>/<template>/<level>`, the key approvals use.'
+              bulletin_id:
+                type: string
+                description: The bulletin the class was composed from; approve this id.
+              outcome:
+                enum: [pending, pass, fail, no-screen]
+              reason:
+                type: string
+              unchanged:
+                type: boolean
+                description: True when the layout digest equals the one before this job, so an approval given earlier still holds.
+    Problem:
+      type: object
+      required: [statusCode, message]
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        code:
+          type: string
+          description: Machine-readable reason, for example `generation-running` or `municipality-not-prepared`.
+        generation_id:
+          type: string
