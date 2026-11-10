@@ -59,6 +59,16 @@ It asks the GSI reverse geocoder (https://mreversegeocoder.gsi.go.jp/reverse-geo
 
 `pnpm -F agents validate data/sites/<id>.json` checks the file.
 
+Or over HTTP, from the system that manages the screens (admin access: a facility token, or the operator token):
+
+```sh
+curl -X PUT http://127.0.0.1:3150/api/admin/sites/my-station-concourse \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"lat": 39.38633978, "lng": 140.0563304, "facing_deg": 0, "name": "Station concourse, north wall"}'
+```
+
+The same lookup fills `municipality_id`, and the same rules apply as for the command: a given `municipality_id` is kept, with a warning in `warnings` when GSI places the point elsewhere, and without one a geocoder that does not answer gives 502 `geocoder-unavailable`. The answer is 201 for a new site and 200 for an update, with the site's state (its screens per class, their approvals and exports). Repeating the call is harmless. A site registered with a facility token belongs to that facility; an id another facility already uses answers 409 `site-id-taken`. `GET` the same URL reads the state, and `DELETE` removes the site with its screens, approvals and webhook registrations. `app/README.md` ("Sites over HTTP") lists the fields.
+
 A municipality not yet in `data/municipalities/` needs a preset first, `data/municipalities/<id>.preset.json` ([`schema/municipality-preset.schema.json`](../schema/municipality-preset.schema.json): names, the PDF list and the GSI CSVs). Then:
 
 ```sh

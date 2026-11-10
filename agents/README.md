@@ -6,7 +6,7 @@ Reader, Writer, Composer, Verifier, the JMA XML parser and the revision loop. Ty
 |---|---|
 | `pnpm -F agents test` | unit and sample-based tests (needs the raw inputs below) |
 | `pnpm -F agents validate <json>` | validate a layout / alert / municipality / shelters / site / municipality preset file against `schema/` |
-| `pnpm -F agents site --id <id> --lat <deg> --lng <deg> [--facing <deg>] [--name <text>] [--municipality <code>] [--facility <facility id>]` | writes `data/sites/<id>.json`; `municipality_id` comes from the GSI reverse geocoder unless given, with a warning when the given code differs; `--facility` writes `facility_id`, the facility whose token may act on the site |
+| `pnpm -F agents site --id <id> --lat <deg> --lng <deg> [--facing <deg>] [--name <text>] [--municipality <code>] [--facility <facility id>]` | writes `data/sites/<id>.json`; `municipality_id` comes from the GSI reverse geocoder unless given, with a warning when the given code differs; `--facility` writes `facility_id`, the facility whose token may act on the site. The lookup is `app/layout/siteRegister.ts`, shared with `PUT /api/admin/sites/<id>` |
 | `pnpm -F agents tokens issue --facility <facility id> --label <text> [--expires <ISO 8601>]` / `tokens list` / `tokens revoke --id <id>` | facility tokens for the admin API in `data/tokens.json` (mode 600): `issue` prints the token once on stdout and stores only its SHA-256; `list` shows id, facility, label, creation and expiry, never the token or its hash |
 | `pnpm -F agents jma <bulletin.xml>` | parse one JMA XML bulletin into alert JSON |
 | `pnpm -F agents replay --municipality <id> [--summary]` | recorded JMA bulletins that concern a municipality, in issue order, as alert JSON |
