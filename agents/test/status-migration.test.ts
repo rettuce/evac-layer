@@ -96,7 +96,7 @@ test("a test bulletin's layout without a status is out of class approval: by its
   assert.equal(plain, "landslide/evac-now/4", "the layout alone reads as normal");
   const rowStatus = screenClass(JSON.parse(files()[0]!.body), "test");
   assert.equal(rowStatus, "landslide/evac-now/4/test");
-  assert.equal(approvalWith(approvalsFor(plain), "15205-demo", NORMAL_ID, layoutDigest(files()), { key: rowStatus, digest: classDigest(files()), checked: true }).approved, false);
+  assert.equal(approvalWith(approvalsFor(plain), "15205-demo", NORMAL_ID, layoutDigest(files()), { key: rowStatus, digest: classDigest(files()), checked: true, headline: true }).approved, false);
 
   const migrated = migrateBulletinStatus("15205-demo", { layoutsDir: root, xmlPath: (f) => path.join(xmlDir, f === "test-bulletin.xml" ? "test.xml" : f) });
   assert.deepEqual(migrated, [NORMAL_ID]);

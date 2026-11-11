@@ -65,7 +65,7 @@ test("a record with a match is reused across Head/Titles, and only for the same 
   const clearAdvisory = heavyRain({ title: "新潟県大雨警報・注意報", kind: "レベル２大雨注意報", kindCode: "10", status: "cleared", level: null, id: "VPWW55-202611011000-000000000004" });
   saveWriterForClass("17204", "heavy_rain/all-clear/1", { model: "opus", output: wording("おわり"), bulletin_id: clearAdvisory.bulletin_id, issued_at: clearAdvisory.issued_at, raw_title: "石川県大雨警報・注意報", match: writerMatchFor(clearAdvisory, "17204", situationFor(clearAdvisory, "17204")) });
   const clearWarning = heavyRain({ title: "石川県大雨警報・注意報", kind: "レベル３大雨警報", kindCode: "03", status: "cleared", level: null, id: "VPWW55-202611021000-000000000005" });
-  await assert.rejects(step(clearWarning, wajima), /Writer API was called/, "the clearance of another warning is written anew even under the same Head/Title");
+  await assert.rejects(step(clearWarning, wajima), /Writer API was called/, "wording written knowing the warning is not reused for another warning");
   assert.equal((await step({ ...clearAdvisory, raw_title: "石川県大雨警報・注意報" }, wajima)).writerSource, `writer-class-cache:${clearAdvisory.bulletin_id}`);
 });
 
@@ -95,5 +95,44 @@ test("wording the Writer writes is saved with its match, and a reuse saves the m
   const reused = await writeForBulletin({ alert: real, municipality: wajima, situation: situationFor(real, "17204"), site: { id: "17204-test" } }, { persist: true, usage: [] });
   reused.afterLoop({ outcome: "pass", writer: reused.writer } as never);
   assert.deepEqual(cachedWriterRecord("17204", real.bulletin_id)!.match, writerMatchFor(real, "17204", situationFor(real, "17204")));
+  fs.rmSync(path.join(WRITER_DIR, "17204"), { recursive: true });
+});
+
+test("wording written without the warning name (blind) goes to the clearance of another warning; a record without the mark does not", async () => {
+  const clearAdvisory = heavyRain({ title: "石川県大雨警報・注意報", kind: "レベル２大雨注意報", kindCode: "10", status: "cleared", level: null, id: "VPWW55-202611011000-000000000011" });
+  const clearWarning = heavyRain({ title: "石川県大雨警報・注意報", kind: "レベル３大雨警報", kindCode: "03", status: "cleared", level: null, id: "VPWW55-202611021000-000000000012" });
+  const record = { model: "opus", output: wording("おわり"), bulletin_id: clearAdvisory.bulletin_id, issued_at: clearAdvisory.issued_at, raw_title: clearAdvisory.raw_title, match: writerMatchFor(clearAdvisory, "17204", situationFor(clearAdvisory, "17204")) };
+  saveWriterForClass("17204", "heavy_rain/all-clear/1", record);
+  await assert.rejects(step(clearWarning, wajima), /Writer API was called/);
+  saveWriterForClass("17204", "heavy_rain/all-clear/1", { ...record, blind: true });
+  const reused = await step(clearWarning, wajima);
+  assert.equal(reused.writerSource, `writer-class-cache:${clearAdvisory.bulletin_id}`);
+  assert.equal(reused.blind, true, "the mark goes with the wording");
+  await assert.rejects(step({ ...clearWarning, status: "drill" }, wajima), /Writer API was called/, "the status still has to match");
+  fs.rmSync(path.join(WRITER_DIR, "17204"), { recursive: true });
+});
+
+test("the Writer is given no warning name, Head/Title, free text, bulletin id or issue time, and its record is marked blind", async () => {
+  let asked = "";
+  const reply = { cells: wording("あたらしい").cells };
+  const client = { messages: { stream: (req: { system: { text: string }[]; messages: { content: { text: string }[] }[] }) => {
+    asked = [...req.system.map((b) => b.text), ...req.messages[0]!.content.map((c) => c.text)].join("\n");
+    return { finalMessage: async () => ({ stop_reason: "end_turn", content: [{ type: "text", text: JSON.stringify(reply) }], usage: { input_tokens: 1, output_tokens: 1 } }) };
+  } } } as unknown as Anthropic;
+  const alert = { ...heavyRain({ title: "石川県大雨警報・注意報", kind: "レベル３大雨警報", kindCode: "03", status: "issued", level: 3, id: "VPWW55-202611061000-000000000013" }), headline_text: "輪島市に大雨警報を発表しました。" };
+  const s = await writeForBulletin({ alert, municipality: wajima, situation: situationFor(alert, "17204"), site: { id: "17204-test" } }, { live: { client, model: "opus" }, persist: true, usage: [] });
+  assert.equal(s.writerSource, "writer-api:opus");
+  for (const name of ["レベル３大雨警報", "大雨警報", "石川県大雨警報・注意報", "輪島市に大雨警報を発表しました", alert.bulletin_id, "2026-11-01T10:00", "Major Tsunami Warning"]) assert.ok(!asked.includes(name), name);
+  for (const kept of ["heavy_rain", "evac-prepare", "輪島市"]) assert.ok(asked.includes(kept), kept);
+  assert.equal(cachedWriterRecord("17204", alert.bulletin_id)!.blind, true);
+
+  let river = "";
+  const flood = { messages: { stream: (req: { messages: { content: { text: string }[] }[] }) => {
+    river = req.messages[0]!.content.map((c) => c.text).join("\n");
+    return { finalMessage: async () => ({ stop_reason: "end_turn", content: [{ type: "text", text: JSON.stringify(reply) }], usage: { input_tokens: 1, output_tokens: 1 } }) };
+  } } } as unknown as Anthropic;
+  await writeForBulletin({ alert: { ...L4.alert, status: "drill", bulletin_id: "VXKOii-202611071200-000000000014" }, municipality: koyoshi, situation: situationFor(L4.alert, "05210"), site: { id: "05210-test" } }, { live: { client: flood, model: "opus" }, persist: false, usage: [] });
+  assert.ok(river.includes("子吉川"), "a flood forecast keeps its river, which is part of the match");
+  assert.ok(!river.includes("氾濫危険警報"));
   fs.rmSync(path.join(WRITER_DIR, "17204"), { recursive: true });
 });

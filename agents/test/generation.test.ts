@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 const repoData = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../data");
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "evac-generation-"));
 for (const dir of ["jma", "municipalities"]) fs.cpSync(path.join(repoData, dir), path.join(dataDir, dir), { recursive: true });
+const easyTable = path.join(dataDir, "jma", "warning-names-ja-easy.json");
+fs.writeFileSync(easyTable, JSON.stringify({ ...JSON.parse(fs.readFileSync(easyTable, "utf8")), reviewed: true }), "utf8");
 process.env.EVAC_DATA_DIR = dataDir;
 
 const { APPROVALS_FILE, FEED_DIR, LAYOUTS_DIR, REPORTS_DIR, SYNTHETIC_DIR, WRITER_DIR } = await import("../src/paths.js");
@@ -191,10 +193,11 @@ test("a class approved from a synthetic bulletin opens the real bulletins of tha
   ]);
 });
 
-test("the Writer of a synthetic bulletin is told no place of the template", { skip }, () => {
+test("the Writer of a synthetic bulletin is told no place of the template, and no place at all in the bulletin block", { skip }, () => {
   assert.ok(alertBlocks.length >= 6);
   for (const text of alertBlocks) {
-    assert.match(text, /柏崎市|輪島市/);
+    assert.match(text, /"hazard"/);
+    assert.doesNotMatch(text, /柏崎市|輪島市/, "the bulletin block carries the class, not the areas");
     for (const place of templatePlaces()) assert.ok(!text.includes(place), `the Writer was told "${place}"`);
   }
 });

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import type { HeadlineCheck } from './headlineTable'
 
 // Synthetic bulletins are composed in advance from JMA sample bulletins so that their screens can be approved before
 // a real one arrives. They are never a bulletin of their own on a screen: their approval only stands for the class.
@@ -53,12 +54,16 @@ export function layoutStatus(layout: ClassedLayout): BulletinStatus {
   return typeof headline === 'string' && headline.startsWith(DRILL_PREFIX_JA) ? 'drill' : 'normal'
 }
 
+// The index row's status covers a test bulletin's layout written before layouts carried one.
+export function bulletinStatus(layout: ClassedLayout | undefined, rowStatus?: string): BulletinStatus {
+  const own = layout ? layoutStatus(layout) : 'normal'
+  return own === 'normal' && (rowStatus === 'drill' || rowStatus === 'test') ? rowStatus : own
+}
+
 // A drill or test screen has a class of its own that no class approval is ever written for or read from: such
-// bulletins are approved one by one (the bundled demos), never by class. The index row's status covers a test
-// bulletin's layout written before layouts carried one.
+// bulletins are approved one by one (the bundled demos, which replay them), never by class.
 export function screenClass(layout: ClassedLayout, rowStatus?: string): string {
-  const own = layoutStatus(layout)
-  const status = own === 'normal' && (rowStatus === 'drill' || rowStatus === 'test') ? rowStatus : own
+  const status = bulletinStatus(layout, rowStatus)
   return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}${status === 'normal' ? '' : `/${status}`}`
 }
 
@@ -66,13 +71,10 @@ export function classApprovable(cls: string): boolean {
   return !/\/(drill|test)$/.test(cls)
 }
 
-function withoutJmaWarningNameAndSource({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
-  if (cell.role === 'source') return cell
-  if (cell.role === 'headline' && text) {
-    const { ja: _ja, ...translations } = text
-    return { ...cell, text: translations }
-  }
-  return { ...cell, text }
+// The headline in every language is the JMA warning name and its entry in JMA's multilingual dictionary, and the source
+// line is the issuer and issue time: both follow from the bulletin, so neither tells one screen of a class from another.
+function withoutWarningNameAndSource({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
+  return cell.role === 'source' || cell.role === 'headline' ? cell : { ...cell, text }
 }
 
 function withoutBulletin(layout: ClassedLayout): ClassedLayout {
@@ -80,7 +82,7 @@ function withoutBulletin(layout: ClassedLayout): ClassedLayout {
   return {
     ...layout,
     ...(layout.alert ? { alert } : {}),
-    ...(layout.cells ? { cells: layout.cells.map(withoutJmaWarningNameAndSource) } : {}),
+    ...(layout.cells ? { cells: layout.cells.map(withoutWarningNameAndSource) } : {}),
     ...(layout.sources ? { sources: layout.sources.map(({ bulletin_id, ...source }) => (source.type === 'jma' ? source : { ...source, bulletin_id })) } : {}),
   }
 }
@@ -122,11 +124,12 @@ export function layoutKey(site: string, bulletinId: string): string {
 
 export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale' | 'synthetic'
 export type ApprovedBy = 'bulletin' | 'class' | null
-export interface LayoutClass { key: string; digest: string; checked: boolean }
+// headline: the evidence that every headline is the JMA dictionary table's (headlineEvidence in headlineTable.ts).
+export interface LayoutClass { key: string; digest: string; checked: boolean; headline: boolean }
 
-// The class digest leaves the JMA warning name out, so only a bulletin whose own screens passed the browser check
-// (where an overflowing headline is caught) may go out on a class approval.
-export interface CheckReport { outcome?: string; verifier?: string; layout_digest?: string; browser_skipped?: string[] }
+// The class digest leaves the headline out, so only a bulletin whose own screens passed the browser check (where an
+// overflowing headline is caught) and whose headline is shown to be the table's may go out on a class approval.
+export interface CheckReport { outcome?: string; verifier?: string; layout_digest?: string; browser_skipped?: string[]; headline_table?: HeadlineCheck }
 
 export function passedBrowserCheck(report: CheckReport | undefined, layoutDigestNow: string): boolean {
   return report?.outcome === 'pass' && /browser|vision/.test(report.verifier ?? '') && !report.browser_skipped?.length && report.layout_digest === layoutDigestNow
@@ -140,7 +143,7 @@ export function approvalWith(
   if (state.approved) return { ...state, by: 'bulletin' }
   const revoked = record?.approved === false
   const byClass = cls && approvals.classes?.[classKey(site, cls.key)]
-  if (cls?.checked && classApprovable(cls.key) && !revoked && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
+  if (cls?.checked && cls.headline && classApprovable(cls.key) && !revoked && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
   return { ...state, by: null }
 }
 

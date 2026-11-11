@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { LAYOUTS_DIR, REPORTS_DIR, REPO_ROOT } from "../paths.js";
 import { layoutDigestOf } from "../delivery/gate.js";
+import { headlineTables } from "../composer/headline.js";
+import { headlineTableVersion } from "../../../app/layout/headlineTable";
 import type { LoopResult } from "./loop.js";
 
 export { LAYOUTS_DIR, REPORTS_DIR };
@@ -17,6 +19,9 @@ export function writeReport(args: { siteId: string; municipalityId: string; bull
     fs.writeFileSync(file, JSON.stringify(s, null, 2) + "\n");
     return path.relative(REPO_ROOT, file);
   });
+  const layoutDigest = layouts.length ? layoutDigestOf(layoutDir) : undefined;
+  const headlineChecked = layoutDigest && args.result.outcome === "pass" && args.result.headline_shapes
+    && args.result.screens.every((s) => args.result.headline_shapes!.includes(s.shape));
   const report = {
     kind: "evac-loop-report",
     version: "0.1",
@@ -31,7 +36,8 @@ export function writeReport(args: { siteId: string; municipalityId: string; bull
     ...(args.result.reason ? { reason: args.result.reason } : {}),
     attempts: args.result.attempts,
     layouts,
-    ...(layouts.length ? { layout_digest: layoutDigestOf(layoutDir) } : {}),
+    ...(layoutDigest ? { layout_digest: layoutDigest } : {}),
+    ...(headlineChecked ? { headline_table: { ok: true, table_version: headlineTableVersion(headlineTables()), layout_digest: layoutDigest, shapes: args.result.screens.map((s) => s.shape) } } : {}),
     browser_skipped: (args.skippedShapes ?? []).filter((shape) => args.result.screens.some((s) => s.shape === shape)),
   };
   fs.writeFileSync(path.join(dir, "report.json"), JSON.stringify(report, null, 2) + "\n");

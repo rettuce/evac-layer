@@ -19,7 +19,7 @@ async function liveStatus(site: SiteFile, t: unknown): Promise<ReplayStatus> {
   const name = index?.name ?? site.name ?? ''
   const base = { municipality: site.municipality_id, name, window: {}, speed: LIVE_SPEED }
   if (!state?.bulletin_id) return { ...base, rows: [], elapsedMs: 0, index: -1 }
-  const bulletin = (await firstDeliverable(state, (id) => isDeliverable(site.id, id))) ?? state.bulletin_id
+  const bulletin = (await firstDeliverable(state, (id) => isLiveDeliverable(site.id, id))) ?? state.bulletin_id
   if (isSyntheticBulletinId(bulletin)) return { ...base, rows: [], elapsedMs: 0, index: -1 }
   const known = index?.entries.find((entry) => entry.bulletin_id === bulletin)
   const row: ReplayRow = { raw_title: '', municipality_level: null, ...known, bulletin_id: bulletin, issued_at: state.updated_at, screen: true }

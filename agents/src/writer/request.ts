@@ -1,4 +1,5 @@
 import type { Alert } from "../jma/parse.js";
+import { DRILL_WORD } from "../composer/headline.js";
 import { EASY_JA_RULES, EASY_JA_SOURCE, SIGNAGE_CONVENTIONS_JA } from "./rules.js";
 
 export type CellRole = "headline" | "action" | "direction" | "shelter" | "languages" | "hazard";
@@ -21,7 +22,7 @@ export const WRITER_OUTPUT_SCHEMA = {
         additionalProperties: false,
         required: ["role", "text", "basis"],
         properties: {
-          role: { enum: ["headline", "action", "direction", "shelter", "languages", "hazard"] },
+          role: { enum: ["action", "languages"] },
           text: {
             type: "object",
             additionalProperties: false,
@@ -44,8 +45,8 @@ export function writerSystem(): string {
     ...SIGNAGE_CONVENTIONS_JA.map((c) => `- ${c}`),
     "en・zh_hans・zh_hant・ko・th・vi・fil・id は ja の内容を同じ情報量で訳します。固有名詞（施設名・地名）はその言語の文字で転写し、日本語の文字を混ぜません。",
     "th はタイ文字だけで書き、分かち書きをしません（数字・記号は可）。vi はベトナム語の声調記号・ダイアクリティカルを必ず付けます。fil はフィリピン語（Filipino）の表記で書きます。id は標準インドネシア語（bahasa Indonesia baku）で書きます。",
-    "alert.status が drill（気象庁の訓練電文）のときは、headline の全言語と、action（＝languages）の ja 以外の全言語を、訓練語で始めます。訓練語は必ず文の先頭に置き、後ろや括弧には置きません: ja_easy「くんれん 」、en「DRILL: 」、zh_hans「演习：」、zh_hant「演習：」、ko「훈련: 」、th「ฝึกซ้อม: 」、vi「Diễn tập: 」、fil「Pagsasanay: 」、id「Latihan: 」。ja の action には入れません（ja は見出しの【訓練】で示し、字数予算が小さいため）。",
-    "津波の警報名の英語は気象庁の公式表記を使います: 大津波警報 = Major Tsunami Warning、津波警報 = Tsunami Warning、津波注意報 = Tsunami Advisory。",
+    `alert.status が drill（気象庁の訓練電文）のときは、action（＝languages）の ja 以外の全言語を、訓練語で始めます。訓練語は必ず文の先頭に置き、後ろや括弧には置きません: ${Object.entries(DRILL_WORD).map(([lang, word]) => `${lang}「${word}」`).join("、")}。ja の action には入れません（ja は見出しの【訓練】で示し、字数予算が小さいため）。`,
+    "見出し（headline）は書きません。見出しは気象庁の警報名と、気象庁「多言語辞書」の対訳でコードが組みます。",
     "解除の action は、各言語で『もう避難しなくてよい／安全になった』の意味を残します。『終わった』『完了』だけの語（例: fil Tapos na、id Selesai）にはしません。",
     "basis には、その文の根拠（警報のどの項目か、知識ファイルのどの項目と出典ページか）を書きます。",
   ].join("\n");
@@ -57,10 +58,23 @@ export function writerMunicipalityBlock(municipality: unknown): string {
   return ["## 自治体知識ファイル（municipality.schema.json）", JSON.stringify(municipality, null, 2)].join("\n\n");
 }
 
-export function writerAlertBlock(alert: Alert, budgets: CellBudget[]): string {
-  return ["## 警報（alert.schema.json）", JSON.stringify(alert, null, 2), "## 書くセルと文字数予算", JSON.stringify(budgets, null, 2)].join("\n\n");
+// What the Writer is told about the bulletin: only what its wording may be reused by (the Writer match without the
+// warning). The warning name, Head/Title, free text, bulletin id and issue time stay out, so the wording does not depend
+// on which warning of the class it is, and a record written from this is marked blind.
+export interface BlindBulletin {
+  hazard: Alert["hazard"];
+  status: Alert["status"];
+  template: string;
+  display_level: number;
+  cleared: boolean;
+  caution?: string;
+  river?: string;
 }
 
-export function writerUser(alert: Alert, municipality: unknown, budgets: CellBudget[]): string {
-  return [writerMunicipalityBlock(municipality), writerAlertBlock(alert, budgets)].join("\n\n");
+export function writerAlertBlock(bulletin: BlindBulletin, budgets: CellBudget[]): string {
+  return ["## 電文（警報の種類・レベル・状態。警報名と電文の本文は渡さない）", JSON.stringify(bulletin, null, 2), "## 書くセルと文字数予算", JSON.stringify(budgets, null, 2)].join("\n\n");
+}
+
+export function writerUser(bulletin: BlindBulletin, municipality: unknown, budgets: CellBudget[]): string {
+  return [writerMunicipalityBlock(municipality), writerAlertBlock(bulletin, budgets)].join("\n\n");
 }

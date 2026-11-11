@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { headlineTables } from "../composer/headline.js";
 import { situationFor } from "../composer/rules.js";
 import { replayEntry } from "../jma/replay.js";
 import { classListing, prefectureOf, type ClassListing, type SyntheticPlan } from "../jma/synthetic-classes.js";
@@ -27,6 +28,7 @@ export interface GenerationRow {
 export interface Generation { site: string; municipality: string; generated_at: string; verifier: string; writer: string; classes: GenerationRow[] }
 
 export const PLACEHOLDER_REASON = "placeholder wording ([draft]): compose again with --writer live, or once the class has wording, before approving";
+export const UNREVIEWED_REASON = "the ja_easy headline table (data/jma/warning-names-ja-easy.json) is not reviewed: approving this bulletin writes its class approval, but the class approval opens no screen until the table is marked reviewed";
 
 export function generationExitCode(rows: readonly GenerationRow[]): number {
   return rows.some((r) => r.outcome === "stopped" || r.outcome === "fail" || r.outcome === "error") ? 1 : 0;
@@ -63,12 +65,13 @@ async function generateClass(plan: SyntheticPlan, args: {
     ...(composed.reason ? [composed.reason] : []),
     ...(composed.row.reason && composed.row.reason !== composed.reason ? [String(composed.row.reason)] : []),
     ...(writerSource === "placeholder" ? [PLACEHOLDER_REASON] : []),
+    ...(composed.outcome === "pass" && !headlineTables().easy.reviewed ? [UNREVIEWED_REASON] : []),
   ];
   const record = cachedWriterRecord(municipality.id, bulletinId);
   if (composed.outcome === "pass" && writerSource !== "placeholder" && record?.match) {
     saveWriterForClass(municipality.id, plan.cls, {
       model: record.model, output: record.output, bulletin_id: bulletinId, issued_at: entry.alert.issued_at, raw_title: entry.alert.raw_title, status: entry.alert.status,
-      ...(record.match.caution ? { caution: record.match.caution } : {}), match: record.match,
+      ...(record.match.caution ? { caution: record.match.caution } : {}), match: record.match, ...(record.blind ? { blind: true as const } : {}),
     });
   }
   return {

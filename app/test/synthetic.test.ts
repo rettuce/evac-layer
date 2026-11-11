@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict'
 import type { ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { after, before, describe, test } from 'node:test'
 import { layoutDigest } from '../layout/gate.ts'
+import { type HeadlineTables, headlineFromTables, headlineTableVersion } from '../layout/headlineTable.ts'
 import { REPO_ROOT, SERVER_ENTRY, postJson, startServer } from './helpers.ts'
 
 const SITE = '15205-demo'
@@ -15,24 +16,41 @@ const SYN = 'SYN-VPWW56-202411020800-314b561ca69f'
 
 const skip = !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first'
 
-async function writeScreens(dataDir: string, site: string, bulletin: string, from: string): Promise<void> {
+// A class approval opens only screens whose headline is shown to be the JMA dictionary table's, so the copies carry the
+// table's headline and a report of that check, against a reviewed copy of the tables.
+async function reviewedTables(dataDir: string): Promise<HeadlineTables> {
+  await cp(join(REPO_ROOT, 'data', 'jma'), join(dataDir, 'jma'), { recursive: true })
+  const easyFile = join(dataDir, 'jma', 'warning-names-ja-easy.json')
+  await writeFile(easyFile, JSON.stringify({ ...JSON.parse(await readFile(easyFile, 'utf8')), reviewed: true }))
+  return { names: JSON.parse(await readFile(join(dataDir, 'jma', 'warning-names.json'), 'utf8')), easy: JSON.parse(await readFile(easyFile, 'utf8')) }
+}
+
+async function writeScreens(dataDir: string, site: string, bulletin: string, from: string, tables: HeadlineTables): Promise<void> {
+  const found = headlineFromTables({ ja: 'レベル４土砂災害危険警報', name: 'レベル４土砂災害危険警報', cleared: false, drill: false }, tables)
+  if (!('text' in found)) throw new Error(found.missing)
   const source = join(REPO_ROOT, 'data', 'layouts', SITE, from)
   const dir = join(dataDir, 'layouts', site, bulletin)
   await mkdir(dir, { recursive: true })
   const files: { shape: string; body: string }[] = []
   for (const name of (await readdir(source)).filter((f) => f.endsWith('.json'))) {
     const layout = JSON.parse(await readFile(join(source, name), 'utf8'))
-    const body = `${JSON.stringify({ ...layout, alert: { ...layout.alert, bulletin_id: bulletin }, sources: layout.sources.map((s: { type: string }) => (s.type === 'jma' ? { ...s, bulletin_id: bulletin } : s)) }, null, 2)}\n`
+    const cells = layout.cells.map((c: { role: string }) => (c.role === 'headline' ? { ...c, text: found.text } : c))
+    const body = `${JSON.stringify({ ...layout, alert: { ...layout.alert, bulletin_id: bulletin }, cells, sources: layout.sources.map((s: { type: string }) => (s.type === 'jma' ? { ...s, bulletin_id: bulletin } : s)) }, null, 2)}\n`
     await writeFile(join(dir, name), body)
     files.push({ shape: name.slice(0, -5), body })
   }
   await mkdir(join(dataDir, 'reports', site, bulletin), { recursive: true })
-  await writeFile(join(dataDir, 'reports', site, bulletin, 'report.json'), JSON.stringify({ outcome: 'pass', verifier: 'static+browser(test)', layout_digest: layoutDigest(files), browser_skipped: [] }))
+  const digest = layoutDigest(files)
+  await writeFile(join(dataDir, 'reports', site, bulletin, 'report.json'), JSON.stringify({
+    outcome: 'pass', verifier: 'static+browser(test)', layout_digest: digest, browser_skipped: [],
+    headline_table: { ok: true, table_version: headlineTableVersion(tables), layout_digest: digest, shapes: files.map((f) => f.shape) },
+  }))
 }
 
 async function makeData(): Promise<string> {
   const dataDir = join(await mkdtemp(join(tmpdir(), 'evac-synthetic-')), 'data')
   await mkdir(join(dataDir, 'sites'), { recursive: true })
+  const tables = await reviewedTables(dataDir)
   const site = JSON.parse(await readFile(join(REPO_ROOT, 'data', 'sites', `${SITE}.json`), 'utf8'))
   await writeFile(join(dataDir, 'sites', `${SITE}.json`), JSON.stringify(site))
   await writeFile(join(dataDir, 'sites', `${REPLAY_SITE}.json`), JSON.stringify({ ...site, id: REPLAY_SITE, replay: { from: '2024-01-01T00:00+09:00', to: '2027-01-01T00:00+09:00', speed: 1 } }))
@@ -41,8 +59,8 @@ async function makeData(): Promise<string> {
     { issued_at: '2026-10-31T16:53:00+09:00', bulletin_id: REAL, wmo_code: 'VPWW56', raw_title: '新潟県土砂災害警報・注意報', municipality_level: 4, screen: true, template: 'evac-now', display_level: 4 },
   ]
   for (const site of [SITE, REPLAY_SITE]) {
-    await writeScreens(dataDir, site, SYN, REAL)
-    await writeScreens(dataDir, site, REAL, REAL)
+    await writeScreens(dataDir, site, SYN, REAL, tables)
+    await writeScreens(dataDir, site, REAL, REAL, tables)
     await writeFile(join(dataDir, 'layouts', site, 'index.json'), JSON.stringify({ municipality: '15205', name: '柏崎市', site, entries: rows }))
   }
   return dataDir
