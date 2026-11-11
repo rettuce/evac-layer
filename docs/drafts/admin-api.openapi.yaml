@@ -1,53 +1,103 @@
 openapi: 3.1.0
 info:
-  title: EVAC LAYER admin API for hosted installations (DRAFT, not implemented)
-  version: 0.3.0-draft.4
+  title: EVAC LAYER admin API for hosted installations (DRAFT, mostly implemented)
+  version: 0.3.0-draft.5
   description: |
-    Draft for review. Nothing in this file is implemented unless a path says "exists today".
+    Draft for review, now written against the implementation. Each path's summary says
+    "(exists today)" when the server answers it as described here. A part that is not built
+    yet starts with "Planned, not implemented:"; nothing else in this file is a plan. The
+    implementation is `app/server/api/` and `app/server/utils/`, and `app/README.md`
+    ("Sites over HTTP", "Audit", "Approval gate", "Delivery", "Access") describes it in prose.
 
-    Why: one EVAC LAYER server is going to serve many venues ("facilities"), and each
-    facility's signage system registers its own screens, has their warning screens composed,
-    approves them and reads its feed. Today the admin API has one credential for everything
-    (`NUXT_ADMIN_TOKEN`), or none on loopback. With one credential, any facility could rewrite
-    or approve the screens of every other facility. This draft makes the credential part of
-    the contract before the new paths exist.
+    Versions:
+    - draft.5 (matches tag `v0.3.0-alpha.11`): rewritten from the implementation.
+      - Errors carry their code in `data.code` (the Nitro error body), not at the top level;
+        `Problem` now has the real shape. The codes `site-busy`, `generation-disabled`
+        and `too-many-sites` are added, and `screens-changed` moves to the plans.
+      - `PUT /api/admin/sites/{site_id}`: `facing_deg` is optional. A new id of five digits
+        only is refused, and an id that differs from an existing one only in case answers
+        409 `site-id-taken`. A facility gets `site-id-taken` for a site without a
+        `facility_id`, and 409 `site-busy` is new.
+      - `DELETE /api/admin/sites/{site_id}` stops the site's generation job and exports and
+        then removes it; the planned 409 `generation-running` is gone.
+      - `Generation`: `started_at`, `error_code` (`generate-failed`, `timed-out`, `no-result`,
+        `server-restarted`, `internal-error`) with a fixed `error` text, and per class
+        `synthetic`, `reason` and `preview_error`. Starting a job: 429
+        `generation-rate-limited` for the hourly count and for unfinished jobs, 409
+        `generation-running` with `data.generation_id`, 503 `generation-disabled`. Only the
+        latest job and the one before it stay readable.
+      - `SiteState`: `needs_generation`, `last_generation`, `exports` and the stored
+        `site.location_updated_at`, as implemented. `ClassState`: `stale`, `synthetic`,
+        `unchanged` (left out until the latest job has started), `approved_via`,
+        `approved_by {token_label, mode, actor?}`, `live` and `previews` as URLs; `reason`
+        and the `no-screen` outcome are removed. A class of a drill or test bulletin
+        (`…/drill`, `…/test`) can appear in `SiteState.classes`.
+      - `POST /api/admin/class-approvals`: every skip `reason`, `bulletin_approvals_left`,
+        the 200-site limit (400 `too-many-sites`). `GET /api/admin/classes`: how
+        `total = approved + pending + blocked` is counted.
+      - `POST /api/admin/approve`: the request and answer as implemented, with `mode`,
+        `token_label` and `actor`. Approving by `class` and the code `screens-changed` stay
+        plans.
+      - The preview path and the paths that existed before this draft (catalog,
+        preview-layout, site, live, subscriptions, the feed, `GET /api/site-near`) are listed
+        with their real requests and answers.
+      - Tsunami classes are composed (only for a municipality with a tsunami forecast
+        region); flood forecasts and level 5 are not. The two "Open" questions of draft.4
+        are settled and moved into the text.
+    - draft.4: approving a class at many sites in one request, and a per-class view of a
+      facility (`GET /api/admin/classes`).
+    - draft.3: every existing admin path gets a facility rule, and any other is closed to
+      facility credentials.
+    - draft.2: revised after an integrator's review; looking a site up by coordinates only on
+      a server that holds one facility.
+    - draft.1: credentials scoped to one facility; registering sites, composing their screens
+      as a job and approving them per class.
 
-    Proposed decisions (each is open until reviewed):
+    Why: one EVAC LAYER server serves many venues ("facilities"), and each facility's
+    signage system registers its own screens, has their warning screens composed, approves
+    them and reads its feed. Before facility credentials the admin API had one credential for
+    everything (`NUXT_ADMIN_TOKEN`), or none on loopback, and any caller could rewrite or
+    approve the screens of every facility.
+
+    Decisions, all implemented:
     1. A credential belongs to one facility. A site stores the `facility_id` of the credential
        that registered it, and a credential may act on a site only when the two are equal.
-       Authorization does not depend on how a site id is spelled. The operator credential
-       (`NUXT_ADMIN_TOKEN`) may act on every site.
+       A site without `facility_id` (registered by the operator or the CLI) is the
+       operator's alone. The operator credential (`NUXT_ADMIN_TOKEN`) may act on every site.
     2. A site of another facility answers 404, the same as a site that does not exist, so a
-       facility cannot list other facilities by probing ids.
+       facility cannot list other facilities by probing ids. The one exception is
+       registering: see 409 `site-id-taken`.
     3. Registering a site is `PUT /api/admin/sites/{site_id}`: the caller chooses the id, and
-       repeating the call after a lost response is harmless. An id already taken by another
-       facility answers 409.
+       repeating the call after a lost response is harmless.
     4. Composing screens is a job: `POST` starts it and answers 202, `GET` reports progress.
        It never runs inside the request.
     5. Approval is given per screen class (`<hazard>/<template>/<level>`). See the `approval`
        tag.
     6. Preparing a municipality (reading its hazard-map PDFs into `data/municipalities/`) is
        the operator's work and is not offered over HTTP. A site in a municipality that is not
-       prepared can be registered but not composed.
+       prepared can be registered but not composed (409 `municipality-not-prepared`).
     7. Looking a site up by coordinates is for single-facility servers only. With any facility
-       credential present, `GET /api/feed?lat=&lng=` is off, and `/screen?lat=&lng=` and
-       `GET /api/site-near`, which exist today and pick the nearest site whoever registered
-       it, have to go off with it.
-    8. Every change records who made it: the label of the credential and, when the caller
-       sends one, the person behind the request (`actor`).
-    9. A facility credential is refused (403 `operator-only`) on every `/api/admin/` path that
-       has no facility rule. The check lives in the admin middleware and names the paths it
-       admits, so a path added later is closed to facilities until someone gives it a rule.
-       The paths that exist today, all of them:
+       credential present (or a token file the server cannot read), `GET /api/feed?lat=&lng=`
+       and `GET /api/site-near` answer 404 `place-lookup-disabled`, and `/screen?lat=&lng=`,
+       which uses `site-near`, shows no site.
+    8. Every change records who made it in `data/audit.jsonl`: the credential and, when the
+       caller sends one, the person behind the request (`actor`). Approvals also keep it.
+    9. A facility credential is refused (403, `data.code: operator-only`) on every
+       `/api/admin/` path that has no facility rule. The admin middleware names the paths it
+       admits (`app/server/utils/adminPolicy.ts`), so a path added later is closed to
+       facilities until someone gives it a rule. All admin paths:
 
        | Path | Facility credential |
        |---|---|
        | `GET /api/admin/catalog` | its own sites only |
        | `POST /api/admin/approve` | `site_id` of its own facility; no `municipality` alias |
        | `POST /api/admin/site` | `site_id` of its own facility |
-       | `GET /api/admin/classes` (new) | its own facility only |
-       | `POST /api/admin/class-approvals` (new) | sites of its own facility; any other id in `site_ids` is skipped as `not-found` |
-       | `/api/admin/sites...` (new, below) | sites of its own facility |
+       | `GET /api/admin/classes` | its own facility, whatever `facility_id` it sends |
+       | `POST /api/admin/class-approvals` | sites of its own facility; any other id in `site_ids` is skipped as `not-found` |
+       | `GET /api/admin/sites` | its own sites; `facility_id` is ignored |
+       | `GET`, `PUT`, `DELETE /api/admin/sites/{site_id}` | a site of its own facility (`PUT` may also create one) |
+       | `POST /api/admin/sites/{site_id}/generations`, `GET …/generations/{generation_id}` | a site of its own facility |
+       | `GET /api/admin/sites/{site_id}/previews/{bulletin_id}/{shape}.png` | a site of its own facility |
        | `GET /api/admin/preview-layout` | `site` of its own facility; no `municipality` alias |
        | `GET /api/admin/subscriptions` | `site` required, of its own facility |
        | `POST /api/admin/subscriptions` | `site_id` of its own facility |
@@ -57,19 +107,11 @@ info:
        A request that names no site where the rule needs one answers 400 for a facility
        credential, never "all sites".
 
-    Open, and each blocks part of the implementation:
-    - `facing_deg` is required by `schema/site.schema.json`, and a signage system that does
-      not know which way its viewers face cannot register a site without inventing one, which
-      would point the arrow the wrong way. Whether a site may omit it (and the screen then
-      shows a north-up map and a compass word instead of an arrow) is a separate request that
-      has to be decided before `PUT /api/admin/sites/{site_id}` is useful to such a system.
-    - Where the bulletins of each class come from. `pnpm -F agents fanout` composes today
-      from a recorded feed, which only holds the classes that happened to be issued for the
-      municipality while it was recorded, and `data/samples/` lists official JMA sample
-      bulletins for two municipalities. The direction preferred so far: compose each class
-      from an official JMA sample bulletin with the municipality code and name replaced.
-      Such a bulletin is marked as synthetic, is used for composing, preview and class
-      approval only, and can never become the live bulletin of a site.
+    Errors. Most paths answer an error as `Problem`, with what a caller branches on in
+    `data.code`. The paths that existed before this draft (`approve`, `site`, `live`,
+    `subscriptions`, `preview-layout`, `GET /api/feed/{site_id}`, and 400 of
+    `GET /api/site-near`) answer the same body without `data`, so only the status tells
+    their errors apart. Planned, not implemented: `data.code` on those paths as well.
   license:
     name: AGPL-3.0-only
     identifier: AGPL-3.0-only
@@ -81,48 +123,70 @@ security:
 tags:
   - name: sites
   - name: generations
+    description: |
+      A job composes, verifies in a browser and writes the screens of a site for every class
+      the agents can compose for its municipality (`agents/src/jma/synthetic-classes.ts`):
+      heavy rain and landslide at levels 3 and 4 and their all-clear, and, for a
+      municipality with a tsunami forecast region, the tsunami advisory, warning, major
+      warning and all-clear (`tsunami/evac-now/2`, `/3`, `/4`, `tsunami/all-clear/1`). Flood
+      forecasts and level 5 special warnings are listed in the job with outcome
+      `unsupported` and are not composed.
+
+      A class is composed from a synthetic bulletin: an official JMA sample bulletin with the
+      municipality code and name replaced. Its id starts with `SYN-`. Its screens are for
+      preview and class approval only: it is never a site's live bulletin, the feed never
+      shows it, and `POST /api/admin/live` refuses it.
   - name: approval
     description: |
-      A class is `<hazard>/<template>/<level>`, the key `data/approvals.json` uses today.
+      A class is `<hazard>/<template>/<level>`, the key `data/approvals.json` uses. A drill or
+      test bulletin has a class of its own (`<hazard>/<template>/<level>/drill` or `/test`)
+      that is never approved as a class: such bulletins are approved one by one.
 
       Approving a class means: the screens composed for it at this site were looked at and
-      may go out, and a later real bulletin of the same class goes out without a new approval
-      when its screens are the same apart from the JMA warning name, the bulletin id and the
-      issue time, and they passed the browser check. This is the rule the feed applies today
-      (`app/layout/gate.ts`). A real bulletin whose screens differ in anything else (another
-      shelter after the site moved, another text) does not go out on the class approval and
-      waits for an approval of its own.
+      may go out, and a later real bulletin of the same class goes out without a new
+      approval when its screens are the same apart from the JMA warning name (the headline),
+      the source line and the bulletin id, its own screens passed the browser check of every
+      shape, the headline is shown to be the JMA dictionary table's and the ja_easy table is
+      reviewed (`app/layout/gate.ts`, `app/layout/headlineTable.ts`). A real bulletin whose
+      screens differ in anything else (another shelter after the site moved, another text)
+      does not go out on the class approval and waits for an approval of its own.
 
-      Today an approval is posted for a bulletin and the server records the class approval
-      with it (`approved_from` names the bulletin). The draft adds the class as a way to
-      address the same approval, so a caller does not have to know which bulletin stands for
-      a class. Approving a single bulletin stays, for the real bulletin that the class
-      approval did not cover.
+      There are two ways to approve. `POST /api/admin/approve` approves one bulletin; unless
+      it is a drill or test bulletin, that also records the class approval, with
+      `approved_from` naming the bulletin. `POST /api/admin/class-approvals` records only the
+      class approval, at many sites at once.
 
-      An approval is bound to the digest of the layout files. Composing again leaves the
-      approval in place for a class whose screens came out byte-identical (`unchanged`) and
-      makes the others wait for a new approval.
+      An approval is bound to digests of the layout files: a bulletin approval to the layout
+      digest, a class approval to the class digest (the layout files without the warning
+      name, source line and bulletin id). Composing again keeps an approval for a class
+      whose screens came out the same (`ClassState.unchanged`), and the others wait for a
+      new approval.
+
       Approving in bulk. What a person decides is whether this kind of guidance goes out at
       all; between two sites of one facility the screens of a class differ only in the
       shelter, distance and direction the Composer computed for each place, and not every
       facility can look at every screen. So a class can be approved for all sites of a
       facility, or some of them, in one request. Each approval is still recorded per site
-      and bound to that site's layout digest, so a site whose screens are composed again and
-      come out different waits for a new approval. Only screens that passed the browser
-      check can be approved, in bulk or one by one; in bulk the check is the only thing that
-      looked at them. Every approval records its `mode`: `reviewed` when the caller sent the
-      digest of the screens a person looked at, `bulk` when it did not.
+      and bound to that site's class digest. In bulk the browser check is the only thing
+      that looked at the screens, so only screens that passed it, of the site's present
+      place, with the headline evidence and with wording known to be real are approved.
+      Every approval records its `mode`: `reviewed` when the caller sent the digest of the
+      screens a person looked at, `bulk` when it did not.
   - name: feed
+  - name: delivery
 paths:
   /api/admin/sites:
     get:
       tags: [sites]
-      summary: The sites of the caller's facility
-      description: For the operator credential, every site; `facility_id` narrows it.
+      summary: The sites of the caller's facility (exists today)
+      description: |
+        For a facility credential, its own sites. For the operator credential, every site;
+        `facility_id` narrows it. Sites whose state changed hands while being read are left
+        out.
       parameters:
         - name: facility_id
           in: query
-          description: Operator credential only.
+          description: Operator credential only; a facility credential's is ignored.
           schema:
             $ref: '#/components/schemas/FacilityId'
       responses:
@@ -138,6 +202,8 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/SiteState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
   /api/admin/sites/{site_id}:
@@ -145,15 +211,31 @@ paths:
       - $ref: '#/components/parameters/SiteId'
     put:
       tags: [sites]
-      summary: Register a site or update its place
+      summary: Register a site or update its place (exists today)
       description: |
-        Writes `data/sites/<site_id>.json` with the caller's `facility_id`. `municipality_id`
-        is taken from the GSI reverse geocoder unless given. The call is idempotent: the same
-        body twice leaves one site.
+        Writes `data/sites/<site_id>.json`. A site created with a facility credential carries
+        its `facility_id`; one created by the operator has none (the CLI
+        `pnpm -F agents site --facility` assigns it). An existing site keeps its
+        `facility_id`.
 
-        Moving a site does not touch its screens or approvals. `needs_generation` tells the
-        caller that the place changed since the screens were composed; after the next job the
+        `municipality_id` is taken from the GSI reverse geocoder unless given; a given code
+        that differs from the geocoder's is kept and reported in `warnings`. The geocoder is
+        not asked when `lat` and `lng` equal the stored ones. The same body twice changes
+        nothing.
+
+        The body replaces the place as a whole: a body without `facing_deg` removes a stored
+        one, and the screens then show a north-fixed compass arrow. `name` (and the
+        file-only `note` and `replay`) are kept when the body leaves them out. A change of
+        `lat`, `lng`, `facing_deg` (gaining or losing it included) or `municipality_id`
+        stamps `site.location_updated_at`.
+
+        Moving a site does not touch its screens or approvals. The screens composed for the
+        old place become `stale`, `needs_generation` turns true, and after the next job the
         classes whose screens came out the same keep their approval.
+
+        Registering an id that has no site file removes whatever is still stored under it
+        (approvals, screens, live state, exports, webhook registrations), so a new site never
+        starts with an earlier one's approvals.
       requestBody:
         required: true
         content:
@@ -174,15 +256,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/SiteState'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: |
+            `invalid-request`: the body does not validate, the id is not 3-64 of `a-z 0-9 -`
+            (not starting with `-`), a new id is five digits only (it would read as a
+            municipality code in an old approval key), or the point lies in no municipality
+            (at sea, outside Japan) and no `municipality_id` was given.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '409':
           description: |
-            `site-id-taken`: the id belongs to a site the caller may not act on. This is the
-            one place where the existence of another facility's site shows; the alternative,
-            404 on a PUT, would leave the caller unable to tell why it can never create the id.
-            The body carries `code` and `message` only and never says whose site it is.
+            `site-id-taken`: the id belongs to a site the caller may not act on (another
+            facility's, or one without `facility_id` when the caller is a facility), or
+            differs from an existing site's id only in case. This is the one place where the
+            existence of another facility's site shows; 404 on a PUT would leave the caller
+            unable to tell why it can never create the id. The body never says whose site it
+            is.
+
+            `site-busy`: a process left by an earlier site of the same id (a generation job
+            that could not be stopped) is still running; register the id again once it has
+            ended. Only the operator and the facility that owned the earlier site are told
+            this; any other facility gets `site-id-taken`.
           content:
             application/json:
               schema:
@@ -195,7 +292,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
     get:
       tags: [sites]
-      summary: Read a site and where its screens stand
+      summary: Read a site and where its screens stand (exists today)
       responses:
         '200':
           description: The site.
@@ -209,46 +306,58 @@ paths:
           $ref: '#/components/responses/NotFound'
     delete:
       tags: [sites]
-      summary: Remove a site
+      summary: Remove a site (exists today)
       description: |
-        For a display that was taken down or a facility that ended. Removes the site file, its
-        screens, reports, approvals, live state, exported files and webhook registrations.
+        For a display that was taken down or a facility that ended. A queued generation job
+        of the site never runs and a running one is stopped (its whole process group), and
+        exports and webhook retries of the site stop; then the site's screens, reports,
+        approvals, live, receiver, export and notice state, exported files, previews, job
+        records and webhook registrations are removed, and the site file last. There is no
+        409: a job never blocks the removal.
+
         Its feed answers 404 from then on, so receivers must stop polling it first or treat
         404 as "no alert". Not reversible; registering the id again starts with no screens
-        and no approvals.
+        and no approvals. A process that could not be stopped keeps the id from being
+        registered again until it ends (409 `site-busy` on the PUT).
       parameters:
         - $ref: '#/components/parameters/ActorId'
         - $ref: '#/components/parameters/ActorName'
       responses:
         '204':
           description: Removed.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          description: '`generation-running`: a job of the site is queued or running.'
+        '400':
+          description: '`invalid-request`: a malformed actor header.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/admin/sites/{site_id}/generations:
     parameters:
       - $ref: '#/components/parameters/SiteId'
     post:
       tags: [generations]
-      summary: Compose the warning screens of a site
+      summary: Compose the warning screens of a site (exists today)
       description: |
-        Starts one job that composes, verifies in a browser and writes the screens of the site
-        for every class the municipality can receive, and renders a preview PNG of each shape,
-        so that a new site has every class to look at and approve before its first real
-        warning. See "Open" in the introduction for where the bulletins come from.
+        Queues one job that composes, verifies in a browser and writes the screens of the
+        site for every class it can compose (see the `generations` tag), then renders a
+        preview PNG of every shape of each class that passed, so that a new site has every
+        class to look at and approve before its first real warning.
 
-        One job per site at a time. Composing calls the Writer once per class that has no
-        cached text for the municipality, which costs API usage on the operator's account, so
-        the server limits how many jobs a facility may start per hour, counted over all its
-        sites.
+        Jobs run one at a time over all sites, in the order they came. A job has 90 minutes
+        for composing and previews together.
+
+        Composing calls the Writer once per class that has no cached text for the
+        municipality, which costs API usage on the operator's account. A facility may start
+        6 jobs an hour, counted over all its sites, and have 2 unfinished at a time; the
+        operator 6 an hour per site. The counts are kept in the server process (they start
+        again after a restart) and the server's settings `NUXT_GENERATIONS_PER_HOUR` and
+        `NUXT_GENERATION_OPEN_JOBS_PER_FACILITY` change them.
       requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -259,31 +368,48 @@ paths:
                   $ref: '#/components/schemas/Actor'
       responses:
         '202':
-          description: The job was queued.
+          description: The job was queued (`status` `queued`, `classes` empty).
           headers:
             Location:
-              description: URL of the job.
+              description: '`/api/admin/sites/<site_id>/generations/<generation_id>`'
               schema:
                 type: string
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Generation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
           description: |
-            `generation-running`: the site already has a job that is queued or running (its id
-            is in `generation_id`). `municipality-not-prepared`: the operator has not prepared
-            the municipality yet.
+            `generation-running`: the site already has a job queued or running (its id is in
+            `data.generation_id`), or a process left by an earlier job of the site is still
+            running (`data.generation_id` names that job when it is known).
+            `municipality-not-prepared`: the operator has not prepared the municipality yet.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
         '429':
-          description: '`generation-rate-limited`: the facility started jobs too often. `Retry-After` says when to try again.'
+          description: |
+            `generation-rate-limited`: the caller started 6 jobs within the last hour, or has
+            2 unfinished. `Retry-After` gives the seconds to wait (60 for unfinished jobs).
+            This body is written by the handler and has no `error` and `url`.
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          description: '`generation-disabled`: composing is switched off on this server (`NUXT_GENERATE_COMMAND=off`).'
           content:
             application/json:
               schema:
@@ -294,13 +420,18 @@ paths:
       - name: generation_id
         in: path
         required: true
+        description: Ids are 16 hex digits; anything not matching the pattern answers 404.
         schema:
           type: string
           pattern: '^[a-z0-9]{8,32}$'
     get:
       tags: [generations]
-      summary: Progress and result of one job
-      description: Poll every few seconds. A finished job stays readable for at least a day.
+      summary: Progress and result of one job (exists today)
+      description: |
+        Poll every few seconds: `queued` → `running` → `done` or `failed`. The latest job of
+        the site and the one before it stay readable; an older one answers 404. A job left
+        `queued` or `running` by a server that stopped reads as `failed` with `error_code`
+        `server-restarted`.
       responses:
         '200':
           description: The job.
@@ -315,11 +446,7 @@ paths:
   /api/admin/sites/{site_id}/previews/{bulletin_id}/{shape}.png:
     parameters:
       - $ref: '#/components/parameters/SiteId'
-      - name: bulletin_id
-        in: path
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/BulletinId'
       - name: shape
         in: path
         required: true
@@ -327,16 +454,26 @@ paths:
           $ref: '#/components/schemas/Shape'
     get:
       tags: [approval]
-      summary: A screen as it would be shown, before it is approved
+      summary: A screen as it would be shown, before it is approved (exists today)
       description: |
-        The PNG the last job rendered for this bulletin and shape, at the shape's base
-        resolution. Needs the credential, because an unapproved screen is not public: the
-        caller's server fetches it and shows it to the person who approves. The `ETag` is the
-        layout digest, so the image a person looked at can be tied to the `digest` sent with
-        the approval.
+        The PNG a job rendered for this bulletin and shape, served only while the layout
+        digest it was rendered from is still the bulletin's; otherwise 404. Needs the
+        credential, because an unapproved screen is not public: the caller's server fetches
+        it and shows it to the person who approves. `ClassState.previews` gives the URL of
+        each shape that has a current PNG. Synthetic and real bulletins alike; a preview is
+        never used for delivery.
       responses:
         '200':
           description: The image.
+          headers:
+            ETag:
+              description: The layout digest in quotes (`"sha256:…"`), so the image a person looked at can be tied to the `digest` sent with the approval.
+              schema:
+                type: string
+            Cache-Control:
+              description: '`no-store`'
+              schema:
+                type: string
           content:
             image/png: {}
         '401':
@@ -346,19 +483,20 @@ paths:
   /api/admin/classes:
     get:
       tags: [approval]
-      summary: The classes of the caller's facility, with every site's state
+      summary: The classes of a facility, with every site's state (exists today)
       description: |
         One request draws a management screen: one row per class, and under it the sites.
-        For the operator credential `facility_id` is required.
+        Drill and test classes are left out. For the operator credential `facility_id` is
+        required; a facility credential gets its own facility whatever it sends.
       parameters:
         - name: facility_id
           in: query
-          description: Operator credential only.
+          description: Required with the operator credential.
           schema:
             $ref: '#/components/schemas/FacilityId'
       responses:
         '200':
-          description: The classes.
+          description: The classes, sorted by class.
           content:
             application/json:
               schema:
@@ -376,13 +514,26 @@ paths:
   /api/admin/class-approvals:
     post:
       tags: [approval]
-      summary: Approve or revoke a class for many sites at once
+      summary: Approve or revoke a class for many sites at once (exists today)
       description: |
-        Approves the class at every site of the caller's facility, or at the sites named in
-        `site_ids`. A site is skipped, and the others still approved, when its screens of the
-        class did not pass the browser check, when it has no screens of the class, or when it
-        is not a site of the caller's facility (reported as `not-found`, like anywhere else).
-        The answer says what happened at each site. Approvals made here have `mode: bulk`.
+        Approves (`approved: true`) or revokes the class at every site of the facility, or at
+        the sites named in `site_ids`. At most 200 sites per request; a larger facility is
+        sent in several requests with `site_ids`. The operator credential sends
+        `facility_id`, `site_ids` or both (with both, a site outside the facility is skipped
+        as `not-found`).
+
+        Approving writes only the class approval (`mode: bulk`), never a bulletin approval.
+        The same class approval already in place is left as it is, so a `reviewed` approval
+        does not turn into `bulk`. Each site is judged, then read and judged again under the
+        site's lock, and written only when the same bulletin and screens still stand for the
+        class (`changed` otherwise). The site's exports are then requested.
+
+        Revoking sets the site's class approval to not approved, whichever bulletin it was
+        approved from, and leaves bulletin approvals alone: `bulletin_approvals_left` lists
+        the real bulletins of the class whose own approval still lets them out.
+
+        A site is skipped, and the others still processed, for the reasons in
+        `ClassApprovalResult.reason`. The answer says what happened at each site.
 
         The class goes in the body and not in the path because a class key contains slashes.
       requestBody:
@@ -400,16 +551,19 @@ paths:
                   type: boolean
                 site_ids:
                   type: array
+                  minItems: 1
+                  maxItems: 200
                   items:
                     type: string
-                  description: Omit for every site of the facility.
+                    pattern: '^[A-Za-z0-9_-]{1,80}$'
+                  description: Omit for every site of the facility. Counted before duplicates are dropped.
                 facility_id:
                   $ref: '#/components/schemas/FacilityId'
                 actor:
                   $ref: '#/components/schemas/Actor'
       responses:
         '200':
-          description: What happened at each site.
+          description: What happened at each site, in the order of `site_ids` (or of site id).
           content:
             application/json:
               schema:
@@ -421,74 +575,71 @@ paths:
                   results:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      required: [site_id, result]
-                      properties:
-                        site_id:
-                          type: string
-                        result:
-                          enum: [approved, revoked, skipped]
-                        reason:
-                          enum: [not-passed, no-screens, not-found]
-                          description: Why the site was skipped.
-                        state:
-                          $ref: '#/components/schemas/ClassState'
+                      $ref: '#/components/schemas/ClassApprovalResult'
         '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-  /api/admin/catalog:
-    get:
-      tags: [approval]
-      summary: Screens and their approval state (exists today; to be limited to the caller's facility)
-      description: |
-        Exists today and returns every site with one entry per bulletin. With facility
-        credentials it returns only the caller's sites. The per-class view a management screen
-        needs is `SiteState.classes`.
-      responses:
-        '200':
-          description: See `app/server/api/admin/catalog.get.ts`.
+          description: |
+            `invalid-request`: a drill or test class, a `class` that is not
+            `<hazard>/<template>/<level>`, a malformed or empty `site_ids`, an unknown field,
+            an `actor` whose `id` or `name` holds a control character, or the operator with
+            neither `facility_id` nor `site_ids`. `too-many-sites`: more than 200 sites.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
         '401':
           $ref: '#/components/responses/Unauthorized'
   /api/admin/approve:
     post:
       tags: [approval]
-      summary: Approve or revoke a class, or one bulletin (exists today for a bulletin; to be scoped)
+      summary: Approve or revoke one bulletin at a site (exists today; approving by class is planned)
       description: |
-        Today the body is `{site_id, bulletin_id, approved, digest?}`. The draft adds `class`
-        in place of `bulletin_id`: the server approves the bulletin that stands for the class
-        in the site's last job, which records the class approval as today.
+        Approving binds the approval to the current layout files of the bulletin and, unless
+        it is a drill or test bulletin, also records the class approval with `approved_from`
+        naming the bulletin. With `digest` (`ClassState.digest`, or the `ETag` of the
+        preview) the server answers 409 when the screens were composed again since, instead
+        of approving something nobody saw. An approval with `digest` is recorded as
+        `mode: reviewed`, one without as `mode: bulk`; both record `token_label` and
+        `actor`. The site's exports are then requested.
 
-        `digest` is the layout digest the person looked at (`ClassState.digest`, or the `ETag`
-        of the preview). When the screens were composed again in the meantime the server
-        answers 409 `screens-changed` instead of approving something nobody saw. An approval
-        with `digest` is recorded as `mode: reviewed`, one without as `mode: bulk`.
+        Revoking a bulletin revokes it, every class approval given from it, and the class
+        approval of its current screens. Who revoked is recorded in the audit log only: the
+        bulletin record keeps `approved: false` and `updated_at`, and a revoked class record
+        keeps the `mode`, `token_label` and `actor` of the approval it had.
 
-        The `municipality` alias (a municipality with exactly one site) is refused for
-        facility credentials, because it names a site the caller did not choose.
+        Unknown body fields are ignored.
+
+        Planned, not implemented: `class` in place of `bulletin_id`, approving the bulletin
+        that stands for the class at the site. Today a body without a valid `bulletin_id`
+        answers 400.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              additionalProperties: false
-              required: [site_id, approved]
-              oneOf:
-                - required: [class]
-                - required: [bulletin_id]
+              required: [bulletin_id, approved]
               properties:
                 site_id:
                   type: string
+                  pattern: '^[A-Za-z0-9_-]{1,80}$'
+                  description: Required for a facility credential.
+                municipality:
+                  type: string
+                  pattern: '^\d{5}$'
+                  description: |
+                    Instead of `site_id`, a municipality with exactly one site. Refused (400)
+                    for a facility credential, because it names a site the caller did not
+                    choose.
+                bulletin_id:
+                  $ref: '#/components/schemas/BulletinId'
                 class:
                   $ref: '#/components/schemas/ClassKey'
-                bulletin_id:
-                  type: string
+                  description: Planned, not implemented. See the description.
                 approved:
                   type: boolean
                 digest:
                   type: string
+                  description: The layout digest the person looked at. Read only when approving.
                 actor:
                   $ref: '#/components/schemas/Actor'
       responses:
@@ -497,47 +648,362 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ClassState'
+                $ref: '#/components/schemas/BulletinApproval'
+        '400':
+          $ref: '#/components/responses/BadRequestPlain'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          description: '`screens-changed`: the screens are not the ones `digest` names.'
+          description: No such site, a site of another facility, or no layout files of the bulletin at the site. No `data.code`.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Problem'
-  /api/admin/site:
-    post:
+        '409':
+          description: |
+            The screens are not the ones `digest` names. No `data.code`.
+            Planned, not implemented: `data.code: screens-changed`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /api/admin/catalog:
+    get:
       tags: [approval]
-      summary: Switch auto publish of a site (exists today; to be scoped)
-      description: Today the body is `{site_id, auto_publish}`. The draft adds the optional `actor`.
+      summary: Screens and their approval state, one entry per bulletin (exists today)
+      description: |
+        The view the bundled `/admin` page reads. With a facility credential it covers only
+        the caller's sites. A management screen built on this API reads the per-class view in
+        `SiteState.classes` or `GET /api/admin/classes` instead. Note that here
+        `approved_by` is a string (`bulletin`, `class` or null), the same thing
+        `ClassState.approved_via` says, while `ClassState.approved_by` is the approver.
       responses:
         '200':
-          description: See `app/server/api/admin/site.post.ts`.
+          description: The catalog (`app/server/api/admin/catalog.get.ts`).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [layouts, sites, approvals_file]
+                properties:
+                  layouts:
+                    type: array
+                    items:
+                      type: object
+                      description: |
+                        One site's screens: `site_id`, `municipality_id`, `name`,
+                        `writer_note`, and `entries`, one per bulletin of the site's index
+                        with `approved`, `stale`, `approved_by`, `digest`, `approved_from`
+                        (when approved through the class) and a summary of the check
+                        `report` (`outcome`, `verifier`, `attempts`, `findings`,
+                        `screens_ok`).
+                  sites:
+                    type: array
+                    items:
+                      type: object
+                      description: The stored site with `auto_publish`.
+                  approvals_file:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/admin/preview-layout:
+    get:
+      tags: [approval]
+      summary: The layout JSON of one bulletin and shape, without the approval gate (exists today)
+      description: What `/screen?src=` renders for a preview. Errors carry no `data.code`.
+      parameters:
+        - name: site
+          in: query
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]{1,80}$'
+          description: Required for a facility credential.
+        - name: municipality
+          in: query
+          schema:
+            type: string
+            pattern: '^\d{5}$'
+          description: Instead of `site`, a municipality with exactly one site; not for a facility credential.
+        - name: bulletin
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/BulletinId'
+        - name: shape
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Shape'
+      responses:
+        '200':
+          description: The layout (`schema/layout.schema.json`).
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/BadRequestPlain'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFoundPlain'
+  /api/admin/site:
+    post:
+      tags: [approval]
+      summary: Switch auto publish of a site (exists today)
+      description: |
+        Only a site with auto publish on shows approved bulletins. Switching it on requests
+        the site's missing exports. `actor` is recorded in the audit log only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [site_id, auto_publish]
+              properties:
+                site_id:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]{1,80}$'
+                auto_publish:
+                  type: boolean
+                actor:
+                  $ref: '#/components/schemas/Actor'
+      responses:
+        '200':
+          description: The setting as recorded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [auto_publish, updated_at]
+                properties:
+                  auto_publish:
+                    type: boolean
+                  updated_at:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequestPlain'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFoundPlain'
+  /api/admin/live:
+    post:
+      tags: [approval]
+      summary: Set the bulletin a live site shows (exists today; operator only)
+      description: |
+        Writes `data/live/<site_id>.json`, moving the bulletin that was live into
+        `fallback_bulletin_id`; `bulletin_id: null` clears both. The bulletin is shown only
+        when it is approved and auto publish is on. `pnpm -F agents receive` sets this
+        itself; a receiver of the operator's own only calls this path. A facility credential
+        answers 403 `operator-only`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [site_id, bulletin_id]
+              properties:
+                site_id:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]{1,80}$'
+                bulletin_id:
+                  oneOf:
+                    - $ref: '#/components/schemas/BulletinId'
+                    - type: 'null'
+      responses:
+        '200':
+          description: The live state.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [site_id, bulletin_id, fallback_bulletin_id, updated_at]
+                properties:
+                  site_id:
+                    type: string
+                  bulletin_id:
+                    type: [string, 'null']
+                  fallback_bulletin_id:
+                    type: [string, 'null']
+                  updated_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: A malformed body, or a synthetic bulletin (`SYN-`). No `data.code`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFoundPlain'
+        '409':
+          description: The site replays a recording, or the bulletin is a drill or test bulletin. No `data.code`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /api/admin/subscriptions:
+    get:
+      tags: [delivery]
+      summary: Webhook registrations, without their secrets (exists today)
+      parameters:
+        - name: site
+          in: query
+          description: Required for a facility credential.
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]{1,80}$'
+      responses:
+        '200':
+          description: The registrations.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [subscriptions]
+                properties:
+                  subscriptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/BadRequestPlain'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFoundPlain'
+    post:
+      tags: [delivery]
+      summary: Register a webhook for a site (exists today)
+      description: |
+        The server posts the feed body to `url` whenever the bulletin the site shows changes,
+        signed with `secret` (`app/README.md` "Delivery"). Targets must be http(s) and
+        resolve to public addresses unless the server allows private ones.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [site_id, url, secret]
+              properties:
+                site_id:
+                  type: string
+                  pattern: '^[A-Za-z0-9_-]{1,80}$'
+                url:
+                  type: string
+                  format: uri
+                secret:
+                  type: string
+                  minLength: 16
+                actor:
+                  $ref: '#/components/schemas/Actor'
+      responses:
+        '201':
+          description: Registered.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, site_id, url, created_at]
+                properties:
+                  id:
+                    type: string
+                  site_id:
+                    type: string
+                  url:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequestPlain'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFoundPlain'
+  /api/admin/subscriptions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      tags: [delivery]
+      summary: Remove a webhook registration (exists today)
+      parameters:
+        - $ref: '#/components/parameters/ActorId'
+        - $ref: '#/components/parameters/ActorName'
+      responses:
+        '204':
+          description: Removed.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFoundPlain'
+  /api/feed/{site_id}:
+    get:
+      tags: [feed]
+      summary: What a site shows now (exists today)
+      description: |
+        The feed (`schema/feed.schema.json`). Only approved bulletins at auto-publish sites
+        become `state: "alert"`. No credential and open CORS: a feed only ever carries
+        approved, public information.
+      security: []
+      parameters:
+        - name: site_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]{1,80}$'
+        - name: If-None-Match
+          in: header
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The feed.
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+        '304':
+          description: Unchanged since the `ETag` sent in `If-None-Match`.
+        '400':
+          $ref: '#/components/responses/BadRequestPlain'
+        '404':
+          $ref: '#/components/responses/NotFoundPlain'
   /api/feed:
     get:
       tags: [feed]
-      summary: The feed of the site at a place (single-facility servers only)
+      summary: The feed of the site at a place (exists today; single-facility servers only)
       description: |
-        Answers with the feed of the site nearest to `lat`,`lng` within 100 m, the same match
-        `/screen?lat=&lng=` and `GET /api/site-near` use today, so a receiver does not have to
-        store a site id. The body, `ETag` and `If-None-Match` behave as in
-        `GET /api/feed/{site_id}`; `Content-Location` names that URL. No credential: a feed
-        only ever carries approved, public information.
+        Answers with the feed of the site nearest to `lat`,`lng` within 100 m, so a receiver
+        does not have to store a site id. The body, `ETag` and `If-None-Match` behave as in
+        `GET /api/feed/{site_id}`; `Content-Location` names that URL. No credential.
 
         Offered only on a single-facility server. A facility chooses the coordinates of its
         own sites, so on a server that holds several facilities a nearest-site lookup would
-        let one of them place a site beside another's screen and either take over what that
-        screen's receiver shows or, under any rule that refuses contested places, stop it from
-        resolving at all. As soon as one facility credential exists the lookup answers 404
-        with `place-lookup-disabled`, and receivers use `GET /api/feed/{site_id}`: the id is
-        given to the receiver once, by the system that registered the site.
+        let one of them place a site beside another's screen and take over what that
+        screen's receiver shows. As soon as one facility credential exists (or the token file
+        cannot be read) the lookup answers 404 `place-lookup-disabled`, and receivers use
+        `GET /api/feed/{site_id}`: the id is given to the receiver once, by the system that
+        registered the site. `GET /api/site-near` (which `/screen?lat=&lng=` uses) is off in
+        the same way.
       security: []
       parameters:
         - name: lat
@@ -565,12 +1031,16 @@ paths:
             ETag:
               schema:
                 type: string
+          content:
+            application/json:
+              schema:
+                type: object
         '304':
           description: Unchanged since the `ETag` sent in `If-None-Match`.
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
-          description: '`no-site-near`: no site within 100 m. `place-lookup-disabled`: the server holds several facilities.'
+          description: '`no-site-near`: no site with a feed within 100 m. `place-lookup-disabled`: the server holds several facilities.'
           content:
             application/json:
               schema:
@@ -581,18 +1051,27 @@ components:
       type: http
       scheme: bearer
       description: |
-        `Authorization: Bearer <token>`. One token per facility, held by that facility's
-        signage server. The EVAC LAYER server keeps, per token, a SHA-256 of the token, a
-        label, the `facility_id` and an optional `expires_at` (`data/tokens.json`, mode 600).
-        Tokens are issued, listed and revoked by an operator CLI and are never returned by the
-        API. `NUXT_ADMIN_TOKEN` stays as the operator credential.
+        `Authorization: Bearer <token>`, either a facility token or the operator token.
 
-        The loopback rule of today (no token set, requests from this machine are admitted)
-        stays for a single-facility installation and is switched off as soon as any facility
-        token exists.
+        Facility tokens: one or more per facility, held by that facility's signage server.
+        `pnpm -F agents tokens issue --facility <facility id> --label <text> [--expires <ISO 8601>]`
+        prints a token once; `list` and `revoke --id <id>` manage them. The server keeps, per
+        token, an id, the label, the `facility_id`, a SHA-256 of the token, `created_at` and
+        an optional `expires_at` (`data/tokens.json`, mode 600), reads the file on every
+        request (a revoked token stops at once), and never returns a token over the API.
 
-        Every call that changes something is appended to `data/audit.jsonl`: time, path,
-        site, the token's label and facility, the `actor` when given, and the outcome.
+        The operator token is `NUXT_ADMIN_TOKEN`. Without it and without facility tokens,
+        the admin API admits requests from this machine only (loopback address, a local
+        Host, not cross-site, JSON POST bodies). Any facility token switches that loopback
+        rule off; with facility tokens and no `NUXT_ADMIN_TOKEN` there is no operator, and
+        the operator-only paths admit no one. A `data/tokens.json` that cannot be read shuts
+        out facility tokens and loopback alike.
+
+        Every admin request that changes something (any method but GET, HEAD and OPTIONS) is
+        appended to `data/audit.jsonl`: `at`, `method`, `path`, `site_id` when known,
+        `principal` (`{kind: operator}` or `{kind: facility, facility_id, label}`), `actor`
+        when given, `class_approvals` counts for a bulk approval, and the answer's `status`,
+        refusals included. A request refused for want of a credential is not recorded.
   parameters:
     SiteId:
       name: site_id
@@ -601,21 +1080,32 @@ components:
       schema:
         type: string
         pattern: '^[a-z0-9][a-z0-9-]{2,63}$'
-      description: As in `schema/site.schema.json`. Free to choose; by convention `<facility>` for a facility's default place and `<facility>-<display key>` for a display with a place of its own.
+      description: |
+        As in `schema/site.schema.json`. Free to choose, but not five digits only; by
+        convention `<facility>` for a facility's default place and
+        `<facility>-<display key>` for a display with a place of its own. Paths that read a
+        site also accept an older site id (`^[A-Za-z0-9_-]{1,80}$`) of a site file written by
+        hand; `PUT` accepts only this pattern.
+    BulletinId:
+      name: bulletin_id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/BulletinId'
     ActorId:
       name: X-EvacLayer-Actor-Id
       in: header
       description: '`actor.id` for requests without a body.'
       schema:
         type: string
+        minLength: 1
         maxLength: 120
     ActorName:
       name: X-EvacLayer-Actor-Name
       in: header
-      description: '`actor.name`, percent-encoded UTF-8, for requests without a body.'
+      description: '`actor.name`, percent-encoded UTF-8, for requests without a body. Needs `X-EvacLayer-Actor-Id`.'
       schema:
         type: string
-        maxLength: 360
   responses:
     BadRequest:
       description: '`invalid-request`: the request does not validate.'
@@ -623,10 +1113,31 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Problem'
+    BadRequestPlain:
+      description: The request does not validate. No `data.code`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     Unauthorized:
-      description: No token, an unknown token or an expired one. The three are not told apart.
+      description: No token, an unknown token or an expired one. The three are not told apart. No `data.code`.
+    Forbidden:
+      description: |
+        `operator-only`: a facility credential on a path that has no facility rule. Without
+        any credential configured, a request that is not a safe local one also answers 403,
+        without `data.code`.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     NotFound:
-      description: '`not-found`: no such site, or a site of another facility. The two are not told apart.'
+      description: '`not-found`: no such site (or job, or preview), or a site of another facility. The two are not told apart.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFoundPlain:
+      description: No such site, or a site of another facility; the two are not told apart. No `data.code`.
       content:
         application/json:
           schema:
@@ -636,10 +1147,18 @@ components:
       type: string
       pattern: '^[a-z0-9][a-z0-9-]{2,63}$'
       description: The id the signage system, its management service and EVAC LAYER share for one facility.
+    BulletinId:
+      type: string
+      pattern: '^[A-Za-z0-9_-]{1,80}$'
+      description: A JMA bulletin id as stored, or a synthetic one starting with `SYN-`.
     ClassKey:
       type: string
       pattern: '^[a-z_]+/[a-z-]+/[1-5-]$'
-      description: '`<hazard>/<template>/<level>`, for example `flood/evac-now/4`.'
+      description: '`<hazard>/<template>/<level>`, for example `heavy_rain/evac-now/4`; `-` for a level the bulletin has none of. Only such a class can be approved.'
+    ScreenClass:
+      type: string
+      pattern: '^[a-z_]+/[a-z-]+/[1-5-](/(drill|test))?$'
+      description: A `ClassKey`, or the class of a drill or test bulletin (`…/drill`, `…/test`), which is never approved as a class.
     Shape:
       enum: [16x9, 9x16, 32x9, 1x1, pillar]
     Actor:
@@ -648,18 +1167,36 @@ components:
       required: [id]
       description: |
         The person behind the request, as the calling system knows them. EVAC LAYER does not
-        verify it; it is recorded beside the credential's label, which it does verify.
+        verify it; it is recorded beside the credential, which it does verify. A malformed
+        one answers 400 `invalid-request`. On `POST /api/admin/class-approvals` neither field
+        may hold a control character.
       properties:
         id:
           type: string
+          minLength: 1
           maxLength: 120
         name:
           type: string
+          minLength: 1
           maxLength: 120
+    Approver:
+      type: object
+      additionalProperties: false
+      required: [token_label, mode]
+      description: Who gave an approval. Left out for approvals recorded before this was kept.
+      properties:
+        token_label:
+          type: string
+          description: The facility token's label, or `operator` for the operator credential and loopback.
+        mode:
+          enum: [reviewed, bulk]
+          description: '`reviewed`: the approval named the digest of the screens a person looked at. `bulk`: it did not.'
+        actor:
+          $ref: '#/components/schemas/Actor'
     SiteInput:
       type: object
       additionalProperties: false
-      required: [lat, lng, facing_deg]
+      required: [lat, lng]
       properties:
         lat:
           type: number
@@ -673,24 +1210,52 @@ components:
           type: number
           minimum: 0
           maximum: 360
-          description: Compass bearing the viewer faces while reading the screen. Required today; see "Open" in the introduction.
+          description: Compass bearing the viewer faces while reading the screen (0 = north). Leave it out when the facing is not known; the screens then show a north-fixed compass arrow.
         name:
           type: string
           minLength: 1
         municipality_id:
           type: string
           pattern: '^\d{5}$'
-          description: Only to override the reverse geocoder; a mismatch is reported in `warnings`.
+          description: Only to override the reverse geocoder; a code that differs from the geocoder's is kept and reported in `warnings`.
         actor:
           $ref: '#/components/schemas/Actor'
+    Site:
+      type: object
+      description: The stored site file (`schema/site.schema.json`).
+      required: [id, municipality_id, lat, lng]
+      properties:
+        id:
+          type: string
+        municipality_id:
+          type: string
+          pattern: '^\d{5}$'
+        name:
+          type: string
+        note:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        facing_deg:
+          type: number
+        facility_id:
+          $ref: '#/components/schemas/FacilityId'
+        location_updated_at:
+          type: string
+          format: date-time
+          description: When the place last changed through the admin API. Screens composed before it were made for the old place.
+        replay:
+          type: object
+          description: Set by hand on a demo site that replays a recording; such a site is never driven live.
     SiteState:
       type: object
       additionalProperties: false
       required: [site, facility_id, auto_publish, municipality_prepared, needs_generation, classes, approved_classes, exports, warnings]
       properties:
         site:
-          description: The stored site (`schema/site.schema.json`, which gains an optional `facility_id`).
-          type: object
+          $ref: '#/components/schemas/Site'
         facility_id:
           oneOf:
             - $ref: '#/components/schemas/FacilityId'
@@ -700,20 +1265,27 @@ components:
           type: boolean
         municipality_prepared:
           type: boolean
-          description: False until the operator has prepared the site's municipality.
+          description: False until the operator has prepared the site's municipality (`data/municipalities/<code>.json`).
         needs_generation:
           type: boolean
-          description: True when the site has no screens, or its place changed after they were composed.
+          description: |
+            False while a job of the site is queued or running. Otherwise true when the site
+            has no screens, when the last finished job failed, or when a class the last job
+            could compose failed, has no screen or is `stale`. A stale class a job cannot
+            compose (flood forecasts, level 5) does not count; before any job has a result,
+            every stale class does.
         last_generation:
           $ref: '#/components/schemas/Generation'
         classes:
           type: array
+          description: One entry per class the site has screens of, sorted by class; drill and test classes included.
           items:
             $ref: '#/components/schemas/ClassState'
         approved_classes:
           type: object
           additionalProperties: false
           required: [approved, total]
+          description: '`approved` counts entries of `classes` with `approved` true, by a bulletin or a class approval; `total` is the length of `classes`.'
           properties:
             approved:
               type: integer
@@ -732,7 +1304,7 @@ components:
               type: array
               items:
                 type: string
-              description: Bulletin ids whose export is waiting or running.
+              description: Bulletin ids whose export is running.
             failed:
               type: array
               items:
@@ -744,6 +1316,7 @@ components:
                     type: string
                   reason:
                     type: string
+                    description: Cut to 300 characters, with paths, URLs and `NAME=value` pairs left out.
                   at:
                     type: string
                     format: date-time
@@ -751,52 +1324,54 @@ components:
           type: array
           items:
             type: string
+          description: Filled only in the answer to a PUT (a `municipality_id` that differs from the geocoder's); empty elsewhere.
     ClassState:
       type: object
       additionalProperties: false
-      required: [class, bulletin_id, digest, outcome, approved, previews]
+      required: [class, bulletin_id, synthetic, digest, outcome, stale, approved, live, previews]
       properties:
         class:
-          $ref: '#/components/schemas/ClassKey'
+          $ref: '#/components/schemas/ScreenClass'
         bulletin_id:
           type: string
-          description: The bulletin that stands for the class in the last job.
+          description: The bulletin that stands for the class at the site, the one the last job composed for it, or else the newest screen of the class.
         synthetic:
           type: boolean
-          description: True when that bulletin was made from a sample for composing and can never go live.
+          description: True when that bulletin was made from a sample for composing (`SYN-`) and can never go live.
         digest:
           type: string
-          description: Digest of the layout files of that bulletin; send it with the approval.
+          description: Layout digest of that bulletin's screens (`sha256:…`); send it with `POST /api/admin/approve`.
         outcome:
-          enum: [pending, pass, fail, no-screen]
-          description: Result of composing and verifying. Only `pass` can be approved.
-        reason:
-          type: string
+          enum: [pending, pass, fail]
+          description: The browser check of the screens from their report; `pending` without one. Only `pass` can be approved in bulk.
+        stale:
+          type: boolean
+          description: |
+            The screens may be of an earlier place: a job's screens when the site's
+            `municipality_id`, `lat`, `lng` or `facing_deg` differ from when that job started,
+            any other screen when its layout files are older than `site.location_updated_at`.
         unchanged:
           type: boolean
-          description: True when the digest equals the one before the last job, so an approval given earlier still holds.
+          description: |
+            The same bulletin with the same digest as when the latest job started, so an
+            approval given before it still holds. Left out while the latest job has not
+            started (and when the site has no job).
         approved:
           type: boolean
+          description: True when the screens may go out on a bulletin approval or on the class approval.
+        approved_via:
+          enum: [bulletin, class]
+          description: Which approval holds; present only while `approved`.
         approved_at:
           type: string
           format: date-time
         approved_by:
-          type: object
-          additionalProperties: false
-          required: [token_label, mode]
-          properties:
-            token_label:
-              type: string
-            mode:
-              enum: [reviewed, bulk]
-              description: '`reviewed`: the approval named the digest of the screens a person looked at. `bulk`: it did not.'
-            actor:
-              $ref: '#/components/schemas/Actor'
+          $ref: '#/components/schemas/Approver'
         live:
           type: boolean
           description: True while a bulletin of this class is the one the site is showing.
         previews:
-          description: Path of the preview PNG per shape, empty until the class has passed.
+          description: URL of the preview PNG per shape (the preview path above), for the shapes rendered from the current screens. Empty until a job rendered them.
           type: object
           additionalProperties:
             type: string
@@ -806,6 +1381,10 @@ components:
       type: object
       additionalProperties: false
       required: [class, total, approved, pending, blocked, live, sites]
+      description: |
+        `total = approved + pending + blocked.count`. A site without screens of the class is
+        not counted. Only the class approval is counted as `approved`: a site whose bulletin
+        approval alone lets the class out counts as `pending` or `blocked`.
       properties:
         class:
           $ref: '#/components/schemas/ClassKey'
@@ -814,26 +1393,28 @@ components:
           description: Sites of the facility that have screens of the class.
         approved:
           type: integer
+          description: Sites whose class approval holds for the screens that stand for the class now.
         pending:
           type: integer
-          description: Sites whose screens passed the browser check and wait for an approval.
+          description: Sites a bulk approval would approve.
         blocked:
           type: object
           additionalProperties: false
           required: [count, reasons]
-          description: Sites whose screens did not pass and cannot be approved.
+          description: Sites a bulk approval would skip, and the distinct reasons, sorted.
           properties:
             count:
               type: integer
             reasons:
               type: array
               items:
-                type: string
+                $ref: '#/components/schemas/BlockReason'
         live:
           type: boolean
           description: True while any site of the facility is showing a bulletin of the class.
         sites:
           type: array
+          description: Sorted by site id.
           items:
             type: object
             additionalProperties: false
@@ -843,10 +1424,96 @@ components:
                 type: string
               state:
                 $ref: '#/components/schemas/ClassState'
+    BlockReason:
+      enum: [not-passed, stale, headline-unchecked, draft-wording, wording-unknown]
+      description: |
+        Why a bulk approval skips the class at a site:
+        `not-passed`: the screens did not pass the browser check of every shape, or the
+        report is not of these layout files.
+        `stale`: the screens may be of an earlier place.
+        `headline-unchecked`: no evidence that the headline is the JMA dictionary table's.
+        `draft-wording`: the last Writer attempt was the placeholder text.
+        `wording-unknown`: the report names no Writer source known to be real wording.
+    ClassApprovalResult:
+      type: object
+      additionalProperties: false
+      required: [site_id, result]
+      properties:
+        site_id:
+          type: string
+        result:
+          enum: [approved, revoked, skipped]
+        reason:
+          description: |
+            Why the site was skipped: a `BlockReason`, or
+            `not-found` (no such site, a site of another facility, or with the operator's
+            `facility_id` a site outside it; also a site deleted or registered again during
+            the request), `no-screens` (no screens of the class), `changed` (another bulletin
+            or other screens stood for the class by the time of the write), and when revoking
+            `not-approved` (no class approval to revoke).
+          oneOf:
+            - $ref: '#/components/schemas/BlockReason'
+            - enum: [not-found, no-screens, changed, not-approved]
+        bulletin_approvals_left:
+          type: array
+          items:
+            type: string
+          description: When revoking, the real bulletins of the class whose own approval still lets them out. Left out when there are none.
+        state:
+          $ref: '#/components/schemas/ClassState'
+          description: The class at the site after the request. Left out for `not-found`, `no-screens`, and a site that has no screens of the class.
+    BulletinApproval:
+      type: object
+      description: |
+        The answer of `POST /api/admin/approve`. When approving: the bulletin approval with
+        `digest`, `mode`, `token_label`, `actor`, the bulletin's `class`, and
+        `class_approval` unless it is a drill or test bulletin. When revoking: `approved`
+        false, `updated_at`, and `class` when the bulletin still has screens.
+      required: [site_id, bulletin_id, approved, updated_at]
+      properties:
+        site_id:
+          type: string
+        bulletin_id:
+          type: string
+        approved:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+        digest:
+          type: string
+        mode:
+          enum: [reviewed, bulk]
+        token_label:
+          type: string
+        actor:
+          $ref: '#/components/schemas/Actor'
+        class:
+          $ref: '#/components/schemas/ScreenClass'
+        class_approval:
+          type: object
+          required: [approved, updated_at, digest, approved_from]
+          properties:
+            approved:
+              type: boolean
+            updated_at:
+              type: string
+              format: date-time
+            digest:
+              type: string
+              description: The class digest.
+            approved_from:
+              type: string
+            mode:
+              enum: [reviewed, bulk]
+            token_label:
+              type: string
+            actor:
+              $ref: '#/components/schemas/Actor'
     Generation:
       type: object
       additionalProperties: false
-      required: [generation_id, site_id, status, created_at, classes]
+      required: [generation_id, site_id, status, created_at, started_by, classes]
       properties:
         generation_id:
           type: string
@@ -854,9 +1521,14 @@ components:
           type: string
         status:
           enum: [queued, running, done, failed]
+          description: '`done` only when the command exited 0 and wrote a result for this job.'
         created_at:
           type: string
           format: date-time
+        started_at:
+          type: string
+          format: date-time
+          description: When the job began to run (it waits for the jobs before it).
         finished_at:
           type: string
           format: date-time
@@ -867,37 +1539,107 @@ components:
           properties:
             token_label:
               type: string
+              description: The facility token's label, or `operator`.
             actor:
               $ref: '#/components/schemas/Actor'
+        error_code:
+          enum: [generate-failed, timed-out, no-result, server-restarted, internal-error]
+          description: |
+            Why the whole job failed (status `failed`): the command ended with an error, the
+            job ran past 90 minutes, the command wrote no result for this job, the server
+            stopped while the job was open, or the job stopped on an error in the server.
+            The command's output goes to the server log only.
         error:
           type: string
-          description: Why the whole job failed (status `failed`).
+          description: A fixed text for `error_code`, for people.
         classes:
-          description: One entry per class, filled in as the job goes.
+          description: One entry per class, filled in when the command has finished.
           type: array
           items:
-            $ref: '#/components/schemas/ClassState'
+            $ref: '#/components/schemas/GenerationClass'
+    GenerationClass:
+      type: object
+      additionalProperties: false
+      required: [class, synthetic, outcome]
+      properties:
+        class:
+          $ref: '#/components/schemas/ClassKey'
+        bulletin_id:
+          type: string
+          description: The bulletin composed for the class; left out when none was.
+        synthetic:
+          type: boolean
+        outcome:
+          type: string
+          description: |
+            As the agents wrote it (`agents/src/loop/generation.ts`): `pass`, `fail`,
+            `stopped`, `no-screen`, `unsupported` (a class this server does not compose, such
+            as flood forecasts and level 5) or `error`. The server copies the value as it is.
+        reason:
+          type: string
+          description: Cut to 300 characters, with paths, URLs and `NAME=value` pairs left out.
+        preview_error:
+          enum: [preview-failed, timed-out, screens-changed]
+          description: Why a preview of the class could not be rendered. Does not fail the job; the next job renders it again.
+    Subscription:
+      type: object
+      required: [id, site_id, url, created_at]
+      properties:
+        id:
+          type: string
+        site_id:
+          type: string
+        url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        last_bulletin_id:
+          type: [string, 'null']
+          description: The bulletin this registration was last told of (null when the site went ambient).
+        last_delivered_at:
+          type: string
+          format: date-time
     Problem:
       type: object
-      required: [statusCode, code, message]
+      description: |
+        The JSON error body of the server (Nitro). The paths that existed before this draft
+        leave `data` out.
+      required: [statusCode, statusMessage, message]
       properties:
+        error:
+          type: boolean
+          description: Always true; left out by the 429 of `POST …/generations`.
+        url:
+          type: string
+          description: Left out by the 429 of `POST …/generations`.
         statusCode:
           type: integer
-        code:
-          enum:
-            - invalid-request
-            - not-found
-            - site-id-taken
-            - geocoder-unavailable
-            - generation-running
-            - generation-rate-limited
-            - municipality-not-prepared
-            - screens-changed
-            - no-site-near
-            - place-lookup-disabled
-            - operator-only
-          description: What a caller branches on. `message` is for people.
+        statusMessage:
+          type: string
         message:
           type: string
-        generation_id:
-          type: string
+          description: For people.
+        data:
+          type: object
+          required: [code]
+          properties:
+            code:
+              enum:
+                - invalid-request
+                - not-found
+                - site-id-taken
+                - site-busy
+                - geocoder-unavailable
+                - generation-running
+                - generation-disabled
+                - generation-rate-limited
+                - municipality-not-prepared
+                - too-many-sites
+                - no-site-near
+                - place-lookup-disabled
+                - operator-only
+              description: What a caller branches on.
+            generation_id:
+              type: string
+              description: With `generation-running`, the job that is queued or running.
