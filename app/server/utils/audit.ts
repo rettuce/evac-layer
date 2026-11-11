@@ -25,7 +25,7 @@ const ACTOR_FIELD_MAX = 120
 const AUDIT_MAX_BYTES = 10 * 1024 * 1024
 const AUDIT_KEPT_FILES = 5
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
-const SITE_PATH = /^\/api\/admin\/sites\/([^/]+)$/
+const SITE_PATH = /^\/api\/admin\/sites\/([^/]+)(?:\/|$)/
 const auditQueue = serialQueue()
 
 export function changesState(method: string): boolean {

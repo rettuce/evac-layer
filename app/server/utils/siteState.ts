@@ -1,17 +1,20 @@
 import { access, stat } from 'node:fs/promises'
 import { join } from 'node:path'
-import { type Approvals, approvalWith, classKey, layoutKey } from '~~/layout/gate'
+import { type Approvals, approvalWith, classKey, isSyntheticBulletinId, layoutKey } from '~~/layout/gate'
 import type { ReplayRow } from '~~/layout/replay'
 import type { LayoutSnapshot } from './approvals'
 import type { ExportRecords } from './exportJob'
+import type { Generation } from './generationRecord'
 
 export interface ClassState {
   class: string
   bulletin_id: string
+  synthetic: boolean
   digest: string
   outcome: 'pending' | 'pass' | 'fail'
   approved: boolean
   approved_at?: string
+  unchanged?: boolean
   live: boolean
   previews: Record<string, string>
 }
@@ -22,6 +25,7 @@ export interface SiteState {
   auto_publish: boolean
   municipality_prepared: boolean
   needs_generation: boolean
+  last_generation?: Generation
   classes: ClassState[]
   approved_classes: { approved: number; total: number }
   exports: { pending: string[]; failed: { bulletin_id: string; reason: string; at: string }[] }
@@ -56,20 +60,35 @@ function outcomeOf(snapshot: LayoutSnapshot): ClassState['outcome'] {
   return snapshot.report.outcome === 'pass' ? 'pass' : 'fail'
 }
 
-async function classStates(site: string, rows: ReplayRow[], approvals: Approvals): Promise<ClassState[]> {
+async function sortedRepresentatives(site: string) {
+  const index = await readLayoutIndex(site)
+  return [...(await representatives(site, index?.entries ?? []))].sort(([a], [b]) => a.localeCompare(b))
+}
+
+export async function classDigests(site: string): Promise<Record<string, string>> {
+  return Object.fromEntries((await sortedRepresentatives(site)).map(([cls, { snapshot }]) => [cls, snapshot.digest]))
+}
+
+export async function passingBulletins(site: string): Promise<string[]> {
+  return (await sortedRepresentatives(site)).filter(([, { snapshot }]) => outcomeOf(snapshot) === 'pass').map(([, { row }]) => row.bulletin_id)
+}
+
+async function classStates(site: string, approvals: Approvals, digestsAtLastJob: Record<string, string> | undefined): Promise<ClassState[]> {
   const liveBulletin = (await currentFeed(site))?.bulletin_id
   const liveClass = liveBulletin ? await currentClassKey(site, liveBulletin) : undefined
-  return [...(await representatives(site, rows))]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([cls, { row, snapshot }]) => ({
+  return Promise.all(
+    (await sortedRepresentatives(site)).map(async ([cls, { row, snapshot }]) => ({
       class: cls,
       bulletin_id: row.bulletin_id,
+      synthetic: isSyntheticBulletinId(row.bulletin_id),
       digest: snapshot.digest,
       outcome: outcomeOf(snapshot),
+      ...(digestsAtLastJob ? { unchanged: digestsAtLastJob[cls] === snapshot.digest } : {}),
       ...approvedAt(approvals, site, row.bulletin_id, snapshot),
       live: cls === liveClass,
-      previews: {},
-    }))
+      previews: await currentPreviews(site, row.bulletin_id, snapshot.digest),
+    })),
+  )
 }
 
 async function exportsOf(site: string): Promise<SiteState['exports']> {
@@ -80,18 +99,19 @@ async function exportsOf(site: string): Promise<SiteState['exports']> {
   }
 }
 
-// The index is rewritten whenever screens are composed, so a place changed after it was last written is newer
-// than every screen.
-async function movedSinceScreens(site: SiteFile): Promise<boolean> {
+// A successful job composed every class from the place as it was when the job started. Without one, the index,
+// rewritten whenever screens are composed, tells whether the place changed after the newest screen.
+async function movedSinceScreens(site: SiteFile, lastSuccessStartedAt: string | undefined): Promise<boolean> {
   if (!site.location_updated_at) return false
+  if (lastSuccessStartedAt) return Date.parse(site.location_updated_at) > Date.parse(lastSuccessStartedAt)
   const index = await stat(siteLayoutsDir(site.id, 'index.json')).catch(() => undefined)
   return !index || Date.parse(site.location_updated_at) > index.mtimeMs
 }
 
 export async function siteState(site: SiteFile, approvals: Approvals, warnings: string[] = []): Promise<SiteState> {
-  const index = await readLayoutIndex(site.id)
+  const generations = await readSiteGenerations(site.id)
   const [classes, exports, prepared] = await Promise.all([
-    classStates(site.id, index?.entries ?? [], approvals),
+    classStates(site.id, approvals, generations.latest?.digests ?? generations.previous?.digests),
     exportsOf(site.id),
     exists(join(dataDir(), 'municipalities', `${site.municipality_id}.json`)),
   ])
@@ -100,7 +120,8 @@ export async function siteState(site: SiteFile, approvals: Approvals, warnings: 
     facility_id: site.facility_id ?? null,
     auto_publish: approvals.sites[site.id]?.auto_publish ?? false,
     municipality_prepared: prepared,
-    needs_generation: !classes.length || (await movedSinceScreens(site)),
+    needs_generation: !classes.length || (await movedSinceScreens(site, generations.last_success_started_at)),
+    ...(generations.latest ? { last_generation: publicGeneration(generations.latest) } : {}),
     classes,
     approved_classes: { approved: classes.filter((c) => c.approved).length, total: classes.length },
     exports,

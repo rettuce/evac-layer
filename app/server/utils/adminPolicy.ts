@@ -44,6 +44,9 @@ const FACILITY_ROUTES: readonly { method: string; path: RegExp }[] = [
   { method: 'GET', path: /^\/api\/admin\/sites\/[^/]+$/ },
   { method: 'PUT', path: /^\/api\/admin\/sites\/[^/]+$/ },
   { method: 'DELETE', path: /^\/api\/admin\/sites\/[^/]+$/ },
+  { method: 'POST', path: /^\/api\/admin\/sites\/[^/]+\/generations$/ },
+  { method: 'GET', path: /^\/api\/admin\/sites\/[^/]+\/generations\/[^/]+$/ },
+  { method: 'GET', path: /^\/api\/admin\/sites\/[^/]+\/previews\/[^/]+\/[^/]+$/ },
 ]
 
 // nuxi dev relays requests to the Nitro worker, so the real client is the entry the relay appended to

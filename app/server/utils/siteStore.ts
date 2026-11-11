@@ -173,6 +173,7 @@ function withoutSite<T>(record: Record<string, T>, id: string): Record<string, T
 // Everything stored under a site id except the site file. Call it under the site's lock.
 async function removeSiteState(id: string): Promise<void> {
   advanceSiteGeneration(id)
+  await stopGenerationsOf(id)
   await removeSubscriptionsOf(id)
   await updateApprovals((approvals) => {
     approvals.layouts = withoutSite(approvals.layouts, id)
@@ -181,8 +182,8 @@ async function removeSiteState(id: string): Promise<void> {
   })
   const live = join(dataDir(), 'live')
   const remove = (path: string) => rm(path, { recursive: true, force: true })
-  await Promise.all([join(live, `${id}.json`), join(live, `${id}.receiver.json`), exportRecordFile(id)].map(remove))
-  await Promise.all([join(distDir(), id), join(dataDir(), 'layouts', id), join(dataDir(), 'reports', id)].map(remove))
+  await Promise.all([join(live, `${id}.json`), join(live, `${id}.receiver.json`), exportRecordFile(id), generationRecordFile(id)].map(remove))
+  await Promise.all([join(distDir(), id), join(dataDir(), 'layouts', id), join(dataDir(), 'reports', id), previewsDir(id)].map(remove))
 }
 
 // The site file goes last: a removal that stops half way leaves a site that can be removed again, never
