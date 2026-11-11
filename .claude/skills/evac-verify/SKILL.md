@@ -10,7 +10,7 @@ description: Read Verifier results (data/reports, data/layouts/<id>/index.json, 
 | Layer | What it checks | Where it runs |
 |---|---|---|
 | static | `schema/layout.schema.json` (required cells per shape, motion, pictogram ids), repeated distance | `agents/src/loop/static-verifier.ts` |
-| browser | the renderer's DOM state on `.evac-screen` (`data-overflow`, `data-dropped`, `data-missing-required`), type size per role against the viewing-distance sizes, flicker (≥ 10 % luminance reversals within 1 s) | `agents/src/verifier/browser.ts`, puppeteer against `/screen?shape=<shape>&src=…` |
+| browser | the renderer's DOM state on `.evac-screen` (`data-overflow`, `data-dropped`, `data-missing-required`), type size per role against the viewing-distance sizes, flicker (≥ 10 % luminance reversals within 1 s) | `agents/src/verifier/browser.ts`, puppeteer against `/screen?shape=<shape>&src=/api/admin/preview-layout?verifier=<hash>` on a dev server or a production build; Chrome answers that src from the layout under check (`serveLayout` in `agents/src/delivery/preview.ts`) |
 | vision | Sonnet looks at each rendered shape beside the bulletin: `bulletin-mismatch`, `pictogram-misuse`, `missing-source`; "can it be understood in 3 seconds" is kept as a note, not a finding | `agents/src/verifier/vision.ts` |
 
 The pillar repeats one screen on four faces: the state is read from the outer `.evac-screen`, cells and type only inside `[data-face="0"]`, and Vision sees face 0 only. A face has the pixel density of the 55-inch 9:16 panel, so the 9:16 type sizes apply unscaled.

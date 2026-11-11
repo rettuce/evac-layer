@@ -62,7 +62,7 @@
    pnpm -F agents export --site 05210-demo-honjo-station --base-url http://127.0.0.1:3151
    JMA_SAMPLES_DIR=… JMA_FEED_DIR=… VERIFIER_URL=http://127.0.0.1:3153 demo/capture/terminal_cuts.sh
    ```
-   - 端末のカット 6 は Verifier がこの worktree の dev（`/api/layout`）を読むので、別ポートで `nuxt dev` を立てる
+   - 端末のカット 6 の Verifier は、`VERIFIER_URL` の app（dev でも本番ビルドでもよい）の `/screen` に、検査する layout をブラウザの中で渡す
    - カット 3・4 の本処理（Reader・ライブ Writer）は `.env` の `ANTHROPIC_API_KEY` が要る。キーが無い環境では、Reader が止まるところと、ライブ実行で書かれた出力を見せる暫定版になる
 4. **3D をレンダする**
    ```sh
