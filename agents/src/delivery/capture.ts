@@ -11,17 +11,27 @@ const SETTLE_MS = 500;
 export class ExportStop extends Error {}
 
 const TERMINATED_EXIT_CODE = 143;
+const openBrowsers = new Set<Browser>();
+let closingOnSigterm = false;
+
+export function recordChromePid(pidFile: string | undefined, pid: number): void {
+  if (pidFile) fs.appendFileSync(pidFile, `${pid}\n`);
+}
 
 // Chrome runs in a process group of its own, so stopping this command's group would leave it running: the server names
-// a file for its pid (never stdout or stderr, which carry text from the data), and a SIGTERM closes it here first.
+// a file for its pid (never stdout or stderr, which carry text from the data), and a SIGTERM closes every one here first.
 export async function launchBrowser(chrome?: string): Promise<Browser> {
   const browser = await puppeteer.launch({ executablePath: chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
   const pid = browser.process()?.pid;
-  const pidFile = process.env.EVAC_CHROME_PID_FILE;
-  if (pid && pidFile) fs.writeFileSync(pidFile, `${pid}\n`);
-  process.once("SIGTERM", () => {
-    void browser.close().catch(() => undefined).finally(() => process.exit(TERMINATED_EXIT_CODE));
-  });
+  if (pid) recordChromePid(process.env.EVAC_CHROME_PID_FILE, pid);
+  openBrowsers.add(browser);
+  browser.once("disconnected", () => openBrowsers.delete(browser));
+  if (!closingOnSigterm) {
+    closingOnSigterm = true;
+    process.once("SIGTERM", () => {
+      void Promise.allSettled([...openBrowsers].map((open) => open.close())).finally(() => process.exit(TERMINATED_EXIT_CODE));
+    });
+  }
   return browser;
 }
 

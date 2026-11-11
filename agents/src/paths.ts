@@ -9,7 +9,7 @@ export const SCHEMA_DIR = path.join(REPO_ROOT, "schema");
 export const ENV_FILE = path.join(REPO_ROOT, ".env");
 export const TMP_DIR = path.join(REPO_ROOT, "tmp");
 
-const PATH_SETTINGS = ["EVAC_DATA_DIR", "EVAC_RAW_DIR", "JMA_FEED_DIR", "JMA_SAMPLES_DIR", "EVAC_URL", "CHROME_PATH"] as const;
+export const PATH_SETTINGS = ["EVAC_DATA_DIR", "EVAC_RAW_DIR", "JMA_FEED_DIR", "JMA_SAMPLES_DIR", "EVAC_URL", "CHROME_PATH"] as const;
 
 if (fs.existsSync(ENV_FILE)) {
   const dotenv = parseEnv(fs.readFileSync(ENV_FILE, "utf8"));

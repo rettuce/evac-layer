@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { parseEnv } from "node:util";
-import { ENV_FILE } from "./paths.js";
+import { ENV_FILE, PATH_SETTINGS } from "./paths.js";
 
 // A placeholder such as "sk-ant-..." must never reach the API; only the shape of a key is checked, never shown.
 const API_KEY_PREFIX = "sk-ant-";
@@ -8,15 +8,17 @@ const API_KEY_MIN_LENGTH = 40;
 
 export interface ApiKeyState { present: boolean; wellFormed: boolean; source: "environment" | "dotenv" | "none"; dotenvPresent: boolean }
 
+const DOTENV_NAMES = ["ANTHROPIC_API_KEY", "ANTHROPIC_BASE_URL", ...PATH_SETTINGS];
+
 // A variable already in the environment is not overridden, so a stale shell export silently wins over a fresh .env;
-// the source is reported for that reason. Only the key is taken from .env: anything else there (an admin token, say)
-// would otherwise reach every process and browser this one starts.
-export function loadApiKey(): ApiKeyState {
+// the source is reported for that reason. Only these names are taken from .env: anything else there (an admin token,
+// say) would otherwise reach every process and browser this one starts.
+export function loadApiKey(envFile = ENV_FILE): ApiKeyState {
   const fromEnv = Boolean(process.env.ANTHROPIC_API_KEY);
-  const dotenvPresent = fs.existsSync(ENV_FILE);
-  if (dotenvPresent && process.env.ANTHROPIC_API_KEY === undefined) {
-    const value = parseEnv(fs.readFileSync(ENV_FILE, "utf8")).ANTHROPIC_API_KEY;
-    if (value !== undefined) process.env.ANTHROPIC_API_KEY = value;
+  const dotenvPresent = fs.existsSync(envFile);
+  if (dotenvPresent) {
+    const dotenv = parseEnv(fs.readFileSync(envFile, "utf8"));
+    for (const name of DOTENV_NAMES) if (process.env[name] === undefined && dotenv[name] !== undefined) process.env[name] = dotenv[name];
   }
   const value = process.env.ANTHROPIC_API_KEY ?? "";
   const present = value.length > 0;
