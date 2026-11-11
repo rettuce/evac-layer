@@ -14,6 +14,7 @@ export interface ClassState {
   outcome: 'pending' | 'pass' | 'fail'
   stale: boolean
   approved: boolean
+  approved_via?: 'bulletin' | 'class'
   approved_at?: string
   approved_by?: Approver
   unchanged?: boolean
@@ -40,13 +41,13 @@ async function exists(file: string): Promise<boolean> {
   return access(file).then(() => true, () => false)
 }
 
-function approvedAt(approvals: Approvals, site: string, bulletin: string, snapshot: LayoutSnapshot): Pick<ClassState, 'approved' | 'approved_at' | 'approved_by'> {
+function approvedAt(approvals: Approvals, site: string, bulletin: string, snapshot: LayoutSnapshot): Pick<ClassState, 'approved' | 'approved_via' | 'approved_at' | 'approved_by'> {
   const { approved, by } = approvalWith(approvals, site, bulletin, snapshot.digest, snapshot.cls)
-  if (!approved) return { approved }
+  if (!approved || !by) return { approved }
   const record = by === 'bulletin' ? approvals.layouts[layoutKey(site, bulletin)] : approvals.classes?.[classKey(site, snapshot.cls.key)]
-  if (!record) return { approved }
+  if (!record) return { approved, approved_via: by }
   const approver = record.mode && record.token_label ? { mode: record.mode, token_label: record.token_label, ...(record.actor ? { actor: record.actor } : {}) } : undefined
-  return { approved, approved_at: record.updated_at, ...(approver ? { approved_by: approver } : {}) }
+  return { approved, approved_via: by, approved_at: record.updated_at, ...(approver ? { approved_by: approver } : {}) }
 }
 
 async function classStates(site: string, reps: Representative[], approvals: Approvals, generations: SiteGenerations): Promise<ClassState[]> {
