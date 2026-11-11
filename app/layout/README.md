@@ -99,9 +99,26 @@ The live screen never goes dark on a failed poll (unreachable server, HTTP error
 | `GET /api/dashboard` | public | totals and per-municipality rows (every municipality with a knowledge file or layouts); NG found / fixed are counted from `data/verifier-findings/*.json` (one finding per entry, fixed when `fix` is filled) with the per-run counts and the file names |
 | `GET /api/feed/<site_id>` | public, gated | the site's feed (`schema/feed.schema.json`); ETag / If-None-Match |
 | `GET /delivery/<site>/<bulletin>/<shape>.{png,html,json}` | public, gated | exported files from `dist/` while the bulletin is deliverable |
-| `POST /api/admin/subscriptions` | admin | register a webhook `{site_id, url, secret}`; see `app/README.md` Delivery |
-| `GET /api/admin/catalog`, `GET /api/admin/preview-layout`, `POST /api/admin/approve`, `POST /api/admin/site`, `GET /api/admin/classes`, `POST /api/admin/class-approvals` | admin | Bearer `NUXT_ADMIN_TOKEN` when set; otherwise local only (loopback address, local Host, not cross-site, JSON POST bodies). Writes go to `data/approvals.json` |
+| `GET /api/admin/catalog` | facility, operator | each site's bulletins with their approval state; see `app/README.md` Approval gate |
+| `GET /api/admin/preview-layout?site&bulletin&shape` | facility, operator | the layout JSON of a bulletin without the delivery gate, for review |
+| `POST /api/admin/approve` | facility, operator | approve or withdraw one bulletin `{site_id, bulletin_id, approved, digest?}`; writes `data/approvals.json`; see `app/README.md` Approval gate |
+| `POST /api/admin/site` | facility, operator | set a site's auto publish |
+| `GET /api/admin/sites` | facility, operator | the sites' states; `?facility_id=` narrows the operator's list |
+| `GET /api/admin/sites/<site_id>` | facility, operator | one site's state |
+| `PUT /api/admin/sites/<site_id>` | facility, operator | register a site or update its place |
+| `DELETE /api/admin/sites/<site_id>` | facility, operator | remove a site and everything stored under it |
+| `POST /api/admin/sites/<site_id>/generations` | facility, operator | queue a generation job (202); 409 while one runs, 429 past the rate limits |
+| `GET /api/admin/sites/<site_id>/generations/<generation_id>` | facility, operator | a generation job's status and classes |
+| `GET /api/admin/sites/<site_id>/previews/<bulletin_id>/<shape>.png` | facility, operator | a preview PNG rendered by a generation job |
+| `GET /api/admin/classes` | facility, operator | the facility's classes with approval counts; the operator sends `?facility_id=` |
+| `POST /api/admin/class-approvals` | facility, operator | approve or revoke a class at the facility's sites (bulk) |
+| `POST /api/admin/live` | operator only | `{site_id, bulletin_id}` sets (or with `null` clears) a site's live bulletin; see `app/README.md` Live state |
+| `GET /api/admin/subscriptions?site` | facility, operator | list webhook registrations without their secrets (a facility must send `?site`) |
+| `POST /api/admin/subscriptions` | facility, operator | register a webhook `{site_id, url, secret}`; see `app/README.md` Delivery |
+| `DELETE /api/admin/subscriptions/<id>` | facility, operator | remove a registration (204, or 404) |
 | `GET /api/layout?file=<absolute path>` | dev only | any `.json` inside the repository; the Verifier no longer uses it; 404 in production |
+
+Every `/api/admin/` route takes the operator's credential (`NUXT_ADMIN_TOKEN` as a Bearer token; without one, a loopback request with a local Host, not cross-site, JSON POST bodies). A facility token reaches only the routes marked "facility", and only on its own sites; the other admin routes answer 403 `operator-only`. The routes a facility may use are the table in `server/utils/adminPolicy.ts`; the rules, errors and bodies are in `app/README.md` (Sites over HTTP, Access) and `docs/drafts/admin-api.openapi.yaml`.
 
 ## Headline band
 
