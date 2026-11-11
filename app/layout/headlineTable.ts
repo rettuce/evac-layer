@@ -9,7 +9,9 @@ export type HeadlineLang = 'ja' | 'ja_easy' | TableLang
 export type HeadlineText = Record<HeadlineLang, string>
 
 export interface DictionaryRow { no: number; ja: string; text: Record<TableLang, string> }
-export interface WarningNames { source?: Record<string, unknown>; cancel: DictionaryRow; names: DictionaryRow[] }
+// applies_to: the names the dictionary files under the same 情報種別等 as this 解除 (No.923: the tsunami warnings).
+export interface CancelRow extends DictionaryRow { applies_to: string[] }
+export interface WarningNames { source?: Record<string, unknown>; cancel: DictionaryRow; tsunami_cancel: CancelRow; names: DictionaryRow[] }
 export interface JaEasyNames { reviewed: boolean; cancel: string; names: { ja: string; ja_easy: string }[] }
 export interface HeadlineTables { names: WarningNames; easy: JaEasyNames }
 
@@ -19,8 +21,8 @@ export const DRILL_WORD: Record<Exclude<HeadlineLang, 'ja'>, string> = {
 }
 
 // The dictionary has no word for "<warning> cleared", so each language joins the warning's entry and the entry for
-// 解除 (No.20) in one fixed order, adding no words of its own. An entry the dictionary ends with a full stop (the Tagalog
-// tsunami names) loses it only here, where it would land mid-phrase.
+// 解除 (No.923 for a tsunami warning, No.20 for the others) in one fixed order, adding no words of its own. An entry the
+// dictionary ends with a full stop (the Tagalog tsunami names) loses it only here, where it would land mid-phrase.
 export const CANCEL_FORM: Record<TableLang, (name: string, cancel: string) => string> = {
   en: (name, cancel) => `${name}: ${cancel}`,
   zh_hans: (name, cancel) => `${name}${cancel}`,
@@ -46,15 +48,20 @@ export function warningKey(name: string): string {
 // other languages; it differs from ja only on a tsunami warning cleared outright (code 50), whose ja is 警報解除.
 export interface WarningOnScreen { ja: string; name: string; cleared: boolean; drill: boolean }
 
+function cancelFor(key: string, names: WarningNames): DictionaryRow {
+  return names.tsunami_cancel.applies_to.some((n) => warningKey(n) === key) ? names.tsunami_cancel : names.cancel
+}
+
 export function headlineFromTables(w: WarningOnScreen, tables: HeadlineTables): { text: HeadlineText } | { missing: string } {
   const key = warningKey(w.name)
   const row = tables.names.names.find((n) => warningKey(n.ja) === key)
   if (!row) return { missing: `warning name "${w.name}" is not in the JMA multilingual dictionary table (data/jma/warning-names.json); no headline translation for it` }
   const easy = tables.easy.names.find((n) => warningKey(n.ja) === key)?.ja_easy
   if (!easy) return { missing: `warning name "${w.name}" has no ja_easy headline in data/jma/warning-names-ja-easy.json` }
+  const cancel = cancelFor(key, tables.names)
   const marked = (lang: Exclude<HeadlineLang, 'ja'>, text: string) => (w.drill ? `${DRILL_WORD[lang]}${text}` : text)
   const text = { ja: `${w.drill ? DRILL_PREFIX_JA : ''}${w.ja}`, ja_easy: marked('ja_easy', w.cleared ? `${easy} ${tables.easy.cancel}` : easy) } as HeadlineText
-  for (const lang of TABLE_LANGS) text[lang] = marked(lang, w.cleared ? cancelled(lang, row.text[lang], tables.names.cancel.text[lang]) : row.text[lang])
+  for (const lang of TABLE_LANGS) text[lang] = marked(lang, w.cleared ? cancelled(lang, row.text[lang], cancel.text[lang]) : row.text[lang])
   return { text }
 }
 
@@ -64,6 +71,7 @@ export function headlineTableVersion(tables: HeadlineTables): string {
   const entries = (rows: DictionaryRow[]) => rows.map((r) => [r.no, r.ja, TABLE_LANGS.map((l) => r.text[l])])
   const content = {
     names: entries(tables.names.names), cancel: entries([tables.names.cancel]),
+    tsunami_cancel: [...entries([tables.names.tsunami_cancel]), tables.names.tsunami_cancel.applies_to],
     easy: tables.easy.names.map((n) => [n.ja, n.ja_easy]), easy_cancel: tables.easy.cancel,
     forms: TABLE_LANGS.map((l) => cancelled(l, '{name}.', '{cancel}')), drill: DRILL_WORD, drill_ja: DRILL_PREFIX_JA,
   }
