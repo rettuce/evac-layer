@@ -114,6 +114,21 @@ To approve a class before any real bulletin of it arrives, `pnpm -F agents gener
 
 A class approval only helps if the next bulletin of the class is written with the approved wording. `receive` and `pipeline` take that wording from the Writer cache of the bulletin the class was approved from (`approved_from` in `data/approvals.json`, cached in `data/writer/<municipality>/<bulletin_id>.json`), and fall back to the class cache when there is none. At the end of a run, `fanout` builds the Writer cache of each class of the municipalities it ran, from the bulletin with the latest issue time, and prints one line per class after its table. To rebuild it by hand, run `pnpm -F agents writer --build-class-cache`. Only these two write the class cache. Either source is used only for a bulletin the wording was written for: Writer records keep a `match` (hazard, template, level, status, the warning the screen names (on an all-clear, the warning that ended), the caution, and for a flood forecast the river), and a record goes to another bulletin only when their matches are equal, whatever the title. A record written before matches were kept has its match restored from the bulletin it was written for: from that bulletin's XML (through a site's index row, or found by its id in the recorded feed or the samples), else from its stored screens; a record whose bulletin cannot be found is not used for another bulletin. A bulletin's own record still serves that bulletin. A site that has not shown a bulletin yet takes its class approval's wording before the record another site of the municipality wrote for the bulletin. Any other bulletin of the class is written by the Writer API, and its new wording is not shown until someone approves it.
 
+Over HTTP, the system that registered the site can start the same composing as a job and poll it (the server runs `generate` with the live Writer and the browser check, then renders a preview PNG of each shape of every class that passed):
+
+```sh
+curl -s -X POST http://127.0.0.1:3150/api/admin/sites/my-station-concourse/generations \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"actor":{"id":"u-1042","name":"Facility staff"}}'
+# 202 with Location: /api/admin/sites/my-station-concourse/generations/<generation_id>
+
+curl -s http://127.0.0.1:3150/api/admin/sites/my-station-concourse/generations/<generation_id> \
+  -H "Authorization: Bearer $TOKEN"
+# status: queued → running → done | failed; classes: class, bulletin_id, synthetic, outcome, reason
+```
+
+Jobs run one at a time on the server, one per site at a time (409 `generation-running`), and a facility may start 6 an hour (429 `generation-rate-limited` with `Retry-After`), because each job may call the Writer on the operator's API account. A site whose municipality the operator has not prepared answers 409 `municipality-not-prepared`. When the job is done, `GET /api/admin/sites/<site_id>` lists each class with `previews` (one URL per shape) and `unchanged` (true when the screens are the same as before the job, so an earlier approval still holds). Fetch a preview with the same credential, show it to the person who approves, and send its `ETag` (the layout digest, without the quotes) as `digest` with the approval, so the approval fails with 409 if the screens changed since. `needs_generation` turns true again when the site moves after the last successful job.
+
 Without the page, approve each bulletin and then switch automatic delivery on for the site:
 
 ```sh
