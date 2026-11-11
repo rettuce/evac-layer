@@ -3,11 +3,24 @@ import path from "node:path";
 import { LAYOUTS_DIR, LIVE_DIR, REPORTS_DIR } from "../paths.js";
 import { type LiveState, nextLiveState } from "../../../app/layout/liveState";
 import { isSyntheticBulletinId } from "../../../app/layout/replay";
+import { bulletinStatus } from "../../../app/layout/gate";
 import { exportGate, layoutClassOf, layoutDigestOf, readApprovals } from "./gate.js";
 
 export const REPLAY_SITE_MESSAGE = (siteId: string) => `site ${siteId} replays a recorded record; remove "replay" from its site file to drive it live`;
 
 export class SyntheticNotLive extends Error {}
+export class DrillNotLive extends Error {}
+
+// A drill or test bulletin is shown only on a site that replays a recording, never put on a live site by hand; its
+// status is read as the class gate reads it, from the index row and else from the stored layout.
+export function refuseDrillOnLive(siteId: string, bulletinId: string, layoutsDir = LAYOUTS_DIR): void {
+  const indexFile = path.join(layoutsDir, siteId, "index.json");
+  const row = fs.existsSync(indexFile) ? (JSON.parse(fs.readFileSync(indexFile, "utf8")) as { entries: { bulletin_id: string; status?: string }[] }).entries.find((e) => e.bulletin_id === bulletinId) : undefined;
+  const dir = path.join(layoutsDir, siteId, bulletinId);
+  const shape = fs.existsSync(dir) ? fs.readdirSync(dir).find((f) => f.endsWith(".json")) : undefined;
+  const status = bulletinStatus(shape ? JSON.parse(fs.readFileSync(path.join(dir, shape), "utf8")) : undefined, row?.status);
+  if (status !== "normal") throw new DrillNotLive(`${bulletinId} is a ${status} bulletin (Control/Status ${status === "drill" ? "訓練" : "試験"}): it is never shown on a live site; show it on a site with "replay"`);
+}
 
 export function writeLive(siteId: string, bulletinId: string | null, dir = LIVE_DIR): { file: string; doc: LiveState } {
   if (isSyntheticBulletinId(bulletinId)) throw new SyntheticNotLive(`${bulletinId} is a synthetic bulletin: its screens stand for their class and are never live`);

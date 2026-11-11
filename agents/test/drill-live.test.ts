@@ -8,6 +8,7 @@ import { approvalWith, classDigest, layoutDigest, layoutStatus, screenClass } fr
 import { compose, type Municipality, type WriterOutput } from "../src/composer/compose.js";
 import { replayEntry } from "../src/jma/replay.js";
 import { receiveSite } from "../src/jma/receive.js";
+import { DrillNotLive, refuseDrillOnLive } from "../src/delivery/live.js";
 import { staticVerifier } from "../src/loop/static-verifier.js";
 import { validateDoc } from "../src/schemas.js";
 import { needsRaw } from "./raw.js";
@@ -90,4 +91,24 @@ test("receive gives a drill bulletin a row and no screen, and does not put it on
   assert.equal(fs.existsSync(path.join(roots.layouts, SITE_ID, DRILL_ID)), false);
   const { entries } = JSON.parse(fs.readFileSync(path.join(roots.layouts, SITE_ID, "index.json"), "utf8"));
   assert.deepEqual(entries.map((e: { screen: boolean }) => e.screen), [false]);
+});
+
+test("a drill or test bulletin is refused on a live site by hand, read from the index row or else the stored layout", () => {
+  assert.throws(() => refuseDrillOnLive(SITE_ID, DRILL_ID), (e: unknown) => e instanceof DrillNotLive && /drill bulletin .*site with "replay"/.test((e as Error).message), "a layout written before layouts carried a status: its 【訓練】 headline");
+  assert.doesNotThrow(() => refuseDrillOnLive("15205-demo", "VPWW56-202610311653-b3fa1b3a2ced"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "evac-drill-refuse-"));
+  fs.cpSync(path.join(LAYOUTS_DIR, "15205-demo", "VPWW56-202610311653-b3fa1b3a2ced"), path.join(root, "x", "VPWW56-202610311653-b3fa1b3a2ced"), { recursive: true });
+  fs.writeFileSync(path.join(root, "x", "index.json"), JSON.stringify({ entries: [{ bulletin_id: "VPWW56-202610311653-b3fa1b3a2ced", status: "test" }] }));
+  assert.throws(() => refuseDrillOnLive("x", "VPWW56-202610311653-b3fa1b3a2ced", root), /test bulletin \(Control\/Status 試験\)/);
+});
+
+test("the bundled drill demos replay their recording: a site with drill screens is a replay site", () => {
+  for (const id of ["22424-demo", "17204-demo"]) {
+    const demo = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "data/sites", `${id}.json`), "utf8")) as SiteFile;
+    assert.ok(demo.replay, id);
+    const { entries } = JSON.parse(fs.readFileSync(path.join(LAYOUTS_DIR, id, "index.json"), "utf8")) as { entries: { bulletin_id: string; issued_at: string; screen: boolean }[] };
+    const drills = entries.filter((e) => e.screen && layoutStatus(JSON.parse(fs.readFileSync(path.join(LAYOUTS_DIR, id, e.bulletin_id, "16x9.json"), "utf8"))) === "drill");
+    assert.ok(drills.length >= 3, id);
+    for (const e of drills) assert.ok(Date.parse(e.issued_at) >= Date.parse(demo.replay!.from) && Date.parse(e.issued_at) <= Date.parse(demo.replay!.to), `${id} ${e.bulletin_id} is inside the replay window`);
+  }
 });

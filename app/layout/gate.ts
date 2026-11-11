@@ -53,12 +53,16 @@ export function layoutStatus(layout: ClassedLayout): BulletinStatus {
   return typeof headline === 'string' && headline.startsWith(DRILL_PREFIX_JA) ? 'drill' : 'normal'
 }
 
+// The index row's status covers a test bulletin's layout written before layouts carried one.
+export function bulletinStatus(layout: ClassedLayout | undefined, rowStatus?: string): BulletinStatus {
+  const own = layout ? layoutStatus(layout) : 'normal'
+  return own === 'normal' && (rowStatus === 'drill' || rowStatus === 'test') ? rowStatus : own
+}
+
 // A drill or test screen has a class of its own that no class approval is ever written for or read from: such
-// bulletins are approved one by one (the bundled demos), never by class. The index row's status covers a test
-// bulletin's layout written before layouts carried one.
+// bulletins are approved one by one (the bundled demos, which replay them), never by class.
 export function screenClass(layout: ClassedLayout, rowStatus?: string): string {
-  const own = layoutStatus(layout)
-  const status = own === 'normal' && (rowStatus === 'drill' || rowStatus === 'test') ? rowStatus : own
+  const status = bulletinStatus(layout, rowStatus)
   return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}${status === 'normal' ? '' : `/${status}`}`
 }
 

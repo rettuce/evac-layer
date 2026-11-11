@@ -13,6 +13,7 @@ const DRILL = 'VTSE41-201609010713-ff3dd5d5c94f'
 const NORMAL_SITE = '15205-demo'
 const NORMAL = 'VPWW56-202610311653-b3fa1b3a2ced'
 const TEST_SITE = '15205-test-status'
+const LIVE_SITE = '15205-live-copy'
 
 const skip = !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first'
 
@@ -26,7 +27,14 @@ async function makeData(): Promise<string> {
     await cp(join(REPO_ROOT, 'data', 'reports', site, bulletin), join(dataDir, 'reports', site, bulletin), { recursive: true })
   }
   const site = JSON.parse(await readFile(join(REPO_ROOT, 'data', 'sites', `${NORMAL_SITE}.json`), 'utf8'))
-  await writeFile(join(dataDir, 'sites', `${TEST_SITE}.json`), JSON.stringify({ ...site, id: TEST_SITE }))
+  await writeFile(join(dataDir, 'sites', `${TEST_SITE}.json`), JSON.stringify({ ...site, id: TEST_SITE, replay: { from: '2026-10-31T16:00+09:00', to: '2026-10-31T17:00+09:00', speed: 1 } }))
+  await writeFile(join(dataDir, 'sites', `${LIVE_SITE}.json`), JSON.stringify({ ...site, id: LIVE_SITE }))
+  await cp(join(REPO_ROOT, 'data', 'layouts', DRILL_SITE, DRILL), join(dataDir, 'layouts', LIVE_SITE, DRILL), { recursive: true })
+  await cp(join(REPO_ROOT, 'data', 'layouts', NORMAL_SITE, NORMAL), join(dataDir, 'layouts', LIVE_SITE, NORMAL), { recursive: true })
+  await writeFile(join(dataDir, 'layouts', LIVE_SITE, 'index.json'), JSON.stringify({ municipality: '15205', name: '柏崎市', site: LIVE_SITE, entries: [
+    { issued_at: '2016-09-01T07:13:00+09:00', bulletin_id: DRILL, wmo_code: 'VTSE41', raw_title: 't', municipality_level: null, screen: true },
+    { issued_at: '2026-10-31T16:53:00+09:00', bulletin_id: NORMAL, wmo_code: 'VPWW56', raw_title: 't', municipality_level: 4, screen: true, status: 'test' },
+  ] }))
   const layoutDir = join(dataDir, 'layouts', TEST_SITE, NORMAL)
   await cp(join(REPO_ROOT, 'data', 'layouts', NORMAL_SITE, NORMAL), layoutDir, { recursive: true })
   const files = await Promise.all((await readdir(layoutDir)).map(async (f) => ({ shape: f.slice(0, -5), body: await readFile(join(layoutDir, f), 'utf8') })))
@@ -52,7 +60,6 @@ describe('drill bulletins and class approvals', { skip }, () => {
   })
 
   test('a layout written without a status, whose index row says test, is out of class approval', async () => {
-    assert.equal((await postJson(base, '/api/admin/live', { site_id: TEST_SITE, bulletin_id: NORMAL })).status, 200)
     assert.equal((await (await fetch(`${base}/api/feed/${TEST_SITE}`)).json()).state, 'ambient', 'a class approval under the normal key does not open it')
     const body = await (await postJson(base, '/api/admin/approve', { site_id: TEST_SITE, bulletin_id: NORMAL, approved: true })).json()
     assert.equal(body.class, 'landslide/evac-now/4/test')
@@ -76,11 +83,22 @@ describe('drill bulletins and class approvals', { skip }, () => {
     assert.equal(body.class_approval.approved_from, NORMAL)
   })
 
-  test('a drill bulletin approved on its own is still shown when it is posted, as the bundled demos do', async () => {
+  test('a drill bulletin approved on its own is shown by the replay of the bundled drill demo', async () => {
     assert.equal((await postJson(base, '/api/admin/site', { site_id: DRILL_SITE, auto_publish: true })).status, 200)
-    assert.equal((await postJson(base, '/api/admin/live', { site_id: DRILL_SITE, bulletin_id: DRILL })).status, 200)
     const feed = await (await fetch(`${base}/api/feed/${DRILL_SITE}`)).json()
     assert.equal(feed.state, 'alert')
     assert.equal(feed.bulletin_id, DRILL)
+    assert.equal((await postJson(base, '/api/admin/live', { site_id: DRILL_SITE, bulletin_id: DRILL })).status, 409, 'the demo replays; it is not driven live')
+  })
+
+  test('a drill or test bulletin is never posted to a live site, by its index row or its stored layout', async () => {
+    const drill = await postJson(base, '/api/admin/live', { site_id: LIVE_SITE, bulletin_id: DRILL })
+    assert.equal(drill.status, 409)
+    assert.match((await drill.json()).message, /drill bulletin/)
+    const testStatus = await postJson(base, '/api/admin/live', { site_id: LIVE_SITE, bulletin_id: NORMAL })
+    assert.equal(testStatus.status, 409)
+    assert.match((await testStatus.json()).message, /test bulletin/)
+    assert.equal((await postJson(base, '/api/admin/live', { site_id: LIVE_SITE, bulletin_id: null })).status, 200)
+    assert.equal((await postJson(base, '/api/admin/live', { site_id: NORMAL_SITE, bulletin_id: NORMAL })).status, 200, 'a normal bulletin still goes live')
   })
 })
