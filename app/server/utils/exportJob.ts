@@ -1,4 +1,3 @@
-import { spawn } from 'node:child_process'
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { EXPORT_DIGEST_FILE } from '~~/layout/feed'
@@ -45,8 +44,7 @@ export async function exportedDigest(site: string, bulletin: string): Promise<st
 }
 
 function exportCommand(): string[] {
-  const command = String(useRuntimeConfig().exportCommand).split(/\s+/).filter(Boolean)
-  return command[0] === 'off' ? [] : command
+  return configuredCommand(useRuntimeConfig().exportCommand)
 }
 
 // The exporter opens /screen on this server. A dev server listens through nuxi's relay and a socket deployment has
@@ -57,33 +55,6 @@ export function ownBaseUrl(): string | undefined {
   const host = process.env.NITRO_HOST ?? process.env.HOST ?? ''
   const reachable = !host || host === '0.0.0.0' || host === '::' ? '127.0.0.1' : host
   return `http://${reachable.includes(':') ? `[${reachable}]` : reachable}:${port}`
-}
-
-function run(command: string[], args: string[]): Promise<{ ok: boolean; output: string }> {
-  return new Promise((done) => {
-    // Its own process group, so a timeout also ends the Chrome that pnpm and tsx started.
-    const child = spawn(command[0]!, [...command.slice(1), ...args], {
-      cwd: useRuntimeConfig().repoRoot,
-      env: { ...process.env, EVAC_DATA_DIR: resolve(dataDir()) },
-      stdio: ['ignore', 'pipe', 'pipe'],
-      detached: true,
-    })
-    let output = ''
-    let timedOut = false
-    const collect = (chunk: string) => (output = (output + chunk).slice(-MESSAGE_TAIL_CHARS))
-    child.stdout.setEncoding('utf8').on('data', collect)
-    child.stderr.setEncoding('utf8').on('data', collect)
-    const timer = setTimeout(() => {
-      timedOut = true
-      if (child.pid) process.kill(-child.pid, 'SIGKILL')
-    }, EXPORT_TIMEOUT_MS)
-    const finish = (ok: boolean, message: string) => {
-      clearTimeout(timer)
-      done({ ok, output: message.trim() })
-    }
-    child.on('error', (error) => finish(false, error.message))
-    child.on('close', (code) => finish(code === 0, timedOut ? `${output}\ntimed out after ${EXPORT_TIMEOUT_MS / 1000} s` : output))
-  })
 }
 
 // A site deleted since the export was queued, perhaps registered again by another facility under the same id, is
@@ -97,7 +68,7 @@ async function exportNow(command: string[], site: string, bulletin: string, dige
   if (!started) return
   const baseUrl = ownBaseUrl()
   const args = [`--site=${site}`, `--bulletin=${bulletin}`, `--out=${resolve(distDir())}`, ...(baseUrl ? [`--base-url=${baseUrl}`] : [])]
-  const { ok, output } = await run(command, args)
+  const { ok, output } = await runAgentCommand(command, args, { timeoutMs: EXPORT_TIMEOUT_MS, tailChars: MESSAGE_TAIL_CHARS }).done
   if (!ok) console.warn(`[export] ${site} ${bulletin} failed: ${output}`)
   await withSiteLock(site, async () => {
     if (siteGeneration(site) === generation) return recordJob(site, bulletin, ok ? { status: 'ok', digest } : { status: 'failed', digest, message: output })
