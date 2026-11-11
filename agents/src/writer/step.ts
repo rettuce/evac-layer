@@ -8,7 +8,7 @@ import type { Reviser } from "../loop/types.js";
 import type { CallUsage } from "../reader/pricing.js";
 import { placeholderWriter } from "./placeholder.js";
 import { approvedWriterForClass } from "./class-cache.js";
-import { cachedWriter, cachedWriterForClass, writerCacheFitsBulletin, saveWriter, screenClassFor, writeCellsUntilClean, type WriterModel } from "./live.js";
+import { cachedWriterRecord, cachedWriterForClass, recordedStatus, writerCacheFitsBulletin, saveWriter, screenClassFor, writeCellsUntilClean, type WriterModel } from "./live.js";
 
 export interface LiveWriter { client: Anthropic; model: WriterModel }
 
@@ -20,7 +20,8 @@ export async function writeForBulletin(
 ): Promise<WriterStep> {
   const { alert, municipality, situation } = ctx;
   const placeholder: WriterStep = { writer: placeholderWriter(alert, municipality.id, situation.level, situation.cleared), writerSource: "placeholder", reviser: liveWriterReviser, afterLoop: () => {} };
-  const cached = cachedWriter(municipality.id, alert.bulletin_id);
+  const own = cachedWriterRecord(municipality.id, alert.bulletin_id);
+  const cached = own && recordedStatus(own) === alert.status ? own.output : undefined;
   const cls = screenClassFor(alert.hazard, situation);
   const classCached = cached
     ? undefined
@@ -30,7 +31,7 @@ export async function writeForBulletin(
     return {
       ...fixed(classCached.output, `writer-class-cache:${classCached.bulletin_id}`),
       afterLoop(result) {
-        if (opts.persist && result.outcome === "pass") saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [] });
+        if (opts.persist && result.outcome === "pass") saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [], status: alert.status });
       },
     };
   }
@@ -50,14 +51,14 @@ export async function writeForBulletin(
     writer = r.output;
     writerSource = `writer-api:${live.model}`;
     opts.usage.push(...used);
-    if (opts.persist) saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: writer, usage: used, lint: r.lint });
+    if (opts.persist) saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: writer, usage: used, lint: r.lint, status: alert.status });
   }
   return {
     writer, writerSource,
     reviser: writerApiReviser({ ...call, usage: opts.usage }),
     afterLoop(result) {
       if (opts.persist && result.outcome === "pass" && result.writer && result.writer !== writer) {
-        saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: result.writer, usage: opts.usage.slice(usageStart), lint: [] });
+        saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: result.writer, usage: opts.usage.slice(usageStart), lint: [], status: alert.status });
       }
     },
   };

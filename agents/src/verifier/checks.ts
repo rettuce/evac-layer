@@ -25,7 +25,7 @@ export const MAX_REVERSALS = 1;
 export type TextKind = "primary" | "secondary" | "label";
 export interface TextSample { cell_id: string; role: Role; step_class: TypeStep | null; font_px: number; kind: TextKind; text: string }
 export interface ScreenState { shape: string; template: string; variant: string; level: string; dropped: string; overflow: string | null; missing_required: string | null }
-export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker" | "direction-dropped"; cell_id?: string; lang?: string; detail: string }
+export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker" | "drill-word-outside-drill" | "direction-dropped"; cell_id?: string; lang?: string; detail: string }
 export interface CellText { id: string; role: Role; text: string }
 
 // The author's artboards (L-4/L-5, 2026-11-05) set these lines below the viewing-distance floor; the floor follows the
@@ -110,4 +110,17 @@ export function judgeDrill(cells: { id: string; role: string; text: Record<strin
     .flatMap((c) => Object.entries(c.text)
       .filter(([lang, text]) => text !== undefined && DRILL_MARKERS[lang] && !(c.role !== "headline" && lang === "ja") && !DRILL_MARKERS[lang].test(text))
       .map(([lang]) => ({ check: "drill-marker" as const, cell_id: c.id, lang, detail: `drill bulletin, but the ${lang} ${c.role} does not open with the drill word` })));
+}
+
+export function drillWordLangs(cells: { text: Record<string, string | undefined> }[]): string[] {
+  return cells.flatMap((c) => Object.entries(c.text).filter(([lang, text]) => text !== undefined && DRILL_MARKERS[lang]?.test(text)).map(([lang]) => lang));
+}
+
+// A real warning read as a drill is not acted on. Drill text on a screen of a bulletin that is not a drill comes from
+// reused wording, which a rewrite of the same cells does not undo, so the loop stops on it.
+export function judgeDrillWordOutsideDrill(cells: { id: string; role: string; text: Record<string, string | undefined> }[], status: string): Finding[] {
+  if (status === "drill") return [];
+  return cells.flatMap((c) => drillWordLangs([c]).map((lang) => ({
+    check: "drill-word-outside-drill" as const, cell_id: c.id, lang, detail: `${status} bulletin, but the ${lang} ${c.role} opens with the drill word`,
+  })));
 }
