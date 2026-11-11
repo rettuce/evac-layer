@@ -95,7 +95,7 @@ async function replayedBulletin(site: SiteFile, approvals: Approvals): Promise<s
   return currentBulletinAt(rows, elapsedMs, speed, (id) => available.has(id))
 }
 
-async function liveBulletin(site: SiteFile, approvals: Approvals): Promise<string | undefined> {
+export async function liveBulletin(site: SiteFile, approvals: Approvals): Promise<string | undefined> {
   return firstDeliverable(await readLiveState(site.id), (id) => liveDeliverableWith(approvals, site.id, id))
 }
 

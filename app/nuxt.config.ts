@@ -20,6 +20,13 @@ export default defineNuxtConfig({
     webhookAllowPrivate: '',
     reverseGeocoderUrl: '',
     auditMaxBytes: '',
+    notifySlackWebhookUrl: '',
+    notifySmtpUrl: '',
+    notifyMailFrom: '',
+    notifyMailTo: '',
+    notifyAdminBaseUrl: '',
+    notifyRemindMinutes: '15',
+    notifyAllowPlaintext: '',
     // NUXT_PUBLIC_STATIC_SCREEN=1 at `nuxt generate` (GitHub Pages): /screen reads public/static/ instead of
     // /api. Read here because a `ssr: false` generate does not carry runtime env into the client.
     public: { staticScreen: process.env.NUXT_PUBLIC_STATIC_SCREEN ?? '' },
