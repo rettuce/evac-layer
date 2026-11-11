@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import { NO_FLOOD_FORECAST_FILE } from "../paths.js";
 import { tsunamiRegionsFor } from "./regions.js";
 
 export interface SyntheticKind { name: string; code: string; status: "発表" | "解除"; last?: { name: string; code: string } }
@@ -38,13 +40,20 @@ const TSUNAMI_PLANS: readonly SyntheticPlan[] = [
 const LEVEL5_HELD = "level 5 special warning: no recorded or sample bulletin to model it on; held";
 const FLOOD_LATER = "flood forecast (VXKO): needs the river and forecast area that cover the municipality; not yet synthesized";
 
+let noFloodForecast: Set<string> | undefined;
+
+function onNoFloodForecastArea(municipalityId: string): boolean {
+  noFloodForecast ??= new Set(Object.keys((JSON.parse(fs.readFileSync(NO_FLOOD_FORECAST_FILE, "utf8")) as { municipalities: Record<string, unknown> }).municipalities));
+  return noFloodForecast.has(municipalityId);
+}
+
 export function classListing(municipalityId: string): ClassListing[] {
   const unsupported = (cls: string, reason: string): ClassListing => ({ cls, supported: false, reason });
   return [
     ...PLANS.map((p): ClassListing => ({ supported: true, ...p })),
     unsupported("heavy_rain/secure-now/5", LEVEL5_HELD),
     unsupported("landslide/secure-now/5", LEVEL5_HELD),
-    ...["flood/evac-prepare/3", "flood/evac-now/4", "flood/secure-now/5", "flood/all-clear/1"].map((cls) => unsupported(cls, FLOOD_LATER)),
+    ...(onNoFloodForecastArea(municipalityId) ? [] : ["flood/evac-prepare/3", "flood/evac-now/4", "flood/secure-now/5", "flood/all-clear/1"].map((cls) => unsupported(cls, FLOOD_LATER))),
     ...(tsunamiRegionsFor(municipalityId).length ? TSUNAMI_PLANS.map((p): ClassListing => ({ supported: true, ...p })) : []),
   ];
 }

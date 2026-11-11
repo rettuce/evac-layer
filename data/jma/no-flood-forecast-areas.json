@@ -1,0 +1,12 @@
+{
+  "source": "Municipalities checked to be in no 指定河川洪水予報 (flood forecast) area, so that no flood forecast bulletin is addressed to them. 柏崎市 (checked 2026-11-11): (1) 気象庁「柏崎市の特別警報の指標及び危険警報・警報・注意報発表基準一覧表」（令和8年5月28日現在、発表官署 新潟地方気象台） (https://www.jma.go.jp/jma/kishou/know/kijun/niigata/kijun_1520500.pdf) refers the river forecast areas of 柏崎市 for レベル５氾濫特別警報・レベル４氾濫危険警報・レベル３氾濫警報・レベル２氾濫注意報 to 別紙３. (2) 別紙３「レベル５氾濫特別警報・レベル４氾濫危険警報・レベル３氾濫警報・レベル２氾濫注意報の発表対象となる河川予報区のうち、新潟県に関係する河川予報区名及び基準観測所名」（更新日 令和8年5月28日） (https://www.jma.go.jp/jma/kishou/know/kijun/niigata/3_niigata.csv, listed on https://www.jma.go.jp/jma/kishou/know/kijun/niigata.html) has the row 1520500,柏崎市,, with no river forecast area and no reference station, where the other municipalities name theirs (e.g. 1522200,上越市,関川,高田). (3) 新潟地方気象台「指定河川洪水予報」 (https://www.data.jma.go.jp/niigata/menu/bousai/flood_forecast.html, checked 2026-11-11) names the designated rivers of 新潟県: 荒川・阿賀野川・信濃川（下流・中流）・魚野川・関川・姫川 by the national government and 中ノ口川・信濃川上流 by the prefecture.",
+  "municipalities": {
+    "15205": {
+      "name": "柏崎市",
+      "notes": [
+        "国土交通省 河川データブック 12-1-4「水位周知河川（都道府県）」（令和8年3月31日現在） (https://www.mlit.go.jp/river/toukei_chousa/kasen_db/pdf/2026/12-1-4.pdf, checked 2026-11-11) lists 鵜川・鯖石川・別山川 among the 37 水位周知河川 designated by the governor of 新潟県; the table names no municipality, so that these are the rivers of the same names in 柏崎市 is judged from the names alone.",
+        "気象庁 新潟県 別紙１－２「レベル５大雨特別警報・レベル４大雨危険警報・レベル３大雨警報・レベル２大雨注意報の流域雨量指数基準値及び複合基準値」 (https://www.jma.go.jp/jma/kishou/know/kijun/niigata/level_flood_niigata.csv, checked 2026-11-11) has rows of 柏崎市 (1520500) for 鯖石川 (河川番号 84272001), 鵜川 and 別山川, so the rise of these rivers is issued as a heavy-rain warning (大雨) of 柏崎市."
+      ]
+    }
+  }
+}

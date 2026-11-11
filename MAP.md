@@ -19,7 +19,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | `schema/` | agents と app の間の取り決め（layout・alert・site・municipality・feed・書き出し） | `schema/README.md` |
 | `data/municipalities/` | 5 自治体の知識ファイル（出典ページつき）・避難場所・プリセット | `<市町村コード>.json` |
 | `data/sites/` | 施設（緯度経度・向き・市町村コード）。1 ファイル 1 施設。`replay` を持つ site は記録を再生するデモ（05210・17204・22424） | `05210-demo-honjo-station.json` |
-| `data/jma/` | 気象庁由来の表: 津波予報区と市町村の対応（site のある 5 市町村。出典つき）、見出しの対訳（気象庁「多言語辞書」から抜いた警報名と「解除」の行。解除は共通の No.20 と、津波警報・注意報の No.923。辞書の No. と出典つき）、見出しのやさしい日本語（確認前の下書き） | `tsunami-regions.json`・`warning-names.json`・`warning-names-ja-easy.json` |
+| `data/jma/` | 気象庁由来の表: 津波予報区と市町村の対応（site のある 5 市町村。出典つき）、指定河川洪水予報の予報区域が掛かっていないと一次資料で確かめた市町村（柏崎市だけ。出典つき。`generate` はこの市町村に洪水のクラスを作らない）、見出しの対訳（気象庁「多言語辞書」から抜いた警報名と「解除」の行。解除は共通の No.20 と、津波警報・注意報の No.923。辞書の No. と出典つき）、見出しのやさしい日本語（確認前の下書き） | `tsunami-regions.json`・`no-flood-forecast-areas.json`・`warning-names.json`・`warning-names-ja-easy.json` |
 | `data/layouts/` | 生成物。施設 × 電文 × 5 形状のレイアウト JSON | 各施設の `index.json` が目録（画面を作らなかった電文も理由つきで載る） |
 | `data/reports/`・`data/verifier-findings/` | 検査レポートと、Vision の初期の指摘の記録 | `data/verifier-findings/2026-11-02-vision-run1.json` ほか |
 | `data/writer/` | Writer の出力の記録（同じ警報から同じ画面を出すための記録） | `<市町村コード>/<電文 ID>.json` |
