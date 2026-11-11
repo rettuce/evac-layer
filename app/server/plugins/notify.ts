@@ -29,7 +29,6 @@ async function eachAtMost<T>(items: T[], limit: number, task: (item: T) => Promi
 
 export default defineNitroPlugin((nitroApp) => {
   if (import.meta.prerender) return
-  const startedMs = Date.now()
   const settings = notifySettings()
   for (const warning of settings.warnings) console.warn(`[notify] ${warning}`)
   console.log(`[notify] channels: ${settings.channels.join(', ') || 'none'}`)
@@ -52,8 +51,8 @@ export default defineNitroPlugin((nitroApp) => {
     for (const key of warnedAt.keys()) if (key.startsWith(`${scope}\n`)) warnedAt.delete(key)
   }
 
-  const checkReceivers = receiverWatch(settings, delivery, warn)
-  const feedIdle = feedIdleWatch(settings, delivery, warn, startedMs)
+  const liveness = livenessWatch(settings, delivery, warn, recovered)
+  let checkingLiveness = false
 
   async function persist(site: string, notice: Notice): Promise<boolean> {
     try {
@@ -135,8 +134,6 @@ export default defineNitroPlugin((nitroApp) => {
       const sites = await readSites()
       const present = new Set(sites.map((site) => site.id))
       for (const site of notices.keys()) if (!present.has(site)) notices.delete(site)
-      feedIdle.forget(present)
-      forgetFeedRequests(present)
       await eachAtMost(sites, SITES_AT_ONCE, async (site) => {
         try {
           await checkSite(site, approvals, now)
@@ -144,20 +141,7 @@ export default defineNitroPlugin((nitroApp) => {
         } catch (error) {
           warn(site.id, `${site.id}: ${(error as Error).message}`)
         }
-        try {
-          await feedIdle.check(site, now)
-          recovered(`feed ${site.id}`)
-        } catch (error) {
-          warn(`feed ${site.id}`, `feed idle check of ${site.id}: ${(error as Error).message}`)
-        }
       })
-      try {
-        await checkReceivers(sites, now)
-        recovered('receivers')
-      } catch (error) {
-        warn('receivers', `receiver check: ${(error as Error).message}`)
-      }
-      if (settings.feedIdleMs > 0) await writeFeedRequests(warn, recovered)
       recovered('watch')
     } catch (error) {
       warn('watch', `watch failed: ${(error as Error).message}`)
@@ -166,9 +150,24 @@ export default defineNitroPlugin((nitroApp) => {
     }
   }
 
+  async function watchLiveness() {
+    if (checkingLiveness || !liveness) return
+    checkingLiveness = true
+    try {
+      await liveness.check(Date.now())
+      recovered('liveness')
+    } catch (error) {
+      warn('liveness', `liveness check failed: ${(error as Error).message}`)
+    } finally {
+      checkingLiveness = false
+    }
+  }
+
   const timer = setInterval(watch, WATCH_INTERVAL_MS)
+  const livenessTimer = liveness ? setInterval(watchLiveness, liveness.tickMs) : undefined
   nitroApp.hooks.hook('close', () => {
     clearInterval(timer)
+    clearInterval(livenessTimer)
     closeNotifyMail()
   })
 })

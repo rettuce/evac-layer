@@ -1,73 +1,105 @@
 import { join } from 'node:path'
-import { feedActivity, receiversNoticeDue, stoppedReceivers } from '~~/layout/liveness'
-import { type ExpectedScreen, type ExpectedState, expectedState, feedIdleMessage, receiverStoppedMessage } from '~~/layout/livenessNotice'
-import { noticeDue } from '~~/layout/noticeSchedule'
+import type { Approvals } from '~~/layout/gate'
+import { type ListEntry, entriesReason, feedActivity, listNoticeDue, recordOutdated, resumesWithin, stoppedReceivers, stoppedTogether, withoutSite } from '~~/layout/liveness'
+import { type ExpectedScreen, type IdleSite, feedIdleMessage, isAlert, receiverStoppedMessage } from '~~/layout/livenessNotice'
+import type { OutgoingNotice } from '~~/layout/notice'
 import { type NoticeDelivery, type NoticeTarget, type SentChannels, type StoredChannels, sentFrom, storedFrom } from './noticeDelivery'
 
 type Warn = (scope: string, message: string) => void
 
+const TICK_MAX_MS = 15000
+const TICK_MIN_MS = 1000
+// A check this late means the clock jumped or the process was paused: requests may simply not have been seen.
+const PAUSED_AFTER_MS = 30000
+const EXPECTED_FOR_MS = 30000
+
 const iso = (ms: number) => new Date(ms).toISOString()
 
-interface ReceiversRecord {
+interface ListRecord {
   first_seen_at: string
   resolved_at?: string
+  together?: boolean
   channels: StoredChannels<string>
 }
 
-// Not under a site id: one notice covers every site whose receiver stopped. A directory name holds no dot, so it never
-// meets a file of a site.
-export function receiversRecordFile(): string {
-  return join(dataDir(), 'live', 'notify', 'receivers.json')
+interface ListState {
+  record: ListRecord
+  sent: SentChannels<string>
 }
 
-async function receivedAtOf(site: string): Promise<unknown> {
-  const state = await readJsonIfExists<{ received_at?: unknown }>(join(dataDir(), 'live', `${site}.receiver.json`)).catch(() => undefined)
-  return state?.received_at
+// Not under a site id: one notice covers every site. A directory name holds no dot, so it never meets a file of a site.
+export function listRecordFile(name: 'receivers' | 'feed-idle'): string {
+  return join(dataDir(), 'live', 'notify', `${name}.json`)
 }
 
-export function receiverWatch(settings: NotifySettings, delivery: NoticeDelivery, warn: Warn) {
-  let notice: { record: ReceiversRecord; sent: SentChannels<string> } | undefined
+function lastActivityMs(state: ListState): number {
+  return Math.max(Date.parse(state.record.first_seen_at), ...Object.values(state.sent).map((sent) => (Number.isFinite(sent?.lastSentMs) ? sent!.lastSentMs! : -Infinity)))
+}
+
+function listNotice(name: 'receivers' | 'feed-idle', settings: NotifySettings, delivery: NoticeDelivery, warn: Warn) {
+  let state: ListState | undefined
   let loaded = false
 
-  async function persist(current: NonNullable<typeof notice>) {
+  async function persist(current: ListState) {
     try {
-      await writeJsonFile(receiversRecordFile(), { ...current.record, channels: storedFrom(current.sent) })
+      await writeJsonFile(listRecordFile(name), { ...current.record, channels: storedFrom(current.sent) })
     } catch (error) {
-      warn('record receivers', `notice record of stopped receivers not recorded: ${failureCode(error)}`)
+      warn(`record ${name}`, `notice record of ${name} not recorded: ${failureCode(error)}`)
     }
   }
 
-  async function load() {
+  async function load(now: number) {
     if (loaded) return
     loaded = true
-    const record = await readJsonIfExists<ReceiversRecord>(receiversRecordFile()).catch(() => undefined)
-    if (record && typeof record.first_seen_at === 'string' && record.channels && typeof record.channels === 'object') notice = { record, sent: sentFrom(record.channels) }
+    const record = await readJsonIfExists<ListRecord>(listRecordFile(name)).catch(() => undefined)
+    if (!(record && typeof record.first_seen_at === 'string' && record.channels && typeof record.channels === 'object')) return
+    state = { record, sent: sentFrom(record.channels) }
+    const last = lastActivityMs(state)
+    if (!record.resolved_at && recordOutdated(last, now, settings.remindMs)) state.record = { ...record, resolved_at: iso(last) }
   }
 
-  return async function check(sites: SiteFile[], now: number) {
-    if (settings.receiverStoppedMs <= 0) return
-    const watched = sites.filter((site) => !site.replay)
-    const records = await Promise.all(watched.map(async (site) => ({ site: site.id, received_at: await receivedAtOf(site.id) })))
-    const stopped = stoppedReceivers(records, now, settings.receiverStoppedMs)
-    await load()
-    if (!stopped.length) {
-      if (notice && !notice.record.resolved_at) {
-        notice.record = { ...notice.record, resolved_at: iso(now) }
-        await persist(notice)
-      }
-      return
+  async function resolve(now: number) {
+    await load(now)
+    if (!state || state.record.resolved_at) return
+    state.record = { ...state.record, resolved_at: iso(now) }
+    await persist(state)
+  }
+
+  async function open(now: number, together: boolean): Promise<ListState> {
+    await load(now)
+    if (state?.record.resolved_at && resumesWithin(Date.parse(state.record.resolved_at), now, settings.remindMs)) {
+      const { resolved_at: _resolved, ...open } = state.record
+      state.record = open
+      await persist(state)
+    } else if (!state || state.record.resolved_at) {
+      state = { record: { first_seen_at: iso(now), channels: {} }, sent: {} }
+      await persist(state)
     }
-    if (!notice || notice.record.resolved_at) {
-      notice = { record: { first_seen_at: iso(now), channels: {} }, sent: {} }
-      await persist(notice)
+    if (together && !state.record.together) {
+      state.record = { ...state.record, together: true }
+      await persist(state)
     }
-    const current = notice
-    const ids = stopped.map((entry) => entry.site)
+    return state
+  }
+
+  async function forget(site: string) {
+    await load(Date.now())
+    if (!state) return
+    let changed = false
+    for (const sent of Object.values(state.sent)) {
+      if (sent?.reason === undefined) continue
+      const kept = withoutSite(sent.reason, site)
+      if (kept !== sent.reason) [sent.reason, changed] = [kept, true]
+    }
+    if (changed) await persist(state)
+  }
+
+  async function dispatch(current: ListState, entries: ListEntry[], now: number, message: (count: number) => Promise<(at: number) => OutgoingNotice>) {
     const target: NoticeTarget<string> = {
-      slot: 'receivers',
+      slot: `list ${name}`,
       state: current.record.first_seen_at,
-      label: 'stopped receivers',
-      current: () => notice === current && !current.record.resolved_at,
+      label: name,
+      current: () => state === current && !current.record.resolved_at,
       sent: async (channel, sent) => {
         current.sent[channel] = sent
         await persist(current)
@@ -75,121 +107,134 @@ export function receiverWatch(settings: NotifySettings, delivery: NoticeDelivery
     }
     const due = settings.channels.flatMap((channel) => {
       if (!delivery.ready(target, channel, now)) return []
-      const next = receiversNoticeDue({ sent: current.sent[channel], sites: ids, now, remindMs: settings.remindMs })
-      return next ? [[channel, next] as const] : []
+      const next = listNoticeDue({ sent: current.sent[channel], entries, now, remindMs: settings.remindMs })
+      return next ? [[channel, next.count] as const] : []
     })
-    if (!due.length) return
-    const byId = new Map(watched.map((site) => [site.id, site]))
-    const listed = await Promise.all(stopped.map(async (entry) => ({ ...(await siteNoticeFacts(byId.get(entry.site)!)), received_at: entry.received_at })))
-    const facts = { sites: listed, threshold_minutes: settings.receiverStoppedMs / 60000, first_seen_at: current.record.first_seen_at, ...(settings.adminUrl ? { admin_url: settings.adminUrl } : {}) }
-    for (const [channel, next] of due) {
-      void delivery.deliver(target, channel, { count: next.count, reason: ids.join(' ') }, (at) => receiverStoppedMessage({ ...facts, count: next.count }, at))
-    }
+    for (const [channel, count] of due) void delivery.deliver(target, channel, { count, reason: entriesReason(entries) }, await message(count))
+  }
+
+  return { resolve, open, forget, dispatch }
+}
+
+async function receiverRecord(site: string): Promise<{ received_at: unknown } | 'unreadable'> {
+  try {
+    return { received_at: (await readJsonIfExists<{ received_at?: unknown }>(join(dataDir(), 'live', `${site}.receiver.json`)))?.received_at }
+  } catch {
+    return 'unreadable'
   }
 }
 
-interface IdleRecord {
-  site_id: string
-  last_request_at: string
-  first_seen_at: string
-  resolved_at?: string
-  channels: StoredChannels<ExpectedState>
-}
-
-interface IdleNotice {
-  generation: number
-  record: IdleRecord
-  sent: SentChannels<ExpectedState>
-}
-
-export function feedIdleRecordFile(site: string): string {
-  return join(dataDir(), 'live', `${site}.feed-idle.json`)
-}
-
-async function expectedOf(site: string): Promise<ExpectedScreen | undefined> {
+async function expectedOf(site: SiteFile, approvals: Approvals): Promise<ExpectedScreen> {
   try {
-    const feed = await currentFeed(site)
-    if (!feed) return undefined
-    if (feed.state === 'ambient' || !feed.alert) return { state: 'ambient' }
-    return { state: 'alert', bulletin_id: feed.alert.bulletin_id, level: feed.alert.level, hazard: feed.alert.hazard }
+    const bulletin = await liveBulletin(site, approvals)
+    if (!bulletin) return { state: 'ambient' }
+    const row = (await readLayoutIndex(site.id).catch(() => undefined))?.entries?.find((entry) => entry?.bulletin_id === bulletin)
+    const level = [row?.display_level, row?.municipality_level].find((value) => typeof value === 'number')
+    return { state: 'alert', bulletin_id: bulletin, ...(level === undefined ? {} : { level }) }
   } catch {
     return 'unknown'
   }
 }
 
-export function feedIdleWatch(settings: NotifySettings, delivery: NoticeDelivery, warn: Warn, startedMs: number) {
-  const notices = new Map<string, IdleNotice>()
+export function livenessWatch(settings: NotifySettings, delivery: NoticeDelivery, warn: Warn, recovered: (scope: string) => void) {
+  const thresholds = [settings.receiverStoppedMs, settings.feedIdleMs].filter((ms) => ms > 0)
+  if (!thresholds.length) return undefined
+  const tickMs = Math.min(TICK_MAX_MS, Math.max(TICK_MIN_MS, Math.min(...thresholds, ...(settings.remindMs > 0 ? [settings.remindMs] : [])) / 4))
+  watchFeedRequests(settings.feedIdleMs)
+  const receivers = listNotice('receivers', settings, delivery, warn)
+  const idle = listNotice('feed-idle', settings, delivery, warn)
+  const generations = new Map<string, number>()
+  const expected = new Map<string, { at: number; generation: number; value: ExpectedScreen }>()
+  let startedMs = Date.now()
+  let lastCheck: number | undefined
+  let idleBefore = new Set<string>()
 
-  async function persist(site: string, notice: IdleNotice): Promise<boolean> {
-    try {
-      return await writeSiteRecord(site, notice.generation, feedIdleRecordFile(site), { ...notice.record, channels: storedFrom(notice.sent) })
-    } catch (error) {
-      warn(`record feed ${site}`, `feed idle record of ${site} not recorded: ${failureCode(error)}`)
-      return true
+  async function forgetChanged(sites: SiteFile[]) {
+    const now = new Map(sites.map((site) => [site.id, siteGeneration(site.id)]))
+    for (const [site, generation] of generations) {
+      if (now.get(site) === generation) continue
+      await receivers.forget(site)
+      await idle.forget(site)
+      expected.delete(site)
     }
+    generations.clear()
+    for (const [site, generation] of now) generations.set(site, generation)
   }
 
-  async function noticeOf(site: string, generation: number): Promise<IdleNotice | undefined> {
-    const known = notices.get(site)
-    if (known?.generation === generation) return known
-    const record = await readJsonIfExists<IdleRecord>(feedIdleRecordFile(site)).catch(() => undefined)
-    if (!(record?.site_id === site && typeof record.last_request_at === 'string' && typeof record.first_seen_at === 'string' && record.channels)) return undefined
-    const loaded: IdleNotice = { generation, record, sent: sentFrom(record.channels) }
-    notices.set(site, loaded)
-    return loaded
-  }
-
-  async function check(site: SiteFile, now: number) {
-    if (settings.feedIdleMs <= 0 || site.replay) return
-    const generation = siteGeneration(site.id)
-    const lastMs = await lastFeedRequest(site.id)
-    const activity = feedActivity({ lastSeenMs: lastMs, startedMs, now, thresholdMs: settings.feedIdleMs })
-    if (activity === undefined || activity === 'unsure') return
-    let notice = await noticeOf(site.id, generation)
-    if (activity === 'active') {
-      if (notice && !notice.record.resolved_at) {
-        notice.record = { ...notice.record, resolved_at: iso(now) }
-        if (!(await persist(site.id, notice))) notices.delete(site.id)
-      }
-      return
+  async function checkReceivers(sites: SiteFile[], now: number) {
+    if (settings.receiverStoppedMs <= 0) return
+    const records: { site: string; received_at: unknown }[] = []
+    for (const site of sites) {
+      const record = await receiverRecord(site.id)
+      if (record === 'unreadable') warn(`receiver ${site.id}`, `the receiver record of ${site.id} cannot be read; the site is left out of the receiver check`)
+      else records.push({ site: site.id, ...record })
     }
-    const lastRequestAt = iso(lastMs!)
-    if (!notice || notice.record.last_request_at !== lastRequestAt || notice.record.resolved_at) {
-      notice = { generation, record: { site_id: site.id, last_request_at: lastRequestAt, first_seen_at: iso(now), channels: {} }, sent: {} }
-      notices.set(site.id, notice)
-      if (!(await persist(site.id, notice))) return void notices.delete(site.id)
-    }
-    const current = notice
-    const target: NoticeTarget<ExpectedState> = {
-      slot: `feed ${site.id}`,
-      state: lastRequestAt,
-      label: `idle feed of ${site.id}`,
-      current: () => notices.get(site.id) === current && siteGeneration(site.id) === current.generation && !current.record.resolved_at,
-      sent: async (channel, sent) => {
-        current.sent[channel] = sent
-        await persist(site.id, current)
-      },
-    }
-    const channels = settings.channels.filter((channel) => delivery.ready(target, channel, now))
-    if (!channels.length) return
-    const expected = await expectedOf(site.id)
-    if (!expected) return
-    const reason = expectedState(expected)
-    const due = channels.flatMap((channel) => {
-      const next = noticeDue({ sent: current.sent[channel], reason, now, remindMs: settings.remindMs })
-      return next ? [[channel, next] as const] : []
+    const scan = stoppedReceivers(records, now, settings.receiverStoppedMs)
+    for (const site of scan.unreadable) warn(`receiver ${site}`, `the last receive of ${site} is not a time; the site is left out of the receiver check`)
+    for (const site of scan.future) warn(`receiver ${site}`, `the last receive of ${site} lies in the future; the site is left out of the receiver check`)
+    const named = new Set([...scan.unreadable, ...scan.future])
+    for (const { site } of records) if (!named.has(site)) recovered(`receiver ${site}`)
+    if (!scan.stopped.length) return receivers.resolve(now)
+    const current = await receivers.open(now, false)
+    const byId = new Map(sites.map((site) => [site.id, site]))
+    await receivers.dispatch(current, scan.stopped.map(({ site }) => ({ site })), now, async (count) => {
+      const listed = await Promise.all(scan.stopped.map(async (entry) => ({ ...(await siteNoticeFacts(byId.get(entry.site)!)), received_at: entry.received_at })))
+      const facts = { sites: listed, threshold_ms: settings.receiverStoppedMs, count, first_seen_at: current.record.first_seen_at, ...(settings.adminUrl ? { admin_url: settings.adminUrl } : {}) }
+      return (at) => receiverStoppedMessage(facts, at)
     })
-    if (!due.length) return
-    const facts = { site: await siteNoticeFacts(site), last_request_at: lastRequestAt, expected, first_seen_at: current.record.first_seen_at, ...(settings.adminUrl ? { admin_url: settings.adminUrl } : {}) }
-    for (const [channel, next] of due) {
-      const message = { ...facts, count: next.count, ...(next.previous_reason ? { previous_expected: next.previous_reason } : {}) }
-      void delivery.deliver(target, channel, { count: next.count, reason }, (at) => feedIdleMessage(message, at))
+  }
+
+  async function expectedNow(site: SiteFile, now: number, approvals: () => Promise<Approvals>): Promise<ExpectedScreen> {
+    const generation = siteGeneration(site.id)
+    const known = expected.get(site.id)
+    if (known && known.generation === generation && now - known.at < EXPECTED_FOR_MS) return known.value
+    const value = await expectedOf(site, await approvals())
+    expected.set(site.id, { at: now, generation, value })
+    return value
+  }
+
+  async function checkFeeds(sites: SiteFile[], now: number) {
+    if (settings.feedIdleMs <= 0) return
+    if (lastCheck !== undefined && now - lastCheck > PAUSED_AFTER_MS) startedMs = now
+    lastCheck = now
+    if (now - startedMs < settings.feedIdleMs) return
+    let watched = 0
+    const stopped: { site: SiteFile; lastMs: number }[] = []
+    for (const site of sites) {
+      const requests = await feedRequests(site.id)
+      if (requests && requests.lastMs - requests.firstMs >= settings.feedIdleMs) watched++
+      if (feedActivity(requests, now, settings.feedIdleMs) === 'idle') stopped.push({ site, lastMs: requests!.lastMs })
     }
+    const newly = stopped.filter(({ site }) => !idleBefore.has(site.id)).length
+    idleBefore = new Set(stopped.map(({ site }) => site.id))
+    for (const site of expected.keys()) if (!idleBefore.has(site)) expected.delete(site)
+    if (!stopped.length) return idle.resolve(now)
+    const current = await idle.open(now, stoppedTogether(newly, watched))
+    let approvals: Promise<Approvals> | undefined
+    const read = () => (approvals ??= readApprovals())
+    const listed: IdleSite[] = []
+    for (const { site, lastMs } of stopped) listed.push({ ...(await siteNoticeFacts(site)), last_request_at: iso(lastMs), expected: await expectedNow(site, now, read) })
+    const entries = listed.map((site) => ({ site: site.id, alert: isAlert(site.expected) }))
+    await idle.dispatch(current, entries, now, async (count) => {
+      const facts = { sites: listed, together: Boolean(current.record.together), threshold_ms: settings.feedIdleMs, count, first_seen_at: current.record.first_seen_at, ...(settings.adminUrl ? { admin_url: settings.adminUrl } : {}) }
+      return (at) => feedIdleMessage(facts, at)
+    })
   }
 
-  function forget(present: Set<string>) {
-    for (const site of notices.keys()) if (!present.has(site)) notices.delete(site)
+  async function check(now: number) {
+    const sites = (await readSites()).filter((site) => !site.replay)
+    await forgetChanged(sites)
+    forgetFeedRequests(new Set(sites.map((site) => site.id)))
+    for (const [scope, run] of [['receivers', checkReceivers], ['feeds', checkFeeds]] as const) {
+      try {
+        await run(sites, now)
+        recovered(scope)
+      } catch (error) {
+        warn(scope, `${scope} check: ${(error as Error).message}`)
+      }
+    }
+    if (settings.feedIdleMs > 0) await writeFeedRequests(now, warn, recovered)
   }
 
-  return { check, forget }
+  return { tickMs, check }
 }

@@ -194,7 +194,7 @@ Poll `GET /api/feed/<site_id>` every few seconds. It returns what the site shoul
 curl -s -H 'If-None-Match: "<etag from last time>"' http://127.0.0.1:3150/api/feed/my-station-concourse
 ```
 
-The server's operator is told when a site's screen stops polling: once no request for `/api/feed/<site_id>` has come for five minutes (the operator can change this), a notice goes out naming the site and whether it should be showing a warning. Keep polling every few seconds, also while nothing changes (`304`), and poll the site's own path; a screen that finds its site with `?lat=&lng=` is not watched. A site whose feed has never been requested is not watched, so a screen that is not installed yet raises nothing.
+The server's operator is told when a site's screen stops polling: once a screen has polled `/api/feed/<site_id>` for five minutes, no request for five minutes (the operator can change both) puts the site on a notice that says whether it should be showing a warning. Keep polling every few seconds, also while nothing changes (`304`), and poll the site's own path; a screen that finds its site with `?lat=&lng=` is not watched. The bundled `/screen?mode=live&site=<site_id>` is watched the same way through its own polling. A site whose feed was requested only once, or never, is not watched, so a screen that is not installed yet raises nothing.
 
 When `state` is `alert`, show `assets["16x9"].png` (or the HTML, or render `layouts["16x9"]` yourself) full screen; when it returns to `ambient`, go back to your normal content. Use the shape that matches the panel.
 
