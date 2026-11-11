@@ -5,14 +5,18 @@ import { isSyntheticBulletinId } from "../../../app/layout/gate";
 import { isBulletinId, isMunicipalityId } from "../../../app/layout/replay";
 import { AGENTS_DIR, DATA_DIR, SYNTHETIC_DIR } from "../paths.js";
 import { parseJmaXml } from "./parse.js";
+import { tsunamiRegionsFor, tsunamiRegionTable } from "./regions.js";
 import type { SyntheticPlan } from "./synthetic-classes.js";
 
 export const TEMPLATES_DIR = path.join(AGENTS_DIR, "src", "jma", "templates");
 
-const TEMPLATE: Record<SyntheticPlan["code"], { file: string; title: string }> = {
-  VPWW55: { file: "15_17_01_251222_VPWW55.xml", title: "大雨警報・注意報" },
-  VPWW56: { file: "15_17_01_251222_VPWW56.xml", title: "土砂災害警報・注意報" },
+const TEMPLATE: Record<SyntheticPlan["code"], string> = {
+  VPWW55: "15_17_01_251222_VPWW55.xml",
+  VPWW56: "15_17_01_251222_VPWW56.xml",
+  VTSE41: "32-39_12_13_250206_VTSE41.xml",
 };
+
+const VPWW_TITLE: Record<"VPWW55" | "VPWW56", string> = { VPWW55: "大雨警報・注意報", VPWW56: "土砂災害警報・注意報" };
 
 const MUNICIPAL_WARNING = "気象警報・注意報（市町村等）";
 const ISSUER = "気象庁";
@@ -49,11 +53,11 @@ function setText(nodes: Nodes, name: string, value: string): void {
 
 export interface SyntheticTarget { municipalityId: string; municipalityName: string; prefecture: string }
 
-// The sample's structure and issue time stay; the municipality, its prefecture and the warning kind are set, and every
-// other area, the headline text and the free-text comments are dropped, so no place of the sample reaches the Writer.
+// The sample's structure and issue time stay; the area, the title and the warning kind are set, and every other area,
+// the headline text and the free-text comments are dropped, so no place of the sample reaches the Writer.
 export function synthesizeXml(plan: SyntheticPlan, target: SyntheticTarget): string {
-  const template = TEMPLATE[plan.code];
-  const tree = new XMLParser(XML_OPTIONS).parse(fs.readFileSync(path.join(TEMPLATES_DIR, template.file), "utf8")) as Nodes;
+  const file = TEMPLATE[plan.code];
+  const tree = new XMLParser(XML_OPTIONS).parse(fs.readFileSync(path.join(TEMPLATES_DIR, file), "utf8")) as Nodes;
   const report = childrenOf(only(tree, "Report"));
 
   const control = childrenOf(only(report, "Control"));
@@ -62,16 +66,28 @@ export function synthesizeXml(plan: SyntheticPlan, target: SyntheticTarget): str
   setText(control, "PublishingOffice", ISSUER);
 
   const head = childrenOf(only(report, "Head"));
-  setText(head, "Title", `${target.prefecture}${template.title}`);
+  setText(head, "Title", plan.code === "VTSE41" ? plan.title : `${target.prefecture}${VPWW_TITLE[plan.code]}`);
   setText(head, "InfoType", "発表");
   const headline = only(head, "Headline");
   headline.Headline = [element("Text", "")];
 
   const bodyNode = only(report, "Body");
+  bodyNode.Body = plan.code === "VTSE41" ? [tsunamiBody(plan, target, bodyNode, file)] : [municipalWarning(plan, target, bodyNode, file)];
+
+  const declaration = tree.findIndex((n) => nameOf(n) === "?xml");
+  tree.splice(declaration + 1, 0, { "?evac-layer": [{ "#text": "" }], ":@": { "@_synthetic": "1" } });
+
+  return new XMLBuilder({ ...XML_OPTIONS, format: true, indentBy: "", suppressEmptyNode: true }).build(tree) as string;
+}
+
+type VpwwPlan = Extract<SyntheticPlan, { code: "VPWW55" | "VPWW56" }>;
+type TsunamiPlan = Extract<SyntheticPlan, { code: "VTSE41" }>;
+
+function municipalWarning(plan: VpwwPlan, target: SyntheticTarget, bodyNode: XmlNode, file: string): XmlNode {
   const warning = childrenOf(bodyNode).find((n) => nameOf(n) === "Warning" && n[":@"]?.["@_type"] === MUNICIPAL_WARNING);
-  if (!warning) throw new SyntheticError(`template ${template.file} has no Warning type="${MUNICIPAL_WARNING}"`);
+  if (!warning) throw new SyntheticError(`template ${file} has no Warning type="${MUNICIPAL_WARNING}"`);
   const item = childrenOf(warning).find((n) => nameOf(n) === "Item");
-  if (!item) throw new SyntheticError(`template ${template.file} has no municipal Item`);
+  if (!item) throw new SyntheticError(`template ${file} has no municipal Item`);
   const kind = [
     element("Name", plan.kind.name),
     element("Code", plan.kind.code),
@@ -86,12 +102,25 @@ export function synthesizeXml(plan: SyntheticPlan, target: SyntheticTarget): str
     return [];
   });
   warning.Warning = [element("Item", itemChildren)];
-  bodyNode.Body = [warning];
+  return warning;
+}
 
-  const declaration = tree.findIndex((n) => nameOf(n) === "?xml");
-  tree.splice(declaration + 1, 0, { "?evac-layer": [{ "#text": "" }], ":@": { "@_synthetic": "1" } });
-
-  return new XMLBuilder({ ...XML_OPTIONS, format: true, indentBy: "", suppressEmptyNode: true }).build(tree) as string;
+// A tsunami bulletin is addressed to forecast regions, not municipalities: one Item per region of the municipality, with
+// its kind and the kind before it. Arrival times, heights, observations, the earthquake and the text are not carried.
+function tsunamiBody(plan: TsunamiPlan, target: SyntheticTarget, bodyNode: XmlNode, file: string): XmlNode {
+  const regions = tsunamiRegionsFor(target.municipalityId).sort();
+  if (!regions.length) throw new SyntheticError(`municipality ${target.municipalityId} is on no tsunami forecast region`);
+  const forecast = childrenOf(only(childrenOf(bodyNode), "Tsunami")).find((n) => nameOf(n) === "Forecast");
+  if (!forecast) throw new SyntheticError(`template ${file} has no Tsunami/Forecast`);
+  const codeDefine = only(childrenOf(forecast), "CodeDefine");
+  const items = regions.map((code) => element("Item", [
+    element("Area", [element("Name", tsunamiRegionTable()[code]!.name), element("Code", code)]),
+    element("Category", [
+      element("Kind", [element("Name", plan.kind.name), element("Code", plan.kind.code)]),
+      element("LastKind", [element("Name", plan.kind.last.name), element("Code", plan.kind.last.code)]),
+    ]),
+  ]));
+  return element("Tsunami", [element("Forecast", [codeDefine, ...items])]);
 }
 
 export function syntheticBulletinId(xml: string): string {

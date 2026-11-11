@@ -1,5 +1,5 @@
 {
-  "source": "JMA tsunami forecast regions (https://www.jma.go.jp/jma/kishou/know/jishin/joho/tsunami-yohoku.html, checked 2026-11-02). Region codes appear in the official VTSE41 samples. Only the municipalities with a site are listed: 石川県能登 = 石川県（かほく市以南を除く）, 静岡県 = whole prefecture, 東京湾内湾 includes 神奈川県（観音崎東端以北の東京湾沿岸に限る）, 秋田県 = whole prefecture.",
+  "source": "JMA tsunami forecast regions (https://www.jma.go.jp/jma/kishou/know/jishin/joho/tsunami-yohoku.html, checked 2026-11-02). Region codes appear in the official VTSE41 samples. Only the municipalities with a site are listed: 石川県能登 = 石川県（かほく市以南を除く）, 静岡県 = whole prefecture, 東京湾内湾 includes 神奈川県（観音崎東端以北の東京湾沿岸に限る）, 秋田県 = whole prefecture. 新潟県上中下越 (checked 2026-11-11) = 新潟県（佐渡市を除く。） on the same page; 柏崎市 is listed under it in 津波予報区に対応する沿岸の市町村対応表（令和８年３月26日時点） (https://www.jma.go.jp/jma/kishou/know/jishin/joho/tsunami-yohoku/tsunami_shichouson.pdf), and its code 340 is in the AreaTsunami code table (津波予報区) of 地震火山関連コード表.xlsx in the 個別コード表 jmaxml_20261110_Code.zip (https://xml.kishou.go.jp/tec_material.html).",
   "regions": {
     "360": {
       "name": "石川県能登",
@@ -23,6 +23,12 @@
       "name": "秋田県",
       "municipalities": [
         "05210"
+      ]
+    },
+    "340": {
+      "name": "新潟県上中下越",
+      "municipalities": [
+        "15205"
       ]
     }
   }

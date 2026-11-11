@@ -65,11 +65,11 @@ function storedFiles(siteId: string, bulletinId: string) {
 
 test("the class list names what can be synthesized and why the rest cannot", () => {
   const wajima = classListing("17204");
-  assert.deepEqual(wajima.filter((c) => c.supported).map((c) => c.cls), SIX);
+  assert.deepEqual(wajima.filter((c) => c.supported).map((c) => c.cls), [...SIX, "tsunami/evac-now/2", "tsunami/evac-now/3", "tsunami/evac-now/4", "tsunami/all-clear/1"], "輪島市 is on a tsunami forecast region");
   const held = wajima.filter((c) => !c.supported) as { cls: string; reason: string }[];
   assert.deepEqual(held.map((c) => c.cls).filter((c) => c.endsWith("/5")), ["heavy_rain/secure-now/5", "landslide/secure-now/5", "flood/secure-now/5"]);
-  assert.ok(held.some((c) => c.cls.startsWith("tsunami/")), "輪島市 is on a tsunami forecast region");
-  assert.ok(!classListing("15205").some((c) => c.cls.startsWith("tsunami/")), "柏崎市 has no region mapped");
+  assert.ok(!held.some((c) => c.cls.startsWith("tsunami/")));
+  assert.ok(!classListing("13101").some((c) => c.cls.startsWith("tsunami/")), "千代田区 is on no region of the table");
   for (const c of held) assert.ok(c.reason.length > 10, c.cls);
 });
 
@@ -81,20 +81,34 @@ function templatePlaces(): Set<string> {
     for (const m of xml.matchAll(/<(?:EditorialOffice|PublishingOffice)>([^<]+)</g)) places.add(m[1]!);
     for (const m of xml.matchAll(/<Text[^>]*>([^<]+)</g)) places.add(m[1]!);
   }
+  places.delete(SYNTHETIC_ISSUER);
   return places;
 }
+
+// The synthesizer names this issuer on purpose; it is no place of a template.
+const SYNTHETIC_ISSUER = "気象庁";
 
 test("a synthetic bulletin parses as a real one and carries no place of its template", () => {
   const places = templatePlaces();
   assert.ok(places.has("松江市") && places.has("松江地方気象台") && places.has("島根県"));
-  for (const plan of classListing("15205").filter((c) => c.supported)) {
+  assert.ok(places.has("北海道太平洋沿岸東部") && places.has("和歌山県南方沖") && places.has("気象庁本庁"), "the tsunami template's regions, epicentre and office are read");
+  const classes = classListing("15205").filter((c) => c.supported);
+  assert.ok(classes.some((c) => c.cls.startsWith("tsunami/")));
+  for (const plan of classes) {
     if (!plan.supported) continue;
     const xml = synthesizeXml(plan, { municipalityId: "15205", municipalityName: "柏崎市", prefecture: "新潟県" });
     const alert = parseJmaXml(xml);
     assert.equal(alert.status, "normal");
-    assert.equal(alert.raw_title, `新潟県${plan.code === "VPWW55" ? "大雨" : "土砂災害"}警報・注意報`);
-    assert.deepEqual(alert.areas.map((a) => [a.code, a.name, a.kind_name]), [["1520500", "柏崎市", plan.kind.name]]);
-    const leaked = [...places].filter((p) => xml.includes(p));
+    // A tsunami bulletin names 柏崎市's own forecast region, which the sample also lists among its regions.
+    const ownRegion = plan.code === "VTSE41" ? "新潟県上中下越" : undefined;
+    if (plan.code === "VTSE41") {
+      assert.equal(alert.raw_title, plan.title);
+      assert.deepEqual(alert.areas.map((a) => [a.code, a.name, a.kind_name]), [["340", "新潟県上中下越", plan.kind.name]]);
+    } else {
+      assert.equal(alert.raw_title, `新潟県${plan.code === "VPWW55" ? "大雨" : "土砂災害"}警報・注意報`);
+      assert.deepEqual(alert.areas.map((a) => [a.code, a.name, a.kind_name]), [["1520500", "柏崎市", plan.kind.name]]);
+    }
+    const leaked = [...places].filter((p) => p !== ownRegion && xml.includes(p));
     assert.deepEqual(leaked, [], plan.cls);
   }
 });

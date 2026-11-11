@@ -2,7 +2,13 @@ import { tsunamiRegionsFor } from "./regions.js";
 
 export interface SyntheticKind { name: string; code: string; status: "発表" | "解除"; last?: { name: string; code: string } }
 
-export interface SyntheticPlan { cls: string; code: "VPWW55" | "VPWW56"; kind: SyntheticKind }
+export interface TsunamiKind { name: string; code: string; last: { name: string; code: string } }
+
+// title: Head/Title of a VTSE41, the kinds the bulletin carries, or 津波予報 once every warning and advisory has ended
+// (地震火山関連_解説資料, Head/Title).
+export type SyntheticPlan =
+  | { cls: string; code: "VPWW55" | "VPWW56"; kind: SyntheticKind }
+  | { cls: string; code: "VTSE41"; title: string; kind: TsunamiKind };
 
 export type ClassListing = ({ supported: true } & SyntheticPlan) | { cls: string; supported: false; reason: string };
 
@@ -17,9 +23,20 @@ const PLANS: readonly SyntheticPlan[] = [
   { cls: "landslide/all-clear/1", code: "VPWW56", kind: { name: "レベル２土砂災害注意報", code: "29", status: "解除", last: { name: "レベル２土砂災害注意報", code: "29" } } },
 ];
 
+const NO_TSUNAMI = { name: "津波なし", code: "00" };
+
+// Each warning is a first bulletin (LastKind 津波なし). The all-clear, as above, ends the advisory (code 60): a warning
+// cleared outright (code 50) composes the same class and wording, and a drop to a forecast (code 71-73) adds a caution
+// that gives it wording of its own.
+const TSUNAMI_PLANS: readonly SyntheticPlan[] = [
+  { cls: "tsunami/evac-now/2", code: "VTSE41", title: "津波注意報", kind: { name: "津波注意報", code: "62", last: NO_TSUNAMI } },
+  { cls: "tsunami/evac-now/3", code: "VTSE41", title: "津波警報", kind: { name: "津波警報", code: "51", last: NO_TSUNAMI } },
+  { cls: "tsunami/evac-now/4", code: "VTSE41", title: "大津波警報", kind: { name: "大津波警報：発表", code: "53", last: NO_TSUNAMI } },
+  { cls: "tsunami/all-clear/1", code: "VTSE41", title: "津波予報", kind: { name: "津波注意報解除", code: "60", last: { name: "津波注意報", code: "62" } } },
+];
+
 const LEVEL5_HELD = "level 5 special warning: no recorded or sample bulletin to model it on; held";
 const FLOOD_LATER = "flood forecast (VXKO): needs the river and forecast area that cover the municipality; not yet synthesized";
-const TSUNAMI_LATER = "tsunami (VTSE41): synthesis comes in a later stage";
 
 export function classListing(municipalityId: string): ClassListing[] {
   const unsupported = (cls: string, reason: string): ClassListing => ({ cls, supported: false, reason });
@@ -28,7 +45,7 @@ export function classListing(municipalityId: string): ClassListing[] {
     unsupported("heavy_rain/secure-now/5", LEVEL5_HELD),
     unsupported("landslide/secure-now/5", LEVEL5_HELD),
     ...["flood/evac-prepare/3", "flood/evac-now/4", "flood/secure-now/5", "flood/all-clear/1"].map((cls) => unsupported(cls, FLOOD_LATER)),
-    ...(tsunamiRegionsFor(municipalityId).length ? ["tsunami/evac-now/2", "tsunami/evac-now/3", "tsunami/evac-now/4", "tsunami/all-clear/1"].map((cls) => unsupported(cls, TSUNAMI_LATER)) : []),
+    ...(tsunamiRegionsFor(municipalityId).length ? TSUNAMI_PLANS.map((p): ClassListing => ({ supported: true, ...p })) : []),
   ];
 }
 

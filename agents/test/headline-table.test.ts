@@ -4,7 +4,11 @@ import fs from "node:fs";
 import path from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
 import { classDigest } from "../../app/layout/gate";
-import { DRILL_PREFIX_JA as SHARED_DRILL_PREFIX } from "../../app/layout/headlineTable";
+import { DRILL_PREFIX_JA as SHARED_DRILL_PREFIX, headlineFromTables, headlineTableVersion } from "../../app/layout/headlineTable";
+import { parseJmaXml } from "../src/jma/parse.js";
+import { tsunamiRegionsFor } from "../src/jma/regions.js";
+import { SAMPLES_DIR } from "../src/paths.js";
+import { needsRaw } from "./raw.js";
 import { compose, type Municipality, type Site, type WriterOutput } from "../src/composer/compose.js";
 import { CANCEL_FORM, DRILL_WORD, headlineTables, headlineText, TABLE_LANGS, warningKey } from "../src/composer/headline.js";
 const warningNames = () => headlineTables().names;
@@ -159,4 +163,64 @@ test("the class digest leaves every headline language out: an advisory's and a w
   const otherAction = compose({ alert: heavyRain("レベル３大雨警報", "03", "cleared", null), municipality: wajima, site, writer: { cells: writer.cells.map((c) => (c.role === "action" ? { ...c, text: { ...c.text, en: "[draft] Other" } } : c)) } })
     .map((s) => ({ shape: s.shape, body: JSON.stringify(s) }));
   assert.notEqual(classDigest(otherAction), classDigest(warning), "the action wording still binds the class approval");
+});
+
+const TSUNAMI_NAMES = ["大津波警報", "津波警報", "津波注意報"];
+const VERSION_WITH_NO20_ONLY = "sha256:b676ea0da23952ece14255a3095371d99c4869fec2ca94ff8faef543f0f86d25";
+
+test("the table holds the dictionary's tsunami entry for 解除 (No.923, en Lifted) beside the general one (No.20)", () => {
+  const { cancel, tsunami_cancel } = warningNames();
+  assert.deepEqual([cancel.no, cancel.ja, cancel.text.en], [20, "解除", "Cancel"]);
+  assert.deepEqual([tsunami_cancel.no, tsunami_cancel.ja, tsunami_cancel.text.en], [923, "解除", "Lifted"]);
+  for (const lang of TABLE_LANGS) assert.ok(tsunami_cancel.text[lang] && tsunami_cancel.text[lang] === tsunami_cancel.text[lang].trim(), lang);
+  assert.deepEqual([...tsunami_cancel.applies_to].sort(), [...TSUNAMI_NAMES].sort());
+});
+
+test("a tsunami warning's all-clear joins its entry and No.923 in every language; every other all-clear keeps No.20", () => {
+  const tables = headlineTables();
+  const clearedText = (name: string) => {
+    const found = headlineFromTables({ ja: `${name}解除`, name, cleared: true, drill: false }, tables);
+    assert.ok("text" in found, name);
+    return found.text;
+  };
+  for (const name of TSUNAMI_NAMES) {
+    const row = tables.names.names.find((n) => n.ja === name)!;
+    const text = clearedText(name);
+    assert.equal(text.ja, `${name}解除`);
+    for (const lang of TABLE_LANGS) assert.equal(text[lang], CANCEL_FORM[lang](row.text[lang].replace(/[.。]$/, ""), tables.names.tsunami_cancel.text[lang]), `${name} ${lang}`);
+  }
+  assert.equal(clearedText("津波注意報").en, "Tsunami Advisory: Lifted");
+  assert.equal(clearedText("大津波警報").en, "Major Tsunami Warning: Lifted");
+  assert.equal(clearedText("津波注意報").ja_easy, "つなみ ちゅういほう おわり", "the ja_easy word for 解除 stays");
+  for (const row of tables.names.names.filter((n) => !TSUNAMI_NAMES.includes(n.ja))) {
+    const text = clearedText(row.ja);
+    for (const lang of TABLE_LANGS) assert.equal(text[lang], CANCEL_FORM[lang](row.text[lang].replace(/[.。]$/, ""), tables.names.cancel.text[lang]), `${row.ja} ${lang}`);
+  }
+  assert.equal(clearedText("レベル２土砂災害注意報").en, "Level 2 Advisory (Landslide): Cancel");
+});
+
+test("the tsunami all-clears of the official sample get No.923, and their Japanese headlines are as before", { skip: needsRaw({ samples: ["32-39_12_13_250206_VTSE41.xml"] }) }, () => {
+  const sample = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_12_13_250206_VTSE41.xml")));
+  const region = tsunamiRegionsFor("22424")[0]!;
+  const advisoryCleared = sample.areas.find((a) => a.kind_code === "60")!;
+  const warningCleared = sample.areas.find((a) => a.kind_code === "50" && a.last_kind_name === "津波警報")!;
+  const downgraded = sample.areas.find((a) => a.code === region)!;
+  const cases: [typeof advisoryCleared, string, string][] = [
+    [advisoryCleared, "【訓練】津波注意報解除", "DRILL: Tsunami Advisory: Lifted"],
+    [warningCleared, "【訓練】警報解除", "DRILL: Tsunami Warning: Lifted"],
+    [downgraded, "【訓練】大津波警報解除", "DRILL: Major Tsunami Warning: Lifted"],
+  ];
+  for (const [area, ja, en] of cases) {
+    const text = headlineText({ ...sample, areas: [{ ...area, code: region }] }, "22424");
+    assert.deepEqual([text.ja, text.en], [ja, en]);
+  }
+});
+
+test("the table version changes with the tsunami entry for 解除", () => {
+  const tables = headlineTables();
+  assert.notEqual(headlineTableVersion(tables), VERSION_WITH_NO20_ONLY, "a check made against the table without No.923 no longer counts");
+  const otherWord = { ...tables, names: { ...tables.names, tsunami_cancel: { ...tables.names.tsunami_cancel, text: { ...tables.names.tsunami_cancel.text, en: "Cancel" } } } };
+  assert.notEqual(headlineTableVersion(otherWord), headlineTableVersion(tables));
+  const otherNames = { ...tables, names: { ...tables.names, tsunami_cancel: { ...tables.names.tsunami_cancel, applies_to: ["津波警報"] } } };
+  assert.notEqual(headlineTableVersion(otherNames), headlineTableVersion(tables));
 });
