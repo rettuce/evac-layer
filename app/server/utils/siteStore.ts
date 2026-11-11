@@ -158,6 +158,9 @@ export async function putSite(id: string, input: SiteInput, admin: AdminPrincipa
     const site = mergedSite(previous, placed, admin)
     const reason = schemaProblem(JSON.parse(JSON.stringify(site)))
     if (reason) invalid(reason)
+    // A site file can vanish without its approvals and screens (a removal that stopped half way, a file deleted by
+    // hand); whoever registers the id next must not inherit what an earlier owner approved.
+    if (!previous) await removeSiteState(id)
     if (JSON.stringify(site) !== JSON.stringify(previous)) await writeSiteFile(site)
     return { site, created: !previous, warnings }
   })
@@ -167,23 +170,28 @@ function withoutSite<T>(record: Record<string, T>, id: string): Record<string, T
   return Object.fromEntries(Object.entries(record).filter(([key]) => !key.startsWith(`${id}/`)))
 }
 
+// Everything stored under a site id except the site file. Call it under the site's lock.
+async function removeSiteState(id: string): Promise<void> {
+  advanceSiteGeneration(id)
+  await removeSubscriptionsOf(id)
+  await updateApprovals((approvals) => {
+    approvals.layouts = withoutSite(approvals.layouts, id)
+    approvals.classes = withoutSite(approvals.classes ?? {}, id)
+    delete approvals.sites[id]
+  })
+  const live = join(dataDir(), 'live')
+  const remove = (path: string) => rm(path, { recursive: true, force: true })
+  await Promise.all([join(live, `${id}.json`), join(live, `${id}.receiver.json`), exportRecordFile(id)].map(remove))
+  await Promise.all([join(distDir(), id), join(dataDir(), 'layouts', id), join(dataDir(), 'reports', id)].map(remove))
+}
+
 // The site file goes last: a removal that stops half way leaves a site that can be removed again, never
 // approvals or registrations of a site that no longer exists.
 export function deleteSite(id: string, admin: AdminPrincipal): Promise<boolean> {
   return withSiteLock(id, async () => {
     if (!(await readVisibleSite(id, admin))) return false
-    advanceSiteGeneration(id)
-    await removeSubscriptionsOf(id)
-    await updateApprovals((approvals) => {
-      approvals.layouts = withoutSite(approvals.layouts, id)
-      approvals.classes = withoutSite(approvals.classes ?? {}, id)
-      delete approvals.sites[id]
-    })
-    const live = join(dataDir(), 'live')
-    const remove = (path: string) => rm(path, { recursive: true, force: true })
-    await Promise.all([join(live, `${id}.json`), join(live, `${id}.receiver.json`), exportRecordFile(id)].map(remove))
-    await Promise.all([join(distDir(), id), join(dataDir(), 'layouts', id), join(dataDir(), 'reports', id)].map(remove))
-    await remove(siteFilePath(id))
+    await removeSiteState(id)
+    await rm(siteFilePath(id), { force: true })
     return true
   })
 }

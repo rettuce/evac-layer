@@ -320,6 +320,30 @@ describe('site registration under contention, on a server that holds facilities'
     assert.ok(!subscriptions.some((s: { site_id: string }) => s.site_id === id))
   })
 
+  test('an id whose site file is gone but whose approvals, screens and exports remain starts empty for whoever registers it', async () => {
+    const id = 'orphaned-hall'
+    assert.equal((await put(id, placeIn(SOLO_MUNI), TOKEN_A)).status, 201)
+    await writeScreen(dataDir, id, SOLO_MUNI, 'TEST-OR-1')
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: id, auto_publish: true }, bearer(TOKEN_A))).status, 200)
+    assert.equal((await postJson(base, '/api/admin/approve', { site_id: id, bulletin_id: 'TEST-OR-1', approved: true }, bearer(TOKEN_A))).status, 200)
+    assert.equal((await postJson(base, '/api/admin/live', { site_id: id, bulletin_id: 'TEST-OR-1' }, bearer(OPERATOR_TOKEN))).status, 200)
+    await mkdir(join(distDir, id, 'TEST-OR-1'), { recursive: true })
+    await writeFile(join(distDir, id, 'TEST-OR-1', '16x9.png'), 'left behind')
+    await rm(siteFile(id))
+
+    assert.equal((await put(id, placeIn(SOLO_MUNI), TOKEN_B)).status, 201)
+    const approvals = await approvalsFile()
+    assert.ok(!Object.keys(approvals.layouts).some((key) => key.startsWith(`${id}/`)), 'no approval of the earlier site')
+    assert.ok(!Object.keys(approvals.classes ?? {}).some((key) => key.startsWith(`${id}/`)), 'no class approval of the earlier site')
+    assert.equal(approvals.sites[id], undefined, 'auto publish starts off')
+    for (const left of [join(dataDir, 'layouts', id), join(dataDir, 'reports', id), join(dataDir, 'live', `${id}.json`), join(distDir, id)]) {
+      assert.equal(existsSync(left), false, `${left} is gone`)
+    }
+    const state = await (await get(`/api/admin/sites/${id}`, TOKEN_B)).json()
+    assert.deepEqual([state.classes, state.auto_publish], [[], false])
+    assert.equal((await (await fetch(`${base}/api/feed/${id}`)).json()).state, 'ambient')
+  })
+
   test('DELETE of another facility\'s site answers as DELETE of a missing one', async () => {
     assert.equal((await put('beta-only', placeIn(SOLO_MUNI), TOKEN_B)).status, 201)
     const missing = await observed(await del('/api/admin/sites/never-was', TOKEN_A), 'never-was')
