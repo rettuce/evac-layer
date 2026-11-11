@@ -3,7 +3,6 @@
   "$id": "https://evac-layer.dev/schema/layout.schema.json",
   "title": "EVAC LAYER layout (contract v0)",
   "type": "object",
-  "additionalProperties": false,
   "required": [
     "version",
     "kind",
@@ -24,7 +23,6 @@
     },
     "municipality": {
       "type": "object",
-      "additionalProperties": false,
       "required": [
         "id",
         "name"
@@ -41,7 +39,6 @@
     },
     "alert": {
       "type": "object",
-      "additionalProperties": false,
       "required": [
         "source",
         "bulletin_id",
@@ -118,7 +115,6 @@
   "$defs": {
     "cell": {
       "type": "object",
-      "additionalProperties": false,
       "required": [
         "id",
         "role",
@@ -289,7 +285,6 @@
     },
     "text": {
       "type": "object",
-      "additionalProperties": false,
       "required": [
         "ja"
       ],
@@ -359,7 +354,6 @@
       "oneOf": [
         {
           "type": "object",
-          "additionalProperties": false,
           "required": [
             "type",
             "file",
@@ -381,7 +375,6 @@
         },
         {
           "type": "object",
-          "additionalProperties": false,
           "required": [
             "type",
             "bulletin_id"
@@ -398,7 +391,6 @@
         },
         {
           "type": "object",
-          "additionalProperties": false,
           "required": [
             "type",
             "file"
@@ -415,7 +407,6 @@
         },
         {
           "type": "object",
-          "additionalProperties": false,
           "description": "JMA's multilingual dictionary (多言語辞書), from which the headline's languages other than Japanese are built.",
           "required": [
             "type",

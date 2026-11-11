@@ -4,13 +4,11 @@
   "title": "EVAC LAYER site feed (GET /api/feed/<site_id>, webhook body)",
   "description": "What one site should show now. Only approved bulletins at sites with auto publish on ever appear as state=alert; everything else is ambient.",
   "type": "object",
-  "additionalProperties": false,
   "required": ["feed_version", "site", "state", "alert", "bulletin_id", "issued_at", "layouts", "assets", "sources", "approved_at"],
   "properties": {
     "feed_version": { "const": "0.1" },
     "site": {
       "type": "object",
-      "additionalProperties": false,
       "required": ["id", "municipality_id"],
       "properties": {
         "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,80}$" },
@@ -24,7 +22,6 @@
         { "type": "null" },
         {
           "type": "object",
-          "additionalProperties": false,
           "required": ["source", "bulletin_id", "hazard", "level", "issued_at", "template"],
           "properties": {
             "source": { "const": "jma" },
@@ -41,7 +38,6 @@
     "issued_at": { "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }] },
     "layouts": {
       "type": "object",
-      "additionalProperties": false,
       "properties": {
         "16x9": { "$ref": "layout.schema.json" },
         "9x16": { "$ref": "layout.schema.json" },
@@ -52,7 +48,6 @@
     },
     "assets": {
       "type": "object",
-      "additionalProperties": false,
       "properties": {
         "16x9": { "$ref": "#/$defs/asset" },
         "9x16": { "$ref": "#/$defs/asset" },
@@ -89,7 +84,6 @@
   "$defs": {
     "asset": {
       "type": "object",
-      "additionalProperties": false,
       "required": ["png", "html"],
       "properties": {
         "png": { "type": "string", "format": "uri-reference" },

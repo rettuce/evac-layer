@@ -5,11 +5,11 @@ import { resolveUserPath } from "./paths.js";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
-  options: { schema: { type: "string" } },
+  options: { schema: { type: "string" }, public: { type: "boolean" } },
 });
 
 if (positionals.length === 0) {
-  console.error("usage: pnpm -F agents validate [--schema layout|alert|municipality|site|municipality-preset|...] <file.json>...");
+  console.error("usage: pnpm -F agents validate [--schema layout|alert|municipality|site|municipality-preset|...] [--public] <file.json>...");
   process.exit(2);
 }
 
@@ -17,7 +17,7 @@ let failed = 0;
 for (const p of positionals) {
   const file = resolveUserPath(p);
   const doc = JSON.parse(fs.readFileSync(file, "utf8"));
-  const result = validateDoc(doc, values.schema as SchemaName | undefined);
+  const result = validateDoc(doc, values.schema as SchemaName | undefined, { public: values.public });
   if (result.ok) {
     console.log(`OK   ${p} (${result.schema})`);
   } else {
