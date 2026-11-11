@@ -11,6 +11,7 @@ import { MODELS, costOf, type CallUsage } from "../reader/pricing.js";
 import { toStructuredSchema } from "../reader/extraction.js";
 import { WRITER_OUTPUT_SCHEMA, writerAlertBlock, writerMunicipalityBlock, writerSystem } from "./request.js";
 import { lintEasyJapanese, lintEnglishScript, lintLatinScript, lintThaiScript, lintTraditionalScript, lintJaEasyScript, lintLevel5, lintMunicipalOrderName, type LintFinding } from "./rules.js";
+import { drillWordLangs } from "../verifier/checks.js";
 
 export { WRITER_DIR };
 const WRITER_ROLES = ["headline", "action", "languages"] as const;
@@ -108,12 +109,26 @@ export async function writeCellsUntilClean(call: Omit<Parameters<typeof writeCel
   return { output: r.output, lint: r.lint };
 }
 
-export function cachedWriter(municipalityId: string, bulletinId: string): WriterOutput | undefined {
-  const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
-  return fs.existsSync(f) ? copyActionIntoLanguages((JSON.parse(fs.readFileSync(f, "utf8")) as { output: WriterOutput }).output) : undefined;
+export type BulletinStatus = Alert["status"];
+
+// Records written before the status was kept are told apart by their text: the Writer opens every language but ja
+// with the drill word on a drill bulletin and never otherwise.
+export function recordedStatus(record: { output: WriterOutput; status?: BulletinStatus }): BulletinStatus {
+  return record.status ?? (drillWordLangs(record.output.cells).length ? "drill" : "normal");
 }
 
-export function saveWriter(municipalityId: string, bulletinId: string, record: { model: string; output: WriterOutput; usage: CallUsage[]; lint: LintFinding[] }) {
+export function cachedWriterRecord(municipalityId: string, bulletinId: string): { output: WriterOutput; status: BulletinStatus } | undefined {
+  const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
+  if (!fs.existsSync(f)) return undefined;
+  const record = JSON.parse(fs.readFileSync(f, "utf8")) as { output: WriterOutput; status?: BulletinStatus };
+  return { output: copyActionIntoLanguages(record.output), status: recordedStatus(record) };
+}
+
+export function cachedWriter(municipalityId: string, bulletinId: string): WriterOutput | undefined {
+  return cachedWriterRecord(municipalityId, bulletinId)?.output;
+}
+
+export function saveWriter(municipalityId: string, bulletinId: string, record: { model: string; output: WriterOutput; usage: CallUsage[]; lint: LintFinding[]; status: BulletinStatus }) {
   const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
   fs.mkdirSync(path.dirname(f), { recursive: true });
   fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
@@ -124,7 +139,7 @@ export function screenClassFor(hazard: string, situation: Pick<Situation, "templ
 }
 
 export interface ClassWriterRecord {
-  model: string; output: WriterOutput; bulletin_id: string; issued_at: string; raw_title: string; caution?: Situation["caution"];
+  model: string; output: WriterOutput; bulletin_id: string; issued_at: string; raw_title: string; caution?: Situation["caution"]; status?: BulletinStatus;
 }
 
 function classWriterFile(municipalityId: string, cls: string): string {
@@ -145,5 +160,5 @@ export function saveWriterForClass(municipalityId: string, cls: string, record: 
 }
 
 export function writerCacheFitsBulletin(record: ClassWriterRecord, alert: Alert, situation: Situation): boolean {
-  return record.raw_title === alert.raw_title && record.caution === situation.caution;
+  return record.raw_title === alert.raw_title && record.caution === situation.caution && recordedStatus(record) === alert.status;
 }
