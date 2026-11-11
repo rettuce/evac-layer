@@ -91,7 +91,8 @@ async function replayedBulletin(site: SiteFile, approvals: Approvals): Promise<s
     rows.filter((row) => row.screen).map(async (row) => ((await deliverableWith(approvals, site.id, row.bulletin_id)) ? row.bulletin_id : undefined)),
   )
   const available = new Set(deliverable.filter((id) => id !== undefined))
-  const elapsedMs = Date.now() - sharedReplayOrigin(site.id, speed, window, false)
+  const origin = sharedReplayOrigin(site.id, speed, window, false)
+  const elapsedMs = Date.now() - origin
   return currentBulletinAt(rows, elapsedMs, speed, (id) => available.has(id))
 }
 
