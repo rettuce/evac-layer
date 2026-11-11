@@ -1,6 +1,6 @@
 import type { LayoutCell } from "../../../app/layout/types";
 import { formatErrors, validateDoc } from "../schemas.js";
-import { judgeContent, judgeDrill, judgeNorthUp, type CellText, type Finding } from "../verifier/checks.js";
+import { judgeContent, judgeDrill, judgeDrillWordOutsideDrill, judgeNorthUp, type CellText, type Finding } from "../verifier/checks.js";
 import type { ScreenVerdict, Verifier } from "./types.js";
 
 function cellText(c: LayoutCell): CellText {
@@ -18,7 +18,7 @@ export const staticVerifier: Verifier = {
       if (!v.ok) findings.push({ check: "missing-required", detail: `layout fails layout.schema.json:\n${formatErrors(v.errors)}` });
       findings.push(...judgeContent((s.cells as LayoutCell[]).map(cellText)));
       findings.push(...judgeNorthUp((s.cells as LayoutCell[]).filter((c) => c.role === "direction" && c.orientation === "north-up").map((c) => ({ id: c.id, word: c.text.ja, rotation: c.rotation }))));
-      if (ctx) findings.push(...judgeDrill(s.cells as LayoutCell[], ctx.alert.status));
+      if (ctx) findings.push(...judgeDrill(s.cells as LayoutCell[], ctx.alert.status), ...judgeDrillWordOutsideDrill(s.cells as LayoutCell[], ctx.alert.status));
       return { shape: s.shape, ok: findings.length === 0, findings };
     });
   },

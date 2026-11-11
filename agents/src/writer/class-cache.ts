@@ -31,7 +31,7 @@ export function writerOfBulletin(siteId: string, municipalityId: string, bulleti
     throw e;
   }
   return {
-    model: writerModelOf(municipalityId, bulletinId), output, bulletin_id: bulletinId, issued_at: alert.issued_at, raw_title: alert.raw_title,
+    model: writerModelOf(municipalityId, bulletinId), output, bulletin_id: bulletinId, issued_at: alert.issued_at, raw_title: alert.raw_title, status: alert.status,
     ...(situation.caution ? { caution: situation.caution } : {}),
   };
 }
@@ -79,7 +79,7 @@ export function cacheLatestWriterPerClass(opts: { layoutsDir?: string; xmlPath?:
   }
   return [...latest.values()].map(({ municipality, cls, alert, situation }) => {
     saveWriterForClass(municipality, cls, {
-      model: writerModelOf(municipality, alert.bulletin_id), output: cachedWriter(municipality, alert.bulletin_id)!, bulletin_id: alert.bulletin_id, issued_at: alert.issued_at, raw_title: alert.raw_title,
+      model: writerModelOf(municipality, alert.bulletin_id), output: cachedWriter(municipality, alert.bulletin_id)!, bulletin_id: alert.bulletin_id, issued_at: alert.issued_at, raw_title: alert.raw_title, status: alert.status,
       ...(situation.caution ? { caution: situation.caution } : {}),
     });
     return `${municipality}/${cls} ← ${alert.bulletin_id}`;
