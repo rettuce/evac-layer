@@ -45,6 +45,14 @@ export async function readWhileOwned<S, T>(id: string, steps: { visible: () => P
   return siteGeneration(id) === generation ? value : undefined
 }
 
+// For a write decided on what was read of the site before: the generation is taken when the reading starts, so a site
+// deleted, or deleted and registered again by anyone, in between is not the same site even to the operator, who sees
+// every site.
+export function stillSameSite(id: string, visible: () => Promise<boolean>): () => Promise<boolean> {
+  const generation = siteGeneration(id)
+  return async () => siteGeneration(id) === generation && (await visible())
+}
+
 export function siteGeneration(id: string): number {
   return generations.get(id) ?? 0
 }

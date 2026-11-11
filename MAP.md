@@ -14,6 +14,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | `app/` | Nuxt。Renderer（`/screen`）・運営者の画面（`/admin`・`/dashboard`）・配信 API | `app/server/api/`（`live-layout.get.ts`・`app/server/api/feed/[site].get.ts`・`admin/`） |
 | `app/layout/` | Nuxt の layouts ではない。承認ゲート・配置・距離の当てはめなど、app と agents が共有する中核ロジック | `app/layout/gate.ts`（承認ゲート）・`headlineTable.ts`（見出しの対訳表とクラス承認の証拠）・`GRID.md`（グリッドの設計） |
 | `app/server/middleware/` | admin API の認証 | `admin-auth.ts` |
+| `app/server/api/admin/` | 管理 API。site の登録・画面の生成・承認。クラスを施設の複数の site でまとめて承認する口は `classes.get.ts`（一覧）と `class-approvals.post.ts`（承認・取り消し）で、承認できない site を除く条件は `app/server/utils/classApprovals.ts` の `bulkBlock`、ロックの中での確かめ直しは `classApprovalSteps.ts` の `approveRechecked` | `approve.post.ts`（電文 1 件の承認）・経路と施設の資格の表は `app/server/utils/adminPolicy.ts` |
 | `schema/` | agents と app の間の取り決め（layout・alert・site・municipality・feed・書き出し） | `schema/README.md` |
 | `data/municipalities/` | 5 自治体の知識ファイル（出典ページつき）・避難場所・プリセット | `<市町村コード>.json` |
 | `data/sites/` | 施設（緯度経度・向き・市町村コード）。1 ファイル 1 施設。`replay` を持つ site は記録を再生するデモ（05210・17204・22424） | `05210-demo-honjo-station.json` |
@@ -40,7 +41,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | 主張 | 裏付け |
 |---|---|
 | スクリーンが自分の場所を知り、避難先・方向・距離を出す | `agents/src/composer/compose.ts:24-38`（方位と向き）・`agents/src/composer/compose.ts:63`（`pickShelter`）・`app/layout/nearSite.ts:1`（100 m の施設解決） |
-| 承認はモデルの外にある | `app/layout/gate.ts:36-38`（種類のキー）・`app/layout/gate.ts:68-70`（警報名と時刻を除いた digest）・`app/layout/gate.ts:106-123`（ゲート） |
+| 承認はモデルの外にある | `app/layout/gate.ts` の `screenClass`・`classKey`（種類のキー）・`classDigest`（警報名と時刻を除いた digest）・`approvalWith`・`liveLayoutGateWith`（ゲート） |
 | 未承認の画面は配信されない | `app/server/api/live-layout.get.ts:7-8`（ゲートを通らなければ 403） |
 | 警報時はモデルを呼ばない | `agents/src/jma/receive.ts:151`・`agents/src/jma/receive.ts:171-172`・`agents/src/writer/step.ts:22-38` |
 | 気象庁のフィードを読む | `agents/src/jma/record.ts:79`（`recordFeeds`） |

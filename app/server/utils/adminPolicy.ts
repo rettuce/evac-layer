@@ -35,6 +35,8 @@ const SHA256_HEX = /^[0-9a-f]{64}$/i
 const FACILITY_ROUTES: readonly { method: string; path: RegExp }[] = [
   { method: 'GET', path: /^\/api\/admin\/catalog$/ },
   { method: 'POST', path: /^\/api\/admin\/approve$/ },
+  { method: 'GET', path: /^\/api\/admin\/classes$/ },
+  { method: 'POST', path: /^\/api\/admin\/class-approvals$/ },
   { method: 'POST', path: /^\/api\/admin\/site$/ },
   { method: 'GET', path: /^\/api\/admin\/preview-layout$/ },
   { method: 'GET', path: /^\/api\/admin\/subscriptions$/ },

@@ -12,6 +12,7 @@ export interface AuditContext {
   principal: AdminPrincipal
   actor?: Actor
   site_id?: string
+  class_approvals?: { class: string; approved: boolean; results: { approved: number; revoked: number; skipped: number } }
   recorded?: boolean
 }
 
@@ -104,6 +105,7 @@ export async function recordAudit(event: H3Event, status: number): Promise<void>
     ...(audit.site_id ? { site_id: audit.site_id } : {}),
     principal: audit.principal,
     ...(audit.actor ? { actor: audit.actor } : {}),
+    ...(audit.class_approvals ? { class_approvals: audit.class_approvals } : {}),
     status,
   }
   try {
