@@ -166,6 +166,8 @@ pnpm -F agents live --site my-station-concourse --bulletin <bulletin id>     # o
 
 Posting a bulletin moves the one that was live into `fallback_bulletin_id` (posting `null` clears both). The posted bulletin is shown when it is approved for the site and auto publish is on; otherwise the site keeps showing the fallback if that one is approved, and stays ambient if not. A site with `replay`, and a drill or test bulletin, answer 409; a drill or test bulletin already in the live state (current or fallback) is not delivered by a live site, approved or not.
 
+A warning that is out but not on screen is told to the operator at once, when the server has a Slack Incoming Webhook or a mail server set (`app/README.md`, "Operator notices"). The server looks every two seconds at each live site: a real bulletin in its live state that is not approved, whose screens changed after the approval, or whose site has auto publish off, and a newer bulletin whose screens did not pass the checks, are each sent once per channel with the site, the bulletin, the reason and what the screen shows now, and again at an interval (15 minutes unless set otherwise) until the bulletin goes out or another takes its place. Facilities see none of this; the notices go only to the addresses the operator set.
+
 `receive` writes the same file. If you already run your own JMA receiver, call this instead when a bulletin for the site arrives, after its screens were composed with `pipeline --publish` and approved.
 
 ## 4. Receive it

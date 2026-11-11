@@ -17,9 +17,10 @@ export async function freePort(): Promise<number> {
   })
 }
 
-export async function startServer(env: Record<string, string>, fixedPort?: number): Promise<{ base: string; child: ChildProcess }> {
+export async function startServer(env: Record<string, string>, fixedPort?: number, output?: (text: string) => void): Promise<{ base: string; child: ChildProcess }> {
   const port = fixedPort ?? (await freePort())
-  const child = spawn(process.execPath, [SERVER_ENTRY], { env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), NUXT_EXPORT_COMMAND: 'off', ...env }, stdio: 'ignore' })
+  const child = spawn(process.execPath, [SERVER_ENTRY], { env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), NUXT_EXPORT_COMMAND: 'off', ...env }, stdio: output ? ['ignore', 'pipe', 'pipe'] : 'ignore' })
+  for (const stream of [child.stdout, child.stderr]) stream?.on('data', (chunk: Buffer) => output?.(chunk.toString('utf8')))
   const base = `http://127.0.0.1:${port}`
   const deadline = Date.now() + READY_TIMEOUT_MS
   while (Date.now() < deadline) {

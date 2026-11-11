@@ -14,6 +14,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | `app/` | Nuxt。Renderer（`/screen`）・運営者の画面（`/admin`・`/dashboard`）・配信 API | `app/server/api/`（`live-layout.get.ts`・`app/server/api/feed/[site].get.ts`・`admin/`） |
 | `app/layout/` | Nuxt の layouts ではない。承認ゲート・配置・距離の当てはめなど、app と agents が共有する中核ロジック | `app/layout/gate.ts`（承認ゲート）・`headlineTable.ts`（見出しの対訳表とクラス承認の証拠）・`GRID.md`（グリッドの設計） |
 | `app/server/middleware/` | admin API の認証 | `admin-auth.ts` |
+| `app/server/plugins/` | サーバーと一緒に動く見張り。Webhook の配信、書き出し、運用者への通知（警報が出ているのに画面に出ていないことを Slack とメールで知らせる） | `webhooks.ts`・`exports.ts`・`notify.ts`（何を通知するかは `app/layout/pending.ts`、文面は `app/layout/notice.ts`、送信と記録は `app/server/utils/notify.ts`） |
 | `schema/` | agents と app の間の取り決め（layout・alert・site・municipality・feed・書き出し） | `schema/README.md` |
 | `data/municipalities/` | 5 自治体の知識ファイル（出典ページつき）・避難場所・プリセット | `<市町村コード>.json` |
 | `data/sites/` | 施設（緯度経度・向き・市町村コード）。1 ファイル 1 施設。`replay` を持つ site は記録を再生するデモ（05210・17204・22424） | `05210-demo-honjo-station.json` |
