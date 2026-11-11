@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 #   JMA_SAMPLES_DIR=... JMA_FEED_DIR=... VERIFIER_URL=http://127.0.0.1:3153 demo/capture/terminal_cuts.sh [cut03 cut04 cut06]
-# VERIFIER_URL must be a dev server of this worktree: the browser Verifier reads /api/layout, which is dev only.
 # Without an API key, cut 3 shows the Reader stopping on the suspect PDF and then the knowledge file a live run
 # wrote; cut 4 shows the cached live Writer output and composes it. Both are re-shot with the key after the freeze.
 set -euo pipefail

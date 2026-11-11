@@ -1,11 +1,7 @@
-import crypto from "node:crypto";
 import type { LayoutCell } from "../../../app/layout/types";
-import fs from "node:fs";
-import path from "node:path";
 import type { Browser } from "puppeteer-core";
 import { launchBrowser } from "../delivery/capture.js";
 import type { Shape } from "../../../app/layout/types";
-import { TMP_DIR } from "../paths.js";
 import { readScreen, sampleLuminance, type Clock } from "../verifier/browser.js";
 import { MAX_REVERSALS, countReversals, judgeContent, judgeDropped, judgeFonts, judgeNorthUp, judgeState, type Finding } from "../verifier/checks.js";
 import type { Screen, ScreenVerdict, Verifier, VerifyContext } from "./types.js";
@@ -14,11 +10,8 @@ import { visionCheck } from "../verifier/vision.js";
 import type { CallUsage, ModelKey } from "../reader/pricing.js";
 import { staticVerifier } from "./static-verifier.js";
 
-// The renderer's /api/layout only serves .json files under its own repository root, so layouts are staged in
-// this worktree's tmp/ and the renderer must run from the same worktree.
 export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?: string; skipShapes?: readonly string[]; vision?: { client: Anthropic; model: ModelKey; usage: CallUsage[] } }): Verifier & { close(): Promise<void> } {
   let browser: Browser | undefined;
-  const stageDir = path.join(TMP_DIR, "verifier-src");
   return {
     name: `static+browser${opts.vision ? `+vision(${opts.vision.model})` : ""}(${opts.baseUrl})`,
     rendersScreens: true,
@@ -32,11 +25,7 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
           continue;
         }
         browser ??= await launchBrowser(opts.chrome);
-        fs.mkdirSync(stageDir, { recursive: true });
-        const body = JSON.stringify(s);
-        const file = path.join(stageDir, `${crypto.createHash("sha256").update(body).digest("hex").slice(0, 16)}.json`);
-        fs.writeFileSync(file, body);
-        const target = { baseUrl: opts.baseUrl, srcFile: file, variant: 0 };
+        const target = { baseUrl: opts.baseUrl, layoutJson: JSON.stringify(s), variant: 0 };
         const shape = s.shape as Shape;
         const { state, samples, cells, north, scale, pngs } = await readScreen(browser, target, shape, { capture: Boolean(opts.vision) });
         const luminances = await sampleLuminance(browser, target, shape, opts.clock ?? "realtime");

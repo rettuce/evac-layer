@@ -53,7 +53,7 @@ export function previewRequestAction(requestUrl: string, args: { baseUrl: string
   return url.pathname.startsWith("/api/admin/") ? "abort" : "continue";
 }
 
-async function serveLayout(page: Page, baseUrl: string, src: string, body: string): Promise<void> {
+export async function serveLayout(page: Page, baseUrl: string, src: string, body: string): Promise<void> {
   await page.setRequestInterception(true);
   page.on("request", (request) => {
     const action = previewRequestAction(request.url(), { baseUrl, src });
