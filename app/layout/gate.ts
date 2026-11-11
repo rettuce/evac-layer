@@ -28,13 +28,32 @@ export function layoutDigest(files: { shape: string; body: string }[]): string {
 
 interface ClassedLayout {
   template?: string
-  alert?: { hazard?: string; level?: number | null; bulletin_id?: string; issued_at?: string }
+  alert?: { hazard?: string; level?: number | null; bulletin_id?: string; issued_at?: string; status?: string }
   cells?: { role?: string; text?: Record<string, unknown> }[]
   sources?: { type?: string; bulletin_id?: string }[]
 }
 
+export const DRILL_PREFIX_JA = '【訓練】'
+
+export type BulletinStatus = 'normal' | 'test' | 'drill'
+
+// Layouts composed before the status was written carry it only in the headline the Composer prefixes on a drill.
+export function layoutStatus(layout: ClassedLayout): BulletinStatus {
+  const status = layout.alert?.status
+  if (status === 'drill' || status === 'test') return status
+  const headline = layout.cells?.find((cell) => cell.role === 'headline')?.text?.ja
+  return typeof headline === 'string' && headline.startsWith(DRILL_PREFIX_JA) ? 'drill' : 'normal'
+}
+
+// A drill or test screen has a class of its own that no class approval is ever written for or read from: such
+// bulletins are approved one by one (the bundled demos), never by class.
 export function screenClass(layout: ClassedLayout): string {
-  return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}`
+  const status = layoutStatus(layout)
+  return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}${status === 'normal' ? '' : `/${status}`}`
+}
+
+export function classApprovable(cls: string): boolean {
+  return !/\/(drill|test)$/.test(cls)
 }
 
 function withoutJmaWarningNameAndSource({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
@@ -111,7 +130,7 @@ export function approvalWith(
   if (state.approved) return { ...state, by: 'bulletin' }
   const revoked = record?.approved === false
   const byClass = cls && approvals.classes?.[classKey(site, cls.key)]
-  if (cls?.checked && !revoked && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
+  if (cls?.checked && classApprovable(cls.key) && !revoked && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
   return { ...state, by: null }
 }
 

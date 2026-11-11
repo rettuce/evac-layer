@@ -69,6 +69,13 @@
         "issued_at": {
           "type": "string",
           "format": "date-time"
+        },
+        "status": {
+          "description": "Control/Status of the bulletin when it is not 通常: drill (訓練) or test (試験). Absent on a normal bulletin.",
+          "enum": [
+            "drill",
+            "test"
+          ]
         }
       }
     },

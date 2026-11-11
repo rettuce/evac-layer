@@ -1,4 +1,4 @@
-import { classKey, layoutKey, revokeClasses } from '~~/layout/gate'
+import { classApprovable, classKey, layoutKey, revokeClasses } from '~~/layout/gate'
 import { isBulletinId } from '~~/layout/replay'
 
 export default defineEventHandler(async (event) => {
@@ -20,10 +20,12 @@ export default defineEventHandler(async (event) => {
       visible,
       write: () =>
         updateApprovals((approvals) => {
-          const classRecord = { approved: true, updated_at: updatedAt, digest: snapshot.cls.digest, approved_from: bulletin }
           approvals.layouts[key] = { approved: true, updated_at: updatedAt, digest: snapshot.digest }
+          const answer = { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], class: snapshot.cls.key }
+          if (!classApprovable(snapshot.cls.key)) return answer
+          const classRecord = { approved: true, updated_at: updatedAt, digest: snapshot.cls.digest, approved_from: bulletin }
           approvals.classes = { ...approvals.classes, [classKey(site, snapshot.cls.key)]: classRecord }
-          return { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], class: snapshot.cls.key, class_approval: classRecord }
+          return { ...answer, class_approval: classRecord }
         }),
     })
     if (!approved) throw siteNotFound(site)

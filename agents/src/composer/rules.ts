@@ -120,7 +120,7 @@ export const MONTH_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
 
 // A JMA drill bulletin (Control/Status 訓練) is shown with the marker in every language's headline; ja is the
 // Composer's, the other nine are the Writer's and the Verifier checks them (verifier/checks.ts DRILL_MARKERS).
-export const DRILL_PREFIX_JA = "【訓練】";
+export { DRILL_PREFIX_JA } from "../../../app/layout/gate";
 
 // A region that drops from a warning or advisory to a forecast (slight sea-level change) has its warning ended:
 // the screen it was shown must be cleared, and the headline names what ended. A forecast that arrives on its own

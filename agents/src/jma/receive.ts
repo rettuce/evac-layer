@@ -37,6 +37,11 @@ function writeReceiverState(siteId: string, state: ReceiverState, liveDir = LIVE
 
 export const LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
+// A live site shows only what JMA issued for real: a drill or test bulletin gets a row and no screen.
+export function liveSkipReason(alert: { status: string; bulletin_id: string }): string | undefined {
+  return alert.status === "normal" ? undefined : `${alert.status} bulletin (Control/Status ${alert.status === "drill" ? "訓練" : "試験"}): not shown on a live site`;
+}
+
 export interface RecordedBody { entry: IndexedEntry; file: string; code: string }
 
 export function recordedSince(since: string, feedDir = FEED_DIR): RecordedBody[] {
@@ -137,7 +142,7 @@ export async function receiveSite(args: {
     try {
       composed = await composeBulletin({
         entry, municipality: municipality!, readerRan, site, verifier: args.verifier, writer: args.writer, usage: args.usage, roots: args.roots,
-        skipIf: (s) => clearanceSkipReason(s, hazard, new Set(Object.keys(state.showing))),
+        skipIf: (s) => liveSkipReason(entry.alert) ?? clearanceSkipReason(s, hazard, new Set(Object.keys(state.showing))),
       });
     } catch (e) {
       fail(body, e);
