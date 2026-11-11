@@ -15,7 +15,7 @@ import { drillWordLangs } from "../verifier/checks.js";
 import { sameWriterMatch, type WriterMatch } from "./match.js";
 
 export { WRITER_DIR };
-const WRITER_ROLES = ["headline", "action", "languages"] as const;
+const WRITER_ROLES = ["action", "languages"] as const;
 const MAX_TOKENS = 16_000;
 
 export type WriterModel = "opus" | "sonnet";
@@ -70,7 +70,7 @@ export async function writeCells(args: {
   const instructions = [
     `テンプレート: ${args.situation.template}（表示レベル ${args.situation.level}${args.situation.cleared ? "・解除" : ""}）。書くセルは ${WRITER_ROLES.join("・")} だけ。languages は action と同じ内容を各言語で。`,
     `action セルには図記号 ${picto}（${actionPictogramMeaning(picto, args.situation.caution)}）が付く。action はこの図記号と同じ意味の行動として書く。`,
-    ...(args.situation.caution === "sea_level_change" ? ["この電文で警報・注意報は津波予報（若干の海面変動）に下がった。headline は解除、action は「海に入らない・海岸に近づかない」の意味で書く。"] : []),
+    ...(args.situation.caution === "sea_level_change" ? ["この電文で警報・注意報は津波予報（若干の海面変動）に下がった。action は「海に入らない・海岸に近づかない」の意味で書く。"] : []),
     ...(args.feedback?.length ? ["前回の出力への指摘（すべて直すこと）:", ...args.feedback.map((f) => `- ${f}`)] : []),
   ].join("\n");
   const msg = await args.client.messages.stream({
@@ -91,9 +91,6 @@ export async function writeCells(args: {
   const text = msg.content.find((b): b is Anthropic.TextBlock => b.type === "text")?.text ?? (() => { throw new WriterStop("Writer returned no text"); })();
   const raw = JSON.parse(text) as WriterOutput;
   const cells = WRITER_ROLES.map((role) => raw.cells.find((c) => c.role === role) ?? (() => { throw new WriterStop(`Writer output has no ${role} cell`); })());
-  // The headline is the JMA warning name verbatim (Meteorological Service Act art. 23); code sets it, not the model.
-  const top = [...areasFor(args.alert, args.municipalityId)].sort((a, b) => (b.level ?? 0) - (a.level ?? 0))[0];
-  cells[0] = { ...cells[0], text: { ...cells[0].text, ja: top?.kind_name || args.alert.raw_title } };
   const output = copyActionIntoLanguages({ cells });
   return { output, usage: costOf(args.model, `writer ${args.alert.bulletin_id}`, msg.usage), lint: lintWriter(output, args.situation.level) };
 }

@@ -42,13 +42,13 @@ function heavyRain(opts: { title: string; kind: string; kindCode: string; status
 const step = (alert: Alert, municipality: Municipality, site = "17204-test") =>
   writeForBulletin({ alert, municipality, situation: situationFor(alert, municipality.id), site: { id: site } }, { live: { client: noApi, model: "opus" }, persist: false, usage: [] });
 
-test("the match names what the Writer wrote from: the class, the status, the warning on screen and, for a flood forecast, the river", () => {
+test("the match names what the Writer wrote from: the class, the status and, for a flood forecast, the river; not the warning name", () => {
   assert.deepEqual(writerMatchFor(L4.alert, "05210", situationFor(L4.alert, "05210")), {
-    hazard: "flood", template: "evac-now", level: 4, status: "normal", warning: "レベル４氾濫危険警報", river: "子吉川",
+    hazard: "flood", template: "evac-now", level: 4, status: "normal", river: "子吉川",
   });
   const clear = heavyRain({ title: "石川県大雨警報・注意報", kind: "レベル２大雨注意報", kindCode: "10", status: "cleared", level: null, id: "VPWW55-202611011000-000000000001" });
   assert.deepEqual(writerMatchFor(clear, "17204", situationFor(clear, "17204")), {
-    hazard: "heavy_rain", template: "all-clear", level: 1, status: "normal", warning: "レベル２大雨注意報解除",
+    hazard: "heavy_rain", template: "all-clear", level: 1, status: "normal",
   });
 });
 
@@ -65,7 +65,7 @@ test("a record with a match is reused across Head/Titles, and only for the same 
   const clearAdvisory = heavyRain({ title: "新潟県大雨警報・注意報", kind: "レベル２大雨注意報", kindCode: "10", status: "cleared", level: null, id: "VPWW55-202611011000-000000000004" });
   saveWriterForClass("17204", "heavy_rain/all-clear/1", { model: "opus", output: wording("おわり"), bulletin_id: clearAdvisory.bulletin_id, issued_at: clearAdvisory.issued_at, raw_title: "石川県大雨警報・注意報", match: writerMatchFor(clearAdvisory, "17204", situationFor(clearAdvisory, "17204")) });
   const clearWarning = heavyRain({ title: "石川県大雨警報・注意報", kind: "レベル３大雨警報", kindCode: "03", status: "cleared", level: null, id: "VPWW55-202611021000-000000000005" });
-  await assert.rejects(step(clearWarning, wajima), /Writer API was called/, "the clearance of another warning is written anew even under the same Head/Title");
+  assert.equal((await step(clearWarning, wajima)).writerSource, `writer-class-cache:${clearAdvisory.bulletin_id}`, "the clearance of a warning takes the wording of an advisory's clearance");
   assert.equal((await step({ ...clearAdvisory, raw_title: "石川県大雨警報・注意報" }, wajima)).writerSource, `writer-class-cache:${clearAdvisory.bulletin_id}`);
 });
 

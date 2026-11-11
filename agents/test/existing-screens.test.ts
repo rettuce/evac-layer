@@ -9,7 +9,7 @@ import { loadMunicipality } from "../src/loop/municipality.js";
 import { runLoop } from "../src/loop/loop.js";
 import { staticVerifier } from "../src/loop/static-verifier.js";
 import { writeForBulletin } from "../src/writer/step.js";
-import { layoutDigest } from "../../app/layout/gate";
+import { apartFromHeadline, headlineIsTheTable } from "./headline-apart.js";
 import type { SiteFile } from "../src/sites.js";
 
 type IndexEntry = { bulletin_id: string; file: string; wmo_code: string; screen: boolean };
@@ -30,7 +30,7 @@ const reproducible = fs.readdirSync(LAYOUTS_DIR).flatMap((siteId) => {
   return index.entries.filter((e) => e.screen && fs.existsSync(xmlOf(e.file))).map((e) => ({ site, municipality: index.municipality, entry: e }));
 });
 
-test("the stored screens whose bulletins are in the fixtures are composed again byte for byte", { skip: reproducible.length ? false : "no stored screen has its bulletin here" }, async () => {
+test("the stored screens whose bulletins are in the fixtures are composed again as stored, but for the headline's translations, which are the table's", { skip: reproducible.length ? false : "no stored screen has its bulletin here" }, async () => {
   let normal = 0;
   for (const { site, municipality: id, entry } of reproducible) {
     const parsed = replayEntry(fs.readFileSync(xmlOf(entry.file)), entry.file, entry.wmo_code, id);
@@ -39,11 +39,14 @@ test("the stored screens whose bulletins are in the fixtures are composed again 
     const step = await writeForBulletin({ alert: parsed.alert, municipality, situation, site }, { persist: false, usage: [] });
     assert.equal(step.writerSource, "writer-cache", `${site.id} ${entry.bulletin_id}`);
     const result = await runLoop({ alert: parsed.alert, municipality, site, writer: step.writer, writerSource: step.writerSource, verifier: staticVerifier, reviser: step.reviser });
-    const composed = result.screens.map((s) => ({ shape: s.shape, body: JSON.stringify(s, null, 2) + "\n" }));
+    assert.equal(result.outcome, "pass", `${site.id} ${entry.bulletin_id}: ${result.reason}`);
+    const composed = new Map(result.screens.map((s) => [s.shape, JSON.stringify(s, null, 2) + "\n"]));
     const stored = storedFiles(path.join(LAYOUTS_DIR, site.id, entry.bulletin_id));
+    for (const { shape } of stored) assert.ok(headlineIsTheTable(composed.get(shape)!, parsed.alert, id), `${site.id} ${entry.bulletin_id} ${shape}`);
     if (parsed.alert.status !== "normal") continue;
     normal++;
-    assert.equal(layoutDigest(composed), layoutDigest(stored), `${site.id} ${entry.bulletin_id}`);
+    assert.deepEqual([...composed.keys()].sort(), stored.map((f) => f.shape).sort(), `${site.id} ${entry.bulletin_id}`);
+    for (const { shape, body } of stored) assert.equal(apartFromHeadline(composed.get(shape)!), apartFromHeadline(body), `${site.id} ${entry.bulletin_id} ${shape}`);
   }
   assert.ok(normal >= 5, `only ${normal} normal screens could be composed from the fixtures`);
 });

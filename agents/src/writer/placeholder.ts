@@ -1,10 +1,8 @@
 import type { WriterOutput } from "../composer/compose.js";
 import type { Lang } from "./request.js";
-import type { Alert } from "../jma/parse.js";
-import { tsunamiRegionsFor } from "../jma/regions.js";
 
-// Stand-in text while the Writer has no API key. Every line except the headline is marked 仮/draft so a
-// rendered screen can never pass for real guidance; the headline is the JMA warning name, used verbatim.
+// Stand-in text while the Writer has no API key. Every line is marked 仮/draft so a rendered screen can never pass for
+// real guidance; the headline is not the Writer's (the Composer sets it from the JMA dictionary table).
 export const PLACEHOLDER_ACTION: Record<string, Record<Lang, string>> = {
   "5": { ja: "【仮】安全確保", ja_easy: "【かり】 うえの かいへ", en: "[draft] Act now", zh_hans: "[草稿]确保安全", zh_hant: "[草稿]確保安全", ko: "[초안] 안전 확보", th: "[ร่าง] ปลอดภัย", vi: "[nháp] Giữ an toàn", fil: "[burador] Ligtas", id: "[draf] Amankan diri" },
   "4": { ja: "【仮】全員避難", ja_easy: "【かり】 みんな にげて", en: "[draft] Evacuate", zh_hans: "[草稿]全员避难", zh_hant: "[草稿]全員避難", ko: "[초안] 전원 대피", th: "[ร่าง] อพยพ", vi: "[nháp] Sơ tán", fil: "[burador] Lumikas", id: "[draf] Mengungsi" },
@@ -12,15 +10,10 @@ export const PLACEHOLDER_ACTION: Record<string, Record<Lang, string>> = {
   cleared: { ja: "【仮】警報解除", ja_easy: "【かり】 おわり", en: "[draft] Lifted", zh_hans: "[草稿]警报解除", zh_hant: "[草稿]警報解除", ko: "[초안] 경보 해제", th: "[ร่าง] ยกเลิก", vi: "[nháp] Đã gỡ bỏ", fil: "[burador] Inalis", id: "[draf] Dicabut" },
 };
 
-export function placeholderWriter(alert: Alert, municipalityId: string, level: number, cleared: boolean): WriterOutput {
-  const regions = new Set(tsunamiRegionsFor(municipalityId));
-  const mine = alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
-  const top = [...mine].sort((a, b) => (b.level ?? 0) - (a.level ?? 0))[0];
-  const headline = top?.kind_name || alert.raw_title;
+export function placeholderWriter(level: number, cleared: boolean): WriterOutput {
   const action = PLACEHOLDER_ACTION[cleared ? "cleared" : String(Math.min(5, Math.max(3, level)))];
   return {
     cells: [
-      { role: "headline", text: { ja: headline, ja_easy: "【かり】", en: "[draft]", zh_hans: "[草稿]", zh_hant: "[草稿]", ko: "[초안]", th: "[ร่าง]", vi: "[nháp]", fil: "[burador]", id: "[draf]" }, basis: "alert kind name (verbatim)" },
       { role: "action", text: action, basis: "placeholder: Writer not run (no API key)" },
       { role: "languages", text: action, basis: "placeholder: Writer not run (no API key)" },
     ],

@@ -307,7 +307,8 @@ test('a class approval opens a new bulletin of the same class whose headline, ti
   assert.notEqual(edited.cls.digest, approved.cls.digest)
   assert.equal(liveLayoutGate(approvals, 's1', 'B3', edited.digest, edited.cls), 'unapproved', 'one changed letter in the action is not the approved screen')
   const retranslated = classOf(floodScreen('B4', '2026-10-22T10:30:00+09:00', '高い ところへ にげて', 'Koyoshi River Flood Lv 5'))
-  assert.equal(liveLayoutGate(approvals, 's1', 'B4', retranslated.digest, retranslated.cls), 'unapproved', 'one changed letter in a translated headline is not the approved screen')
+  assert.equal(retranslated.cls.digest, approved.cls.digest)
+  assert.equal(liveLayoutGate(approvals, 's1', 'B4', retranslated.digest, retranslated.cls), 'ok', 'every language of the headline follows from the warning name through the JMA dictionary table, so none of them is part of the class')
 
   const revoked = {
     ...approvals,

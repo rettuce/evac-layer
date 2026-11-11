@@ -11,7 +11,7 @@ import type { Screen, ScreenVerdict, Verifier, VerifyContext } from "./types.js"
 import type Anthropic from "@anthropic-ai/sdk";
 import { visionCheck } from "../verifier/vision.js";
 import type { CallUsage, ModelKey } from "../reader/pricing.js";
-import { staticVerifier } from "./static-verifier.js";
+import { headlineTableFindings, staticVerifier } from "./static-verifier.js";
 
 // The renderer's /api/layout only serves .json files under its own repository root, so layouts are staged in
 // this worktree's tmp/ and the renderer must run from the same worktree.
@@ -40,7 +40,7 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
         const { state, samples, cells, north, scale, pngs } = await readScreen(browser, target, shape, { capture: Boolean(opts.vision) });
         const luminances = await sampleLuminance(browser, target, shape, opts.clock ?? "realtime");
         const reversals = countReversals(luminances);
-        const findings: Finding[] = [...base[i].findings.filter((f) => f.check !== "distance-duplicated" && f.check !== "direction-mismatch"), ...judgeState(state), ...judgeDropped(s.cells as LayoutCell[], state), ...judgeFonts(samples, scale, shape), ...judgeContent(cells), ...judgeNorthUp(north), ...(ctx ? [...judgeDrill(s.cells as LayoutCell[], ctx.alert.status), ...judgeDrillWordOutsideDrill(s.cells as LayoutCell[], ctx.alert.status)] : [])];
+        const findings: Finding[] = [...base[i].findings.filter((f) => f.check !== "distance-duplicated" && f.check !== "direction-mismatch"), ...judgeState(state), ...judgeDropped(s.cells as LayoutCell[], state), ...judgeFonts(samples, scale, shape), ...judgeContent(cells), ...judgeNorthUp(north), ...(ctx ? [...judgeDrill(s.cells as LayoutCell[], ctx.alert.status), ...judgeDrillWordOutsideDrill(s.cells as LayoutCell[], ctx.alert.status), ...headlineTableFindings(s.cells as LayoutCell[], ctx)] : [])];
         if (reversals > MAX_REVERSALS) findings.push({ check: "flicker", detail: `${reversals} luminance reversals of ≥10% within 1 s` });
         let note: string | undefined;
         if (opts.vision) {

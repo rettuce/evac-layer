@@ -5,8 +5,9 @@ import { NoRevision, type LoopFinding, type Reviser, type Screen, type Verifier 
 
 export const MAX_ATTEMPTS = 3;
 const WRITER_FIXABLE = new Set(["over-budget", "font-size", "overflow", "distance-duplicated", "bulletin-mismatch", "drill-marker"]);
-// The Composer writes the shelter and source cells from data, so a rewrite of Writer text cannot fix them.
-const WRITER_CELLS = new Set(["headline", "action", "direction", "languages"]);
+// The Composer writes the headline (JMA dictionary table), shelter and source cells from data, so a rewrite of Writer
+// text cannot fix them.
+const WRITER_CELLS = new Set(["action", "direction", "languages"]);
 // The action pictogram is fixed by the template and its meaning is given to the Writer, so a mismatch on the
 // action cell is the text's to fix; any other pictogram belongs to the Composer.
 // The renderer reports ja for the headline and every text the code writes, pictogram when only the pictogram

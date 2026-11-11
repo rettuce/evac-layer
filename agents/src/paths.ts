@@ -32,6 +32,8 @@ export const LIVE_DIR = path.join(DATA_DIR, "live");
 export const SYNTHETIC_DIR = path.join(DATA_DIR, "synthetic");
 export const APPROVALS_FILE = path.join(DATA_DIR, "approvals.json");
 export const TSUNAMI_REGIONS_FILE = path.join(DATA_DIR, "jma", "tsunami-regions.json");
+export const WARNING_NAMES_FILE = path.join(DATA_DIR, "jma", "warning-names.json");
+export const WARNING_NAMES_JA_EASY_FILE = path.join(DATA_DIR, "jma", "warning-names-ja-easy.json");
 
 export const RAW_DIR = path.resolve(REPO_ROOT, process.env.EVAC_RAW_DIR ?? "data/raw");
 export const FEED_DIR = path.resolve(REPO_ROOT, process.env.JMA_FEED_DIR ?? path.join(RAW_DIR, "jma-feed"));

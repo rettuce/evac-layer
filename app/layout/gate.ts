@@ -66,13 +66,10 @@ export function classApprovable(cls: string): boolean {
   return !/\/(drill|test)$/.test(cls)
 }
 
-function withoutJmaWarningNameAndSource({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
-  if (cell.role === 'source') return cell
-  if (cell.role === 'headline' && text) {
-    const { ja: _ja, ...translations } = text
-    return { ...cell, text: translations }
-  }
-  return { ...cell, text }
+// The headline in every language is the JMA warning name and its entry in JMA's multilingual dictionary, and the source
+// line is the issuer and issue time: both follow from the bulletin, so neither tells one screen of a class from another.
+function withoutWarningNameAndSource({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
+  return cell.role === 'source' || cell.role === 'headline' ? cell : { ...cell, text }
 }
 
 function withoutBulletin(layout: ClassedLayout): ClassedLayout {
@@ -80,7 +77,7 @@ function withoutBulletin(layout: ClassedLayout): ClassedLayout {
   return {
     ...layout,
     ...(layout.alert ? { alert } : {}),
-    ...(layout.cells ? { cells: layout.cells.map(withoutJmaWarningNameAndSource) } : {}),
+    ...(layout.cells ? { cells: layout.cells.map(withoutWarningNameAndSource) } : {}),
     ...(layout.sources ? { sources: layout.sources.map(({ bulletin_id, ...source }) => (source.type === 'jma' ? source : { ...source, bulletin_id })) } : {}),
   }
 }
@@ -124,8 +121,8 @@ export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale' 
 export type ApprovedBy = 'bulletin' | 'class' | null
 export interface LayoutClass { key: string; digest: string; checked: boolean }
 
-// The class digest leaves the JMA warning name out, so only a bulletin whose own screens passed the browser check
-// (where an overflowing headline is caught) may go out on a class approval.
+// The class digest leaves the headline out, so only a bulletin whose own screens passed the browser check (where an
+// overflowing headline is caught) may go out on a class approval.
 export interface CheckReport { outcome?: string; verifier?: string; layout_digest?: string; browser_skipped?: string[] }
 
 export function passedBrowserCheck(report: CheckReport | undefined, layoutDigestNow: string): boolean {

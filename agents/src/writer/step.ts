@@ -20,7 +20,7 @@ export async function writeForBulletin(
   opts: { live?: LiveWriter; persist: boolean; usage: CallUsage[]; newAtSite?: boolean },
 ): Promise<WriterStep> {
   const { alert, municipality, situation } = ctx;
-  const placeholder: WriterStep = { writer: placeholderWriter(alert, municipality.id, situation.level, situation.cleared), writerSource: "placeholder", reviser: liveWriterReviser, afterLoop: () => {} };
+  const placeholder: WriterStep = { writer: placeholderWriter(situation.level, situation.cleared), writerSource: "placeholder", reviser: liveWriterReviser, afterLoop: () => {} };
   const cls = screenClassFor(alert.hazard, situation);
   const match = writerMatchFor(alert, municipality.id, situation);
   const approved = approvedWriterForClass(ctx.site.id, municipality.id, cls);
