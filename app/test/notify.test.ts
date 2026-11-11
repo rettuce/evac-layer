@@ -134,10 +134,24 @@ describe('notice text', () => {
     const { text } = slackMessage(named, NOW)
     const links = text.match(/https?:\/\/\S+/g) ?? []
     assert.deepEqual(links.map((link) => link.replace(/>$/, '')), ['https://ops.example.org/admin', 'https://ops.example.org/admin'])
-    assert.ok(text.includes('example.com/x'), 'the rest of the name is kept')
+    assert.ok(text.includes('example[.]com/x'), 'the rest of the name is kept')
     const mail = mailMessage(named, NOW)
     assert.deepEqual(mail.text.match(/https?:\/\/\S+/g), ['https://ops.example.org/admin', 'https://ops.example.org/admin'])
     assert.ok(!/https?:\/\//.test(mail.subject))
+  })
+
+  test('a host name in registered text is shown broken, so Slack does not link it either; numbers with a dot stay as they are', () => {
+    const name = 'evil.example.com/login と https://a-b.co.jp と No.3 ホール と 1.5km 先'
+    const named = facts({ site: { id: SITE, name, municipality_id: MUNICIPALITY }, admin_url: 'https://ops.example.org/admin' })
+    const { text } = slackMessage(named, NOW)
+    const { subject, text: body } = mailMessage(named, NOW)
+    for (const out of [text, subject, body]) {
+      assert.ok(out.includes('evil[.]example[.]com/login'), out)
+      assert.ok(out.includes('https[:]//a-b[.]co[.]jp'), out)
+      assert.ok(out.includes('No.3 ホール') && out.includes('1.5km 先'), out)
+      assert.ok(!/evil\.example|a-b\.co/.test(out))
+    }
+    for (const out of [text, body]) assert.ok(out.includes('https://ops.example.org/admin'), 'the admin URL stays a link')
   })
 
   test('direction and zero-width characters are removed and a long name is cut between characters', () => {

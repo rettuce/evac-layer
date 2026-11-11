@@ -63,9 +63,11 @@ function plain(value: string): string {
   return points.length > MAX_FIELD_LENGTH ? `${points.slice(0, MAX_FIELD_LENGTH).join('')}…` : flat
 }
 
-// A URL a facility registered is shown broken, so that Slack does not make it a link.
+const HOST_NAME = /(?<![A-Za-z0-9-])(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}(?![A-Za-z0-9-])/g
+
+// A URL or a host name a facility registered is shown broken, so that Slack does not make it a link.
 export function oneLine(value: string): string {
-  return plain(value).replace(/:\/\//g, '[:]//')
+  return plain(value).replace(/:\/\//g, '[:]//').replace(HOST_NAME, (host) => host.replace(/\./g, '[.]'))
 }
 
 // Slack reads <…> as a mention or a link and &…; as an entity; escaped, they are shown as typed.
