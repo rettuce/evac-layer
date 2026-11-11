@@ -363,7 +363,7 @@ describe('site registration under contention, on a server that holds facilities'
     assert.ok(Date.parse(after.location_updated_at) > Date.parse(before))
   })
 
-  test('an export that finishes after its site was deleted and taken by another facility leaves nothing behind', async () => {
+  test('an export still running when its site is deleted is stopped and leaves nothing behind for the facility that takes the id', async () => {
     const id = 'export-hall'
     assert.equal((await put(id, placeIn(SOLO_MUNI), TOKEN_A)).status, 201)
     await writeScreen(dataDir, id, SOLO_MUNI, 'TEST-EX-1')
@@ -373,8 +373,8 @@ describe('site registration under contention, on a server that holds facilities'
 
     assert.equal((await del(`/api/admin/sites/${id}`, TOKEN_A)).status, 204)
     assert.equal((await put(id, placeIn(SOLO_MUNI), TOKEN_B)).status, 201)
-    await until(() => readFile(calls, 'utf8'), (text) => text.includes(`done ${id}`), 'export done')
-    await sleep(300)
+    await sleep(1500)
+    assert.equal((await readFile(calls, 'utf8')).includes(`done ${id}`), false, 'the export was stopped before it finished')
     assert.equal(existsSync(join(distDir, id)), false, 'no screens of the old site')
     assert.equal(existsSync(join(dataDir, 'live', `${id}.export.json`)), false, 'no export record of the old site')
   })
