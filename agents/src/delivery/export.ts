@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import puppeteer, { type Browser } from "puppeteer-core";
 import { EXPORT_DIGEST_FILE } from "../../../app/layout/feed";
-import { SHAPES } from "../../../app/layout/shapes";
 import { isSyntheticBulletinId } from "../../../app/layout/replay";
 import type { Shape } from "../../../app/layout/types";
 import { SHAPE_ORDER } from "../composer/rules.js";
@@ -10,13 +9,10 @@ import { LAYOUTS_DIR, REPORTS_DIR, chromePath } from "../paths.js";
 import { findSite as findSiteFile, siteMunicipality, SiteNotFound, type SiteFile } from "../sites.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { exportGate, layoutClassOf, layoutDigestOf, readApprovals } from "./gate.js";
+import { ExportStop, captureShape } from "./capture.js";
 import { INLINE_PAGE_SCRIPT } from "./inline-page.js";
 
-const CAPTURE_SCALE: Partial<Record<Shape, number>> = { pillar: 0.5 };
-const READY_TIMEOUT_MS = 30_000;
-const SETTLE_MS = 500;
-
-export class ExportStop extends Error {}
+export { ExportStop };
 
 interface IndexEntry { bulletin_id: string; issued_at: string; screen: boolean; template?: string; display_level?: number; synthetic?: boolean; status?: string }
 
@@ -47,24 +43,14 @@ async function renderShape(browser: Browser, args: { baseUrl: string; site: stri
   if (!v.ok) throw new ExportStop(`${args.layoutFile} fails layout.schema.json:\n${formatErrors(v.errors)}`);
   fs.writeFileSync(path.join(dir, `${shape}.json`), JSON.stringify(layout, null, 2) + "\n");
   const live = `/api/live-layout?${new URLSearchParams({ municipality: args.municipality, bulletin: bulletinId, shape, site: args.site })}`;
-  const page = await browser.newPage();
-  try {
-    await page.setViewport({ ...SHAPES[shape], deviceScaleFactor: CAPTURE_SCALE[shape] ?? 1 });
-    await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
-    await page.goto(`${args.baseUrl}/screen?${new URLSearchParams({ shape, src: live })}`, { waitUntil: "networkidle0" });
-    const failed = await page.$('[data-error]');
-    if (failed) throw new ExportStop(`renderer refused ${bulletinId} ${shape}: ${await failed.evaluate((el) => el.textContent)}`);
-    await page.waitForSelector('.evac-screen[data-ready="1"]', { timeout: READY_TIMEOUT_MS });
-    const overflow = await page.$eval(".evac-screen", (el) => (el as HTMLElement).dataset.overflow ?? "");
-    if (overflow) throw new ExportStop(`${bulletinId} ${shape} overflows (${overflow}); re-run the Verifier before exporting`);
-    await new Promise((r) => setTimeout(r, SETTLE_MS));
-    await page.screenshot({ path: path.join(dir, `${shape}.png`), type: "png" });
-    const { html, fontsKept } = (await page.evaluate(INLINE_PAGE_SCRIPT)) as { html: string; fontsKept: number };
-    fs.writeFileSync(path.join(dir, `${shape}.html`), html);
-    args.log(`${bulletinId} ${shape}: png + html (${fontsKept} font subsets, ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB)`);
-  } finally {
-    await page.close();
-  }
+  await captureShape(browser, {
+    baseUrl: args.baseUrl, shape, src: live, png: path.join(dir, `${shape}.png`), label: `${bulletinId} ${shape}`,
+    after: async (page) => {
+      const { html, fontsKept } = (await page.evaluate(INLINE_PAGE_SCRIPT)) as { html: string; fontsKept: number };
+      fs.writeFileSync(path.join(dir, `${shape}.html`), html);
+      args.log(`${bulletinId} ${shape}: png + html (${fontsKept} font subsets, ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB)`);
+    },
+  });
   return { files: { json: `${bulletinId}/${shape}.json`, png: `${bulletinId}/${shape}.png`, html: `${bulletinId}/${shape}.html` }, sources: layout.sources };
 }
 
