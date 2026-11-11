@@ -29,6 +29,8 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   const layoutsRoot = args.roots?.layouts ?? LAYOUTS_DIR;
   const reportsRoot = args.roots?.reports ?? REPORTS_DIR;
   migrateBulletinStatus(args.site.id, { layoutsDir: layoutsRoot });
+  const siteDir = path.join(layoutsRoot, args.site.id);
+  const shownBefore = new Set(fs.existsSync(siteDir) ? fs.readdirSync(siteDir) : []);
   if (persist) {
     fs.rmSync(path.join(layoutsRoot, args.site.id), { recursive: true, force: true });
     fs.rmSync(path.join(reportsRoot, args.site.id), { recursive: true, force: true });
@@ -59,7 +61,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
       args.onEvent?.({ municipality: municipality.id, issued_at: e.issued_at, outcome: "no-screen", reason });
       continue;
     }
-    const step = await writeForBulletin({ alert: e.alert, municipality, situation, site: args.site }, { live, persist, usage: writerUsage });
+    const step = await writeForBulletin({ alert: e.alert, municipality, situation, site: args.site }, { live, persist, usage: writerUsage, newAtSite: !shownBefore.has(e.bulletin_id) });
     if (step.writerSource === "placeholder") usedPlaceholder = true;
     const result = await runLoop({
       alert: e.alert, municipality, site: args.site,

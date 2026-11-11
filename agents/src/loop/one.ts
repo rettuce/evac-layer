@@ -71,7 +71,10 @@ export async function composeBulletin(args: {
   if (skipped) return { ...noScreen(args, row, skipped), situation };
   const step: WriterStep = args.writer.kind === "fixture"
     ? { writer: args.writer.writer, writerSource: args.writer.source, reviser: args.writer.reviser, afterLoop: () => {} }
-    : await writeForBulletin({ alert: e.alert, municipality, situation, site: args.site }, { live: args.writer.kind === "live" ? args.writer.live : undefined, persist: args.persistWriter ?? true, usage: args.usage ?? [] });
+    : await writeForBulletin({ alert: e.alert, municipality, situation, site: args.site }, {
+      live: args.writer.kind === "live" ? args.writer.live : undefined, persist: args.persistWriter ?? true, usage: args.usage ?? [],
+      newAtSite: !fs.existsSync(path.join(args.roots?.layouts ?? LAYOUTS_DIR, args.site.id, e.bulletin_id)),
+    });
   const maxAttempts = args.maxAttempts ?? MAX_ATTEMPTS;
   const result = await runLoop({ alert: e.alert, municipality, site: args.site, writer: step.writer, writerSource: step.writerSource, verifier: args.verifier, reviser: step.reviser, maxAttempts });
   step.afterLoop(result);

@@ -10,7 +10,8 @@ const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "evac-generation-"));
 for (const dir of ["jma", "municipalities"]) fs.cpSync(path.join(repoData, dir), path.join(dataDir, dir), { recursive: true });
 process.env.EVAC_DATA_DIR = dataDir;
 
-const { APPROVALS_FILE, FEED_DIR, LAYOUTS_DIR, REPORTS_DIR, SYNTHETIC_DIR } = await import("../src/paths.js");
+const { APPROVALS_FILE, FEED_DIR, LAYOUTS_DIR, REPORTS_DIR, SYNTHETIC_DIR, WRITER_DIR } = await import("../src/paths.js");
+const { cachedWriterRecord } = await import("../src/writer/live.js");
 const { generateSite, generationFile } = await import("../src/loop/generation.js");
 const { classListing } = await import("../src/jma/synthetic-classes.js");
 const { synthesizeXml, TEMPLATES_DIR } = await import("../src/jma/synthetic.js");
@@ -244,4 +245,30 @@ test("the wording of a class approved from a synthetic bulletin is found after a
   assert.equal(record?.bulletin_id, from);
   assert.ok(record?.match);
   fs.writeFileSync(indexFile, JSON.stringify(index));
+});
+
+test("a site takes its approved class wording over another site's record for a bulletin it has no screen for yet", { skip }, async () => {
+  const other = (easy: string): WriterOutput => ({ cells: WORDING["evac-now"]!.cells.map((c) => (c.role === "headline" ? c : { ...c, text: { ...c.text, ja_easy: easy } })) });
+  const clientFor = (output: WriterOutput) => ({ messages: { stream: () => ({ finalMessage: async () => ({ stop_reason: "end_turn", content: [{ type: "text", text: JSON.stringify({ cells: output.cells }) }], usage: { input_tokens: 1, output_tokens: 1 } }) }) } }) as unknown as Anthropic;
+  const siteA: SiteFile = { ...KASHIWAZAKI, id: "15205-site-a" };
+  const siteB: SiteFile = { ...KASHIWAZAKI, id: "15205-site-b" };
+  const real = "bodies/20261031/20261031093903_0_VPWW56_150000.xml";
+  const body = { name: path.basename(real), xml: fs.readFileSync(path.join(FEED_DIR, real)), updated: "2026-10-31T09:39:03Z" };
+  const feedDir = feedOf([body]);
+  for (const f of fs.readdirSync(path.join(WRITER_DIR, "15205")).filter((n) => n.startsWith("SYN-") || n === path.basename(real))) fs.rmSync(path.join(WRITER_DIR, "15205", f));
+  fs.rmSync(path.join(WRITER_DIR, "15205", "class"), { recursive: true, force: true });
+  const roundA = await receiveSite({ site: siteA, verifier: checkedVerifier, writer: { kind: "live", live: { client: clientFor(other("いますぐ にげて")), model: "opus" } }, usage: [], initialSince: "2026-10-01T00:00:00Z", feedDir, liveDir: fs.mkdtempSync(path.join(os.tmpdir(), "evac-a-")) });
+  assert.deepEqual(roundA.bulletins.map((b) => b.outcome), ["pass"]);
+  assert.equal(cachedWriterRecord("15205", roundA.bulletins[0]!.entry.bulletin_id)!.output.cells[1]!.text.ja_easy, "いますぐ にげて");
+
+  const g = await generateSite({ site: siteB, classes: ["landslide/evac-now/4"], verifier: checkedVerifier, writer: { kind: "live", live: { client: clientFor(other("すぐに にげて")), model: "opus" } } });
+  const synthetic = g.classes[0]!.bulletin_id!;
+  const files = storedFiles(siteB.id, synthetic);
+  const approvals = JSON.parse(fs.readFileSync(APPROVALS_FILE, "utf8"));
+  approvals.classes[`${siteB.id}/landslide/evac-now/4`] = { approved: true, updated_at: "2026-11-11T00:00:00Z", digest: classDigest(files), approved_from: synthetic };
+  fs.writeFileSync(APPROVALS_FILE, JSON.stringify(approvals));
+
+  const rows = await receiveAndGate(siteB, [body], new Map([["landslide/evac-now/4", { cls: "landslide/evac-now/4", digest: classDigest(files), from: synthetic }]]));
+  assert.deepEqual(rows.map((r) => [r.cls, r.matches, r.by]), [["landslide/evac-now/4", true, "class"]]);
+  assert.equal(cachedWriterRecord("15205", roundA.bulletins[0]!.entry.bulletin_id)!.output.cells[1]!.text.ja_easy, "いますぐ にげて", "site A's record of the bulletin is kept");
 });

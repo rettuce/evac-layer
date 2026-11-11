@@ -17,24 +17,27 @@ export interface WriterStep { writer: WriterOutput; writerSource: string; revise
 
 export async function writeForBulletin(
   ctx: { alert: Alert; municipality: Municipality; situation: Situation; site: { id: string } },
-  opts: { live?: LiveWriter; persist: boolean; usage: CallUsage[] },
+  opts: { live?: LiveWriter; persist: boolean; usage: CallUsage[]; newAtSite?: boolean },
 ): Promise<WriterStep> {
   const { alert, municipality, situation } = ctx;
   const placeholder: WriterStep = { writer: placeholderWriter(alert, municipality.id, situation.level, situation.cleared), writerSource: "placeholder", reviser: liveWriterReviser, afterLoop: () => {} };
-  const own = cachedWriterRecord(municipality.id, alert.bulletin_id);
-  const cached = own && recordedStatus(own) === alert.status ? own.output : undefined;
   const cls = screenClassFor(alert.hazard, situation);
   const match = writerMatchFor(alert, municipality.id, situation);
-  const classCached = cached
-    ? undefined
-    : [approvedWriterForClass(ctx.site.id, municipality.id, cls), classWriterRecord(municipality.id, cls, { siteId: ctx.site.id })].find((r) => r && writerCacheFitsBulletin(r, match));
+  const approved = approvedWriterForClass(ctx.site.id, municipality.id, cls);
+  const approvedFits = approved && writerCacheFitsBulletin(approved, match) ? approved : undefined;
+  // The bulletin's own record is shared by the municipality's sites; a site that has not shown the bulletin yet takes
+  // the wording its own class approval was given to, or its screens could never match that approval.
+  const shared = cachedWriterRecord(municipality.id, alert.bulletin_id);
+  const own = opts.newAtSite && approvedFits ? undefined : shared;
+  const cached = own && recordedStatus(own) === alert.status ? own.output : undefined;
+  const classCached = cached ? undefined : approvedFits ?? [classWriterRecord(municipality.id, cls, { siteId: ctx.site.id })].find((r) => r && writerCacheFitsBulletin(r, match));
   const fixed = (writer: WriterOutput, writerSource: string): WriterStep => ({ writer, writerSource, reviser: liveWriterReviser, afterLoop: () => {} });
   if (classCached) {
     return {
       ...fixed(classCached.output, `writer-class-cache:${classCached.bulletin_id}`),
       match,
       afterLoop(result) {
-        if (opts.persist && result.outcome === "pass") saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [], status: alert.status, match });
+        if (opts.persist && result.outcome === "pass" && !(shared && !own)) saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [], status: alert.status, match });
       },
     };
   }
