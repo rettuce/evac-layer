@@ -69,13 +69,10 @@ test("a record with a match is reused across Head/Titles, and only for the same 
   assert.equal((await step({ ...clearAdvisory, raw_title: "石川県大雨警報・注意報" }, wajima)).writerSource, `writer-class-cache:${clearAdvisory.bulletin_id}`);
 });
 
-test("a record without a match keeps the old rule: same Head/Title, caution and status", async () => {
+test("a record without a match whose bulletin cannot be found is not reused, even under the same Head/Title", async () => {
   const old = heavyRain({ title: "石川県大雨警報・注意報", kind: "レベル４大雨危険警報", kindCode: "43", status: "issued", level: 4, id: "VPWW55-202610011000-000000000006" });
   saveWriterForClass("17204", "heavy_rain/evac-now/4", { model: "opus", output: wording("ふるい"), bulletin_id: old.bulletin_id, issued_at: old.issued_at, raw_title: old.raw_title, status: "normal" });
-  const sameTitle = await step({ ...old, bulletin_id: "VPWW55-202611031000-000000000007" }, wajima);
-  assert.equal(sameTitle.writerSource, `writer-class-cache:${old.bulletin_id}`);
-  assert.equal(sameTitle.match, undefined, "a reuse under the old rule passes no match on");
-  await assert.rejects(step({ ...old, raw_title: "新潟県大雨警報・注意報" }, wajima), /Writer API was called/);
+  await assert.rejects(step({ ...old, bulletin_id: "VPWW55-202611031000-000000000007" }, wajima), /Writer API was called/);
 });
 
 test("a flood forecast on another river is written anew", async () => {

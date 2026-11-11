@@ -162,8 +162,7 @@ export function saveWriterForClass(municipalityId: string, cls: string, record: 
   fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
 }
 
-// Records written before the match was kept are reused only for the same Head/Title, caution and status, as then.
-export function writerCacheFitsBulletin(record: ClassWriterRecord, alert: Alert, situation: Situation, match: WriterMatch): boolean {
-  if (record.match) return sameWriterMatch(record.match, match);
-  return record.raw_title === alert.raw_title && record.caution === situation.caution && recordedStatus(record) === alert.status;
+// Wording goes to another bulletin only by its match; a record without one has it restored first (class-cache.ts).
+export function writerCacheFitsBulletin(record: ClassWriterRecord, match: WriterMatch): boolean {
+  return record.match !== undefined && sameWriterMatch(record.match, match);
 }

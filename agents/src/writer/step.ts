@@ -7,8 +7,8 @@ import { liveWriterReviser, writerApiReviser } from "../loop/revisers.js";
 import type { Reviser } from "../loop/types.js";
 import type { CallUsage } from "../reader/pricing.js";
 import { placeholderWriter } from "./placeholder.js";
-import { approvedWriterForClass } from "./class-cache.js";
-import { cachedWriterRecord, cachedWriterForClass, recordedStatus, writerCacheFitsBulletin, saveWriter, screenClassFor, writeCellsUntilClean, type WriterModel } from "./live.js";
+import { approvedWriterForClass, classWriterRecord } from "./class-cache.js";
+import { cachedWriterRecord, recordedStatus, writerCacheFitsBulletin, saveWriter, screenClassFor, writeCellsUntilClean, type WriterModel } from "./live.js";
 import { writerMatchFor, type WriterMatch } from "./match.js";
 
 export interface LiveWriter { client: Anthropic; model: WriterModel }
@@ -27,14 +27,14 @@ export async function writeForBulletin(
   const match = writerMatchFor(alert, municipality.id, situation);
   const classCached = cached
     ? undefined
-    : [approvedWriterForClass(ctx.site.id, municipality.id, cls), cachedWriterForClass(municipality.id, cls)].find((r) => r && writerCacheFitsBulletin(r, alert, situation, match));
+    : [approvedWriterForClass(ctx.site.id, municipality.id, cls), classWriterRecord(municipality.id, cls, { siteId: ctx.site.id })].find((r) => r && writerCacheFitsBulletin(r, match));
   const fixed = (writer: WriterOutput, writerSource: string): WriterStep => ({ writer, writerSource, reviser: liveWriterReviser, afterLoop: () => {} });
   if (classCached) {
     return {
       ...fixed(classCached.output, `writer-class-cache:${classCached.bulletin_id}`),
-      ...(classCached.match ? { match: classCached.match } : {}),
+      match,
       afterLoop(result) {
-        if (opts.persist && result.outcome === "pass") saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [], status: alert.status, ...(classCached.match ? { match: classCached.match } : {}) });
+        if (opts.persist && result.outcome === "pass") saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [], status: alert.status, match });
       },
     };
   }
