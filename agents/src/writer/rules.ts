@@ -36,7 +36,6 @@ export const EASY_JA_RULES: readonly EasyJaRule[] = [
 // Project conventions layered on the guideline for signage, where ruby cannot be relied on at reading distance.
 export const SIGNAGE_CONVENTIONS_JA: readonly string[] = [
   "ja_easy は ひらがな・カタカナ で書き、文節の あいだを 半角スペースで 区切る（契約 v0 の例「すぐ たかい ところへ にげて」）",
-  "見出しの ja は気象庁の警報名をそのまま使う（気象業務法 23 条: 電文の本質を変えない）",
   "画面形状ごとの文字数予算を超えない（予算は Composer が渡す）",
   "action に市町村の避難情報の名称（高齢者等避難・避難指示・緊急安全確保）をそのまま書かない。電文は気象庁の警報で、市町村が発令したとは限らないため。行動として書く（例: 高齢者等は避難・危険な場所から避難）",
   "警戒レベル5（緊急安全確保）では「にげる」「ひなん」を使わず、いまいる場所で命を守る行動（たかい ところへ・うえの かいへ）を書く。避難場所への移動がかえって危険な段階のため（内閣府の避難情報の考え方。プロジェクトの取り決め）",

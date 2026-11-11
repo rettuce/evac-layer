@@ -36,7 +36,7 @@ test("a synthetic bulletin is never live, whatever its approvals", () => {
   assert.equal(fs.existsSync(path.join(dir, `${SITE}.json`)), false);
   const at = "2026-11-11T00:00:00Z";
   const approvals = { version: "0.1" as const, layouts: { [`${SITE}/${SYN}`]: { approved: true, updated_at: at, digest: "sha256:a" } }, sites: { [SITE]: { auto_publish: true, updated_at: at } }, classes: { [`${SITE}/landslide/evac-now/4`]: { approved: true, updated_at: at, digest: "sha256:c", approved_from: SYN } } };
-  assert.deepEqual(liveLayoutGateWith(approvals, SITE, SYN, "sha256:a", { key: "landslide/evac-now/4", digest: "sha256:c", checked: true }), { gate: "synthetic", by: null });
+  assert.deepEqual(liveLayoutGateWith(approvals, SITE, SYN, "sha256:a", { key: "landslide/evac-now/4", digest: "sha256:c", checked: true, headline: true }), { gate: "synthetic", by: null });
   assert.equal(liveLayoutGateWith({ ...approvals, layouts: { [`${SITE}/${REAL}`]: approvals.layouts[`${SITE}/${SYN}`] } }, SITE, REAL, "sha256:a").gate, "ok");
 });
 

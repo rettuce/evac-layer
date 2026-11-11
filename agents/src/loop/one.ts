@@ -14,7 +14,7 @@ import type { Reviser, Verifier } from "./types.js";
 
 export type IndexRow = Record<string, unknown> & { issued_at: string; bulletin_id: string };
 
-export const PLACEHOLDER_NOTE = "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名をそのまま使い、それ以外は【仮】/[draft] のプレースホルダ。";
+export const PLACEHOLDER_NOTE = "文言は仮: Writer は API キー未設定のため未実行。見出しは気象庁の警報名と気象庁「多言語辞書」の対訳で組み、それ以外は【仮】/[draft] のプレースホルダ。";
 export const READER_MISSING_NOTE = "自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。";
 
 export function bulletinRow(e: ReplayEntry) {

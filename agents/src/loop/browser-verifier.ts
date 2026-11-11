@@ -6,7 +6,7 @@ import puppeteer, { type Browser } from "puppeteer-core";
 import type { Shape } from "../../../app/layout/types";
 import { TMP_DIR, chromePath } from "../paths.js";
 import { readScreen, sampleLuminance, type Clock } from "../verifier/browser.js";
-import { MAX_REVERSALS, countReversals, judgeContent, judgeDrill, judgeDrillWordOutsideDrill, judgeDropped, judgeFonts, judgeNorthUp, judgeState, type Finding } from "../verifier/checks.js";
+import { MAX_REVERSALS, countReversals, judgeContent, judgeDropped, judgeFonts, judgeNorthUp, judgeState, type Finding } from "../verifier/checks.js";
 import type { Screen, ScreenVerdict, Verifier, VerifyContext } from "./types.js";
 import type Anthropic from "@anthropic-ai/sdk";
 import { visionCheck } from "../verifier/vision.js";
@@ -23,15 +23,15 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
     rendersScreens: true,
     skippedShapes: opts.skipShapes ?? [],
     async verify(screens: Screen[], ctx?: VerifyContext) {
-      const base = await staticVerifier.verify(screens);
-      browser ??= await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
-      fs.mkdirSync(stageDir, { recursive: true });
+      const base = await staticVerifier.verify(screens, ctx);
       const out: ScreenVerdict[] = [];
       for (const [i, s] of screens.entries()) {
         if (opts.skipShapes?.includes(s.shape)) {
           out.push({ ...base[i], note: `browser and vision checks skipped for ${s.shape}; static checks only` });
           continue;
         }
+        browser ??= await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
+        fs.mkdirSync(stageDir, { recursive: true });
         const body = JSON.stringify(s);
         const file = path.join(stageDir, `${crypto.createHash("sha256").update(body).digest("hex").slice(0, 16)}.json`);
         fs.writeFileSync(file, body);
@@ -40,7 +40,7 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
         const { state, samples, cells, north, scale, pngs } = await readScreen(browser, target, shape, { capture: Boolean(opts.vision) });
         const luminances = await sampleLuminance(browser, target, shape, opts.clock ?? "realtime");
         const reversals = countReversals(luminances);
-        const findings: Finding[] = [...base[i].findings.filter((f) => f.check !== "distance-duplicated" && f.check !== "direction-mismatch"), ...judgeState(state), ...judgeDropped(s.cells as LayoutCell[], state), ...judgeFonts(samples, scale, shape), ...judgeContent(cells), ...judgeNorthUp(north), ...(ctx ? [...judgeDrill(s.cells as LayoutCell[], ctx.alert.status), ...judgeDrillWordOutsideDrill(s.cells as LayoutCell[], ctx.alert.status)] : [])];
+        const findings: Finding[] = [...base[i].findings.filter((f) => f.check !== "distance-duplicated" && f.check !== "direction-mismatch"), ...judgeState(state), ...judgeDropped(s.cells as LayoutCell[], state), ...judgeFonts(samples, scale, shape), ...judgeContent(cells), ...judgeNorthUp(north)];
         if (reversals > MAX_REVERSALS) findings.push({ check: "flicker", detail: `${reversals} luminance reversals of ≥10% within 1 s` });
         let note: string | undefined;
         if (opts.vision) {
@@ -50,7 +50,7 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
           findings.push(...v.findings);
           note = v.note;
         }
-        out.push({ shape: s.shape, ok: findings.length === 0, findings, ...(note ? { note } : {}) });
+        out.push({ shape: s.shape, ok: findings.length === 0, findings, ...(note ? { note } : {}), ...(base[i].headline_table ? { headline_table: base[i].headline_table } : {}) });
       }
       return out;
     },

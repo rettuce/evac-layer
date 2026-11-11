@@ -4,5 +4,11 @@
   "lat": 37.388763,
   "lng": 136.906418,
   "facing_deg": 0,
-  "note": "Illustrative demo screen near 道の駅輪島 ふらっと訪夢 (centroid of 河井町20番 from the GSI address search, not a GSI-listed facility); the viewer is assumed to face north. Not a real installation."
+  "note": "Illustrative demo screen near 道の駅輪島 ふらっと訪夢 (centroid of 河井町20番 from the GSI address search, not a GSI-listed facility); the viewer is assumed to face north. Not a real installation.",
+  "replay": {
+    "municipality": "17204",
+    "from": "2016-09-01T07:00+09:00",
+    "to": "2016-09-01T10:00+09:00",
+    "speed": 120
+  }
 }

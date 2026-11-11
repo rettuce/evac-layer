@@ -118,8 +118,9 @@ function categoryOfKind(code: string): TsunamiCategory {
 // English for the source line only; the Writer never sees the municipality name, so romanisation lives here.
 export const MONTH_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
 
-// A JMA drill bulletin (Control/Status 訓練) is shown with the marker in every language's headline; ja is the
-// Composer's, the other nine are the Writer's and the Verifier checks them (verifier/checks.ts DRILL_MARKERS).
+// A JMA drill bulletin (Control/Status 訓練) is shown with the drill word in every language of the headline (code
+// writes them all, headlineTable.ts) and in every language but ja of the Writer's cells; the Verifier checks both
+// (verifier/checks.ts DRILL_MARKERS).
 export { DRILL_PREFIX_JA } from "../../../app/layout/gate";
 
 // A region that drops from a warning or advisory to a forecast (slight sea-level change) has its warning ended:

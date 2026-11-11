@@ -13,6 +13,7 @@ process.env.EVAC_DATA_DIR = dataDir;
 
 const { APPROVALS_FILE, FEED_DIR, LAYOUTS_DIR, WRITER_DIR } = await import("../src/paths.js");
 const { situationFor } = await import("../src/composer/rules.js");
+const { headlineSource } = await import("../src/composer/headline.js");
 const { replayEntry } = await import("../src/jma/replay.js");
 const { loadMunicipality } = await import("../src/loop/municipality.js");
 const { runLoop } = await import("../src/loop/loop.js");
@@ -40,9 +41,13 @@ function withKind(file: string, cityCode: string, kind: { name: string; code: st
   return xml.replace(/<ReportDateTime>[^<]*</, "<ReportDateTime>2026-11-20T03:10:00+09:00<");
 }
 
+// Stored screens predate the dictionary source a screen carries now, so they are compared as composed today.
 function approveFrom(siteId: string, bulletinId: string): { cls: string; digest: string } {
   const dir = path.join(LAYOUTS_DIR, siteId, bulletinId);
-  const files = fs.readdirSync(dir).map((f) => ({ shape: f.slice(0, -5), body: fs.readFileSync(path.join(dir, f), "utf8") }));
+  const files = fs.readdirSync(dir).map((f) => {
+    const layout = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
+    return { shape: f.slice(0, -5), body: JSON.stringify({ ...layout, sources: [...layout.sources, headlineSource()] }, null, 2) + "\n" };
+  });
   const cls = screenClass(JSON.parse(files[0]!.body));
   const approvals = fs.existsSync(APPROVALS_FILE) ? JSON.parse(fs.readFileSync(APPROVALS_FILE, "utf8")) : { version: "0.1", layouts: {}, sites: {}, classes: {} };
   approvals.classes[`${siteId}/${cls}`] = { approved: true, updated_at: "2026-11-11T00:00:00Z", digest: classDigest(files), approved_from: bulletinId };
@@ -67,6 +72,19 @@ test("an old class record is restored from its bulletin's screens: the advisory'
   assert.equal((await compose("17204-demo", fromWarning, "VPWW55")).source, "placeholder");
   const fromAdvisory = withKind(W55, "1720400", { name: "レベル２大雨注意報", code: "10", status: "解除", last: { name: "レベル２大雨注意報", code: "10" } });
   assert.equal((await compose("17204-demo", fromAdvisory, "VPWW55")).source, "writer-class-cache:VPWW55-202610211942-7720a18f5cfa");
+});
+
+test("once its record is marked blind, the advisory's all-clear wording serves a warning's all-clear under one class approval", { skip }, async () => {
+  const classFile = path.join(WRITER_DIR, "17204/class/heavy_rain-all-clear-1.json");
+  const kept = fs.readFileSync(classFile, "utf8");
+  fs.writeFileSync(classFile, JSON.stringify({ ...JSON.parse(kept), blind: true }));
+  const fromWarning = await compose("17204-demo", withKind(W55, "1720400", { name: "レベル３大雨警報", code: "03", status: "解除", last: { name: "レベル３大雨警報", code: "03" } }), "VPWW55");
+  const fromAdvisory = await compose("17204-demo", withKind(W55, "1720400", { name: "レベル２大雨注意報", code: "10", status: "解除", last: { name: "レベル２大雨注意報", code: "10" } }), "VPWW55");
+  fs.writeFileSync(classFile, kept);
+  assert.equal(fromAdvisory.source, "writer-class-cache:VPWW55-202610211942-7720a18f5cfa");
+  assert.equal(fromWarning.source, fromAdvisory.source);
+  assert.equal(fromWarning.cls, "heavy_rain/all-clear/1");
+  assert.equal(fromWarning.digest, fromAdvisory.digest, "the headlines differ, and the class digest leaves every headline language out");
 });
 
 test("an old record whose bulletin left neither XML nor screens is not reused for another bulletin", { skip }, async () => {

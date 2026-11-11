@@ -1,6 +1,7 @@
 import { readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { type Approvals, type CheckReport, type LayoutClass, classDigest, layoutDigest, passedBrowserCheck, screenClass } from '~~/layout/gate'
+import { type HeadlineTables, headlineEvidence } from '~~/layout/headlineTable'
 import { isMunicipalityId } from '~~/layout/replay'
 import { isShape } from '~~/layout/shapes'
 
@@ -64,6 +65,14 @@ async function rowStatus(site: string, bulletin: string): Promise<string | undef
   return (await readLayoutIndex(site))?.entries.find((row) => row.bulletin_id === bulletin)?.status
 }
 
+export async function readHeadlineTables(): Promise<HeadlineTables | undefined> {
+  const [names, easy] = await Promise.all([
+    readJsonIfExists<HeadlineTables['names']>(join(dataDir(), 'jma', 'warning-names.json')),
+    readJsonIfExists<HeadlineTables['easy']>(join(dataDir(), 'jma', 'warning-names-ja-easy.json')),
+  ])
+  return names && easy ? { names, easy } : undefined
+}
+
 // One read of a bulletin's shape files and report: the gate decides on these bytes and the feed serves them.
 export async function readLayoutSnapshot(site: string, bulletin: string): Promise<LayoutSnapshot | undefined> {
   const files = await layoutFiles(site, bulletin)
@@ -73,7 +82,10 @@ export async function readLayoutSnapshot(site: string, bulletin: string): Promis
   return {
     files,
     digest,
-    cls: { key: screenClass(JSON.parse(files[0]!.body), await rowStatus(site, bulletin)), digest: classDigest(files), checked: passedBrowserCheck(report, digest) },
+    cls: {
+      key: screenClass(JSON.parse(files[0]!.body), await rowStatus(site, bulletin)), digest: classDigest(files), checked: passedBrowserCheck(report, digest),
+      headline: headlineEvidence({ files, digest, report, tables: await readHeadlineTables() }),
+    },
     ...(report ? { report } : {}),
   }
 }

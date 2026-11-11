@@ -100,8 +100,8 @@ test("a headline font-size finding stops at once instead of going to the Writer"
   assert.match(r.reason!, /font-size\[headline\]/);
 });
 
-test("a Japanese overflow stops at once as render-overflow; other languages go to the Writer at most twice", { skip }, async () => {
-  const overflow = (lang: string): Verifier => ({ name: "stub", rendersScreens: false, verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: "headline", lang, detail: `cell headline (${lang}) overflows its slot` }] })) });
+test("a Japanese overflow stops at once as render-overflow; other languages of the Writer's cells go to the Writer at most twice", { skip }, async () => {
+  const overflow = (lang: string, cell = "headline"): Verifier => ({ name: "stub", rendersScreens: false, verify: async (screens) => screens.map((s) => ({ shape: s.shape, ok: false, findings: [{ check: "overflow", cell_id: cell, lang, detail: `cell ${cell} (${lang}) overflows its slot` }] })) });
   const clean = fxPath("writer-tsunami-advisory.json");
   const ja = await runLoop({ ...base(), verifier: overflow("ja"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });
   assert.equal(ja.attempts.length, 1);
@@ -109,7 +109,10 @@ test("a Japanese overflow stops at once as render-overflow; other languages go t
   const picto = await runLoop({ ...base(), verifier: overflow("pictogram"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });
   assert.equal(picto.attempts.length, 1);
   assert.match(picto.reason!, /render-overflow\[headline:pictogram\]/);
-  const en = await runLoop({ ...base(), verifier: overflow("en"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean, clean, clean, clean]), maxAttempts: 5 });
+  const headlineEn = await runLoop({ ...base(), verifier: overflow("en"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean]) });
+  assert.equal(headlineEn.attempts.length, 1, "the headline's translations come from the JMA dictionary table, not the Writer");
+  assert.match(headlineEn.reason!, /not fixable by rewriting text: .*overflow\[headline:en\]/);
+  const en = await runLoop({ ...base(), verifier: overflow("en", "action"), writer: fx<WriterOutput>("writer-tsunami-advisory.json"), writerSource: "clean", reviser: fixtureReviser([clean, clean, clean, clean]), maxAttempts: 5 });
   assert.equal(en.attempts.length, 3);
   assert.match(en.reason!, /sent to the Writer 2 times already/);
 });

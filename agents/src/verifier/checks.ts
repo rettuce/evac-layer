@@ -25,7 +25,7 @@ export const MAX_REVERSALS = 1;
 export type TextKind = "primary" | "secondary" | "label";
 export interface TextSample { cell_id: string; role: Role; step_class: TypeStep | null; font_px: number; kind: TextKind; text: string }
 export interface ScreenState { shape: string; template: string; variant: string; level: string; dropped: string; overflow: string | null; missing_required: string | null }
-export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker" | "drill-word-outside-drill" | "direction-dropped" | "direction-mismatch" | "north-missing"; cell_id?: string; lang?: string; detail: string }
+export interface Finding { check: "missing-required" | "overflow" | "dropped" | "font-size" | "flicker" | "distance-duplicated" | "bulletin-mismatch" | "pictogram-misuse" | "missing-source" | "drill-marker" | "drill-word-outside-drill" | "direction-dropped" | "direction-mismatch" | "north-missing" | "headline-table"; cell_id?: string; lang?: string; detail: string }
 export interface CellText { id: string; role: Role; text: string }
 
 // The author's artboards (L-4/L-5, 2026-11-05) set these lines below the viewing-distance floor; the floor follows the
@@ -149,5 +149,19 @@ export function judgeNorthUp(cells: NorthUpRead[]): Finding[] {
       if (!c.marks.some((m) => m.text === NORTH_MARK && m.visible && m.onDial)) out.push({ check: "north-missing", cell_id: c.id, detail: `north-up dial does not show ${NORTH_MARK} on the circle` });
     }
     return out;
+  });
+}
+
+// The headline of a screen the Composer has just written must be the dictionary table's, language for language; a
+// language the table does not give, or a different text, means the headline came from somewhere else.
+export function judgeHeadline(cells: { id: string; role: string; text: Record<string, string | undefined> }[], expected: Record<string, string>): Finding[] {
+  return cells.filter((c) => c.role === "headline").flatMap((c) => {
+    const langs = [...new Set([...Object.keys(expected), ...Object.keys(c.text)])];
+    return langs
+      .filter((lang) => c.text[lang] !== expected[lang])
+      .map((lang) => ({
+        check: "headline-table" as const, cell_id: c.id, lang,
+        detail: expected[lang] === undefined ? `headline carries ${lang}, which the JMA dictionary table does not give` : `headline ${lang} is ${JSON.stringify(c.text[lang] ?? null)}, the JMA dictionary table gives ${JSON.stringify(expected[lang])}`,
+      }));
   });
 }

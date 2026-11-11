@@ -119,7 +119,7 @@ test("action pictogram follows the template", async () => {
 
 const CLEARED_VPWW56 = "bodies/20261021/20261021150027_0_VPWW56_170000.xml";
 test("a cleared VPWW headline says 解除", { skip: needsRaw({ feed: [CLEARED_VPWW56] }) }, async () => {
-  const { headlineFor } = await import("../src/composer/compose.js");
+  const { headlineFor } = await import("../src/composer/headline.js");
     const file = path.join(FEED_DIR, CLEARED_VPWW56);
   assert.equal(headlineFor(parseJmaXml(fs.readFileSync(file)), "17204"), "レベル２土砂災害注意報解除");
 });

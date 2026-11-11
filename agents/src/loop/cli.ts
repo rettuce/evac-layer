@@ -4,7 +4,7 @@ import { parseArgs } from "node:util";
 import Anthropic from "@anthropic-ai/sdk";
 import { requireApiKey } from "../apikey.js";
 import type { Municipality, WriterOutput } from "../composer/compose.js";
-import { liveGateWarning, REPLAY_SITE_MESSAGE, SyntheticNotLive, writeLive } from "../delivery/live.js";
+import { DrillNotLive, liveGateWarning, refuseDrillOnLive, REPLAY_SITE_MESSAGE, SyntheticNotLive, writeLive } from "../delivery/live.js";
 import { BODY_NAME } from "../jma/feed.js";
 import { replayEntry } from "../jma/replay.js";
 import { EVAC_URL, FEED_DIR, TMP_DIR, resolveUserPath } from "../paths.js";
@@ -95,9 +95,10 @@ if (values["go-live"]) {
   }
   let written: ReturnType<typeof writeLive>;
   try {
+    refuseDrillOnLive(site.id, entry.bulletin_id);
     written = writeLive(site.id, entry.bulletin_id);
   } catch (e) {
-    if (!(e instanceof SyntheticNotLive)) throw e;
+    if (!(e instanceof SyntheticNotLive) && !(e instanceof DrillNotLive)) throw e;
     console.error(`[go-live refused] ${e.message}; data/live/${site.id}.json is unchanged`);
     process.exit(1);
   }

@@ -1,11 +1,11 @@
 import { northDistanceOn } from "../../../app/layout/northUp";
 import type { LayoutCell, Orientation, PanelShape } from "../../../app/layout/types";
 import type { Alert } from "../jma/parse.js";
-import { tsunamiRegionsFor } from "../jma/regions.js";
 import type { Lang } from "../writer/request.js";
 import { budgetsFor } from "./budgets.js";
+import { headlineSource, headlineTables, headlineText } from "./headline.js";
 import { shapeContract } from "./template.js";
-import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, DRILL_PREFIX_JA, LANGUAGES_REQUIRED_ON, MONTH_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor, tsunamiClearedFrom } from "./rules.js";
+import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, MONTH_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
 export interface WriterCell { role: string; text: Partial<Record<Lang, string>> & { ja: string }; basis: string }
 export interface WriterOutput { cells: WriterCell[] }
@@ -78,21 +78,6 @@ export function pickShelter(m: Municipality, site: Site, hazard: string) {
   return { shelter: best.s, distance_m: Math.round(best.d / DISTANCE_STEP_M) * DISTANCE_STEP_M };
 }
 
-// The headline is the JMA warning name verbatim (Meteorological Service Act art. 23). A VPWW clearance keeps the
-// warning's name and sets Status 解除, so the cleared state is shown by appending 解除 to that name.
-export function headlineFor(alert: Alert, municipalityId: string): string {
-  const regions = new Set(tsunamiRegionsFor(municipalityId));
-  const mine = alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
-  const live = mine.filter((a) => a.status !== "cleared" && a.status !== "none").sort((a, b) => (b.level ?? 0) - (a.level ?? 0));
-  const prefix = alert.status === "drill" ? DRILL_PREFIX_JA : "";
-  const ended = tsunamiClearedFrom(alert, municipalityId);
-  if (ended) return `${prefix}${ended}解除`;
-  if (live.length) return prefix + live[0].kind_name.replace(/：発表$/, "");
-  const cleared = mine.find((a) => a.status === "cleared");
-  if (cleared) return prefix + (cleared.kind_name.endsWith("解除") ? cleared.kind_name : `${cleared.kind_name}解除`);
-  return prefix + alert.raw_title;
-}
-
 // The screen names only the issuer, its time and the municipality; the PDF page, the GSI file and the bulletin id stay in
 // layout.sources[] (and so in the feed, the export manifest and the admin screen), where a reader can follow them.
 // 指定河川洪水予報 (VXKO) is issued jointly by the river office of MLIT and the local JMA observatory, so both are named.
@@ -126,7 +111,8 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
   const { alert, municipality: m, site } = input;
   if (site.municipality_id !== m.id) stop(`site ${site.id} belongs to ${site.municipality_id}, not ${m.id}`);
   const situation = situationFor(alert, m.id);
-  const headline = headlineFor(alert, m.id);
+  const tables = headlineTables();
+  const headline = headlineText(alert, m.id, tables);
   const guide = NO_SHELTER_TEMPLATES.has(situation.template) ? null : pickShelter(m, site, alert.hazard);
   const way = guide ? directionToward(site, guide.shelter) : null;
   const hazardEntry = m.hazards.find((h) => h.type === alert.hazard);
@@ -136,6 +122,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     ...(hazardEntry ? [{ type: "pdf" as const, file: hazardEntry.source.file, page: hazardEntry.source.page }] : []),
     ...(guide ? [{ type: "gsi" as const, file: guide.shelter.source.file }] : []),
     { type: "jma" as const, bulletin_id: alert.bulletin_id },
+    headlineSource(tables),
   ];
 
   return SHAPE_ORDER.map((shape) => {
@@ -150,8 +137,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     };
     const cells: LayoutCell[] = [];
     const add = (cell: LayoutCell) => { if (slots.has(cell.role)) cells.push(cell); };
-    const headlineText = text("headline") ?? stop("Writer output has no headline");
-    add({ id: "headline", role: "headline", priority: 1, text: { ...headlineText, ja: headline }, pictogram: HAZARD_PICTOGRAM[alert.hazard], motion: "scale-in" });
+    add({ id: "headline", role: "headline", priority: 1, text: { ...headline }, pictogram: HAZARD_PICTOGRAM[alert.hazard], motion: "scale-in" });
     add({ id: "action", role: "action", priority: 1, text: text("action") ?? stop("Writer output has no action"), pictogram: actionPictogram(alert.hazard, situation.template), motion: "pulse" });
     if (guide && way) {
       const reference = way.orientation ? { orientation: way.orientation, ...(distanceOnDirection ? { distance_m: guide.distance_m } : {}) } : {};

@@ -3,6 +3,8 @@ import path from "node:path";
 import { APPROVALS_FILE } from "../paths.js";
 import { readSites, siteMunicipality, type SiteFile } from "../sites.js";
 import { holdsFacilities } from "../tokens.js";
+import { headlineTablesIfPresent } from "../composer/headline.js";
+import { headlineEvidence } from "../../../app/layout/headlineTable";
 import { type CheckReport, type ClassApproval, type LayoutClass, classDigest, classKey, layoutDigest, liveLayoutGateWith, passedBrowserCheck, screenClass } from "../../../app/layout/gate";
 
 export interface Approvals {
@@ -66,5 +68,9 @@ export function layoutClassOf(dir: string, reportFile: string, rowStatus?: strin
   const files = layoutFilesOf(dir);
   if (!files.length) return undefined;
   const report = fs.existsSync(reportFile) ? (JSON.parse(fs.readFileSync(reportFile, "utf8")) as CheckReport) : undefined;
-  return { key: screenClass(JSON.parse(files[0].body), rowStatus), digest: classDigest(files), checked: passedBrowserCheck(report, layoutDigest(files)) };
+  const digest = layoutDigest(files);
+  return {
+    key: screenClass(JSON.parse(files[0].body), rowStatus), digest: classDigest(files), checked: passedBrowserCheck(report, digest),
+    headline: headlineEvidence({ files, digest, report, tables: headlineTablesIfPresent() }),
+  };
 }

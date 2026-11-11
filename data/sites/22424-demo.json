@@ -4,5 +4,11 @@
   "lat": 34.771056924389,
   "lng": 138.25961812434,
   "facing_deg": 0,
-  "note": "Illustrative demo screen at the coordinates of a GSI-listed facility near 吉田町立中央小学校; the viewer is assumed to face north. Not a real installation."
+  "note": "Illustrative demo screen at the coordinates of a GSI-listed facility near 吉田町立中央小学校; the viewer is assumed to face north. Not a real installation.",
+  "replay": {
+    "municipality": "22424",
+    "from": "2016-09-01T07:00+09:00",
+    "to": "2016-09-01T10:00+09:00",
+    "speed": 120
+  }
 }

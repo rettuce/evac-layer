@@ -11,6 +11,7 @@ import { AGENTS_DIR, LAYOUTS_DIR, REPO_ROOT } from "../src/paths.js";
 import { northDistanceOn } from "../../app/layout/northUp";
 import type { Alert } from "../src/jma/parse.js";
 import type { LayoutCell } from "../../app/layout/types";
+import { apartFromHeadline, headlineIsTheTable } from "./headline-apart.js";
 
 type Entry = { alert: Alert; municipality_level: number | null; bulletin_id: string };
 const replay = JSON.parse(fs.readFileSync(path.join(AGENTS_DIR, "test/fixtures/replay-05210-koyoshi-20261021.json"), "utf8")) as { entries: Entry[] };
@@ -70,14 +71,16 @@ test("north-up rounds the map bearing to 8 points: north is up, east right, sout
   }
 });
 
-test("a site with facing_deg composes byte for byte what it composed before", () => {
+test("a site with facing_deg composes what it composed before, but for the headline's translations, which are the table's", () => {
   const site = honjo.id;
   for (const e of replay.entries) {
     const dir = path.join(LAYOUTS_DIR, site, e.bulletin_id);
     if (!fs.existsSync(dir)) continue;
     for (const screen of compose({ alert: e.alert, municipality: yurihonjo, site: honjo, writer: writerFor(e.bulletin_id) })) {
       const saved = fs.readFileSync(path.join(dir, `${screen.shape}.json`), "utf8");
-      assert.equal(`${JSON.stringify(screen, null, 2)}\n`, saved, `${e.bulletin_id} ${screen.shape}`);
+      const composed = `${JSON.stringify(screen, null, 2)}\n`;
+      assert.equal(apartFromHeadline(composed), apartFromHeadline(saved), `${e.bulletin_id} ${screen.shape}`);
+      assert.ok(headlineIsTheTable(composed, e.alert, "05210"), `${e.bulletin_id} ${screen.shape}`);
       assert.equal(cell(screen, "direction")?.orientation, undefined);
     }
   }
@@ -127,9 +130,10 @@ test("north-up findings: a missing N, an N off the dial, an arrow turned away fr
   assert.deepEqual(judgeNorthUp([{ ...ok, word: "まっすぐ", marks }]).map((f) => f.check), ["direction-mismatch"]);
 });
 
-test("the renderer's north-up fixtures are what the Composer makes today", () => {
+test("the renderer's north-up fixtures are what the Composer makes today, but for the headline's translations, which the renderer does not draw", () => {
   for (const level of [3, 5]) {
-    const fixture = fs.readFileSync(path.join(REPO_ROOT, "app/fixtures", `north-up-l${level}.json`), "utf8");
-    assert.equal(fixture, `${JSON.stringify(composeAt(level, unoriented), null, 2)}\n`, `app/fixtures/north-up-l${level}.json`);
+    const fixture = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "app/fixtures", `north-up-l${level}.json`), "utf8")) as unknown[];
+    const composed = composeAt(level, unoriented);
+    assert.deepEqual(fixture.map((s) => apartFromHeadline(JSON.stringify(s))), composed.map((s) => apartFromHeadline(JSON.stringify(s))), `app/fixtures/north-up-l${level}.json`);
   }
 });
