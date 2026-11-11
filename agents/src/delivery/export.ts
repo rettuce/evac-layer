@@ -1,15 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
-import puppeteer, { type Browser } from "puppeteer-core";
+import type { Browser } from "puppeteer-core";
 import { EXPORT_DIGEST_FILE } from "../../../app/layout/feed";
 import { isSyntheticBulletinId } from "../../../app/layout/replay";
 import type { Shape } from "../../../app/layout/types";
 import { SHAPE_ORDER } from "../composer/rules.js";
-import { LAYOUTS_DIR, REPORTS_DIR, chromePath } from "../paths.js";
+import { LAYOUTS_DIR, REPORTS_DIR } from "../paths.js";
 import { findSite as findSiteFile, siteMunicipality, SiteNotFound, type SiteFile } from "../sites.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { exportGate, layoutClassOf, layoutDigestOf, readApprovals } from "./gate.js";
-import { ExportStop, captureShape } from "./capture.js";
+import { ExportStop, captureShape, launchBrowser } from "./capture.js";
 import { INLINE_PAGE_SCRIPT } from "./inline-page.js";
 
 export { ExportStop };
@@ -77,7 +77,7 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
 
   const siteDir = path.join(opts.out, site.id);
   const manifestFile = path.join(siteDir, "manifest.json");
-  const browser = await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
+  const browser = await launchBrowser(opts.chrome);
   const entries = [];
   try {
     for (const e of ready) {

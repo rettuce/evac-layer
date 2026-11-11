@@ -59,6 +59,22 @@ test("a preview needs a valid site, bulletin and layouts", () => {
   fs.rmSync(r.root, { recursive: true, force: true });
 });
 
+test("a preview follows no symbolic link out of the previews or layouts directories", () => {
+  const r = roots();
+  const outside = path.join(r.root, "outside");
+  fs.mkdirSync(outside, { recursive: true });
+  fs.mkdirSync(r.previews, { recursive: true });
+  fs.symlinkSync(outside, path.join(r.previews, SITE));
+  assert.throws(() => previewPlan({ site: SITE, bulletin: SYN, out: path.join(r.previews, SITE, "x") }, r), ExportStop, "an out directory behind a link");
+  fs.rmSync(path.join(r.previews, SITE));
+  const layout = path.join(r.layouts, SITE, SYN, "16x9.json");
+  fs.rmSync(layout);
+  fs.writeFileSync(path.join(outside, "16x9.json"), "{}");
+  fs.symlinkSync(path.join(outside, "16x9.json"), layout);
+  assert.throws(() => previewPlan({ site: SITE, bulletin: SYN, out: path.join(r.previews, SITE, "x") }, r), ExportStop, "a layout file that is a link");
+  fs.rmSync(r.root, { recursive: true, force: true });
+});
+
 test("the screen is pointed at the preview layout path, which the renderer accepts in production", () => {
   const src = previewSrc(SITE, SYN, "16x9");
   assert.ok(src.startsWith(`${PREVIEW_LAYOUT_PATH}?`));

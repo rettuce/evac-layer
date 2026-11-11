@@ -1,18 +1,28 @@
 import fs from "node:fs";
 import path from "node:path";
-import puppeteer, { type Page } from "puppeteer-core";
+import type { Page } from "puppeteer-core";
 import { isBulletinId } from "../../../app/layout/replay";
 import type { Shape } from "../../../app/layout/types";
 import { SHAPE_ORDER } from "../composer/rules.js";
-import { DATA_DIR, LAYOUTS_DIR, chromePath } from "../paths.js";
+import { DATA_DIR, LAYOUTS_DIR } from "../paths.js";
 import { formatErrors, validateDoc } from "../schemas.js";
 import { isSiteId } from "../sites.js";
-import { ExportStop, captureShape } from "./capture.js";
+import { ExportStop, captureShape, launchBrowser } from "./capture.js";
 
 export const PREVIEWS_DIR = path.join(DATA_DIR, "previews");
 export const PREVIEW_LAYOUT_PATH = "/api/admin/preview-layout";
 
 export interface PreviewPlan { site: string; bulletin: string; out: string; shapes: { shape: Shape; layoutFile: string }[] }
+
+function refuseLinks(base: string, target: string, what: string): void {
+  let current = base;
+  for (const part of path.relative(base, target).split(path.sep).filter(Boolean)) {
+    current = path.join(current, part);
+    const stat = fs.lstatSync(current, { throwIfNoEntry: false });
+    if (!stat) return;
+    if (stat.isSymbolicLink()) throw new ExportStop(`${what} goes through a symbolic link at ${current}`);
+  }
+}
 
 export function previewPlan(args: { site?: string; bulletin?: string; out?: string }, roots = { layouts: LAYOUTS_DIR, previews: PREVIEWS_DIR }): PreviewPlan {
   if (!isSiteId(args.site)) throw new ExportStop("--site must be a site id");
@@ -21,9 +31,11 @@ export function previewPlan(args: { site?: string; bulletin?: string; out?: stri
   const out = path.resolve(args.out);
   const inside = path.relative(path.resolve(roots.previews), out);
   if (!inside || inside.startsWith("..") || path.isAbsolute(inside)) throw new ExportStop(`--out must be a directory under ${roots.previews}: a preview is not a delivery file`);
+  refuseLinks(roots.previews, out, "--out");
   const dir = path.join(roots.layouts, args.site, args.bulletin);
   const shapes = SHAPE_ORDER.map((shape) => ({ shape, layoutFile: path.join(dir, `${shape}.json`) })).filter((s) => fs.existsSync(s.layoutFile));
   if (!shapes.length) throw new ExportStop(`no layouts in ${dir}`);
+  for (const { layoutFile } of shapes) refuseLinks(roots.layouts, layoutFile, "the layout");
   return { site: args.site, bulletin: args.bulletin, out, shapes };
 }
 
@@ -56,7 +68,7 @@ export async function renderPreview(plan: PreviewPlan, opts: { baseUrl: string; 
   fs.mkdirSync(plan.out, { recursive: true });
   const rendered: Shape[] = [];
   const failed: string[] = [];
-  const browser = await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
+  const browser = await launchBrowser(opts.chrome);
   try {
     for (const { shape, layoutFile } of plan.shapes) {
       try {
