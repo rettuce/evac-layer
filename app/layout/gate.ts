@@ -9,13 +9,23 @@ export function isSyntheticBulletinId(value: unknown): boolean {
   return typeof value === 'string' && value.startsWith(SYNTHETIC_PREFIX)
 }
 
-export interface LayoutApproval {
+// reviewed: the caller sent the digest of the screens a person looked at. bulk: it did not. Records written before
+// approvals carried this have none of it.
+export type ApprovalMode = 'reviewed' | 'bulk'
+
+export interface Approver {
+  mode: ApprovalMode
+  token_label: string
+  actor?: { id: string; name?: string }
+}
+
+export interface LayoutApproval extends Partial<Approver> {
   approved: boolean
   updated_at: string
   digest?: string
 }
 
-export interface ClassApproval {
+export interface ClassApproval extends Partial<Approver> {
   approved: boolean
   updated_at: string
   digest: string

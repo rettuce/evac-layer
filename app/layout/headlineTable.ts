@@ -101,13 +101,20 @@ export interface HeadlineCheck { ok: boolean; table_version: string; layout_dige
 
 interface HeadlinedLayout { alert?: { hazard?: string }; cells?: { role?: string; text?: Record<string, unknown> }[] }
 
+type HeadlineEvidenceArgs = { files: { shape: string; body: string }[]; digest: string; report: { headline_table?: HeadlineCheck } | undefined; tables: HeadlineTables | undefined }
+
 // A class approval may open a screen only when both say its headline is the table's: the check the Verifier made with
 // the bulletin, bound to these layout files and this table, and the stored files read again here. While the ja_easy
 // table is unreviewed nothing counts.
-export function headlineEvidence(args: { files: { shape: string; body: string }[]; digest: string; report: { headline_table?: HeadlineCheck } | undefined; tables: HeadlineTables | undefined }): boolean {
+export function headlineEvidence(args: HeadlineEvidenceArgs): boolean {
+  return !!args.tables?.easy.reviewed && headlineMatchesCheckedTable(args)
+}
+
+// headlineEvidence without the review of the ja_easy table, which is a gate of its own at delivery.
+export function headlineMatchesCheckedTable(args: HeadlineEvidenceArgs): boolean {
   const { files, digest, report, tables } = args
   const check = report?.headline_table
-  if (!tables?.easy.reviewed || !check?.ok || !files.length) return false
+  if (!tables || !check?.ok || !files.length) return false
   if (check.table_version !== headlineTableVersion(tables) || check.layout_digest !== digest) return false
   if (!files.every((f) => check.shapes.includes(f.shape))) return false
   return files.every((f) => {

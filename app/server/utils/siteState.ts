@@ -1,6 +1,6 @@
 import { access } from 'node:fs/promises'
 import { join } from 'node:path'
-import { type Approvals, approvalWith, classKey, isSyntheticBulletinId, layoutKey } from '~~/layout/gate'
+import { type Approvals, type Approver, approvalWith, classKey, isSyntheticBulletinId, layoutKey } from '~~/layout/gate'
 import type { LayoutSnapshot } from './approvals'
 import type { ExportRecords } from './exportJob'
 import type { Generation, SiteGenerations } from './generationRecord'
@@ -14,7 +14,9 @@ export interface ClassState {
   outcome: 'pending' | 'pass' | 'fail'
   stale: boolean
   approved: boolean
+  approved_via?: 'bulletin' | 'class'
   approved_at?: string
+  approved_by?: Approver
   unchanged?: boolean
   live: boolean
   previews: Record<string, string>
@@ -39,11 +41,13 @@ async function exists(file: string): Promise<boolean> {
   return access(file).then(() => true, () => false)
 }
 
-function approvedAt(approvals: Approvals, site: string, bulletin: string, snapshot: LayoutSnapshot): { approved: boolean; approved_at?: string } {
+function approvedAt(approvals: Approvals, site: string, bulletin: string, snapshot: LayoutSnapshot): Pick<ClassState, 'approved' | 'approved_via' | 'approved_at' | 'approved_by'> {
   const { approved, by } = approvalWith(approvals, site, bulletin, snapshot.digest, snapshot.cls)
-  if (!approved) return { approved }
+  if (!approved || !by) return { approved }
   const record = by === 'bulletin' ? approvals.layouts[layoutKey(site, bulletin)] : approvals.classes?.[classKey(site, snapshot.cls.key)]
-  return { approved, ...(record ? { approved_at: record.updated_at } : {}) }
+  if (!record) return { approved, approved_via: by }
+  const approver = record.mode && record.token_label ? { mode: record.mode, token_label: record.token_label, ...(record.actor ? { actor: record.actor } : {}) } : undefined
+  return { approved, approved_via: by, approved_at: record.updated_at, ...(approver ? { approved_by: approver } : {}) }
 }
 
 async function classStates(site: string, reps: Representative[], approvals: Approvals, generations: SiteGenerations): Promise<ClassState[]> {
@@ -90,11 +94,25 @@ function needsGeneration(classes: ClassState[], generations: SiteGenerations): b
   })
 }
 
+export interface SiteClass {
+  state: ClassState
+  snapshot: LayoutSnapshot
+}
+
+async function classesOf(site: SiteFile, approvals: Approvals, generations: SiteGenerations): Promise<SiteClass[]> {
+  const reps = await representatives(site, generations)
+  const states = await classStates(site.id, reps, approvals, generations)
+  return states.map((state, i) => ({ state, snapshot: reps[i]!.snapshot }))
+}
+
+export async function siteClasses(site: SiteFile, approvals: Approvals): Promise<SiteClass[]> {
+  return classesOf(site, approvals, await readSiteGenerations(site.id))
+}
+
 export async function siteState(site: SiteFile, approvals: Approvals, warnings: string[] = []): Promise<SiteState> {
   const generations = await readSiteGenerations(site.id)
-  const reps = await representatives(site, generations)
   const [classes, exports, prepared] = await Promise.all([
-    classStates(site.id, reps, approvals, generations),
+    classesOf(site, approvals, generations).then((list) => list.map(({ state }) => state)),
     exportsOf(site.id),
     exists(join(dataDir(), 'municipalities', `${site.municipality_id}.json`)),
   ])
