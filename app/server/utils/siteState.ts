@@ -1,10 +1,10 @@
-import { access, stat } from 'node:fs/promises'
+import { access } from 'node:fs/promises'
 import { join } from 'node:path'
 import { type Approvals, approvalWith, classKey, isSyntheticBulletinId, layoutKey } from '~~/layout/gate'
-import type { ReplayRow } from '~~/layout/replay'
 import type { LayoutSnapshot } from './approvals'
 import type { ExportRecords } from './exportJob'
-import type { Generation } from './generationRecord'
+import type { Generation, SiteGenerations } from './generationRecord'
+import type { Representative } from './screenClasses'
 
 export interface ClassState {
   class: string
@@ -12,6 +12,7 @@ export interface ClassState {
   synthetic: boolean
   digest: string
   outcome: 'pending' | 'pass' | 'fail'
+  stale: boolean
   approved: boolean
   approved_at?: string
   unchanged?: boolean
@@ -32,20 +33,10 @@ export interface SiteState {
   warnings: string[]
 }
 
+const COMPOSED_WITHOUT_SCREEN = new Set(['unsupported', 'no-screen'])
+
 async function exists(file: string): Promise<boolean> {
   return access(file).then(() => true, () => false)
-}
-
-async function representatives(site: string, rows: ReplayRow[]): Promise<Map<string, { row: ReplayRow; snapshot: LayoutSnapshot }>> {
-  const byClass = new Map<string, { row: ReplayRow; snapshot: LayoutSnapshot }>()
-  for (const row of rows) {
-    if (!row.screen) continue
-    const snapshot = await readLayoutSnapshot(site, row.bulletin_id)
-    if (!snapshot) continue
-    const current = byClass.get(snapshot.cls.key)
-    if (!current || Date.parse(row.issued_at) >= Date.parse(current.row.issued_at)) byClass.set(snapshot.cls.key, { row, snapshot })
-  }
-  return byClass
 }
 
 function approvedAt(approvals: Approvals, site: string, bulletin: string, snapshot: LayoutSnapshot): { approved: boolean; approved_at?: string } {
@@ -55,35 +46,19 @@ function approvedAt(approvals: Approvals, site: string, bulletin: string, snapsh
   return { approved, ...(record ? { approved_at: record.updated_at } : {}) }
 }
 
-function outcomeOf(snapshot: LayoutSnapshot): ClassState['outcome'] {
-  if (!snapshot.report) return 'pending'
-  return snapshot.report.outcome === 'pass' ? 'pass' : 'fail'
-}
-
-async function sortedRepresentatives(site: string) {
-  const index = await readLayoutIndex(site)
-  return [...(await representatives(site, index?.entries ?? []))].sort(([a], [b]) => a.localeCompare(b))
-}
-
-export async function classDigests(site: string): Promise<Record<string, string>> {
-  return Object.fromEntries((await sortedRepresentatives(site)).map(([cls, { snapshot }]) => [cls, snapshot.digest]))
-}
-
-export async function passingBulletins(site: string): Promise<string[]> {
-  return (await sortedRepresentatives(site)).filter(([, { snapshot }]) => outcomeOf(snapshot) === 'pass').map(([, { row }]) => row.bulletin_id)
-}
-
-async function classStates(site: string, approvals: Approvals, digestsAtLastJob: Record<string, string> | undefined): Promise<ClassState[]> {
+async function classStates(site: string, reps: Representative[], approvals: Approvals, generations: SiteGenerations): Promise<ClassState[]> {
   const liveBulletin = (await currentFeed(site))?.bulletin_id
   const liveClass = liveBulletin ? await currentClassKey(site, liveBulletin) : undefined
+  const atLastJob = generations.latest?.digests ?? generations.previous?.digests
   return Promise.all(
-    (await sortedRepresentatives(site)).map(async ([cls, { row, snapshot }]) => ({
+    reps.map(async ({ cls, row, snapshot, stale }) => ({
       class: cls,
       bulletin_id: row.bulletin_id,
       synthetic: isSyntheticBulletinId(row.bulletin_id),
       digest: snapshot.digest,
-      outcome: outcomeOf(snapshot),
-      ...(digestsAtLastJob ? { unchanged: digestsAtLastJob[cls] === snapshot.digest } : {}),
+      outcome: snapshotOutcome(snapshot),
+      stale,
+      ...(atLastJob ? { unchanged: atLastJob[cls]?.bulletin_id === row.bulletin_id && atLastJob[cls]?.digest === snapshot.digest } : {}),
       ...approvedAt(approvals, site, row.bulletin_id, snapshot),
       live: cls === liveClass,
       previews: await currentPreviews(site, row.bulletin_id, snapshot.digest),
@@ -99,19 +74,25 @@ async function exportsOf(site: string): Promise<SiteState['exports']> {
   }
 }
 
-// A successful job composed every class from the place as it was when the job started. Without one, the index,
-// rewritten whenever screens are composed, tells whether the place changed after the newest screen.
-async function movedSinceScreens(site: SiteFile, lastSuccessStartedAt: string | undefined): Promise<boolean> {
-  if (!site.location_updated_at) return false
-  if (lastSuccessStartedAt) return Date.parse(site.location_updated_at) > Date.parse(lastSuccessStartedAt)
-  const index = await stat(siteLayoutsDir(site.id, 'index.json')).catch(() => undefined)
-  return !index || Date.parse(site.location_updated_at) > index.mtimeMs
+// A job can only remake the classes it composes, so a stale screen of a class it cannot compose is shown on that
+// class and does not ask for a job. Before any job has a result, every stale screen asks for one.
+function needsGeneration(classes: ClassState[], generations: SiteGenerations): boolean {
+  if (!classes.length || lastFinished(generations)?.status === 'failed') return true
+  const result = generations.last_result
+  if (!result) return classes.some((c) => c.stale)
+  return result.rows.some((row) => {
+    if (COMPOSED_WITHOUT_SCREEN.has(row.outcome)) return false
+    if (row.outcome !== 'pass') return true
+    const state = classes.find((c) => c.class === row.class)
+    return !state || state.stale
+  })
 }
 
 export async function siteState(site: SiteFile, approvals: Approvals, warnings: string[] = []): Promise<SiteState> {
   const generations = await readSiteGenerations(site.id)
+  const reps = await representatives(site, generations)
   const [classes, exports, prepared] = await Promise.all([
-    classStates(site.id, approvals, generations.latest?.digests ?? generations.previous?.digests),
+    classStates(site.id, reps, approvals, generations),
     exportsOf(site.id),
     exists(join(dataDir(), 'municipalities', `${site.municipality_id}.json`)),
   ])
@@ -120,7 +101,7 @@ export async function siteState(site: SiteFile, approvals: Approvals, warnings: 
     facility_id: site.facility_id ?? null,
     auto_publish: approvals.sites[site.id]?.auto_publish ?? false,
     municipality_prepared: prepared,
-    needs_generation: !classes.length || (await movedSinceScreens(site, generations.last_success_started_at)),
+    needs_generation: needsGeneration(classes, generations),
     ...(generations.latest ? { last_generation: publicGeneration(generations.latest) } : {}),
     classes,
     approved_classes: { approved: classes.filter((c) => c.approved).length, total: classes.length },

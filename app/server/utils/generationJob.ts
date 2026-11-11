@@ -3,18 +3,22 @@ import { access } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { AdminPrincipal } from './adminPolicy'
 import type { Actor } from './audit'
-import type { ChildResult, ChildRun } from './childProcess'
-import type { Generation, GenerationClass, SiteGenerations, StoredGeneration } from './generationRecord'
+import type { AgentPurpose, ChildResult, ChildRun } from './childProcess'
+import type { Generation, GenerationClass, GenerationErrorCode, JobResult, PreviewErrorCode, SiteGenerations, StoredGeneration } from './generationRecord'
 
 // Each job may call the Writer once per class on the operator's API account.
 export const GENERATIONS_PER_FACILITY_PER_HOUR = 6
+// Jobs run one at a time over all facilities, so one facility's queue must not hold the others back for long.
+export const OPEN_JOBS_PER_FACILITY = 2
+const OPEN_JOBS_RETRY_AFTER_S = 60
 const RATE_WINDOW_MS = 60 * 60 * 1000
-const GENERATION_TIMEOUT_MS = 60 * 60 * 1000
-const OUTPUT_TAIL_CHARS = 2000
+const JOB_TIMEOUT_MS = 90 * 60 * 1000
+const OUTPUT_TAIL_CHARS = 4000
 
 interface ActiveJob {
   id: string
   site: string
+  key: string
   siteGeneration: number
   cancelled: boolean
   child?: ChildRun
@@ -22,7 +26,7 @@ interface ActiveJob {
 
 export class GenerationRateLimited extends Error {
   constructor(readonly retryAfterSeconds: number) {
-    super(`too many generations started in the last hour; try again in ${retryAfterSeconds} s`)
+    super(`too many generations started or waiting; try again in ${retryAfterSeconds} s`)
   }
 }
 
@@ -31,14 +35,11 @@ const starts = new Map<string, number[]>()
 let lastJob: Promise<void> = Promise.resolve()
 
 const isActive = (id: string) => active.has(id)
+const isCurrent = (job: ActiveJob) => !job.cancelled && siteGeneration(job.site) === job.siteGeneration
 
-export function readSiteGenerations(site: string): Promise<SiteGenerations> {
-  return readGenerationFile(site, isActive)
-}
-
-function generationsPerHour(): number {
-  const configured = Number(useRuntimeConfig().generationsPerHour)
-  return Number.isInteger(configured) && configured > 0 ? configured : GENERATIONS_PER_FACILITY_PER_HOUR
+function positiveSetting(value: unknown, fallback: number): number {
+  const configured = Number(value)
+  return Number.isInteger(configured) && configured > 0 ? configured : fallback
 }
 
 // A facility shares one budget over all its sites; the operator, who may act on every site, is counted per site.
@@ -47,9 +48,16 @@ function rateKey(admin: AdminPrincipal, site: string): string {
 }
 
 function retryAfter(key: string, now: number): number | undefined {
-  const recent = (starts.get(key) ?? []).filter((at) => now - at < RATE_WINDOW_MS)
-  starts.set(key, recent)
-  if (recent.length < generationsPerHour()) return undefined
+  for (const [other, times] of starts) {
+    const recent = times.filter((at) => now - at < RATE_WINDOW_MS)
+    if (recent.length) starts.set(other, recent)
+    else starts.delete(other)
+  }
+  const config = useRuntimeConfig()
+  const open = [...active.values()].filter((job) => job.key === key && isCurrent(job)).length
+  if (open >= positiveSetting(config.generationOpenJobsPerFacility, OPEN_JOBS_PER_FACILITY)) return OPEN_JOBS_RETRY_AFTER_S
+  const recent = starts.get(key) ?? []
+  if (recent.length < positiveSetting(config.generationsPerHour, GENERATIONS_PER_FACILITY_PER_HOUR)) return undefined
   return Math.max(1, Math.ceil((recent[0]! + RATE_WINDOW_MS - now) / 1000))
 }
 
@@ -57,65 +65,133 @@ async function municipalityPrepared(municipality: string): Promise<boolean> {
   return access(join(dataDir(), 'municipalities', `${municipality}.json`)).then(() => true, () => false)
 }
 
-const isCurrent = (job: ActiveJob) => !job.cancelled && siteGeneration(job.site) === job.siteGeneration
+// Run under the site's lock. A record left open by a stopped server becomes failed; its child, when it is still
+// running and is certainly ours, is stopped first. One that cannot be confirmed is left alone and blocks the site.
+async function reapStale(site: string): Promise<void> {
+  const file = await readRawGenerationFile(site)
+  let changed = false
+  for (const slot of ['latest', 'previous'] as const) {
+    const record = file[slot]
+    if (!record || !isOpen(record) || active.has(record.generation_id)) continue
+    if (record.child && (await stopOrphan(record.child)) === 'unverified') {
+      console.warn(`[generate] ${site}: process group ${record.child.pgid} of job ${record.generation_id} is still running and could not be confirmed as a child of this server; it is left running and the site takes no job until it ends`)
+      file.orphan = { ...record.child, generation_id: record.generation_id }
+    }
+    file[slot] = restarted(record)
+    changed = true
+  }
+  if (file.orphan && !groupAlive(file.orphan.pgid)) {
+    delete file.orphan
+    changed = true
+  }
+  if (changed) await writeGenerationFile(file)
+}
 
-function update(job: ActiveJob, change: (record: StoredGeneration) => StoredGeneration): Promise<boolean> {
+function needsReaping(file: SiteGenerations): boolean {
+  return Boolean(file.orphan) || [file.latest, file.previous].some((record) => record && isOpen(record) && !active.has(record.generation_id))
+}
+
+export async function readSiteGenerations(site: string): Promise<SiteGenerations> {
+  if (needsReaping(await readRawGenerationFile(site))) await withSiteLock(site, () => reapStale(site))
+  return readGenerationFile(site, isActive)
+}
+
+export async function reapAllStale(): Promise<void> {
+  const sites = (await listDir(join(dataDir(), 'live'))).filter((f) => f.endsWith('.generation.json')).map((f) => f.slice(0, -'.generation.json'.length))
+  for (const site of sites) await readSiteGenerations(site).catch((error: Error) => console.warn(`[generate] ${site}: ${error.message}`))
+}
+
+function update(job: ActiveJob, change: (record: StoredGeneration) => StoredGeneration, results: Pick<SiteGenerations, 'last_result' | 'last_success'> = {}): Promise<boolean> {
   return withSiteLock(job.site, async () => {
     if (!isCurrent(job)) return false
-    await updateGeneration(job.site, job.id, change, isActive)
+    await updateGeneration(job.site, job.id, change, isActive, results)
     return true
   })
 }
 
-async function runChild(job: ActiveJob, command: string[], args: string[], timeoutMs: number): Promise<ChildResult | undefined> {
-  if (!isCurrent(job)) return undefined
-  job.child = runAgentCommand(command, args, { timeoutMs, tailChars: OUTPUT_TAIL_CHARS })
-  const result = await job.child.done
+async function runChild(job: ActiveJob, purpose: AgentPurpose, command: string[], args: string[], timeoutMs: number, match: string[]): Promise<ChildResult | undefined> {
+  if (!isCurrent(job) || isShuttingDown()) return undefined
+  const child = runAgentCommand(command, args, { purpose, timeoutMs, tailChars: OUTPUT_TAIL_CHARS })
+  job.child = child
+  if (child.pid) await update(job, (record) => ({ ...record, child: { pgid: child.pid!, started_at: child.startedAt, match } }))
+  const result = await child.done
   job.child = undefined
-  return isCurrent(job) ? result : undefined
+  return isCurrent(job) && !isShuttingDown() ? result : undefined
 }
 
-function withPreviewErrors(classes: GenerationClass[], errors: Record<string, string>): GenerationClass[] {
+function withPreviewErrors(classes: GenerationClass[], errors: Record<string, PreviewErrorCode>): GenerationClass[] {
   return classes.map((c) => (c.bulletin_id && errors[c.bulletin_id] ? { ...c, preview_error: errors[c.bulletin_id] } : c))
 }
 
-async function runJob(command: string[], job: ActiveJob): Promise<void> {
-  const startedAt = new Date().toISOString()
-  const digests = await classDigests(job.site)
-  if (!(await update(job, (record) => ({ ...record, status: 'running', started_at: startedAt, digests })))) return
-  const config = useRuntimeConfig()
-  const baseUrl = ownBaseUrl()
-  const args = [`--site=${job.site}`, `--writer=${config.generateWriter}`, `--verifier=${config.generateVerifier}`, ...(baseUrl ? [`--base-url=${baseUrl}`] : [])]
-  const result = await runChild(job, command, args, GENERATION_TIMEOUT_MS)
-  if (!result) return
-  const classes = (await generatedClasses(job.site, startedAt)) ?? []
-  if (!(await update(job, (record) => ({ ...record, classes })))) return
-  const passed = classes.filter((c) => c.outcome === 'pass').flatMap((c) => (c.bulletin_id ? [c.bulletin_id] : []))
-  const errors = await renderPreviews(
-    { site: job.site, isCurrent: () => isCurrent(job), run: (previewCommand, previewArgs, timeoutMs) => runChild(job, previewCommand, previewArgs, timeoutMs) },
-    [...passed, ...(await passingBulletins(job.site))],
-  )
-  if (!errors) return
-  await update(job, (record) => ({
-    ...record,
-    status: result.ok ? 'done' : 'failed',
-    finished_at: new Date().toISOString(),
-    classes: withPreviewErrors(classes, errors),
-    ...(result.ok ? {} : { error: result.output || 'generate exited with an error' }),
-  }))
+async function currentRepresentatives(site: string) {
+  const stored = await readSite(site)
+  return stored ? representatives(stored, await readGenerationFile(site, isActive)) : []
 }
 
-// Composing opens Chrome and calls the Writer, so jobs run one at a time over all sites.
-function enqueue(command: string[], id: string, site: string): void {
-  const job: ActiveJob = { id, site, siteGeneration: siteGeneration(site), cancelled: false }
-  active.set(id, job)
+async function finish(job: ActiveJob, failure: GenerationErrorCode | undefined, classes: GenerationClass[], summary: JobResult | undefined): Promise<void> {
+  await withSiteLock(job.site, async () => {
+    if (!isCurrent(job)) return
+    const finishedAt = new Date().toISOString()
+    await updateGeneration(
+      job.site,
+      job.id,
+      ({ child: _child, ...record }) => ({ ...record, status: failure ? 'failed' : 'done', finished_at: finishedAt, classes, ...(failure ? { error_code: failure, error: ERROR_TEXT[failure] } : {}) }),
+      isActive,
+      !failure && summary ? { last_success: summary } : {},
+    )
+    await prunePreviews(job.site, new Set((await currentRepresentatives(job.site)).map((rep) => rep.row.bulletin_id)))
+  })
+}
+
+async function runJob(command: string[], job: ActiveJob): Promise<void> {
+  const begun = await withSiteLock(job.site, async () => {
+    const site = isCurrent(job) ? await readSite(job.site) : undefined
+    if (!site) return undefined
+    const reps = await representatives(site, await readGenerationFile(job.site, isActive))
+    const digests = Object.fromEntries(reps.map((rep) => [rep.cls, { bulletin_id: rep.row.bulletin_id, digest: rep.snapshot.digest }]))
+    const startedAt = new Date().toISOString()
+    const place = placeOf(site)
+    await updateGeneration(job.site, job.id, (record) => ({ ...record, status: 'running', started_at: startedAt, place, digests }), isActive)
+    return { startedAt, place }
+  })
+  if (!begun) return
+  const deadline = Date.parse(begun.startedAt) + JOB_TIMEOUT_MS
+  const config = useRuntimeConfig()
+  const baseUrl = ownBaseUrl()
+  const match = [`--site=${job.site}`, `--writer=${config.generateWriter}`]
+  const args = [...match, `--verifier=${config.generateVerifier}`, ...(baseUrl ? [`--base-url=${baseUrl}`] : [])]
+  const result = await runChild(job, 'generate', command, args, deadline - Date.now(), match)
+  if (!result) return
+  if (!result.ok) console.warn(`[generate] ${job.site} ${job.id}: ${result.output}`)
+  const generated = await generatedResult(job.site, begun.startedAt)
+  const summary = generated && { generation_id: job.id, started_at: begun.startedAt, place: begun.place, rows: generated.rows }
+  const classes = generated?.classes ?? []
+  if (!(await update(job, (record) => ({ ...record, classes }), summary ? { last_result: summary } : {}))) return
+  let errors: Record<string, PreviewErrorCode> = {}
+  if (generated) {
+    const passed = classes.flatMap((c) => (c.outcome === 'pass' && c.bulletin_id ? [c.bulletin_id] : []))
+    const standing = (await currentRepresentatives(job.site)).filter((rep) => snapshotOutcome(rep.snapshot) === 'pass').map((rep) => rep.row.bulletin_id)
+    const previews = await renderPreviews(
+      { site: job.site, isCurrent: () => isCurrent(job) && !isShuttingDown(), run: (previewCommand, previewArgs, timeoutMs, previewMatch) => runChild(job, 'preview', previewCommand, previewArgs, timeoutMs, previewMatch) },
+      [...passed, ...standing],
+      deadline,
+    )
+    if (!previews) return
+    errors = previews.errors
+  }
+  const failure: GenerationErrorCode | undefined = result.timedOut || Date.now() >= deadline ? 'timed-out' : !result.ok ? 'generate-failed' : !generated ? 'no-result' : undefined
+  await finish(job, failure, withPreviewErrors(classes, errors), summary)
+}
+
+// Composing opens Chrome and calls the Writer, so jobs run one at a time over all sites, in the order they came.
+function enqueue(command: string[], job: ActiveJob): void {
   lastJob = lastJob.then(() =>
     runJob(command, job)
       .catch(async (error: Error) => {
-        console.warn(`[generate] ${site} ${id} stopped: ${error.message}`)
-        await update(job, (record) => ({ ...record, status: 'failed', finished_at: new Date().toISOString(), error: error.message })).catch(() => undefined)
+        console.warn(`[generate] ${job.site} ${job.id} stopped: ${error.stack ?? error.message}`)
+        await update(job, ({ child: _child, ...record }) => ({ ...record, status: 'failed', finished_at: new Date().toISOString(), error_code: 'internal-error', error: ERROR_TEXT['internal-error'] })).catch(() => undefined)
       })
-      .finally(() => active.delete(id)),
+      .finally(() => active.delete(job.id)),
   )
 }
 
@@ -130,6 +206,10 @@ export async function startGeneration(site: string, admin: AdminPrincipal, actor
       if (!(await municipalityPrepared(stored.municipality_id))) {
         throw problem(409, 'municipality-not-prepared', `municipality ${stored.municipality_id} is not prepared yet; the operator prepares it`)
       }
+      await reapStale(site)
+      const orphan = (await readRawGenerationFile(site)).orphan
+      if (orphan) throw problem(409, 'generation-running', `a job of site ${site} started by an earlier server is still running`, { generation_id: orphan.generation_id })
+      // From here to the registration nothing awaits, so starts of one facility on other sites cannot slip in between.
       const open = [...active.values()].find((job) => job.site === site && isCurrent(job))
       if (open) throw problem(409, 'generation-running', `site ${site} has a job queued or running`, { generation_id: open.id })
       const now = Date.now()
@@ -144,9 +224,20 @@ export async function startGeneration(site: string, admin: AdminPrincipal, actor
         started_by: { token_label: admin.kind === 'facility' ? admin.label : 'operator', ...(actor ? { actor } : {}) },
         classes: [],
       }
-      await pushGeneration(site, record, isActive)
-      starts.get(key)!.push(now)
-      enqueue(command, record.generation_id, site)
+      const job: ActiveJob = { id: record.generation_id, site, key, siteGeneration: siteGeneration(site), cancelled: false }
+      const times = starts.get(key) ?? []
+      starts.set(key, [...times, now])
+      active.set(job.id, job)
+      try {
+        await pushGeneration(site, record, isActive)
+      } catch (error) {
+        active.delete(job.id)
+        const kept = [...(starts.get(key) ?? [])]
+        kept.splice(kept.lastIndexOf(now), 1)
+        starts.set(key, kept)
+        throw error
+      }
+      enqueue(command, job)
       return record
     },
   })

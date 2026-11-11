@@ -68,7 +68,7 @@ async function exportNow(command: string[], site: string, bulletin: string, dige
   if (!started) return
   const baseUrl = ownBaseUrl()
   const args = [`--site=${site}`, `--bulletin=${bulletin}`, `--out=${resolve(distDir())}`, ...(baseUrl ? [`--base-url=${baseUrl}`] : [])]
-  const { ok, output } = await runAgentCommand(command, args, { timeoutMs: EXPORT_TIMEOUT_MS, tailChars: MESSAGE_TAIL_CHARS }).done
+  const { ok, output } = await runAgentCommand(command, args, { purpose: 'export', timeoutMs: EXPORT_TIMEOUT_MS, tailChars: MESSAGE_TAIL_CHARS }).done
   if (!ok) console.warn(`[export] ${site} ${bulletin} failed: ${output}`)
   await withSiteLock(site, async () => {
     if (siteGeneration(site) === generation) return recordJob(site, bulletin, ok ? { status: 'ok', digest } : { status: 'failed', digest, message: output })

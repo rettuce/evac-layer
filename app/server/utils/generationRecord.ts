@@ -2,8 +2,19 @@ import { mkdir, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { isSyntheticBulletinId } from '~~/layout/gate'
 import type { Actor } from './audit'
+import type { ChildMark } from './orphans'
 
 export type GenerationStatus = 'queued' | 'running' | 'done' | 'failed'
+export type GenerationErrorCode = 'generate-failed' | 'timed-out' | 'no-result' | 'server-restarted' | 'internal-error'
+export type PreviewErrorCode = 'preview-failed' | 'timed-out' | 'screens-changed'
+
+export const ERROR_TEXT: Record<GenerationErrorCode, string> = {
+  'generate-failed': 'the generate command ended with an error; the operator finds its output in the server log',
+  'timed-out': 'the job ran past its time limit',
+  'no-result': 'the generate command wrote no result for this job',
+  'server-restarted': 'server restarted',
+  'internal-error': 'the job stopped on an error; the operator finds it in the server log',
+}
 
 export interface GenerationClass {
   class: string
@@ -11,7 +22,7 @@ export interface GenerationClass {
   synthetic: boolean
   outcome: string
   reason?: string
-  preview_error?: string
+  preview_error?: PreviewErrorCode
 }
 
 export interface Generation {
@@ -22,56 +33,94 @@ export interface Generation {
   started_at?: string
   finished_at?: string
   started_by: { token_label: string; actor?: Actor }
+  error_code?: GenerationErrorCode
   error?: string
   classes: GenerationClass[]
 }
 
-// `digests` holds each class's layout digest when the job started, which `unchanged` compares against.
+export interface Place {
+  municipality_id: string
+  lat: number | null
+  lng: number | null
+  facing_deg: number | null
+}
+
 export interface StoredGeneration extends Generation {
-  digests?: Record<string, string>
+  digests?: Record<string, { bulletin_id: string; digest: string }>
+  place?: Place
+  child?: ChildMark
+}
+
+export interface JobResult {
+  generation_id: string
+  started_at: string
+  place: Place
+  rows: { class: string; bulletin_id?: string; outcome: string }[]
 }
 
 export interface SiteGenerations {
   site_id: string
   latest?: StoredGeneration
   previous?: StoredGeneration
-  last_success_started_at?: string
+  last_result?: JobResult
+  last_success?: JobResult
+  orphan?: ChildMark & { generation_id: string }
 }
 
 interface AgentsGenerationRow {
-  class: string
-  outcome: string
-  bulletin_id?: string
-  reasons?: string[]
+  class?: unknown
+  outcome?: unknown
+  bulletin_id?: unknown
+  reasons?: unknown
 }
 
-export const SERVER_RESTARTED = 'server restarted'
+const REASON_MAX_CHARS = 300
+const UNSAFE_IN_REASON = [/[a-z][a-z0-9+.-]*:\/\/\S+/gi, /(?<![\w.~-])(?:[A-Za-z]:)?(?:[\\/][^\s\\/:;,'"]+){2,}[\\/]?/g, /\b[A-Z][A-Z0-9_]{2,}=\S*/g]
+const BULLETIN_ID = /^[A-Za-z0-9_-]{1,80}$/
+
+export function placeOf(site: SiteFile): Place {
+  return { municipality_id: site.municipality_id, lat: site.lat ?? null, lng: site.lng ?? null, facing_deg: site.facing_deg ?? null }
+}
+
+export function samePlace(a: Place, b: Place): boolean {
+  return a.municipality_id === b.municipality_id && a.lat === b.lat && a.lng === b.lng && a.facing_deg === b.facing_deg
+}
 
 export function generationRecordFile(site: string): string {
   return join(dataDir(), 'live', `${site}.generation.json`)
 }
 
-// Jobs live only in the process that queued them, so a record still queued or running without a job behind it
-// was left by a server that stopped.
-function settled(record: StoredGeneration | undefined, isActive: (id: string) => boolean): StoredGeneration | undefined {
-  if (!record || (record.status !== 'queued' && record.status !== 'running') || isActive(record.generation_id)) return record
-  return { ...record, status: 'failed', error: SERVER_RESTARTED }
+export function isOpen(record: StoredGeneration | undefined): boolean {
+  return record?.status === 'queued' || record?.status === 'running'
 }
 
+export function restarted(record: StoredGeneration): StoredGeneration {
+  const { child: _child, ...rest } = record
+  return { ...rest, status: 'failed', error_code: 'server-restarted', error: ERROR_TEXT['server-restarted'] }
+}
+
+// Jobs live only in the process that queued them, so a record still open without a job behind it was left by a
+// server that stopped.
 export async function readGenerationFile(site: string, isActive: (id: string) => boolean): Promise<SiteGenerations> {
   const stored = await readJsonIfExists<SiteGenerations>(generationRecordFile(site))
   if (!stored || stored.site_id !== site) return { site_id: site }
-  return { ...stored, latest: settled(stored.latest, isActive), previous: settled(stored.previous, isActive) }
+  const settle = (record?: StoredGeneration) => (record && isOpen(record) && !isActive(record.generation_id) ? restarted(record) : record)
+  return { ...stored, latest: settle(stored.latest), previous: settle(stored.previous) }
 }
 
-async function writeGenerationFile(file: SiteGenerations): Promise<void> {
+export async function readRawGenerationFile(site: string): Promise<SiteGenerations> {
+  const stored = await readJsonIfExists<SiteGenerations>(generationRecordFile(site))
+  return stored?.site_id === site ? stored : { site_id: site }
+}
+
+export async function writeGenerationFile(file: SiteGenerations): Promise<void> {
   const path = generationRecordFile(file.site_id)
   await mkdir(join(dataDir(), 'live'), { recursive: true })
   await writeFile(`${path}.tmp`, `${JSON.stringify(file, null, 2)}\n`)
   await rename(`${path}.tmp`, path)
 }
 
-export function publicGeneration({ digests: _digests, ...generation }: StoredGeneration): Generation {
+export function publicGeneration({ digests: _digests, place: _place, child: _child, ...generation }: StoredGeneration): Generation {
   return generation
 }
 
@@ -79,30 +128,53 @@ export function findGeneration(file: SiteGenerations, id: string): StoredGenerat
   return [file.latest, file.previous].find((record) => record?.generation_id === id)
 }
 
-// Call these under the site's lock.
+export function lastFinished(file: SiteGenerations): StoredGeneration | undefined {
+  return [file.latest, file.previous].find((record) => record && !isOpen(record))
+}
+
+// The writers below run under the site's lock.
 export async function pushGeneration(site: string, record: StoredGeneration, isActive: (id: string) => boolean): Promise<void> {
   const file = await readGenerationFile(site, isActive)
   await writeGenerationFile({ ...file, latest: record, previous: file.latest })
 }
 
-export async function updateGeneration(site: string, id: string, change: (record: StoredGeneration) => StoredGeneration, isActive: (id: string) => boolean): Promise<void> {
+export async function updateGeneration(site: string, id: string, change: (record: StoredGeneration) => StoredGeneration, isActive: (id: string) => boolean, results: Pick<SiteGenerations, 'last_result' | 'last_success'> = {}): Promise<void> {
   const file = await readGenerationFile(site, isActive)
   const slot = file.latest?.generation_id === id ? 'latest' : file.previous?.generation_id === id ? 'previous' : undefined
   if (!slot) return
-  const record = change(file[slot]!)
-  const succeeded = record.status === 'done' && record.started_at
-  await writeGenerationFile({ ...file, [slot]: record, ...(succeeded ? { last_success_started_at: record.started_at } : {}) })
+  await writeGenerationFile({ ...file, [slot]: change(file[slot]!), ...results })
 }
 
-// generation.json is written by the agents; one older than the job is what an earlier run left.
-export async function generatedClasses(site: string, since: string): Promise<GenerationClass[] | undefined> {
-  const file = await readJsonIfExists<{ generated_at?: string; classes?: AgentsGenerationRow[] }>(siteLayoutsDir(site, 'generation.json')).catch(() => undefined)
-  if (!Array.isArray(file?.classes) || !file.generated_at || !(Date.parse(file.generated_at) >= Date.parse(since))) return undefined
-  return file.classes.map((row) => ({
-    class: String(row.class),
-    ...(row.bulletin_id ? { bulletin_id: String(row.bulletin_id) } : {}),
-    synthetic: isSyntheticBulletinId(row.bulletin_id),
-    outcome: String(row.outcome),
-    ...(row.reasons?.length ? { reason: row.reasons.join('; ') } : {}),
-  }))
+function safeReason(reasons: unknown): string | undefined {
+  if (!Array.isArray(reasons) || !reasons.length) return undefined
+  let text = reasons.map(String).join('; ')
+  for (const pattern of UNSAFE_IN_REASON) text = text.replace(pattern, '[…]')
+  return text.length > REASON_MAX_CHARS ? `${text.slice(0, REASON_MAX_CHARS - 1)}…` : text
+}
+
+export interface GeneratedResult {
+  classes: GenerationClass[]
+  rows: JobResult['rows']
+}
+
+// generation.json is written by the agents: one older than the job, of another site or of another shape is not this
+// job's result.
+export async function generatedResult(site: string, since: string): Promise<GeneratedResult | undefined> {
+  const file = await readJsonIfExists<{ site?: unknown; generated_at?: unknown; classes?: unknown }>(siteLayoutsDir(site, 'generation.json')).catch(() => undefined)
+  if (!file || file.site !== site || typeof file.generated_at !== 'string' || !(Date.parse(file.generated_at) >= Date.parse(since)) || !Array.isArray(file.classes)) return undefined
+  const rows = file.classes as AgentsGenerationRow[]
+  if (!rows.every((row) => typeof row?.class === 'string' && typeof row.outcome === 'string' && (row.bulletin_id === undefined || (typeof row.bulletin_id === 'string' && BULLETIN_ID.test(row.bulletin_id))))) return undefined
+  return {
+    classes: rows.map((row) => {
+      const reason = safeReason(row.reasons)
+      return {
+        class: row.class as string,
+        ...(row.bulletin_id ? { bulletin_id: row.bulletin_id as string } : {}),
+        synthetic: isSyntheticBulletinId(row.bulletin_id),
+        outcome: row.outcome as string,
+        ...(reason ? { reason } : {}),
+      }
+    }),
+    rows: rows.map((row) => ({ class: row.class as string, ...(row.bulletin_id ? { bulletin_id: row.bulletin_id as string } : {}), outcome: row.outcome as string })),
+  }
 }

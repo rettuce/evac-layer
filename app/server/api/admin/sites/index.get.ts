@@ -6,5 +6,6 @@ export default defineEventHandler(async (event) => {
   if (wanted !== undefined && !(typeof wanted === 'string' && FACILITY_ID.test(wanted))) throw problem(400, 'invalid-request', 'facility_id is invalid')
   const sites = (await readSites()).filter((site) => siteVisibleTo(admin, site) && (admin?.kind === 'facility' || wanted === undefined || site.facility_id === wanted))
   const approvals = await readApprovals()
-  return { sites: await Promise.all(sites.map((site) => siteState(site, approvals))) }
+  const states = await Promise.all(sites.map((site) => readWhileOwned(site.id, { visible: () => readVisibleSite(site.id, admin), read: (current) => siteState(current, approvals) })))
+  return { sites: states.filter((state) => state !== undefined) }
 })

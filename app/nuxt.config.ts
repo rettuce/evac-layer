@@ -16,6 +16,7 @@ export default defineNuxtConfig({
     generateVerifier: 'browser',
     previewCommand: 'pnpm -s -F agents preview',
     generationsPerHour: '',
+    generationOpenJobsPerFacility: '',
     webhookAllowPrivate: '',
     reverseGeocoderUrl: '',
     auditMaxBytes: '',
