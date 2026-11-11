@@ -109,3 +109,22 @@ test("the class cache is built over an index that holds a synthetic row, and goe
   const lines = cacheLatestWriterPerClass({ layoutsDir });
   assert.deepEqual(lines.sort(), [`15205/landslide/all-clear/1 ← ${realId}`, `15205/landslide/evac-now/4 ← ${id}`]);
 });
+
+test("synthetic XML and generation results are written only under their own directories, for ids of the right form", async () => {
+  const { generateSite } = await import("../src/loop/generation.js");
+  const id = parseJmaXml(xml).bulletin_id;
+  for (const [m, b] of [["../15205", id], ["15205", "../../escape"], ["15205", "VPWW56-202411020800-314b561ca69f"], ["1520", id]]) {
+    assert.throws(() => saveSyntheticXml(m!, b!, xml), /municipality|bulletin/, `${m} ${b}`);
+  }
+  assert.equal(fs.existsSync(path.join(dataDir, "escape.xml")), false);
+  const site = JSON.parse(fs.readFileSync(path.join(repoData, "sites", "15205-demo.json"), "utf8")) as SiteFile;
+  await assert.rejects(generateSite({ site: { ...site, id: "../outside" }, verifier: staticVerifier, writer: { kind: "placeholder" } }), /site id/);
+  assert.equal(fs.existsSync(path.join(LAYOUTS_DIR, "..", "outside")), false);
+});
+
+test("generate fails when a class it can compose stopped, failed or broke, and not for the classes it cannot compose yet", async () => {
+  const { generationExitCode } = await import("../src/loop/generation.js");
+  const row = (outcome: string) => ({ class: "c", outcome, approvable: false, reasons: [] }) as never;
+  assert.equal(generationExitCode([row("pass"), row("unsupported")]), 0);
+  for (const bad of ["stopped", "fail", "error"]) assert.equal(generationExitCode([row("pass"), row(bad)]), 1, bad);
+});

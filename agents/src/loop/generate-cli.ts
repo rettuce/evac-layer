@@ -5,7 +5,7 @@ import { EVAC_URL } from "../paths.js";
 import { findSite, SiteNotFound, type SiteFile } from "../sites.js";
 import type { WriterModel } from "../writer/live.js";
 import { browserVerifier } from "./browser-verifier.js";
-import { generateSite, generationFile } from "./generation.js";
+import { generateSite, generationExitCode, generationFile } from "./generation.js";
 import type { WriterChoice } from "./one.js";
 import { staticVerifier } from "./static-verifier.js";
 
@@ -44,7 +44,7 @@ try {
   const usd = usage.reduce((n, u) => n + u.usd, 0);
   if (usd) console.log(`  api $${usd.toFixed(3)}`);
   console.log(`${generationFile(site.id)}: ${result.classes.filter((c) => c.approvable).length} of ${result.classes.length} classes ready for approval`);
-  process.exitCode = result.classes.some((c) => c.outcome === "error" || c.outcome === "fail") ? 1 : 0;
+  process.exitCode = generationExitCode(result.classes);
 } finally {
   await browser?.close();
 }

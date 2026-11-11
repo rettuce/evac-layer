@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
 import { isSyntheticBulletinId } from "../../../app/layout/gate";
+import { isBulletinId, isMunicipalityId } from "../../../app/layout/replay";
 import { AGENTS_DIR, DATA_DIR, SYNTHETIC_DIR } from "../paths.js";
 import { parseJmaXml } from "./parse.js";
 import type { SyntheticPlan } from "./synthetic-classes.js";
@@ -107,9 +108,17 @@ export function syntheticXmlPath(file: string): string {
   return path.join(DATA_DIR, file);
 }
 
+function within(dir: string, file: string): boolean {
+  const relative = path.relative(dir, file);
+  return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+
 export function saveSyntheticXml(municipalityId: string, bulletinId: string, xml: string): string {
+  if (!isMunicipalityId(municipalityId)) throw new SyntheticError(`municipality id "${municipalityId}" is not a 5-digit code`);
+  if (!isBulletinId(bulletinId) || !isSyntheticBulletinId(bulletinId)) throw new SyntheticError(`bulletin id "${bulletinId}" is not a synthetic bulletin id`);
   const file = syntheticFile(municipalityId, bulletinId);
   const full = syntheticXmlPath(file);
+  if (!within(SYNTHETIC_DIR, full)) throw new SyntheticError(`bulletin ${bulletinId} would be written outside ${SYNTHETIC_DIR}`);
   if (fs.existsSync(full) && fs.readFileSync(full, "utf8") === xml) return file;
   fs.mkdirSync(path.join(SYNTHETIC_DIR, municipalityId), { recursive: true });
   fs.writeFileSync(full, xml);

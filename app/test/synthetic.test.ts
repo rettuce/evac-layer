@@ -79,6 +79,8 @@ describe('synthetic bulletins', { skip }, () => {
     await mkdir(join(dataDir, 'live'), { recursive: true })
     await writeFile(join(dataDir, 'live', `${SITE}.json`), JSON.stringify({ bulletin_id: SYN, fallback_bulletin_id: null, updated_at: '2026-11-11T00:00:00Z' }))
     assert.equal((await feed(SITE)).state, 'ambient', 'not even when the live file names it')
+    const replay = await (await fetch(`${base}/api/replay?site=${SITE}`)).json()
+    assert.deepEqual(replay.rows, [], 'nor does the live replay status')
     const layout = await fetch(`${base}/api/live-layout?site=${SITE}&bulletin=${SYN}&shape=16x9`)
     assert.equal(layout.status, 403)
   })

@@ -230,8 +230,12 @@ test("a normal bulletin of a class approved from a drill gets no drill text and 
     assert.equal(screenClass(layout), cls.replace(/\/drill$/, ""), "the normal screen has the class without the drill mark");
   }
   assert.notEqual(classDigest(normalFiles), approvals.classes[`${SITE_ID}/${cls}`].digest);
-  const gate = approvalWith(approvals, SITE_ID, normalAlert.bulletin_id, layoutDigest(normalFiles), { key: cls, digest: classDigest(normalFiles), checked: true });
+  const normalCls = { key: screenClass(JSON.parse(normalFiles[0].body)), digest: classDigest(normalFiles), checked: true };
+  const gate = approvalWith(approvals, SITE_ID, normalAlert.bulletin_id, layoutDigest(normalFiles), normalCls);
   assert.equal(gate.approved, false);
+  const underNormalKey = { ...approvals, layouts: {}, classes: { [`${SITE_ID}/${normalCls.key}`]: { approved: true, updated_at: "2026-11-11T00:00:00Z", digest: classDigest(drillFiles), approved_from: DRILL_ID } } };
+  const drillCls = { key: cls, digest: classDigest(drillFiles), checked: true };
+  assert.equal(approvalWith(underNormalKey, SITE_ID, "VTSE41-202611110930-000000000003", layoutDigest(drillFiles), drillCls).approved, false, "a class approval recorded under the normal key does not open a drill screen");
   fs.rmSync(APPROVALS_FILE);
   fs.rmSync(own);
 });

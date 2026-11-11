@@ -6,7 +6,7 @@ import { classListing, prefectureOf, type ClassListing, type SyntheticPlan } fro
 import { saveSyntheticXml, synthesizeXml, syntheticBulletinId } from "../jma/synthetic.js";
 import { LAYOUTS_DIR } from "../paths.js";
 import type { CallUsage } from "../reader/pricing.js";
-import { siteMunicipality, type SiteFile } from "../sites.js";
+import { isSiteId, SITE_ID, siteMunicipality, type SiteFile } from "../sites.js";
 import { cachedWriterRecord, saveWriterForClass, screenClassFor } from "../writer/live.js";
 import { loadMunicipality } from "./municipality.js";
 import { composeBulletin, type WriterChoice } from "./one.js";
@@ -27,6 +27,10 @@ export interface GenerationRow {
 export interface Generation { site: string; municipality: string; generated_at: string; verifier: string; writer: string; classes: GenerationRow[] }
 
 export const PLACEHOLDER_REASON = "placeholder wording ([draft]): compose again with --writer live, or once the class has wording, before approving";
+
+export function generationExitCode(rows: readonly GenerationRow[]): number {
+  return rows.some((r) => r.outcome === "stopped" || r.outcome === "fail" || r.outcome === "error") ? 1 : 0;
+}
 
 export function generationFile(siteId: string, layoutsDir = LAYOUTS_DIR): string {
   return path.join(layoutsDir, siteId, "generation.json");
@@ -77,7 +81,11 @@ export async function generateSite(args: {
   site: SiteFile; classes?: readonly string[]; verifier: Verifier; writer: WriterChoice; usage?: CallUsage[];
   roots?: { reports: string; layouts: string }; log?: (m: string) => void; now?: () => Date;
 }): Promise<Generation> {
+  if (!isSiteId(args.site.id)) throw new Error(`site id "${args.site.id}" must match ${SITE_ID}`);
   const municipalityId = siteMunicipality(args.site);
+  const out = generationFile(args.site.id, args.roots?.layouts);
+  const relative = path.relative(args.roots?.layouts ?? LAYOUTS_DIR, out);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) throw new Error(`site id "${args.site.id}" would write outside the layouts directory`);
   const log = args.log ?? (() => {});
   migrateBulletinStatus(args.site.id, { layoutsDir: args.roots?.layouts, log });
   const rows: GenerationRow[] = [];
@@ -99,7 +107,6 @@ export async function generateSite(args: {
     site: args.site.id, municipality: municipalityId, generated_at: (args.now ?? (() => new Date()))().toISOString(),
     verifier: args.verifier.name, writer: args.writer.kind, classes: rows,
   };
-  const out = generationFile(args.site.id, args.roots?.layouts);
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(`${out}.tmp`, JSON.stringify(generation, null, 2) + "\n");
   fs.renameSync(`${out}.tmp`, out);
