@@ -25,7 +25,9 @@ export interface GenerationRow {
   reasons: string[];
 }
 
-export interface Generation { site: string; municipality: string; generated_at: string; verifier: string; writer: string; classes: GenerationRow[] }
+// composable: every class this command composes for the municipality, so that a reader can tell a class it can remake
+// from one only a real bulletin can, whichever classes a run was limited to.
+export interface Generation { site: string; municipality: string; generated_at: string; verifier: string; writer: string; composable: string[]; classes: GenerationRow[] }
 
 export const PLACEHOLDER_REASON = "placeholder wording ([draft]): compose again with --writer live, or once the class has wording, before approving";
 export const UNREVIEWED_REASON = "the ja_easy headline table (data/jma/warning-names-ja-easy.json) is not reviewed: approving this bulletin writes its class approval, but the class approval opens no screen until the table is marked reviewed";
@@ -108,7 +110,7 @@ export async function generateSite(args: {
   }
   const generation: Generation = {
     site: args.site.id, municipality: municipalityId, generated_at: (args.now ?? (() => new Date()))().toISOString(),
-    verifier: args.verifier.name, writer: args.writer.kind, classes: rows,
+    verifier: args.verifier.name, writer: args.writer.kind, composable: classListing(municipalityId).filter((c) => c.supported).map((c) => c.cls), classes: rows,
   };
   fs.mkdirSync(path.dirname(out), { recursive: true });
   fs.writeFileSync(`${out}.tmp`, JSON.stringify(generation, null, 2) + "\n");

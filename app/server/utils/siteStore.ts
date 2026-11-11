@@ -155,6 +155,7 @@ export async function putSite(id: string, input: SiteInput, admin: AdminPrincipa
     const stored = await storedSite(id)
     assertMayWrite(id, admin, stored)
     const previous = stored.kind === 'site' ? stored.site : undefined
+    if (!previous) await refuseWhileOrphansRun(id, admin)
     const site = mergedSite(previous, placed, admin)
     const reason = schemaProblem(JSON.parse(JSON.stringify(site)))
     if (reason) invalid(reason)
@@ -166,6 +167,17 @@ export async function putSite(id: string, input: SiteInput, admin: AdminPrincipa
   })
 }
 
+// A process left by the id's earlier site may still write under it. Only the operator and the facility that owned
+// that site learn why; anyone else is told what an id in use tells them.
+async function refuseWhileOrphansRun(id: string, admin: AdminPrincipal): Promise<void> {
+  const orphans = await liveOrphans(id)
+  if (!orphans.length) return
+  if (admin.kind === 'operator' || orphans.some((orphan) => orphan.facility_id === admin.facility_id)) {
+    throw problem(409, 'site-busy', `a process of an earlier site ${id} is still running; register the id again once it has ended`)
+  }
+  throw problem(409, 'site-id-taken', `site id ${id} is taken; choose another id`)
+}
+
 function withoutSite<T>(record: Record<string, T>, id: string): Record<string, T> {
   return Object.fromEntries(Object.entries(record).filter(([key]) => !key.startsWith(`${id}/`)))
 }
@@ -173,6 +185,8 @@ function withoutSite<T>(record: Record<string, T>, id: string): Record<string, T
 // Everything stored under a site id except the site file. Call it under the site's lock.
 async function removeSiteState(id: string): Promise<void> {
   advanceSiteGeneration(id)
+  await stopGenerationsOf(id)
+  await stopChildrenOf(id)
   await removeSubscriptionsOf(id)
   await updateApprovals((approvals) => {
     approvals.layouts = withoutSite(approvals.layouts, id)
@@ -181,8 +195,8 @@ async function removeSiteState(id: string): Promise<void> {
   })
   const live = join(dataDir(), 'live')
   const remove = (path: string) => rm(path, { recursive: true, force: true })
-  await Promise.all([join(live, `${id}.json`), join(live, `${id}.receiver.json`), exportRecordFile(id)].map(remove))
-  await Promise.all([join(distDir(), id), join(dataDir(), 'layouts', id), join(dataDir(), 'reports', id)].map(remove))
+  await Promise.all([join(live, `${id}.json`), join(live, `${id}.receiver.json`), exportRecordFile(id), generationRecordFile(id)].map(remove))
+  await Promise.all([join(distDir(), id), join(dataDir(), 'layouts', id), join(dataDir(), 'reports', id), previewsDir(id)].map(remove))
 }
 
 // The site file goes last: a removal that stops half way leaves a site that can be removed again, never

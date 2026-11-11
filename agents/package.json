@@ -23,6 +23,7 @@
     "replay-pipeline": "tsx src/loop/replay-cli.ts",
     "fanout": "tsx src/loop/fanout.ts",
     "export": "tsx src/delivery/cli.ts",
+    "preview": "tsx src/delivery/preview-cli.ts",
     "live": "tsx src/delivery/live-cli.ts",
     "record": "tsx src/jma/record.ts",
     "receive": "tsx src/jma/receive.ts",

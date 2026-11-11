@@ -35,6 +35,16 @@ export async function guardedSiteWrite<T>(
   return withSiteLock(id, async () => ((await steps.visible()) ? { value: await steps.write() } : undefined))
 }
 
+// A site deleted, or deleted and registered again, while its data was read moves its generation on: what was read
+// may then be the next owner's, and the caller gets nothing.
+export async function readWhileOwned<S, T>(id: string, steps: { visible: () => Promise<S | undefined>; read: (site: S) => Promise<T> }): Promise<T | undefined> {
+  const generation = siteGeneration(id)
+  const site = await steps.visible()
+  if (site === undefined) return undefined
+  const value = await steps.read(site)
+  return siteGeneration(id) === generation ? value : undefined
+}
+
 export function siteGeneration(id: string): number {
   return generations.get(id) ?? 0
 }

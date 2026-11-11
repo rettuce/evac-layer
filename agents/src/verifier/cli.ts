@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
-import puppeteer from "puppeteer-core";
+import { launchBrowser } from "../delivery/capture.js";
 import type { Shape } from "../../../app/layout/types";
 import { TMP_DIR } from "../paths.js";
 import { MAX_REVERSALS, countReversals, droppedCells, judgeContent, judgeFonts, judgeState, type Finding } from "./checks.js";
@@ -24,7 +24,7 @@ if (values.clock !== "realtime" && values.clock !== "virtual") {
 }
 
 const target = { baseUrl: values.url!, layout: values.layout!, variant: Number(values.variant) };
-const browser = await puppeteer.launch({ executablePath: values.chrome, headless: true, args: ["--disable-gpu-rasterization"] });
+const browser = await launchBrowser(values.chrome);
 try {
   const screens = [];
   for (const shape of SHAPES) {

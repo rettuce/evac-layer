@@ -119,17 +119,18 @@ describe('site locks', () => {
 })
 
 const SLOW_EXPORTER = `#!/usr/bin/env node
-import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs'
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
+const settings = JSON.parse(readFileSync(new URL('./slow-exporter.json', import.meta.url), 'utf8'))
 const { values } = parseArgs({ options: { site: { type: 'string' }, bulletin: { type: 'string' }, out: { type: 'string' }, 'base-url': { type: 'string' } } })
-appendFileSync(process.env.SLOW_EXPORT_CALLS, 'start ' + values.site + '\\n')
+appendFileSync(settings.calls, 'start ' + values.site + '\\n')
 await new Promise((resolve) => setTimeout(resolve, 800))
 const dir = join(values.out, values.site, values.bulletin)
 mkdirSync(dir, { recursive: true })
 writeFileSync(join(dir, '16x9.png'), 'old screen')
 writeFileSync(join(dir, '16x9.html'), '<!doctype html>')
-appendFileSync(process.env.SLOW_EXPORT_CALLS, 'done ' + values.site + '\\n')
+appendFileSync(settings.calls, 'done ' + values.site + '\\n')
 `
 
 describe('site registration under contention, on a server that holds facilities', { skip }, () => {
@@ -181,6 +182,7 @@ describe('site registration under contention, on a server that holds facilities'
 
     const exporter = join(root, 'slow-exporter.mjs')
     await writeFile(exporter, SLOW_EXPORTER)
+    await writeFile(join(root, 'slow-exporter.json'), JSON.stringify({ calls }))
     await chmod(exporter, 0o755)
     await writeFile(calls, '')
 
@@ -200,7 +202,6 @@ describe('site registration under contention, on a server that holds facilities'
       NUXT_ADMIN_TOKEN: OPERATOR_TOKEN,
       NUXT_WEBHOOK_ALLOW_PRIVATE: '1',
       NUXT_EXPORT_COMMAND: exporter,
-      SLOW_EXPORT_CALLS: calls,
       NUXT_REVERSE_GEOCODER_URL: `http://127.0.0.1:${await freePort()}/unreachable`,
     }
     ;({ base, child } = await startServer(serverEnv))
@@ -362,7 +363,7 @@ describe('site registration under contention, on a server that holds facilities'
     assert.ok(Date.parse(after.location_updated_at) > Date.parse(before))
   })
 
-  test('an export that finishes after its site was deleted and taken by another facility leaves nothing behind', async () => {
+  test('an export still running when its site is deleted is stopped and leaves nothing behind for the facility that takes the id', async () => {
     const id = 'export-hall'
     assert.equal((await put(id, placeIn(SOLO_MUNI), TOKEN_A)).status, 201)
     await writeScreen(dataDir, id, SOLO_MUNI, 'TEST-EX-1')
@@ -372,8 +373,8 @@ describe('site registration under contention, on a server that holds facilities'
 
     assert.equal((await del(`/api/admin/sites/${id}`, TOKEN_A)).status, 204)
     assert.equal((await put(id, placeIn(SOLO_MUNI), TOKEN_B)).status, 201)
-    await until(() => readFile(calls, 'utf8'), (text) => text.includes(`done ${id}`), 'export done')
-    await sleep(300)
+    await sleep(1500)
+    assert.equal((await readFile(calls, 'utf8')).includes(`done ${id}`), false, 'the export was stopped before it finished')
     assert.equal(existsSync(join(distDir, id)), false, 'no screens of the old site')
     assert.equal(existsSync(join(dataDir, 'live', `${id}.export.json`)), false, 'no export record of the old site')
   })

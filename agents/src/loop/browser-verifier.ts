@@ -2,9 +2,10 @@ import crypto from "node:crypto";
 import type { LayoutCell } from "../../../app/layout/types";
 import fs from "node:fs";
 import path from "node:path";
-import puppeteer, { type Browser } from "puppeteer-core";
+import type { Browser } from "puppeteer-core";
+import { launchBrowser } from "../delivery/capture.js";
 import type { Shape } from "../../../app/layout/types";
-import { TMP_DIR, chromePath } from "../paths.js";
+import { TMP_DIR } from "../paths.js";
 import { readScreen, sampleLuminance, type Clock } from "../verifier/browser.js";
 import { MAX_REVERSALS, countReversals, judgeContent, judgeDropped, judgeFonts, judgeNorthUp, judgeState, type Finding } from "../verifier/checks.js";
 import type { Screen, ScreenVerdict, Verifier, VerifyContext } from "./types.js";
@@ -30,7 +31,7 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
           out.push({ ...base[i], note: `browser and vision checks skipped for ${s.shape}; static checks only` });
           continue;
         }
-        browser ??= await puppeteer.launch({ executablePath: opts.chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
+        browser ??= await launchBrowser(opts.chrome);
         fs.mkdirSync(stageDir, { recursive: true });
         const body = JSON.stringify(s);
         const file = path.join(stageDir, `${crypto.createHash("sha256").update(body).digest("hex").slice(0, 16)}.json`);

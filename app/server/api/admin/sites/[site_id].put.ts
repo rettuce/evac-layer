@@ -4,5 +4,7 @@ export default defineEventHandler(async (event) => {
   const input = parseSiteInput(await readBody(event))
   const { site, created, warnings } = await putSite(id, input, event.context.admin!)
   setResponseStatus(event, created ? 201 : 200)
-  return siteState(site, await readApprovals(), warnings)
+  const state = await readWhileOwned(id, { visible: () => readVisibleSite(id, event.context.admin), read: async (current) => siteState(current, await readApprovals(), warnings) })
+  if (!state) throw problem(404, 'not-found', `no site ${site.id}`)
+  return state
 })
