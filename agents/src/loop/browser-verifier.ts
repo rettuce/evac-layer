@@ -6,7 +6,7 @@ import puppeteer, { type Browser } from "puppeteer-core";
 import type { Shape } from "../../../app/layout/types";
 import { TMP_DIR, chromePath } from "../paths.js";
 import { readScreen, sampleLuminance, type Clock } from "../verifier/browser.js";
-import { MAX_REVERSALS, countReversals, judgeContent, judgeDrill, judgeDropped, judgeFonts, judgeState, type Finding } from "../verifier/checks.js";
+import { MAX_REVERSALS, countReversals, judgeContent, judgeDrill, judgeDrillWordOutsideDrill, judgeDropped, judgeFonts, judgeState, type Finding } from "../verifier/checks.js";
 import type { Screen, ScreenVerdict, Verifier, VerifyContext } from "./types.js";
 import type Anthropic from "@anthropic-ai/sdk";
 import { visionCheck } from "../verifier/vision.js";
@@ -40,7 +40,7 @@ export function browserVerifier(opts: { baseUrl: string; clock?: Clock; chrome?:
         const { state, samples, cells, scale, pngs } = await readScreen(browser, target, shape, { capture: Boolean(opts.vision) });
         const luminances = await sampleLuminance(browser, target, shape, opts.clock ?? "realtime");
         const reversals = countReversals(luminances);
-        const findings: Finding[] = [...base[i].findings.filter((f) => f.check !== "distance-duplicated"), ...judgeState(state), ...judgeDropped(s.cells as LayoutCell[], state), ...judgeFonts(samples, scale, shape), ...judgeContent(cells), ...(ctx ? judgeDrill(s.cells as LayoutCell[], ctx.alert.status) : [])];
+        const findings: Finding[] = [...base[i].findings.filter((f) => f.check !== "distance-duplicated"), ...judgeState(state), ...judgeDropped(s.cells as LayoutCell[], state), ...judgeFonts(samples, scale, shape), ...judgeContent(cells), ...(ctx ? [...judgeDrill(s.cells as LayoutCell[], ctx.alert.status), ...judgeDrillWordOutsideDrill(s.cells as LayoutCell[], ctx.alert.status)] : [])];
         if (reversals > MAX_REVERSALS) findings.push({ check: "flicker", detail: `${reversals} luminance reversals of ≥10% within 1 s` });
         let note: string | undefined;
         if (opts.vision) {
