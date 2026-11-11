@@ -1,5 +1,5 @@
 /* The north-up dial (northUp.ts): drawn in the ink and the page colour only, and still; the arrow turns once, by the
-   layout's rotation. The ring opens behind N and 北 so that the marks read as part of the circle. */
+   layout's rotation. The ring opens behind the N so that the mark reads as part of the circle. */
 .north-dial {
   position: relative;
   flex: none;

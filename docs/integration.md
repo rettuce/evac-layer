@@ -44,7 +44,7 @@ A site is one venue whose screens share the coordinates. It is one JSON file, `d
 ```
 
 - `municipality_id` (5-digit JIS code) selects which bulletins apply and which municipality knowledge file is read. `pnpm -F agents site` fills it from the coordinates (below); a code written by hand is kept.
-- `facing_deg` is the compass direction the viewer faces when looking at the screen; the arrow to the evacuation site is rotated against it. Leave it out when the facing is not known (many signage systems do not hold it): the screens then show a north-fixed compass arrow instead, a circle marked N and 北 with the arrow at the map direction (rounded to 8 points) and the direction word with the distance beside it (「南西へ 570m」). Do not write 0 for "unknown": 0 means the viewer faces north, and every arrow is turned on that assumption.
+- `facing_deg` is the compass direction the viewer faces when looking at the screen; the arrow to the evacuation site is rotated against it. Leave it out when the facing is not known (many signage systems do not hold it): the screens then show a north-fixed compass arrow instead, a circle marked N at its top with the arrow at the map direction (rounded to 8 points) and the direction word with the distance beside it (「南西へ 570m」). Do not write 0 for "unknown": 0 means the viewer faces north, and every arrow is turned on that assumption.
 - From the coordinates the Composer picks the nearest GSI designated evacuation site that matches the hazard and writes its name, direction and distance into every layout for this site.
 - A municipality may have any number of sites; each gets its own screens and approvals.
 - Leave out `replay`. It makes a site play back a recording, for the demo only.

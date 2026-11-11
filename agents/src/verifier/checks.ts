@@ -119,10 +119,12 @@ export const NORTH_UP_ROTATION: Record<string, number> = {
 };
 const ANGLE_TOLERANCE_DEG = 1;
 
+const NORTH_MARK = "N";
+
 export interface NorthMark { text: string; visible: boolean; onDial: boolean }
 export interface NorthUpRead { id: string; word: string; rotation: number | undefined; marks?: NorthMark[] }
 
-// A north-up arrow read as "ahead of me" sends people the wrong way, so the dial must carry N and 北 where they are seen
+// A north-up arrow read as "ahead of me" sends people the wrong way, so the dial must carry its N where it is seen
 // with it, and the arrow must point the way its word says. marks is what the browser saw; the static layer has none.
 export function judgeNorthUp(cells: NorthUpRead[]): Finding[] {
   return cells.flatMap((c) => {
@@ -131,8 +133,7 @@ export function judgeNorthUp(cells: NorthUpRead[]): Finding[] {
     const off = want === undefined || c.rotation === undefined ? Infinity : Math.abs((((c.rotation - want) % 360) + 540) % 360 - 180);
     if (off > ANGLE_TOLERANCE_DEG) out.push({ check: "direction-mismatch", cell_id: c.id, detail: `north-up arrow at ${c.rotation ?? "no"}° does not point ${JSON.stringify(c.word)}${want === undefined ? " (not one of the eight words)" : ` (${want}°)`}` });
     if (c.marks) {
-      const missing = ["N", "北"].filter((t) => !c.marks!.some((m) => m.text === t && m.visible && m.onDial));
-      if (missing.length) out.push({ check: "north-missing", cell_id: c.id, detail: `north-up dial does not show ${missing.join(" and ")} on the circle` });
+      if (!c.marks.some((m) => m.text === NORTH_MARK && m.visible && m.onDial)) out.push({ check: "north-missing", cell_id: c.id, detail: `north-up dial does not show ${NORTH_MARK} on the circle` });
     }
     return out;
   });
