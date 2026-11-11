@@ -13,7 +13,7 @@ import { writerMatchFor, type WriterMatch } from "./match.js";
 
 export interface LiveWriter { client: Anthropic; model: WriterModel }
 
-export interface WriterStep { writer: WriterOutput; writerSource: string; reviser: Reviser; afterLoop(result: LoopResult): void; match?: WriterMatch }
+export interface WriterStep { writer: WriterOutput; writerSource: string; reviser: Reviser; afterLoop(result: LoopResult): void; match?: WriterMatch; blind?: true }
 
 export async function writeForBulletin(
   ctx: { alert: Alert; municipality: Municipality; situation: Situation; site: { id: string } },
@@ -36,13 +36,14 @@ export async function writeForBulletin(
     return {
       ...fixed(classCached.output, `writer-class-cache:${classCached.bulletin_id}`),
       match,
+      ...(classCached.blind ? { blind: true as const } : {}),
       afterLoop(result) {
-        if (opts.persist && result.outcome === "pass" && !(shared && !own)) saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [], status: alert.status, match });
+        if (opts.persist && result.outcome === "pass" && !(shared && !own)) saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [], status: alert.status, match, ...(classCached.blind ? { blind: true as const } : {}) });
       },
     };
   }
   const live = opts.live;
-  if (!live) return cached ? { ...fixed(cached, "writer-cache"), ...(own?.match ? { match: own.match } : {}) } : placeholder;
+  if (!live) return cached ? { ...fixed(cached, "writer-cache"), ...(own?.match ? { match: own.match } : {}), ...(own?.blind ? { blind: true as const } : {}) } : placeholder;
   const usageStart = opts.usage.length;
   const call = { client: live.client, model: live.model, alert, municipality, municipalityId: municipality.id, situation };
   let writer: WriterOutput;
@@ -57,16 +58,17 @@ export async function writeForBulletin(
     writer = r.output;
     writerSource = `writer-api:${live.model}`;
     opts.usage.push(...used);
-    if (opts.persist) saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: writer, usage: used, lint: r.lint, status: alert.status, match });
+    if (opts.persist) saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: writer, usage: used, lint: r.lint, status: alert.status, match, blind: true });
   }
   const written = writerSource !== "writer-cache";
   const keyOf = written ? { match } : own?.match ? { match: own.match } : {};
+  const blind = written || own?.blind ? { blind: true as const } : {};
   return {
-    writer, writerSource, ...keyOf,
+    writer, writerSource, ...keyOf, ...blind,
     reviser: writerApiReviser({ ...call, usage: opts.usage }),
     afterLoop(result) {
       if (opts.persist && result.outcome === "pass" && result.writer && result.writer !== writer) {
-        saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: result.writer, usage: opts.usage.slice(usageStart), lint: [], status: alert.status, match });
+        saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: result.writer, usage: opts.usage.slice(usageStart), lint: [], status: alert.status, match, blind: true });
       }
     },
   };

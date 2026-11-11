@@ -5,14 +5,13 @@ import type { Municipality, WriterOutput } from "../composer/compose.js";
 import { strictestBudgets } from "../composer/budgets.js";
 import { actionPictogramMeaning, actionPictogram, type Situation } from "../composer/rules.js";
 import type { Alert } from "../jma/parse.js";
-import { tsunamiRegionsFor } from "../jma/regions.js";
 import { WRITER_DIR } from "../paths.js";
 import { MODELS, costOf, type CallUsage } from "../reader/pricing.js";
 import { toStructuredSchema } from "../reader/extraction.js";
-import { WRITER_OUTPUT_SCHEMA, writerAlertBlock, writerMunicipalityBlock, writerSystem } from "./request.js";
+import { WRITER_OUTPUT_SCHEMA, writerAlertBlock, writerMunicipalityBlock, writerSystem, type BlindBulletin } from "./request.js";
 import { lintEasyJapanese, lintEnglishScript, lintLatinScript, lintThaiScript, lintTraditionalScript, lintJaEasyScript, lintLevel5, lintMunicipalOrderName, type LintFinding } from "./rules.js";
 import { drillWordLangs } from "../verifier/checks.js";
-import { sameWriterMatch, type WriterMatch } from "./match.js";
+import { riverOf, sameWriterMatch, type WriterMatch } from "./match.js";
 
 export { WRITER_DIR };
 const WRITER_ROLES = ["action", "languages"] as const;
@@ -22,16 +21,17 @@ export type WriterModel = "opus" | "sonnet";
 
 export class WriterStop extends Error {}
 
-function areasFor(alert: Alert, municipalityId: string) {
-  const regions = new Set(tsunamiRegionsFor(municipalityId));
-  return alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
+export function blindBulletin(alert: Alert, situation: Situation): BlindBulletin {
+  return {
+    hazard: alert.hazard, status: alert.status, template: situation.template, display_level: situation.level, cleared: situation.cleared,
+    ...(situation.caution ? { caution: situation.caution } : {}),
+    ...(alert.code === "VXKOii" ? { river: riverOf(alert) } : {}),
+  };
 }
 
-function writerContext({ synthetic: _synthetic, ...alert }: Alert, m: Municipality, municipalityId: string) {
-  const mine = areasFor(alert, municipalityId);
+export function writerMunicipality(alert: Alert, m: Municipality) {
   const facts = m as unknown as { hazards: unknown[]; cautions?: unknown[]; name: string };
   return {
-    alert: { ...alert, areas: mine },
     municipality: {
       name: facts.name,
       hazards: (m.hazards as { type: string }[]).filter((h) => h.type === alert.hazard),
@@ -65,7 +65,7 @@ export async function writeCells(args: {
   client: Anthropic; model: WriterModel; alert: Alert; municipality: Municipality; municipalityId: string; situation: Situation; feedback?: string[];
 }): Promise<{ output: WriterOutput; usage: CallUsage; lint: LintFinding[] }> {
   const budgets = strictestBudgets(args.situation.template, ["16x9", "9x16", "32x9", "1x1"]).filter((b) => (WRITER_ROLES as readonly string[]).includes(b.role));
-  const ctx = writerContext(args.alert, args.municipality, args.municipalityId);
+  const ctx = writerMunicipality(args.alert, args.municipality);
   const picto = actionPictogram(args.alert.hazard, args.situation.template);
   const instructions = [
     `テンプレート: ${args.situation.template}（表示レベル ${args.situation.level}${args.situation.cleared ? "・解除" : ""}）。書くセルは ${WRITER_ROLES.join("・")} だけ。languages は action と同じ内容を各言語で。`,
@@ -82,7 +82,7 @@ export async function writeCells(args: {
       role: "user",
       content: [
         { type: "text", text: writerMunicipalityBlock(ctx.municipality), cache_control: { type: "ephemeral" as const } },
-        { type: "text", text: `${writerAlertBlock(ctx.alert, budgets)}\n\n${instructions}` },
+        { type: "text", text: `${writerAlertBlock(blindBulletin(args.alert, args.situation), budgets)}\n\n${instructions}` },
       ],
     }],
   }).finalMessage();
@@ -115,20 +115,21 @@ export function recordedStatus(record: { output: WriterOutput; status?: Bulletin
   return record.status ?? (drillWordLangs(record.output.cells).length ? "drill" : "normal");
 }
 
-export interface BulletinWriterRecord { model: string; output: WriterOutput; status: BulletinStatus; match?: WriterMatch }
+// blind: written without the warning name (BlindBulletin), so it may serve another warning of the same match.
+export interface BulletinWriterRecord { model: string; output: WriterOutput; status: BulletinStatus; match?: WriterMatch; blind?: true }
 
 export function cachedWriterRecord(municipalityId: string, bulletinId: string): BulletinWriterRecord | undefined {
   const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
   if (!fs.existsSync(f)) return undefined;
-  const record = JSON.parse(fs.readFileSync(f, "utf8")) as { model: string; output: WriterOutput; status?: BulletinStatus; match?: WriterMatch };
-  return { model: record.model, output: copyActionIntoLanguages(record.output), status: recordedStatus(record), ...(record.match ? { match: record.match } : {}) };
+  const record = JSON.parse(fs.readFileSync(f, "utf8")) as { model: string; output: WriterOutput; status?: BulletinStatus; match?: WriterMatch; blind?: boolean };
+  return { model: record.model, output: copyActionIntoLanguages(record.output), status: recordedStatus(record), ...(record.match ? { match: record.match } : {}), ...(record.blind === true ? { blind: true as const } : {}) };
 }
 
 export function cachedWriter(municipalityId: string, bulletinId: string): WriterOutput | undefined {
   return cachedWriterRecord(municipalityId, bulletinId)?.output;
 }
 
-export function saveWriter(municipalityId: string, bulletinId: string, record: { model: string; output: WriterOutput; usage: CallUsage[]; lint: LintFinding[]; status: BulletinStatus; match?: WriterMatch }) {
+export function saveWriter(municipalityId: string, bulletinId: string, record: { model: string; output: WriterOutput; usage: CallUsage[]; lint: LintFinding[]; status: BulletinStatus; match?: WriterMatch; blind?: true }) {
   const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
   fs.mkdirSync(path.dirname(f), { recursive: true });
   fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
@@ -139,7 +140,7 @@ export function screenClassFor(hazard: string, situation: Pick<Situation, "templ
 }
 
 export interface ClassWriterRecord {
-  model: string; output: WriterOutput; bulletin_id: string; issued_at: string; raw_title: string; caution?: Situation["caution"]; status?: BulletinStatus; match?: WriterMatch;
+  model: string; output: WriterOutput; bulletin_id: string; issued_at: string; raw_title: string; caution?: Situation["caution"]; status?: BulletinStatus; match?: WriterMatch; blind?: true;
 }
 
 function classWriterFile(municipalityId: string, cls: string): string {
@@ -161,5 +162,5 @@ export function saveWriterForClass(municipalityId: string, cls: string, record: 
 
 // Wording goes to another bulletin only by its match; a record without one has it restored first (class-cache.ts).
 export function writerCacheFitsBulletin(record: ClassWriterRecord, match: WriterMatch): boolean {
-  return record.match !== undefined && sameWriterMatch(record.match, match);
+  return record.match !== undefined && sameWriterMatch(record.match, match, { blind: record.blind === true });
 }

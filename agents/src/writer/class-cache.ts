@@ -15,6 +15,7 @@ export function writerOfBulletin(siteId: string, municipalityId: string, bulleti
     model: record.model, output: record.output, bulletin_id: bulletinId, issued_at: restored.issued_at, raw_title: restored.raw_title, status: record.status,
     ...(restored.match.caution ? { caution: restored.match.caution } : {}),
     match: record.match ?? restored.match,
+    ...(record.blind ? { blind: true as const } : {}),
   };
 }
 

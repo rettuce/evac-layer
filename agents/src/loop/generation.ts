@@ -68,7 +68,7 @@ async function generateClass(plan: SyntheticPlan, args: {
   if (composed.outcome === "pass" && writerSource !== "placeholder" && record?.match) {
     saveWriterForClass(municipality.id, plan.cls, {
       model: record.model, output: record.output, bulletin_id: bulletinId, issued_at: entry.alert.issued_at, raw_title: entry.alert.raw_title, status: entry.alert.status,
-      ...(record.match.caution ? { caution: record.match.caution } : {}), match: record.match,
+      ...(record.match.caution ? { caution: record.match.caution } : {}), match: record.match, ...(record.blind ? { blind: true as const } : {}),
     });
   }
   return {

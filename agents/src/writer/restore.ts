@@ -63,8 +63,8 @@ function fromXml(xmlFile: string, municipalityId: string, status: BulletinStatus
 
 interface StoredLayout { template?: string; alert?: { hazard?: string; level?: number; issued_at?: string; status?: string }; cells?: { role?: string; text?: Record<string, unknown> }[] }
 
-// The screens keep what the Writer wrote from: the template and level are the class, and the headline names the
-// warning, which a flood forecast's Head/Title follows its river with. A tsunami all-clear's caution needs more than that.
+// The screens keep what the Writer wrote from: the headline the Composer set is the warning (or what ended), and the
+// template and level are the class. A tsunami all-clear's caution and a flood forecast's river need more than that.
 function fromLayout(dir: string, row: IndexRow | undefined, status: BulletinStatus, caution: { known: boolean; value?: Situation["caution"] }): Restored | undefined {
   const shape = fs.existsSync(dir) ? fs.readdirSync(dir).find((f) => f.endsWith(".json")) : undefined;
   if (!shape) return undefined;
@@ -82,7 +82,7 @@ function fromLayout(dir: string, row: IndexRow | undefined, status: BulletinStat
   }
   if (layoutStatus(layout) !== status && layoutStatus(layout) !== "normal") return undefined;
   return {
-    match: { hazard, template: layout.template, level: layout.alert.level, status, ...(caution.value ? { caution: caution.value } : {}), ...(river !== undefined ? { river } : {}) },
+    match: { hazard, template: layout.template, level: layout.alert.level, status, warning, ...(caution.value ? { caution: caution.value } : {}), ...(river !== undefined ? { river } : {}) },
     issued_at: layout.alert.issued_at ?? "", raw_title: row?.raw_title ?? "",
   };
 }
