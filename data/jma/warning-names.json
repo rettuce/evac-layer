@@ -1,0 +1,308 @@
+{
+  "source": {
+    "title": "多言語辞書",
+    "publisher": "気象庁",
+    "page": "https://www.data.jma.go.jp/developer/multilingual.html",
+    "file": "https://www.data.jma.go.jp/developer/jma_multilingual.xlsx",
+    "sheet": "多言語辞書（本体）",
+    "updated": "2026-03-26",
+    "retrieved": "2026-11-11",
+    "terms": "気象庁ホームページ利用規約（公共データ利用規約（第1.0版）に準拠）",
+    "terms_url": "https://www.jma.go.jp/jma/kishou/info/coment.html",
+    "credit": "気象庁「多言語辞書」を加工して作成",
+    "processing": "EVAC LAYER が見出しに出す警報名の行と「解除」の行だけを抜き出し、8 言語の列だけを残した。訳語は前後の空白を除いたほかは辞書の表記のまま。no は辞書の No.",
+    "generator": "scripts/jma-warning-names.py"
+  },
+  "languages": {
+    "en": "英語",
+    "zh_hans": "中国語(簡体字)",
+    "zh_hant": "中国語(繁体字)",
+    "ko": "韓国語",
+    "th": "タイ語",
+    "vi": "ベトナム語",
+    "fil": "タガログ語",
+    "id": "インドネシア語"
+  },
+  "cancel": {
+    "no": 20,
+    "ja": "解除",
+    "text": {
+      "en": "Cancel",
+      "zh_hans": "解除",
+      "zh_hant": "解除",
+      "ko": "해제",
+      "th": "ยกเลิก",
+      "vi": "Gỡ bỏ",
+      "fil": "Kanselahin",
+      "id": "pembatalan"
+    }
+  },
+  "names": [
+    {
+      "no": 7264,
+      "ja": "レベル５氾濫特別警報",
+      "text": {
+        "en": "Level 5 Emergency Warning (Flood)",
+        "zh_hans": "等级5 泛滥特别警报",
+        "zh_hant": "5級氾濫特別警報",
+        "ko": "레벨 5 범람 특별 경보",
+        "th": "ประกาศเตือนภัยพิเศษน้ำล้นตลิ่งระดับ 5",
+        "vi": "Cảnh báo đặc biệt lũ tràn cấp độ 5",
+        "fil": "Antas 5 Malubhang babala ng pag-apaw",
+        "id": "Peringatan Khusus Banjir Tingkat 5"
+      }
+    },
+    {
+      "no": 7265,
+      "ja": "レベル５土砂災害特別警報",
+      "text": {
+        "en": "Level 5 Emergency Warning (Landslide)",
+        "zh_hans": "等级5 土石流特别警报",
+        "zh_hant": "5級土石流特別警報",
+        "ko": "레벨 5 토사 재해 특별 경보",
+        "th": "ประกาศเตือนภัยพิเศษดินถล่มระดับ 5",
+        "vi": "Cảnh báo đặc biệt tai họa sạt lở đất cấp độ 5",
+        "fil": "Antas 5 Malubhang babala ng sakuna ng pagguho ng lupa",
+        "id": "Peringatan Khusus Tanah Longsor Tingkat 5"
+      }
+    },
+    {
+      "no": 7266,
+      "ja": "レベル５大雨特別警報",
+      "text": {
+        "en": "Level 5 Emergency Warning (Heavy Rain)",
+        "zh_hans": "等级5 大雨特别警报",
+        "zh_hant": "5級大雨特別警報",
+        "ko": "레벨 5 호우 특별 경보",
+        "th": "ประกาศเตือนภัยพิเศษฝนตกหนักระดับ 5",
+        "vi": "Cảnh báo đặc biệt mưa to cấp độ 5",
+        "fil": "Antas 5 Malubhang babala ng malakas na ulan",
+        "id": "Peringatan Khusus Hujan Lebat Tingkat 5"
+      }
+    },
+    {
+      "no": 7268,
+      "ja": "レベル４氾濫危険警報",
+      "text": {
+        "en": "Level 4 Urgent Warning (Flood)",
+        "zh_hans": "等级4 泛滥危险警报",
+        "zh_hant": "4級氾濫危險警報",
+        "ko": "레벨 4 범람 위험 경보",
+        "th": "ประกาศเตือนภัยฉุกเฉินน้ำล้นตลิ่งระดับ 4",
+        "vi": "Cảnh báo khẩn cấp lũ tràn cấp độ 4",
+        "fil": "Antas 4 Apurahang babala ng panganib ng pag-apaw",
+        "id": "Peringatan Darurat Banjir Tingkat 4"
+      }
+    },
+    {
+      "no": 7269,
+      "ja": "レベル４土砂災害危険警報",
+      "text": {
+        "en": "Level 4 Urgent Warning (Landslide)",
+        "zh_hans": "等级4 土石流危险警报",
+        "zh_hant": "4級土石流危險警報",
+        "ko": "레벨 4 토사 재해 위험 경보",
+        "th": "ประกาศเตือนภัยฉุกเฉินดินถล่มระดับ 4",
+        "vi": "Cảnh báo khẩn cấp tai họa sạt lở đất cấp độ 4",
+        "fil": "Antas 4 Apurahang babala ng panganib ng sakuna ng pagguho ng lupa",
+        "id": "Peringatan Darurat Tanah Longsor Tingkat 4"
+      }
+    },
+    {
+      "no": 7270,
+      "ja": "レベル４大雨危険警報",
+      "text": {
+        "en": "Level 4 Urgent Warning (Heavy Rain)",
+        "zh_hans": "等级4 大雨危险警报",
+        "zh_hant": "4級大雨危險警報",
+        "ko": "레벨 4 호우 위험 경보",
+        "th": "ประกาศเตือนภัยฉุกเฉินฝนตกหนักระดับ 4",
+        "vi": "Cảnh báo khẩn cấp mưa to cấp độ 4",
+        "fil": "Antas 4 Apurahang babala ng panganib ng malakas na ulan",
+        "id": "Peringatan Darurat Hujan Lebat Tingkat 4"
+      }
+    },
+    {
+      "no": 7272,
+      "ja": "レベル３氾濫警報",
+      "text": {
+        "en": "Level 3 Warning (Flood)",
+        "zh_hans": "等级3 泛滥警报",
+        "zh_hant": "3級氾濫警報",
+        "ko": "레벨 3 범람 경보",
+        "th": "ประกาศเตือนภัยน้ำล้นตลิ่งระดับ 3",
+        "vi": "Cảnh báo lũ tràn cấp độ 3",
+        "fil": "Antas 3 Babala ng pag-apaw",
+        "id": "Peringatan Banjir Tingkat 3"
+      }
+    },
+    {
+      "no": 7273,
+      "ja": "レベル３土砂災害警報",
+      "text": {
+        "en": "Level 3 Warning (Landslide)",
+        "zh_hans": "等级3 土石流警报",
+        "zh_hant": "3級土石流警報",
+        "ko": "레벨 3 토사 재해 경보",
+        "th": "ประกาศเตือนภัยดินถล่มระดับ 3",
+        "vi": "Cảnh báo tai họa sạt lở đất cấp độ 3",
+        "fil": "Antas 3 Babala ng sakuna ng pagguho ng lupa",
+        "id": "Peringatan Tanah Longsor Tingkat 3"
+      }
+    },
+    {
+      "no": 7274,
+      "ja": "レベル３大雨警報",
+      "text": {
+        "en": "Level 3 Warning (Heavy Rain)",
+        "zh_hans": "等级3 大雨警报",
+        "zh_hant": "3級大雨警報",
+        "ko": "레벨 3 호우 경보",
+        "th": "ประกาศเตือนภัยฝนตกหนักระดับ 3",
+        "vi": "Cảnh báo mưa to cấp độ 3",
+        "fil": "Antas 3 Babala ng malakas na ulan",
+        "id": "Peringatan Hujan Lebat Tingkat 3"
+      }
+    },
+    {
+      "no": 7276,
+      "ja": "レベル２氾濫注意報",
+      "text": {
+        "en": "Level 2 Advisory (Flood)",
+        "zh_hans": "等级2 泛滥注意报",
+        "zh_hant": "2級氾濫注意報",
+        "ko": "레벨 2 범람 주의보",
+        "th": "ประกาศเฝ้าระวังน้ำล้นตลิ่งระดับ 2",
+        "vi": "Thông tin lưu ý lũ tràn cấp độ 2",
+        "fil": "Antas 2 Payo na mag-ingat sa pag-apaw",
+        "id": "Pemberitahuan Banjir Tingkat 2"
+      }
+    },
+    {
+      "no": 7277,
+      "ja": "レベル２土砂災害注意報",
+      "text": {
+        "en": "Level 2 Advisory (Landslide)",
+        "zh_hans": "等级2 土石流注意报",
+        "zh_hant": "2級土石流注意報",
+        "ko": "레벨 2 토사 재해 주의보",
+        "th": "ประกาศเฝ้าระวังดินถล่มระดับ 2",
+        "vi": "Thông tin lưu ý tai họa sạt lở đất cấp độ 2",
+        "fil": "Antas 2 Payo na mag-ingat sa sakuna ng pagguho ng lupa",
+        "id": "Pemberitahuan Tanah Longsor Tingkat 2"
+      }
+    },
+    {
+      "no": 7278,
+      "ja": "レベル２大雨注意報",
+      "text": {
+        "en": "Level 2 Advisory (Heavy Rain)",
+        "zh_hans": "等级2 大雨注意报",
+        "zh_hant": "2級大雨注意報",
+        "ko": "레벨 2 호우 주의보",
+        "th": "ประกาศเฝ้าระวังฝนตกหนักระดับ 2",
+        "vi": "Thông tin lưu ý mưa to cấp độ 2",
+        "fil": "Antas 2 Payo na mag-ingat sa malakas na ulan",
+        "id": "Pemberitahuan Hujan Lebat Tingkat 2"
+      }
+    },
+    {
+      "no": 915,
+      "ja": "大津波警報",
+      "text": {
+        "en": "Major Tsunami Warning",
+        "zh_hans": "大海啸警报",
+        "zh_hant": "大海嘯警報",
+        "ko": "대형 지진해일 경보",
+        "th": "เตือนภัยสึนามิใหญ่",
+        "vi": "Cảnh báo sóng thần lớn",
+        "fil": "Babala ng malaking tsunami.",
+        "id": "peringatan bahaya tsunami skala besar"
+      }
+    },
+    {
+      "no": 916,
+      "ja": "津波警報",
+      "text": {
+        "en": "Tsunami Warning",
+        "zh_hans": "海啸警报",
+        "zh_hant": "海嘯警報",
+        "ko": "지진해일 경보",
+        "th": "เตือนภัยสึนามิ",
+        "vi": "Cảnh báo sóng thần",
+        "fil": "Babala ng tsunami.",
+        "id": "peringatan bahaya tsunami skala kecil"
+      }
+    },
+    {
+      "no": 917,
+      "ja": "津波注意報",
+      "text": {
+        "en": "Tsunami Advisory",
+        "zh_hans": "海啸注意警报",
+        "zh_hant": "海嘯注意警報",
+        "ko": "지진해일 주의보",
+        "th": "เฝ้าระวังสึนามิ",
+        "vi": "Thông tin lưu ý sóng thần",
+        "fil": "Payo na mag-ingat sa tsunami.",
+        "id": "pemberitahuan tsunami"
+      }
+    },
+    {
+      "no": 244,
+      "ja": "氾濫注意情報",
+      "text": {
+        "en": "Information to call attention to flooding",
+        "zh_hans": "泛滥注意通知",
+        "zh_hant": "氾濫注意通知",
+        "ko": "범람 주의 정보",
+        "th": "ข้อมูลระวังน้ำล้นตลิ่ง",
+        "vi": "Tin lưu ý lũ tràn",
+        "fil": "Impormasyon sa payo na mag-ingat sa baha",
+        "id": "informasi tentang perhatian banjir"
+      }
+    },
+    {
+      "no": 246,
+      "ja": "氾濫警戒情報",
+      "text": {
+        "en": "Information to provide a warning on flooding",
+        "zh_hans": "泛滥警戒通知",
+        "zh_hant": "氾濫警戒通知",
+        "ko": "범람 경계 정보",
+        "th": "ข้อมูลเตรียมรับมือน้ำล้นตลิ่ง",
+        "vi": "Thông tin cảnh giác lũ tràn",
+        "fil": "Impormasyon sa pag-iingat sa baha",
+        "id": "informasi tentang kewaspadaan banjir (pencabutan peringatan)"
+      }
+    },
+    {
+      "no": 247,
+      "ja": "氾濫危険情報",
+      "text": {
+        "en": "Information on potential flood hazards",
+        "zh_hans": "泛滥危险通知",
+        "zh_hant": "氾濫危險通知",
+        "ko": "범람 위험 정보",
+        "th": "ข้อมูลอันตรายน้ำล้นตลิ่ง",
+        "vi": "Thông tin nguy hiểm lũ tràn",
+        "fil": "Impormasyon sa panganib ng baha",
+        "id": "informasi tentang kebanjiran potensi"
+      }
+    },
+    {
+      "no": 248,
+      "ja": "氾濫発生情報",
+      "text": {
+        "en": "Information on flooding",
+        "zh_hans": "泛滥发生信息",
+        "zh_hant": "泛濫發生通知",
+        "ko": "범람 발생 정보",
+        "th": "ข้อมูลการเกิดน้ำล้นตลิ่ง",
+        "vi": "Thông tin phát sinh lũ tràn",
+        "fil": "Impormasyon sa pagkaroon ng baha",
+        "id": "Informasi tentang tempat terkena banjir"
+      }
+    }
+  ]
+}
