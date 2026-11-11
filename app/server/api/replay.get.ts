@@ -29,9 +29,12 @@ async function liveStatus(site: SiteFile, t: unknown): Promise<ReplayStatus> {
 
 export default defineEventHandler(async (event): Promise<ReplayStatus> => {
   const query = getQuery(event)
+  const generation = typeof query.site === 'string' ? siteGeneration(query.site) : undefined
   const site = await resolveSite(query)
   // `municipality=` is the pre-site URL: it always replays the record, with the window and speed of the query.
   const bySite = query.municipality === undefined
+  // The bundled screen polls this every second for a live site; a screen on a virtual clock asks once with `t`.
+  if (bySite && generation !== undefined && query.t === undefined) noteSiteRequest(site, generation)
   if (bySite && !site.replay) return liveStatus(site, query.t)
 
   const siteReplay = bySite ? site.replay : undefined

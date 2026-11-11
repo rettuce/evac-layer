@@ -13,7 +13,7 @@ export interface NoticeFacts {
   previous_reason?: PendingReason
 }
 
-type Lang = 'ja' | 'en'
+export type Lang = 'ja' | 'en'
 
 const MAX_FIELD_LENGTH = 200
 
@@ -58,7 +58,7 @@ const LABELS = {
 // Strings a facility registers, and strings from a bulletin, are folded to NFKC first, so full-width and compatibility
 // forms read as what they look like, and must not add lines, reorder what follows them or hide characters. They are cut
 // between code points, never inside a surrogate pair.
-function plain(value: string): string {
+export function plain(value: string): string {
   const flat = value.normalize('NFKC').replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ').replace(/\p{Cf}/gu, '').trim()
   const points = Array.from(flat)
   return points.length > MAX_FIELD_LENGTH ? `${points.slice(0, MAX_FIELD_LENGTH).join('')}…` : flat
@@ -66,10 +66,10 @@ function plain(value: string): string {
 
 const HOST_NAME = /(?<![A-Za-z0-9-])(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}(?![A-Za-z0-9-])/g
 
-type Quote = (value: string | undefined, fallback: string) => string
+export type Quote = (value: string | undefined, fallback: string) => string
 
 // Mail has no inline code: a URL or a host name is shown broken instead, which catches the common forms only.
-const mailQuote: Quote = (value, fallback) =>
+export const mailQuote: Quote = (value, fallback) =>
   plain(value ?? '').replace(/:\/\//g, '[:]//').replace(HOST_NAME, (host) => host.replace(/\./g, '[.]')) || fallback
 
 // Slack reads <…> as a mention or a link and &…; as an entity, and links nothing inside inline code.
@@ -80,8 +80,15 @@ const slackQuote: Quote = (value, fallback) => {
   return shown ? `\`${escapeSlack(shown)}\`` : fallback
 }
 
-function minutesSince(firstSeenAt: string, now: number): number {
+export function minutesSince(firstSeenAt: string, now: number): number {
   return Math.max(0, Math.floor((now - Date.parse(firstSeenAt)) / 60000))
+}
+
+export function namedWith(quote: Quote, unknown: string): (name: string | undefined, id: string) => string {
+  return (name, id) => {
+    const shownName = quote(name, '')
+    return shownName ? `${shownName} (${quote(id, unknown)})` : quote(id, unknown)
+  }
 }
 
 function headline(facts: NoticeFacts, now: number, lang: Lang): string {
@@ -104,10 +111,7 @@ function headline(facts: NoticeFacts, now: number, lang: Lang): string {
 
 function block(facts: NoticeFacts, now: number, lang: Lang, quote: Quote, link: (url: string) => string): string[] {
   const label = LABELS[lang]
-  const named = (name: string | undefined, id: string) => {
-    const shownName = quote(name, '')
-    return shownName ? `${shownName} (${quote(id, label.unknown)})` : quote(id, label.unknown)
-  }
+  const named = namedWith(quote, label.unknown)
   const showing =
     facts.showing === 'unknown' ? label.unreadableFeed : facts.showing === null ? label.nothing : named(facts.showing.title, facts.showing.bulletin_id)
   const outcome = facts.outcome ? ` (${label.outcome}: ${quote(facts.outcome, label.unknown)})` : ''
@@ -125,9 +129,7 @@ function block(facts: NoticeFacts, now: number, lang: Lang, quote: Quote, link: 
   ]
 }
 
-function noticeText(facts: NoticeFacts, now: number, quote: Quote, link: (url: string) => string): string {
-  return [...block(facts, now, 'ja', quote, link), '', ...block(facts, now, 'en', quote, link)].join('\n')
-}
+export type NoticeBlock = (lang: Lang, quote: Quote, link: (url: string) => string) => string[]
 
 export interface SlackMessage {
   text: string
@@ -136,12 +138,38 @@ export interface SlackMessage {
   unfurl_media: false
 }
 
-export function slackMessage(facts: NoticeFacts, now: number): SlackMessage {
-  return { text: noticeText(facts, now, slackQuote, (url) => `<${escapeSlack(plain(url))}>`), parse: 'none', unfurl_links: false, unfurl_media: false }
+export interface MailMessage {
+  subject: string
+  text: string
 }
 
-export function mailMessage(facts: NoticeFacts, now: number): { subject: string; text: string } {
+export interface OutgoingNotice {
+  slack: SlackMessage
+  mail: MailMessage
+}
+
+function bilingual(block: NoticeBlock, quote: Quote, link: (url: string) => string): string {
+  return [...block('ja', quote, link), '', ...block('en', quote, link)].join('\n')
+}
+
+export function slackOf(block: NoticeBlock): SlackMessage {
+  return { text: bilingual(block, slackQuote, (url) => `<${escapeSlack(plain(url))}>`), parse: 'none', unfurl_links: false, unfurl_media: false }
+}
+
+export function mailOf(subject: string, block: NoticeBlock): MailMessage {
+  return { subject, text: bilingual(block, mailQuote, plain) }
+}
+
+export function slackMessage(facts: NoticeFacts, now: number): SlackMessage {
+  return slackOf((lang, quote, link) => block(facts, now, lang, quote, link))
+}
+
+export function mailMessage(facts: NoticeFacts, now: number): MailMessage {
   const reminder = facts.count === 1 ? '' : ` — 通知 ${facts.count} 回目 / notice ${facts.count}`
   const subject = `[EVAC LAYER] 警報が画面に出ていません / Warning not on screen: ${mailQuote(facts.site.name, mailQuote(facts.site.id, ''))} (${mailQuote(facts.site.id, '')})${reminder}`
-  return { subject, text: noticeText(facts, now, mailQuote, plain) }
+  return mailOf(subject, (lang, quote, link) => block(facts, now, lang, quote, link))
+}
+
+export function pendingMessage(facts: NoticeFacts, now: number): OutgoingNotice {
+  return { slack: slackMessage(facts, now), mail: mailMessage(facts, now) }
 }

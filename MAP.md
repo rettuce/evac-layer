@@ -15,7 +15,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | `app/layout/` | Nuxt の layouts ではない。承認ゲート・配置・距離の当てはめなど、app と agents が共有する中核ロジック | `app/layout/gate.ts`（承認ゲート）・`headlineTable.ts`（見出しの対訳表とクラス承認の証拠）・`GRID.md`（グリッドの設計） |
 | `app/server/middleware/` | admin API の認証 | `admin-auth.ts` |
 | `app/server/api/admin/` | 管理 API。site の登録・画面の生成・承認。クラスを施設の複数の site でまとめて承認する口は `classes.get.ts`（一覧）と `class-approvals.post.ts`（承認・取り消し）で、承認できない site を除く条件は `app/server/utils/classApprovals.ts` の `bulkBlock`、ロックの中での確かめ直しは `classApprovalSteps.ts` の `approveRechecked` | `approve.post.ts`（電文 1 件の承認）・経路と施設の資格の表は `app/server/utils/adminPolicy.ts` |
-| `app/server/plugins/` | サーバーと一緒に動く見張り。Webhook の配信、書き出し、運用者への通知（警報が出ているのに画面に出ていないことを Slack とメールで知らせる） | `webhooks.ts`・`exports.ts`・`notify.ts`（何を通知するかは `app/layout/pending.ts`、文面は `app/layout/notice.ts`、送信と記録は `app/server/utils/notify.ts`） |
+| `app/server/plugins/` | サーバーと一緒に動く見張り。Webhook の配信、書き出し、運用者への通知（警報が出ているのに画面に出ていないこと、気象庁の電文の受信が止まっていること、施設の画面がフィードを取りに来なくなったことを Slack とメールで知らせる） | `webhooks.ts`・`exports.ts`・`notify.ts`（何を通知するかは `app/layout/pending.ts` と `app/layout/liveness.ts`、文面は `app/layout/notice.ts` と `app/layout/livenessNotice.ts`、送信・再試行は `app/server/utils/noticeDelivery.ts`、設定と記録は `app/server/utils/notify.ts`、止まったことの見張りは `app/server/utils/liveness.ts`、施設の画面が最後に来た時刻は `app/server/utils/feedSeen.ts`（数えるのは `app/server/api/feed/[site].get.ts` と `app/server/api/replay.get.ts`）） |
 | `schema/` | agents と app の間の取り決め（layout・alert・site・municipality・feed・書き出し） | `schema/README.md` |
 | `data/municipalities/` | 5 自治体の知識ファイル（出典ページつき）・避難場所・プリセット | `<市町村コード>.json` |
 | `data/sites/` | 施設（緯度経度・向き・市町村コード）。1 ファイル 1 施設。`replay` を持つ site は記録を再生するデモ（05210・17204・22424） | `05210-demo-honjo-station.json` |
@@ -50,7 +50,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | レイアウト 110 | `data/layouts/` の `index.json` 以外の JSON が 110 ファイル |
 | 実データで見つけた欠陥 | `agents/FINDINGS.md`・README「実データで見つかったこと」 |
 | 10 言語と逆翻訳の照合 | `agents/FINDINGS.md` の 9（照合で直した 16 欄と commit 516c6e6・4177bac） |
-| HTTP の 3 通りの口 | `docs/integration.md:142-188`・ETag は `app/server/api/feed/[site].get.ts:8-13` |
+| HTTP の 3 通りの口 | `docs/integration.md:142-188`・ETag は `app/server/utils/feed.ts:138-154`（`feedResponse`） |
 | 40 行の組み込み例 | `examples/minimal-cms/index.mjs:1-40` |
 | 同じ契約の受け側が 2 つ（Node と Python） | `examples/minimal-cms/index.mjs`・`examples/python-player/player.py`・README「あなたのサイネージに導入する」 |
 | prompt caching | `agents/src/writer/live.ts:77`・`82`・`agents/src/verifier/vision.ts:65` |

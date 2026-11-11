@@ -99,9 +99,10 @@ export async function liveBulletin(site: SiteFile, approvals: Approvals): Promis
   return firstDeliverable(await readLiveState(site.id), (id) => liveDeliverableWith(approvals, site.id, id))
 }
 
-export async function currentFeed(siteId: string): Promise<Feed | undefined> {
+export async function currentFeed(siteId: string, found?: (site: SiteFile) => void): Promise<Feed | undefined> {
   const site = await readSite(siteId)
   if (!site) return undefined
+  found?.(site)
   const receivedAt = await lastReceivedAt(site.id)
   const feed = await feedFor(site)
   return receivedAt ? { ...feed, last_received_at: receivedAt } : feed
