@@ -8,7 +8,8 @@ import type { ReplayEntry } from "../src/jma/replay.js";
 import { loadMunicipality } from "../src/loop/municipality.js";
 import { composeBulletin, upsertIndexRow } from "../src/loop/one.js";
 import { staticVerifier } from "../src/loop/static-verifier.js";
-import { receiveSite } from "../src/jma/receive.js";
+import { receiveSite, receiveSites } from "../src/jma/receive.js";
+import type { Verifier } from "../src/loop/types.js";
 import { AGENTS_DIR, FEED_DIR } from "../src/paths.js";
 import { needsRaw } from "./raw.js";
 import { isSiteId } from "../src/sites.js";
@@ -98,8 +99,13 @@ function receiveSetup() {
   };
   const run = (initialSince: string, receivedAt?: string) => receiveSite({ site, verifier: staticVerifier, writer: { kind: "placeholder" }, usage: [], initialSince, feedDir, roots, liveDir, receivedAt });
   const state = () => JSON.parse(fs.readFileSync(path.join(liveDir, `${site.id}.receiver.json`), "utf8"));
-  return { add, run, state, roots, liveDir };
+  return { add, run, state, roots, liveDir, feedDir };
 }
+
+const receiverRecord = (liveDir: string, id: string) => {
+  const file = path.join(liveDir, `${id}.receiver.json`);
+  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : undefined;
+};
 
 test("receive looks back 24 hours and does not move its cursor past a bulletin that failed", async () => {
   const r = receiveSetup();
@@ -127,6 +133,18 @@ test("receive records when the feed was last fetched, and keeps the previous tim
   assert.equal(r.state().received_at, "2026-11-10T05:00:00.000Z");
 });
 
+test("a round whose feeds could not all be fetched leaves the fetch time where it was, and a site that fails still has its fetch noted", async () => {
+  const r = receiveSetup();
+  r.add("20261107020000_0_VPWW55_050000.xml", "2026-11-07T02:00:00Z", "<Report/>");
+  const round = (fetchedAt?: string, receivedAt?: string) => receiveSites({ sites: [site], fetchedAt, liveDir: r.liveDir, each: () => r.run("2026-11-07T00:00:00Z", receivedAt) });
+  await round("2026-11-10T05:00:04.000Z", "2026-11-10T05:00:00.000Z");
+  assert.deepEqual([r.state().fetched_at, r.state().received_at], ["2026-11-10T05:00:04.000Z", "2026-11-10T05:00:00.000Z"]);
+  await round();
+  assert.deepEqual([r.state().fetched_at, r.state().received_at], ["2026-11-10T05:00:04.000Z", "2026-11-10T05:00:00.000Z"]);
+  await assert.rejects(receiveSites({ sites: [site], fetchedAt: "2026-11-10T05:01:04.000Z", liveDir: r.liveDir, each: async () => { throw new Error("composing failed"); } }), /composing failed/);
+  assert.deepEqual([r.state().fetched_at, r.state().received_at], ["2026-11-10T05:01:04.000Z", "2026-11-10T05:00:00.000Z"]);
+});
+
 const RAW_L3 = path.join(FEED_DIR, L3.file);
 const skipRaw = needsRaw({ feed: [L3.file] });
 
@@ -149,4 +167,23 @@ test("a pass that only the static checks saw changes neither what is showing nor
   assert.deepEqual(r.state().showing, {});
   assert.equal(fs.existsSync(path.join(r.liveDir, `${site.id}.json`)), false);
   assert.equal(r.state().since, "2026-10-21T06:55:19Z");
+});
+
+test("a round notes the fetch for every site before it composes any screen, and writes received_at only once each site's screens are done", { skip: skipRaw }, async () => {
+  const r = receiveSetup();
+  r.add(path.basename(L3.file), "2026-10-21T06:55:19Z", fs.readFileSync(RAW_L3));
+  const other = { ...site, id: `${site.id}-b` };
+  const before = { since: "2026-10-21T06:00:00Z", showing: {}, received_at: "2026-10-21T06:00:00.000Z" };
+  fs.mkdirSync(r.liveDir, { recursive: true });
+  fs.writeFileSync(path.join(r.liveDir, `${site.id}.receiver.json`), JSON.stringify(before));
+  const RECEIVED = "2026-10-21T07:00:00.000Z";
+  const FETCHED = "2026-10-21T07:00:04.000Z";
+  const seen: unknown[][] = [];
+  const watching: Verifier = { ...staticVerifier, verify: (screens, ctx) => (seen.push([receiverRecord(r.liveDir, site.id), receiverRecord(r.liveDir, other.id)]), staticVerifier.verify(screens, ctx)) };
+  await receiveSites({
+    sites: [site, other], fetchedAt: FETCHED, liveDir: r.liveDir,
+    each: (s) => receiveSite({ site: s, verifier: watching, writer: { kind: "placeholder" }, usage: [], initialSince: "2026-10-21T06:00:00Z", feedDir: r.feedDir, roots: r.roots, liveDir: r.liveDir, receivedAt: RECEIVED }),
+  });
+  assert.deepEqual(seen[0], [{ ...before, fetched_at: FETCHED }, { fetched_at: FETCHED }]);
+  for (const id of [site.id, other.id]) assert.deepEqual(receiverRecord(r.liveDir, id), { since: "2026-10-21T06:55:19Z", showing: {}, received_at: RECEIVED, fetched_at: FETCHED }, id);
 });

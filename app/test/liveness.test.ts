@@ -36,6 +36,33 @@ describe('which receivers have stopped', () => {
     )
     assert.deepEqual(scan, { stopped: [], unreadable: ['garbled', 'number'], future: ['ahead'] })
   })
+
+  test('a site is judged by when its receiver last fetched the feeds when that is recorded, and by received_at otherwise; the time judged is the one listed', () => {
+    const { stopped } = stoppedReceivers(
+      [
+        { site: 'composing', received_at: iso(NOW - 40 * MINUTE), fetched_at: iso(NOW - MINUTE) },
+        { site: 'fetch-stopped', received_at: iso(NOW - 40 * MINUTE), fetched_at: iso(NOW - 25 * MINUTE) },
+        { site: 'older-receiver', received_at: iso(NOW - 20 * MINUTE) },
+        { site: 'older-receiver-fresh', received_at: iso(NOW - MINUTE) },
+      ],
+      NOW,
+      15 * MINUTE,
+    )
+    assert.deepEqual(stopped.map((entry) => [entry.site, entry.at]), [['fetch-stopped', iso(NOW - 25 * MINUTE)], ['older-receiver', iso(NOW - 20 * MINUTE)]])
+  })
+
+  test('a fetch time that cannot be read or lies in the future leaves the site out and named, as received_at does, whatever received_at says', () => {
+    const scan = stoppedReceivers(
+      [
+        { site: 'garbled', received_at: iso(NOW - 40 * MINUTE), fetched_at: 'soon' },
+        { site: 'number', received_at: iso(NOW - MINUTE), fetched_at: 12 },
+        { site: 'ahead', received_at: iso(NOW - 40 * MINUTE), fetched_at: iso(NOW + 60 * MINUTE) },
+      ],
+      NOW,
+      15 * MINUTE,
+    )
+    assert.deepEqual(scan, { stopped: [], unreadable: ['garbled', 'number'], future: ['ahead'] })
+  })
 })
 
 describe('whether a site screen keeps polling', () => {

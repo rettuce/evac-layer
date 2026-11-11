@@ -183,3 +183,15 @@ test("received_at moves on a round that read only the frequent feeds when all of
   const bad = await recordRound({ feedDir: tmpFeed(), fetchImpl: fakeJma({}, { failing: ["other"] }).fetchImpl, sleep: noWait, now: () => at, lastLongAt: t0 });
   assert.equal(bad.receivedAt, undefined);
 });
+
+test("fetchedAt is when every feed of the round came in, and is absent when one failed; receivedAt stays the start of the round", async () => {
+  const t0 = new Date("2026-11-07T07:00:00Z");
+  const clock = () => {
+    const times = [new Date("2026-11-07T07:01:00Z"), new Date("2026-11-07T07:01:04Z")];
+    return () => (times.length > 1 ? times.shift()! : times[0]);
+  };
+  const ok = await recordRound({ feedDir: tmpFeed(), fetchImpl: fakeJma({}).fetchImpl, sleep: noWait, now: clock(), lastLongAt: t0 });
+  assert.deepEqual([ok.receivedAt, ok.fetchedAt], ["2026-11-07T07:01:00.000Z", "2026-11-07T07:01:04.000Z"]);
+  const bad = await recordRound({ feedDir: tmpFeed(), fetchImpl: fakeJma({}, { failing: ["other"] }).fetchImpl, sleep: noWait, now: clock(), lastLongAt: t0 });
+  assert.deepEqual([bad.receivedAt, bad.fetchedAt], [undefined, undefined]);
+});

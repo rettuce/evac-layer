@@ -116,9 +116,10 @@ function listNotice(name: 'receivers' | 'feed-idle', settings: NotifySettings, d
   return { resolve, open, forget, dispatch }
 }
 
-async function receiverRecord(site: string): Promise<{ received_at: unknown } | 'unreadable'> {
+async function receiverRecord(site: string): Promise<{ received_at: unknown; fetched_at: unknown } | 'unreadable'> {
   try {
-    return { received_at: (await readJsonIfExists<{ received_at?: unknown }>(join(dataDir(), 'live', `${site}.receiver.json`)))?.received_at }
+    const record = await readJsonIfExists<{ received_at?: unknown; fetched_at?: unknown }>(join(dataDir(), 'live', `${site}.receiver.json`))
+    return { received_at: record?.received_at, fetched_at: record?.fetched_at }
   } catch {
     return 'unreadable'
   }
@@ -163,7 +164,7 @@ export function livenessWatch(settings: NotifySettings, delivery: NoticeDelivery
 
   async function checkReceivers(sites: SiteFile[], now: number) {
     if (settings.receiverStoppedMs <= 0) return
-    const records: { site: string; received_at: unknown }[] = []
+    const records: { site: string; received_at: unknown; fetched_at: unknown }[] = []
     for (const site of sites) {
       const record = await receiverRecord(site.id)
       if (record === 'unreadable') warn(`receiver ${site.id}`, `the receiver record of ${site.id} cannot be read; the site is left out of the receiver check`)
@@ -178,7 +179,7 @@ export function livenessWatch(settings: NotifySettings, delivery: NoticeDelivery
     const current = await receivers.open(now, false)
     const byId = new Map(sites.map((site) => [site.id, site]))
     await receivers.dispatch(current, scan.stopped.map(({ site }) => ({ site })), now, async (count) => {
-      const listed = await Promise.all(scan.stopped.map(async (entry) => ({ ...(await siteNoticeFacts(byId.get(entry.site)!)), received_at: entry.received_at })))
+      const listed = await Promise.all(scan.stopped.map(async (entry) => ({ ...(await siteNoticeFacts(byId.get(entry.site)!)), received_at: entry.at })))
       const facts = { sites: listed, threshold_ms: settings.receiverStoppedMs, count, first_seen_at: current.record.first_seen_at, ...(settings.adminUrl ? { admin_url: settings.adminUrl } : {}) }
       return (at) => receiverStoppedMessage(facts, at)
     })
