@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { XMLParser } from "fast-xml-parser";
+import { SYNTHETIC_PREFIX } from "../../../app/layout/gate";
 import {
   CODE_TO_HAZARD,
   CONTROL_TITLE_TO_CODE,
@@ -41,6 +42,7 @@ export interface Alert {
   // Control/Status: 通常 (normal), 試験 (test), 訓練 (drill). A drill screen must say so in every language.
   status: "normal" | "test" | "drill";
   tsunami?: { highest_category: TsunamiCategory };
+  synthetic?: true;
 }
 
 const CONTROL_STATUS: Record<string, Alert["status"]> = { "通常": "normal", "試験": "test", "訓練": "drill" };
@@ -59,6 +61,15 @@ const parser = new XMLParser({
 });
 
 export class JmaParseError extends Error {}
+
+// A bulletin composed here from a JMA sample carries <?evac-layer synthetic="1"?> before its root. JMA bulletins carry
+// no processing instruction but the XML declaration, so the mark cannot appear on one, and every path that reads a
+// bulletin gives the synthetic one its SYN- id.
+export const SYNTHETIC_MARK = '<?evac-layer synthetic="1"?>';
+
+function isSynthetic(doc: Node): boolean {
+  return doc["?evac-layer"]?.["@synthetic"] === "1";
+}
 
 function fail(msg: string): never {
   throw new JmaParseError(msg);
@@ -233,8 +244,9 @@ export function parseJmaXml(xml: string | Buffer): Alert {
     level = inForce.length ? Math.max(...inForce) : null;
   }
 
+  const synthetic = isSynthetic(doc);
   return {
-    bulletin_id: `${code}-${issued_at.replace(/[^0-9]/g, "").slice(0, 12)}-${sha}`,
+    bulletin_id: `${synthetic ? SYNTHETIC_PREFIX : ""}${code}-${issued_at.replace(/[^0-9]/g, "").slice(0, 12)}-${sha}`,
     code,
     hazard: CODE_TO_HAZARD[code],
     level,
@@ -246,5 +258,6 @@ export function parseJmaXml(xml: string | Buffer): Alert {
     publishing_office: text(control.PublishingOffice),
     status: CONTROL_STATUS[text(control.Status)] ?? fail(`unknown Control/Status "${text(control.Status)}"`),
     ...(tsunami ? { tsunami } : {}),
+    ...(synthetic ? { synthetic: true as const } : {}),
   };
 }

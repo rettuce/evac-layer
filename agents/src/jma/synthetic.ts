@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
-import { SYNTHETIC_PREFIX } from "../../../app/layout/replay";
+import { isSyntheticBulletinId } from "../../../app/layout/gate";
 import { AGENTS_DIR, DATA_DIR, SYNTHETIC_DIR } from "../paths.js";
 import { parseJmaXml } from "./parse.js";
 import type { SyntheticPlan } from "./synthetic-classes.js";
@@ -87,11 +87,16 @@ export function synthesizeXml(plan: SyntheticPlan, target: SyntheticTarget): str
   warning.Warning = [element("Item", itemChildren)];
   bodyNode.Body = [warning];
 
+  const declaration = tree.findIndex((n) => nameOf(n) === "?xml");
+  tree.splice(declaration + 1, 0, { "?evac-layer": [{ "#text": "" }], ":@": { "@_synthetic": "1" } });
+
   return new XMLBuilder({ ...XML_OPTIONS, format: true, indentBy: "", suppressEmptyNode: true }).build(tree) as string;
 }
 
 export function syntheticBulletinId(xml: string): string {
-  return `${SYNTHETIC_PREFIX}${parseJmaXml(xml).bulletin_id}`;
+  const id = parseJmaXml(xml).bulletin_id;
+  if (!isSyntheticBulletinId(id)) throw new SyntheticError(`composed XML reads as a JMA bulletin (${id}); the synthetic mark is missing`);
+  return id;
 }
 
 export function syntheticFile(municipalityId: string, bulletinId: string): string {

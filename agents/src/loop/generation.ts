@@ -47,8 +47,7 @@ async function generateClass(plan: SyntheticPlan, args: {
   const xml = synthesizeXml(plan, { municipalityId: municipality.id, municipalityName: municipality.name, prefecture });
   const bulletinId = syntheticBulletinId(xml);
   const file = saveSyntheticXml(municipality.id, bulletinId, xml);
-  const parsed = replayEntry(Buffer.from(xml, "utf8"), file, plan.code, municipality.id);
-  const entry = { ...parsed, bulletin_id: bulletinId, alert: { ...parsed.alert, bulletin_id: bulletinId } };
+  const entry = replayEntry(Buffer.from(xml, "utf8"), file, plan.code, municipality.id);
   const composedClass = screenClassFor(entry.alert.hazard, situationFor(entry.alert, municipality.id));
   if (composedClass !== plan.cls) throw new Error(`synthetic bulletin for ${plan.cls} composes as ${composedClass}`);
 

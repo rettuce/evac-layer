@@ -38,7 +38,8 @@ function writeReceiverState(siteId: string, state: ReceiverState, liveDir = LIVE
 export const LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 // A live site shows only what JMA issued for real: a drill or test bulletin gets a row and no screen.
-export function liveSkipReason(alert: { status: string; bulletin_id: string }): string | undefined {
+export function liveSkipReason(alert: { status: string; bulletin_id: string; synthetic?: true }): string | undefined {
+  if (alert.synthetic) return "synthetic bulletin: its screens stand for their class and are never live";
   return alert.status === "normal" ? undefined : `${alert.status} bulletin (Control/Status ${alert.status === "drill" ? "訓練" : "試験"}): not shown on a live site`;
 }
 

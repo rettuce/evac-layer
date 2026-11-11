@@ -4,7 +4,7 @@ import { parseArgs } from "node:util";
 import Anthropic from "@anthropic-ai/sdk";
 import { requireApiKey } from "../apikey.js";
 import type { Municipality, WriterOutput } from "../composer/compose.js";
-import { liveGateWarning, REPLAY_SITE_MESSAGE, writeLive } from "../delivery/live.js";
+import { liveGateWarning, REPLAY_SITE_MESSAGE, SyntheticNotLive, writeLive } from "../delivery/live.js";
 import { BODY_NAME } from "../jma/feed.js";
 import { replayEntry } from "../jma/replay.js";
 import { EVAC_URL, FEED_DIR, TMP_DIR, resolveUserPath } from "../paths.js";
@@ -93,7 +93,15 @@ if (values["go-live"]) {
     console.error(`[go-live skipped] ${entry.bulletin_id} did not pass (${composed.outcome}${composed.reason ? `: ${composed.reason}` : ""}); data/live/${site.id}.json is unchanged`);
     process.exit(1);
   }
-  const { file, doc } = writeLive(site.id, entry.bulletin_id);
+  let written: ReturnType<typeof writeLive>;
+  try {
+    written = writeLive(site.id, entry.bulletin_id);
+  } catch (e) {
+    if (!(e instanceof SyntheticNotLive)) throw e;
+    console.error(`[go-live refused] ${e.message}; data/live/${site.id}.json is unchanged`);
+    process.exit(1);
+  }
+  const { file, doc } = written;
   console.log(`${file}: ${JSON.stringify(doc)}`);
   const warning = liveGateWarning(site.id, entry.bulletin_id);
   if (warning) console.warn(warning);

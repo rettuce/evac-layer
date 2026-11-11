@@ -27,7 +27,7 @@ function areasFor(alert: Alert, municipalityId: string) {
   return alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
 }
 
-function writerContext(alert: Alert, m: Municipality, municipalityId: string) {
+function writerContext({ synthetic: _synthetic, ...alert }: Alert, m: Municipality, municipalityId: string) {
   const mine = areasFor(alert, municipalityId);
   const facts = m as unknown as { hazards: unknown[]; cautions?: unknown[]; name: string };
   return {
