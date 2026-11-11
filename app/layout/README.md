@@ -100,7 +100,7 @@ The live screen never goes dark on a failed poll (unreachable server, HTTP error
 | `GET /api/feed/<site_id>` | public, gated | the site's feed (`schema/feed.schema.json`); ETag / If-None-Match |
 | `GET /delivery/<site>/<bulletin>/<shape>.{png,html,json}` | public, gated | exported files from `dist/` while the bulletin is deliverable |
 | `POST /api/admin/subscriptions` | admin | register a webhook `{site_id, url, secret}`; see `app/README.md` Delivery |
-| `GET /api/admin/catalog`, `GET /api/admin/preview-layout`, `POST /api/admin/approve`, `POST /api/admin/site` | admin | Bearer `NUXT_ADMIN_TOKEN` when set; otherwise local only (loopback address, local Host, not cross-site, JSON POST bodies). Writes go to `data/approvals.json` |
+| `GET /api/admin/catalog`, `GET /api/admin/preview-layout`, `POST /api/admin/approve`, `POST /api/admin/site`, `GET /api/admin/classes`, `POST /api/admin/class-approvals` | admin | Bearer `NUXT_ADMIN_TOKEN` when set; otherwise local only (loopback address, local Host, not cross-site, JSON POST bodies). Writes go to `data/approvals.json` |
 | `GET /api/layout?file=<absolute path>` | dev only | any `.json` inside the repository; the Verifier no longer uses it; 404 in production |
 
 ## Headline band

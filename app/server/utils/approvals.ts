@@ -1,6 +1,6 @@
 import { readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { type Approvals, type CheckReport, type LayoutClass, classDigest, layoutDigest, passedBrowserCheck, screenClass } from '~~/layout/gate'
+import { type ApprovalMode, type Approvals, type Approver, type CheckReport, type LayoutClass, classApprovable, classDigest, classKey, layoutDigest, layoutKey, passedBrowserCheck, screenClass } from '~~/layout/gate'
 import { type HeadlineTables, headlineEvidence } from '~~/layout/headlineTable'
 import { isMunicipalityId } from '~~/layout/replay'
 import { isShape } from '~~/layout/shapes'
@@ -97,6 +97,22 @@ export async function currentClassKey(site: string, bulletin: string): Promise<s
   } catch {
     return undefined
   }
+}
+
+export function approverOf(admin: AdminPrincipal | undefined, actor: Actor | undefined, mode: ApprovalMode): Approver {
+  return { mode, token_label: admin?.kind === 'facility' ? admin.label : 'operator', ...(actor ? { actor } : {}) }
+}
+
+// What approving a bulletin writes, whether one bulletin is approved or a class at many sites: the bulletin's approval
+// and, unless it is a drill or test, its class's.
+export function approveBulletin(approvals: Approvals, site: string, bulletin: string, snapshot: LayoutSnapshot, at: string, approver: Approver) {
+  const key = layoutKey(site, bulletin)
+  approvals.layouts[key] = { approved: true, updated_at: at, digest: snapshot.digest, ...approver }
+  const answer = { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], class: snapshot.cls.key }
+  if (!classApprovable(snapshot.cls.key)) return answer
+  const classRecord = { approved: true, updated_at: at, digest: snapshot.cls.digest, approved_from: bulletin, ...approver }
+  approvals.classes = { ...approvals.classes, [classKey(site, snapshot.cls.key)]: classRecord }
+  return { ...answer, class_approval: classRecord }
 }
 
 function sortedRecord<T>(record: Record<string, T>): Record<string, T> {

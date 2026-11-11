@@ -1,4 +1,4 @@
-import { classApprovable, classKey, layoutKey, revokeClasses } from '~~/layout/gate'
+import { layoutKey, revokeClasses } from '~~/layout/gate'
 import { isBulletinId } from '~~/layout/replay'
 
 export default defineEventHandler(async (event) => {
@@ -16,17 +16,10 @@ export default defineEventHandler(async (event) => {
     const snapshot = await readLayoutSnapshot(site, bulletin)
     if (!snapshot) throw createError({ status: 404, statusText: 'Not Found', message: `no layout files for ${site}/${bulletin}` })
     if (body.digest !== undefined && body.digest !== snapshot.digest) throw createError({ status: 409, statusText: 'Conflict', message: 'the screens changed since you looked; reload' })
+    const approver = approverOf(admin, event.context.audit?.actor, body.digest === undefined ? 'bulk' : 'reviewed')
     const approved = await guardedSiteWrite(site, {
       visible,
-      write: () =>
-        updateApprovals((approvals) => {
-          approvals.layouts[key] = { approved: true, updated_at: updatedAt, digest: snapshot.digest }
-          const answer = { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], class: snapshot.cls.key }
-          if (!classApprovable(snapshot.cls.key)) return answer
-          const classRecord = { approved: true, updated_at: updatedAt, digest: snapshot.cls.digest, approved_from: bulletin }
-          approvals.classes = { ...approvals.classes, [classKey(site, snapshot.cls.key)]: classRecord }
-          return { ...answer, class_approval: classRecord }
-        }),
+      write: () => updateApprovals((approvals) => approveBulletin(approvals, site, bulletin, snapshot, updatedAt, approver)),
     })
     if (!approved) throw siteNotFound(site)
     await requestMissingExports(site).catch((error: Error) => console.warn(`[export] ${site} not queued: ${error.message}`))

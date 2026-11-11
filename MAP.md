@@ -14,6 +14,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | `app/` | Nuxt。Renderer（`/screen`）・運営者の画面（`/admin`・`/dashboard`）・配信 API | `app/server/api/`（`live-layout.get.ts`・`app/server/api/feed/[site].get.ts`・`admin/`） |
 | `app/layout/` | Nuxt の layouts ではない。承認ゲート・配置・距離の当てはめなど、app と agents が共有する中核ロジック | `app/layout/gate.ts`（承認ゲート）・`headlineTable.ts`（見出しの対訳表とクラス承認の証拠）・`GRID.md`（グリッドの設計） |
 | `app/server/middleware/` | admin API の認証 | `admin-auth.ts` |
+| `app/server/api/admin/` | 管理 API。site の登録・画面の生成・承認。クラスを施設の複数の site でまとめて承認する口は `classes.get.ts`（一覧）と `class-approvals.post.ts`（承認・取り消し）で、承認できない site を除く条件は `app/server/utils/classApprovals.ts` | `approve.post.ts`（電文 1 件の承認）・経路と施設の資格の表は `app/server/utils/adminPolicy.ts` |
 | `schema/` | agents と app の間の取り決め（layout・alert・site・municipality・feed・書き出し） | `schema/README.md` |
 | `data/municipalities/` | 5 自治体の知識ファイル（出典ページつき）・避難場所・プリセット | `<市町村コード>.json` |
 | `data/sites/` | 施設（緯度経度・向き・市町村コード）。1 ファイル 1 施設。`replay` を持つ site は記録を再生するデモ（05210・17204・22424） | `05210-demo-honjo-station.json` |
