@@ -12,16 +12,39 @@ export function readSchema(name: string): Record<string, unknown> {
   return JSON.parse(fs.readFileSync(path.join(SCHEMA_DIR, `${name}.schema.json`), "utf8"));
 }
 
-let compiled: Map<SchemaName, ValidateFunction> | undefined;
+// layout.schema.json and feed.schema.json are what receivers validate against, so the files accept unknown optional
+// fields (an added optional field is compatible and does not change feed_version). Our own output is checked against
+// the same files with additionalProperties:false added at the objects below, so a misspelt field name in a cell is
+// still caught here. A new object in either file that should be closed internally is added to this list.
+const CLOSED_WHEN_STRICT: Record<string, string[]> = {
+  layout: ["", "/properties/municipality", "/properties/alert", "/$defs/cell", "/$defs/text", "/$defs/source/oneOf/0", "/$defs/source/oneOf/1", "/$defs/source/oneOf/2", "/$defs/source/oneOf/3"],
+  feed: ["", "/properties/site", "/properties/alert/anyOf/1", "/properties/layouts", "/properties/assets", "/$defs/asset"],
+};
 
-function validators(): Map<SchemaName, ValidateFunction> {
-  if (compiled) return compiled;
+export function closeObjects(name: string, schema: Record<string, unknown>): Record<string, unknown> {
+  const copy = structuredClone(schema);
+  for (const pointer of CLOSED_WHEN_STRICT[name] ?? []) {
+    let node: unknown = copy;
+    for (const part of pointer.split("/").slice(1)) node = (node as Record<string, unknown>)[part];
+    if (typeof node !== "object" || node === null) throw new Error(`schema/${name}.schema.json has no object at ${pointer}`);
+    (node as Record<string, unknown>).additionalProperties = false;
+  }
+  return copy;
+}
+
+const compiled = new Map<boolean, Map<SchemaName, ValidateFunction>>();
+
+function validators(publicMode: boolean): Map<SchemaName, ValidateFunction> {
+  const cached = compiled.get(publicMode);
+  if (cached) return cached;
+  const load = (name: string) => (publicMode ? readSchema(name) : closeObjects(name, readSchema(name)));
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   addFormats(ajv);
   ajv.addSchema(readSchema("common"));
-  ajv.addSchema(readSchema("layout"));
-  compiled = new Map(SCHEMA_NAMES.map((n) => [n, n === "layout" ? ajv.getSchema("https://evac-layer.dev/schema/layout.schema.json")! : ajv.compile(readSchema(n))]));
-  return compiled;
+  ajv.addSchema(load("layout"));
+  const map = new Map(SCHEMA_NAMES.map((n) => [n, n === "layout" ? ajv.getSchema("https://evac-layer.dev/schema/layout.schema.json")! : ajv.compile(load(n))]));
+  compiled.set(publicMode, map);
+  return map;
 }
 
 export function inferSchema(doc: unknown): SchemaName {
@@ -44,8 +67,13 @@ export interface ValidationResult {
   errors: ErrorObject[];
 }
 
-export function validateDoc(doc: unknown, schema: SchemaName = inferSchema(doc)): ValidationResult {
-  const fn = validators().get(schema)!;
+export interface ValidateOptions {
+  /** Validate as a receiver would, with the published schema files as they are. Default: strict. */
+  public?: boolean;
+}
+
+export function validateDoc(doc: unknown, schema: SchemaName = inferSchema(doc), options: ValidateOptions = {}): ValidationResult {
+  const fn = validators(options.public === true).get(schema)!;
   const ok = fn(doc) as boolean;
   return { schema, ok, errors: fn.errors ?? [] };
 }

@@ -13,7 +13,13 @@ Everything in this directory is dedicated to the public domain under CC0 1.0 ([`
 | `feed.schema.json` | feed API / webhook (render seat) | other signage systems |
 | `export-manifest.schema.json` | `pnpm -F agents export` | systems that take files only |
 
-Validate any document: `pnpm -F agents validate <file.json>` (schema inferred; `--schema` to force).
+Validate any document: `pnpm -F agents validate <file.json>` (schema inferred; `--schema` to force). `--public` validates `layout` and `feed` exactly as a receiver does with the files here; without it, EVAC LAYER's own check also refuses fields the files do not list.
+
+## Compatibility
+
+- Adding an optional field is compatible and does not change `feed_version`. A receiver must ignore fields it does not know. For this reason `layout.schema.json` and `feed.schema.json` (everything a receiver reads from the feed) do not set `additionalProperties: false`.
+- Removing a required field, or changing a field's type or meaning, breaks receivers and raises `feed_version`.
+- EVAC LAYER checks its own output more strictly than a receiver needs to: `agents/src/schemas.ts` closes the objects of these two files (`CLOSED_WHEN_STRICT`) before it validates, so a misspelt field name in a cell is caught before delivery. Schemas for inputs and internal files (`site`, `municipality`, `municipality-preset`, `shelters`, `alert`, `export-manifest`) stay closed in the file: an unknown field there is a mistake to report.
 
 - `alert.status` is written only for a drill (`drill`, Control/Status 訓練) or test (`test`, 試験) bulletin; a normal bulletin's layout has no `status`, so its bytes are as before. A drill or test screen is never approved by class (`app/layout/gate.ts`).
 - Colors are never written into layout JSON. `palette: "cabinet-office-5"` tells the Renderer to use the Cabinet Office five-level tokens.
