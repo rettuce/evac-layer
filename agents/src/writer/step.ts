@@ -9,10 +9,11 @@ import type { CallUsage } from "../reader/pricing.js";
 import { placeholderWriter } from "./placeholder.js";
 import { approvedWriterForClass } from "./class-cache.js";
 import { cachedWriterRecord, cachedWriterForClass, recordedStatus, writerCacheFitsBulletin, saveWriter, screenClassFor, writeCellsUntilClean, type WriterModel } from "./live.js";
+import { writerMatchFor, type WriterMatch } from "./match.js";
 
 export interface LiveWriter { client: Anthropic; model: WriterModel }
 
-export interface WriterStep { writer: WriterOutput; writerSource: string; reviser: Reviser; afterLoop(result: LoopResult): void }
+export interface WriterStep { writer: WriterOutput; writerSource: string; reviser: Reviser; afterLoop(result: LoopResult): void; match?: WriterMatch }
 
 export async function writeForBulletin(
   ctx: { alert: Alert; municipality: Municipality; situation: Situation; site: { id: string } },
@@ -23,20 +24,22 @@ export async function writeForBulletin(
   const own = cachedWriterRecord(municipality.id, alert.bulletin_id);
   const cached = own && recordedStatus(own) === alert.status ? own.output : undefined;
   const cls = screenClassFor(alert.hazard, situation);
+  const match = writerMatchFor(alert, municipality.id, situation);
   const classCached = cached
     ? undefined
-    : [approvedWriterForClass(ctx.site.id, municipality.id, cls), cachedWriterForClass(municipality.id, cls)].find((r) => r && writerCacheFitsBulletin(r, alert, situation));
+    : [approvedWriterForClass(ctx.site.id, municipality.id, cls), cachedWriterForClass(municipality.id, cls)].find((r) => r && writerCacheFitsBulletin(r, alert, situation, match));
   const fixed = (writer: WriterOutput, writerSource: string): WriterStep => ({ writer, writerSource, reviser: liveWriterReviser, afterLoop: () => {} });
   if (classCached) {
     return {
       ...fixed(classCached.output, `writer-class-cache:${classCached.bulletin_id}`),
+      ...(classCached.match ? { match: classCached.match } : {}),
       afterLoop(result) {
-        if (opts.persist && result.outcome === "pass") saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [], status: alert.status });
+        if (opts.persist && result.outcome === "pass") saveWriter(municipality.id, alert.bulletin_id, { model: classCached.model, output: classCached.output, usage: [], lint: [], status: alert.status, ...(classCached.match ? { match: classCached.match } : {}) });
       },
     };
   }
   const live = opts.live;
-  if (!live) return cached ? fixed(cached, "writer-cache") : placeholder;
+  if (!live) return cached ? { ...fixed(cached, "writer-cache"), ...(own?.match ? { match: own.match } : {}) } : placeholder;
   const usageStart = opts.usage.length;
   const call = { client: live.client, model: live.model, alert, municipality, municipalityId: municipality.id, situation };
   let writer: WriterOutput;
@@ -51,14 +54,16 @@ export async function writeForBulletin(
     writer = r.output;
     writerSource = `writer-api:${live.model}`;
     opts.usage.push(...used);
-    if (opts.persist) saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: writer, usage: used, lint: r.lint, status: alert.status });
+    if (opts.persist) saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: writer, usage: used, lint: r.lint, status: alert.status, match });
   }
+  const written = writerSource !== "writer-cache";
+  const keyOf = written ? { match } : own?.match ? { match: own.match } : {};
   return {
-    writer, writerSource,
+    writer, writerSource, ...keyOf,
     reviser: writerApiReviser({ ...call, usage: opts.usage }),
     afterLoop(result) {
       if (opts.persist && result.outcome === "pass" && result.writer && result.writer !== writer) {
-        saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: result.writer, usage: opts.usage.slice(usageStart), lint: [], status: alert.status });
+        saveWriter(municipality.id, alert.bulletin_id, { model: live.model, output: result.writer, usage: opts.usage.slice(usageStart), lint: [], status: alert.status, match });
       }
     },
   };

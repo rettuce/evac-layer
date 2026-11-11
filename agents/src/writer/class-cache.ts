@@ -2,8 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { ComposerStop, situationFor, type Situation } from "../composer/rules.js";
 import { parseJmaXml, type Alert } from "../jma/parse.js";
-import { APPROVALS_FILE, FEED_DIR, LAYOUTS_DIR, SAMPLES_DIR, WRITER_DIR } from "../paths.js";
-import { cachedWriter, saveWriterForClass, screenClassFor, type ClassWriterRecord } from "./live.js";
+import { APPROVALS_FILE, FEED_DIR, LAYOUTS_DIR, SAMPLES_DIR } from "../paths.js";
+import { cachedWriterRecord, saveWriterForClass, screenClassFor, type ClassWriterRecord } from "./live.js";
 
 export function bulletinXmlPath(file: string): string {
   return file.startsWith("jma-samples/") ? path.join(SAMPLES_DIR, file.slice("jma-samples/".length)) : path.join(FEED_DIR, file);
@@ -11,14 +11,10 @@ export function bulletinXmlPath(file: string): string {
 
 interface IndexEntry { bulletin_id: string; file: string; screen?: boolean }
 
-function writerModelOf(municipalityId: string, bulletinId: string): string {
-  return (JSON.parse(fs.readFileSync(path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`), "utf8")) as { model: string }).model;
-}
-
 export function writerOfBulletin(siteId: string, municipalityId: string, bulletinId: string, opts: { layoutsDir?: string; xmlPath?: (file: string) => string } = {}): ClassWriterRecord | undefined {
-  const output = cachedWriter(municipalityId, bulletinId);
+  const record = cachedWriterRecord(municipalityId, bulletinId);
   const indexFile = path.join(opts.layoutsDir ?? LAYOUTS_DIR, siteId, "index.json");
-  if (!output || !fs.existsSync(indexFile)) return undefined;
+  if (!record || !fs.existsSync(indexFile)) return undefined;
   const row = (JSON.parse(fs.readFileSync(indexFile, "utf8")) as { entries: IndexEntry[] }).entries.find((e) => e.bulletin_id === bulletinId);
   const xml = row && (opts.xmlPath ?? bulletinXmlPath)(row.file);
   if (!xml || !fs.existsSync(xml)) return undefined;
@@ -31,8 +27,9 @@ export function writerOfBulletin(siteId: string, municipalityId: string, bulleti
     throw e;
   }
   return {
-    model: writerModelOf(municipalityId, bulletinId), output, bulletin_id: bulletinId, issued_at: alert.issued_at, raw_title: alert.raw_title, status: alert.status,
+    model: record.model, output: record.output, bulletin_id: bulletinId, issued_at: alert.issued_at, raw_title: alert.raw_title, status: alert.status,
     ...(situation.caution ? { caution: situation.caution } : {}),
+    ...(record.match ? { match: record.match } : {}),
   };
 }
 
@@ -55,7 +52,7 @@ export function cacheLatestWriterPerClass(opts: { layoutsDir?: string; xmlPath?:
     if (opts.municipalities && !opts.municipalities.has(index.municipality)) continue;
     for (const entry of index.entries.filter((e) => e.screen)) {
       const id = `${index.municipality}/${entry.bulletin_id}`;
-      if (seen.has(id) || !cachedWriter(index.municipality, entry.bulletin_id)) continue;
+      if (seen.has(id) || !cachedWriterRecord(index.municipality, entry.bulletin_id)) continue;
       seen.add(id);
       const xml = xmlPath(entry.file);
       if (!fs.existsSync(xml)) {
@@ -78,9 +75,11 @@ export function cacheLatestWriterPerClass(opts: { layoutsDir?: string; xmlPath?:
     }
   }
   return [...latest.values()].map(({ municipality, cls, alert, situation }) => {
+    const record = cachedWriterRecord(municipality, alert.bulletin_id)!;
     saveWriterForClass(municipality, cls, {
-      model: writerModelOf(municipality, alert.bulletin_id), output: cachedWriter(municipality, alert.bulletin_id)!, bulletin_id: alert.bulletin_id, issued_at: alert.issued_at, raw_title: alert.raw_title, status: alert.status,
+      model: record.model, output: record.output, bulletin_id: alert.bulletin_id, issued_at: alert.issued_at, raw_title: alert.raw_title, status: alert.status,
       ...(situation.caution ? { caution: situation.caution } : {}),
+      ...(record.match ? { match: record.match } : {}),
     });
     return `${municipality}/${cls} ← ${alert.bulletin_id}`;
   });
