@@ -16,7 +16,6 @@ const arrowPx = computed(() => Math.round(props.dialPx * ARROW_RATIO))
     <div class="north-marks">
       <span />
       <p class="t-fine north-mark" lang="en">N</p>
-      <p class="t-fine north-mark" lang="ja">北</p>
     </div>
   </div>
 </template>

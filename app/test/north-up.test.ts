@@ -100,11 +100,10 @@ describe('a site without facing shows the way on a north-fixed dial on every sha
         assert.deepEqual([read.overflow, read.missing, read.dropped], ['', '', ''], 'overflow / missing / dropped')
         assert.equal(read.word, screen.cells.find((c) => c.role === 'direction')!.text.ja)
         assert.equal(read.rotation, ROTATION[read.word], `the drawn arrow points ${read.word}`)
-        for (const text of ['N', '北']) {
-          const mark = read.marks.find((m) => m.text === text)
-          assert.ok(mark?.visible && mark.onDial, `${text} is shown on the circle`)
-          assert.ok(mark.px + 0.5 >= TYPE_PX.fine * scale, `${text} is ${mark.px}px, under the label floor`)
-        }
+        assert.deepEqual(read.marks.map((m) => m.text), ['N'], 'the dial carries one north mark, N')
+        const mark = read.marks[0]!
+        assert.ok(mark.visible && mark.onDial, 'N is shown on the circle')
+        assert.ok(mark.px + 0.5 >= TYPE_PX.fine * scale, `N is ${mark.px}px, under the label floor`)
         for (const px of read.directionPx) assert.ok(px + 0.5 >= TYPE_PX.guide * scale, `direction text ${px}px is under the guide floor`)
         const showing = read.distances.filter((c) => /570\s?m/.test(c.text)).map((c) => c.role)
         const expected = screen.cells.find((c) => c.distance_m !== undefined)!.role

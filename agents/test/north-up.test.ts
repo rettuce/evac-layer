@@ -113,14 +113,14 @@ test("the static Verifier passes north-up screens and fails an arrow that contra
   }
 });
 
-test("north-up findings: a missing N or 北, a mark off the dial, an arrow turned away from its word", () => {
-  const marks = [{ text: "N", visible: true, onDial: true }, { text: "北", visible: true, onDial: true }];
+test("north-up findings: a missing N, an N off the dial, an arrow turned away from its word", () => {
+  const marks = [{ text: "N", visible: true, onDial: true }];
   const ok = { id: "direction", word: "南西へ", rotation: 135 };
   assert.deepEqual(judgeNorthUp([{ ...ok, marks }]), []);
   assert.deepEqual(judgeNorthUp([{ ...ok, rotation: 495 }]), [], "angles are compared modulo 360");
-  assert.deepEqual(judgeNorthUp([{ ...ok, marks: [marks[0]] }]).map((f) => f.check), ["north-missing"]);
-  assert.deepEqual(judgeNorthUp([{ ...ok, marks: [marks[0], { ...marks[1], visible: false }] }]).map((f) => f.check), ["north-missing"]);
-  assert.deepEqual(judgeNorthUp([{ ...ok, marks: [marks[0], { ...marks[1], onDial: false }] }]).map((f) => f.check), ["north-missing"]);
+  assert.deepEqual(judgeNorthUp([{ ...ok, marks: [{ ...marks[0], visible: false }] }]).map((f) => f.check), ["north-missing"]);
+  assert.deepEqual(judgeNorthUp([{ ...ok, marks: [{ ...marks[0], onDial: false }] }]).map((f) => f.check), ["north-missing"]);
+  assert.deepEqual(judgeNorthUp([{ ...ok, marks: [{ text: "北", visible: true, onDial: true }] }]).map((f) => f.check), ["north-missing"]);
   assert.deepEqual(judgeNorthUp([{ ...ok, marks: [] }]).map((f) => f.check), ["north-missing"]);
   assert.deepEqual(judgeNorthUp([{ ...ok, rotation: 225, marks }]).map((f) => f.check), ["direction-mismatch"]);
   assert.deepEqual(judgeNorthUp([{ ...ok, rotation: undefined, marks }]).map((f) => f.check), ["direction-mismatch"]);

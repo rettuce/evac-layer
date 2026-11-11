@@ -2,7 +2,7 @@ import { describeLayout, resolveLayout, type ResolvedTemplate } from './template
 import type { NorthDial, Orientation, Shape, ShapeLayout, TemplateId } from './types'
 
 // A site whose facing is unknown shows the way on a north-fixed dial (decision 2026-11-11, mock B): the circle with
-// N and 北 on its top, the arrow at the 8-point map angle, and the direction word with the distance beside it. The
+// N on its top, the arrow at the 8-point map angle, and the direction word with the distance beside it. The
 // distance leaves the shelter row so that it is shown once, except where the dial and two lines do not fit.
 
 type AreaEdit = (areas: string[]) => string[]
