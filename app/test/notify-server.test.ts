@@ -207,7 +207,7 @@ describe('operator notices through the server', { skip }, () => {
     await serve({ ...plaintext, NUXT_NOTIFY_SLACK_WEBHOOK_URL: slackUrl, NUXT_NOTIFY_REMIND_MINUTES: '0' }, dataDir)
 
     const reasonOf = (id: string) => {
-      const text = notices().find((notice) => notice.includes(`(${id})`))
+      const text = notices().find((notice) => notice.includes(`(\`${id}\`)`))
       return text && /理由: (\S+)/.exec(text)?.[1]
     }
     await until('four notices', () => ['broken-screens', 'broken-index', 'fine-site', 'failed-check'].every((id) => reasonOf(id) !== undefined))
@@ -215,7 +215,7 @@ describe('operator notices through the server', { skip }, () => {
     assert.equal(reasonOf('broken-index'), 'screens-unreadable')
     assert.equal(reasonOf('fine-site'), 'unapproved')
     assert.equal(reasonOf('failed-check'), 'check-failed')
-    assert.match(notices().find((notice) => notice.includes('(broken-index)'))!, /警戒レベル: 不明/)
+    assert.match(notices().find((notice) => notice.includes('(`broken-index`)'))!, /警戒レベル: 不明/)
     assert.equal(reasonOf('broken-live'), undefined)
     assert.match(output, /broken-live/)
   })

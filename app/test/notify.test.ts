@@ -129,29 +129,44 @@ describe('notice text', () => {
     assert.ok(!/\n(承認済み|Bcc)/.test(body))
   })
 
-  test('a URL in a registered name is shown broken, so Slack does not link it; the admin URL stays a link', () => {
-    const named = facts({ site: { id: SITE, name: '駅 https://example.com/x と http://evil.example/y', municipality_id: MUNICIPALITY }, admin_url: 'https://ops.example.org/admin' })
-    const { text } = slackMessage(named, NOW)
-    const links = text.match(/https?:\/\/\S+/g) ?? []
-    assert.deepEqual(links.map((link) => link.replace(/>$/, '')), ['https://ops.example.org/admin', 'https://ops.example.org/admin'])
-    assert.ok(text.includes('example[.]com/x'), 'the rest of the name is kept')
-    const mail = mailMessage(named, NOW)
-    assert.deepEqual(mail.text.match(/https?:\/\/\S+/g), ['https://ops.example.org/admin', 'https://ops.example.org/admin'])
-    assert.ok(!/https?:\/\//.test(mail.subject))
+  test('in Slack each value a facility registered is one inline code span, and nothing of it shows outside the spans', () => {
+    const admin_url = 'https://ops.example.org/admin'
+    const named = (name: string) => facts({ site: { id: SITE, name, municipality_id: MUNICIPALITY }, admin_url })
+    const outside = (text: string) => text.replace(/`[^`]*`/g, '`_`')
+    const span = (value: string) => `\`${value.normalize('NFKC').replace(/`/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}\``
+    const neutral = slackMessage(named('x'), NOW)
+    assert.ok(neutral.text.includes(`<${admin_url}>`), 'the admin URL is a link outside the spans')
+    assert.deepEqual([neutral.parse, neutral.unfurl_links, neutral.unfurl_media], ['none', false, false])
+    const values = ['evil.example.com/login', 'https://a-b.co.jp', 'ｅｖｉｌ．ｅｘａｍｐｌｅ．ｃｏｍ', '例え.テスト', '192.168.0.1', '<!channel>', 'a`b`c']
+    for (const name of [...values, values.join(' ')]) {
+      const { text } = slackMessage(named(name), NOW)
+      assert.ok(text.includes(`${span(name)} (\`${SITE}\`)`), `${name}: ${text}`)
+      assert.equal(outside(text), outside(neutral.text), `${name} shows outside inline code`)
+      assert.equal((text.match(/`/g) ?? []).length % 2, 0)
+    }
+    assert.ok(slackMessage(named('ｅｖｉｌ．ｅｘａｍｐｌｅ．ｃｏｍ'), NOW).text.includes('`evil.example.com`'), 'full-width forms are folded first')
   })
 
-  test('a host name in registered text is shown broken, so Slack does not link it either; numbers with a dot stay as they are', () => {
-    const name = 'evil.example.com/login と https://a-b.co.jp と No.3 ホール と 1.5km 先'
-    const named = facts({ site: { id: SITE, name, municipality_id: MUNICIPALITY }, admin_url: 'https://ops.example.org/admin' })
-    const { text } = slackMessage(named, NOW)
-    const { subject, text: body } = mailMessage(named, NOW)
-    for (const out of [text, subject, body]) {
+  test('an empty value is not put in a span; a fixed word stands for it', () => {
+    const empty = facts({ bulletin: { id: BULLETIN, title: '``', issued_at: '' }, outcome: String.fromCodePoint(0x200b) })
+    const { text } = slackMessage(empty, NOW)
+    assert.ok(!text.includes('``'), text)
+    assert.match(text, /発表: 不明/)
+    assert.match(text, /Issued: unknown/)
+    assert.ok(text.includes(`電文: \`${BULLETIN}\``))
+  })
+
+  test('in mail, URLs and host names a facility registered are shown broken; numbers with a dot and the admin URL stay as they are', () => {
+    const name = 'evil.example.com/login と https://a-b.co.jp と ｅｖｉｌ．ｅｘａｍｐｌｅ．ｃｏｍ と No.3 ホール と 1.5km 先'
+    const { subject, text } = mailMessage(facts({ site: { id: SITE, name, municipality_id: MUNICIPALITY }, admin_url: 'https://ops.example.org/admin' }), NOW)
+    for (const out of [subject, text]) {
       assert.ok(out.includes('evil[.]example[.]com/login'), out)
       assert.ok(out.includes('https[:]//a-b[.]co[.]jp'), out)
+      assert.ok(out.includes('と evil[.]example[.]com と'), out)
       assert.ok(out.includes('No.3 ホール') && out.includes('1.5km 先'), out)
       assert.ok(!/evil\.example|a-b\.co/.test(out))
     }
-    for (const out of [text, body]) assert.ok(out.includes('https://ops.example.org/admin'), 'the admin URL stays a link')
+    assert.deepEqual(text.match(/https?:\/\/\S+/g), ['https://ops.example.org/admin', 'https://ops.example.org/admin'])
   })
 
   test('direction and zero-width characters are removed and a long name is cut between characters', () => {

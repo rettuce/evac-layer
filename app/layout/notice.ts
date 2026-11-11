@@ -55,26 +55,29 @@ const LABELS = {
   },
 } satisfies Record<Lang, Record<string, string>>
 
-// Strings a facility registers, and strings from a bulletin, must not add lines, reorder what follows them or hide
-// characters. They are cut between code points, never inside a surrogate pair.
+// Strings a facility registers, and strings from a bulletin, are folded to NFKC first, so full-width and compatibility
+// forms read as what they look like, and must not add lines, reorder what follows them or hide characters. They are cut
+// between code points, never inside a surrogate pair.
 function plain(value: string): string {
-  const flat = value.replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ').replace(/\p{Cf}/gu, '')
+  const flat = value.normalize('NFKC').replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ').replace(/\p{Cf}/gu, '').trim()
   const points = Array.from(flat)
   return points.length > MAX_FIELD_LENGTH ? `${points.slice(0, MAX_FIELD_LENGTH).join('')}…` : flat
 }
 
 const HOST_NAME = /(?<![A-Za-z0-9-])(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}(?![A-Za-z0-9-])/g
 
-// A URL or a host name a facility registered is shown broken, so that Slack does not make it a link.
-export function oneLine(value: string): string {
-  return plain(value).replace(/:\/\//g, '[:]//').replace(HOST_NAME, (host) => host.replace(/\./g, '[.]'))
-}
+type Quote = (value: string | undefined, fallback: string) => string
 
-// Slack reads <…> as a mention or a link and &…; as an entity; escaped, they are shown as typed.
+// Mail has no inline code: a URL or a host name is shown broken instead, which catches the common forms only.
+const mailQuote: Quote = (value, fallback) =>
+  plain(value ?? '').replace(/:\/\//g, '[:]//').replace(HOST_NAME, (host) => host.replace(/\./g, '[.]')) || fallback
+
+// Slack reads <…> as a mention or a link and &…; as an entity, and links nothing inside inline code.
 const escapeSlack = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
-export function slackEscape(value: string): string {
-  return escapeSlack(oneLine(value))
+const slackQuote: Quote = (value, fallback) => {
+  const shown = plain(value ?? '').replace(/`/g, '').trim()
+  return shown ? `\`${escapeSlack(shown)}\`` : fallback
 }
 
 function minutesSince(firstSeenAt: string, now: number): number {
@@ -99,18 +102,21 @@ function headline(facts: NoticeFacts, now: number, lang: Lang): string {
     : `[EVAC LAYER] Reminder (notice ${facts.count}, first seen ${minutes} min ago): the warning is still not on screen`
 }
 
-function block(facts: NoticeFacts, now: number, lang: Lang, quote: (value: string) => string, link: (url: string) => string): string[] {
+function block(facts: NoticeFacts, now: number, lang: Lang, quote: Quote, link: (url: string) => string): string[] {
   const label = LABELS[lang]
-  const named = (name: string | undefined, id: string) => (name ? `${quote(name)} (${quote(id)})` : quote(id))
+  const named = (name: string | undefined, id: string) => {
+    const shownName = quote(name, '')
+    return shownName ? `${shownName} (${quote(id, label.unknown)})` : quote(id, label.unknown)
+  }
   const showing =
     facts.showing === 'unknown' ? label.unreadableFeed : facts.showing === null ? label.nothing : named(facts.showing.title, facts.showing.bulletin_id)
-  const outcome = facts.outcome ? ` (${label.outcome}: ${quote(facts.outcome)})` : ''
+  const outcome = facts.outcome ? ` (${label.outcome}: ${quote(facts.outcome, label.unknown)})` : ''
   return [
     headline(facts, now, lang),
     `${label.site}: ${named(facts.site.name, facts.site.id)}`,
     `${label.municipality}: ${named(facts.site.municipality_name, facts.site.municipality_id)}`,
     `${label.bulletin}: ${named(facts.bulletin.title, facts.bulletin.id)}`,
-    `${label.issued}: ${facts.bulletin.issued_at ? quote(facts.bulletin.issued_at) : label.unknown}`,
+    `${label.issued}: ${quote(facts.bulletin.issued_at, label.unknown)}`,
     `${label.level}: ${typeof facts.bulletin.level === 'number' ? facts.bulletin.level : label.unknown}`,
     `${label.reason}: ${facts.reason} — ${REASONS[facts.reason][lang]}${outcome}`,
     ...(facts.auto_publish || facts.reason === 'auto-publish-off' ? [] : [label.autoPublishOff]),
@@ -119,7 +125,7 @@ function block(facts: NoticeFacts, now: number, lang: Lang, quote: (value: strin
   ]
 }
 
-function noticeText(facts: NoticeFacts, now: number, quote: (value: string) => string, link: (url: string) => string): string {
+function noticeText(facts: NoticeFacts, now: number, quote: Quote, link: (url: string) => string): string {
   return [...block(facts, now, 'ja', quote, link), '', ...block(facts, now, 'en', quote, link)].join('\n')
 }
 
@@ -131,11 +137,11 @@ export interface SlackMessage {
 }
 
 export function slackMessage(facts: NoticeFacts, now: number): SlackMessage {
-  return { text: noticeText(facts, now, slackEscape, (url) => `<${escapeSlack(plain(url))}>`), parse: 'none', unfurl_links: false, unfurl_media: false }
+  return { text: noticeText(facts, now, slackQuote, (url) => `<${escapeSlack(plain(url))}>`), parse: 'none', unfurl_links: false, unfurl_media: false }
 }
 
 export function mailMessage(facts: NoticeFacts, now: number): { subject: string; text: string } {
   const reminder = facts.count === 1 ? '' : ` — 通知 ${facts.count} 回目 / notice ${facts.count}`
-  const subject = `[EVAC LAYER] 警報が画面に出ていません / Warning not on screen: ${oneLine(facts.site.name ?? facts.site.id)} (${oneLine(facts.site.id)})${reminder}`
-  return { subject, text: noticeText(facts, now, oneLine, plain) }
+  const subject = `[EVAC LAYER] 警報が画面に出ていません / Warning not on screen: ${mailQuote(facts.site.name, mailQuote(facts.site.id, ''))} (${mailQuote(facts.site.id, '')})${reminder}`
+  return { subject, text: noticeText(facts, now, mailQuote, plain) }
 }
