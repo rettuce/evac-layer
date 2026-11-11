@@ -6,7 +6,7 @@ import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { createServer as createHttpServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { after, before, describe, test } from 'node:test'
+import { after, afterEach, before, describe, test } from 'node:test'
 import { SERVER_ENTRY, postJson, startServer } from './helpers.ts'
 import { type SmtpMessage, decodeWords, filesUnder, parseMail, pause, smtpReceiver, stop, until, writeSite } from './notify-helpers.ts'
 
@@ -66,8 +66,8 @@ describe('operator notices through the server', { skip }, () => {
       NUXT_NOTIFY_MAIL_TO: 'ops1@example.org, ops2@example.org',
     }
   })
+  afterEach(() => Promise.all(children.splice(0).map(stop)))
   after(async () => {
-    await Promise.all(children.map(stop))
     slack.close()
     smtp.close()
     if (lockDir) await chmod(lockDir, 0o755).catch(() => undefined)
@@ -256,6 +256,7 @@ describe('operator notices through the server', { skip }, () => {
     assert.equal(registered.status, 201)
     await writeSite(dataDir, { id: 'shared-hall', name: 'B の駅', facility_id: 'beta-fac' })
     await until('a notice for the new owner', () => notices().some((notice) => notice.includes('B の駅')))
+    await until('the mail of the same notice, before the next test counts connections', () => mails.some((mail) => parseMail(mail.raw).body.includes('B の駅')))
     const fresh = notices().find((notice) => notice.includes('B の駅'))!
     assert.ok(!fresh.includes('回目') && !fresh.includes('A の駅'), fresh)
   })
