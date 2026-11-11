@@ -37,7 +37,11 @@ info:
         `total = approved + pending + blocked` is counted.
       - `POST /api/admin/approve`: the request and answer as implemented, with `mode`,
         `token_label` and `actor`. Approving by `class` and the code `screens-changed` stay
-        plans.
+        plans. Revoking records who revoked (`token_label`, `actor`, `mode: bulk`) on the
+        bulletin record and on each class record it takes down, and drops the earlier
+        approver's `actor`.
+      - The 429 of `POST …/generations` has the same body as the other errors, `error` and
+        `url` included.
       - The preview path and the paths that existed before this draft (catalog,
         preview-layout, site, live, subscriptions, the feed, `GET /api/site-near`) are listed
         with their real requests and answers.
@@ -398,7 +402,6 @@ paths:
           description: |
             `generation-rate-limited`: the caller started 6 jobs within the last hour, or has
             2 unfinished. `Retry-After` gives the seconds to wait (60 for unfinished jobs).
-            This body is written by the handler and has no `error` and `url`.
           headers:
             Retry-After:
               schema:
@@ -602,9 +605,10 @@ paths:
         `actor`. The site's exports are then requested.
 
         Revoking a bulletin revokes it, every class approval given from it, and the class
-        approval of its current screens. Who revoked is recorded in the audit log only: the
-        bulletin record keeps `approved: false` and `updated_at`, and a revoked class record
-        keeps the `mode`, `token_label` and `actor` of the approval it had.
+        approval of its current screens. The bulletin record and each class record it takes
+        down name who revoked: `token_label`, the `actor` when one was sent, and `mode: bulk`
+        as a class revocation records it. The `actor` of the approval that was taken back is
+        not kept.
 
         Unknown body fields are ignored.
 
@@ -1468,7 +1472,8 @@ components:
         The answer of `POST /api/admin/approve`. When approving: the bulletin approval with
         `digest`, `mode`, `token_label`, `actor`, the bulletin's `class`, and
         `class_approval` unless it is a drill or test bulletin. When revoking: `approved`
-        false, `updated_at`, and `class` when the bulletin still has screens.
+        false, `updated_at`, `mode` (`bulk`), `token_label`, `actor` when one was sent, and
+        `class` when the bulletin still has screens.
       required: [site_id, bulletin_id, approved, updated_at]
       properties:
         site_id:
@@ -1609,10 +1614,10 @@ components:
       properties:
         error:
           type: boolean
-          description: Always true; left out by the 429 of `POST …/generations`.
+          description: Always true.
         url:
           type: string
-          description: Left out by the 429 of `POST …/generations`.
+          description: The URL of the request.
         statusCode:
           type: integer
         statusMessage:
