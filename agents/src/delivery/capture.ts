@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import puppeteer, { type Browser, type Page } from "puppeteer-core";
 import { SHAPES } from "../../../app/layout/shapes";
 import type { Shape } from "../../../app/layout/types";
@@ -9,15 +10,15 @@ const SETTLE_MS = 500;
 
 export class ExportStop extends Error {}
 
-export const CHROME_PID_LINE = "[chrome-pid]";
 const TERMINATED_EXIT_CODE = 143;
 
-// Chrome runs in a process group of its own, so stopping this command's group would leave it running: the server is
-// told its pid to stop it after a deadline, and a SIGTERM closes it here first.
+// Chrome runs in a process group of its own, so stopping this command's group would leave it running: the server names
+// a file for its pid (never stdout or stderr, which carry text from the data), and a SIGTERM closes it here first.
 export async function launchBrowser(chrome?: string): Promise<Browser> {
   const browser = await puppeteer.launch({ executablePath: chrome ?? chromePath(), headless: true, args: ["--disable-gpu-rasterization"] });
   const pid = browser.process()?.pid;
-  if (pid) console.error(`${CHROME_PID_LINE} ${pid}`);
+  const pidFile = process.env.EVAC_CHROME_PID_FILE;
+  if (pid && pidFile) fs.writeFileSync(pidFile, `${pid}\n`);
   process.once("SIGTERM", () => {
     void browser.close().catch(() => undefined).finally(() => process.exit(TERMINATED_EXIT_CODE));
   });

@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process'
-import { resolve } from 'node:path'
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
 
 export type AgentPurpose = 'generate' | 'preview' | 'export'
 
@@ -17,7 +19,7 @@ export interface ChildRun {
 }
 
 const STOP_GRACE_MS = 5000
-const CHROME_PID_LINE = /^\[chrome-pid\] (\d+)$/
+const CHROME_PID_FILE = /^(\d+)\n?$/
 const SHARED_ENV = new Set(['PATH', 'HOME', 'USER', 'LOGNAME', 'SHELL', 'TMPDIR', 'TMP', 'TEMP', 'LANG', 'LANGUAGE', 'TZ', 'CHROME_PATH'])
 const SHARED_ENV_PREFIXES = ['LC_', 'EVAC_', 'JMA_']
 const PURPOSE_ENV: Record<AgentPurpose, readonly string[]> = { generate: ['ANTHROPIC_API_KEY'], preview: [], export: [] }
@@ -63,31 +65,37 @@ export async function stopAllChildren(): Promise<void> {
   await Promise.all([...running].map((child) => child.stop()))
 }
 
+// The command reports the Chrome it started in a file only it and the server know. Even so, the pid is stopped only
+// when it leads its own process group and descends from the command, so a wrong number cannot reach anyone else.
+async function chromeOf(child: number, pidFile: string): Promise<number | undefined> {
+  let text: string
+  try {
+    text = readFileSync(pidFile, 'utf8')
+  } catch {
+    return undefined
+  }
+  const pid = Number(CHROME_PID_FILE.exec(text)?.[1])
+  if (Number.isSafeInteger(pid) && pid > 1 && (await leadsGroupBelow(pid, child))) return pid
+  console.warn(`[agents] the Chrome pid a command reported is not one of its own processes; it is left alone`)
+  return undefined
+}
+
 export function runAgentCommand(command: string[], args: string[], options: { purpose: AgentPurpose; timeoutMs: number; tailChars: number }): ChildRun {
+  const workDir = mkdtempSync(join(tmpdir(), 'evac-agent-'))
+  const pidFile = join(workDir, 'chrome.pid')
   // Its own process group, so stopping it reaches the pnpm, tsx and node processes it starts.
   const child = spawn(command[0]!, [...command.slice(1), ...args], {
     cwd: useRuntimeConfig().repoRoot,
-    env: agentEnv(options.purpose, process.env, resolve(dataDir())),
+    env: { ...agentEnv(options.purpose, process.env, resolve(dataDir())), EVAC_CHROME_PID_FILE: pidFile },
     stdio: ['ignore', 'pipe', 'pipe'],
     detached: true,
   })
-  const chromeGroups = new Set<number>()
   let output = ''
-  let partialLine = ''
   let timedOut = false
   let exited = false
   const collect = (chunk: string) => (output = (output + chunk).slice(-options.tailChars))
-  const watchStderr = (chunk: string) => {
-    const lines = (partialLine + chunk).split('\n')
-    partialLine = lines.pop() ?? ''
-    for (const line of lines) {
-      const chrome = CHROME_PID_LINE.exec(line.trim())
-      if (chrome) chromeGroups.add(Number(chrome[1]))
-    }
-    collect(chunk)
-  }
   child.stdout.setEncoding('utf8').on('data', collect)
-  child.stderr.setEncoding('utf8').on('data', watchStderr)
+  child.stderr.setEncoding('utf8').on('data', collect)
   const done = new Promise<ChildResult>((settle) => {
     const finish = (ok: boolean, message: string) => {
       exited = true
@@ -100,13 +108,15 @@ export function runAgentCommand(command: string[], args: string[], options: { pu
   let stopping: Promise<ChildResult> | undefined
   const stop = () => {
     stopping ??= (async () => {
+      let chrome: number | undefined
       if (!exited && child.pid) {
+        chrome = await chromeOf(child.pid, pidFile)
         signalGroup(child.pid, 'SIGTERM')
         const hard = setTimeout(() => signalGroup(child.pid!, 'SIGKILL'), STOP_GRACE_MS)
         await done
         clearTimeout(hard)
       }
-      for (const chrome of chromeGroups) signalGroup(chrome, 'SIGKILL')
+      if (chrome) signalGroup(chrome, 'SIGKILL')
       return done
     })()
     return stopping
@@ -117,6 +127,9 @@ export function runAgentCommand(command: string[], args: string[], options: { pu
   }, Math.max(0, options.timeoutMs))
   const run: ChildRun = { pid: child.pid, startedAt: Date.now(), done, stop }
   running.add(run)
-  void done.finally(() => running.delete(run))
+  void done.finally(() => {
+    running.delete(run)
+    rmSync(workDir, { recursive: true, force: true })
+  })
   return run
 }

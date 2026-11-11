@@ -150,7 +150,7 @@ describe('generation jobs over HTTP', { skip }, () => {
 
   before(async () => {
     data = await makeData()
-    for (const id of ['alpha-one', 'alpha-two', 'alpha-fresh', 'alpha-fail', 'alpha-nopng', 'alpha-shapes', 'alpha-moved', 'alpha-partial', 'alpha-empty', 'alpha-link', 'del-running', 'del-queued', 'del-done', 'del-reborn']) await data.writeSite(id, 'alpha-fac')
+    for (const id of ['alpha-one', 'alpha-two', 'alpha-fresh', 'alpha-fail', 'alpha-nopng', 'alpha-shapes', 'alpha-moved', 'alpha-partial', 'alpha-empty', 'alpha-link', 'del-running', 'del-queued', 'del-done', 'del-reborn', 'chrome-stderr', 'chrome-file', 'chrome-own']) await data.writeSite(id, 'alpha-fac')
     await data.writeSite('alpha-cold', 'alpha-fac', NOT_PREPARED)
     await data.writeSite('beta-one', 'beta-fac')
     await data.writeSite('op-site')
@@ -158,6 +158,10 @@ describe('generation jobs over HTTP', { skip }, () => {
   })
   after(async () => {
     child?.kill()
+    for (const file of (await readdir(data.root)).filter((f) => f.startsWith('chrome-'))) {
+      const pid = Number(await readFile(join(data.root, file), 'utf8'))
+      if (alive(pid)) process.kill(pid, 'SIGKILL')
+    }
     await rm(join(data.root, 'hold'), { recursive: true, force: true })
     await sleep(300)
     await rm(data.root, { recursive: true, force: true })
@@ -457,6 +461,32 @@ describe('generation jobs over HTTP', { skip }, () => {
     await sleep(500)
     assert.ok(!(await data.fakes.calls()).some((c) => c.site === 'del-queued'))
     for (const site of ['del-running', 'del-queued']) assert.ok(!existsSync(join(data.dataDir, 'live', `${site}.generation.json`)), site)
+  })
+
+  test('a Chrome to stop is taken only from the job\'s own pid file, and only when it descends from the command', async () => {
+    const bystander = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'], { detached: true, stdio: 'ignore' })
+    try {
+      const stopDuringPreview = async (site: string) => {
+        await data.fakes.hold(`${site}.preview`)
+        assert.equal((await api.start(site, TOKEN_A)).status, 202)
+        await appears(join(data.root, `pid-preview-${site}`))
+        await sleep(100)
+        assert.equal((await api.remove(site, TOKEN_A)).status, 204)
+        await data.fakes.release(`${site}.preview`)
+      }
+      await data.fakes.stage('chrome-stderr', [SYN_PASS], { chromeMode: `stderr:${bystander.pid}` })
+      await stopDuringPreview('chrome-stderr')
+      assert.equal(alive(bystander.pid!), true, 'a pid printed on stderr is never stopped')
+      await data.fakes.stage('chrome-file', [SYN_PASS], { chromeMode: `file:${bystander.pid}` })
+      await stopDuringPreview('chrome-file')
+      assert.equal(alive(bystander.pid!), true, 'a pid in the file that does not descend from the command is not stopped')
+      await data.fakes.stage('chrome-own', [SYN_PASS], { chromeMode: 'own' })
+      await stopDuringPreview('chrome-own')
+      const browser = Number(await readFile(join(data.root, 'chrome-chrome-own'), 'utf8'))
+      await until(() => !alive(browser), 'the Chrome the command started is still running')
+    } finally {
+      bystander.kill('SIGKILL')
+    }
   })
 
   test('DELETE removes the job record and the previews of a finished job', async () => {

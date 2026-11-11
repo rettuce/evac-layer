@@ -10,6 +10,7 @@ const DEFAULT_SHAPES = ['16x9', '1x1']
 // EVAC_DATA_DIR (the server hands its children an allowlist), copy what a test staged under <root>/source/<site>/
 // into the data directory, and log their calls, environment and pid under <root>.
 const SCRIPT_HEAD = (root: string) => `#!/usr/bin/env node
+import { spawn } from 'node:child_process'
 import { appendFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
@@ -64,8 +65,17 @@ process.on('SIGTERM', () => {
 log({ kind: 'preview', site, bulletin, argv: process.argv.slice(2) })
 writeFileSync(join(root, 'env-preview-' + site + '.json'), JSON.stringify(process.env))
 writeFileSync(join(root, 'pid-preview-' + site), String(process.pid))
-while (existsSync(join(root, 'hold', site + '.preview'))) await sleep(20)
 const source = join(root, 'source', site)
+const chromeMode = existsSync(join(source, 'chrome-mode')) ? readFileSync(join(source, 'chrome-mode'), 'utf8') : ''
+if (chromeMode.startsWith('stderr:')) console.error('[chrome-pid] ' + chromeMode.slice('stderr:'.length))
+if (chromeMode.startsWith('file:') && process.env.EVAC_CHROME_PID_FILE) writeFileSync(process.env.EVAC_CHROME_PID_FILE, chromeMode.slice('file:'.length))
+if (chromeMode === 'own') {
+  const browser = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'], { detached: true, stdio: 'ignore' })
+  browser.unref()
+  if (process.env.EVAC_CHROME_PID_FILE) writeFileSync(process.env.EVAC_CHROME_PID_FILE, String(browser.pid))
+  writeFileSync(join(root, 'chrome-' + site), String(browser.pid))
+}
+while (existsSync(join(root, 'hold', site + '.preview'))) await sleep(20)
 if (existsSync(join(source, 'preview-fail'))) {
   console.error('[preview stopped] no Chrome found at /opt/secret/chrome')
   process.exit(3)
@@ -128,6 +138,7 @@ export interface StageOptions {
   exit?: string
   previewFails?: boolean
   previewFailShapes?: string[]
+  chromeMode?: string
   noResult?: boolean
 }
 
@@ -157,6 +168,7 @@ export async function makeFakes(root: string) {
     if (options.exit) await writeFile(join(source, 'exit'), options.exit)
     if (options.previewFails) await writeFile(join(source, 'preview-fail'), '')
     if (options.previewFailShapes) await writeFile(join(source, 'preview-fail-shapes'), JSON.stringify(options.previewFailShapes))
+    if (options.chromeMode) await writeFile(join(source, 'chrome-mode'), options.chromeMode)
   }
 
   async function calls(): Promise<Record<string, any>[]> {

@@ -18,6 +18,29 @@ const START_SLACK_MS = 3000
 const STOP_GRACE_MS = 5000
 const POLL_MS = 100
 const PS_LINE = /^\s*(\d+)\s+(\d+)\s+(\w{3}\s+\w{3}\s+\d+\s+[\d:]+\s+\d{4})\s+(.*)$/
+const PS_PARENT_LINE = /^\s*(\d+)\s+(\d+)\s+(\d+)\s*$/
+
+// True only when `pid` leads its own process group and its chain of parents reaches `ancestor`.
+export async function leadsGroupBelow(pid: number, ancestor: number): Promise<boolean> {
+  let stdout: string
+  try {
+    ;({ stdout } = await promisify(execFile)('ps', ['-A', '-o', 'pid=,ppid=,pgid='], { env: { PATH: process.env.PATH, LC_ALL: 'C' }, maxBuffer: 16 * 1024 * 1024 }))
+  } catch {
+    return false
+  }
+  const processes = new Map<number, { ppid: number; pgid: number }>()
+  for (const line of stdout.split('\n')) {
+    const parsed = PS_PARENT_LINE.exec(line)
+    if (parsed) processes.set(Number(parsed[1]), { ppid: Number(parsed[2]), pgid: Number(parsed[3]) })
+  }
+  if (processes.get(pid)?.pgid !== pid) return false
+  const seen = new Set<number>()
+  for (let current = processes.get(pid)?.ppid; current && current > 1 && !seen.has(current); current = processes.get(current)?.ppid) {
+    if (current === ancestor) return true
+    seen.add(current)
+  }
+  return false
+}
 
 async function groupMembers(pgid: number): Promise<GroupMember[] | undefined> {
   try {
