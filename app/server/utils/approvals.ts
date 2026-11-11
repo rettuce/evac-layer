@@ -60,6 +60,10 @@ export interface LayoutSnapshot {
   report?: CheckReport
 }
 
+async function rowStatus(site: string, bulletin: string): Promise<string | undefined> {
+  return (await readLayoutIndex(site))?.entries.find((row) => row.bulletin_id === bulletin)?.status
+}
+
 // One read of a bulletin's shape files and report: the gate decides on these bytes and the feed serves them.
 export async function readLayoutSnapshot(site: string, bulletin: string): Promise<LayoutSnapshot | undefined> {
   const files = await layoutFiles(site, bulletin)
@@ -69,7 +73,7 @@ export async function readLayoutSnapshot(site: string, bulletin: string): Promis
   return {
     files,
     digest,
-    cls: { key: screenClass(JSON.parse(files[0]!.body)), digest: classDigest(files), checked: passedBrowserCheck(report, digest) },
+    cls: { key: screenClass(JSON.parse(files[0]!.body), await rowStatus(site, bulletin)), digest: classDigest(files), checked: passedBrowserCheck(report, digest) },
     ...(report ? { report } : {}),
   }
 }
@@ -77,7 +81,7 @@ export async function readLayoutSnapshot(site: string, bulletin: string): Promis
 export async function currentClassKey(site: string, bulletin: string): Promise<string | undefined> {
   try {
     const [first] = await layoutFiles(site, bulletin)
-    return first && screenClass(JSON.parse(first.body))
+    return first && screenClass(JSON.parse(first.body), await rowStatus(site, bulletin))
   } catch {
     return undefined
   }

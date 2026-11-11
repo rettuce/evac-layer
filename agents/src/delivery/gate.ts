@@ -62,9 +62,9 @@ export function layoutDigestOf(dir: string): string | undefined {
   return files.length ? layoutDigest(files) : undefined;
 }
 
-export function layoutClassOf(dir: string, reportFile: string): LayoutClass | undefined {
+export function layoutClassOf(dir: string, reportFile: string, rowStatus?: string): LayoutClass | undefined {
   const files = layoutFilesOf(dir);
   if (!files.length) return undefined;
   const report = fs.existsSync(reportFile) ? (JSON.parse(fs.readFileSync(reportFile, "utf8")) as CheckReport) : undefined;
-  return { key: screenClass(JSON.parse(files[0].body)), digest: classDigest(files), checked: passedBrowserCheck(report, layoutDigest(files)) };
+  return { key: screenClass(JSON.parse(files[0].body), rowStatus), digest: classDigest(files), checked: passedBrowserCheck(report, layoutDigest(files)) };
 }

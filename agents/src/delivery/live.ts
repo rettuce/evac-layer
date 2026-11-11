@@ -22,7 +22,9 @@ export function writeLive(siteId: string, bulletinId: string | null, dir = LIVE_
 
 export function liveGateWarning(siteId: string, bulletinId: string, roots: { layouts: string; reports: string } = { layouts: LAYOUTS_DIR, reports: REPORTS_DIR }): string | undefined {
   const dir = path.join(roots.layouts, siteId, bulletinId);
-  const { gate } = exportGate(readApprovals(), siteId, bulletinId, layoutDigestOf(dir), layoutClassOf(dir, path.join(roots.reports, siteId, bulletinId, "report.json")));
+  const indexFile = path.join(roots.layouts, siteId, "index.json");
+  const row = fs.existsSync(indexFile) ? (JSON.parse(fs.readFileSync(indexFile, "utf8")) as { entries: { bulletin_id: string; status?: string }[] }).entries.find((e) => e.bulletin_id === bulletinId) : undefined;
+  const { gate } = exportGate(readApprovals(), siteId, bulletinId, layoutDigestOf(dir), layoutClassOf(dir, path.join(roots.reports, siteId, bulletinId, "report.json"), row?.status));
   if (gate === "ok") return undefined;
   return `[warn] ${bulletinId} is ${gate} for ${siteId}; the site keeps the screen it showed before (or stays ambient) until this one is approved in /admin and auto publish is on`;
 }

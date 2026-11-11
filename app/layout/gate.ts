@@ -54,9 +54,11 @@ export function layoutStatus(layout: ClassedLayout): BulletinStatus {
 }
 
 // A drill or test screen has a class of its own that no class approval is ever written for or read from: such
-// bulletins are approved one by one (the bundled demos), never by class.
-export function screenClass(layout: ClassedLayout): string {
-  const status = layoutStatus(layout)
+// bulletins are approved one by one (the bundled demos), never by class. The index row's status covers a test
+// bulletin's layout written before layouts carried one.
+export function screenClass(layout: ClassedLayout, rowStatus?: string): string {
+  const own = layoutStatus(layout)
+  const status = own === 'normal' && (rowStatus === 'drill' || rowStatus === 'test') ? rowStatus : own
   return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}${status === 'normal' ? '' : `/${status}`}`
 }
 

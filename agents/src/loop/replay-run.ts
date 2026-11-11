@@ -3,6 +3,7 @@ import type { Site } from "../composer/compose.js";
 import { ComposerStop, situationFor } from "../composer/rules.js";
 import type { ReplayEntry } from "../jma/replay.js";
 import { runLoop } from "./loop.js";
+import { migrateBulletinStatus } from "./status-migration.js";
 import { loadMunicipality } from "./municipality.js";
 import { LAYOUTS_DIR, REPORTS_DIR, writeReport } from "./report.js";
 import { PLACEHOLDER_NOTE, READER_MISSING_NOTE, bulletinRow, clearanceSkipReason, screenRow } from "./one.js";
@@ -27,6 +28,7 @@ export async function runReplay(args: { municipalityId: string; entries: ReplayE
   const { municipality, readerRan } = loadMunicipality(args.municipalityId);
   const layoutsRoot = args.roots?.layouts ?? LAYOUTS_DIR;
   const reportsRoot = args.roots?.reports ?? REPORTS_DIR;
+  migrateBulletinStatus(args.site.id, { layoutsDir: layoutsRoot });
   if (persist) {
     fs.rmSync(path.join(layoutsRoot, args.site.id), { recursive: true, force: true });
     fs.rmSync(path.join(reportsRoot, args.site.id), { recursive: true, force: true });

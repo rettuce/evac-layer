@@ -10,6 +10,7 @@ import { siteMunicipality, type SiteFile } from "../sites.js";
 import { cachedWriterRecord, saveWriterForClass, screenClassFor } from "../writer/live.js";
 import { loadMunicipality } from "./municipality.js";
 import { composeBulletin, type WriterChoice } from "./one.js";
+import { migrateBulletinStatus } from "./status-migration.js";
 import type { Verifier } from "./types.js";
 
 export interface GenerationRow {
@@ -78,6 +79,7 @@ export async function generateSite(args: {
 }): Promise<Generation> {
   const municipalityId = siteMunicipality(args.site);
   const log = args.log ?? (() => {});
+  migrateBulletinStatus(args.site.id, { layoutsDir: args.roots?.layouts, log });
   const rows: GenerationRow[] = [];
   for (const plan of plansFor(municipalityId, args.classes)) {
     let row: GenerationRow;

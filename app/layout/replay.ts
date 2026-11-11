@@ -15,6 +15,7 @@ export interface ReplayRow {
   display_level?: number
   reason?: string
   synthetic?: boolean
+  status?: 'drill' | 'test'
 }
 
 export interface ReplayIndex {

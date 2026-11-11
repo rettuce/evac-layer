@@ -50,6 +50,7 @@ export interface EvacScreen {
     hazard: string
     level: AlertLevel
     issued_at: string
+    status?: 'drill' | 'test'
   }
   shape: Shape
   template: TemplateId

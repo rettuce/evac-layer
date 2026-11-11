@@ -7,6 +7,7 @@ import { liveGateWarning, REPLAY_SITE_MESSAGE, writeLive } from "../delivery/liv
 import { browserVerifier } from "../loop/browser-verifier.js";
 import { loadMunicipality } from "../loop/municipality.js";
 import { byIssue, clearanceSkipReason, composeBulletin, indexedBulletins, type WriterChoice } from "../loop/one.js";
+import { migrateBulletinStatus } from "../loop/status-migration.js";
 import { staticVerifier } from "../loop/static-verifier.js";
 import type { Verifier } from "../loop/types.js";
 import { EVAC_URL, FEED_DIR, LIVE_DIR } from "../paths.js";
@@ -112,6 +113,7 @@ export async function receiveSite(args: {
   const feedDir = args.feedDir ?? FEED_DIR;
   const liveDir = args.liveDir ?? LIVE_DIR;
   const municipalityId = siteMunicipality(site);
+  migrateBulletinStatus(site.id, { layoutsDir: args.roots?.layouts, log });
   const state = readReceiverState(site.id, args.initialSince, liveDir);
   const round: SiteRound = { site: site.id, bulletins: [], errors: [] };
   const bodies = recordedSince(state.since, feedDir);
