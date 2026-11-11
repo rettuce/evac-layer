@@ -195,7 +195,7 @@ async function removeSiteState(id: string): Promise<void> {
   })
   const live = join(dataDir(), 'live')
   const remove = (path: string) => rm(path, { recursive: true, force: true })
-  await Promise.all([join(live, `${id}.json`), join(live, `${id}.receiver.json`), exportRecordFile(id), generationRecordFile(id), notifyRecordFile(id)].map(remove))
+  await Promise.all([join(live, `${id}.json`), join(live, `${id}.receiver.json`), exportRecordFile(id), generationRecordFile(id), notifyRecordFile(id), feedSeenFile(id), feedIdleRecordFile(id)].map(remove))
   await Promise.all([join(distDir(), id), join(dataDir(), 'layouts', id), join(dataDir(), 'reports', id), previewsDir(id)].map(remove))
 }
 

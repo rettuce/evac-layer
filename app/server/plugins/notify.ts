@@ -1,15 +1,12 @@
 import type { Approvals } from '~~/layout/gate'
-import type { NoticeFacts } from '~~/layout/notice'
-import { type ChannelSent, noticeDue } from '~~/layout/noticeSchedule'
+import { pendingMessage } from '~~/layout/notice'
+import { noticeDue } from '~~/layout/noticeSchedule'
 import type { PendingReason } from '~~/layout/pending'
+import { type NoticeTarget, type SentChannels, sentFrom, storedFrom } from '../utils/noticeDelivery'
 
 const WATCH_INTERVAL_MS = 2000
 const SITES_AT_ONCE = 8
-const RETRY_DELAYS_MS = [2000, 5000, 15000]
-const AFTER_GIVING_UP_MS = 5 * 60 * 1000
 const SAME_WARNING_EVERY_MS = 10 * 60 * 1000
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // What this process knows was sent. The disk record only seeds it after a start, so a record that cannot be written
 // never makes a notice go out again.
@@ -17,28 +14,10 @@ interface Notice {
   generation: number
   key: string
   record: NotifyRecord
-  sent: Partial<Record<NotifyChannel, ChannelSent>>
+  sent: SentChannels<PendingReason>
 }
 
 const keyOf = (bulletin: string, digest: string) => `${bulletin}\n${digest}`
-
-function sentFrom(record: NotifyRecord): Notice['sent'] {
-  const sent: Notice['sent'] = {}
-  for (const [channel, stored] of Object.entries(record.channels) as [NotifyChannel, NotifyRecord['channels'][NotifyChannel]][]) {
-    if (!stored) continue
-    const lastSentMs = typeof stored.last_sent_at === 'string' ? Date.parse(stored.last_sent_at) : Number.NaN
-    sent[channel] = { count: Number.isInteger(stored.count) && stored.count > 0 ? stored.count : 1, lastSentMs, reason: stored.reason ?? record.reason }
-  }
-  return sent
-}
-
-function recordOf(notice: Notice): NotifyRecord {
-  const channels: NotifyRecord['channels'] = {}
-  for (const [channel, sent] of Object.entries(notice.sent) as [NotifyChannel, ChannelSent][]) {
-    channels[channel] = { count: sent.count, ...(Number.isFinite(sent.lastSentMs) ? { last_sent_at: new Date(sent.lastSentMs!).toISOString() } : {}), ...(sent.reason ? { reason: sent.reason } : {}) }
-  }
-  return { ...notice.record, channels }
-}
 
 async function eachAtMost<T>(items: T[], limit: number, task: (item: T) => Promise<void>): Promise<void> {
   let next = 0
@@ -50,15 +29,15 @@ async function eachAtMost<T>(items: T[], limit: number, task: (item: T) => Promi
 
 export default defineNitroPlugin((nitroApp) => {
   if (import.meta.prerender) return
+  const startedMs = Date.now()
   const settings = notifySettings()
   for (const warning of settings.warnings) console.warn(`[notify] ${warning}`)
   console.log(`[notify] channels: ${settings.channels.join(', ') || 'none'}`)
   if (!settings.channels.length) return
 
   const notices = new Map<string, Notice>()
-  const sending = new Set<string>()
-  const pausedUntil = new Map<string, number>()
   const warnedAt = new Map<string, number>()
+  const delivery = noticeDelivery(settings)
   let watching = false
 
   function warn(scope: string, message: string) {
@@ -73,9 +52,12 @@ export default defineNitroPlugin((nitroApp) => {
     for (const key of warnedAt.keys()) if (key.startsWith(`${scope}\n`)) warnedAt.delete(key)
   }
 
+  const checkReceivers = receiverWatch(settings, delivery, warn)
+  const feedIdle = feedIdleWatch(settings, delivery, warn, startedMs)
+
   async function persist(site: string, notice: Notice): Promise<boolean> {
     try {
-      const written = await writeNotifyRecord(site, notice.generation, recordOf(notice))
+      const written = await writeNotifyRecord(site, notice.generation, { ...notice.record, channels: storedFrom(notice.sent) })
       if (written) recovered(`record ${site}`)
       return written
     } catch (error) {
@@ -84,45 +66,12 @@ export default defineNitroPlugin((nitroApp) => {
     }
   }
 
-  function stillPending(site: string, notice: Notice): boolean {
-    return notices.get(site) === notice && siteGeneration(site) === notice.generation && !notice.record.resolved_at
-  }
-
-  async function deliver(site: string, notice: Notice, channel: NotifyChannel, facts: NoticeFacts) {
-    const slot = `${site}\n${channel}`
-    sending.add(slot)
-    try {
-      let lastFailure = ''
-      for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
-        if (!stillPending(site, notice)) return
-        try {
-          await sendNotice(settings, channel, facts, Date.now())
-          lastFailure = ''
-        } catch (error) {
-          lastFailure = failureCode(error)
-        }
-        if (!lastFailure) {
-          if (stillPending(site, notice)) {
-            notice.sent[channel] = { count: facts.count, lastSentMs: Date.now(), reason: facts.reason }
-            await persist(site, notice)
-          }
-          return
-        }
-        if (attempt < RETRY_DELAYS_MS.length) await sleep(RETRY_DELAYS_MS[attempt]!)
-      }
-      pausedUntil.set(`${slot}\n${notice.key}`, Date.now() + AFTER_GIVING_UP_MS)
-      console.warn(`[notify] ${channel} notice for ${site} ${facts.bulletin.id} not sent after ${RETRY_DELAYS_MS.length + 1} attempts: ${lastFailure}`)
-    } finally {
-      sending.delete(slot)
-    }
-  }
-
   async function noticeOf(site: string, generation: number): Promise<Notice | undefined> {
     const known = notices.get(site)
     if (known?.generation === generation) return known
     const record = await readNotifyRecord(site)
     if (!record) return undefined
-    const loaded: Notice = { generation, key: keyOf(record.bulletin_id, record.digest), record, sent: sentFrom(record) }
+    const loaded: Notice = { generation, key: keyOf(record.bulletin_id, record.digest), record, sent: sentFrom(record.channels, record.reason) }
     notices.set(site, loaded)
     return loaded
   }
@@ -152,17 +101,27 @@ export default defineNitroPlugin((nitroApp) => {
       notice.record = { ...notice.record, reason: pending.reason }
       await persist(site.id, notice)
     }
-    const due: [NotifyChannel, { count: number; previous_reason?: PendingReason }][] = []
-    for (const channel of settings.channels) {
-      const slot = `${site.id}\n${channel}`
-      if (sending.has(slot) || (pausedUntil.get(`${slot}\n${key}`) ?? 0) > now) continue
-      const next = noticeDue({ sent: notice.sent[channel], reason: pending.reason, now, remindMs: settings.remindMs })
-      if (next) due.push([channel, next])
+    const current = notice
+    const target: NoticeTarget<PendingReason> = {
+      slot: `pending ${site.id}`,
+      state: key,
+      label: `${site.id} ${pending.bulletin_id}`,
+      current: () => notices.get(site.id) === current && siteGeneration(site.id) === current.generation && !current.record.resolved_at,
+      sent: async (channel, sent) => {
+        current.sent[channel] = sent
+        await persist(site.id, current)
+      },
     }
+    const due = settings.channels.flatMap((channel) => {
+      if (!delivery.ready(target, channel, now)) return []
+      const next = noticeDue({ sent: current.sent[channel], reason: pending.reason, now, remindMs: settings.remindMs })
+      return next ? [[channel, next] as const] : []
+    })
     if (!due.length) return
     const showing = await showingNow(site, approvals, pending.rows)
     for (const [channel, next] of due) {
-      void deliver(site.id, notice, channel, { ...pending.facts, showing, count: next.count, first_seen_at: notice.record.first_seen_at, ...(next.previous_reason ? { previous_reason: next.previous_reason } : {}) })
+      const facts = { ...pending.facts, showing, count: next.count, first_seen_at: current.record.first_seen_at, ...(next.previous_reason ? { previous_reason: next.previous_reason } : {}) }
+      void delivery.deliver(target, channel, { count: next.count, reason: pending.reason }, (at) => pendingMessage(facts, at))
     }
   }
 
@@ -171,11 +130,13 @@ export default defineNitroPlugin((nitroApp) => {
     watching = true
     try {
       const now = Date.now()
-      for (const [slot, until] of pausedUntil) if (until <= now) pausedUntil.delete(slot)
+      delivery.sweep(now)
       const approvals = await readApprovals()
       const sites = await readSites()
       const present = new Set(sites.map((site) => site.id))
       for (const site of notices.keys()) if (!present.has(site)) notices.delete(site)
+      feedIdle.forget(present)
+      forgetFeedRequests(present)
       await eachAtMost(sites, SITES_AT_ONCE, async (site) => {
         try {
           await checkSite(site, approvals, now)
@@ -183,7 +144,20 @@ export default defineNitroPlugin((nitroApp) => {
         } catch (error) {
           warn(site.id, `${site.id}: ${(error as Error).message}`)
         }
+        try {
+          await feedIdle.check(site, now)
+          recovered(`feed ${site.id}`)
+        } catch (error) {
+          warn(`feed ${site.id}`, `feed idle check of ${site.id}: ${(error as Error).message}`)
+        }
       })
+      try {
+        await checkReceivers(sites, now)
+        recovered('receivers')
+      } catch (error) {
+        warn('receivers', `receiver check: ${(error as Error).message}`)
+      }
+      if (settings.feedIdleMs > 0) await writeFeedRequests(warn, recovered)
       recovered('watch')
     } catch (error) {
       warn('watch', `watch failed: ${(error as Error).message}`)

@@ -1,10 +1,11 @@
 import { mkdir, rename, writeFile } from 'node:fs/promises'
 import { request as httpRequest } from 'node:http'
 import { request as httpsRequest } from 'node:https'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { createTransport } from 'nodemailer'
 import type { Approvals } from '~~/layout/gate'
-import { type NoticeFacts, type SlackMessage, mailMessage, slackMessage } from '~~/layout/notice'
+import type { NoticeSite } from '~~/layout/livenessNotice'
+import type { NoticeFacts, OutgoingNotice, SlackMessage } from '~~/layout/notice'
 import { type IndexRow, type PendingReason, type ScreensRead, pendingReason, pendingSubject } from '~~/layout/pending'
 import { type SmtpTransportOptions, smtpTransportOptions } from '~~/layout/smtpOptions'
 import type { LayoutSnapshot } from './approvals'
@@ -15,6 +16,8 @@ const SLACK_IDLE_TIMEOUT_MS = 10000
 const SLACK_DEADLINE_MS = 20000
 const SMTP_TIMEOUT_MS = 15000
 const DEFAULT_REMIND_MINUTES = 15
+const DEFAULT_RECEIVER_STOPPED_MINUTES = 15
+const DEFAULT_FEED_IDLE_MINUTES = 5
 
 export interface NotifySettings {
   channels: NotifyChannel[]
@@ -22,6 +25,8 @@ export interface NotifySettings {
   mail?: { options: SmtpTransportOptions; from: string; to: string[] }
   adminUrl?: string
   remindMs: number
+  receiverStoppedMs: number
+  feedIdleMs: number
   warnings: string[]
 }
 
@@ -46,7 +51,7 @@ export function notifySettings(): NotifySettings {
   const config = useRuntimeConfig()
   const warnings: string[] = []
   const channels: NotifyChannel[] = []
-  const settings: NotifySettings = { channels, remindMs: DEFAULT_REMIND_MINUTES * 60000, warnings }
+  const settings: NotifySettings = { channels, remindMs: 0, receiverStoppedMs: 0, feedIdleMs: 0, warnings }
   const allowPlaintext = text(config.notifyAllowPlaintext) === '1'
 
   const slack = text(config.notifySlackWebhookUrl)
@@ -78,12 +83,17 @@ export function notifySettings(): NotifySettings {
     else warnings.push('the admin link is left out: NUXT_NOTIFY_ADMIN_BASE_URL must be an http(s) URL')
   }
 
-  const remind = text(config.notifyRemindMinutes)
-  if (remind) {
-    const minutes = Number(remind)
-    if (Number.isFinite(minutes) && minutes >= 0) settings.remindMs = minutes * 60000
-    else warnings.push(`NUXT_NOTIFY_REMIND_MINUTES must be a number of minutes, 0 or more; using ${DEFAULT_REMIND_MINUTES}`)
+  const minutes = (value: unknown, name: string, fallback: number): number => {
+    const given = text(value)
+    if (!given) return fallback * 60000
+    const parsed = Number(given)
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed * 60000
+    warnings.push(`${name} must be a number of minutes, 0 or more; using ${fallback}`)
+    return fallback * 60000
   }
+  settings.remindMs = minutes(config.notifyRemindMinutes, 'NUXT_NOTIFY_REMIND_MINUTES', DEFAULT_REMIND_MINUTES)
+  settings.receiverStoppedMs = minutes(config.notifyReceiverStoppedMinutes, 'NUXT_NOTIFY_RECEIVER_STOPPED_MINUTES', DEFAULT_RECEIVER_STOPPED_MINUTES)
+  settings.feedIdleMs = minutes(config.notifyFeedIdleMinutes, 'NUXT_NOTIFY_FEED_IDLE_MINUTES', DEFAULT_FEED_IDLE_MINUTES)
   return settings
 }
 
@@ -139,10 +149,10 @@ export function closeNotifyMail(): void {
   mailer = undefined
 }
 
-export async function sendNotice(settings: NotifySettings, channel: NotifyChannel, facts: NoticeFacts, now: number): Promise<void> {
-  if (channel === 'slack') return postSlack(settings.slackUrl!, slackMessage(facts, now))
+export async function sendNotice(settings: NotifySettings, channel: NotifyChannel, message: OutgoingNotice): Promise<void> {
+  if (channel === 'slack') return postSlack(settings.slackUrl!, message.slack)
   const { options, from, to } = settings.mail!
-  const { subject, text: body } = mailMessage(facts, now)
+  const { subject, text: body } = message.mail
   await mailTransport(options).sendMail({ from, to, subject, text: body })
 }
 
@@ -167,18 +177,25 @@ export async function readNotifyRecord(site: string): Promise<NotifyRecord | und
 
 let partialCounter = 0
 
+export async function writeJsonFile(file: string, value: unknown): Promise<void> {
+  await mkdir(dirname(file), { recursive: true })
+  const partial = `${file}.${process.pid}.${++partialCounter}.tmp`
+  await writeFile(partial, `${JSON.stringify(value, null, 2)}\n`)
+  await rename(partial, file)
+}
+
 // Under the site's lock, and only while the site is the one `generation` was read from: a site deleted, or deleted and
-// registered again, gets no record of what was sent for the earlier one. False when the site is no longer that one.
-export function writeNotifyRecord(site: string, generation: number, record: NotifyRecord): Promise<boolean> {
+// registered again, gets no record of the earlier one. False when the site is no longer that one.
+export function writeSiteRecord(site: string, generation: number, file: string, value: unknown): Promise<boolean> {
   return withSiteLock(site, async () => {
     if (siteGeneration(site) !== generation || !(await readSite(site).catch(() => undefined))) return false
-    const file = notifyRecordFile(site)
-    await mkdir(join(dataDir(), 'live'), { recursive: true })
-    const partial = `${file}.${process.pid}.${++partialCounter}.tmp`
-    await writeFile(partial, `${JSON.stringify(record, null, 2)}\n`)
-    await rename(partial, file)
+    await writeJsonFile(file, value)
     return true
   })
+}
+
+export function writeNotifyRecord(site: string, generation: number, record: NotifyRecord): Promise<boolean> {
+  return writeSiteRecord(site, generation, notifyRecordFile(site), record)
 }
 
 export interface Pending {
@@ -209,6 +226,11 @@ async function indexRows(site: string): Promise<{ rows: IndexRow[]; name?: strin
   } catch {
     return { rows: [] }
   }
+}
+
+export async function siteNoticeFacts(site: SiteFile): Promise<NoticeSite> {
+  const { name } = await indexRows(site.id)
+  return { id: site.id, municipality_id: site.municipality_id, ...(site.name ? { name: site.name } : {}), ...(name ? { municipality_name: name } : {}) }
 }
 
 function alertOf(snapshot: LayoutSnapshot | undefined): { level?: number | null; issued_at?: string } | undefined {
