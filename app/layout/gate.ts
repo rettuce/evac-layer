@@ -1,5 +1,13 @@
 import { createHash } from 'node:crypto'
 
+// Synthetic bulletins are composed in advance from JMA sample bulletins so that their screens can be approved before
+// a real one arrives. They are never a bulletin of their own on a screen: their approval only stands for the class.
+export const SYNTHETIC_PREFIX = 'SYN-'
+
+export function isSyntheticBulletinId(value: unknown): boolean {
+  return typeof value === 'string' && value.startsWith(SYNTHETIC_PREFIX)
+}
+
 export interface LayoutApproval {
   approved: boolean
   updated_at: string
@@ -110,7 +118,7 @@ export function layoutKey(site: string, bulletinId: string): string {
   return `${site}/${bulletinId}`
 }
 
-export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale'
+export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale' | 'synthetic'
 export type ApprovedBy = 'bulletin' | 'class' | null
 export interface LayoutClass { key: string; digest: string; checked: boolean }
 
@@ -137,6 +145,7 @@ export function approvalWith(
 export function liveLayoutGateWith(
   approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass,
 ): { gate: LiveLayoutGate; by: ApprovedBy } {
+  if (isSyntheticBulletinId(bulletinId)) return { gate: 'synthetic', by: null }
   if (!approvals.sites[site]?.auto_publish) return { gate: 'auto-publish-off', by: null }
   const state = approvalWith(approvals, site, bulletinId, digest, cls)
   return { gate: state.approved ? 'ok' : state.stale ? 'stale' : 'unapproved', by: state.by }

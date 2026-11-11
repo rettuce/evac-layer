@@ -2,11 +2,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { LAYOUTS_DIR, LIVE_DIR, REPORTS_DIR } from "../paths.js";
 import { type LiveState, nextLiveState } from "../../../app/layout/liveState";
+import { isSyntheticBulletinId } from "../../../app/layout/replay";
 import { exportGate, layoutClassOf, layoutDigestOf, readApprovals } from "./gate.js";
 
 export const REPLAY_SITE_MESSAGE = (siteId: string) => `site ${siteId} replays a recorded record; remove "replay" from its site file to drive it live`;
 
+export class SyntheticNotLive extends Error {}
+
 export function writeLive(siteId: string, bulletinId: string | null, dir = LIVE_DIR): { file: string; doc: LiveState } {
+  if (isSyntheticBulletinId(bulletinId)) throw new SyntheticNotLive(`${bulletinId} is a synthetic bulletin: its screens stand for their class and are never live`);
   const file = path.join(dir, `${siteId}.json`);
   const current = fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf8")) as LiveState) : undefined;
   const doc = nextLiveState(current, bulletinId, new Date().toISOString());

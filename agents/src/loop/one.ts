@@ -4,6 +4,7 @@ import type { Municipality, Site, WriterOutput } from "../composer/compose.js";
 import { ComposerStop, situationFor, type Situation } from "../composer/rules.js";
 import type { ReplayEntry } from "../jma/replay.js";
 import { REPO_ROOT } from "../paths.js";
+import { isSyntheticBulletinId } from "../../../app/layout/replay";
 import { isSiteId, SITE_ID } from "../sites.js";
 import type { CallUsage } from "../reader/pricing.js";
 import { writeForBulletin, type LiveWriter, type WriterStep } from "../writer/step.js";
@@ -17,7 +18,7 @@ export const PLACEHOLDER_NOTE = "文言は仮: Writer は API キー未設定の
 export const READER_MISSING_NOTE = "自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。";
 
 export function bulletinRow(e: ReplayEntry) {
-  return { issued_at: e.issued_at, bulletin_id: e.bulletin_id, wmo_code: e.wmo_code, raw_title: e.alert.raw_title, municipality_level: e.municipality_level, file: e.file };
+  return { issued_at: e.issued_at, bulletin_id: e.bulletin_id, wmo_code: e.wmo_code, raw_title: e.alert.raw_title, municipality_level: e.municipality_level, file: e.file, ...(isSyntheticBulletinId(e.bulletin_id) ? { synthetic: true } : {}) };
 }
 
 export function screenRow(row: ReturnType<typeof bulletinRow>, a: { situation: Situation; verifier: Verifier; dir: string; report: { outcome: string; reason?: string; layouts: string[] } }) {

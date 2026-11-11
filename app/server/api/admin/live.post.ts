@@ -1,4 +1,4 @@
-import { isBulletinId } from '~~/layout/replay'
+import { isBulletinId, isSyntheticBulletinId } from '~~/layout/replay'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<{ site_id?: unknown; bulletin_id?: unknown }>(event)
@@ -7,6 +7,9 @@ export default defineEventHandler(async (event) => {
   }
   const siteId = body.site_id
   const bulletinId = body.bulletin_id
+  if (isSyntheticBulletinId(bulletinId)) {
+    throw createError({ status: 400, statusText: 'Bad Request', message: `${bulletinId} is a synthetic bulletin: its screens stand for their class and are never live` })
+  }
   return withSiteLock(siteId, async () => {
     const site = await readSite(siteId)
     if (!site) throw createError({ status: 404, statusText: 'Not Found', message: `no site ${siteId}` })
