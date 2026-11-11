@@ -26,7 +26,7 @@ export default defineNuxtConfig({
     notifyMailTo: '',
     notifyAdminBaseUrl: '',
     notifyRemindMinutes: '15',
-    notifyAllowHttp: '',
+    notifyAllowPlaintext: '',
     // NUXT_PUBLIC_STATIC_SCREEN=1 at `nuxt generate` (GitHub Pages): /screen reads public/static/ instead of
     // /api. Read here because a `ssr: false` generate does not carry runtime env into the client.
     public: { staticScreen: process.env.NUXT_PUBLIC_STATIC_SCREEN ?? '' },

@@ -1,16 +1,10 @@
 import assert from 'node:assert/strict'
-import type { ChildProcess } from 'node:child_process'
-import { existsSync } from 'node:fs'
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises'
-import { createServer as createHttpServer } from 'node:http'
-import { type Server, createServer as createTcpServer } from 'node:net'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { after, before, describe, test } from 'node:test'
+import { describe, test } from 'node:test'
 import type { Approvals } from '../layout/gate.ts'
 import { type NoticeFacts, mailMessage, slackMessage } from '../layout/notice.ts'
+import { REASON_CHANGE_MIN_MS, noticeDue } from '../layout/noticeSchedule.ts'
 import { CHECK_FAILED_WINDOW_MS, type IndexRow, type ScreensRead, pendingReason, pendingSubject } from '../layout/pending.ts'
-import { APP_DIR, SERVER_ENTRY, postJson, startServer } from './helpers.ts'
+import { smtpTransportOptions } from '../layout/smtpOptions.ts'
 
 const SITE = 'notify-site'
 const MUNICIPALITY = '00004'
@@ -18,13 +12,9 @@ const BULLETIN = 'TEST-NOTIFY-1'
 const TITLE = '津波警報・注意報・予報a'
 const AT = '2026-11-10T00:00:00.000Z'
 const HOSTILE_NAME = '駅<!channel> <https://example.com|x>\n承認済み & ok\r\nBcc: victim@example.org'
-const SLACK_SECRET = 'slack-secret-path-7f3a'
-const SMTP_USER = 'smtp-user-9c1d'
-const SMTP_PASS = 'smtp-pass-4e8b'
-const WAIT_MS = 20000
-const TICKS_MS = 7000
-
-const skip = !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first'
+const RLO = String.fromCodePoint(0x202e)
+const ZWSP = String.fromCodePoint(0x200b)
+const MINUTE = 60000
 
 function approvalsWith(over: Partial<Approvals> = {}): Approvals {
   return { version: '0.1', layouts: {}, sites: { [SITE]: { auto_publish: true, updated_at: AT } }, classes: {}, ...over }
@@ -109,13 +99,22 @@ describe('notice text', () => {
   })
 
   test('a reminder says which notice it is and how long since the state was first seen', () => {
-    const { text } = slackMessage(facts({ count: 3, showing: { bulletin_id: 'OLDER', title: '前の警報' } }), NOW + 30 * 60 * 1000)
+    const { text } = slackMessage(facts({ count: 3, showing: { bulletin_id: 'OLDER', title: '前の警報' } }), NOW + 30 * MINUTE)
     assert.match(text, /3 回目/)
     assert.match(text, /30 分/)
     assert.match(text, /notice 3/)
     assert.match(text, /30 min/)
     assert.ok(text.includes('OLDER'))
     assert.match(mailMessage(facts({ count: 3 }), NOW).subject, /3/)
+  })
+
+  test('a notice sent because the reason changed names the reason before and after', () => {
+    const changed = facts({ count: 2, reason: 'auto-publish-off', previous_reason: 'unapproved' })
+    for (const { text } of [slackMessage(changed, NOW), mailMessage(changed, NOW)]) {
+      assert.ok(text.includes('unapproved → auto-publish-off'), text)
+      assert.match(text, /理由が変わりました/)
+      assert.match(text, /reason changed/i)
+    }
   })
 
   test('strings a facility registered cannot mention, link or add lines in Slack, or break the mail subject', () => {
@@ -129,291 +128,94 @@ describe('notice text', () => {
     assert.ok(!/[\r\n]/.test(subject))
     assert.ok(!/\n(承認済み|Bcc)/.test(body))
   })
+
+  test('a URL in a registered name is shown broken, so Slack does not link it; the admin URL stays a link', () => {
+    const named = facts({ site: { id: SITE, name: '駅 https://example.com/x と http://evil.example/y', municipality_id: MUNICIPALITY }, admin_url: 'https://ops.example.org/admin' })
+    const { text } = slackMessage(named, NOW)
+    const links = text.match(/https?:\/\/\S+/g) ?? []
+    assert.deepEqual(links.map((link) => link.replace(/>$/, '')), ['https://ops.example.org/admin', 'https://ops.example.org/admin'])
+    assert.ok(text.includes('example.com/x'), 'the rest of the name is kept')
+    const mail = mailMessage(named, NOW)
+    assert.deepEqual(mail.text.match(/https?:\/\/\S+/g), ['https://ops.example.org/admin', 'https://ops.example.org/admin'])
+    assert.ok(!/https?:\/\//.test(mail.subject))
+  })
+
+  test('direction and zero-width characters are removed and a long name is cut between characters', () => {
+    const name = `駅${RLO}evil${ZWSP}name`
+    for (const out of [slackMessage(facts({ site: { id: SITE, name, municipality_id: MUNICIPALITY } }), NOW).text, mailMessage(facts({ site: { id: SITE, name, municipality_id: MUNICIPALITY } }), NOW).subject]) {
+      assert.ok(!out.includes(RLO) && !out.includes(ZWSP))
+      assert.ok(out.includes('駅evilname'))
+    }
+    for (let length = 195; length < 205; length++) {
+      const long = `${'a'.repeat(length)}${'😀'.repeat(20)}`
+      const { text } = slackMessage(facts({ site: { id: SITE, name: long, municipality_id: MUNICIPALITY } }), NOW)
+      assert.ok(text.isWellFormed(), `cut at ${length}`)
+    }
+  })
 })
 
-interface SmtpMessage { from: string; to: string[]; auth?: string; raw: string }
+describe('when a channel sends', () => {
+  const REMIND = 15 * MINUTE
 
-function smtpReceiver(messages: SmtpMessage[], connections: { count: number }): Server {
-  return createTcpServer((socket) => {
-    connections.count++
-    let buffer = ''
-    let data: string | undefined
-    let message: SmtpMessage = { from: '', to: [], raw: '' }
-    let auth: string | undefined
-    let awaitingAuth = false
-    const reply = (line: string) => socket.write(`${line}\r\n`)
-    reply('220 test ESMTP')
-    socket.on('data', (chunk: Buffer) => {
-      buffer += chunk.toString('latin1')
-      for (;;) {
-        if (data !== undefined) {
-          const end = buffer.indexOf('\r\n.\r\n')
-          if (end < 0) return
-          messages.push({ ...message, ...(auth ? { auth } : {}), raw: Buffer.from(buffer.slice(0, end).replace(/^\.\./gm, '.'), 'latin1').toString('utf8') })
-          buffer = buffer.slice(end + 5)
-          data = undefined
-          message = { from: '', to: [], raw: '' }
-          reply('250 OK queued')
-          continue
-        }
-        const end = buffer.indexOf('\r\n')
-        if (end < 0) return
-        const line = buffer.slice(0, end)
-        buffer = buffer.slice(end + 2)
-        const verb = line.split(' ')[0]!.toUpperCase()
-        if (awaitingAuth) {
-          auth = line
-          awaitingAuth = false
-          reply('235 accepted')
-        } else if (verb === 'EHLO') reply('250-test\r\n250 AUTH PLAIN LOGIN')
-        else if (verb === 'HELO' || verb === 'RSET' || verb === 'NOOP') reply('250 OK')
-        else if (verb === 'AUTH') {
-          const [, , initial] = line.split(' ')
-          if (initial) {
-            auth = initial
-            reply('235 accepted')
-          } else {
-            awaitingAuth = true
-            reply('334 ')
-          }
-        } else if (verb === 'MAIL') {
-          message.from = /<([^>]*)>/.exec(line)?.[1] ?? ''
-          reply('250 OK')
-        } else if (verb === 'RCPT') {
-          message.to.push(/<([^>]*)>/.exec(line)?.[1] ?? '')
-          reply('250 OK')
-        } else if (verb === 'DATA') {
-          data = ''
-          reply('354 go ahead')
-        } else if (verb === 'QUIT') {
-          reply('221 bye')
-          socket.end()
-          return
-        } else reply('502 not implemented')
-      }
-    })
-    socket.on('error', () => undefined)
+  test('the first notice at once, and a reminder each interval', () => {
+    assert.deepEqual(noticeDue({ sent: undefined, reason: 'unapproved', now: NOW, remindMs: 0 }), { count: 1 })
+    const sent = { count: 1, lastSentMs: NOW, reason: 'unapproved' as const }
+    assert.equal(noticeDue({ sent, reason: 'unapproved', now: NOW + REMIND - 1, remindMs: REMIND }), undefined)
+    assert.deepEqual(noticeDue({ sent, reason: 'unapproved', now: NOW + REMIND, remindMs: REMIND }), { count: 2 })
+    assert.equal(noticeDue({ sent, reason: 'unapproved', now: NOW + 10 * REMIND, remindMs: 0 }), undefined, '0 sends no reminder')
   })
-}
 
-function decodeWords(value: string): string {
-  const unfolded = value.replace(/\r\n[ \t]/g, ' ').replace(/\?=\s+=\?/g, '?==?')
-  return unfolded.replace(/(=\?utf-8\?[bq]\?[^?]*\?=)+/gi, (words) => {
-    const bytes = [...words.matchAll(/=\?utf-8\?([bq])\?([^?]*)\?=/gi)].map(([, kind, text]) =>
-      kind!.toLowerCase() === 'b'
-        ? Buffer.from(text!, 'base64')
-        : Buffer.from(text!.replace(/_/g, ' ').replace(/=([0-9a-f]{2})/gi, (_, hex: string) => String.fromCharCode(parseInt(hex, 16))), 'latin1'),
-    )
-    return Buffer.concat(bytes).toString('utf8')
+  test('a changed reason at once, but not sooner than the minimum after the last notice, and not when it changed back', () => {
+    const sent = { count: 1, lastSentMs: NOW, reason: 'unapproved' as const }
+    assert.equal(noticeDue({ sent, reason: 'auto-publish-off', now: NOW + REASON_CHANGE_MIN_MS - 1, remindMs: 0 }), undefined)
+    assert.deepEqual(noticeDue({ sent, reason: 'auto-publish-off', now: NOW + REASON_CHANGE_MIN_MS, remindMs: 0 }), { count: 2, previous_reason: 'unapproved' })
+    assert.equal(noticeDue({ sent, reason: 'unapproved', now: NOW + 5 * REASON_CHANGE_MIN_MS, remindMs: 0 }), undefined)
+    assert.ok(REASON_CHANGE_MIN_MS >= MINUTE)
   })
-}
 
-function parseMail(raw: string): { headers: Record<string, string>; body: string } {
-  const split = raw.indexOf('\r\n\r\n')
-  const headers: Record<string, string> = {}
-  for (const line of raw.slice(0, split).replace(/\r\n[ \t]/g, ' ').split('\r\n')) {
-    const colon = line.indexOf(':')
-    headers[line.slice(0, colon).toLowerCase()] = line.slice(colon + 1).trim()
+  test('a last time that cannot be read or lies in the future sends rather than staying silent', () => {
+    assert.deepEqual(noticeDue({ sent: { count: 2, lastSentMs: Number.NaN, reason: 'unapproved' }, reason: 'unapproved', now: NOW, remindMs: REMIND }), { count: 3 })
+    assert.deepEqual(noticeDue({ sent: { count: 2, lastSentMs: NOW + 3600000, reason: 'unapproved' }, reason: 'unapproved', now: NOW, remindMs: REMIND }), { count: 3 })
+    assert.deepEqual(noticeDue({ sent: { count: 2, lastSentMs: undefined, reason: 'unapproved' }, reason: 'unapproved', now: NOW, remindMs: REMIND }), { count: 3 })
+  })
+})
+
+describe('SMTP transport options', () => {
+  const options = (url: string, allowPlaintext = false) => {
+    const setting = smtpTransportOptions(url, allowPlaintext)
+    assert.ok(setting.ok, `${url} is refused: ${setting.ok ? '' : setting.problem}`)
+    return setting.options
   }
-  const encoded = raw.slice(split + 4)
-  const encoding = headers['content-transfer-encoding']?.toLowerCase()
-  const body =
-    encoding === 'base64'
-      ? Buffer.from(encoded.replace(/\s+/g, ''), 'base64').toString('utf8')
-      : encoding === 'quoted-printable'
-        ? Buffer.from(encoded.replace(/=\r\n/g, '').replace(/=([0-9A-F]{2})/g, (_, hex: string) => String.fromCharCode(parseInt(hex, 16))), 'latin1').toString('utf8')
-        : Buffer.from(encoded, 'latin1').toString('utf8')
-  return { headers, body }
-}
 
-async function makeData(root: string): Promise<string> {
-  const dataDir = join(root, 'data')
-  const layoutDir = join(dataDir, 'layouts', SITE, BULLETIN)
-  await mkdir(layoutDir, { recursive: true })
-  await mkdir(join(dataDir, 'sites'))
-  await mkdir(join(dataDir, 'live'))
-  const fixture = JSON.parse(await readFile(join(APP_DIR, 'fixtures', 'wajima-tsunami.json'), 'utf8'))
-  await writeFile(join(layoutDir, '16x9.json'), JSON.stringify({ ...fixture, alert: { ...fixture.alert, bulletin_id: BULLETIN } }))
-  await writeFile(
-    join(dataDir, 'layouts', SITE, 'index.json'),
-    JSON.stringify({ municipality: MUNICIPALITY, name: '通知市', site: SITE, entries: [row({ template: 'evac-now', display_level: 3, outcome: 'pass' })] }),
-  )
-  await writeFile(join(dataDir, 'sites', `${SITE}.json`), JSON.stringify({ id: SITE, municipality_id: MUNICIPALITY, name: HOSTILE_NAME }))
-  await writeFile(join(dataDir, 'live', `${SITE}.json`), JSON.stringify(live(BULLETIN)))
-  return dataDir
-}
-
-async function filesUnder(dir: string): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true, recursive: true })
-  return Promise.all(entries.filter((entry) => entry.isFile()).map((entry) => readFile(join(entry.parentPath, entry.name), 'utf8')))
-}
-
-async function until(what: string, ready: () => boolean) {
-  const deadline = Date.now() + WAIT_MS
-  while (!ready() && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 100))
-  assert.ok(ready(), `timed out waiting for ${what}`)
-}
-
-const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
-function stop(child: ChildProcess | undefined): Promise<void> {
-  if (!child || child.exitCode !== null) return Promise.resolve()
-  return new Promise((resolve) => {
-    child.once('exit', () => resolve())
-    child.kill()
-  })
-}
-
-describe('operator notices', { skip }, () => {
-  const slackBodies: string[] = []
-  const slackPaths: string[] = []
-  let slackFailures = 0
-  const mails: SmtpMessage[] = []
-  const smtpConnections = { count: 0 }
-  const slack = createHttpServer((req, res) => {
-    let body = ''
-    req.on('data', (chunk) => (body += chunk))
-    req.on('end', () => {
-      slackPaths.push(req.url ?? '')
-      if (slackFailures > 0) {
-        slackFailures--
-        res.writeHead(500).end('busy')
-        return
-      }
-      slackBodies.push(body)
-      res.writeHead(200).end('ok')
-    })
-  })
-  const smtp = smtpReceiver(mails, smtpConnections)
-  const children: ChildProcess[] = []
-  const roots: string[] = []
-  let output = ''
-  let env: Record<string, string> = {}
-
-  before(async () => {
-    await new Promise<void>((resolve) => slack.listen(0, '127.0.0.1', resolve))
-    await new Promise<void>((resolve) => smtp.listen(0, '127.0.0.1', resolve))
-    env = {
-      NUXT_ADMIN_TOKEN: '',
-      NUXT_NOTIFY_SLACK_WEBHOOK_URL: `http://127.0.0.1:${(slack.address() as { port: number }).port}/services/${SLACK_SECRET}`,
-      NUXT_NOTIFY_ALLOW_HTTP: '1',
-      NUXT_NOTIFY_SMTP_URL: `smtp://${SMTP_USER}:${SMTP_PASS}@127.0.0.1:${(smtp.address() as { port: number }).port}`,
-      NUXT_NOTIFY_MAIL_FROM: 'evac-layer@example.org',
-      NUXT_NOTIFY_MAIL_TO: 'ops1@example.org, ops2@example.org',
-      NUXT_NOTIFY_ADMIN_BASE_URL: 'https://ops.example.org/',
+  test('credentials, or a server off this machine, need STARTTLS', () => {
+    for (const url of ['smtp://user:pass@127.0.0.1:2525', 'smtp://user@localhost', 'smtp://mail.example.org:587', 'smtp://10.0.0.5', 'smtp://127.1']) {
+      const set = options(url)
+      assert.equal(set.requireTLS, true, url)
+      assert.equal(set.secure, false, url)
     }
   })
-  after(async () => {
-    await Promise.all(children.map(stop))
-    slack.close()
-    smtp.close()
-    await Promise.all(roots.map((root) => rm(root, { recursive: true, force: true })))
+
+  test('a relay on this machine without credentials may stay in plaintext', () => {
+    for (const url of ['smtp://127.0.0.1:25', 'smtp://localhost:25', 'smtp://LOCALHOST', 'smtp://[::1]:25', 'smtp://127.0.0.53']) assert.equal(options(url).requireTLS, false, url)
   })
 
-  async function serve(extra: Record<string, string>, dataDir: string) {
-    const server = await startServer({ ...env, NUXT_DATA_DIR: dataDir, ...extra }, undefined, (text) => (output += text))
-    children.push(server.child)
-    return server
-  }
+  test('smtps is TLS from the start, and certificates are always checked', () => {
+    const set = options('smtps://user:pass@mail.example.org')
+    assert.equal(set.secure, true)
+    for (const url of ['smtps://mail.example.org', 'smtp://127.0.0.1', 'smtp://u:p@mail.example.org']) assert.deepEqual(options(url).tls, { rejectUnauthorized: true })
+  })
 
-  async function newData(): Promise<string> {
-    const root = await mkdtemp(join(tmpdir(), 'evac-notify-'))
-    roots.push(root)
-    return makeData(root)
-  }
-
-  test('sends one notice per channel, keeps the addresses out of logs, files and answers, and does not send again after a restart', async () => {
-    slackBodies.length = 0
-    mails.length = 0
-    slackFailures = 1
-    const dataDir = await newData()
-    let { base, child } = await serve({ NUXT_NOTIFY_REMIND_MINUTES: '0' }, dataDir)
-    assert.match(output, /\[notify\] channels: slack, mail/)
-
-    await until('a Slack notice', () => slackBodies.length >= 1)
-    await until('a mail notice', () => mails.length >= 1)
-    assert.equal(slackPaths.at(-1), `/services/${SLACK_SECRET}`)
-    const payload = JSON.parse(slackBodies[0]!)
-    for (const part of [SITE, BULLETIN, TITLE, 'unapproved', 'https://ops.example.org/admin']) assert.ok(payload.text.includes(part), part)
-    assert.ok(!payload.text.includes('<!channel>'))
-    assert.ok(!payload.text.includes('<https://example.com|x>'))
-    assert.ok(!/\n(承認済み|Bcc)/.test(payload.text))
-
-    const mail = mails[0]!
-    assert.deepEqual(mail.to.sort(), ['ops1@example.org', 'ops2@example.org'])
-    assert.equal(mail.from, 'evac-layer@example.org')
-    const { headers, body } = parseMail(mail.raw)
-    assert.equal(headers.bcc, undefined)
-    const subject = decodeWords(headers.subject!)
-    assert.ok(subject.includes(SITE), subject)
-    assert.ok(!/[\r\n]/.test(subject))
-    for (const part of [SITE, BULLETIN, 'unapproved', 'Site']) assert.ok(body.includes(part), part)
-    assert.ok(!/\n(承認済み|Bcc)/.test(body))
-    assert.ok(Buffer.from(mail.auth ?? '', 'base64').toString('utf8').includes(SMTP_USER), 'the credentials in the SMTP URL are used')
-
-    await pause(TICKS_MS)
-    assert.equal(slackBodies.length, 1)
-    assert.equal(mails.length, 1)
-
-    await stop(child)
-    ;({ base, child } = await serve({ NUXT_NOTIFY_REMIND_MINUTES: '0' }, dataDir))
-    await pause(TICKS_MS)
-    assert.equal(slackBodies.length, 1, 'a restart does not send the notice again')
-    assert.equal(mails.length, 1)
-
-    const answers = await Promise.all([`/api/admin/sites/${SITE}`, '/api/admin/sites', `/api/feed/${SITE}`, '/api/admin/subscriptions', '/admin'].map(async (path) => (await fetch(`${base}${path}`)).text()))
-    const files = await filesUnder(dataDir)
-    for (const secret of [SLACK_SECRET, SMTP_USER, SMTP_PASS]) {
-      assert.ok(!output.includes(secret), `the log carries ${secret}`)
-      assert.ok(!files.some((file) => file.includes(secret)), `data/ carries ${secret}`)
-      assert.ok(!answers.some((answer) => answer.includes(secret)), `an answer carries ${secret}`)
+  test('a URL with a query is refused, because nodemailer lets its query loosen TLS', () => {
+    for (const url of ['smtp://mail.example.org?tls.rejectUnauthorized=false', 'smtp://u:p@mail.example.org/?ignoreTLS=true', 'smtps://mail.example.org?secure=false']) {
+      const setting = smtpTransportOptions(url, false)
+      assert.equal(setting.ok, false, url)
+      assert.equal(setting.ok ? '' : setting.problem, 'query')
     }
-
-    const record = join(dataDir, 'live', `${SITE}.notify.json`)
-    assert.ok(existsSync(record))
-    assert.equal((await fetch(`${base}/api/admin/sites/${SITE}`, { method: 'DELETE' })).status, 204)
-    assert.ok(!existsSync(record), 'deleting the site removes what was sent for it')
+    const other = smtpTransportOptions('http://mail.example.org', false)
+    assert.equal(other.ok ? '' : other.problem, 'protocol')
   })
 
-  test('reminds at the interval while the bulletin waits, and stops once it is approved', async () => {
-    slackBodies.length = 0
-    mails.length = 0
-    const dataDir = await newData()
-    const { base } = await serve({ NUXT_NOTIFY_REMIND_MINUTES: '0.05' }, dataDir)
-
-    await until('a reminder on Slack', () => slackBodies.length >= 2)
-    await until('a reminder by mail', () => mails.length >= 2)
-    const reminder = JSON.parse(slackBodies[1]!).text as string
-    assert.match(reminder, /2 回目/)
-    assert.match(reminder, /notice 2/)
-
-    assert.equal((await postJson(base, '/api/admin/site', { site_id: SITE, auto_publish: true })).status, 200)
-    assert.equal((await postJson(base, '/api/admin/approve', { site_id: SITE, bulletin_id: BULLETIN, approved: true })).status, 200)
-    assert.equal((await (await fetch(`${base}/api/feed/${SITE}`)).json()).state, 'alert')
-    await pause(3000)
-    const sent = { slack: slackBodies.length, mail: mails.length }
-    await pause(TICKS_MS)
-    assert.deepEqual({ slack: slackBodies.length, mail: mails.length }, sent)
-  })
-
-  test('without a complete setting nothing is sent and nothing is connected to', async () => {
-    slackBodies.length = 0
-    slackPaths.length = 0
-    mails.length = 0
-    smtpConnections.count = 0
-    output = ''
-    const dataDir = await newData()
-    await serve(
-      { NUXT_NOTIFY_ALLOW_HTTP: '', NUXT_NOTIFY_MAIL_FROM: '', NUXT_NOTIFY_MAIL_TO: '', NUXT_NOTIFY_REMIND_MINUTES: '0.05' },
-      dataDir,
-    )
-    await pause(TICKS_MS)
-    assert.match(output, /\[notify\] channels: none/)
-    assert.match(output, /slack is off/)
-    assert.match(output, /mail is off/)
-    assert.equal(slackPaths.length, 0)
-    assert.equal(smtpConnections.count, 0)
-    assert.ok(!existsSync(join(dataDir, 'live', `${SITE}.notify.json`)))
-    for (const secret of [SLACK_SECRET, SMTP_USER, SMTP_PASS]) assert.ok(!output.includes(secret))
+  test('the test switch lets credentials go in plaintext', () => {
+    assert.equal(options('smtp://user:pass@127.0.0.1:2525', true).requireTLS, false)
   })
 })

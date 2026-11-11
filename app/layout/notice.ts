@@ -10,6 +10,7 @@ export interface NoticeFacts {
   admin_url?: string
   count: number
   first_seen_at: string
+  previous_reason?: PendingReason
 }
 
 type Lang = 'ja' | 'en'
@@ -54,15 +55,24 @@ const LABELS = {
   },
 } satisfies Record<Lang, Record<string, string>>
 
-// Strings a facility registers, and strings from a bulletin, must not add lines that read as part of the notice.
+// Strings a facility registers, and strings from a bulletin, must not add lines, reorder what follows them or hide
+// characters. They are cut between code points, never inside a surrogate pair.
+function plain(value: string): string {
+  const flat = value.replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ').replace(/\p{Cf}/gu, '')
+  const points = Array.from(flat)
+  return points.length > MAX_FIELD_LENGTH ? `${points.slice(0, MAX_FIELD_LENGTH).join('')}…` : flat
+}
+
+// A URL a facility registered is shown broken, so that Slack does not make it a link.
 export function oneLine(value: string): string {
-  const flat = value.replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ')
-  return flat.length > MAX_FIELD_LENGTH ? `${flat.slice(0, MAX_FIELD_LENGTH)}…` : flat
+  return plain(value).replace(/:\/\//g, '[:]//')
 }
 
 // Slack reads <…> as a mention or a link and &…; as an entity; escaped, they are shown as typed.
+const escapeSlack = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
 export function slackEscape(value: string): string {
-  return oneLine(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  return escapeSlack(oneLine(value))
 }
 
 function minutesSince(firstSeenAt: string, now: number): number {
@@ -71,6 +81,12 @@ function minutesSince(firstSeenAt: string, now: number): number {
 
 function headline(facts: NoticeFacts, now: number, lang: Lang): string {
   const minutes = minutesSince(facts.first_seen_at, now)
+  if (facts.previous_reason && facts.count > 1) {
+    const change = `${facts.previous_reason} → ${facts.reason}`
+    return lang === 'ja'
+      ? `【EVAC LAYER】理由が変わりました（通知 ${facts.count} 回目・最初の検知から ${minutes} 分）: ${change}`
+      : `[EVAC LAYER] The reason changed (notice ${facts.count}, first seen ${minutes} min ago): ${change}`
+  }
   if (lang === 'ja') {
     return facts.count === 1
       ? '【EVAC LAYER】警報が出ていますが、画面に出ていません'
@@ -113,11 +129,11 @@ export interface SlackMessage {
 }
 
 export function slackMessage(facts: NoticeFacts, now: number): SlackMessage {
-  return { text: noticeText(facts, now, slackEscape, (url) => `<${slackEscape(url)}>`), parse: 'none', unfurl_links: false, unfurl_media: false }
+  return { text: noticeText(facts, now, slackEscape, (url) => `<${escapeSlack(plain(url))}>`), parse: 'none', unfurl_links: false, unfurl_media: false }
 }
 
 export function mailMessage(facts: NoticeFacts, now: number): { subject: string; text: string } {
   const reminder = facts.count === 1 ? '' : ` — 通知 ${facts.count} 回目 / notice ${facts.count}`
   const subject = `[EVAC LAYER] 警報が画面に出ていません / Warning not on screen: ${oneLine(facts.site.name ?? facts.site.id)} (${oneLine(facts.site.id)})${reminder}`
-  return { subject, text: noticeText(facts, now, oneLine, oneLine) }
+  return { subject, text: noticeText(facts, now, oneLine, plain) }
 }

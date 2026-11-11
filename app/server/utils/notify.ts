@@ -6,18 +6,20 @@ import { createTransport } from 'nodemailer'
 import type { Approvals } from '~~/layout/gate'
 import { type NoticeFacts, type SlackMessage, mailMessage, slackMessage } from '~~/layout/notice'
 import { type IndexRow, type PendingReason, type ScreensRead, pendingReason, pendingSubject } from '~~/layout/pending'
+import { type SmtpTransportOptions, smtpTransportOptions } from '~~/layout/smtpOptions'
 import type { LayoutSnapshot } from './approvals'
 
 export type NotifyChannel = 'slack' | 'mail'
 
-const SLACK_TIMEOUT_MS = 10000
+const SLACK_IDLE_TIMEOUT_MS = 10000
+const SLACK_DEADLINE_MS = 20000
 const SMTP_TIMEOUT_MS = 15000
 const DEFAULT_REMIND_MINUTES = 15
 
 export interface NotifySettings {
   channels: NotifyChannel[]
   slackUrl?: URL
-  mail?: { smtpUrl: string; from: string; to: string[] }
+  mail?: { options: SmtpTransportOptions; from: string; to: string[] }
   adminUrl?: string
   remindMs: number
   warnings: string[]
@@ -33,30 +35,38 @@ function parsedUrl(value: string): URL | undefined {
   }
 }
 
+const SMTP_PROBLEMS = {
+  'not-a-url': 'mail is off: NUXT_NOTIFY_SMTP_URL is not a URL',
+  protocol: 'mail is off: NUXT_NOTIFY_SMTP_URL must start with smtp:// or smtps://',
+  query: 'mail is off: NUXT_NOTIFY_SMTP_URL must not carry a query (it could turn TLS checks off)',
+} as const
+
 // Warnings name the setting, never its value: the values carry the Slack webhook secret and the SMTP credentials.
 export function notifySettings(): NotifySettings {
   const config = useRuntimeConfig()
   const warnings: string[] = []
   const channels: NotifyChannel[] = []
   const settings: NotifySettings = { channels, remindMs: DEFAULT_REMIND_MINUTES * 60000, warnings }
+  const allowPlaintext = text(config.notifyAllowPlaintext) === '1'
 
   const slack = text(config.notifySlackWebhookUrl)
   if (slack) {
     const url = parsedUrl(slack)
-    const allowHttp = text(config.notifyAllowHttp) === '1'
-    if (url && (url.protocol === 'https:' || (allowHttp && url.protocol === 'http:'))) {
+    if (url && (url.protocol === 'https:' || (allowPlaintext && url.protocol === 'http:'))) {
       settings.slackUrl = url
       channels.push('slack')
     } else warnings.push('slack is off: NUXT_NOTIFY_SLACK_WEBHOOK_URL must be an https URL')
   }
 
-  const mail = { smtpUrl: text(config.notifySmtpUrl), from: text(config.notifyMailFrom), to: text(config.notifyMailTo).split(',').map((to) => to.trim()).filter(Boolean) }
-  if (mail.smtpUrl || mail.from || mail.to.length) {
-    const protocol = parsedUrl(mail.smtpUrl)?.protocol
-    if (!mail.smtpUrl || !mail.from || !mail.to.length) warnings.push('mail is off: set NUXT_NOTIFY_SMTP_URL, NUXT_NOTIFY_MAIL_FROM and NUXT_NOTIFY_MAIL_TO together')
-    else if (protocol !== 'smtp:' && protocol !== 'smtps:') warnings.push('mail is off: NUXT_NOTIFY_SMTP_URL must start with smtp:// or smtps://')
+  const smtpUrl = text(config.notifySmtpUrl)
+  const from = text(config.notifyMailFrom)
+  const to = text(config.notifyMailTo).split(',').map((address) => address.trim()).filter(Boolean)
+  if (smtpUrl || from || to.length) {
+    const smtp = smtpUrl ? smtpTransportOptions(smtpUrl, allowPlaintext) : undefined
+    if (!smtpUrl || !from || !to.length) warnings.push('mail is off: set NUXT_NOTIFY_SMTP_URL, NUXT_NOTIFY_MAIL_FROM and NUXT_NOTIFY_MAIL_TO together')
+    else if (!smtp!.ok) warnings.push(SMTP_PROBLEMS[smtp!.problem])
     else {
-      settings.mail = mail
+      settings.mail = { options: smtp!.options, from, to }
       channels.push('mail')
     }
   }
@@ -93,7 +103,7 @@ function postSlack(url: URL, message: SlackMessage): Promise<void> {
       url,
       {
         method: 'POST',
-        timeout: SLACK_TIMEOUT_MS,
+        timeout: SLACK_IDLE_TIMEOUT_MS,
         headers: { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body), 'User-Agent': 'EVAC-LAYER-notify/0.1' },
       },
       (res) => {
@@ -103,20 +113,23 @@ function postSlack(url: URL, message: SlackMessage): Promise<void> {
           if (status >= 200 && status < 300) resolve()
           else reject(failure(`HTTP_${status}`))
         })
+        res.on('error', reject)
       },
     )
+    const deadline = setTimeout(() => req.destroy(failure('ETIMEDOUT')), SLACK_DEADLINE_MS)
+    req.on('close', () => clearTimeout(deadline))
     req.on('timeout', () => req.destroy(failure('ETIMEDOUT')))
     req.on('error', reject)
     req.end(body)
   })
 }
 
-let mailer: { url: string; transport: ReturnType<typeof createTransport> } | undefined
+let mailer: { options: SmtpTransportOptions; transport: ReturnType<typeof createTransport> } | undefined
 
-function mailTransport(url: string) {
-  if (mailer?.url !== url) {
+function mailTransport(options: SmtpTransportOptions) {
+  if (mailer?.options !== options) {
     mailer?.transport.close()
-    mailer = { url, transport: createTransport({ url, connectionTimeout: SMTP_TIMEOUT_MS, greetingTimeout: SMTP_TIMEOUT_MS, socketTimeout: SMTP_TIMEOUT_MS }) }
+    mailer = { options, transport: createTransport({ ...options, connectionTimeout: SMTP_TIMEOUT_MS, greetingTimeout: SMTP_TIMEOUT_MS, socketTimeout: SMTP_TIMEOUT_MS }) }
   }
   return mailer.transport
 }
@@ -128,9 +141,9 @@ export function closeNotifyMail(): void {
 
 export async function sendNotice(settings: NotifySettings, channel: NotifyChannel, facts: NoticeFacts, now: number): Promise<void> {
   if (channel === 'slack') return postSlack(settings.slackUrl!, slackMessage(facts, now))
-  const { smtpUrl, from, to } = settings.mail!
+  const { options, from, to } = settings.mail!
   const { subject, text: body } = mailMessage(facts, now)
-  await mailTransport(smtpUrl).sendMail({ from, to, subject, text: body })
+  await mailTransport(options).sendMail({ from, to, subject, text: body })
 }
 
 export interface NotifyRecord {
@@ -140,37 +153,31 @@ export interface NotifyRecord {
   reason: PendingReason
   first_seen_at: string
   resolved_at?: string
-  channels: Partial<Record<NotifyChannel, { count: number; last_sent_at: string }>>
+  channels: Partial<Record<NotifyChannel, { count: number; last_sent_at?: string; reason?: PendingReason }>>
 }
 
 export function notifyRecordFile(site: string): string {
   return join(dataDir(), 'live', `${site}.notify.json`)
 }
 
-export function noticeKey(bulletin: string, digest: string): string {
-  return `${bulletin}\n${digest}`
-}
-
 export async function readNotifyRecord(site: string): Promise<NotifyRecord | undefined> {
   const record = await readJsonIfExists<NotifyRecord>(notifyRecordFile(site)).catch(() => undefined)
-  return record?.site_id === site && typeof record.bulletin_id === 'string' && record.channels ? record : undefined
+  return record?.site_id === site && typeof record.bulletin_id === 'string' && typeof record.digest === 'string' && record.channels ? record : undefined
 }
 
 let partialCounter = 0
 
 // Under the site's lock, and only while the site is the one `generation` was read from: a site deleted, or deleted and
-// registered again, keeps no record of what was sent for the earlier one.
-export function changeNotifyRecord(site: string, generation: number, change: (record: NotifyRecord | undefined) => NotifyRecord | undefined): Promise<NotifyRecord | undefined> {
+// registered again, gets no record of what was sent for the earlier one. False when the site is no longer that one.
+export function writeNotifyRecord(site: string, generation: number, record: NotifyRecord): Promise<boolean> {
   return withSiteLock(site, async () => {
-    if (siteGeneration(site) !== generation || !(await readSite(site).catch(() => undefined))) return undefined
-    const next = change(await readNotifyRecord(site))
-    if (!next) return undefined
+    if (siteGeneration(site) !== generation || !(await readSite(site).catch(() => undefined))) return false
     const file = notifyRecordFile(site)
     await mkdir(join(dataDir(), 'live'), { recursive: true })
     const partial = `${file}.${process.pid}.${++partialCounter}.tmp`
-    await writeFile(partial, `${JSON.stringify(next, null, 2)}\n`)
+    await writeFile(partial, `${JSON.stringify(record, null, 2)}\n`)
     await rename(partial, file)
-    return next
+    return true
   })
 }
 
@@ -178,24 +185,45 @@ export interface Pending {
   bulletin_id: string
   digest: string
   reason: PendingReason
-  facts: Omit<NoticeFacts, 'count' | 'first_seen_at'>
+  rows: IndexRow[]
+  facts: Omit<NoticeFacts, 'count' | 'first_seen_at' | 'showing' | 'previous_reason'>
 }
 
-async function showingNow(site: string, rows: IndexRow[]): Promise<NoticeFacts['showing']> {
+export async function showingNow(site: SiteFile, approvals: Approvals, rows: IndexRow[]): Promise<NoticeFacts['showing']> {
   try {
-    const feed = await currentFeed(site)
-    if (!feed?.bulletin_id) return null
-    const title = rows.find((row) => row.bulletin_id === feed.bulletin_id)?.raw_title
-    return { bulletin_id: feed.bulletin_id, ...(title ? { title } : {}) }
+    const bulletin = await liveBulletin(site, approvals)
+    if (!bulletin) return null
+    const title = rows.find((row) => row.bulletin_id === bulletin)?.raw_title
+    return { bulletin_id: bulletin, ...(title ? { title } : {}) }
   } catch {
     return 'unknown'
   }
 }
 
+async function indexRows(site: string): Promise<{ rows: IndexRow[]; name?: string }> {
+  try {
+    const index = await readLayoutIndex(site)
+    if (!index) return { rows: [] }
+    if (!Array.isArray(index.entries)) throw new Error('index.json has no entries')
+    return { rows: index.entries.filter((row) => row && typeof row === 'object'), ...(typeof index.name === 'string' ? { name: index.name } : {}) }
+  } catch {
+    return { rows: [] }
+  }
+}
+
+function alertOf(snapshot: LayoutSnapshot | undefined): { level?: number | null; issued_at?: string } | undefined {
+  try {
+    return snapshot ? (JSON.parse(snapshot.files[0]!.body) as { alert?: { level?: number | null; issued_at?: string } }).alert : undefined
+  } catch {
+    return undefined
+  }
+}
+
+// A broken index or broken screens are themselves a reason the warning is not on screen; only a live state that cannot
+// be read leaves the bulletin unknown, and that throws.
 export async function findPending(site: SiteFile, approvals: Approvals, now: number, adminUrl?: string): Promise<Pending | undefined> {
   if (site.replay) return undefined
-  const index = await readLayoutIndex(site.id)
-  const rows: IndexRow[] = index?.entries ?? []
+  const { rows, name } = await indexRows(site.id)
   const subject = pendingSubject({ replay: false, live: await readLiveState(site.id), rows, now })
   if (!subject) return undefined
   const row = rows.find((entry) => entry.bulletin_id === subject.bulletin_id)
@@ -209,18 +237,20 @@ export async function findPending(site: SiteFile, approvals: Approvals, now: num
   }
   const reason = pendingReason({ approvals, site: site.id, subject, screens, rowStatus: row?.status })
   if (!reason) return undefined
-  const alert = snapshot ? (JSON.parse(snapshot.files[0]!.body) as { alert?: { level?: number | null; issued_at?: string } }).alert : undefined
+  const alert = alertOf(snapshot)
+  const level = [alert?.level, row?.display_level, row?.municipality_level].find((value) => typeof value === 'number')
+  const issuedAt = [row?.issued_at, alert?.issued_at].find((value) => typeof value === 'string')
   return {
     bulletin_id: subject.bulletin_id,
     digest: screens.kind === 'read' ? screens.digest : screens.kind,
     reason,
+    rows,
     facts: {
-      site: { id: site.id, municipality_id: site.municipality_id, ...(site.name ? { name: site.name } : {}), ...(index?.name ? { municipality_name: index.name } : {}) },
-      bulletin: { id: subject.bulletin_id, title: row?.raw_title, issued_at: row?.issued_at ?? alert?.issued_at, level: alert?.level ?? row?.display_level ?? row?.municipality_level },
+      site: { id: site.id, municipality_id: site.municipality_id, ...(site.name ? { name: site.name } : {}), ...(name ? { municipality_name: name } : {}) },
+      bulletin: { id: subject.bulletin_id, ...(typeof row?.raw_title === 'string' ? { title: row.raw_title } : {}), ...(issuedAt ? { issued_at: issuedAt } : {}), level: level ?? null },
       reason,
-      ...(subject.failed?.outcome ? { outcome: subject.failed.outcome } : {}),
+      ...(typeof subject.failed?.outcome === 'string' ? { outcome: subject.failed.outcome } : {}),
       auto_publish: Boolean(approvals.sites[site.id]?.auto_publish),
-      showing: await showingNow(site.id, rows),
       ...(adminUrl ? { admin_url: adminUrl } : {}),
     },
   }
