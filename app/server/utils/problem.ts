@@ -8,6 +8,7 @@ export type ProblemCode =
   | 'generation-running'
   | 'generation-disabled'
   | 'municipality-not-prepared'
+  | 'site-busy'
 
 const STATUS_TEXT: Record<number, string> = { 400: 'Bad Request', 404: 'Not Found', 409: 'Conflict', 502: 'Bad Gateway', 503: 'Service Unavailable' }
 

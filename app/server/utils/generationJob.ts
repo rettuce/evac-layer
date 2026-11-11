@@ -66,29 +66,27 @@ async function municipalityPrepared(municipality: string): Promise<boolean> {
 }
 
 // Run under the site's lock. A record left open by a stopped server becomes failed; its child, when it is still
-// running and is certainly ours, is stopped first. One that cannot be confirmed is left alone and blocks the site.
+// running and matches the record, is stopped first. One that cannot be checked, or does not stop, goes to the orphan
+// table, which holds the site until it ends.
 async function reapStale(site: string): Promise<void> {
   const file = await readRawGenerationFile(site)
   let changed = false
   for (const slot of ['latest', 'previous'] as const) {
     const record = file[slot]
     if (!record || !isOpen(record) || active.has(record.generation_id)) continue
-    if (record.child && (await stopOrphan(record.child)) === 'unverified') {
-      console.warn(`[generate] ${site}: process group ${record.child.pgid} of job ${record.generation_id} is still running and could not be confirmed as a child of this server; it is left running and the site takes no job until it ends`)
-      file.orphan = { ...record.child, generation_id: record.generation_id }
+    const state = record.child ? await stopOrphan(record.child) : 'gone'
+    if (record.child && (state === 'unknown' || state === 'alive')) {
+      const facility = (await readSite(site).catch(() => undefined))?.facility_id
+      await addOrphan({ ...record.child, site_id: site, generation_id: record.generation_id, ...(facility ? { facility_id: facility } : {}) })
     }
     file[slot] = restarted(record)
-    changed = true
-  }
-  if (file.orphan && !groupAlive(file.orphan.pgid)) {
-    delete file.orphan
     changed = true
   }
   if (changed) await writeGenerationFile(file)
 }
 
 function needsReaping(file: SiteGenerations): boolean {
-  return Boolean(file.orphan) || [file.latest, file.previous].some((record) => record && isOpen(record) && !active.has(record.generation_id))
+  return [file.latest, file.previous].some((record) => record && isOpen(record) && !active.has(record.generation_id))
 }
 
 export async function readSiteGenerations(site: string): Promise<SiteGenerations> {
@@ -111,9 +109,9 @@ function update(job: ActiveJob, change: (record: StoredGeneration) => StoredGene
 
 async function runChild(job: ActiveJob, purpose: AgentPurpose, command: string[], args: string[], timeoutMs: number, match: string[]): Promise<ChildResult | undefined> {
   if (!isCurrent(job) || isShuttingDown()) return undefined
-  const child = runAgentCommand(command, args, { purpose, timeoutMs, tailChars: OUTPUT_TAIL_CHARS })
+  const child = runAgentCommand(command, args, { purpose, timeoutMs, tailChars: OUTPUT_TAIL_CHARS, owner: { site: job.site, match, generationId: job.id } })
   job.child = child
-  if (child.pid) await update(job, (record) => ({ ...record, child: { pgid: child.pid!, started_at: child.startedAt, match } }))
+  if (child.pid) await update(job, (record) => ({ ...record, child: { pgid: child.pid!, started_at: child.startedAt, match, kind: purpose } }))
   const result = await child.done
   job.child = undefined
   return isCurrent(job) && !isShuttingDown() ? result : undefined
@@ -164,7 +162,7 @@ async function runJob(command: string[], job: ActiveJob): Promise<void> {
   if (!result) return
   if (!result.ok) console.warn(`[generate] ${job.site} ${job.id}: ${result.output}`)
   const generated = await generatedResult(job.site, begun.startedAt)
-  const summary = generated && { generation_id: job.id, started_at: begun.startedAt, place: begun.place, rows: generated.rows }
+  const summary = generated && { generation_id: job.id, started_at: begun.startedAt, place: begun.place, rows: generated.rows, ...(generated.composable ? { composable: generated.composable } : {}) }
   const classes = generated?.classes ?? []
   if (!(await update(job, (record) => ({ ...record, classes }), summary ? { last_result: summary } : {}))) return
   let errors: Record<string, PreviewErrorCode> = {}
@@ -207,8 +205,8 @@ export async function startGeneration(site: string, admin: AdminPrincipal, actor
         throw problem(409, 'municipality-not-prepared', `municipality ${stored.municipality_id} is not prepared yet; the operator prepares it`)
       }
       await reapStale(site)
-      const orphan = (await readRawGenerationFile(site)).orphan
-      if (orphan) throw problem(409, 'generation-running', `a job of site ${site} started by an earlier server is still running`, { generation_id: orphan.generation_id })
+      const [orphan] = await liveOrphans(site)
+      if (orphan) throw problem(409, 'generation-running', `a process of site ${site} left by an earlier job is still running`, orphan.generation_id ? { generation_id: orphan.generation_id } : {})
       // From here to the registration nothing awaits, so starts of one facility on other sites cannot slip in between.
       const open = [...active.values()].find((job) => job.site === site && isCurrent(job))
       if (open) throw problem(409, 'generation-running', `site ${site} has a job queued or running`, { generation_id: open.id })

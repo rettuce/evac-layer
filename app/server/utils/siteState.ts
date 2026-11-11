@@ -33,7 +33,7 @@ export interface SiteState {
   warnings: string[]
 }
 
-const COMPOSED_WITHOUT_SCREEN = new Set(['unsupported', 'no-screen'])
+const FAILED_OUTCOMES = new Set(['fail', 'stopped', 'error'])
 
 async function exists(file: string): Promise<boolean> {
   return access(file).then(() => true, () => false)
@@ -49,7 +49,7 @@ function approvedAt(approvals: Approvals, site: string, bulletin: string, snapsh
 async function classStates(site: string, reps: Representative[], approvals: Approvals, generations: SiteGenerations): Promise<ClassState[]> {
   const liveBulletin = (await currentFeed(site))?.bulletin_id
   const liveClass = liveBulletin ? await currentClassKey(site, liveBulletin) : undefined
-  const atLastJob = generations.latest?.digests ?? generations.previous?.digests
+  const atLastJob = generations.latest?.digests
   return Promise.all(
     reps.map(async ({ cls, row, snapshot, stale }) => ({
       class: cls,
@@ -70,21 +70,23 @@ async function exportsOf(site: string): Promise<SiteState['exports']> {
   const jobs = Object.entries((await readJsonIfExists<Partial<ExportRecords>>(exportRecordFile(site)))?.jobs ?? {})
   return {
     pending: jobs.filter(([, job]) => job.status === 'running').map(([bulletin]) => bulletin),
-    failed: jobs.filter(([, job]) => job.status === 'failed').map(([bulletin, job]) => ({ bulletin_id: bulletin, reason: job.message ?? '', at: job.updated_at })),
+    failed: jobs.filter(([, job]) => job.status === 'failed').map(([bulletin, job]) => ({ bulletin_id: bulletin, reason: redacted(job.message ?? ''), at: job.updated_at })),
   }
 }
 
 // A job can only remake the classes it composes, so a stale screen of a class it cannot compose is shown on that
 // class and does not ask for a job. Before any job has a result, every stale screen asks for one.
 function needsGeneration(classes: ClassState[], generations: SiteGenerations): boolean {
+  if (isOpen(generations.latest) || isOpen(generations.previous)) return false
   if (!classes.length || lastFinished(generations)?.status === 'failed') return true
   const result = generations.last_result
   if (!result) return classes.some((c) => c.stale)
-  return result.rows.some((row) => {
-    if (COMPOSED_WITHOUT_SCREEN.has(row.outcome)) return false
-    if (row.outcome !== 'pass') return true
-    const state = classes.find((c) => c.class === row.class)
-    return !state || state.stale
+  const composable = result.composable ?? result.rows.filter((row) => row.outcome !== 'unsupported').map((row) => row.class)
+  return composable.some((cls) => {
+    const row = result.rows.find((r) => r.class === cls)
+    if (row && FAILED_OUTCOMES.has(row.outcome)) return true
+    const state = classes.find((c) => c.class === cls)
+    return state ? state.stale : row?.outcome !== 'no-screen'
   })
 }
 

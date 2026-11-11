@@ -20,8 +20,18 @@ const log = (entry) => appendFileSync(join(root, 'calls.log'), JSON.stringify({ 
 `
 
 const FAKE_GENERATE = (root: string) => `${SCRIPT_HEAD(root)}
-const { values } = parseArgs({ options: { site: { type: 'string' }, writer: { type: 'string' }, verifier: { type: 'string' }, 'base-url': { type: 'string' }, classes: { type: 'string' } } })
+const { values } = parseArgs({ options: { site: { type: 'string' }, writer: { type: 'string' }, verifier: { type: 'string' }, 'base-url': { type: 'string' }, classes: { type: 'string' }, grandchild: { type: 'boolean' } } })
 const site = values.site
+const source = join(root, 'source', site)
+if (values.grandchild) {
+  process.on('SIGTERM', () => {
+    writeFileSync(join(root, 'term-grandchild-' + site), '')
+    if (!existsSync(join(source, 'grandchild-stubborn'))) process.exit(143)
+  })
+  writeFileSync(join(root, 'grandchild-' + site), String(process.pid))
+  while (existsSync(join(root, 'hold', site + '.grandchild'))) await sleep(20)
+  process.exit(0)
+}
 process.on('SIGTERM', () => {
   writeFileSync(join(root, 'term-' + site), '')
   process.exit(143)
@@ -29,9 +39,13 @@ process.on('SIGTERM', () => {
 log({ kind: 'generate', site, argv: process.argv.slice(2) })
 writeFileSync(join(root, 'env-generate-' + site + '.json'), JSON.stringify(process.env))
 writeFileSync(join(root, 'pid-' + site), String(process.pid))
+if (existsSync(join(source, 'pipe-holder'))) {
+  const holder = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'], { detached: true, stdio: ['ignore', 'inherit', 'inherit'] })
+  holder.unref()
+  writeFileSync(join(root, 'stray-' + site), String(holder.pid))
+}
 while (existsSync(join(root, 'hold', site))) await sleep(20)
 await sleep(100)
-const source = join(root, 'source', site)
 const data = process.env.EVAC_DATA_DIR
 mkdirSync(join(data, 'layouts', site), { recursive: true })
 for (const dir of ['layouts', 'reports']) if (existsSync(join(source, dir))) cpSync(join(source, dir), join(data, dir), { recursive: true })
@@ -47,6 +61,12 @@ if (existsSync(join(source, 'generation.json'))) {
   writeFileSync(join(data, 'layouts', site, 'generation.json'), JSON.stringify({ ...generation, generated_at: new Date().toISOString() }))
 }
 log({ kind: 'generate-end', site })
+if (existsSync(join(source, 'grandchild'))) {
+  const member = spawn(process.execPath, [process.argv[1], ...process.argv.slice(2), '--grandchild'], { stdio: 'ignore' })
+  member.unref()
+  while (!existsSync(join(root, 'grandchild-' + site))) await sleep(10)
+  process.exit(0)
+}
 if (existsSync(join(source, 'exit'))) {
   const message = readFileSync(join(source, 'exit'), 'utf8')
   console.log('composing '.repeat(50) + message)
@@ -60,7 +80,12 @@ const { values } = parseArgs({ options: { site: { type: 'string' }, bulletin: { 
 const { site, bulletin, out } = values
 process.on('SIGTERM', () => {
   writeFileSync(join(root, 'term-preview-' + site), '')
-  process.exit(143)
+  if (!existsSync(join(root, 'source', site, 'late-chrome'))) process.exit(143)
+  const late = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'], { detached: true, stdio: 'ignore' })
+  late.unref()
+  if (process.env.EVAC_CHROME_PID_FILE) appendFileSync(process.env.EVAC_CHROME_PID_FILE, late.pid + '\\n')
+  writeFileSync(join(root, 'chrome-late-' + site), String(late.pid))
+  setTimeout(() => process.exit(143), 800)
 })
 log({ kind: 'preview', site, bulletin, argv: process.argv.slice(2) })
 writeFileSync(join(root, 'env-preview-' + site + '.json'), JSON.stringify(process.env))
@@ -91,6 +116,25 @@ if (failing.length) {
   console.error('[preview incomplete] ' + failing.join(', '))
   process.exit(1)
 }
+`
+
+const FAKE_EXPORT = (root: string) => `${SCRIPT_HEAD(root)}
+const { values } = parseArgs({ options: { site: { type: 'string' }, bulletin: { type: 'string' }, out: { type: 'string' }, 'base-url': { type: 'string' } } })
+const { site, bulletin, out } = values
+process.on('SIGTERM', () => {
+  writeFileSync(join(root, 'term-export-' + site), '')
+  process.exit(143)
+})
+log({ kind: 'export', site, bulletin, argv: process.argv.slice(2) })
+writeFileSync(join(root, 'env-export-' + site + '.json'), JSON.stringify(process.env))
+writeFileSync(join(root, 'pid-export-' + site), String(process.pid))
+while (existsSync(join(root, 'hold', site + '.export'))) await sleep(20)
+if (existsSync(join(root, 'source', site, 'export-fail'))) {
+  console.error(readFileSync(join(root, 'source', site, 'export-fail'), 'utf8'))
+  process.exit(3)
+}
+mkdirSync(join(out, site, bulletin), { recursive: true })
+writeFileSync(join(out, site, bulletin, '16x9.png'), 'png')
 `
 
 export interface StagedClass {
@@ -139,16 +183,22 @@ export interface StageOptions {
   previewFails?: boolean
   previewFailShapes?: string[]
   chromeMode?: string
+  grandchild?: 'obedient' | 'stubborn'
+  pipeHolder?: boolean
+  lateChrome?: boolean
+  exportFail?: string
+  composable?: string[]
   noResult?: boolean
 }
 
 export async function makeFakes(root: string) {
   const generate = join(root, 'fake-generate.mjs')
   const preview = join(root, 'fake-preview.mjs')
+  const exporter = join(root, 'fake-export.mjs')
   await writeFile(generate, FAKE_GENERATE(root))
   await writeFile(preview, FAKE_PREVIEW(root))
-  await chmod(generate, 0o755)
-  await chmod(preview, 0o755)
+  await writeFile(exporter, FAKE_EXPORT(root))
+  for (const script of [generate, preview, exporter]) await chmod(script, 0o755)
   await mkdir(join(root, 'hold'), { recursive: true })
   await writeFile(join(root, 'calls.log'), '')
 
@@ -164,11 +214,16 @@ export async function makeFakes(root: string) {
         ? { class: classOf(s), outcome: 'unsupported', approvable: false, reasons: [s.reason ?? 'not composed yet'] }
         : { class: classOf(s), outcome: s.outcome, approvable: s.outcome === 'pass', bulletin_id: s.bulletin, screen: true, reasons: s.outcome === 'pass' ? [] : [s.reason ?? 'the headline overflows'] },
     )
-    if (!options.noResult) await writeFile(join(source, 'generation.json'), JSON.stringify({ site, municipality: '13101', generated_at: '', verifier: 'browser', writer: 'live', classes }))
+    if (!options.noResult) await writeFile(join(source, 'generation.json'), JSON.stringify({ site, municipality: '13101', generated_at: '', verifier: 'browser', writer: 'live', composable: options.composable ?? composed.map(classOf), classes }))
     if (options.exit) await writeFile(join(source, 'exit'), options.exit)
     if (options.previewFails) await writeFile(join(source, 'preview-fail'), '')
     if (options.previewFailShapes) await writeFile(join(source, 'preview-fail-shapes'), JSON.stringify(options.previewFailShapes))
     if (options.chromeMode) await writeFile(join(source, 'chrome-mode'), options.chromeMode)
+    if (options.grandchild) await writeFile(join(source, 'grandchild'), '')
+    if (options.grandchild === 'stubborn') await writeFile(join(source, 'grandchild-stubborn'), '')
+    if (options.pipeHolder) await writeFile(join(source, 'pipe-holder'), '')
+    if (options.lateChrome) await writeFile(join(source, 'late-chrome'), '')
+    if (options.exportFail) await writeFile(join(source, 'export-fail'), options.exportFail)
   }
 
   async function calls(): Promise<Record<string, any>[]> {
@@ -178,5 +233,5 @@ export async function makeFakes(root: string) {
   const hold = (name: string) => writeFile(join(root, 'hold', name), '')
   const release = (name: string) => rm(join(root, 'hold', name), { force: true })
 
-  return { generate, preview, stage, calls, hold, release }
+  return { generate, preview, exporter, stage, calls, hold, release }
 }

@@ -2,15 +2,19 @@ import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { EXPORT_DIGEST_FILE } from '~~/layout/feed'
 import type { ReplayRow } from '~~/layout/replay'
+import type { ChildMark } from './orphans'
 
 const EXPORT_TIMEOUT_MS = 2 * 60 * 1000
 const MESSAGE_TAIL_CHARS = 2000
+const RECORDED_MESSAGE_CHARS = 300
 
 export interface ExportJobRecord {
   status: 'running' | 'ok' | 'failed'
   digest: string
   updated_at: string
+  code?: 'export-failed' | 'timed-out'
   message?: string
+  child?: ChildMark
 }
 
 export interface ExportRecords {
@@ -25,13 +29,40 @@ export function exportRecordFile(site: string): string {
   return join(dataDir(), 'live', `${site}.export.json`)
 }
 
-async function recordJob(site: string, bulletin: string, job: Omit<ExportJobRecord, 'updated_at'>): Promise<void> {
-  const file = exportRecordFile(site)
-  const jobs = (await readJsonIfExists<Partial<ExportRecords>>(file))?.jobs ?? {}
-  const records: ExportRecords = { site_id: site, jobs: { ...jobs, [bulletin]: { ...job, updated_at: new Date().toISOString() } } }
+async function writeRecords(records: ExportRecords): Promise<void> {
+  const file = exportRecordFile(records.site_id)
   await mkdir(join(dataDir(), 'live'), { recursive: true })
   await writeFile(`${file}.tmp`, `${JSON.stringify(records, null, 2)}\n`)
   await rename(`${file}.tmp`, file)
+}
+
+async function recordJob(site: string, bulletin: string, job: Omit<ExportJobRecord, 'updated_at'>): Promise<void> {
+  const jobs = (await readJsonIfExists<Partial<ExportRecords>>(exportRecordFile(site)))?.jobs ?? {}
+  await writeRecords({ site_id: site, jobs: { ...jobs, [bulletin]: { ...job, updated_at: new Date().toISOString() } } })
+}
+
+// A server killed outright leaves its exports running: each one the records still name is stopped when it matches,
+// and put in the orphan table when it cannot be checked or does not stop.
+export async function reapExportChildren(): Promise<void> {
+  const sites = (await listDir(join(dataDir(), 'live'))).filter((f) => f.endsWith('.export.json')).map((f) => f.slice(0, -'.export.json'.length))
+  for (const site of sites) {
+    await withSiteLock(site, async () => {
+      const records = await readJsonIfExists<Partial<ExportRecords>>(exportRecordFile(site)).catch(() => undefined)
+      const jobs = { ...(records?.jobs ?? {}) }
+      let changed = false
+      for (const [bulletin, { child, ...job }] of Object.entries(jobs)) {
+        if (!child) continue
+        const state = await stopOrphan(child)
+        if (state === 'unknown' || state === 'alive') {
+          const facility = (await readSite(site).catch(() => undefined))?.facility_id
+          await addOrphan({ ...child, site_id: site, ...(facility ? { facility_id: facility } : {}) })
+        }
+        jobs[bulletin] = job
+        changed = true
+      }
+      if (changed) await writeRecords({ site_id: site, jobs })
+    }).catch((error: Error) => console.warn(`[export] ${site}: ${error.message}`))
+  }
 }
 
 export async function exportedDigest(site: string, bulletin: string): Promise<string | undefined> {
@@ -67,11 +98,20 @@ async function exportNow(command: string[], site: string, bulletin: string, dige
   })
   if (!started) return
   const baseUrl = ownBaseUrl()
-  const args = [`--site=${site}`, `--bulletin=${bulletin}`, `--out=${resolve(distDir())}`, ...(baseUrl ? [`--base-url=${baseUrl}`] : [])]
-  const { ok, output } = await runAgentCommand(command, args, { purpose: 'export', timeoutMs: EXPORT_TIMEOUT_MS, tailChars: MESSAGE_TAIL_CHARS }).done
+  const match = [`--site=${site}`, `--bulletin=${bulletin}`]
+  const args = [...match, `--out=${resolve(distDir())}`, ...(baseUrl ? [`--base-url=${baseUrl}`] : [])]
+  const child = runAgentCommand(command, args, { purpose: 'export', timeoutMs: EXPORT_TIMEOUT_MS, tailChars: MESSAGE_TAIL_CHARS, owner: { site, match } })
+  if (child.pid) {
+    const mark: ChildMark = { pgid: child.pid, started_at: child.startedAt, match, kind: 'export' }
+    await withSiteLock(site, async () => {
+      if (siteGeneration(site) === generation) await recordJob(site, bulletin, { status: 'running', digest, child: mark })
+    })
+  }
+  const { ok, timedOut, output } = await child.done
   if (!ok) console.warn(`[export] ${site} ${bulletin} failed: ${output}`)
+  const failure: Omit<ExportJobRecord, 'updated_at'> = { status: 'failed', digest, code: timedOut ? 'timed-out' : 'export-failed', message: redacted(output.slice(-RECORDED_MESSAGE_CHARS), RECORDED_MESSAGE_CHARS) }
   await withSiteLock(site, async () => {
-    if (siteGeneration(site) === generation) return recordJob(site, bulletin, ok ? { status: 'ok', digest } : { status: 'failed', digest, message: output })
+    if (siteGeneration(site) === generation) return recordJob(site, bulletin, ok ? { status: 'ok', digest } : failure)
     // Exports run one at a time, so what dist/<site>/ holds now is this job's output and nothing of the new site.
     await rm(join(distDir(), site), { recursive: true, force: true })
   })

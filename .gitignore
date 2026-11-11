@@ -23,6 +23,8 @@ data/raw/
 data/live/
 data/synthetic/
 data/previews/
+data/orphans.json
+data/orphans.json.*
 app/dist
 sim/dist-pages/
 sim/public/ambient/

@@ -149,12 +149,13 @@ describe('feed', { skip }, () => {
 })
 
 const FAKE_EXPORTER = `#!/usr/bin/env node
-import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs'
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
+const settings = JSON.parse(readFileSync(new URL('./fake-export.json', import.meta.url), 'utf8'))
 const { values } = parseArgs({ options: { site: { type: 'string' }, bulletin: { type: 'string' }, out: { type: 'string' }, 'base-url': { type: 'string' } } })
-appendFileSync(process.env.EVAC_FAKE_EXPORT_CALLS, values.site + ' ' + values.bulletin + '\\n')
-if (process.env.EVAC_FAKE_EXPORT_FAILS) {
+appendFileSync(settings.calls, values.site + ' ' + values.bulletin + '\\n')
+if (settings.fails) {
   console.error('[export stopped] no Chrome found')
   process.exit(3)
 }
@@ -164,10 +165,10 @@ for (const shape of ${JSON.stringify(SHAPES)}) {
   writeFileSync(join(dir, shape + '.png'), 'png from ' + values['base-url'])
   writeFileSync(join(dir, shape + '.html'), '<!doctype html>')
 }
-writeFileSync(join(dir, '${EXPORT_DIGEST_FILE}'), process.env.EVAC_FAKE_EXPORT_DIGEST)
+writeFileSync(join(dir, '${EXPORT_DIGEST_FILE}'), settings.digest)
 `
 
-async function startExportingServer(env: Record<string, string>, approvedBeforeStart = false) {
+async function startExportingServer(fake: { fails?: boolean }, approvedBeforeStart = false) {
   const { dataDir, distDir, digest } = await makeDelivery()
   if (approvedBeforeStart) {
     const at = '2026-11-10T00:00:00.000Z'
@@ -178,9 +179,10 @@ async function startExportingServer(env: Record<string, string>, approvedBeforeS
   const exporter = join(dataDir, 'fake-export.mjs')
   const calls = join(dataDir, 'fake-export-calls.log')
   await writeFile(exporter, FAKE_EXPORTER)
+  await writeFile(join(dataDir, 'fake-export.json'), JSON.stringify({ calls, digest, fails: Boolean(fake.fails) }))
   await chmod(exporter, 0o755)
   await writeFile(calls, '')
-  const server = await startServer({ NUXT_DATA_DIR: dataDir, NUXT_DIST_DIR: distDir, NUXT_ADMIN_TOKEN: '', NUXT_EXPORT_COMMAND: exporter, EVAC_FAKE_EXPORT_CALLS: calls, EVAC_FAKE_EXPORT_DIGEST: digest, ...env })
+  const server = await startServer({ NUXT_DATA_DIR: dataDir, NUXT_DIST_DIR: distDir, NUXT_ADMIN_TOKEN: '', NUXT_EXPORT_COMMAND: exporter })
   return { ...server, dataDir, calls }
 }
 
@@ -244,7 +246,7 @@ describe('export on approval', { skip }, () => {
   })
 
   test('a failed export is recorded with its reason and leaves the alert on the feed without assets', async () => {
-    const { base, child, dataDir } = await startExportingServer({ EVAC_FAKE_EXPORT_FAILS: '1' })
+    const { base, child, dataDir } = await startExportingServer({ fails: true })
     children.push(child)
     await approve(base, true)
 
@@ -264,7 +266,7 @@ describe('export on approval', { skip }, () => {
   })
 
   test('the sweep does not export the same screens again after their export failed', async () => {
-    const { base, child, dataDir, calls } = await startExportingServer({ EVAC_FAKE_EXPORT_FAILS: '1' }, true)
+    const { base, child, dataDir, calls } = await startExportingServer({ fails: true }, true)
     children.push(child)
     await feedOnAlert(base)
 

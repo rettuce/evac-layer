@@ -119,17 +119,18 @@ describe('site locks', () => {
 })
 
 const SLOW_EXPORTER = `#!/usr/bin/env node
-import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs'
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
+const settings = JSON.parse(readFileSync(new URL('./slow-exporter.json', import.meta.url), 'utf8'))
 const { values } = parseArgs({ options: { site: { type: 'string' }, bulletin: { type: 'string' }, out: { type: 'string' }, 'base-url': { type: 'string' } } })
-appendFileSync(process.env.EVAC_SLOW_EXPORT_CALLS, 'start ' + values.site + '\\n')
+appendFileSync(settings.calls, 'start ' + values.site + '\\n')
 await new Promise((resolve) => setTimeout(resolve, 800))
 const dir = join(values.out, values.site, values.bulletin)
 mkdirSync(dir, { recursive: true })
 writeFileSync(join(dir, '16x9.png'), 'old screen')
 writeFileSync(join(dir, '16x9.html'), '<!doctype html>')
-appendFileSync(process.env.EVAC_SLOW_EXPORT_CALLS, 'done ' + values.site + '\\n')
+appendFileSync(settings.calls, 'done ' + values.site + '\\n')
 `
 
 describe('site registration under contention, on a server that holds facilities', { skip }, () => {
@@ -181,6 +182,7 @@ describe('site registration under contention, on a server that holds facilities'
 
     const exporter = join(root, 'slow-exporter.mjs')
     await writeFile(exporter, SLOW_EXPORTER)
+    await writeFile(join(root, 'slow-exporter.json'), JSON.stringify({ calls }))
     await chmod(exporter, 0o755)
     await writeFile(calls, '')
 
@@ -200,7 +202,6 @@ describe('site registration under contention, on a server that holds facilities'
       NUXT_ADMIN_TOKEN: OPERATOR_TOKEN,
       NUXT_WEBHOOK_ALLOW_PRIVATE: '1',
       NUXT_EXPORT_COMMAND: exporter,
-      EVAC_SLOW_EXPORT_CALLS: calls,
       NUXT_REVERSE_GEOCODER_URL: `http://127.0.0.1:${await freePort()}/unreachable`,
     }
     ;({ base, child } = await startServer(serverEnv))

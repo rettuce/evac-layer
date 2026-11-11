@@ -55,6 +55,7 @@ export interface JobResult {
   generation_id: string
   started_at: string
   place: Place
+  composable?: string[]
   rows: { class: string; bulletin_id?: string; outcome: string }[]
 }
 
@@ -64,7 +65,6 @@ export interface SiteGenerations {
   previous?: StoredGeneration
   last_result?: JobResult
   last_success?: JobResult
-  orphan?: ChildMark & { generation_id: string }
 }
 
 interface AgentsGenerationRow {
@@ -75,7 +75,12 @@ interface AgentsGenerationRow {
 }
 
 const REASON_MAX_CHARS = 300
-const UNSAFE_IN_REASON = [/[a-z][a-z0-9+.-]*:\/\/\S+/gi, /(?<![\w.~-])(?:[A-Za-z]:)?(?:[\\/][^\s\\/:;,'"]+){2,}[\\/]?/g, /\b[A-Z][A-Z0-9_]{2,}=\S*/g]
+const UNSAFE_IN_REASON = [
+  /[a-z][a-z0-9+.-]*:\/\/\S+/gi,
+  /(?<![\w.~-])(?:~|\.{1,2})(?:[\\/][^\s\\/:;,'"]+)+[\\/]?/g,
+  /(?<![\w.~-])(?:[A-Za-z]:)?(?:[\\/][^\s\\/:;,'"]+){2,}[\\/]?/g,
+  /\b[A-Z][A-Z0-9_]{2,}=\S*/g,
+]
 const BULLETIN_ID = /^[A-Za-z0-9_-]{1,80}$/
 
 export function placeOf(site: SiteFile): Place {
@@ -145,22 +150,27 @@ export async function updateGeneration(site: string, id: string, change: (record
   await writeGenerationFile({ ...file, [slot]: change(file[slot]!), ...results })
 }
 
+export function redacted(text: string, maxChars = REASON_MAX_CHARS): string {
+  let safe = text
+  for (const pattern of UNSAFE_IN_REASON) safe = safe.replace(pattern, '[…]')
+  return safe.length > maxChars ? `${safe.slice(0, maxChars - 1)}…` : safe
+}
+
 function safeReason(reasons: unknown): string | undefined {
   if (!Array.isArray(reasons) || !reasons.length) return undefined
-  let text = reasons.map(String).join('; ')
-  for (const pattern of UNSAFE_IN_REASON) text = text.replace(pattern, '[…]')
-  return text.length > REASON_MAX_CHARS ? `${text.slice(0, REASON_MAX_CHARS - 1)}…` : text
+  return redacted(reasons.map(String).join('; '))
 }
 
 export interface GeneratedResult {
   classes: GenerationClass[]
   rows: JobResult['rows']
+  composable?: string[]
 }
 
 // generation.json is written by the agents: one older than the job, of another site or of another shape is not this
 // job's result.
 export async function generatedResult(site: string, since: string): Promise<GeneratedResult | undefined> {
-  const file = await readJsonIfExists<{ site?: unknown; generated_at?: unknown; classes?: unknown }>(siteLayoutsDir(site, 'generation.json')).catch(() => undefined)
+  const file = await readJsonIfExists<{ site?: unknown; generated_at?: unknown; composable?: unknown; classes?: unknown }>(siteLayoutsDir(site, 'generation.json')).catch(() => undefined)
   if (!file || file.site !== site || typeof file.generated_at !== 'string' || !(Date.parse(file.generated_at) >= Date.parse(since)) || !Array.isArray(file.classes)) return undefined
   const rows = file.classes as AgentsGenerationRow[]
   if (!rows.every((row) => typeof row?.class === 'string' && typeof row.outcome === 'string' && (row.bulletin_id === undefined || (typeof row.bulletin_id === 'string' && BULLETIN_ID.test(row.bulletin_id))))) return undefined
@@ -176,5 +186,6 @@ export async function generatedResult(site: string, since: string): Promise<Gene
       }
     }),
     rows: rows.map((row) => ({ class: row.class as string, ...(row.bulletin_id ? { bulletin_id: row.bulletin_id as string } : {}), outcome: row.outcome as string })),
+    ...(Array.isArray(file.composable) && file.composable.every((c) => typeof c === 'string') ? { composable: file.composable as string[] } : {}),
   }
 }

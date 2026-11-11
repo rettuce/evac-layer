@@ -1,112 +1,18 @@
 import assert from 'node:assert/strict'
 import { type ChildProcess, spawn } from 'node:child_process'
-import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, utimes, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { cp, mkdir, readFile, readdir, rm, symlink, utimes, writeFile } from 'node:fs/promises'
+import { createServer } from 'node:http'
+import { dirname, join } from 'node:path'
 import { after, before, describe, test } from 'node:test'
 import { agentEnv } from '../server/utils/childProcess.ts'
+import { argumentsMatch, parsePsLine, psEnv } from '../server/utils/orphans.ts'
 import { advanceSiteGeneration, readWhileOwned, withSiteLock } from '../server/utils/siteLocks.ts'
 import { SERVER_ENTRY, postJson, startServer } from './helpers.ts'
-import { type StagedClass, classOf, makeFakes, stagedDigest, writeExistingScreens } from './generation-fakes.ts'
-
-const OPERATOR_TOKEN = 'operator-token-for-generation-tests'
-const TOKEN_A = 'facility-a-token-for-generation-tests'
-const TOKEN_B = 'facility-b-token-for-generation-tests'
-const TOKEN_C = 'facility-c-token-for-generation-tests'
-const API_KEY = 'sk-ant-api-key-for-generation-tests-0000000000'
-const SECRET_SAMPLE = 'a-secret-the-children-must-not-see'
-const ALL_SECRETS = [OPERATOR_TOKEN, TOKEN_A, TOKEN_B, TOKEN_C, SECRET_SAMPLE]
-// macOS adds __CF_USER_TEXT_ENCODING to every process it starts, whatever environment the parent passed.
-const ALLOWED_ENV = /^(PATH|HOME|USER|LOGNAME|SHELL|TMPDIR|TMP|TEMP|LANG|LANGUAGE|TZ|CHROME_PATH|ANTHROPIC_API_KEY|__CF_USER_TEXT_ENCODING)$|^(LC_|EVAC_|JMA_)/
-const PREPARED = '13101'
-const NOT_PREPARED = '13102'
-const WAIT_MS = 15000
+import { type StagedClass, classOf, stagedDigest, writeExistingScreens } from './generation-fakes.ts'
+import { ALL_SECRETS, API_KEY, GENERATE_ENV, NOT_PREPARED, OPERATOR_TOKEN, PREPARED, REAL_PASS, SECRET_SAMPLE, SHARED_ENV, SYN_FAIL, SYN_PASS, TOKEN_A, TOKEN_B, TOKEN_C, alive, appears, bearer, byClass, client, makeData, previewPath, sleep, until } from './generation-harness.ts'
 
 const skip = !existsSync(SERVER_ENTRY) && 'run `pnpm -F app build` first'
-const sha256 = (token: string) => createHash('sha256').update(token).digest('hex')
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-const bearer = (token: string) => ({ authorization: `Bearer ${token}` })
-
-function alive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch {
-    return false
-  }
-}
-
-async function until(done: () => boolean | Promise<boolean>, label: string): Promise<void> {
-  const deadline = Date.now() + WAIT_MS
-  while (!(await done())) {
-    if (Date.now() > deadline) assert.fail(label)
-    await sleep(20)
-  }
-}
-
-const appears = (file: string) => until(() => existsSync(file), `${file} never appeared`)
-
-const TOKENS_FILE = {
-  version: '0.1',
-  tokens: [
-    { id: 'tok-a', label: 'alpha signage', facility_id: 'alpha-fac', sha256: sha256(TOKEN_A), created_at: '2026-11-01T00:00:00Z' },
-    { id: 'tok-b', label: 'beta signage', facility_id: 'beta-fac', sha256: sha256(TOKEN_B), created_at: '2026-11-01T00:00:00Z' },
-    { id: 'tok-c', label: 'gamma signage', facility_id: 'gamma-fac', sha256: sha256(TOKEN_C), created_at: '2026-11-01T00:00:00Z' },
-  ],
-}
-
-const SYN_PASS: StagedClass = { bulletin: 'SYN-VTSE41-202611010000-0000000000a1', level: 3, outcome: 'pass' }
-const SYN_FAIL: StagedClass = { bulletin: 'SYN-VTSE41-202611010000-0000000000a2', level: 4, outcome: 'fail' }
-const REAL_PASS: StagedClass = { bulletin: 'VTSE41-202611010000-0000000000a3', level: 5, outcome: 'pass' }
-
-async function makeData() {
-  const root = await mkdtemp(join(tmpdir(), 'evac-generations-'))
-  const dataDir = join(root, 'data')
-  const distDir = join(root, 'dist')
-  await mkdir(join(dataDir, 'sites'), { recursive: true })
-  await mkdir(join(dataDir, 'municipalities'), { recursive: true })
-  await writeFile(join(dataDir, 'municipalities', `${PREPARED}.json`), '{}')
-  await writeFile(join(dataDir, 'tokens.json'), JSON.stringify(TOKENS_FILE), { mode: 0o600 })
-  const fakes = await makeFakes(root)
-  const writeSite = (id: string, facility?: string, municipality = PREPARED, located = '2026-11-01T00:00:00.000Z', lat = 35.68) =>
-    writeFile(join(dataDir, 'sites', `${id}.json`), JSON.stringify({ id, municipality_id: municipality, lat, lng: 139.76, facing_deg: 90, ...(facility ? { facility_id: facility } : {}), location_updated_at: located }))
-  const env = { NUXT_DATA_DIR: dataDir, NUXT_DIST_DIR: distDir, NUXT_ADMIN_TOKEN: OPERATOR_TOKEN, NUXT_GENERATE_COMMAND: fakes.generate, NUXT_PREVIEW_COMMAND: fakes.preview, ANTHROPIC_API_KEY: API_KEY, SECRET_SAMPLE }
-  return { root, dataDir, distDir, fakes, writeSite, env }
-}
-
-function client(baseOf: () => string) {
-  const start = (site: string, token: string, body: unknown = {}) => postJson(baseOf(), `/api/admin/sites/${site}/generations`, body, bearer(token))
-  const get = (path: string, token: string) => fetch(`${baseOf()}${path}`, { headers: bearer(token) })
-  async function job(site: string, id: string, token: string, until: (status: string) => boolean = (s) => s === 'done' || s === 'failed') {
-    const deadline = Date.now() + WAIT_MS
-    let last: any
-    while (Date.now() < deadline) {
-      const response = await get(`/api/admin/sites/${site}/generations/${id}`, token)
-      assert.equal(response.status, 200)
-      last = await response.json()
-      if (until(last.status)) return last
-      await sleep(50)
-    }
-    assert.fail(`job ${id} of ${site} stayed ${JSON.stringify(last)}`)
-  }
-  async function run(site: string, token: string): Promise<any> {
-    const response = await start(site, token)
-    assert.equal(response.status, 202, await response.clone().text())
-    return job(site, (await response.json()).generation_id, token)
-  }
-  async function state(site: string, token = OPERATOR_TOKEN) {
-    const response = await get(`/api/admin/sites/${site}`, token)
-    assert.equal(response.status, 200)
-    return response.json()
-  }
-  const remove = (site: string, token: string) => fetch(`${baseOf()}/api/admin/sites/${site}`, { method: 'DELETE', headers: bearer(token) })
-  return { start, get, job, run, state, remove }
-}
-
-const previewPath = (site: string, bulletin: string, shape: string) => `/api/admin/sites/${site}/previews/${bulletin}/${shape}.png`
-const byClass = (state: any) => Object.fromEntries(state.classes.map((c: any) => [c.class, c]))
 
 describe('reads and child environments, without a server', () => {
   test('a read whose site was deleted and registered again while it read answers nothing', async () => {
@@ -127,17 +33,37 @@ describe('reads and child environments, without a server', () => {
     assert.equal(await readWhileOwned('hidden-site', { visible: async () => undefined, read: async () => assert.fail('read without the site') }), undefined)
   })
 
-  test('each kind of child gets an allowlist of the environment; only generate gets the API key', () => {
-    const source = {
-      PATH: '/bin', HOME: '/home/x', LANG: 'C', LC_ALL: 'C', TZ: 'UTC', TMPDIR: '/tmp', EVAC_URL: 'http://127.0.0.1:1', JMA_FEED_DIR: '/feed', CHROME_PATH: '/chrome',
-      ANTHROPIC_API_KEY: API_KEY, NUXT_ADMIN_TOKEN: OPERATOR_TOKEN, NUXT_WEBHOOK_ALLOW_PRIVATE: '1', SECRET_SAMPLE, AWS_SECRET_ACCESS_KEY: 'x', EVAC_DATA_DIR: '/elsewhere',
+  test('each kind of child gets the listed names of the environment; only generate gets the API settings', () => {
+    const source: Record<string, string> = {
+      PATH: '/bin', HOME: '/home/x', LANG: 'C', LC_ALL: 'C', LC_TERMINAL: 'x', TZ: 'UTC', TMPDIR: '/tmp', EVAC_URL: 'http://127.0.0.1:1', EVAC_RAW_DIR: '/raw', JMA_FEED_DIR: '/feed', CHROME_PATH: '/chrome',
+      ANTHROPIC_API_KEY: API_KEY, ANTHROPIC_BASE_URL: 'http://127.0.0.1:9', HTTPS_PROXY: 'http://proxy', NODE_EXTRA_CA_CERTS: '/ca.pem',
+      NUXT_ADMIN_TOKEN: OPERATOR_TOKEN, NUXT_WEBHOOK_ALLOW_PRIVATE: '1', SECRET_SAMPLE, AWS_SECRET_ACCESS_KEY: 'x', EVAC_DATA_DIR: '/elsewhere', EVAC_FAKE_EXPORT_CALLS: '/calls', EVAC_UNLISTED_SETTING: 'x',
     }
     for (const purpose of ['generate', 'preview', 'export'] as const) {
       const env = agentEnv(purpose, source, '/data')
       assert.equal(env.EVAC_DATA_DIR, '/data', purpose)
-      for (const name of ['PATH', 'HOME', 'LANG', 'LC_ALL', 'TZ', 'TMPDIR', 'EVAC_URL', 'JMA_FEED_DIR', 'CHROME_PATH']) assert.equal(env[name], source[name as keyof typeof source], `${purpose} ${name}`)
-      for (const name of ['NUXT_ADMIN_TOKEN', 'NUXT_WEBHOOK_ALLOW_PRIVATE', 'SECRET_SAMPLE', 'AWS_SECRET_ACCESS_KEY']) assert.equal(env[name], undefined, `${purpose} ${name}`)
-      assert.equal(env.ANTHROPIC_API_KEY, purpose === 'generate' ? API_KEY : undefined, purpose)
+      for (const name of ['PATH', 'HOME', 'LANG', 'LC_ALL', 'TZ', 'TMPDIR', 'EVAC_URL', 'EVAC_RAW_DIR', 'JMA_FEED_DIR', 'CHROME_PATH']) assert.equal(env[name], source[name], `${purpose} ${name}`)
+      for (const name of ['NUXT_ADMIN_TOKEN', 'NUXT_WEBHOOK_ALLOW_PRIVATE', 'SECRET_SAMPLE', 'AWS_SECRET_ACCESS_KEY', 'EVAC_FAKE_EXPORT_CALLS', 'EVAC_UNLISTED_SETTING', 'LC_TERMINAL']) assert.equal(env[name], undefined, `${purpose} ${name}`)
+      for (const name of ['ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'HTTPS_PROXY', 'NODE_EXTRA_CA_CERTS']) assert.equal(env[name], purpose === 'generate' ? source[name] : undefined, `${purpose} ${name}`)
+    }
+  })
+
+  test('ps lines are read in the time zone ps is given, and the arguments of a command are matched whole', () => {
+    const line = parsePsLine('  4321  4000  4000 Wed Nov 11 10:12:34 2026     node /srv/fake.mjs --site=ab --writer=live')
+    assert.deepEqual(line, { pid: 4321, ppid: 4000, pgid: 4000, startedAt: new Date(2026, 10, 11, 10, 12, 34).getTime(), args: ['node', '/srv/fake.mjs', '--site=ab', '--writer=live'] })
+    assert.equal(parsePsLine('  12  1  12 Mon Nov  2 09:05:01 2026 /sbin/launchd')?.startedAt, new Date(2026, 10, 2, 9, 5, 1).getTime())
+    assert.equal(parsePsLine('garbage'), undefined)
+    assert.equal(argumentsMatch(['--site=ab', '--writer=live'], line!.args), true)
+    assert.equal(argumentsMatch(['--site=a'], line!.args), false)
+    assert.equal(argumentsMatch(['--site=ab'], ['node', 'x', '--site=abc']), false)
+    const saved = process.env.TZ
+    try {
+      process.env.TZ = 'Asia/Tokyo'
+      assert.equal(psEnv().TZ, 'Asia/Tokyo')
+      assert.equal(psEnv().LC_ALL, 'C')
+    } finally {
+      if (saved === undefined) delete process.env.TZ
+      else process.env.TZ = saved
     }
   })
 })
@@ -150,7 +76,7 @@ describe('generation jobs over HTTP', { skip }, () => {
 
   before(async () => {
     data = await makeData()
-    for (const id of ['alpha-one', 'alpha-two', 'alpha-fresh', 'alpha-fail', 'alpha-nopng', 'alpha-shapes', 'alpha-moved', 'alpha-partial', 'alpha-empty', 'alpha-link', 'del-running', 'del-queued', 'del-done', 'del-reborn', 'chrome-stderr', 'chrome-file', 'chrome-own']) await data.writeSite(id, 'alpha-fac')
+    for (const id of ['alpha-one', 'alpha-two', 'alpha-fresh', 'alpha-fail', 'alpha-nopng', 'alpha-shapes', 'alpha-moved', 'alpha-partial', 'alpha-empty', 'alpha-link', 'del-running', 'del-queued', 'del-done', 'del-reborn', 'chrome-stderr', 'chrome-file', 'chrome-own', 'chrome-late', 'grand-live', 'pipe-hold', 'exp-del', 'exp-fail', 'alpha-comp', 'alpha-open']) await data.writeSite(id, 'alpha-fac')
     await data.writeSite('alpha-cold', 'alpha-fac', NOT_PREPARED)
     await data.writeSite('beta-one', 'beta-fac')
     await data.writeSite('op-site')
@@ -158,7 +84,7 @@ describe('generation jobs over HTTP', { skip }, () => {
   })
   after(async () => {
     child?.kill()
-    for (const file of (await readdir(data.root)).filter((f) => f.startsWith('chrome-'))) {
+    for (const file of (await readdir(data.root)).filter((f) => /^(chrome-|stray-|grandchild-)/.test(f))) {
       const pid = Number(await readFile(join(data.root, file), 'utf8'))
       if (alive(pid)) process.kill(pid, 'SIGKILL')
     }
@@ -357,7 +283,7 @@ describe('generation jobs over HTTP', { skip }, () => {
   })
 
   test('a failed job tells a code and a fixed text, never the paths or variables the command printed', async () => {
-    const leak = '[generate stopped] /Users/someone/private/evac/.env: API_TOKEN=abc123 at https://internal.example/x'
+    const leak = '[generate stopped] /Users/someone/private/evac/.env: API_TOKEN=abc123 at https://internal.example/x ~/someone-key.pem ../../someone/etc ./someone/raw'
     await data.fakes.stage('alpha-fail', [{ ...SYN_PASS, outcome: 'fail', reason: leak }, SYN_FAIL], { exit: leak })
     const failed = await api.run('alpha-fail', TOKEN_A)
     assert.equal(failed.status, 'failed')
@@ -366,7 +292,7 @@ describe('generation jobs over HTTP', { skip }, () => {
     assert.deepEqual(failed.classes.map((c: any) => c.outcome), ['fail', 'fail'])
     assert.ok(failed.classes[0].reason.length > 0)
     const answers = [JSON.stringify(failed), JSON.stringify(await api.state('alpha-fail', TOKEN_A)), await readFile(join(data.dataDir, 'live', 'alpha-fail.generation.json'), 'utf8')]
-    for (const text of answers) for (const secret of ['/Users/someone', 'API_TOKEN=abc123', 'internal.example', 'composing composing']) assert.ok(!text.includes(secret), `${secret} in ${text}`)
+    for (const text of answers) for (const secret of ['/Users/someone', 'API_TOKEN=abc123', 'internal.example', 'composing composing', 'someone-key', 'someone/etc', 'someone/raw']) assert.ok(!text.includes(secret), `${secret} in ${text}`)
   })
 
   test('a preview that cannot be rendered leaves the job done with a preview error code', async () => {
@@ -430,9 +356,11 @@ describe('generation jobs over HTTP', { skip }, () => {
     assert.ok(dumps.some((f) => f.startsWith('env-generate-')) && dumps.some((f) => f.startsWith('env-preview-')))
     for (const file of dumps) {
       const env = JSON.parse(await readFile(join(data.root, file), 'utf8'))
-      for (const name of Object.keys(env)) assert.match(name, ALLOWED_ENV, `${file}: ${name}`)
+      const allowed = file.startsWith('env-generate-') ? [...SHARED_ENV, ...GENERATE_ENV] : SHARED_ENV
+      for (const name of Object.keys(env)) assert.ok(allowed.includes(name), `${file}: ${name}`)
       for (const secret of ALL_SECRETS) assert.ok(!JSON.stringify(env).includes(secret), file)
       assert.equal(env.ANTHROPIC_API_KEY, file.startsWith('env-generate-') ? API_KEY : undefined, file)
+      assert.equal(env.ANTHROPIC_BASE_URL, file.startsWith('env-generate-') ? 'http://127.0.0.1:9' : undefined, file)
     }
     const preview = `/api/admin/preview-layout?${new URLSearchParams({ site: 'alpha-one', bulletin: SYN_PASS.bulletin, shape: '16x9' })}`
     assert.equal((await fetch(`${base}${preview}`)).status, 401)
@@ -487,6 +415,103 @@ describe('generation jobs over HTTP', { skip }, () => {
     } finally {
       bystander.kill('SIGKILL')
     }
+  })
+
+  test('a Chrome the command starts while it is being stopped is stopped too', async () => {
+    await data.fakes.stage('chrome-late', [SYN_PASS], { lateChrome: true })
+    await data.fakes.hold('chrome-late.preview')
+    assert.equal((await api.start('chrome-late', TOKEN_A)).status, 202)
+    await appears(join(data.root, 'pid-preview-chrome-late'))
+    assert.equal((await api.remove('chrome-late', TOKEN_A)).status, 204)
+    await data.fakes.release('chrome-late.preview')
+    const late = Number(await readFile(join(data.root, 'chrome-late-chrome-late'), 'utf8'))
+    await until(() => !alive(late), 'the Chrome started during the stop is still running')
+  })
+
+  test('a command that ends while a process of its group runs on does not end the job before that process', async () => {
+    await data.fakes.stage('grand-live', [SYN_PASS], { grandchild: 'obedient' })
+    await data.fakes.hold('grand-live.grandchild')
+    const done = await api.run('grand-live', TOKEN_A)
+    assert.equal(done.status, 'done')
+    const member = Number(await readFile(join(data.root, 'grandchild-grand-live'), 'utf8'))
+    assert.equal(alive(member), false, 'the member left behind was stopped before the job finished')
+    await data.fakes.release('grand-live.grandchild')
+  })
+
+  test('a stop that cannot see the command\'s output close still ends within a bound', async () => {
+    await data.fakes.stage('pipe-hold', [SYN_PASS], { pipeHolder: true })
+    await data.fakes.hold('pipe-hold')
+    const id = (await (await api.start('pipe-hold', TOKEN_A)).json()).generation_id
+    await api.job('pipe-hold', id, TOKEN_A, (s) => s === 'running')
+    await appears(join(data.root, 'stray-pipe-hold'))
+    const began = Date.now()
+    assert.equal((await api.remove('pipe-hold', TOKEN_A)).status, 204)
+    assert.ok(Date.now() - began < 15000, `DELETE took ${Date.now() - began} ms`)
+    await data.fakes.release('pipe-hold')
+  })
+
+  test('needs_generation looks at every class the job composes, and is false while a job is open', async () => {
+    const old: StagedClass = { bulletin: 'VTSE41-202611050000-0000000000d5', level: 5, outcome: 'pass', issued_at: '2026-11-05T00:00:00+09:00' }
+    await writeExistingScreens(data.dataDir, 'alpha-comp', [old])
+    await sleep(20)
+    await data.writeSite('alpha-comp', 'alpha-fac', PREPARED, new Date().toISOString(), 35.9)
+    await data.fakes.stage('alpha-comp', [SYN_PASS], { composable: [classOf(SYN_PASS), classOf(old)] })
+    assert.equal((await api.run('alpha-comp', TOKEN_A)).status, 'done')
+    const state = await api.state('alpha-comp')
+    assert.equal(byClass(state)[classOf(old)].stale, true)
+    assert.equal(state.needs_generation, true, 'a composable class left stale, though the last result did not list it')
+    await data.fakes.hold('alpha-comp')
+    const open = (await (await api.start('alpha-comp', TOKEN_A)).json()).generation_id
+    await api.job('alpha-comp', open, TOKEN_A, (s) => s === 'running')
+    assert.equal((await api.state('alpha-comp')).needs_generation, false)
+    await data.fakes.release('alpha-comp')
+    await api.job('alpha-comp', open, TOKEN_A)
+  })
+
+  test('unchanged is left out while the latest job has not recorded the screens it started from', async () => {
+    await data.fakes.stage('alpha-open', [SYN_PASS])
+    assert.equal((await api.run('alpha-open', TOKEN_A)).status, 'done')
+    assert.equal(byClass(await api.state('alpha-open'))[classOf(SYN_PASS)].unchanged, false)
+    await data.fakes.stage('alpha-two', [SYN_PASS])
+    await data.fakes.hold('alpha-two')
+    const blocker = (await (await api.start('alpha-two', TOKEN_A)).json()).generation_id
+    await api.job('alpha-two', blocker, TOKEN_A, (s) => s === 'running')
+    const queued = (await (await api.start('alpha-open', OPERATOR_TOKEN)).json()).generation_id
+    assert.equal('unchanged' in byClass(await api.state('alpha-open'))[classOf(SYN_PASS)], false)
+    await data.fakes.release('alpha-two')
+    await api.job('alpha-two', blocker, TOKEN_A)
+    await api.job('alpha-open', queued, OPERATOR_TOKEN)
+  })
+
+  async function approveForExport(site: string, spec: StagedClass) {
+    await writeExistingScreens(data.dataDir, site, [spec])
+    assert.equal((await postJson(base, '/api/admin/approve', { site_id: site, bulletin_id: spec.bulletin, approved: true }, bearer(TOKEN_A))).status, 200)
+    assert.equal((await postJson(base, '/api/admin/site', { site_id: site, auto_publish: true }, bearer(TOKEN_A))).status, 200)
+  }
+
+  test('an export running when its site is deleted is stopped before anything is removed, and writes nothing for the next owner', async () => {
+    await data.fakes.hold('exp-del.export')
+    await approveForExport('exp-del', REAL_PASS)
+    await appears(join(data.root, 'pid-export-exp-del'))
+    const pid = Number(await readFile(join(data.root, 'pid-export-exp-del'), 'utf8'))
+    assert.equal((await api.remove('exp-del', TOKEN_A)).status, 204)
+    assert.equal(alive(pid), false, 'the export is gone when DELETE answers')
+    assert.ok(existsSync(join(data.root, 'term-export-exp-del')))
+    await data.writeSite('exp-del', 'beta-fac')
+    await data.fakes.release('exp-del.export')
+    await sleep(500)
+    assert.ok(!existsSync(join(data.distDir, 'exp-del')))
+  })
+
+  test('a failed export tells the facility a fixed reason, never the paths or variables the command printed', async () => {
+    const leak = '[export stopped] /Users/someone/private/chrome: API_TOKEN=abc123'
+    await data.fakes.stage('exp-fail', [], { exportFail: leak })
+    await approveForExport('exp-fail', REAL_PASS)
+    let failed: any[] = []
+    await until(async () => (failed = (await api.state('exp-fail', TOKEN_A)).exports.failed).length > 0, 'the export never failed')
+    assert.equal(failed[0].bulletin_id, REAL_PASS.bulletin)
+    const answers = [JSON.stringify(await api.state('exp-fail', TOKEN_A)), await readFile(join(data.dataDir, 'live', 'exp-fail.export.json'), 'utf8')]
+    for (const text of answers) for (const secret of ['/Users/someone', 'API_TOKEN=abc123']) assert.ok(!text.includes(secret), `${secret} in ${text}`)
   })
 
   test('DELETE removes the job record and the previews of a finished job', async () => {
@@ -553,32 +578,57 @@ describe('generation jobs across server stops', { skip }, () => {
   let data: Awaited<ReturnType<typeof makeData>>
   const api = client(() => base)
   const stray: ChildProcess[] = []
+  const geocoder = createServer((_req, res) => {
+    res.setHeader('content-type', 'application/json')
+    res.end(JSON.stringify({ results: { muniCd: PREPARED, lv01Nm: 'test' } }))
+  })
+  let geocoderUrl = ''
 
   before(async () => {
+    await new Promise<void>((resolve) => geocoder.listen(0, '127.0.0.1', resolve))
+    geocoderUrl = `http://127.0.0.1:${(geocoder.address() as { port: number }).port}/reverse-geocoder/LonLatToAddress`
     data = await makeData()
     for (let n = 1; n <= 7; n++) {
       await data.writeSite(`gamma-${n}`, 'gamma-fac')
       await data.fakes.stage(`gamma-${n}`, [SYN_PASS])
     }
-    for (const id of ['alpha-a', 'alpha-b', 'alpha-c', 'stop-term', 'stop-kill', 'stop-foreign']) {
+    for (const id of ['alpha-a', 'alpha-b', 'alpha-c', 'stop-term', 'stop-kill', 'stop-foreign', 'stop-grand', 'stop-late', 'stop-orphan']) {
       await data.writeSite(id, 'alpha-fac')
       await data.fakes.stage(id, [SYN_PASS])
     }
-    ;({ base, child } = await startServer(data.env))
+    ;({ base, child } = await startServer({ ...data.env, NUXT_REVERSE_GEOCODER_URL: geocoderUrl }))
   })
   after(async () => {
     child?.kill()
     for (const leftover of stray) leftover.kill('SIGKILL')
+    await new Promise((resolve) => geocoder.close(resolve))
     await rm(join(data.root, 'hold'), { recursive: true, force: true })
     await sleep(300)
     await rm(data.root, { recursive: true, force: true })
   })
 
-  async function restart(env: Record<string, string> = {}, signal: NodeJS.Signals = 'SIGTERM') {
+  async function stopServer(signal: NodeJS.Signals = 'SIGTERM') {
     const stopped = new Promise((resolve) => child!.once('exit', resolve))
     child!.kill(signal)
     await stopped
-    ;({ base, child } = await startServer({ ...data.env, ...env }))
+  }
+
+  async function restart(env: Record<string, string> = {}, signal: NodeJS.Signals = 'SIGTERM') {
+    await stopServer(signal)
+    ;({ base, child } = await startServer({ ...data.env, NUXT_REVERSE_GEOCODER_URL: geocoderUrl, ...env }))
+  }
+
+  async function writeRunningRecord(site: string, child: { pgid: number; started_at: number; match: string[] }) {
+    const now = new Date().toISOString()
+    const record = { site_id: site, latest: { generation_id: 'f0f0f0f0f0f0f0f0', site_id: site, status: 'running', created_at: now, started_at: now, started_by: { token_label: 'operator' }, classes: [], child } }
+    await mkdir(join(data.dataDir, 'live'), { recursive: true })
+    await writeFile(join(data.dataDir, 'live', `${site}.generation.json`), JSON.stringify(record))
+  }
+
+  const standIn = (args: string[]) => {
+    const stand = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)', '--', ...args], { detached: true, stdio: 'ignore' })
+    stray.push(stand)
+    return stand
   }
 
   test('a facility has at most two jobs unfinished; a third waits its turn as 429', async () => {
@@ -633,29 +683,69 @@ describe('generation jobs across server stops', { skip }, () => {
     assert.equal((await api.run('stop-kill', OPERATOR_TOKEN)).status, 'done')
   })
 
-  test('a recorded child that cannot be told to be ours is left running, and its site takes no job meanwhile', async () => {
-    const foreign = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 60000)'], { detached: true, stdio: 'ignore' })
-    stray.push(foreign)
-    const pid = foreign.pid!
-    const record = {
-      site_id: 'stop-foreign',
-      latest: {
-        generation_id: 'f0f0f0f0f0f0f0f0', site_id: 'stop-foreign', status: 'running', created_at: new Date().toISOString(), started_at: new Date().toISOString(),
-        started_by: { token_label: 'operator' }, classes: [], child: { pgid: pid, started_at: Date.now(), match: ['--site=stop-foreign'] },
-      },
-    }
-    await mkdir(join(data.dataDir, 'live'), { recursive: true })
-    await writeFile(join(data.dataDir, 'live', 'stop-foreign.generation.json'), JSON.stringify(record))
+  test('a recorded process group whose command line is not the job\'s is someone else\'s: it is left running and does not hold the site', async () => {
+    const foreign = standIn([])
+    await writeRunningRecord('stop-foreign', { pgid: foreign.pid!, started_at: Date.now(), match: ['--site=stop-foreign'] })
     await restart()
     const job = await (await api.get('/api/admin/sites/stop-foreign/generations/f0f0f0f0f0f0f0f0', OPERATOR_TOKEN)).json()
     assert.equal(job.status, 'failed')
-    assert.equal(alive(pid), true, 'a process whose command line is not the job\'s is not stopped')
-    const refused = await api.start('stop-foreign', OPERATOR_TOKEN)
-    assert.equal(refused.status, 409)
-    assert.equal((await refused.json()).data.code, 'generation-running')
-    foreign.kill('SIGKILL')
-    await until(() => !alive(pid), 'the stand-in process did not end')
+    assert.equal(alive(foreign.pid!), true, 'a process whose command line is not the job\'s is not stopped')
     assert.equal((await api.run('stop-foreign', OPERATOR_TOKEN)).status, 'done')
+    foreign.kill('SIGKILL')
+  })
+
+  test('a recorded process group that started at another time is someone else\'s, whatever its command line', async () => {
+    const late = standIn(['--site=stop-late', '--writer=live'])
+    await writeRunningRecord('stop-late', { pgid: late.pid!, started_at: Date.now() - 3600_000, match: ['--site=stop-late', '--writer=live'] })
+    await restart()
+    assert.equal((await (await api.get('/api/admin/sites/stop-late/generations/f0f0f0f0f0f0f0f0', OPERATOR_TOKEN)).json()).status, 'failed')
+    assert.equal(alive(late.pid!), true)
+    assert.equal((await api.run('stop-late', OPERATOR_TOKEN)).status, 'done')
+    late.kill('SIGKILL')
+  })
+
+  test('a group whose leader ended while a member runs on is matched by the member, and nothing goes on until the member ends', async () => {
+    await data.fakes.stage('stop-grand', [SYN_PASS], { grandchild: 'stubborn' })
+    await data.fakes.hold('stop-grand')
+    await data.fakes.hold('stop-grand.grandchild')
+    const id = (await (await api.start('stop-grand', OPERATOR_TOKEN)).json()).generation_id
+    await api.job('stop-grand', id, OPERATOR_TOKEN, (s) => s === 'running')
+    await appears(join(data.root, 'pid-stop-grand'))
+    const leader = Number(await readFile(join(data.root, 'pid-stop-grand'), 'utf8'))
+    await stopServer('SIGKILL')
+    await data.fakes.release('stop-grand')
+    await appears(join(data.root, 'grandchild-stop-grand'))
+    const member = Number(await readFile(join(data.root, 'grandchild-stop-grand'), 'utf8'))
+    await until(() => !alive(leader), 'the leader did not end')
+    ;({ base, child } = await startServer({ ...data.env, NUXT_REVERSE_GEOCODER_URL: geocoderUrl }))
+    const job = await (await api.get(`/api/admin/sites/stop-grand/generations/${id}`, OPERATOR_TOKEN)).json()
+    assert.equal(job.error_code, 'server-restarted')
+    assert.equal(alive(member), false, 'the record reads failed only once the member has ended')
+    await data.fakes.release('stop-grand.grandchild')
+    assert.equal((await api.run('stop-grand', OPERATOR_TOKEN)).status, 'done')
+  })
+
+  test('a child that cannot be checked outlives a DELETE of its site: the id is neither registered nor composed again until it ends', async () => {
+    const orphan = standIn(['--site=stop-orphan', '--writer=live'])
+    await writeRunningRecord('stop-orphan', { pgid: orphan.pid!, started_at: Date.now(), match: ['--site=stop-orphan', '--writer=live'] })
+    await restart({ PATH: dirname(process.execPath) })
+    assert.equal((await (await api.get('/api/admin/sites/stop-orphan/generations/f0f0f0f0f0f0f0f0', OPERATOR_TOKEN)).json()).status, 'failed')
+    assert.equal(alive(orphan.pid!), true, 'without ps nothing is confirmed, so nothing is stopped')
+    const running = await api.start('stop-orphan', TOKEN_A)
+    assert.equal(running.status, 409)
+    assert.equal((await running.json()).data.code, 'generation-running')
+    assert.equal((await api.remove('stop-orphan', TOKEN_A)).status, 204)
+    const put = (token: string) => fetch(`${base}/api/admin/sites/stop-orphan`, { method: 'PUT', headers: { 'content-type': 'application/json', ...bearer(token) }, body: JSON.stringify({ lat: 35.68, lng: 139.76, facing_deg: 90 }) })
+    for (const [token, code] of [[OPERATOR_TOKEN, 'site-busy'], [TOKEN_A, 'site-busy'], [TOKEN_B, 'site-id-taken']] as const) {
+      const refused = await put(token)
+      assert.equal(refused.status, 409, token)
+      assert.equal((await refused.json()).data.code, code, token)
+    }
+    orphan.kill('SIGKILL')
+    await until(() => !alive(orphan.pid!), 'the stand-in process did not end')
+    assert.equal((await put(TOKEN_A)).status, 201)
+    await data.fakes.stage('stop-orphan', [SYN_PASS])
+    assert.equal((await api.run('stop-orphan', TOKEN_A)).status, 'done')
   })
 
   test('with the command off, a start answers generation-disabled', async () => {
