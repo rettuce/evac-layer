@@ -34,7 +34,8 @@ A map of this repository for first-time readers and AI: what is where, and which
 
 誤解しやすい点:
 - `data/layouts/14100-demo/` には `index.json` しかありません。横浜市は記録期間に警報が出ず、画面は 0 枚です（`docs/evaluation.md:13`）。
-- `agents/src/jma/receive.ts` は Anthropic SDK を import します。ただしモデルを呼ぶのは `--writer live` か `--verifier vision` を明示したときだけです。既定の Writer は `placeholder` で、承認済みの文を再利用します（`agents/src/jma/receive.ts:151`・`agents/src/jma/receive.ts:171-172`、`agents/src/writer/step.ts:22-38`）。
+- `agents/src/jma/receive.ts` は Anthropic SDK を import します。ただしモデルを呼ぶのは `--writer live` か `--verifier vision` を明示したときだけです。既定の Writer は `placeholder` で、承認済みの文を再利用します（`agents/src/jma/receive.ts:228-229`・`agents/src/jma/receive.ts:242`、`agents/src/writer/step.ts:22-38`）。
+- `data/live/<site_id>.receiver.json` には時刻が 2 つあります。`fetched_at` は受信の 1 周でフィードを取り終えた時刻で、画面を作る前に全 site へ書きます。`received_at` はその周の開始時刻で、その site の画面を作り終えてから書きます。フィードの `last_received_at` は `received_at`、「受信が止まっている」の通知が読むのは `fetched_at`（無ければ `received_at`）です（`agents/src/jma/receive.ts` の `receiveSites`、`app/layout/liveness.ts` の `stoppedReceivers`）。
 - `docs/how-we-built.md` は、英語の段落のあとに同じ内容の日本語が続きます。
 
 ## README の主張と裏付け
@@ -44,7 +45,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | スクリーンが自分の場所を知り、避難先・方向・距離を出す | `agents/src/composer/compose.ts:24-38`（方位と向き）・`agents/src/composer/compose.ts:63`（`pickShelter`）・`app/layout/nearSite.ts:1`（100 m の施設解決） |
 | 承認はモデルの外にある | `app/layout/gate.ts` の `screenClass`・`classKey`（種類のキー）・`classDigest`（警報名と時刻を除いた digest）・`approvalWith`・`liveLayoutGateWith`（ゲート） |
 | 未承認の画面は配信されない | `app/server/api/live-layout.get.ts:7-8`（ゲートを通らなければ 403） |
-| 警報時はモデルを呼ばない | `agents/src/jma/receive.ts:151`・`agents/src/jma/receive.ts:171-172`・`agents/src/writer/step.ts:22-38` |
+| 警報時はモデルを呼ばない | `agents/src/jma/receive.ts:228-229`・`agents/src/jma/receive.ts:242`・`agents/src/writer/step.ts:22-38` |
 | 気象庁のフィードを読む | `agents/src/jma/record.ts:79`（`recordFeeds`） |
 | 実電文で作り、3 段で検査する | `agents/src/loop/static-verifier.ts`・`browser-verifier.ts`・`agents/src/verifier/vision.ts`・指摘の種類は `agents/src/verifier/checks.ts:28`・最大 3 回は `agents/src/loop/loop.ts:6` |
 | レイアウト 110 | `data/layouts/` の `index.json` 以外の JSON が 110 ファイル |

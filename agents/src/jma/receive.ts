@@ -18,22 +18,46 @@ import { BODY_NAME, mentionsMunicipality } from "./feed.js";
 import { bodyPath, FEEDS_WITH_BODIES, isLongFeed, readIndex, recordFeeds, roundLine, type FeedResult, type FetchImpl, type IndexedEntry, type SavedBody } from "./record.js";
 import { REPLAYABLE, replayEntry, type ReplayEntry } from "./replay.js";
 
-export interface ReceiverState { since: string; showing: Record<string, string>; received_at?: string }
+export interface ReceiverState { since: string; showing: Record<string, string>; received_at?: string; fetched_at?: string }
 
 export function receiverStateFile(siteId: string, liveDir = LIVE_DIR): string {
   return path.join(liveDir, `${siteId}.receiver.json`);
 }
 
-export function readReceiverState(siteId: string, initialSince: string, liveDir = LIVE_DIR): ReceiverState {
+function readStored(siteId: string, liveDir: string): Partial<ReceiverState> | undefined {
   const file = receiverStateFile(siteId, liveDir);
-  return fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf8")) as ReceiverState) : { since: initialSince, showing: {} };
+  return fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf8")) as Partial<ReceiverState>) : undefined;
 }
 
-function writeReceiverState(siteId: string, state: ReceiverState, liveDir = LIVE_DIR) {
+// A record holding only `fetched_at` stands for a site no round has finished yet, so it starts from `initialSince`.
+export function readReceiverState(siteId: string, initialSince: string, liveDir = LIVE_DIR): ReceiverState {
+  return { since: initialSince, showing: {}, ...readStored(siteId, liveDir) };
+}
+
+function writeReceiverState(siteId: string, state: Partial<ReceiverState>, liveDir = LIVE_DIR) {
   const file = receiverStateFile(siteId, liveDir);
   fs.mkdirSync(liveDir, { recursive: true });
   fs.writeFileSync(`${file}.tmp`, JSON.stringify(state, null, 2) + "\n");
   fs.renameSync(`${file}.tmp`, file);
+}
+
+export function noteFetched(siteId: string, fetchedAt: string, liveDir = LIVE_DIR) {
+  writeReceiverState(siteId, { ...readStored(siteId, liveDir), fetched_at: fetchedAt }, liveDir);
+}
+
+// The fetch is noted for every site before any is composed, so a long round of screens does not look like a stopped receiver.
+export async function receiveSites(args: { sites: SiteFile[]; fetchedAt?: string; liveDir?: string; each: (site: SiteFile) => Promise<unknown>; log?: (m: string) => void }) {
+  const log = args.log ?? console.error;
+  if (args.fetchedAt) {
+    for (const site of args.sites) {
+      try {
+        noteFetched(site.id, args.fetchedAt, args.liveDir);
+      } catch (e) {
+        log(`  [${site.id}] [error] fetch time not recorded: ${(e as Error).message}`);
+      }
+    }
+  }
+  for (const site of args.sites) await args.each(site);
 }
 
 export const LOOKBACK_MS = 24 * 60 * 60 * 1000;
@@ -72,17 +96,20 @@ export function readsLongFeeds(lastLongAt: Date | undefined, now: Date): boolean
   return lastLongAt === undefined || now.getTime() - lastLongAt.getTime() >= LONG_FEED_EVERY_MS;
 }
 
-export interface RecordRound { feeds: FeedResult[]; saved: SavedBody[]; receivedAt?: string; lastLongAt?: Date }
+export interface RecordRound { feeds: FeedResult[]; saved: SavedBody[]; receivedAt?: string; fetchedAt?: string; lastLongAt?: Date }
 
 export async function recordRound(opts: { lastLongAt?: Date; feedDir?: string; fetchImpl?: FetchImpl; now?: () => Date; sleep?: (ms: number) => Promise<void>; log?: (m: string) => void }): Promise<RecordRound> {
   const { lastLongAt, ...rest } = opts;
-  const t0 = (opts.now ?? (() => new Date()))();
+  const now = opts.now ?? (() => new Date());
+  const t0 = now();
   const withLong = readsLongFeeds(lastLongAt, t0);
   const { feeds, saved } = await recordFeeds({ ...rest, feeds: withLong ? "both" : "frequent" });
+  const fetched = !feeds.some((f) => f.failed);
   const longFetched = withLong && feeds.filter((f) => isLongFeed(f.feed)).every((f) => !f.failed);
   return {
     feeds, saved,
-    receivedAt: feeds.some((f) => f.failed) ? undefined : t0.toISOString(),
+    receivedAt: fetched ? t0.toISOString() : undefined,
+    fetchedAt: fetched ? now().toISOString() : undefined,
     lastLongAt: longFetched ? t0 : lastLongAt,
   };
 }
@@ -206,12 +233,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const t0 = Date.now();
     const recorded = await recordRound({ lastLongAt });
     lastLongAt = recorded.lastLongAt;
-    const { feeds, saved, receivedAt } = recorded;
+    const { feeds, saved, receivedAt, fetchedAt } = recorded;
     console.log(`${roundLine(t0, feeds)}  saved=${saved.length}`);
     for (const f of feeds) if (f.failed) console.error(`[record] ${f.feed}: ${f.failed}`);
     const usage: CallUsage[] = [];
     const visionUsage: CallUsage[] = [];
-    for (const site of sites) {
+    await receiveSites({ sites, fetchedAt, each: async (site) => {
       const browser = values.verifier === "static" ? undefined : browserVerifier({ baseUrl: values["base-url"]!, ...(values.verifier === "vision" ? { vision: { client: new Anthropic(), model: "sonnet" as const, usage: visionUsage } } : {}) });
       try {
         const r = await receiveSite({ site, verifier: browser ?? staticVerifier, writer, usage, initialSince, log: (m) => console.log(m), baseUrl: values["base-url"], receivedAt });
@@ -222,7 +249,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       } finally {
         await browser?.close();
       }
-    }
+    } });
     const usd = [...usage, ...visionUsage].reduce((n, u) => n + u.usd, 0);
     if (usd) console.log(`  api $${usd.toFixed(3)}`);
   };

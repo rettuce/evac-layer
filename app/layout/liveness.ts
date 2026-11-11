@@ -5,7 +5,7 @@ const RESUME_WITHOUT_REMINDERS_MS = 15 * 60 * 1000
 
 export interface StoppedReceiver {
   site: string
-  received_at: string
+  at: string
   ms: number
 }
 
@@ -15,15 +15,18 @@ export interface ReceiverScan {
   future: string[]
 }
 
-// `received_at` is written by `receive` after a round in which every feed was fetched; a site it never ran for has none.
-export function stoppedReceivers(records: { site: string; received_at: unknown }[], now: number, thresholdMs: number): ReceiverScan {
+// `receive` writes `fetched_at` once every feed of a round was fetched, before it composes any site's screens, and
+// `received_at` once it has composed the site's. A receiver of an earlier version writes only `received_at`; a site no
+// receiver ran for has neither.
+export function stoppedReceivers(records: { site: string; received_at: unknown; fetched_at?: unknown }[], now: number, thresholdMs: number): ReceiverScan {
   const scan: ReceiverScan = { stopped: [], unreadable: [], future: [] }
-  for (const { site, received_at } of records) {
-    if (received_at === undefined) continue
-    const ms = typeof received_at === 'string' ? Date.parse(received_at) : Number.NaN
+  for (const { site, received_at, fetched_at } of records) {
+    const at = fetched_at === undefined ? received_at : fetched_at
+    if (at === undefined) continue
+    const ms = typeof at === 'string' ? Date.parse(at) : Number.NaN
     if (!Number.isFinite(ms)) scan.unreadable.push(site)
     else if (ms > now) scan.future.push(site)
-    else if (now - ms >= thresholdMs) scan.stopped.push({ site, received_at: received_at as string, ms })
+    else if (now - ms >= thresholdMs) scan.stopped.push({ site, at: at as string, ms })
   }
   scan.stopped.sort((a, b) => a.ms - b.ms || a.site.localeCompare(b.site))
   return scan

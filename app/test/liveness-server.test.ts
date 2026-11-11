@@ -152,6 +152,28 @@ describe('notices that something has stopped', { skip }, () => {
     assert.ok(about('recv-a')(again) && !again.includes('recv-b') && !again.includes('回目'), again)
   })
 
+  test('by default a site whose receiver fetched the feeds in the last 15 minutes is not stopped, however old received_at is; a site without a fetch time is judged by received_at', async () => {
+    await reset()
+    const dataDir = await newDataDir()
+    const ids = ['hb-composing', 'hb-fetch-old', 'hb-legacy-old', 'hb-legacy-fresh']
+    for (const id of ids) await quietSite(dataDir, id)
+    const now = Date.now()
+    const stamp = (ms: number) => new Date(ms).toISOString()
+    const record = (id: string, fields: Record<string, string>) => writeFile(join(dataDir, 'live', `${id}.receiver.json`), JSON.stringify({ since: fields.received_at, showing: {}, ...fields }))
+    await record('hb-composing', { received_at: stamp(now - 40 * MINUTE), fetched_at: stamp(now) })
+    await record('hb-fetch-old', { received_at: stamp(now - 40 * MINUTE), fetched_at: stamp(now - 25 * MINUTE) })
+    await record('hb-legacy-old', { received_at: stamp(now - 20 * MINUTE) })
+    await record('hb-legacy-fresh', { received_at: stamp(now - 10 * MINUTE) })
+    await serve({ NUXT_NOTIFY_REMIND_MINUTES: '0.05', NUXT_NOTIFY_FEED_IDLE_MINUTES: '0' }, dataDir)
+
+    await until('a receiver notice', () => receiverNotices().length >= 1)
+    const first = receiverNotices()[0]!
+    assert.ok(about('hb-fetch-old')(first) && about('hb-legacy-old')(first), first)
+    assert.ok(!first.includes('hb-composing') && !first.includes('hb-legacy-fresh'), first)
+    assert.ok(first.includes(stamp(now - 25 * MINUTE)) && !first.includes(stamp(now - 40 * MINUTE)), 'the time listed is the fetch time')
+    assert.ok(first.includes('15 分以上'), first)
+  })
+
   test('without any receive record, or with the threshold at 0, no receiver notice is sent', async () => {
     await reset()
     const dataDir = await newDataDir()
