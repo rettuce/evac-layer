@@ -11,9 +11,8 @@ export default defineEventHandler(async (event) => {
     generation = await startGeneration(id, event.context.admin!, event.context.audit?.actor)
   } catch (error) {
     if (!(error instanceof GenerationRateLimited)) throw error
-    setResponseStatus(event, 429, 'Too Many Requests')
     setResponseHeader(event, 'Retry-After', error.retryAfterSeconds)
-    return { statusCode: 429, statusMessage: 'Too Many Requests', message: error.message, data: { code: 'generation-rate-limited' } }
+    throw problem(429, 'generation-rate-limited', error.message)
   }
   if (!generation) throw problem(404, 'not-found', `no site ${id}`)
   setResponseStatus(event, 202)

@@ -26,13 +26,14 @@ export default defineEventHandler(async (event) => {
     return approved.value
   }
   const current = await currentClassKey(site, bulletin)
+  const revoker = approverOf(admin, event.context.audit?.actor, 'bulk')
   const revoked = await guardedSiteWrite(site, {
     visible,
     write: () =>
       updateApprovals((approvals) => {
-        approvals.layouts[key] = { approved: false, updated_at: updatedAt }
-        approvals.classes = revokeClasses(approvals.classes ?? {}, site, bulletin, undefined, updatedAt)
-        if (current) approvals.classes = revokeClasses(approvals.classes, site, bulletin, current, updatedAt)
+        approvals.layouts[key] = { approved: false, updated_at: updatedAt, ...revoker }
+        approvals.classes = revokeClasses(approvals.classes ?? {}, site, bulletin, undefined, updatedAt, revoker)
+        if (current) approvals.classes = revokeClasses(approvals.classes, site, bulletin, current, updatedAt, revoker)
         return { site_id: site, bulletin_id: bulletin, ...approvals.layouts[key], ...(current ? { class: current } : {}) }
       }),
   })

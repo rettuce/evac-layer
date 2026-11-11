@@ -14,7 +14,7 @@
     "facing_deg": { "type": "number", "minimum": 0, "maximum": 360, "description": "Compass bearing the viewer faces while reading the screen (0 = north). The arrow to the shelter is turned against it. Leave it out when the facing is not known: the screens then show a north-fixed compass arrow (north up, marked N / 北) with the direction word beside it." },
     "name": { "type": "string", "minLength": 1 },
     "note": { "type": "string" },
-    "location_updated_at": { "type": "string", "format": "date-time", "description": "When lat, lng or facing_deg (including gaining or losing it) last changed through the admin API. Screens composed before it were made for the old place." },
+    "location_updated_at": { "type": "string", "format": "date-time", "description": "When lat, lng, facing_deg (including gaining or losing it) or municipality_id last changed through the admin API. Screens composed before it were made for the old place." },
     "facility_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$", "description": "The facility the site belongs to. A facility credential (data/tokens.json) acts only on sites with its facility_id; a site without one is reached by the operator credential only." },
     "replay": {
       "description": "Demo only: the site replays a recorded feed instead of following data/live/<id>.json.",

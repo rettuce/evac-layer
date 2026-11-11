@@ -114,11 +114,14 @@ export function classKey(site: string, cls: string): string {
   return `${site}/${cls}`
 }
 
-export function revokeClasses(classes: Record<string, ClassApproval>, site: string, bulletinId: string, currentClassKey: string | undefined, at: string): Record<string, ClassApproval> {
+// With a revoker, the record names who took the approval back and no longer names who gave it.
+export function revokeClasses(classes: Record<string, ClassApproval>, site: string, bulletinId: string, currentClassKey: string | undefined, at: string, revoker?: Approver): Record<string, ClassApproval> {
   return Object.fromEntries(Object.entries(classes).map(([key, record]) => {
     const fromBulletin = key.startsWith(`${site}/`) && record.approved_from === bulletinId
     const current = currentClassKey !== undefined && key === classKey(site, currentClassKey)
-    return [key, (fromBulletin || current) && record.approved ? { ...record, approved: false, updated_at: at } : record]
+    if (!((fromBulletin || current) && record.approved)) return [key, record]
+    const { actor: _approvedBy, ...kept } = record
+    return [key, revoker ? { ...kept, approved: false, updated_at: at, ...revoker } : { ...record, approved: false, updated_at: at }]
   }))
 }
 

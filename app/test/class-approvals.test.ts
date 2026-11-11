@@ -340,6 +340,26 @@ describe('class approvals', { skip }, () => {
     assert.equal(approvals.classes[`${READY_TOO}/${CLASS}`].mode, 'bulk')
   })
 
+  test('withdrawing one bulletin records who withdrew it, and the class approval it takes down no longer names the approver', async () => {
+    const approve = await postJson(base, '/api/admin/approve', { site_id: READY_TOO, bulletin_id: REAL, approved: true, actor: { id: 'staff-1', name: 'approver' } }, bearer(TOKEN_A))
+    assert.equal(approve.status, 200)
+    assert.equal((await approvalsFile()).classes[`${READY_TOO}/${CLASS}`].actor.id, 'staff-1')
+    const response = await postJson(base, '/api/admin/approve', { site_id: READY_TOO, bulletin_id: REAL, approved: false, actor: { id: 'staff-2' } }, bearer(TOKEN_A))
+    assert.equal(response.status, 200)
+    const answer = await response.json()
+    assert.deepEqual([answer.approved, answer.token_label, answer.actor], [false, 'alpha signage', { id: 'staff-2' }])
+    const approvals = await approvalsFile()
+    for (const record of [approvals.layouts[`${READY_TOO}/${REAL}`], approvals.classes[`${READY_TOO}/${CLASS}`]]) {
+      assert.deepEqual([record.approved, record.token_label, record.actor, record.mode], [false, 'alpha signage', { id: 'staff-2' }, 'bulk'])
+    }
+    const noActor = await postJson(base, '/api/admin/approve', { site_id: READY_TOO, bulletin_id: REAL, approved: true, actor: { id: 'staff-1' } }, bearer(TOKEN_A))
+    assert.equal(noActor.status, 200)
+    assert.equal((await postJson(base, '/api/admin/approve', { site_id: READY_TOO, bulletin_id: REAL, approved: false }, bearer(TOKEN_A))).status, 200)
+    const unnamed = await approvalsFile()
+    assert.equal(unnamed.layouts[`${READY_TOO}/${REAL}`].actor, undefined)
+    assert.equal(unnamed.classes[`${READY_TOO}/${CLASS}`].actor, undefined)
+  })
+
   test('while the ja_easy table is unreviewed, a site whose headline is the table\'s is approved by class but nothing goes out', async () => {
     assert.equal((await (await bulk({ class: CLASS, approved: false, site_ids: [UNREVIEWED] }, TOKEN_A)).json()).results[0].result, 'revoked')
     await addReal(dataDir, UNREVIEWED, tables)
