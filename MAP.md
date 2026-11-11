@@ -10,7 +10,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 
 | ディレクトリ | 中身 | 入口 |
 |---|---|---|
-| `agents/` | 気象庁 XML の parser・Reader・Writer・Composer・Verifier・書き直しのループ・受信・書き出し | `agents/package.json` の scripts（`receive` → `agents/src/jma/receive.ts`、`fanout` → `agents/src/loop/fanout.ts`、`reader` → `agents/src/reader/cli.ts`） |
+| `agents/` | 気象庁 XML の parser・Reader・Writer・Composer・Verifier・書き直しのループ・受信・書き出し。警報が出る前にクラスの画面を作る合成電文（`generate`）は `agents/src/jma/synthetic.ts`。合成できるクラス（大雨・土砂災害・津波）の一覧は `synthetic-classes.ts`、テンプレートの公式サンプル電文は `agents/src/jma/templates/` | `agents/package.json` の scripts（`receive` → `agents/src/jma/receive.ts`、`fanout` → `agents/src/loop/fanout.ts`、`reader` → `agents/src/reader/cli.ts`） |
 | `app/` | Nuxt。Renderer（`/screen`）・運営者の画面（`/admin`・`/dashboard`）・配信 API | `app/server/api/`（`live-layout.get.ts`・`app/server/api/feed/[site].get.ts`・`admin/`） |
 | `app/layout/` | Nuxt の layouts ではない。承認ゲート・配置・距離の当てはめなど、app と agents が共有する中核ロジック | `app/layout/gate.ts`（承認ゲート）・`headlineTable.ts`（見出しの対訳表とクラス承認の証拠）・`GRID.md`（グリッドの設計） |
 | `app/server/middleware/` | admin API の認証 | `admin-auth.ts` |
@@ -19,7 +19,7 @@ A map of this repository for first-time readers and AI: what is where, and which
 | `schema/` | agents と app の間の取り決め（layout・alert・site・municipality・feed・書き出し） | `schema/README.md` |
 | `data/municipalities/` | 5 自治体の知識ファイル（出典ページつき）・避難場所・プリセット | `<市町村コード>.json` |
 | `data/sites/` | 施設（緯度経度・向き・市町村コード）。1 ファイル 1 施設。`replay` を持つ site は記録を再生するデモ（05210・17204・22424） | `05210-demo-honjo-station.json` |
-| `data/jma/` | 気象庁由来の表: 津波予報区と市町村の対応、見出しの対訳（気象庁「多言語辞書」から抜いた警報名と「解除」の行・辞書の No. と出典つき）、見出しのやさしい日本語（確認前の下書き） | `tsunami-regions.json`・`warning-names.json`・`warning-names-ja-easy.json` |
+| `data/jma/` | 気象庁由来の表: 津波予報区と市町村の対応（site のある 5 市町村。出典つき）、見出しの対訳（気象庁「多言語辞書」から抜いた警報名と「解除」の行。解除は共通の No.20 と、津波警報・注意報の No.923。辞書の No. と出典つき）、見出しのやさしい日本語（確認前の下書き） | `tsunami-regions.json`・`warning-names.json`・`warning-names-ja-easy.json` |
 | `data/layouts/` | 生成物。施設 × 電文 × 5 形状のレイアウト JSON | 各施設の `index.json` が目録（画面を作らなかった電文も理由つきで載る） |
 | `data/reports/`・`data/verifier-findings/` | 検査レポートと、Vision の初期の指摘の記録 | `data/verifier-findings/2026-11-02-vision-run1.json` ほか |
 | `data/writer/` | Writer の出力の記録（同じ警報から同じ画面を出すための記録） | `<市町村コード>/<電文 ID>.json` |

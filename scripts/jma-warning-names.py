@@ -19,6 +19,9 @@ LANG_COLUMNS = {
     "id": "インドネシア語",
 }
 CANCEL = (20, "解除")
+# The dictionary's own 解除 for the tsunami warnings (英語 "Lifted"). It joins the names the dictionary files under the same
+# 情報種別等 (津波警報・注意報); every other name keeps CANCEL.
+TSUNAMI_CANCEL = (923, "解除")
 # Every name the Composer can put in a headline: the R6 names of the heavy rain, landslide and flood bulletins at
 # levels 2 to 5 (a level 2 name appears only cleared), the tsunami categories, and the pre-R6 flood forecast names
 # that agents/src/jma/codes.ts still reads. Storm surge is left out: no bulletin EVAC LAYER parses carries it.
@@ -49,7 +52,7 @@ def read_rows(path):
     sheet = load_workbook(path, read_only=True, data_only=True)[SHEET]
     rows = sheet.iter_rows(values_only=True)
     header = [str(c).strip() if c is not None else "" for c in next(rows)]
-    col = {name: header.index(name) for name in ["No.", "日本語", *LANG_COLUMNS.values()]}
+    col = {name: header.index(name) for name in ["No.", "情報種別等", "日本語", *LANG_COLUMNS.values()]}
     by_no = {}
     for r in rows:
         try:
@@ -74,6 +77,19 @@ def entry(by_no, col, no, ja):
     return {"no": no, "ja": ja, "text": text}
 
 
+def category(by_no, col, no):
+    return str(by_no[no][col["情報種別等"]]).strip()
+
+
+def tsunami_cancel(by_no, col):
+    row = entry(by_no, col, *TSUNAMI_CANCEL)
+    kind = category(by_no, col, TSUNAMI_CANCEL[0])
+    applies_to = [ja for no, ja in NAMES if category(by_no, col, no) == kind]
+    if not applies_to:
+        sys.exit(f"No.{TSUNAMI_CANCEL[0]} is filed under {kind!r}, and no name of the list is")
+    return {**row, "applies_to": applies_to}
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("xlsx")
@@ -93,11 +109,12 @@ def main():
             "terms": "気象庁ホームページ利用規約（公共データ利用規約（第1.0版）に準拠）",
             "terms_url": "https://www.jma.go.jp/jma/kishou/info/coment.html",
             "credit": "気象庁「多言語辞書」を加工して作成",
-            "processing": "EVAC LAYER が見出しに出す警報名の行と「解除」の行だけを抜き出し、8 言語の列だけを残した。訳語は前後の空白を除いたほかは辞書の表記のまま。no は辞書の No.。解除の見出しは警報名の訳と「解除」の訳を言語ごとに決めた形で並べる（app/layout/headlineTable.ts の CANCEL_FORM）。そのとき警報名の訳の末尾の句点（. 。）だけを外す。表の値は外さない。",
+            "processing": "EVAC LAYER が見出しに出す警報名の行と「解除」の行（No.20 と、津波警報・注意報の No.923）だけを抜き出し、8 言語の列だけを残した。訳語は前後の空白を除いたほかは辞書の表記のまま。no は辞書の No.。解除の見出しは警報名の訳と「解除」の訳を言語ごとに決めた形で並べる（app/layout/headlineTable.ts の CANCEL_FORM）。「解除」の訳は、辞書が No.923 と同じ情報種別等（津波警報・注意報）に置く警報名（tsunami_cancel.applies_to）には No.923、ほかの警報名には No.20 を使う。そのとき警報名の訳の末尾の句点（. 。）だけを外す。表の値は外さない。",
             "generator": "scripts/jma-warning-names.py",
         },
         "languages": LANG_COLUMNS,
         "cancel": entry(by_no, col, *CANCEL),
+        "tsunami_cancel": tsunami_cancel(by_no, col),
         "names": [entry(by_no, col, no, ja) for no, ja in NAMES],
     }
     sys.stdout.write(json.dumps(table, ensure_ascii=False, indent=2) + "\n")

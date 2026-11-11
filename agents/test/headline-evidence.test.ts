@@ -100,7 +100,7 @@ test("the agents gate holds a class to the headline evidence: report, stored hea
 test("a tsunami warning or major warning cleared outright (code 50, 警報解除) takes its translations from LastKind", { skip: needsRaw({ samples: ["32-39_12_13_250206_VTSE41.xml"] }) }, () => {
   const sample = parseJmaXml(fs.readFileSync(path.join(SAMPLES_DIR, "32-39_12_13_250206_VTSE41.xml")));
   const region = tsunamiRegionsFor("22424")[0]!;
-  for (const [last, en, fil] of [["津波警報", "Tsunami Warning: Cancel", "Babala ng tsunami: Kanselahin"], ["大津波警報", "Major Tsunami Warning: Cancel", "Babala ng malaking tsunami: Kanselahin"]] as const) {
+  for (const [last, en, fil] of [["津波警報", "Tsunami Warning: Lifted", "Babala ng tsunami: Kanselahin"], ["大津波警報", "Major Tsunami Warning: Lifted", "Babala ng malaking tsunami: Kanselahin"]] as const) {
     const area = sample.areas.find((a) => a.kind_code === "50" && a.last_kind_name === last);
     assert.ok(area, `the sample clears a ${last} with code 50`);
     const alert = { ...sample, areas: [{ ...area!, code: region }] };
