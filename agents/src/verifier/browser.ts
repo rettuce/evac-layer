@@ -1,6 +1,8 @@
+import crypto from "node:crypto";
 import type { Browser, Page } from "puppeteer-core";
 import type { Shape } from "../../../app/layout/types";
 import { PILLAR, SHAPES } from "../../../app/layout/shapes";
+import { PREVIEW_LAYOUT_PATH, serveLayout } from "../delivery/preview.js";
 import type { CellText, NorthUpRead, ScreenState, TextSample } from "./checks.js";
 
 const READY_TIMEOUT_MS = 30_000;
@@ -11,16 +13,25 @@ const TYPE_BASE_SHORT_SIDE_PX = 1080;
 
 export type Clock = "realtime" | "virtual";
 
-export interface ScreenTarget { baseUrl: string; layout?: string; srcFile?: string; variant: number }
+export interface ScreenTarget { baseUrl: string; layout?: string; layoutJson?: string; variant: number }
 
-function screenUrl(t: ScreenTarget, shape: Shape, extra: Record<string, string> = {}): string {
-  const source: Record<string, string> = t.srcFile ? { src: `/api/layout?${new URLSearchParams({ file: t.srcFile })}` } : { layout: t.layout ?? "" };
+// A screen under check may not be saved under any site yet, so its src is named by the layout's own bytes, not by a
+// site and bulletin. The request never reaches the server: the page answers it from layoutJson.
+export function verifierSrc(layoutJson: string): string {
+  const verifier = crypto.createHash("sha256").update(layoutJson).digest("hex").slice(0, 16);
+  return `${PREVIEW_LAYOUT_PATH}?${new URLSearchParams({ verifier })}`;
+}
+
+export function screenUrl(t: ScreenTarget, shape: Shape, extra: Record<string, string> = {}): string {
+  const source: Record<string, string> = t.layoutJson !== undefined ? { src: verifierSrc(t.layoutJson) } : { layout: t.layout ?? "" };
   const q = new URLSearchParams({ shape, ...source, variant: String(t.variant), ...extra });
   return `${t.baseUrl}/screen?${q}`;
 }
 
-async function open(browser: Browser, url: string, shape: Shape, reducedMotion: boolean): Promise<Page> {
+async function open(browser: Browser, t: ScreenTarget, shape: Shape, reducedMotion: boolean, extra: Record<string, string> = {}): Promise<Page> {
+  const url = screenUrl(t, shape, extra);
   const page = await browser.newPage();
+  if (t.layoutJson !== undefined) await serveLayout(page, t.baseUrl, verifierSrc(t.layoutJson), t.layoutJson);
   const { width, height } = SHAPES[shape];
   await page.setViewport({ width, height, deviceScaleFactor: 1 });
   await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: reducedMotion ? "reduce" : "no-preference" }]);
@@ -48,7 +59,7 @@ async function capture(page: Page, shape: Shape): Promise<string[]> {
 }
 
 export async function readScreen(browser: Browser, t: ScreenTarget, shape: Shape, opts: { capture?: boolean } = {}) {
-  const page = await open(browser, screenUrl(t, shape), shape, true);
+  const page = await open(browser, t, shape, true);
   try {
     const pngs = opts.capture ? await capture(page, shape) : [];
     const state = await page.$eval(".evac-screen", (el): ScreenState => {
@@ -135,13 +146,13 @@ export async function sampleLuminance(browser: Browser, t: ScreenTarget, shape: 
   const out: number[] = [];
   if (clock === "virtual") {
     for (let i = 0; i < FLICKER_FRAMES; i++) {
-      const page = await open(browser, screenUrl(t, shape, { clock: "virtual", t: String(Math.round(i * interval)) }), shape, false);
+      const page = await open(browser, t, shape, false, { clock: "virtual", t: String(Math.round(i * interval)) });
       out.push(await meanLuminance(page));
       await page.close();
     }
     return out;
   }
-  const page = await open(browser, screenUrl(t, shape), shape, false);
+  const page = await open(browser, t, shape, false);
   try {
     for (let i = 0; i < FLICKER_FRAMES; i++) {
       if (i > 0) await new Promise((r) => setTimeout(r, interval));

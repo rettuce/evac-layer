@@ -51,7 +51,7 @@ Common to every mode:
 | Parameter | Meaning |
 |---|---|
 | `layout=<name>` | fixture in `app/fixtures/` (default `wajima-tsunami`) |
-| `src=<path>` | render a layout JSON fetched from a same-origin path instead of a fixture. Dev: any path starting with `/` (e.g. `/api/layout?file=<absolute path>` for a `.json` inside the repository). Production: only `/api/live-layout?…` and `/api/admin/preview-layout?…`, plus a relative `demo/sites/<slug>/<file>.json` (served by `/api/demo-site-layout`, no approval gate, `data-source="demo-sites"`). Rejected values show `[data-error="src-rejected"]`; fetch failures `[data-error="src-load-failed"]` |
+| `src=<path>` | render a layout JSON fetched from a same-origin path instead of a fixture. Dev: any path starting with `/`. Production: only `/api/live-layout?…` and `/api/admin/preview-layout?…`, plus a relative `demo/sites/<slug>/<file>.json` (served by `/api/demo-site-layout`, no approval gate, `data-source="demo-sites"`). The browser Verifier and `agents preview` use `/api/admin/preview-layout?…` and answer that request inside their own Chrome from the layout they check, so it works on a production build and never reaches the server. Rejected values show `[data-error="src-rejected"]`; fetch failures `[data-error="src-load-failed"]` |
 | `w=<px>&h=<px>` or `aspect=<w>:<h>` | draw at that size (aspect: short side 1080) instead of the window. Without `shape`, the nearest base shape follows the aspect r = w/h: r ≥ 2.8 → 32x9, ≥ 1.25 → 16x9, ≤ 0.75 → 9x16, otherwise 1x1. Pass that base shape's layout as `src`. Its native canvas is fitted inside the size, so a layout that fits natively fits at any aspect it serves. The 1x1 base shape (between 0.75 and 1.25) shows every cell it shows at 1:1: shelter, direction, language band and source. 4:3 and 5:4 still go to 16x9 because the landscape threshold is 1.25 |
 | `variant=<n>` | layout variant for the template and shape (default 0; 32x9 `evac-now` has 1 = wide direction) |
 
@@ -101,7 +101,7 @@ The live screen never goes dark on a failed poll (unreachable server, HTTP error
 | `GET /delivery/<site>/<bulletin>/<shape>.{png,html,json}` | public, gated | exported files from `dist/` while the bulletin is deliverable |
 | `POST /api/admin/subscriptions` | admin | register a webhook `{site_id, url, secret}`; see `app/README.md` Delivery |
 | `GET /api/admin/catalog`, `GET /api/admin/preview-layout`, `POST /api/admin/approve`, `POST /api/admin/site` | admin | Bearer `NUXT_ADMIN_TOKEN` when set; otherwise local only (loopback address, local Host, not cross-site, JSON POST bodies). Writes go to `data/approvals.json` |
-| `GET /api/layout?file=<absolute path>` | dev only | any `.json` inside the repository, for the Verifier; 404 in production |
+| `GET /api/layout?file=<absolute path>` | dev only | any `.json` inside the repository; the Verifier no longer uses it; 404 in production |
 
 ## Headline band
 
