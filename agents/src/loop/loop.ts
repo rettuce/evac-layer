@@ -29,6 +29,8 @@ const blockingLabel = (f: LoopFinding) =>
 export interface Attempt { n: number; writer_source: string; findings: LoopFinding[]; screens_ok: Record<string, boolean>; notes?: Record<string, string> }
 export interface LoopResult {
   outcome: "pass" | "fail" | "stopped";
+  // The shapes whose headline the Verifier found to be the JMA dictionary table's, on the attempt that passed.
+  headline_shapes?: string[];
   writer?: WriterOutput;
   reason?: string;
   attempts: Attempt[];
@@ -47,12 +49,14 @@ export async function runLoop(args: {
   const resends = new Map<string, number>();
   for (let n = 1; n <= max; n++) {
     let findings: LoopFinding[];
+    let headlineShapes: string[] = [];
     const screensOk: Record<string, boolean> = {};
     const notes: Record<string, string> = {};
     try {
       screens = compose({ alert: args.alert, municipality: args.municipality, site: args.site, writer }) as Screen[];
       const verdicts = await args.verifier.verify(screens, { alert: args.alert, municipalityId: args.municipality.id });
       findings = verdicts.flatMap((v) => v.findings.map((f) => ({ shape: v.shape, ...f })));
+      headlineShapes = verdicts.filter((v) => v.headline_table === "pass").map((v) => v.shape);
       for (const v of verdicts) {
         screensOk[v.shape] = v.ok;
         if (v.note) notes[v.shape] = v.note;
@@ -66,7 +70,7 @@ export async function runLoop(args: {
       findings = [{ shape: e.shape, check: "over-budget", cell_id: e.role, detail: e.message }];
     }
     attempts.push({ n, writer_source: source, findings, screens_ok: screensOk, ...(Object.keys(notes).length ? { notes } : {}) });
-    if (!findings.length) return { outcome: "pass", attempts, screens, writer };
+    if (!findings.length) return { outcome: "pass", attempts, screens, writer, ...(headlineShapes.length ? { headline_shapes: headlineShapes } : {}) };
     const blocking = findings.filter((f) => !writerCanFix(f));
     if (blocking.length) return { outcome: "fail", reason: `not fixable by rewriting text: ${blocking.map(blockingLabel).join(", ")}`, attempts, screens };
     if (n === max) break;

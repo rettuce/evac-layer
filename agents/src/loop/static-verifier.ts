@@ -33,8 +33,10 @@ export const staticVerifier: Verifier = {
       if (!v.ok) findings.push({ check: "missing-required", detail: `layout fails layout.schema.json:\n${formatErrors(v.errors)}` });
       findings.push(...judgeContent((s.cells as LayoutCell[]).map(cellText)));
       findings.push(...judgeNorthUp((s.cells as LayoutCell[]).filter((c) => c.role === "direction" && c.orientation === "north-up").map((c) => ({ id: c.id, word: c.text.ja, rotation: c.rotation }))));
-      if (ctx) findings.push(...judgeDrill(s.cells as LayoutCell[], ctx.alert.status), ...judgeDrillWordOutsideDrill(s.cells as LayoutCell[], ctx.alert.status), ...headlineTableFindings(s.cells as LayoutCell[], ctx));
-      return { shape: s.shape, ok: findings.length === 0, findings };
+      if (!ctx) return { shape: s.shape, ok: findings.length === 0, findings };
+      const headline = headlineTableFindings(s.cells as LayoutCell[], ctx);
+      findings.push(...judgeDrill(s.cells as LayoutCell[], ctx.alert.status), ...judgeDrillWordOutsideDrill(s.cells as LayoutCell[], ctx.alert.status), ...headline);
+      return { shape: s.shape, ok: findings.length === 0, findings, headline_table: headline.length ? "fail" : "pass" };
     });
   },
 };

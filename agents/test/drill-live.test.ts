@@ -26,7 +26,7 @@ function stored(bulletinId: string) {
   const dir = path.join(LAYOUTS_DIR, SITE_ID, bulletinId);
   const files = fs.readdirSync(dir).map((f) => ({ shape: f.slice(0, -5), body: fs.readFileSync(path.join(dir, f), "utf8") }));
   const digest = layoutDigest(files);
-  return { files, digest, cls: { key: screenClass(JSON.parse(files[0].body)), digest: classDigest(files), checked: true } };
+  return { files, digest, cls: { key: screenClass(JSON.parse(files[0].body)), digest: classDigest(files), checked: true, headline: true } };
 }
 
 test("a stored drill screen, written before layouts carried a status, is read as a drill and has a class of its own", () => {
@@ -44,7 +44,7 @@ test("a drill bulletin is shown on its own approval and never on a class approva
     const layout = JSON.parse(f.body);
     return { shape: f.shape, body: JSON.stringify({ ...layout, alert: { ...layout.alert, bulletin_id: LATER_DRILL_ID }, sources: layout.sources.map((s: { type: string }) => (s.type === "jma" ? { ...s, bulletin_id: LATER_DRILL_ID } : s)) }) };
   });
-  const later = { digest: layoutDigest(laterFiles), cls: { key: first.cls.key, digest: classDigest(laterFiles), checked: true } };
+  const later = { digest: layoutDigest(laterFiles), cls: { key: first.cls.key, digest: classDigest(laterFiles), checked: true, headline: true } };
   assert.equal(first.cls.digest, later.cls.digest, "the copy differs only in its bulletin id");
   const at = "2026-11-11T00:00:00Z";
   const approvals = {

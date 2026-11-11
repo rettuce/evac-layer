@@ -34,10 +34,15 @@ export interface LayoutCell {
 export type ShelterKind = 'emergency_evacuation_site' | 'evacuation_shelter'
 
 export interface ScreenSource {
-  type: 'pdf' | 'jma' | 'gsi'
+  type: 'pdf' | 'jma' | 'gsi' | 'jma-dictionary'
   file?: string
   page?: number
   bulletin_id?: string
+  title?: string
+  publisher?: string
+  url?: string
+  updated?: string
+  credit?: string
 }
 
 export interface EvacScreen {

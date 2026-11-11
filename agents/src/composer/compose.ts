@@ -3,7 +3,7 @@ import type { LayoutCell, Orientation, PanelShape } from "../../../app/layout/ty
 import type { Alert } from "../jma/parse.js";
 import type { Lang } from "../writer/request.js";
 import { budgetsFor } from "./budgets.js";
-import { headlineText } from "./headline.js";
+import { headlineSource, headlineTables, headlineText } from "./headline.js";
 import { shapeContract } from "./template.js";
 import { actionPictogram, BudgetExceeded, CELLS_OF, ComposerStop, HAZARD_PICTOGRAM, LANGUAGES_REQUIRED_ON, MONTH_EN, NO_SHELTER_TEMPLATES, SHAPE_ORDER, SHELTER_HAZARDS, situationFor } from "./rules.js";
 
@@ -111,7 +111,8 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
   const { alert, municipality: m, site } = input;
   if (site.municipality_id !== m.id) stop(`site ${site.id} belongs to ${site.municipality_id}, not ${m.id}`);
   const situation = situationFor(alert, m.id);
-  const headline = headlineText(alert, m.id);
+  const tables = headlineTables();
+  const headline = headlineText(alert, m.id, tables);
   const guide = NO_SHELTER_TEMPLATES.has(situation.template) ? null : pickShelter(m, site, alert.hazard);
   const way = guide ? directionToward(site, guide.shelter) : null;
   const hazardEntry = m.hazards.find((h) => h.type === alert.hazard);
@@ -121,6 +122,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
     ...(hazardEntry ? [{ type: "pdf" as const, file: hazardEntry.source.file, page: hazardEntry.source.page }] : []),
     ...(guide ? [{ type: "gsi" as const, file: guide.shelter.source.file }] : []),
     { type: "jma" as const, bulletin_id: alert.bulletin_id },
+    headlineSource(tables),
   ];
 
   return SHAPE_ORDER.map((shape) => {

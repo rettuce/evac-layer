@@ -1,13 +1,17 @@
 import type { Alert } from "../src/jma/parse.js";
 import { headlineText } from "../src/composer/headline.js";
 
-type Layout = { cells: { role: string; text?: Record<string, string> }[] };
+type Layout = { cells: { role: string; text?: Record<string, string> }[]; sources: { type: string }[] };
 
-// Screens stored before the headline came from the JMA dictionary table carry the Writer's translations there, so a
-// screen composed again is compared with them apart from the headline's text, and its headline with the table.
+// Screens stored before the headline came from the JMA dictionary table carry the Writer's translations there and no
+// dictionary source, so a screen composed again is compared with them apart from those, and its headline with the table.
 export function apartFromHeadline(json: string): string {
   const layout = JSON.parse(json) as Layout;
-  return JSON.stringify({ ...layout, cells: layout.cells.map((c) => (c.role === "headline" ? { ...c, text: { ja: c.text?.ja } } : c)) }, null, 2);
+  return JSON.stringify({
+    ...layout,
+    cells: layout.cells.map((c) => (c.role === "headline" ? { ...c, text: { ja: c.text?.ja } } : c)),
+    sources: layout.sources.filter((s) => s.type !== "jma-dictionary"),
+  }, null, 2);
 }
 
 export function headlineIsTheTable(json: string, alert: Alert, municipalityId: string): boolean {

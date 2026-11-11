@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import type { HeadlineCheck } from './headlineTable'
 
 // Synthetic bulletins are composed in advance from JMA sample bulletins so that their screens can be approved before
 // a real one arrives. They are never a bulletin of their own on a screen: their approval only stands for the class.
@@ -123,11 +124,12 @@ export function layoutKey(site: string, bulletinId: string): string {
 
 export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale' | 'synthetic'
 export type ApprovedBy = 'bulletin' | 'class' | null
-export interface LayoutClass { key: string; digest: string; checked: boolean }
+// headline: the evidence that every headline is the JMA dictionary table's (headlineEvidence in headlineTable.ts).
+export interface LayoutClass { key: string; digest: string; checked: boolean; headline: boolean }
 
 // The class digest leaves the headline out, so only a bulletin whose own screens passed the browser check (where an
-// overflowing headline is caught) may go out on a class approval.
-export interface CheckReport { outcome?: string; verifier?: string; layout_digest?: string; browser_skipped?: string[] }
+// overflowing headline is caught) and whose headline is shown to be the table's may go out on a class approval.
+export interface CheckReport { outcome?: string; verifier?: string; layout_digest?: string; browser_skipped?: string[]; headline_table?: HeadlineCheck }
 
 export function passedBrowserCheck(report: CheckReport | undefined, layoutDigestNow: string): boolean {
   return report?.outcome === 'pass' && /browser|vision/.test(report.verifier ?? '') && !report.browser_skipped?.length && report.layout_digest === layoutDigestNow
@@ -141,7 +143,7 @@ export function approvalWith(
   if (state.approved) return { ...state, by: 'bulletin' }
   const revoked = record?.approved === false
   const byClass = cls && approvals.classes?.[classKey(site, cls.key)]
-  if (cls?.checked && classApprovable(cls.key) && !revoked && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
+  if (cls?.checked && cls.headline && classApprovable(cls.key) && !revoked && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
   return { ...state, by: null }
 }
 

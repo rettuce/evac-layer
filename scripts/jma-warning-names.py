@@ -1,4 +1,4 @@
-# Builds data/jma/warning-names.json from the JMA multilingual dictionary (https://www.data.jma.go.jp/developer/multilingual.html):
+# Builds data/jma/warning-names.json from the JMA multilingual dictionary (https://www.data.jma.go.jp/developer/multilingual.html), entries as written:
 #   curl -O https://www.data.jma.go.jp/developer/jma_multilingual.xlsx
 #   uv run --with openpyxl python scripts/jma-warning-names.py jma_multilingual.xlsx --updated 2026-03-26 --retrieved 2026-11-11 > data/jma/warning-names.json
 import argparse
@@ -93,7 +93,7 @@ def main():
             "terms": "気象庁ホームページ利用規約（公共データ利用規約（第1.0版）に準拠）",
             "terms_url": "https://www.jma.go.jp/jma/kishou/info/coment.html",
             "credit": "気象庁「多言語辞書」を加工して作成",
-            "processing": "EVAC LAYER が見出しに出す警報名の行と「解除」の行だけを抜き出し、8 言語の列だけを残した。訳語は前後の空白を除いたほかは辞書の表記のまま。no は辞書の No.",
+            "processing": "EVAC LAYER が見出しに出す警報名の行と「解除」の行だけを抜き出し、8 言語の列だけを残した。訳語は前後の空白を除いたほかは辞書の表記のまま。no は辞書の No.。解除の見出しは警報名の訳と「解除」の訳を言語ごとに決めた形で並べる（app/layout/headlineTable.ts の CANCEL_FORM）。そのとき警報名の訳の末尾の句点（. 。）だけを外す。表の値は外さない。",
             "generator": "scripts/jma-warning-names.py",
         },
         "languages": LANG_COLUMNS,

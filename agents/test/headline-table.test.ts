@@ -4,8 +4,11 @@ import fs from "node:fs";
 import path from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
 import { classDigest } from "../../app/layout/gate";
+import { DRILL_PREFIX_JA as SHARED_DRILL_PREFIX } from "../../app/layout/headlineTable";
 import { compose, type Municipality, type Site, type WriterOutput } from "../src/composer/compose.js";
-import { CANCEL_FORM, DRILL_WORD, headlineText, jaEasyNames, TABLE_LANGS, warningKey, warningNames } from "../src/composer/headline.js";
+import { CANCEL_FORM, DRILL_WORD, headlineTables, headlineText, TABLE_LANGS, warningKey } from "../src/composer/headline.js";
+const warningNames = () => headlineTables().names;
+const jaEasyNames = () => headlineTables().easy;
 import { ComposerStop, DRILL_PREFIX_JA, situationFor } from "../src/composer/rules.js";
 import type { Alert } from "../src/jma/parse.js";
 import { runLoop } from "../src/loop/loop.js";
@@ -92,6 +95,7 @@ test("an all-clear joins the warning's entry and the entry for 解除 in each la
 });
 
 test("a drill headline opens every language with the drill word, and the Verifier's drill check passes it", () => {
+  assert.equal(SHARED_DRILL_PREFIX, DRILL_PREFIX_JA, "the headline table module keeps the gate's drill prefix");
   const text = headlineText(heavyRain("レベル３大雨警報", "03", "issued", 3, true), "17204");
   assert.equal(text.ja, "【訓練】レベル３大雨警報");
   for (const [lang, word] of Object.entries(DRILL_WORD)) assert.ok(text[lang as keyof typeof text].startsWith(word), lang);

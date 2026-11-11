@@ -13,6 +13,7 @@ process.env.EVAC_DATA_DIR = dataDir;
 
 const { APPROVALS_FILE, FEED_DIR, LAYOUTS_DIR, WRITER_DIR } = await import("../src/paths.js");
 const { situationFor } = await import("../src/composer/rules.js");
+const { headlineSource } = await import("../src/composer/headline.js");
 const { replayEntry } = await import("../src/jma/replay.js");
 const { loadMunicipality } = await import("../src/loop/municipality.js");
 const { runLoop } = await import("../src/loop/loop.js");
@@ -40,9 +41,13 @@ function withKind(file: string, cityCode: string, kind: { name: string; code: st
   return xml.replace(/<ReportDateTime>[^<]*</, "<ReportDateTime>2026-11-20T03:10:00+09:00<");
 }
 
+// Stored screens predate the dictionary source a screen carries now, so they are compared as composed today.
 function approveFrom(siteId: string, bulletinId: string): { cls: string; digest: string } {
   const dir = path.join(LAYOUTS_DIR, siteId, bulletinId);
-  const files = fs.readdirSync(dir).map((f) => ({ shape: f.slice(0, -5), body: fs.readFileSync(path.join(dir, f), "utf8") }));
+  const files = fs.readdirSync(dir).map((f) => {
+    const layout = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
+    return { shape: f.slice(0, -5), body: JSON.stringify({ ...layout, sources: [...layout.sources, headlineSource()] }, null, 2) + "\n" };
+  });
   const cls = screenClass(JSON.parse(files[0]!.body));
   const approvals = fs.existsSync(APPROVALS_FILE) ? JSON.parse(fs.readFileSync(APPROVALS_FILE, "utf8")) : { version: "0.1", layouts: {}, sites: {}, classes: {} };
   approvals.classes[`${siteId}/${cls}`] = { approved: true, updated_at: "2026-11-11T00:00:00Z", digest: classDigest(files), approved_from: bulletinId };

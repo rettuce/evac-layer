@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import type { H3Event } from 'h3'
 import { join } from 'node:path'
 import { alertFeed, ambientFeed, type Feed, type FeedAsset, type FeedSite } from '~~/layout/feed'
-import { type ApprovedBy, type Approvals, classKey, layoutKey, liveLayoutGateWith } from '~~/layout/gate'
+import { type ApprovedBy, type Approvals, classApprovable, classKey, layoutKey, liveLayoutGateWith } from '~~/layout/gate'
 import { DEFAULT_REPLAY_SPEED, currentBulletinAt, rowsInWindow, type ReplayWindow } from '~~/layout/replay'
 import { SHAPES, isShape } from '~~/layout/shapes'
 import type { EvacScreen, Shape } from '~~/layout/types'
@@ -59,6 +59,21 @@ async function deliverableWith(approvals: Approvals, site: string, bulletin: str
   return (await deliverableDigest(approvals, site, bulletin)) !== undefined
 }
 
+// A drill or test bulletin is shown only by a site that replays a recording. One posted to a live site before that was
+// refused, or approved on its own and left as the live or fallback bulletin, is not delivered there.
+export function onLiveSite(snapshot: LayoutSnapshot | undefined): boolean {
+  return snapshot !== undefined && classApprovable(snapshot.cls.key)
+}
+
+async function liveDeliverableWith(approvals: Approvals, site: string, bulletin: string): Promise<boolean> {
+  const snapshot = await readLayoutSnapshot(site, bulletin)
+  return onLiveSite(snapshot) && approvalIn(approvals, site, bulletin, snapshot).by !== null
+}
+
+export async function isLiveDeliverable(site: string, bulletin: string): Promise<boolean> {
+  return (await readSite(site)) !== undefined && liveDeliverableWith(await readApprovals(), site, bulletin)
+}
+
 export async function isDeliverable(site: string, bulletin: string): Promise<boolean> {
   return (await readSite(site)) !== undefined && deliverableWith(await readApprovals(), site, bulletin)
 }
@@ -81,7 +96,7 @@ async function replayedBulletin(site: SiteFile, approvals: Approvals): Promise<s
 }
 
 async function liveBulletin(site: SiteFile, approvals: Approvals): Promise<string | undefined> {
-  return firstDeliverable(await readLiveState(site.id), (id) => deliverableWith(approvals, site.id, id))
+  return firstDeliverable(await readLiveState(site.id), (id) => liveDeliverableWith(approvals, site.id, id))
 }
 
 export async function currentFeed(siteId: string): Promise<Feed | undefined> {

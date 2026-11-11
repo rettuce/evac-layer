@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { mkdir, mkdtemp, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -12,6 +13,7 @@ import { checkRepoJsonPath } from '../server/utils/repoJson.ts'
 import { checkWebhookUrl, isPublicAddress } from '../server/utils/webhookPolicy.ts'
 import { WEBHOOK_RETRIES, webhookRetryDelayMs } from '../layout/feed.ts'
 import { firstDeliverable, nextLiveState } from '../layout/liveState.ts'
+import { type HeadlineTables, headlineEvidence, headlineFromTables, headlineTableVersion } from '../layout/headlineTable.ts'
 
 test('dev layout bridge serves only .json files inside the repository', async () => {
   const sandbox = await mkdtemp(join(tmpdir(), 'evac-repo-'))
@@ -254,13 +256,26 @@ test('an approval is bound to the layout files it was given for; regenerated fil
   assert.equal(liveLayoutGate(bound, 's1', 'B1'), 'ok')
 })
 
-function floodScreen(bulletin: string, issuedAt: string, action = '高い ところへ にげて', headlineEn = 'Koyoshi River Flood Lv 4') {
+const JMA_DIR = join(import.meta.dirname, '..', '..', 'data', 'jma')
+const REPO_TABLES: HeadlineTables = {
+  names: JSON.parse(readFileSync(join(JMA_DIR, 'warning-names.json'), 'utf8')),
+  easy: JSON.parse(readFileSync(join(JMA_DIR, 'warning-names-ja-easy.json'), 'utf8')),
+}
+const TABLES: HeadlineTables = { ...REPO_TABLES, easy: { ...REPO_TABLES.easy, reviewed: true } }
+
+function tableHeadline(name: string, cleared = false): Record<string, string> {
+  const found = headlineFromTables({ ja: `${name}${cleared ? '解除' : ''}`, name, cleared, drill: false }, TABLES)
+  if (!('text' in found)) throw new Error(found.missing)
+  return found.text
+}
+
+function floodScreen(bulletin: string, issuedAt: string, action = '高い ところへ にげて', headline: Record<string, string> = tableHeadline('レベル４氾濫危険警報')) {
   return {
     version: '0.1', kind: 'evac-screen', municipality: { id: '05210', name: '由利本荘市' },
     alert: { source: 'jma', bulletin_id: bulletin, hazard: 'flood', level: 4, issued_at: issuedAt },
     shape: '16x9', template: 'evac-now', palette: 'cabinet-office-5',
     cells: [
-      { id: 'headline', role: 'headline', text: { ja: `見出し ${bulletin}`, en: headlineEn } },
+      { id: 'headline', role: 'headline', text: headline },
       { id: 'action', role: 'action', text: { ja_easy: action } },
       { id: 'source', role: 'source', text: { ja: `気象庁 ${issuedAt} 発表` } },
     ],
@@ -268,11 +283,16 @@ function floodScreen(bulletin: string, issuedAt: string, action = '高い とこ
   }
 }
 
-function classOf(screen: ReturnType<typeof floodScreen>, report: CheckReport = {}) {
+function classOf(screen: { alert: object; template: string; cells: object[] }, report: CheckReport = {}, tables: HeadlineTables = TABLES) {
   const files = [{ shape: '16x9', body: JSON.stringify(screen) }]
   const digest = layoutDigest(files)
-  const checked = passedBrowserCheck({ outcome: 'pass', verifier: 'browser (http://127.0.0.1:3150)', layout_digest: digest, browser_skipped: [], ...report }, digest)
-  return { files, digest, cls: { key: screenClass(screen), digest: classDigest(files), checked } }
+  const full: CheckReport = {
+    outcome: 'pass', verifier: 'browser (http://127.0.0.1:3150)', layout_digest: digest, browser_skipped: [],
+    headline_table: { ok: true, table_version: headlineTableVersion(TABLES), layout_digest: digest, shapes: ['16x9'] },
+    ...report,
+  }
+  const checked = passedBrowserCheck(full, digest)
+  return { files, digest, cls: { key: screenClass(screen), digest: classDigest(files), checked, headline: headlineEvidence({ files, digest, report: full, tables }) } }
 }
 
 test('a class approval opens a new bulletin of the same class whose headline, time and id alone differ', () => {
@@ -306,9 +326,9 @@ test('a class approval opens a new bulletin of the same class whose headline, ti
   const edited = classOf(floodScreen('B3', '2026-10-22T10:00:00+09:00', '高い ところへ にげで'))
   assert.notEqual(edited.cls.digest, approved.cls.digest)
   assert.equal(liveLayoutGate(approvals, 's1', 'B3', edited.digest, edited.cls), 'unapproved', 'one changed letter in the action is not the approved screen')
-  const retranslated = classOf(floodScreen('B4', '2026-10-22T10:30:00+09:00', '高い ところへ にげて', 'Koyoshi River Flood Lv 5'))
-  assert.equal(retranslated.cls.digest, approved.cls.digest)
-  assert.equal(liveLayoutGate(approvals, 's1', 'B4', retranslated.digest, retranslated.cls), 'ok', 'every language of the headline follows from the warning name through the JMA dictionary table, so none of them is part of the class')
+  const retranslated = classOf(floodScreen('B4', '2026-10-22T10:30:00+09:00', '高い ところへ にげて', { ...tableHeadline('レベル４氾濫危険警報'), en: 'Koyoshi River Flood Lv 5' }))
+  assert.equal(retranslated.cls.digest, approved.cls.digest, 'the class digest leaves the headline out')
+  assert.equal(liveLayoutGate(approvals, 's1', 'B4', retranslated.digest, retranslated.cls), 'unapproved', 'a headline that is not the table\'s is not opened by a class approval')
 
   const revoked = {
     ...approvals,
@@ -388,4 +408,44 @@ test('every source of a screen stays readable in the document behind the short s
     ],
   })
   assert.deepEqual(lines, ['自治体資料 yurihonjo-map-north.pdf p.1', '国土地理院 mergeFromCity_05210.csv', '気象庁 電文 VXKOii-1（2026-10-21T18:15:00+09:00）'])
+})
+
+test('a class approval opens only screens whose headline is shown to be the JMA dictionary table\'s', () => {
+  const at = '2026-11-11T00:00:00Z'
+  const allClear = (bulletin: string, headline: Record<string, string>) => ({
+    version: '0.1', kind: 'evac-screen', municipality: { id: '17204', name: '輪島市' },
+    alert: { source: 'jma', bulletin_id: bulletin, hazard: 'heavy_rain', level: 1, issued_at: '2026-11-11T10:00:00+09:00' },
+    shape: '16x9', template: 'all-clear', palette: 'cabinet-office-5',
+    cells: [{ id: 'headline', role: 'headline', text: headline }, { id: 'action', role: 'action', text: { ja_easy: 'もう にげなくて いいです' } }],
+    sources: [{ type: 'jma', bulletin_id: bulletin }],
+  })
+  const advisory = classOf(allClear('A1', tableHeadline('レベル２大雨注意報', true)))
+  const warning = classOf(allClear('A2', tableHeadline('レベル３大雨警報', true)))
+  assert.equal(warning.cls.digest, advisory.cls.digest)
+  const approvals = {
+    version: '0.1' as const, sites: { s1: { auto_publish: true, updated_at: at } },
+    layouts: { 's1/A1': { approved: true, updated_at: at, digest: advisory.digest } },
+    classes: { 's1/heavy_rain/all-clear/1': { approved: true, updated_at: at, digest: advisory.cls.digest, approved_from: 'A1' } },
+  }
+  assert.deepEqual(liveLayoutGateWith(approvals, 's1', 'A2', warning.digest, warning.cls), { gate: 'ok', by: 'class' }, 'two warnings whose headlines are the table\'s share the class')
+
+  const writerHeadline = { ...tableHeadline('レベル３大雨警報', true), en: 'Heavy rain warning lifted' }
+  const oldReport = classOf(allClear('A3', writerHeadline), { headline_table: undefined })
+  assert.equal(liveLayoutGate(approvals, 's1', 'A3', oldReport.digest, oldReport.cls), 'unapproved', 'a Writer headline with a report from before the table')
+  assert.equal(liveLayoutGate(approvals, 's1', 'A3', oldReport.digest, classOf(allClear('A3', tableHeadline('レベル３大雨警報', true)), { headline_table: undefined }).cls), 'unapproved', 'a report without the table check')
+  const forged = classOf(allClear('A4', writerHeadline))
+  assert.equal(forged.cls.headline, false, 'a report that claims the check does not outweigh the stored headline')
+  const otherDigest = classOf(allClear('A5', tableHeadline('レベル３大雨警報', true)), { headline_table: { ok: true, table_version: headlineTableVersion(TABLES), layout_digest: advisory.digest, shapes: ['16x9'] } })
+  assert.equal(otherDigest.cls.headline, false, 'the check was made on other layout files')
+  const missingShape = classOf(allClear('A6', tableHeadline('レベル３大雨警報', true)), { headline_table: { ok: true, table_version: headlineTableVersion(TABLES), layout_digest: 'x', shapes: [] } })
+  assert.equal(missingShape.cls.headline, false)
+
+  const oneWord: HeadlineTables = { ...TABLES, names: { ...TABLES.names, cancel: { ...TABLES.names.cancel, text: { ...TABLES.names.cancel.text, en: 'Lifted' } } } }
+  assert.notEqual(headlineTableVersion(oneWord), headlineTableVersion(TABLES))
+  assert.equal(classOf(allClear('A7', tableHeadline('レベル３大雨警報', true)), {}, oneWord).cls.headline, false, 'a table changed by one word voids the earlier check')
+  const unreviewed = { ...TABLES, easy: { ...TABLES.easy, reviewed: false } }
+  assert.equal(classOf(allClear('A8', tableHeadline('レベル３大雨警報', true)), {}, unreviewed).cls.headline, false, 'not while the ja_easy table is unreviewed')
+
+  const byBulletin = { ...approvals, layouts: { ...approvals.layouts, 's1/A3': { approved: true, updated_at: at, digest: oldReport.digest } } }
+  assert.deepEqual(liveLayoutGateWith(byBulletin, 's1', 'A3', oldReport.digest, oldReport.cls), { gate: 'ok', by: 'bulletin' }, 'an approval of the bulletin itself is unchanged')
 })
