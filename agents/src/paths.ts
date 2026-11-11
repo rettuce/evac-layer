@@ -32,6 +32,7 @@ export const LIVE_DIR = path.join(DATA_DIR, "live");
 export const SYNTHETIC_DIR = path.join(DATA_DIR, "synthetic");
 export const APPROVALS_FILE = path.join(DATA_DIR, "approvals.json");
 export const TSUNAMI_REGIONS_FILE = path.join(DATA_DIR, "jma", "tsunami-regions.json");
+export const NO_FLOOD_FORECAST_FILE = path.join(DATA_DIR, "jma", "no-flood-forecast-areas.json");
 export const WARNING_NAMES_FILE = path.join(DATA_DIR, "jma", "warning-names.json");
 export const WARNING_NAMES_JA_EASY_FILE = path.join(DATA_DIR, "jma", "warning-names-ja-easy.json");
 
