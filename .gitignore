@@ -21,6 +21,7 @@ data/audit.jsonl
 data/audit.jsonl.*
 data/raw/
 data/live/
+data/synthetic/
 app/dist
 sim/dist-pages/
 sim/public/ambient/

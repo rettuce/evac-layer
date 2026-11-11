@@ -29,6 +29,7 @@ export const MUNICIPALITIES_DIR = path.join(DATA_DIR, "municipalities");
 export const SAMPLES_LIST_DIR = path.join(DATA_DIR, "samples");
 export const WRITER_DIR = path.join(DATA_DIR, "writer");
 export const LIVE_DIR = path.join(DATA_DIR, "live");
+export const SYNTHETIC_DIR = path.join(DATA_DIR, "synthetic");
 export const APPROVALS_FILE = path.join(DATA_DIR, "approvals.json");
 export const TSUNAMI_REGIONS_FILE = path.join(DATA_DIR, "jma", "tsunami-regions.json");
 

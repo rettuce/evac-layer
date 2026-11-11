@@ -4,8 +4,11 @@ import { ComposerStop, situationFor, type Situation } from "../composer/rules.js
 import { parseJmaXml, type Alert } from "../jma/parse.js";
 import { APPROVALS_FILE, FEED_DIR, LAYOUTS_DIR, SAMPLES_DIR } from "../paths.js";
 import { cachedWriterRecord, saveWriterForClass, screenClassFor, type ClassWriterRecord } from "./live.js";
+import { syntheticFile, syntheticXmlPath } from "../jma/synthetic.js";
+import { isSyntheticBulletinId } from "../../../app/layout/replay";
 
 export function bulletinXmlPath(file: string): string {
+  if (file.startsWith("synthetic/")) return syntheticXmlPath(file);
   return file.startsWith("jma-samples/") ? path.join(SAMPLES_DIR, file.slice("jma-samples/".length)) : path.join(FEED_DIR, file);
 }
 
@@ -13,10 +16,12 @@ interface IndexEntry { bulletin_id: string; file: string; screen?: boolean }
 
 export function writerOfBulletin(siteId: string, municipalityId: string, bulletinId: string, opts: { layoutsDir?: string; xmlPath?: (file: string) => string } = {}): ClassWriterRecord | undefined {
   const record = cachedWriterRecord(municipalityId, bulletinId);
+  if (!record) return undefined;
   const indexFile = path.join(opts.layoutsDir ?? LAYOUTS_DIR, siteId, "index.json");
-  if (!record || !fs.existsSync(indexFile)) return undefined;
-  const row = (JSON.parse(fs.readFileSync(indexFile, "utf8")) as { entries: IndexEntry[] }).entries.find((e) => e.bulletin_id === bulletinId);
-  const xml = row && (opts.xmlPath ?? bulletinXmlPath)(row.file);
+  const row = fs.existsSync(indexFile) ? (JSON.parse(fs.readFileSync(indexFile, "utf8")) as { entries: IndexEntry[] }).entries.find((e) => e.bulletin_id === bulletinId) : undefined;
+  // A synthetic bulletin's XML stays where generation saved it even after a fan-out rewrote the site's index.
+  const file = row?.file ?? (isSyntheticBulletinId(bulletinId) ? syntheticFile(municipalityId, bulletinId) : undefined);
+  const xml = file && (opts.xmlPath ?? bulletinXmlPath)(file);
   if (!xml || !fs.existsSync(xml)) return undefined;
   const alert = parseJmaXml(fs.readFileSync(xml));
   let situation: Situation;

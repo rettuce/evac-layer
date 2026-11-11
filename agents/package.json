@@ -25,7 +25,8 @@
     "export": "tsx src/delivery/cli.ts",
     "live": "tsx src/delivery/live-cli.ts",
     "record": "tsx src/jma/record.ts",
-    "receive": "tsx src/jma/receive.ts"
+    "receive": "tsx src/jma/receive.ts",
+    "generate": "tsx src/loop/generate-cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
