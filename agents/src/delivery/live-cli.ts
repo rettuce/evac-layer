@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { LAYOUTS_DIR } from "../paths.js";
-import { writeLive } from "./live.js";
+import { SyntheticNotLive, writeLive } from "./live.js";
 import { findSite, SiteNotFound } from "../sites.js";
 
 const { values } = parseArgs({ options: { site: { type: "string" }, bulletin: { type: "string" }, clear: { type: "boolean", default: false } } });
@@ -21,5 +21,11 @@ const bulletin = values.clear ? null : values.bulletin!;
 if (bulletin && !fs.existsSync(path.join(LAYOUTS_DIR, values.site, bulletin))) {
   console.warn(`[warn] no screens for ${bulletin} under ${path.join(LAYOUTS_DIR, values.site)}; the site stays ambient until they exist and are approved`);
 }
-const { file, doc } = writeLive(values.site, bulletin);
-console.log(`${file}: ${JSON.stringify(doc)}`);
+try {
+  const { file, doc } = writeLive(values.site, bulletin);
+  console.log(`${file}: ${JSON.stringify(doc)}`);
+} catch (e) {
+  if (!(e instanceof SyntheticNotLive)) throw e;
+  console.error(`[live stopped] ${e.message}`);
+  process.exit(2);
+}

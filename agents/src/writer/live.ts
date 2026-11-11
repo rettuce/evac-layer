@@ -12,6 +12,7 @@ import { toStructuredSchema } from "../reader/extraction.js";
 import { WRITER_OUTPUT_SCHEMA, writerAlertBlock, writerMunicipalityBlock, writerSystem } from "./request.js";
 import { lintEasyJapanese, lintEnglishScript, lintLatinScript, lintThaiScript, lintTraditionalScript, lintJaEasyScript, lintLevel5, lintMunicipalOrderName, type LintFinding } from "./rules.js";
 import { drillWordLangs } from "../verifier/checks.js";
+import { sameWriterMatch, type WriterMatch } from "./match.js";
 
 export { WRITER_DIR };
 const WRITER_ROLES = ["headline", "action", "languages"] as const;
@@ -26,7 +27,7 @@ function areasFor(alert: Alert, municipalityId: string) {
   return alert.areas.filter((a) => (a.code_type === "city" ? a.code.slice(0, 5) === municipalityId : regions.has(a.code)));
 }
 
-function writerContext(alert: Alert, m: Municipality, municipalityId: string) {
+function writerContext({ synthetic: _synthetic, ...alert }: Alert, m: Municipality, municipalityId: string) {
   const mine = areasFor(alert, municipalityId);
   const facts = m as unknown as { hazards: unknown[]; cautions?: unknown[]; name: string };
   return {
@@ -117,18 +118,20 @@ export function recordedStatus(record: { output: WriterOutput; status?: Bulletin
   return record.status ?? (drillWordLangs(record.output.cells).length ? "drill" : "normal");
 }
 
-export function cachedWriterRecord(municipalityId: string, bulletinId: string): { output: WriterOutput; status: BulletinStatus } | undefined {
+export interface BulletinWriterRecord { model: string; output: WriterOutput; status: BulletinStatus; match?: WriterMatch }
+
+export function cachedWriterRecord(municipalityId: string, bulletinId: string): BulletinWriterRecord | undefined {
   const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
   if (!fs.existsSync(f)) return undefined;
-  const record = JSON.parse(fs.readFileSync(f, "utf8")) as { output: WriterOutput; status?: BulletinStatus };
-  return { output: copyActionIntoLanguages(record.output), status: recordedStatus(record) };
+  const record = JSON.parse(fs.readFileSync(f, "utf8")) as { model: string; output: WriterOutput; status?: BulletinStatus; match?: WriterMatch };
+  return { model: record.model, output: copyActionIntoLanguages(record.output), status: recordedStatus(record), ...(record.match ? { match: record.match } : {}) };
 }
 
 export function cachedWriter(municipalityId: string, bulletinId: string): WriterOutput | undefined {
   return cachedWriterRecord(municipalityId, bulletinId)?.output;
 }
 
-export function saveWriter(municipalityId: string, bulletinId: string, record: { model: string; output: WriterOutput; usage: CallUsage[]; lint: LintFinding[]; status: BulletinStatus }) {
+export function saveWriter(municipalityId: string, bulletinId: string, record: { model: string; output: WriterOutput; usage: CallUsage[]; lint: LintFinding[]; status: BulletinStatus; match?: WriterMatch }) {
   const f = path.join(WRITER_DIR, municipalityId, `${bulletinId}.json`);
   fs.mkdirSync(path.dirname(f), { recursive: true });
   fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
@@ -139,7 +142,7 @@ export function screenClassFor(hazard: string, situation: Pick<Situation, "templ
 }
 
 export interface ClassWriterRecord {
-  model: string; output: WriterOutput; bulletin_id: string; issued_at: string; raw_title: string; caution?: Situation["caution"]; status?: BulletinStatus;
+  model: string; output: WriterOutput; bulletin_id: string; issued_at: string; raw_title: string; caution?: Situation["caution"]; status?: BulletinStatus; match?: WriterMatch;
 }
 
 function classWriterFile(municipalityId: string, cls: string): string {
@@ -159,6 +162,7 @@ export function saveWriterForClass(municipalityId: string, cls: string, record: 
   fs.writeFileSync(f, JSON.stringify(record, null, 2) + "\n");
 }
 
-export function writerCacheFitsBulletin(record: ClassWriterRecord, alert: Alert, situation: Situation): boolean {
-  return record.raw_title === alert.raw_title && record.caution === situation.caution && recordedStatus(record) === alert.status;
+// Wording goes to another bulletin only by its match; a record without one has it restored first (class-cache.ts).
+export function writerCacheFitsBulletin(record: ClassWriterRecord, match: WriterMatch): boolean {
+  return record.match !== undefined && sameWriterMatch(record.match, match);
 }

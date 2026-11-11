@@ -71,6 +71,10 @@
         "drill"
       ],
       "description": "Control/Status of the bulletin: 通常, 試験 or 訓練"
+    },
+    "synthetic": {
+      "const": true,
+      "description": "Composed by EVAC LAYER from a JMA sample (the XML carries <?evac-layer synthetic=\"1\"?>) so that a screen class can be approved in advance; its bulletin_id starts with SYN-. Never delivered. Absent on a bulletin JMA issued."
     }
   },
   "$defs": {

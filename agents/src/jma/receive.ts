@@ -7,6 +7,7 @@ import { liveGateWarning, REPLAY_SITE_MESSAGE, writeLive } from "../delivery/liv
 import { browserVerifier } from "../loop/browser-verifier.js";
 import { loadMunicipality } from "../loop/municipality.js";
 import { byIssue, clearanceSkipReason, composeBulletin, indexedBulletins, type WriterChoice } from "../loop/one.js";
+import { migrateBulletinStatus } from "../loop/status-migration.js";
 import { staticVerifier } from "../loop/static-verifier.js";
 import type { Verifier } from "../loop/types.js";
 import { EVAC_URL, FEED_DIR, LIVE_DIR } from "../paths.js";
@@ -36,6 +37,12 @@ function writeReceiverState(siteId: string, state: ReceiverState, liveDir = LIVE
 }
 
 export const LOOKBACK_MS = 24 * 60 * 60 * 1000;
+
+// A live site shows only what JMA issued for real: a drill or test bulletin gets a row and no screen.
+export function liveSkipReason(alert: { status: string; bulletin_id: string; synthetic?: true }): string | undefined {
+  if (alert.synthetic) return "synthetic bulletin: its screens stand for their class and are never live";
+  return alert.status === "normal" ? undefined : `${alert.status} bulletin (Control/Status ${alert.status === "drill" ? "訓練" : "試験"}): not shown on a live site`;
+}
 
 export interface RecordedBody { entry: IndexedEntry; file: string; code: string }
 
@@ -106,6 +113,7 @@ export async function receiveSite(args: {
   const feedDir = args.feedDir ?? FEED_DIR;
   const liveDir = args.liveDir ?? LIVE_DIR;
   const municipalityId = siteMunicipality(site);
+  migrateBulletinStatus(site.id, { layoutsDir: args.roots?.layouts, log });
   const state = readReceiverState(site.id, args.initialSince, liveDir);
   const round: SiteRound = { site: site.id, bulletins: [], errors: [] };
   const bodies = recordedSince(state.since, feedDir);
@@ -137,7 +145,7 @@ export async function receiveSite(args: {
     try {
       composed = await composeBulletin({
         entry, municipality: municipality!, readerRan, site, verifier: args.verifier, writer: args.writer, usage: args.usage, roots: args.roots,
-        skipIf: (s) => clearanceSkipReason(s, hazard, new Set(Object.keys(state.showing))),
+        skipIf: (s) => liveSkipReason(entry.alert) ?? clearanceSkipReason(s, hazard, new Set(Object.keys(state.showing))),
       });
     } catch (e) {
       fail(body, e);

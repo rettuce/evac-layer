@@ -15,6 +15,7 @@ Everything in this directory is dedicated to the public domain under CC0 1.0 ([`
 
 Validate any document: `pnpm -F agents validate <file.json>` (schema inferred; `--schema` to force).
 
+- `alert.status` is written only for a drill (`drill`, Control/Status 訓練) or test (`test`, 試験) bulletin; a normal bulletin's layout has no `status`, so its bytes are as before. A drill or test screen is never approved by class (`app/layout/gate.ts`).
 - Colors are never written into layout JSON. `palette: "cabinet-office-5"` tells the Renderer to use the Cabinet Office five-level tokens.
 - Tsunami bulletins carry no five-level value (`level: null`). The Composer maps `tsunami.highest_category` to a level token: `major_warning` → Lv4 token, `warning` → Lv3, `advisory` → Lv2, `forecast` / `cleared` → Lv1 (same ordering as JMA tsunami warning colors).
 - Tsunami areas are forecast regions, not municipalities; `data/jma/tsunami-regions.json` maps the regions of the demo municipalities only; a municipality missing from it gets a warning when a tsunami bulletin is processed.

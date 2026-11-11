@@ -1,5 +1,13 @@
 import { createHash } from 'node:crypto'
 
+// Synthetic bulletins are composed in advance from JMA sample bulletins so that their screens can be approved before
+// a real one arrives. They are never a bulletin of their own on a screen: their approval only stands for the class.
+export const SYNTHETIC_PREFIX = 'SYN-'
+
+export function isSyntheticBulletinId(value: unknown): boolean {
+  return typeof value === 'string' && value.startsWith(SYNTHETIC_PREFIX)
+}
+
 export interface LayoutApproval {
   approved: boolean
   updated_at: string
@@ -28,13 +36,34 @@ export function layoutDigest(files: { shape: string; body: string }[]): string {
 
 interface ClassedLayout {
   template?: string
-  alert?: { hazard?: string; level?: number | null; bulletin_id?: string; issued_at?: string }
+  alert?: { hazard?: string; level?: number | null; bulletin_id?: string; issued_at?: string; status?: string }
   cells?: { role?: string; text?: Record<string, unknown> }[]
   sources?: { type?: string; bulletin_id?: string }[]
 }
 
-export function screenClass(layout: ClassedLayout): string {
-  return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}`
+export const DRILL_PREFIX_JA = '【訓練】'
+
+export type BulletinStatus = 'normal' | 'test' | 'drill'
+
+// Layouts composed before the status was written carry it only in the headline the Composer prefixes on a drill.
+export function layoutStatus(layout: ClassedLayout): BulletinStatus {
+  const status = layout.alert?.status
+  if (status === 'drill' || status === 'test') return status
+  const headline = layout.cells?.find((cell) => cell.role === 'headline')?.text?.ja
+  return typeof headline === 'string' && headline.startsWith(DRILL_PREFIX_JA) ? 'drill' : 'normal'
+}
+
+// A drill or test screen has a class of its own that no class approval is ever written for or read from: such
+// bulletins are approved one by one (the bundled demos), never by class. The index row's status covers a test
+// bulletin's layout written before layouts carried one.
+export function screenClass(layout: ClassedLayout, rowStatus?: string): string {
+  const own = layoutStatus(layout)
+  const status = own === 'normal' && (rowStatus === 'drill' || rowStatus === 'test') ? rowStatus : own
+  return `${layout.alert?.hazard}/${layout.template}/${layout.alert?.level ?? '-'}${status === 'normal' ? '' : `/${status}`}`
+}
+
+export function classApprovable(cls: string): boolean {
+  return !/\/(drill|test)$/.test(cls)
 }
 
 function withoutJmaWarningNameAndSource({ text, ...cell }: NonNullable<ClassedLayout['cells']>[number]): NonNullable<ClassedLayout['cells']>[number] {
@@ -91,7 +120,7 @@ export function layoutKey(site: string, bulletinId: string): string {
   return `${site}/${bulletinId}`
 }
 
-export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale'
+export type LiveLayoutGate = 'ok' | 'auto-publish-off' | 'unapproved' | 'stale' | 'synthetic'
 export type ApprovedBy = 'bulletin' | 'class' | null
 export interface LayoutClass { key: string; digest: string; checked: boolean }
 
@@ -111,13 +140,14 @@ export function approvalWith(
   if (state.approved) return { ...state, by: 'bulletin' }
   const revoked = record?.approved === false
   const byClass = cls && approvals.classes?.[classKey(site, cls.key)]
-  if (cls?.checked && !revoked && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
+  if (cls?.checked && classApprovable(cls.key) && !revoked && byClass?.approved && byClass.digest === cls.digest) return { approved: true, stale: false, by: 'class' }
   return { ...state, by: null }
 }
 
 export function liveLayoutGateWith(
   approvals: Approvals, site: string, bulletinId: string, digest?: string, cls?: LayoutClass,
 ): { gate: LiveLayoutGate; by: ApprovedBy } {
+  if (isSyntheticBulletinId(bulletinId)) return { gate: 'synthetic', by: null }
   if (!approvals.sites[site]?.auto_publish) return { gate: 'auto-publish-off', by: null }
   const state = approvalWith(approvals, site, bulletinId, digest, cls)
   return { gate: state.approved ? 'ok' : state.stale ? 'stale' : 'unapproved', by: state.by }

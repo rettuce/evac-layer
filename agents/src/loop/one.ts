@@ -4,6 +4,7 @@ import type { Municipality, Site, WriterOutput } from "../composer/compose.js";
 import { ComposerStop, situationFor, type Situation } from "../composer/rules.js";
 import type { ReplayEntry } from "../jma/replay.js";
 import { REPO_ROOT } from "../paths.js";
+import { isSyntheticBulletinId } from "../../../app/layout/replay";
 import { isSiteId, SITE_ID } from "../sites.js";
 import type { CallUsage } from "../reader/pricing.js";
 import { writeForBulletin, type LiveWriter, type WriterStep } from "../writer/step.js";
@@ -17,7 +18,7 @@ export const PLACEHOLDER_NOTE = "文言は仮: Writer は API キー未設定の
 export const READER_MISSING_NOTE = "自治体 PDF 由来の情報なし: Reader 未実行のため避難所（国土地理院）と警報だけで構成。";
 
 export function bulletinRow(e: ReplayEntry) {
-  return { issued_at: e.issued_at, bulletin_id: e.bulletin_id, wmo_code: e.wmo_code, raw_title: e.alert.raw_title, municipality_level: e.municipality_level, file: e.file };
+  return { issued_at: e.issued_at, bulletin_id: e.bulletin_id, wmo_code: e.wmo_code, raw_title: e.alert.raw_title, municipality_level: e.municipality_level, file: e.file, ...(isSyntheticBulletinId(e.bulletin_id) ? { synthetic: true } : {}), ...(e.alert.status === "normal" ? {} : { status: e.alert.status }) };
 }
 
 export function screenRow(row: ReturnType<typeof bulletinRow>, a: { situation: Situation; verifier: Verifier; dir: string; report: { outcome: string; reason?: string; layouts: string[] } }) {
@@ -70,7 +71,10 @@ export async function composeBulletin(args: {
   if (skipped) return { ...noScreen(args, row, skipped), situation };
   const step: WriterStep = args.writer.kind === "fixture"
     ? { writer: args.writer.writer, writerSource: args.writer.source, reviser: args.writer.reviser, afterLoop: () => {} }
-    : await writeForBulletin({ alert: e.alert, municipality, situation, site: args.site }, { live: args.writer.kind === "live" ? args.writer.live : undefined, persist: args.persistWriter ?? true, usage: args.usage ?? [] });
+    : await writeForBulletin({ alert: e.alert, municipality, situation, site: args.site }, {
+      live: args.writer.kind === "live" ? args.writer.live : undefined, persist: args.persistWriter ?? true, usage: args.usage ?? [],
+      newAtSite: !fs.existsSync(path.join(args.roots?.layouts ?? LAYOUTS_DIR, args.site.id, e.bulletin_id)),
+    });
   const maxAttempts = args.maxAttempts ?? MAX_ATTEMPTS;
   const result = await runLoop({ alert: e.alert, municipality, site: args.site, writer: step.writer, writerSource: step.writerSource, verifier: args.verifier, reviser: step.reviser, maxAttempts });
   step.afterLoop(result);

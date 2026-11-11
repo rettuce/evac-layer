@@ -170,7 +170,7 @@ export function compose(input: { alert: Alert; municipality: Municipality; site:
       version: "0.1",
       kind: "evac-screen" as const,
       municipality: { id: m.id, name: m.name },
-      alert: { source: "jma", bulletin_id: alert.bulletin_id, hazard: alert.hazard, level: situation.level, issued_at: alert.issued_at },
+      alert: { source: "jma", bulletin_id: alert.bulletin_id, hazard: alert.hazard, level: situation.level, issued_at: alert.issued_at, ...(alert.status === "normal" ? {} : { status: alert.status }) },
       shape,
       template: situation.template,
       cells,

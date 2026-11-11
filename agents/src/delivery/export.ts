@@ -3,6 +3,7 @@ import path from "node:path";
 import puppeteer, { type Browser } from "puppeteer-core";
 import { EXPORT_DIGEST_FILE } from "../../../app/layout/feed";
 import { SHAPES } from "../../../app/layout/shapes";
+import { isSyntheticBulletinId } from "../../../app/layout/replay";
 import type { Shape } from "../../../app/layout/types";
 import { SHAPE_ORDER } from "../composer/rules.js";
 import { LAYOUTS_DIR, REPORTS_DIR, chromePath } from "../paths.js";
@@ -17,7 +18,7 @@ const SETTLE_MS = 500;
 
 export class ExportStop extends Error {}
 
-interface IndexEntry { bulletin_id: string; issued_at: string; screen: boolean; template?: string; display_level?: number }
+interface IndexEntry { bulletin_id: string; issued_at: string; screen: boolean; template?: string; display_level?: number; synthetic?: boolean; status?: string }
 
 export function findSite(siteId: string): SiteFile {
   try {
@@ -78,8 +79,8 @@ export async function exportSite(opts: { site: string; out: string; baseUrl: str
   const indexFile = path.join(siteLayouts, "index.json");
   if (!fs.existsSync(indexFile)) throw new ExportStop(`${indexFile} not found; run replay-pipeline or fanout first`);
   const index = JSON.parse(fs.readFileSync(indexFile, "utf8")) as { entries: IndexEntry[] };
-  const shown = index.entries.filter((e) => e.screen);
-  const gated = shown.map((e) => ({ e, ...exportGate(approvals, site.id, e.bulletin_id, layoutDigestOf(path.join(siteLayouts, e.bulletin_id)), layoutClassOf(path.join(siteLayouts, e.bulletin_id), path.join(REPORTS_DIR, site.id, e.bulletin_id, "report.json"))) }));
+  const shown = index.entries.filter((e) => e.screen && !e.synthetic && !isSyntheticBulletinId(e.bulletin_id));
+  const gated = shown.map((e) => ({ e, ...exportGate(approvals, site.id, e.bulletin_id, layoutDigestOf(path.join(siteLayouts, e.bulletin_id)), layoutClassOf(path.join(siteLayouts, e.bulletin_id), path.join(REPORTS_DIR, site.id, e.bulletin_id, "report.json"), e.status)) }));
   const approvedAt = new Map(gated.map((g) => [g.e.bulletin_id, g.approved_at]));
   const approvedIds = gated.filter((g) => g.gate === "ok").map((g) => g.e.bulletin_id);
   const partial = Boolean(opts.bulletins?.length);

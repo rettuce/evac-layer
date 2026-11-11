@@ -1,3 +1,4 @@
+import { isSyntheticBulletinId } from './gate'
 import { CLEAR_CROSSFADE_MS, SWITCH_BLACK_MS } from './scenario'
 import type { Shape, TemplateId } from './types'
 
@@ -13,6 +14,8 @@ export interface ReplayRow {
   template?: TemplateId
   display_level?: number
   reason?: string
+  synthetic?: boolean
+  status?: 'drill' | 'test'
 }
 
 export interface ReplayIndex {
@@ -41,6 +44,7 @@ export function rowsInWindow(rows: ReplayRow[], { from, to }: ReplayWindow): Rep
   const start = from ? Date.parse(from) : -Infinity
   const end = to ? Date.parse(to) : Infinity
   return rows.filter((row) => {
+    if (row.synthetic || isSyntheticBulletinId(row.bulletin_id)) return false
     const issued = Date.parse(row.issued_at)
     return issued >= start && issued <= end
   })
@@ -156,4 +160,5 @@ export function isMunicipalityId(value: unknown): value is string {
   return typeof value === 'string' && /^\d{5}$/.test(value)
 }
 
+export { SYNTHETIC_PREFIX, isSyntheticBulletinId } from './gate'
 export type { Shape }
