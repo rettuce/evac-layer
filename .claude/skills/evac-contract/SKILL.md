@@ -18,6 +18,9 @@ The layout JSON is the intermediate form: the Composer writes it, the renderer d
 
 ## Rules the parts rely on
 
+- `alert.status` is written only on a drill (`drill`) or test (`test`) bulletin, never on a normal one, so normal screens stay byte for byte. Their class is `<hazard>/<template>/<level>/drill` (or `/test`; an older drill screen is known by its 【訓練】 headline): no class approval is written from it or opens it, and `receive` never puts one on a live site. They are approved bulletin by bulletin (the bundled tsunami demos).
+- A synthetic bulletin (id `SYN-…`, index row `"synthetic": true`, XML in `data/synthetic/<municipality>/`) is composed by `pnpm -F agents generate` from an official JMA sample so that a class can be approved in advance. Its approval stands for its class only: the gate answers `synthetic`, so it is never on the feed, the live layout, a replay or an export, and `POST /api/admin/live` and `writeLive` refuse it.
+- Writer wording is reused across bulletins by its `match` (hazard, template, level, status, the warning on screen or the one that ended, caution, river of a flood forecast), not by Head/Title; records without a match keep the old rule (Head/Title, caution, status).
 - A drill bulletin (Control/Status 訓練, `alert.status: "drill"`) carries a drill word in every language of the headline (ja: 【訓練】 prefix, by code) and in every language but ja of `action` / `languages`; the Verifier's `drill-marker` check sends the Writer back otherwise.
 - A tsunami region downgraded from a warning or advisory to 津波予報（若干の海面変動） gets an all-clear screen: headline 「〈last warning name〉解除」, action "stay out of the sea, away from the coast" with the all-clear pictogram `safe_here` (the action pictogram shows the action only; the hazard is the headline's) (`situation.caution: "sea_level_change"`). A forecast that arrives on its own shows nothing.
 - The headline is the JMA warning name verbatim, set by code (Meteorological Service Act art. 23), with 解除 appended on an all-clear. The Writer writes the other languages only.
@@ -40,4 +43,4 @@ A column 1.062 m square wrapped by LED from 0.40 to 3.60 m: 6616 × 5046 logical
 
 ## Files
 
-`data/layouts/<municipality>/<bulletin>/<shape>.json` and `index.json` (every recorded bulletin, with `screen` and a reason when there is none); `data/reports/<municipality>-<bulletin>/report.json`; `data/sites/<id>-demo.json` (hand-written; `replay` sets the demo window); `data/approvals.json` (written by /admin, not committed).
+`data/layouts/<municipality>/<bulletin>/<shape>.json` and `index.json` (every recorded bulletin, with `screen` and a reason when there is none); `data/reports/<municipality>-<bulletin>/report.json`; `data/sites/<id>-demo.json` (hand-written; `replay` sets the demo window); `data/approvals.json` (written by /admin, not committed); `data/layouts/<site>/generation.json` and `data/synthetic/` (written by `generate`, not committed).

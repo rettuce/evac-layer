@@ -22,6 +22,7 @@ pnpm -F agents -s fanout --municipalities 05210,17204 --verifier vision --writer
 - `--verifier static | browser | vision` — only a browser or Vision pass may set `screen: true`; a static-only pass is recorded as "not browser-verified".
 - `--writer live` reuses `data/writer/<id>/<bulletin>.json` when it exists. To make the Writer write again, move that file to `tmp/` (do not delete it) and re-run.
 - `--skip-browser-shapes pillar` checks a shape statically only and marks the index row `browser_skipped`; use it only while the renderer lacks the shape.
+- The fan-out rewrites `data/layouts/<site_id>/`, synthetic screens and `generation.json` included. Their XML (`data/synthetic/`) and Writer records stay, so class approvals given to them keep working; run `pnpm -F agents generate --site <id>` afterwards to show them in `/admin` again.
 
 ## Done when
 

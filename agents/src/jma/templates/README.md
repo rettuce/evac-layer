@@ -11,4 +11,4 @@ Terms: 気象庁ホームページ利用規約 https://www.jma.go.jp/jma/kishou/
 | `15_17_01_251222_VPWW55.xml` | 気象警報・注意報（Ｒ０６）（大雨）: the heavy-rain classes |
 | `15_17_01_251222_VPWW56.xml` | 気象警報・注意報（Ｒ０６）（土砂）: the landslide classes |
 
-`agents/src/jma/synthetic.ts` reads them to compose a synthetic bulletin for one municipality and one class: it keeps the sample's Control and Head, sets the municipality, its prefecture and the warning kind, and drops every other area, the headline text and the free-text comments. The synthetic bulletin is saved under `data/synthetic/` (not in the repository) and is never delivered: its screens stand for their class in an approval.
+`agents/src/jma/synthetic.ts` reads them to compose a synthetic bulletin for one municipality and one class: it keeps the sample's structure and issue time, sets the municipality, its prefecture (in Head/Title) and the warning kind, names the issuer 気象庁, and drops every other area, the headline text and the free-text comments. The synthetic bulletin is saved under `data/synthetic/` (not in the repository) and is never delivered: its screens stand for their class in an approval.

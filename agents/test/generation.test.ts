@@ -233,3 +233,15 @@ test("generating again composes the same synthetic bulletins, and a new id or is
   await composeBulletin({ entry: { ...parsed, bulletin_id: retimedId, alert: { ...parsed.alert, bulletin_id: retimedId } }, municipality, readerRan, site: KASHIWAZAKI, verifier: checkedVerifier, writer: { kind: "placeholder" }, persistWriter: false });
   assert.equal(classDigest(storedFiles(KASHIWAZAKI.id, retimedId)), digest);
 });
+
+test("the wording of a class approved from a synthetic bulletin is found after a fan-out rewrote the site's index", { skip }, async () => {
+  const { writerOfBulletin } = await import("../src/writer/class-cache.js");
+  const from = JSON.parse(fs.readFileSync(APPROVALS_FILE, "utf8")).classes[`${KASHIWAZAKI.id}/landslide/evac-now/4`].approved_from as string;
+  const indexFile = path.join(LAYOUTS_DIR, KASHIWAZAKI.id, "index.json");
+  const index = JSON.parse(fs.readFileSync(indexFile, "utf8"));
+  fs.writeFileSync(indexFile, JSON.stringify({ ...index, entries: index.entries.filter((e: { synthetic?: boolean }) => !e.synthetic) }));
+  const record = writerOfBulletin(KASHIWAZAKI.id, "15205", from);
+  assert.equal(record?.bulletin_id, from);
+  assert.ok(record?.match);
+  fs.writeFileSync(indexFile, JSON.stringify(index));
+});
